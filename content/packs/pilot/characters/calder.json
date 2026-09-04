@@ -10,7 +10,7 @@
   "hp": 7,
   "ac": 11,
   "skills": ["Arcano", "Investigación", "Historia", "Percepción"],
-  "roles": ["Daño magico", "Control"],
+  "roles": ["Daño mágico", "Control"],
   "goal": "Responder una pregunta que lleva veinte años sin resolver.",
   "portrait": null
 }
