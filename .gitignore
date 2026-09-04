@@ -1,0 +1,10 @@
+# Notas privadas del DM: el repo es publico, los secretos de campana no se versionan aqui
+dm/
+
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*
+.DS_Store

@@ -1,0 +1,16 @@
+{
+  "id": "calder",
+  "name": "Calder",
+  "race": "Humano",
+  "class": "Mago",
+  "age": "52 años",
+  "quote": "El conocimiento es el verdadero poder.",
+  "bio": "Calder ha dedicado su vida a los misterios del mundo. Su mente es su mayor arma, aunque sus aliados son su mayor fortaleza.",
+  "stats": { "fue": 9, "des": 12, "con": 12, "int": 17, "sab": 14, "car": 10 },
+  "hp": 7,
+  "ac": 11,
+  "skills": ["Arcano", "Investigación", "Historia", "Percepción"],
+  "roles": ["Daño magico", "Control"],
+  "goal": "Responder una pregunta que lleva veinte años sin resolver.",
+  "portrait": null
+}

@@ -1,0 +1,16 @@
+{
+  "id": "orion",
+  "name": "Orion",
+  "race": "Elfo silvano",
+  "class": "Explorador",
+  "age": "117 años",
+  "quote": "El mundo siempre tiene más que mostrar.",
+  "bio": "Orion conoce los caminos que otros ni siquiera imaginan. Paciente, observador y siempre un paso adelante.",
+  "stats": { "fue": 14, "des": 16, "con": 13, "int": 12, "sab": 14, "car": 11 },
+  "hp": 11,
+  "ac": 14,
+  "skills": ["Supervivencia", "Rastreo", "Percepción", "Trato con animales"],
+  "roles": ["Exploración", "Apoyo", "Daño a distancia"],
+  "goal": "Cartografiar lo que ningún mapa se ha atrevido a nombrar.",
+  "portrait": null
+}

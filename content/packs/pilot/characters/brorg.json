@@ -1,0 +1,16 @@
+{
+  "id": "brorg",
+  "name": "Brorg",
+  "race": "Medio orco",
+  "class": "Bárbaro",
+  "age": "24 años",
+  "quote": "¡Más fuerte!",
+  "bio": "Brorg habla poco, pero sus acciones dicen mucho. En la batalla encuentra su paz, y en sus compañeros, su verdadero hogar.",
+  "stats": { "fue": 17, "des": 14, "con": 15, "int": 10, "sab": 12, "car": 11 },
+  "hp": 14,
+  "ac": 14,
+  "skills": ["Atletismo", "Intimidación", "Supervivencia", "Aguante"],
+  "roles": ["Daño cuerpo a cuerpo", "Tanque"],
+  "goal": "Encontrar un lugar (o una gente) al que pertenecer.",
+  "portrait": null
+}

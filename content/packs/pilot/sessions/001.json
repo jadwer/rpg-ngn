@@ -1,0 +1,21 @@
+{
+  "id": "001",
+  "title": "Sesión 1: Camino a Valdoria",
+  "date": "2026-09-05",
+  "status": "planned",
+  "briefing": "Cada quien viajaba por su cuenta hacia el sur cuando la crecida del río Halden se llevó el puente de Vado Rojo. La única ruta que queda cruza por Valdoria, un pueblo minero entre colinas. Llevan dos jornadas compartiendo camino, fuego y silencios.",
+  "howToPlay": [
+    "Di lo que tu personaje intenta hacer, con tus palabras. No hay lista de acciones válidas.",
+    "Cuando algo tenga riesgo, tiras un d20. El DM interpreta el resultado; nunca te dirá el número que necesitabas.",
+    "Tu hoja dice en qué eres bueno. Úsalo: el mundo reacciona distinto según quién lo intenta.",
+    "Al empezar tiras 1d20 de Fortuna. No se te dice para qué sirvió. Ya lo descubrirás."
+  ],
+  "fortune": [
+    { "range": "1-3", "label": "Mala suerte" },
+    { "range": "4-6", "label": "Incómodo" },
+    { "range": "7-14", "label": "Normal" },
+    { "range": "15-17", "label": "Buena estrella" },
+    { "range": "18-19", "label": "Afortunado" },
+    { "range": "20", "label": "Destino" }
+  ]
+}

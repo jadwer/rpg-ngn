@@ -1,0 +1,16 @@
+{
+  "id": "dayan",
+  "name": "Dayan",
+  "race": "Elfa oscura",
+  "class": "Arquera",
+  "age": "72 años (joven)",
+  "quote": "La sombra también puede ser un hogar.",
+  "bio": "Nacida en las profundidades, Dayan prefiere los bosques y la libertad. Sus flechas siempre encuentran su objetivo.",
+  "stats": { "fue": 10, "des": 17, "con": 14, "int": 12, "sab": 14, "car": 11 },
+  "hp": 12,
+  "ac": 14,
+  "skills": ["Tiro con arco", "Sigilo", "Percepción", "Supervivencia"],
+  "roles": ["Daño a distancia", "Exploración"],
+  "goal": "Demostrar que su origen no define su destino.",
+  "portrait": null
+}

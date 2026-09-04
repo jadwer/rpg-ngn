@@ -1,0 +1,9 @@
+{
+  "name": "rpg-ngn",
+  "private": true,
+  "description": "Motor agnostico para campanas de rol de mesa dirigidas por un DM asistido por IA",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.30.3"
+}

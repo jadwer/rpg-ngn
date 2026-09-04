@@ -1,0 +1,16 @@
+{
+  "id": "talin",
+  "name": "Talin",
+  "race": "Mediana",
+  "class": "Pícara",
+  "age": "26 años",
+  "quote": "Si hay una cerradura, hay una manera.",
+  "bio": "Talin siempre tiene un plan (y un plan B). Curiosa, audaz y con una sonrisa que puede abrir más puertas que una llave.",
+  "stats": { "fue": 10, "des": 16, "con": 13, "int": 13, "sab": 12, "car": 14 },
+  "hp": 9,
+  "ac": 14,
+  "skills": ["Sigilo", "Juego de manos", "Percepción", "Engaño"],
+  "roles": ["Sigilo", "Control", "Utilidad"],
+  "goal": "Encontrar el tesoro del que hablaba su abuela, si es que existe.",
+  "portrait": null
+}

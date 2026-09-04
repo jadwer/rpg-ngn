@@ -1,0 +1,29 @@
+{
+  "id": "pilot",
+  "type": "campaign",
+  "version": "0.1.0",
+  "name": "Los Nueve Viajeros",
+  "tagline": "Diferentes caminos, un mismo destino",
+  "motto": "Extraños hoy, quizás una leyenda mañana.",
+  "system": "fantasy-d20-lite",
+  "provenance": {
+    "class": "original",
+    "authors": ["Gabino Ramirez"],
+    "sources": ["img/personajes.png (lámina generada por IA para la sesión piloto)"],
+    "license": "propietario",
+    "createdAt": "2026-09-04",
+    "updatedAt": "2026-09-04"
+  },
+  "characters": [
+    "dayan",
+    "hector",
+    "zahira",
+    "talin",
+    "kael",
+    "brorg",
+    "narivyl",
+    "calder",
+    "orion"
+  ],
+  "sessions": ["001"]
+}

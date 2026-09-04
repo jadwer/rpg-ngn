@@ -1,0 +1,16 @@
+{
+  "id": "hector",
+  "name": "Héctor",
+  "race": "Humano",
+  "class": "Paladín",
+  "age": "34 años",
+  "quote": "La justicia no se pide, se hace.",
+  "bio": "Héctor cree en un mundo mejor y está dispuesto a luchar por él. Su fe es su escudo y su espada, y sus aliados son su familia.",
+  "stats": { "fue": 16, "des": 11, "con": 15, "int": 12, "sab": 13, "car": 16 },
+  "hp": 12,
+  "ac": 18,
+  "skills": ["Persuasión", "Religión", "Medicina", "Intimidación"],
+  "roles": ["Tanque", "Apoyo", "Líder"],
+  "goal": "Proteger a quienes no pueden protegerse solos.",
+  "portrait": null
+}

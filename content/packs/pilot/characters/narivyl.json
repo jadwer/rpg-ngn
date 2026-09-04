@@ -1,0 +1,16 @@
+{
+  "id": "narivyl",
+  "name": "Narivyl",
+  "race": "Tiefling",
+  "class": "Druida",
+  "age": "31 años",
+  "quote": "La naturaleza no juzga, solo es.",
+  "bio": "Narivyl camina entre dos mundos: la sangre infernal y la vida natural. Encuentra equilibrio donde otros solo ven conflicto.",
+  "stats": { "fue": 12, "des": 14, "con": 14, "int": 12, "sab": 16, "car": 11 },
+  "hp": 10,
+  "ac": 13,
+  "skills": ["Naturaleza", "Supervivencia", "Medicina", "Trato con animales"],
+  "roles": ["Control", "Apoyo", "Invocación"],
+  "goal": "Probar que la sangre no decide a quién sirve el bosque.",
+  "portrait": null
+}

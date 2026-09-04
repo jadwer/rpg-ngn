@@ -1,0 +1,16 @@
+{
+  "id": "kael",
+  "name": "Kael",
+  "race": "Semielfo",
+  "class": "Bardo",
+  "age": "29 años",
+  "quote": "La vida suena mejor con compañía.",
+  "bio": "Kael convierte historias en magia y extraños en amigos. Donde otros ven problemas, él ve una buena canción.",
+  "stats": { "fue": 10, "des": 14, "con": 12, "int": 13, "sab": 12, "car": 16 },
+  "hp": 9,
+  "ac": 13,
+  "skills": ["Interpretación", "Persuasión", "Inspiración", "Engaño"],
+  "roles": ["Apoyo", "Control", "Social"],
+  "goal": "Vivir una historia que valga la pena cantar.",
+  "portrait": null
+}

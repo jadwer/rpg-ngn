@@ -1,0 +1,16 @@
+{
+  "id": "zahira",
+  "name": "Zahira",
+  "race": "Enana",
+  "class": "Guerrera",
+  "age": "88 años",
+  "quote": "Pequeña estatura, grandes hazañas.",
+  "bio": "Zahira es tan resistente como las montañas de su hogar. Directa, leal y con un sentido del humor tan afilado como su hacha.",
+  "stats": { "fue": 16, "des": 12, "con": 16, "int": 10, "sab": 12, "car": 11 },
+  "hp": 13,
+  "ac": 17,
+  "skills": ["Atletismo", "Aguante", "Historia", "Artesanía"],
+  "roles": ["Tanque", "Combate cuerpo a cuerpo"],
+  "goal": "Ganarse un nombre propio lejos del clan.",
+  "portrait": null
+}

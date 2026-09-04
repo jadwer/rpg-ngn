@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Los Nueve Viajeros</title>
+<meta name="description" content="Fichas de personaje de la campaña Los Nueve Viajeros">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #17120e;
+    --panel: #221a13;
+    --panel-2: #2b2118;
+    --border: #4a392a;
+    --gold: #c9a35c;
+    --gold-dim: #8a713f;
+    --ink: #e8dcc8;
+    --ink-dim: #a89778;
+    --accent: #7d2f28;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% -10%, #2c2115 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: "Crimson Pro", Georgia, serif;
+    font-size: 17px;
+    line-height: 1.45;
+    min-height: 100dvh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { text-align: center; margin-bottom: 6px; }
+  .motto { color: var(--ink-dim); font-style: italic; font-size: .95rem; margin: 0; }
+  h1 {
+    font-family: Cinzel, Georgia, serif;
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    letter-spacing: .06em;
+    color: var(--gold);
+    margin: .2em 0 .1em;
+    text-transform: uppercase;
+  }
+  .tagline {
+    color: var(--ink-dim);
+    font-variant: small-caps;
+    letter-spacing: .12em;
+    margin: 0 0 14px;
+    font-size: .95rem;
+  }
+  .rule {
+    border: 0; height: 1px; margin: 14px auto;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .session {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .session h2 {
+    font-family: Cinzel, serif; font-size: 1.02rem; color: var(--gold);
+    margin: 0 0 6px; letter-spacing: .04em;
+  }
+  .session .date { color: var(--ink-dim); font-size: .9rem; float: right; }
+  .session p { margin: .4em 0; }
+  details.how { margin-top: 8px; }
+  details.how summary {
+    cursor: pointer; color: var(--gold); font-variant: small-caps;
+    letter-spacing: .08em; font-size: .95rem;
+  }
+  details.how ul { margin: 8px 0 4px; padding-left: 20px; }
+  details.how li { margin: 6px 0; }
+  .fortune { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .fortune span {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 8px; font-size: .82rem; color: var(--ink-dim);
+  }
+  .fortune b { color: var(--ink); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 12px 10px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--ink);
+    font: inherit;
+    transition: border-color .15s, transform .1s;
+  }
+  .card:active { transform: scale(.98); }
+  .card:hover, .card:focus-visible { border-color: var(--gold-dim); outline: none; }
+  .card .n { font-family: Cinzel, serif; color: var(--gold); font-size: 1.05rem; letter-spacing: .03em; }
+  .card .r { color: var(--ink-dim); font-size: .88rem; margin-top: 2px; }
+  .card .roles { margin-top: 8px; font-size: .78rem; color: var(--ink-dim); font-variant: small-caps; letter-spacing: .05em; }
+
+  /* Detalle */
+  .detail { display: none; }
+  body.detail-open .home { display: none; }
+  body.detail-open .detail { display: block; }
+  .back {
+    background: none; border: 1px solid var(--border); color: var(--gold);
+    border-radius: 8px; padding: 6px 14px; font: inherit; font-size: .95rem;
+    cursor: pointer; margin-bottom: 14px;
+  }
+  .sheet {
+    background: var(--panel);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 20px 18px;
+  }
+  .sheet h2 {
+    font-family: Cinzel, serif; color: var(--gold); font-size: 1.6rem;
+    margin: 0; letter-spacing: .05em;
+  }
+  .sub { color: var(--ink-dim); margin: 2px 0 0; font-size: .98rem; }
+  .quote { font-style: italic; color: var(--ink); margin: 12px 0; border-left: 3px solid var(--accent); padding-left: 10px; }
+  .vitals { display: flex; gap: 10px; margin: 14px 0; }
+  .vital {
+    flex: 1; text-align: center; background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px;
+  }
+  .vital .v { font-family: Cinzel, serif; font-size: 1.3rem; color: var(--ink); }
+  .vital .l { font-size: .75rem; color: var(--ink-dim); font-variant: small-caps; letter-spacing: .08em; }
+  .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 12px 0; }
+  .stat {
+    text-align: center; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 2px;
+  }
+  .stat .v { font-size: 1.15rem; font-weight: 600; }
+  .stat .m { font-size: .78rem; color: var(--gold); }
+  .stat .l { font-size: .72rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .05em; }
+  .label {
+    font-family: Cinzel, serif; font-size: .88rem; color: var(--gold);
+    letter-spacing: .08em; text-transform: uppercase; margin: 16px 0 6px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 12px; font-size: .9rem;
+  }
+  .roles-line { color: var(--ink-dim); font-variant: small-caps; letter-spacing: .06em; }
+  .goal { margin: 6px 0 0; }
+  footer { text-align: center; color: var(--ink-dim); font-size: .85rem; margin-top: 28px; font-variant: small-caps; letter-spacing: .1em; }
+  .err { color: #d98; text-align: center; padding: 30px 10px; }
+  .loading { text-align: center; color: var(--ink-dim); padding: 30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="home">
+    <header>
+      <p class="motto" id="motto"></p>
+      <h1 id="title">Los Nueve Viajeros</h1>
+      <p class="tagline" id="tagline"></p>
+    </header>
+    <section class="session" id="session" hidden></section>
+    <div class="grid" id="grid"><div class="loading">Consultando los archivos del gremio...</div></div>
+    <footer>El mundo es más grande cuando se comparte</footer>
+  </div>
+
+  <div class="detail" id="detail"></div>
+</div>
+
+<script>
+const BASE = '../../content/packs/pilot/';
+const STAT_LABELS = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };
+let characters = [];
+
+const mod = v => { const m = Math.floor((v - 10) / 2); return m >= 0 ? '+' + m : String(m); };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function load() {
+  try {
+    const pack = await (await fetch(BASE + 'pack.json')).json();
+    document.getElementById('title').textContent = pack.name;
+    document.getElementById('tagline').textContent = pack.tagline || '';
+    document.getElementById('motto').textContent = pack.motto ? '"' + pack.motto + '"' : '';
+    document.title = pack.name;
+
+    if (pack.sessions && pack.sessions.length) {
+      try { renderSession(await (await fetch(BASE + 'sessions/' + pack.sessions[pack.sessions.length - 1] + '.json')).json()); }
+      catch (e) { /* sesion opcional */ }
+    }
+
+    characters = await Promise.all(
+      pack.characters.map(id => fetch(BASE + 'characters/' + id + '.json').then(r => r.json()))
+    );
+    renderGrid();
+    if (location.hash) openFromHash();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = '<div class="err">No se pudieron cargar las fichas. Intenta recargar.</div>';
+  }
+}
+
+function renderSession(s) {
+  const el = document.getElementById('session');
+  el.hidden = false;
+  el.innerHTML = `
+    <span class="date">${esc(s.date)}</span>
+    <h2>${esc(s.title)}</h2>
+    <p>${esc(s.briefing)}</p>
+    <details class="how">
+      <summary>Cómo se juega</summary>
+      <ul>${(s.howToPlay || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <div class="fortune">${(s.fortune || []).map(f => `<span><b>${esc(f.range)}</b> ${esc(f.label)}</span>`).join('')}</div>
+    </details>`;
+}
+
+function renderGrid() {
+  document.getElementById('grid').innerHTML = characters.map(c => `
+    <button class="card" onclick="location.hash='${c.id}'">
+      <div class="n">${esc(c.name)}</div>
+      <div class="r">${esc(c.race)}<br>${esc(c.class)}</div>
+      <div class="roles">${esc((c.roles || []).join(' / '))}</div>
+    </button>`).join('');
+}
+
+function renderDetail(c) {
+  document.getElementById('detail').innerHTML = `
+    <button class="back" onclick="history.back()">&larr; Volver</button>
+    <div class="sheet">
+      <h2>${esc(c.name)}</h2>
+      <p class="sub">${esc(c.race)} &middot; ${esc(c.class)} &middot; ${esc(c.age)}</p>
+      <p class="quote">"${esc(c.quote)}"</p>
+      <div class="vitals">
+        <div class="vital"><div class="v">${c.hp}</div><div class="l">Puntos de vida</div></div>
+        <div class="vital"><div class="v">${c.ac}</div><div class="l">Armadura</div></div>
+      </div>
+      <div class="stats">
+        ${Object.entries(c.stats).map(([k, v]) => `
+          <div class="stat"><div class="l">${STAT_LABELS[k] || k}</div><div class="v">${v}</div><div class="m">${mod(v)}</div></div>`).join('')}
+      </div>
+      <div class="label">Eres bueno en</div>
+      <div class="chips">${(c.skills || []).map(s => `<span>${esc(s)}</span>`).join('')}</div>
+      <div class="label">Rol en el grupo</div>
+      <p class="roles-line">${esc((c.roles || []).join(' / '))}</p>
+      <div class="label">Quién eres</div>
+      <p>${esc(c.bio)}</p>
+      <div class="label">Tu objetivo</div>
+      <p class="goal">${esc(c.goal)}</p>
+    </div>`;
+  document.body.classList.add('detail-open');
+  window.scrollTo(0, 0);
+}
+
+function openFromHash() {
+  const id = location.hash.slice(1);
+  const c = characters.find(x => x.id === id);
+  if (c) renderDetail(c);
+  else document.body.classList.remove('detail-open');
+}
+
+window.addEventListener('hashchange', openFromHash);
+load();
+</script>
+</body>
+</html>
