@@ -1,6 +1,9 @@
 # Notas privadas del DM: el repo es publico, los secretos de campana no se versionan aqui
 dm/
 
+# Overrides personales de configuracion Claude (el settings.json del equipo si se versiona)
+.claude/settings.local.json
+
 node_modules/
 dist/
 coverage/
