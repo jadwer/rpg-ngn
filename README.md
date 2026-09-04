@@ -33,6 +33,7 @@ tools/              validacion de content packs
 
 - [Vision](docs/00-vision.md)
 - [Contrato de realidad](docs/06-reality-contract.md) (la filosofia del DM)
+- [Modelo de eventos y conocimiento](docs/08-event-model.md) (el corazon tecnico)
 - [Contrato del DM](docs/03-dm-contract.md)
 - [Especificacion de content packs](docs/05-content-pack-spec.md)
 - [ROADMAP](ROADMAP.md)

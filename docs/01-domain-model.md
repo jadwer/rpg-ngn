@@ -31,7 +31,7 @@ Una sesion de mesa es un corte transversal: puede cerrar a mitad de una escena (
 | Character | Instancia de un template asignada a un player, con HP, XP, inventario, relaciones y fortuna |
 | Session | Registro de una sesion: asistentes, resumen, decisiones, tiradas, estado al cierre, cabos sueltos |
 | Quest | Mision activa, completada o fallida, con objetivos |
-| Event | Hecho ocurrido en la campana, con visibilidad por capa de conocimiento |
+| Event | Hecho ocurrido en la campana, con visibilidad por capa de conocimiento. Es la entidad central: el estado es una proyeccion de la secuencia de eventos (ver [08-event-model.md](08-event-model.md)) |
 | Roll | Tirada registrada e inmutable: dado, resultado, modificador, contexto |
 
 ## Capas de conocimiento
