@@ -36,6 +36,15 @@ NarrativeContext
     └── presupuesto narrativo (longitud, terminar en pregunta a los jugadores)
 ```
 
+## World State y Narrative State
+
+Son dos cosas distintas y el contexto las separa (Issue #1, punto 5):
+
+- **World State**: lo objetivamente cierto en el mundo. HP, posiciones, inventarios, relaciones, hechos. Es la proyeccion de los `effects` del log de eventos.
+- **Narrative State**: la escena en curso. Que tension esta activa, que hilos quedaron abiertos, que informacion esta preparada para emerger y bajo que condicion. Se deriva de los eventos narrativos (`scene_started`, `narration`, cabos de sesiones previas) mas las restricciones de escena.
+
+La distincion existe para atacar el peligro central de un LLM como DM: confundir "lo se" con "debo contarselo al jugador". El World State completo esta disponible para resolver mecanica; a la narrativa solo entra lo que el Narrative State marca como emergible. En la estructura de arriba, `world` y `party` son World State; `constraints` y `secretState` (con sus condiciones de revelacion) son la parte explicita del Narrative State.
+
 ## Reglas de construccion
 
 1. El contexto se construye por escena, no por campana completa: entra lo relevante a la ubicacion, la party presente y las quests activas.

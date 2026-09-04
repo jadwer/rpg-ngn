@@ -76,6 +76,7 @@ Campos clave:
 
 - **WorldState**: HP, inventarios, quests, relaciones, posiciones. Se reconstruye aplicando `effects` en orden de `seq`.
 - **PlayerKnowledge(pc)**: todo lo presenciado por ese personaje mas lo otorgado via `knowledgeGranted`. Es una proyeccion por personaje, no por mesa: dos jugadores en la misma campana pueden saber cosas distintas.
+- **NarrativeState**: la escena en curso, la tension activa, los hilos abiertos y la informacion preparada para emerger. Se deriva de los eventos narrativos y de los cabos sueltos registrados al cierre de cada sesion (ver [04-narrative-context.md](04-narrative-context.md)).
 - **Snapshots**: al cerrar cada sesion se persiste un snapshot de ambas proyecciones. Reabrir una campana de 30 sesiones no requiere replay completo.
 
 Asi se cumplen a la vez "el mundo recuerda" (regla 3) y "el jugador solo sabe lo que descubrio" (reglas 2 y 14).
