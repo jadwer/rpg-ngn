@@ -1,8 +1,8 @@
 {
   "id": "002",
   "title": "Sesión 2: La campana",
-  "date": null,
-  "status": "planned",
+  "date": "2026-09-05",
+  "status": "played",
   "briefing": "Valdoria olvidó a los Nueve Viajeros, pero el pueblo guarda las huellas: un libro de huéspedes con sus nombres, un cuarto pagado por seis días y una mina cerrada por un derrumbe que nadie vio. El capataz Osric lleva ocho días encerrado con la luz encendida. Alguien mencionó una campana.",
   "howToPlay": [
     "Di lo que tu personaje intenta hacer, con tus palabras. No hay lista de acciones válidas.",
@@ -11,17 +11,56 @@
     "Si te incorporas ahora, tiras 1d20 de Fortuna. No se te dice para qué sirvió. Ya lo descubrirás."
   ],
   "fortune": [
-    { "range": "1-3", "label": "Mala suerte" },
-    { "range": "4-6", "label": "Incómodo" },
-    { "range": "7-14", "label": "Normal" },
-    { "range": "15-17", "label": "Buena estrella" },
-    { "range": "18-19", "label": "Afortunado" },
-    { "range": "20", "label": "Destino" }
+    {
+      "range": "1-3",
+      "label": "Mala suerte"
+    },
+    {
+      "range": "4-6",
+      "label": "Incómodo"
+    },
+    {
+      "range": "7-14",
+      "label": "Normal"
+    },
+    {
+      "range": "15-17",
+      "label": "Buena estrella"
+    },
+    {
+      "range": "18-19",
+      "label": "Afortunado"
+    },
+    {
+      "range": "20",
+      "label": "Destino"
+    }
   ],
   "party": [
-    { "player": "Armando", "character": "calder" },
-    { "player": "Gabino", "character": "narivyl" },
-    { "player": "Jaz", "character": "zahira" }
+    {
+      "player": "Armando",
+      "character": "calder"
+    },
+    {
+      "player": "Gabino",
+      "character": "narivyl"
+    },
+    {
+      "player": "Jaz",
+      "character": "zahira"
+    }
   ],
-  "notes": "La Fortuna se tira una vez por campaña, no por sesión. Quien ya tiró en la sesión 1 conserva su resultado."
+  "notes": "La Fortuna se tira una vez por campaña, no por sesión. Quien ya tiró en la sesión 1 conserva su resultado.",
+  "recap": "Osric abrió la puerta un palmo cuando Calder le contó su propia pérdida y Narivyl le prometió dejarlo en paz. Dentro, cientos de nombres escritos en carbón en las paredes y decenas de velas encendidas a plena mañana. Osric confesó que hace treinta años bajó con otros diez y subió solo, porque alguien pagó por él, y que nunca supo quién. Dijo dónde está la campana de bronce y advirtió que cada vez que suena, algo abajo sabe dónde estás. Mientras tanto Zahira despertó sola en el segundo nivel, sin memoria de nueve días, y salió por su cuenta hasta la entrada tapiada, donde la encontró Tomás. Los tres se reunieron sin reconocerse, con el mismo barro del camino del norte en las botas. Al dormir, Zahira recordó una mano que tocaba una campana y la empujaba hacia arriba. Bajaron con Tomás de guía hasta la capilla de los mineros: allí estaba la campana, y también la mochila vaciada del hermano de Tomás. Al descolgarla, algo respondió desde el tercer nivel. Al volver al pueblo, la casa de Osric estaba a oscuras por primera vez en ocho días.",
+  "openThreads": [
+    "Osric desapareció de su casa. Las velas llevaban apagadas poco rato y la puerta quedó entornada.",
+    "En la pared de los nombres hay uno nuevo, en carbón fresco y sin tachar: Narivyl.",
+    "Alguien toca la campana en el tercer nivel, y en Valdoria no hay campana desde hace treinta años.",
+    "Zahira recuerda una mano verdosa, con una cicatriz en los nudillos, que la empujó hacia arriba.",
+    "El hermano de Tomás dejó su mochila ordenada en la capilla y bajó al tercer nivel por su cuenta.",
+    "En el camino hay marcas de tiza frescas que nadie del grupo hizo, y una cuenta de palotes: cinco cerrados y dos empezados.",
+    "Calder lleva una llave de hierro pequeña y no conoce ninguna cerradura que abra.",
+    "Nueve ganchos de lámpara en el segundo nivel, seis lámparas colgadas y tres huecos.",
+    "Tomás guarda la campana. Dijo que si en tres días no suben, la toca."
+  ]
 }
