@@ -2,7 +2,7 @@
   "id": "001",
   "title": "Sesión 1: Camino a Valdoria",
   "date": "2026-09-05",
-  "status": "planned",
+  "status": "played",
   "briefing": "Cada quien viajaba por su cuenta hacia el sur cuando la crecida del río Halden se llevó el puente de Vado Rojo. La única ruta que queda cruza por Valdoria, un pueblo minero entre colinas. Llevan dos jornadas compartiendo camino, fuego y silencios.",
   "howToPlay": [
     "Di lo que tu personaje intenta hacer, con tus palabras. No hay lista de acciones válidas.",
@@ -17,5 +17,18 @@
     { "range": "15-17", "label": "Buena estrella" },
     { "range": "18-19", "label": "Afortunado" },
     { "range": "20", "label": "Destino" }
+  ],
+  "party": [
+    { "player": "Armando", "character": "calder" },
+    { "player": "Gabino", "character": "narivyl" }
+  ],
+  "recap": "Calder y Narivyl llegaron a Valdoria bajo la lluvia. El guardia les abrió sin pedirles el nombre. En el libro de huéspedes de El Farol Torcido encontraron su propio registro, escrito de su puño nueve días antes, junto a otros siete nombres y la anotación de un cuarto grande pagado por adelantado. Un minero llamado Tomás fue el único del pueblo que los reconoció: según él, el grupo llegó hace nueve días, investigó las desapariciones de mineros, bajó a la mina y no volvió a subir. Esa noche una figura de niebla gris entró en la posada y se identificó como Orion, uno de los nombres del libro. Antes de deshacerse dijo dónde buscar respuestas y dejó una pregunta abierta sobre cómo salieron ellos dos.",
+  "openThreads": [
+    "El capataz Osric lleva ocho días encerrado con la luz encendida toda la noche y no recibe a nadie.",
+    "Existe un tercer nivel en la mina que no aparece en los planos.",
+    "El cuarto grande de El Farol Torcido sigue rentado y pagado, y Mera no sabe por quién.",
+    "No hay un solo animal en Valdoria: se fueron todos la misma noche.",
+    "Bren, el guardia, desconfía de la party desde que se quemó el registro de la puerta.",
+    "Una nota con la letra de Calder advierte de una campana y de alguien cuyo nombre empieza con O."
   ]
 }

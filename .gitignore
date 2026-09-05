@@ -4,6 +4,9 @@ dm/
 # Overrides personales de configuracion Claude (el settings.json del equipo si se versiona)
 .claude/settings.local.json
 
+# Artefactos de automatizacion de navegador
+.playwright-mcp/
+
 node_modules/
 dist/
 coverage/

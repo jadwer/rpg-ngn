@@ -6,11 +6,77 @@
   "age": "52 años",
   "quote": "El conocimiento es el verdadero poder.",
   "bio": "Calder ha dedicado su vida a los misterios del mundo. Su mente es su mayor arma, aunque sus aliados son su mayor fortaleza.",
-  "stats": { "fue": 9, "des": 12, "con": 12, "int": 17, "sab": 14, "car": 10 },
+  "stats": {
+    "fue": 9,
+    "des": 12,
+    "con": 12,
+    "int": 17,
+    "sab": 14,
+    "car": 10
+  },
   "hp": 7,
   "ac": 11,
-  "skills": ["Arcano", "Investigación", "Historia", "Percepción"],
-  "roles": ["Daño mágico", "Control"],
+  "attacks": [
+    {
+      "id": "baston",
+      "name": "Bastón",
+      "use": "des",
+      "damage": "1d6",
+      "damageType": "contundente",
+      "range": "cuerpo a cuerpo"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "descarga-arcana",
+      "name": "Descarga arcana",
+      "type": "truco",
+      "uses": null,
+      "damage": "1d10",
+      "damageType": "energía",
+      "range": "largo",
+      "effect": "Proyectil de fuerza pura. Sin límite de usos."
+    },
+    {
+      "id": "prestidigitacion",
+      "name": "Prestidigitación",
+      "type": "truco",
+      "uses": null,
+      "effect": "Efectos menores a distancia: mover objetos ligeros, encender o apagar una llama, limpiar, marcar. Sin daño."
+    },
+    {
+      "id": "contencion",
+      "name": "Contención",
+      "type": "conjuro",
+      "uses": 2,
+      "per": "descanso largo",
+      "effect": "Fija en el sitio a una criatura o forma durante unos instantes. No la daña. Objetos y presencias sin voluntad propia quedan definidos al ser contenidos."
+    },
+    {
+      "id": "escudo-arcano",
+      "name": "Escudo arcano",
+      "type": "conjuro",
+      "uses": 2,
+      "per": "descanso largo",
+      "effect": "Reacción: +5 a la armadura contra un golpe que ya venía en camino."
+    },
+    {
+      "id": "saber-arcano",
+      "name": "Saber arcano",
+      "type": "pasiva",
+      "effect": "Puede identificar magia, criaturas y fenómenos arcanos con una prueba de Arcano."
+    }
+  ],
+  "skills": [
+    "Arcano",
+    "Investigación",
+    "Historia",
+    "Percepción"
+  ],
+  "roles": [
+    "Daño mágico",
+    "Control"
+  ],
   "goal": "Responder una pregunta que lleva veinte años sin resolver.",
-  "portrait": null
+  "portrait": "portraits/calder.jpg"
 }

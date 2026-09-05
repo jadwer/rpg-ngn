@@ -6,11 +6,89 @@
   "age": "31 años",
   "quote": "La naturaleza no juzga, solo es.",
   "bio": "Narivyl camina entre dos mundos: la sangre infernal y la vida natural. Encuentra equilibrio donde otros solo ven conflicto.",
-  "stats": { "fue": 12, "des": 14, "con": 14, "int": 12, "sab": 16, "car": 11 },
+  "stats": {
+    "fue": 12,
+    "des": 14,
+    "con": 14,
+    "int": 12,
+    "sab": 16,
+    "car": 11
+  },
   "hp": 10,
   "ac": 13,
-  "skills": ["Naturaleza", "Supervivencia", "Medicina", "Trato con animales"],
-  "roles": ["Control", "Apoyo", "Invocación"],
+  "attacks": [
+    {
+      "id": "hoz",
+      "name": "Hoz",
+      "use": "des",
+      "damage": "1d4",
+      "damageType": "cortante",
+      "range": "cuerpo a cuerpo"
+    },
+    {
+      "id": "honda",
+      "name": "Honda",
+      "use": "des",
+      "damage": "1d4",
+      "damageType": "contundente",
+      "range": "medio"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "llama-producida",
+      "name": "Llama producida",
+      "type": "truco",
+      "uses": null,
+      "damage": "1d8",
+      "damageType": "fuego",
+      "range": "corto",
+      "effect": "Una llama en la palma que alumbra como una antorcha y se puede arrojar. No prende materiales salvo contacto sostenido."
+    },
+    {
+      "id": "escarcha",
+      "name": "Escarcha",
+      "type": "truco",
+      "uses": null,
+      "damage": "1d6",
+      "damageType": "frío",
+      "range": "corto",
+      "effect": "Si acierta, el objetivo se mueve la mitad hasta su siguiente acción."
+    },
+    {
+      "id": "hablar-con-animales",
+      "name": "Hablar con las bestias",
+      "type": "conjuro",
+      "uses": 2,
+      "per": "descanso largo",
+      "effect": "Conversa con un animal. Responde según lo que un animal puede saber y le importa."
+    },
+    {
+      "id": "enredar",
+      "name": "Enredadera",
+      "type": "conjuro",
+      "uses": 1,
+      "per": "descanso largo",
+      "effect": "Raíces y tallos brotan del suelo y sujetan a quien pise la zona. Requiere tierra o materia viva."
+    },
+    {
+      "id": "resistencia-infernal",
+      "name": "Sangre infernal",
+      "type": "pasiva",
+      "effect": "Resistencia al fuego. Ve en la oscuridad natural a media distancia."
+    }
+  ],
+  "skills": [
+    "Naturaleza",
+    "Supervivencia",
+    "Medicina",
+    "Trato con animales"
+  ],
+  "roles": [
+    "Control",
+    "Apoyo",
+    "Invocación"
+  ],
   "goal": "Probar que la sangre no decide a quién sirve el bosque.",
-  "portrait": null
+  "portrait": "portraits/narivyl.jpg"
 }

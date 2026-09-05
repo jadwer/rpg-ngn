@@ -6,11 +6,73 @@
   "age": "29 años",
   "quote": "La vida suena mejor con compañía.",
   "bio": "Kael convierte historias en magia y extraños en amigos. Donde otros ven problemas, él ve una buena canción.",
-  "stats": { "fue": 10, "des": 14, "con": 12, "int": 13, "sab": 12, "car": 16 },
+  "stats": {
+    "fue": 10,
+    "des": 14,
+    "con": 12,
+    "int": 13,
+    "sab": 12,
+    "car": 16
+  },
   "hp": 9,
   "ac": 13,
-  "skills": ["Interpretación", "Persuasión", "Inspiración", "Engaño"],
-  "roles": ["Apoyo", "Control", "Social"],
+  "attacks": [
+    {
+      "id": "estoque",
+      "name": "Estoque",
+      "use": "des",
+      "damage": "1d8",
+      "damageType": "perforante",
+      "range": "cuerpo a cuerpo"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "burla-cruel",
+      "name": "Burla hiriente",
+      "type": "truco",
+      "uses": null,
+      "damage": "1d6",
+      "damageType": "psíquico",
+      "range": "medio",
+      "effect": "Una palabra bien puesta. Si acierta, además el objetivo tira con desventaja su siguiente acción."
+    },
+    {
+      "id": "inspiracion",
+      "name": "Inspiración",
+      "type": "rasgo",
+      "uses": 3,
+      "per": "descanso largo",
+      "effect": "Otorga a un aliado un 1d6 que puede sumar a cualquier tirada, incluso después de ver el resultado."
+    },
+    {
+      "id": "encantar",
+      "name": "Encantamiento",
+      "type": "conjuro",
+      "uses": 2,
+      "per": "descanso largo",
+      "effect": "Una criatura que lo entienda lo trata como a un amigo de confianza durante un rato. Se rompe si la perjudica. Ella recuerda que fue encantada."
+    },
+    {
+      "id": "curar-heridas",
+      "name": "Canción de alivio",
+      "type": "conjuro",
+      "uses": 1,
+      "per": "descanso largo",
+      "effect": "Restaura 1d8+3 puntos de vida por contacto."
+    }
+  ],
+  "skills": [
+    "Interpretación",
+    "Persuasión",
+    "Inspiración",
+    "Engaño"
+  ],
+  "roles": [
+    "Apoyo",
+    "Control",
+    "Social"
+  ],
   "goal": "Vivir una historia que valga la pena cantar.",
-  "portrait": null
+  "portrait": "portraits/kael.jpg"
 }

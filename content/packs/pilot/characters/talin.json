@@ -6,11 +6,69 @@
   "age": "26 años",
   "quote": "Si hay una cerradura, hay una manera.",
   "bio": "Talin siempre tiene un plan (y un plan B). Curiosa, audaz y con una sonrisa que puede abrir más puertas que una llave.",
-  "stats": { "fue": 10, "des": 16, "con": 13, "int": 13, "sab": 12, "car": 14 },
+  "stats": {
+    "fue": 10,
+    "des": 16,
+    "con": 13,
+    "int": 13,
+    "sab": 12,
+    "car": 14
+  },
   "hp": 9,
   "ac": 14,
-  "skills": ["Sigilo", "Juego de manos", "Percepción", "Engaño"],
-  "roles": ["Sigilo", "Control", "Utilidad"],
+  "attacks": [
+    {
+      "id": "daga",
+      "name": "Daga",
+      "use": "des",
+      "damage": "1d4",
+      "damageType": "perforante",
+      "range": "cuerpo a cuerpo o lanzada"
+    },
+    {
+      "id": "ballesta-mano",
+      "name": "Ballesta de mano",
+      "use": "des",
+      "damage": "1d6",
+      "damageType": "perforante",
+      "range": "medio"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "ataque-furtivo",
+      "name": "Ataque furtivo",
+      "type": "rasgo",
+      "uses": null,
+      "damage": "1d6",
+      "damageType": "según el arma",
+      "effect": "Daño extra una vez por turno si tiene ventaja o si un aliado está trabado con el objetivo."
+    },
+    {
+      "id": "manos-habiles",
+      "name": "Manos hábiles",
+      "type": "pasiva",
+      "effect": "Forzar cerraduras, desarmar trampas y robar bolsillos son pruebas de Juego de manos con ventaja."
+    },
+    {
+      "id": "escapista",
+      "name": "Escapista",
+      "type": "rasgo",
+      "uses": null,
+      "effect": "Puede desengancharse o esconderse como parte del mismo movimiento, sin gastar la acción."
+    }
+  ],
+  "skills": [
+    "Sigilo",
+    "Juego de manos",
+    "Percepción",
+    "Engaño"
+  ],
+  "roles": [
+    "Sigilo",
+    "Control",
+    "Utilidad"
+  ],
   "goal": "Encontrar el tesoro del que hablaba su abuela, si es que existe.",
-  "portrait": null
+  "portrait": "portraits/talin.jpg"
 }

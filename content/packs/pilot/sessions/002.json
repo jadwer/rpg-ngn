@@ -1,0 +1,27 @@
+{
+  "id": "002",
+  "title": "Sesión 2: La campana",
+  "date": null,
+  "status": "planned",
+  "briefing": "Valdoria olvidó a los Nueve Viajeros, pero el pueblo guarda las huellas: un libro de huéspedes con sus nombres, un cuarto pagado por seis días y una mina cerrada por un derrumbe que nadie vio. El capataz Osric lleva ocho días encerrado con la luz encendida. Alguien mencionó una campana.",
+  "howToPlay": [
+    "Di lo que tu personaje intenta hacer, con tus palabras. No hay lista de acciones válidas.",
+    "Cuando algo tenga riesgo, tiras un d20. El DM interpreta el resultado; nunca te dirá el número que necesitabas.",
+    "Tu hoja dice en qué eres bueno. Úsalo: el mundo reacciona distinto según quién lo intenta.",
+    "Si te incorporas ahora, tiras 1d20 de Fortuna. No se te dice para qué sirvió. Ya lo descubrirás."
+  ],
+  "fortune": [
+    { "range": "1-3", "label": "Mala suerte" },
+    { "range": "4-6", "label": "Incómodo" },
+    { "range": "7-14", "label": "Normal" },
+    { "range": "15-17", "label": "Buena estrella" },
+    { "range": "18-19", "label": "Afortunado" },
+    { "range": "20", "label": "Destino" }
+  ],
+  "party": [
+    { "player": "Armando", "character": "calder" },
+    { "player": "Gabino", "character": "narivyl" },
+    { "player": "Jaz", "character": "zahira" }
+  ],
+  "notes": "La Fortuna se tira una vez por campaña, no por sesión. Quien ya tiró en la sesión 1 conserva su resultado."
+}

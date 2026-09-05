@@ -81,6 +81,43 @@
     border-radius: 6px; padding: 2px 8px; font-size: .82rem; color: var(--ink-dim);
   }
   .fortune b { color: var(--ink); font-weight: 600; }
+  .session .party { color: var(--ink-dim); font-size: .88rem; margin: .5em 0 0; font-variant: small-caps; letter-spacing: .05em; }
+  .badge {
+    display: inline-block; border-radius: 999px; padding: 1px 9px;
+    font-size: .72rem; font-variant: small-caps; letter-spacing: .08em;
+    border: 1px solid var(--gold-dim); color: var(--gold); margin-left: 8px; vertical-align: 2px;
+  }
+  .badge.played { border-color: var(--border); color: var(--ink-dim); }
+
+  /* Cronica */
+  .chronicle { margin-bottom: 18px; }
+  .chronicle > summary {
+    cursor: pointer; color: var(--gold); font-family: Cinzel, serif;
+    font-size: .92rem; letter-spacing: .08em; text-transform: uppercase;
+    padding: 10px 14px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; list-style: none;
+  }
+  .chronicle > summary::-webkit-details-marker { display: none; }
+  .chronicle > summary::after { content: " \25be"; color: var(--gold-dim); }
+  .chronicle[open] > summary { border-radius: 10px 10px 0 0; border-bottom: 0; }
+  .chronicle .past {
+    background: var(--panel); border: 1px solid var(--border); border-top: 0;
+    border-radius: 0 0 10px 10px; padding: 4px 16px 14px;
+  }
+  .past article { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .past article:last-child { border-bottom: 0; }
+  .past h3 {
+    font-family: Cinzel, serif; font-size: .98rem; color: var(--gold);
+    margin: 0 0 6px; letter-spacing: .04em;
+  }
+  .past .date { color: var(--ink-dim); font-size: .85rem; float: right; font-family: "Crimson Pro", serif; }
+  .past p { margin: .4em 0; font-size: .95rem; }
+  .threads { margin: 8px 0 0; padding-left: 18px; }
+  .threads li { margin: 5px 0; font-size: .92rem; color: var(--ink-dim); }
+  .threads-label {
+    font-variant: small-caps; letter-spacing: .08em; color: var(--gold-dim);
+    font-size: .85rem; margin: 10px 0 2px;
+  }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
   .card {
@@ -99,6 +136,11 @@
   .card .n { font-family: Cinzel, serif; color: var(--gold); font-size: 1.05rem; letter-spacing: .03em; }
   .card .r { color: var(--ink-dim); font-size: .88rem; margin-top: 2px; }
   .card .roles { margin-top: 8px; font-size: .78rem; color: var(--ink-dim); font-variant: small-caps; letter-spacing: .05em; }
+  .card .av {
+    display: block; width: 100%; aspect-ratio: 1; object-fit: cover;
+    border-radius: 8px; margin-bottom: 9px; background: var(--panel-2);
+    border: 1px solid var(--border);
+  }
 
   /* Detalle */
   .detail { display: none; }
@@ -119,6 +161,12 @@
     font-family: Cinzel, serif; color: var(--gold); font-size: 1.6rem;
     margin: 0; letter-spacing: .05em;
   }
+  .hero { display: flex; gap: 14px; align-items: center; }
+  .hero .av {
+    width: 92px; height: 92px; flex: none; object-fit: cover;
+    border-radius: 10px; border: 1px solid var(--gold-dim); background: var(--panel-2);
+  }
+  .hero .who { min-width: 0; }
   .sub { color: var(--ink-dim); margin: 2px 0 0; font-size: .98rem; }
   .quote { font-style: italic; color: var(--ink); margin: 12px 0; border-left: 3px solid var(--accent); padding-left: 10px; }
   .vitals { display: flex; gap: 10px; margin: 14px 0; }
@@ -147,6 +195,22 @@
   }
   .roles-line { color: var(--ink-dim); font-variant: small-caps; letter-spacing: .06em; }
   .goal { margin: 6px 0 0; }
+
+  /* Ataques y capacidades */
+  .kit { display: flex; flex-direction: column; gap: 8px; }
+  .kit .item {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+  }
+  .kit .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .kit .nm { font-weight: 600; color: var(--ink); }
+  .kit .dmg {
+    font-family: Cinzel, serif; color: var(--gold); font-size: .92rem;
+    background: var(--bg); border: 1px solid var(--gold-dim);
+    border-radius: 5px; padding: 0 7px;
+  }
+  .kit .meta { color: var(--ink-dim); font-size: .82rem; font-variant: small-caps; letter-spacing: .06em; }
+  .kit .eff { margin: 5px 0 0; font-size: .92rem; color: var(--ink-dim); line-height: 1.4; }
   footer { text-align: center; color: var(--ink-dim); font-size: .85rem; margin-top: 28px; font-variant: small-caps; letter-spacing: .1em; }
   .err { color: #d98; text-align: center; padding: 30px 10px; }
   .loading { text-align: center; color: var(--ink-dim); padding: 30px; }
@@ -161,6 +225,10 @@
       <p class="tagline" id="tagline"></p>
     </header>
     <section class="session" id="session" hidden></section>
+    <details class="chronicle" id="chronicle" hidden>
+      <summary>Lo que ha pasado hasta ahora</summary>
+      <div class="past" id="past"></div>
+    </details>
     <div class="grid" id="grid"><div class="loading">Consultando los archivos del gremio...</div></div>
     <footer>El mundo es más grande cuando se comparte</footer>
   </div>
@@ -184,38 +252,78 @@ async function load() {
     document.getElementById('motto').textContent = pack.motto ? '"' + pack.motto + '"' : '';
     document.title = pack.name;
 
-    if (pack.sessions && pack.sessions.length) {
-      try { renderSession(await (await fetch(BASE + 'sessions/' + pack.sessions[pack.sessions.length - 1] + '.json')).json()); }
-      catch (e) { /* sesion opcional */ }
-    }
-
     characters = await Promise.all(
       pack.characters.map(id => fetch(BASE + 'characters/' + id + '.json').then(r => r.json()))
     );
     renderGrid();
+
+    if (pack.sessions && pack.sessions.length) {
+      try {
+        const sessions = (await Promise.all(
+          pack.sessions.map(id => fetch(BASE + 'sessions/' + id + '.json').then(r => r.json()).catch(() => null))
+        )).filter(Boolean);
+        renderSessions(sessions);
+      } catch (e) { /* sesiones opcionales */ }
+    }
+
     if (location.hash) openFromHash();
   } catch (e) {
     document.getElementById('grid').innerHTML = '<div class="err">No se pudieron cargar las fichas. Intenta recargar.</div>';
   }
 }
 
-function renderSession(s) {
+function renderSessions(sessions) {
+  const played = sessions.filter(s => s.status === 'played');
+  const current = sessions.filter(s => s.status !== 'played').pop() || sessions[sessions.length - 1];
+
+  if (current) renderCurrent(current);
+  if (played.length) renderChronicle(played);
+}
+
+function partyLine(s) {
+  if (!s.party || !s.party.length) return '';
+  const names = s.party.map(p => {
+    const c = characters.find(x => x.id === p.character);
+    return esc((c ? c.name : p.character) + (p.player ? ' (' + p.player + ')' : ''));
+  });
+  return `<p class="party">En la mesa: ${names.join(' &middot; ')}</p>`;
+}
+
+function renderCurrent(s) {
   const el = document.getElementById('session');
   el.hidden = false;
   el.innerHTML = `
-    <span class="date">${esc(s.date)}</span>
-    <h2>${esc(s.title)}</h2>
+    ${s.date ? `<span class="date">${esc(s.date)}</span>` : ''}
+    <h2>${esc(s.title)}${s.status === 'played' ? '<span class="badge played">jugada</span>' : '<span class="badge">próxima</span>'}</h2>
     <p>${esc(s.briefing)}</p>
+    ${partyLine(s)}
     <details class="how">
       <summary>Cómo se juega</summary>
       <ul>${(s.howToPlay || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
       <div class="fortune">${(s.fortune || []).map(f => `<span><b>${esc(f.range)}</b> ${esc(f.label)}</span>`).join('')}</div>
+      ${s.notes ? `<p class="party">${esc(s.notes)}</p>` : ''}
     </details>`;
+}
+
+function renderChronicle(played) {
+  const el = document.getElementById('chronicle');
+  el.hidden = false;
+  document.getElementById('past').innerHTML = played.slice().reverse().map(s => `
+    <article>
+      ${s.date ? `<span class="date">${esc(s.date)}</span>` : ''}
+      <h3>${esc(s.title)}</h3>
+      ${partyLine(s)}
+      <p>${esc(s.recap || s.briefing)}</p>
+      ${(s.openThreads && s.openThreads.length) ? `
+        <p class="threads-label">Cabos sueltos</p>
+        <ul class="threads">${s.openThreads.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+    </article>`).join('');
 }
 
 function renderGrid() {
   document.getElementById('grid').innerHTML = characters.map(c => `
     <button class="card" onclick="location.hash='${c.id}'">
+      ${c.portrait ? `<img class="av" src="${BASE}${esc(c.portrait)}" alt="" loading="lazy">` : ''}
       <div class="n">${esc(c.name)}</div>
       <div class="r">${esc(c.race)}<br>${esc(c.class)}</div>
       <div class="roles">${esc((c.roles || []).join(' / '))}</div>
@@ -226,8 +334,13 @@ function renderDetail(c) {
   document.getElementById('detail').innerHTML = `
     <button class="back" onclick="history.back()">&larr; Volver</button>
     <div class="sheet">
-      <h2>${esc(c.name)}</h2>
-      <p class="sub">${esc(c.race)} &middot; ${esc(c.class)} &middot; ${esc(c.age)}</p>
+      <div class="hero">
+        ${c.portrait ? `<img class="av" src="${BASE}${esc(c.portrait)}" alt="Retrato de ${esc(c.name)}">` : ''}
+        <div class="who">
+          <h2>${esc(c.name)}</h2>
+          <p class="sub">${esc(c.race)} &middot; ${esc(c.class)} &middot; ${esc(c.age)}</p>
+        </div>
+      </div>
       <p class="quote">"${esc(c.quote)}"</p>
       <div class="vitals">
         <div class="vital"><div class="v">${c.hp}</div><div class="l">Puntos de vida</div></div>
@@ -237,6 +350,32 @@ function renderDetail(c) {
         ${Object.entries(c.stats).map(([k, v]) => `
           <div class="stat"><div class="l">${STAT_LABELS[k] || k}</div><div class="v">${v}</div><div class="m">${mod(v)}</div></div>`).join('')}
       </div>
+      ${(c.attacks && c.attacks.length) ? `
+        <div class="label">Con qué peleas</div>
+        <div class="kit">${c.attacks.map(a => `
+          <div class="item">
+            <div class="top">
+              <span class="nm">${esc(a.name)}</span>
+              ${a.damage ? `<span class="dmg">${esc(a.damage)}</span>` : ''}
+              <span class="meta">${[a.damageType, a.range].filter(Boolean).map(esc).join(' &middot; ')}</span>
+            </div>
+          </div>`).join('')}</div>` : ''}
+      ${(c.abilities && c.abilities.length) ? `
+        <div class="label">Qué sabes hacer</div>
+        <div class="kit">${c.abilities.map(a => `
+          <div class="item">
+            <div class="top">
+              <span class="nm">${esc(a.name)}</span>
+              ${a.damage ? `<span class="dmg">${esc(a.damage)}</span>` : ''}
+              <span class="meta">${[
+                a.type,
+                a.damageType,
+                a.range,
+                a.uses ? a.uses + ' por ' + (a.per || 'descanso') : (a.uses === null ? 'a voluntad' : '')
+              ].filter(Boolean).map(esc).join(' &middot; ')}</span>
+            </div>
+            ${a.effect ? `<p class="eff">${esc(a.effect)}</p>` : ''}
+          </div>`).join('')}</div>` : ''}
       <div class="label">Eres bueno en</div>
       <div class="chips">${(c.skills || []).map(s => `<span>${esc(s)}</span>`).join('')}</div>
       <div class="label">Rol en el grupo</div>

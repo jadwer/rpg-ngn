@@ -6,11 +6,66 @@
   "age": "117 años",
   "quote": "El mundo siempre tiene más que mostrar.",
   "bio": "Orion conoce los caminos que otros ni siquiera imaginan. Paciente, observador y siempre un paso adelante.",
-  "stats": { "fue": 14, "des": 16, "con": 13, "int": 12, "sab": 14, "car": 11 },
+  "stats": {
+    "fue": 14,
+    "des": 16,
+    "con": 13,
+    "int": 12,
+    "sab": 14,
+    "car": 11
+  },
   "hp": 11,
   "ac": 14,
-  "skills": ["Supervivencia", "Rastreo", "Percepción", "Trato con animales"],
-  "roles": ["Exploración", "Apoyo", "Daño a distancia"],
+  "attacks": [
+    {
+      "id": "arco-largo",
+      "name": "Arco largo",
+      "use": "des",
+      "damage": "1d8",
+      "damageType": "perforante",
+      "range": "largo"
+    },
+    {
+      "id": "espada-corta",
+      "name": "Espada corta",
+      "use": "des",
+      "damage": "1d6",
+      "damageType": "perforante",
+      "range": "cuerpo a cuerpo"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "marcar-presa",
+      "name": "Marcar presa",
+      "type": "rasgo",
+      "uses": null,
+      "effect": "Señala un objetivo a la vista: mientras lo persiga, +1d4 al daño contra él y ventaja para rastrearlo."
+    },
+    {
+      "id": "explorador-natural",
+      "name": "Explorador natural",
+      "type": "pasiva",
+      "effect": "No se pierde por medios no mágicos, avanza a paso normal por terreno difícil y detecta al doble de distancia mientras explora."
+    },
+    {
+      "id": "sentido-primigenio",
+      "name": "Sentido primigenio",
+      "type": "pasiva",
+      "effect": "Ventaja en Percepción y Rastreo al aire libre y en pasajes naturales."
+    }
+  ],
+  "skills": [
+    "Supervivencia",
+    "Rastreo",
+    "Percepción",
+    "Trato con animales"
+  ],
+  "roles": [
+    "Exploración",
+    "Apoyo",
+    "Daño a distancia"
+  ],
   "goal": "Cartografiar lo que ningún mapa se ha atrevido a nombrar.",
-  "portrait": null
+  "portrait": "portraits/orion.jpg"
 }

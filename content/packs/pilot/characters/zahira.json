@@ -6,11 +6,74 @@
   "age": "88 años",
   "quote": "Pequeña estatura, grandes hazañas.",
   "bio": "Zahira es tan resistente como las montañas de su hogar. Directa, leal y con un sentido del humor tan afilado como su hacha.",
-  "stats": { "fue": 16, "des": 12, "con": 16, "int": 10, "sab": 12, "car": 11 },
+  "stats": {
+    "fue": 16,
+    "des": 12,
+    "con": 16,
+    "int": 10,
+    "sab": 12,
+    "car": 11
+  },
   "hp": 13,
   "ac": 17,
-  "skills": ["Atletismo", "Aguante", "Historia", "Artesanía"],
-  "roles": ["Tanque", "Combate cuerpo a cuerpo"],
+  "attacks": [
+    {
+      "id": "hacha-de-guerra",
+      "name": "Hacha de guerra",
+      "use": "fue",
+      "damage": "1d8",
+      "damageType": "cortante",
+      "range": "cuerpo a cuerpo"
+    },
+    {
+      "id": "martillo-arrojadizo",
+      "name": "Martillo arrojadizo",
+      "use": "fue",
+      "damage": "1d6",
+      "damageType": "contundente",
+      "range": "lanzada, corta"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "segundo-aliento",
+      "name": "Segundo aliento",
+      "type": "rasgo",
+      "uses": 1,
+      "per": "descanso corto",
+      "effect": "Recupera 1d10+1 puntos de vida sin ayuda de nadie."
+    },
+    {
+      "id": "acometida",
+      "name": "Acometida",
+      "type": "rasgo",
+      "uses": 1,
+      "per": "descanso corto",
+      "effect": "Ataca dos veces en el mismo turno."
+    },
+    {
+      "id": "resistencia-enana",
+      "name": "Resistencia enana",
+      "type": "pasiva",
+      "effect": "Ventaja contra venenos y contra el agotamiento por marcha, frío o falta de sueño."
+    },
+    {
+      "id": "ojo-de-piedra",
+      "name": "Ojo de piedra",
+      "type": "pasiva",
+      "effect": "Reconoce trabajos de cantería, túneles y galerías: si algo fue excavado o alterado, lo nota."
+    }
+  ],
+  "skills": [
+    "Atletismo",
+    "Aguante",
+    "Historia",
+    "Artesanía"
+  ],
+  "roles": [
+    "Tanque",
+    "Combate cuerpo a cuerpo"
+  ],
   "goal": "Ganarse un nombre propio lejos del clan.",
-  "portrait": null
+  "portrait": "portraits/zahira.jpg"
 }

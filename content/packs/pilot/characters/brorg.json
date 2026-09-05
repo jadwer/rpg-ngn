@@ -6,11 +6,60 @@
   "age": "24 años",
   "quote": "¡Más fuerte!",
   "bio": "Brorg habla poco, pero sus acciones dicen mucho. En la batalla encuentra su paz, y en sus compañeros, su verdadero hogar.",
-  "stats": { "fue": 17, "des": 14, "con": 15, "int": 10, "sab": 12, "car": 11 },
+  "stats": {
+    "fue": 17,
+    "des": 14,
+    "con": 15,
+    "int": 10,
+    "sab": 12,
+    "car": 11
+  },
   "hp": 14,
   "ac": 14,
-  "skills": ["Atletismo", "Intimidación", "Supervivencia", "Aguante"],
-  "roles": ["Daño cuerpo a cuerpo", "Tanque"],
+  "attacks": [
+    {
+      "id": "hacha-grande",
+      "name": "Hacha grande",
+      "use": "fue",
+      "damage": "1d12",
+      "damageType": "cortante",
+      "range": "cuerpo a cuerpo"
+    },
+    {
+      "id": "jabalina",
+      "name": "Jabalina",
+      "use": "fue",
+      "damage": "1d6",
+      "damageType": "perforante",
+      "range": "lanzada, media"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "furia",
+      "name": "Furia",
+      "type": "rasgo",
+      "uses": 2,
+      "per": "descanso largo",
+      "effect": "Mientras dura, ventaja en pruebas de Fuerza, +2 al daño cuerpo a cuerpo y resistencia a golpes físicos. No puede lanzar magia."
+    },
+    {
+      "id": "sin-armadura",
+      "name": "Defensa sin armadura",
+      "type": "pasiva",
+      "effect": "Su armadura ya cuenta la resistencia natural: no mejora con armadura pesada."
+    }
+  ],
+  "skills": [
+    "Atletismo",
+    "Intimidación",
+    "Supervivencia",
+    "Aguante"
+  ],
+  "roles": [
+    "Daño cuerpo a cuerpo",
+    "Tanque"
+  ],
   "goal": "Encontrar un lugar (o una gente) al que pertenecer.",
-  "portrait": null
+  "portrait": "portraits/brorg.jpg"
 }

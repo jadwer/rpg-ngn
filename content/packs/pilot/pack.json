@@ -1,7 +1,7 @@
 {
   "id": "pilot",
   "type": "campaign",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "name": "Los Nueve Viajeros",
   "tagline": "Diferentes caminos, un mismo destino",
   "motto": "Extraños hoy, quizás una leyenda mañana.",
@@ -9,10 +9,14 @@
   "provenance": {
     "class": "original",
     "authors": ["Gabino Ramirez"],
-    "sources": ["img/personajes.png (lámina generada por IA para la sesión piloto)"],
+    "sources": [
+      "img/personajes.png (lámina generada por IA para la sesión piloto)",
+      "portraits/*.jpg (recortes de la lámina anterior, mismo origen y licencia)"
+    ],
     "license": "propietario",
     "createdAt": "2026-09-04",
-    "updatedAt": "2026-09-04"
+    "updatedAt": "2026-09-04",
+    "changelog": "0.2.0: ataques y capacidades declarados en las nueve fichas; retratos recortados de la lamina; sesion 001 registrada como jugada; sesion 002 planeada."
   },
   "characters": [
     "dayan",
@@ -25,5 +29,5 @@
     "calder",
     "orion"
   ],
-  "sessions": ["001"]
+  "sessions": ["001", "002"]
 }
