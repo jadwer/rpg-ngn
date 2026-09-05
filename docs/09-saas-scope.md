@@ -287,6 +287,27 @@ Lo que si hace falta es que la mesa sepa si alguien esta narrando en voz alta:
 
 Es un indicador de estado compartido, no sincronia de audio.
 
+## Fortuna abierta
+
+El jugador tira su Fortuna, ve el numero y la tabla de rangos esta publicada. Es
+informacion de jugador, no de personaje.
+
+Lo secreto es el **efecto**, nunca el tier. El jugador sabe que le toco mala suerte
+y descubre jugando como se manifiesta.
+
+Razon, y viene de la mesa: en la sesion 002, Narivyl volco un farol y quemo el
+unico registro del pueblo con un 1 natural. Que la mesa viera el numero hizo el
+momento mejor, no peor. Un modificador secreto del que el jugador no percibe nada
+es un modificador que igual podria no existir.
+
+Consecuencia tecnica: los eventos `roll` de tipo fortuna no llevan
+`visibility.layer: "dm"`. La proyeccion de conocimiento del jugador incluye su
+propio tier.
+
+Esto cierra el hallazgo IL6 de [10](10-audit-2026-09-05.md), donde el diseno estaba
+a medias: el evento se registraba como secreto mientras el jugador veia el dado y
+la tabla estaba publicada en el visor.
+
 ## Lo que sigue sin definir
 
 1. **Coste real por sesion.** Calculable con los datos de las tres sesiones

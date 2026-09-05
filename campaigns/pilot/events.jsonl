@@ -1,21 +1,21 @@
-{"seq":1,"type":"session_started","sessionId":"002","recordedAt":"2026-09-05T00:00:00Z","worldTime":"Valdoria, mañana siguiente","payload":{"party":["character:calder","character:narivyl","character:zahira"]}}
-{"seq":2,"type":"roll","sessionId":"002","actor":"character:zahira","recordedAt":"2026-09-05T00:00:00Z","resolved":{"kind":"fortune","die":"1d20","result":6,"source":"csprng:secrets"},"visibility":{"layer":"dm"}}
-{"seq":3,"type":"discovery","sessionId":"002","targets":["character:calder","character:narivyl"],"payload":{"fact":"fact:campana-en-capilla-segundo-nivel","confidence":"known","method":"Osric lo dijo por la rendija"}}
-{"seq":4,"type":"discovery","sessionId":"002","targets":["character:calder","character:narivyl"],"payload":{"fact":"fact:campana-delata-posicion","confidence":"known","method":"advertencia de Osric al cerrar"}}
-{"seq":5,"type":"discovery","sessionId":"002","targets":["character:zahira"],"payload":{"fact":"fact:un-medio-orco-la-subio-tocando-la-campana","confidence":"uncertain","method":"memoria recuperada al dormir (20 en descanso)"}}
-{"seq":6,"type":"discovery","sessionId":"002","targets":["character:calder","character:narivyl","character:zahira"],"payload":{"fact":"fact:alguien-toca-la-campana-abajo","confidence":"uncertain","method":"Tomas: en Valdoria no hay campana desde hace 30 anios"}}
-{"seq":7,"type":"world_event","sessionId":"002","payload":{"note":"Tomas se une hasta la capilla y queda como custodio de la campana"}}
-{"seq":8,"type":"roll","sessionId":"002","actor":"character:zahira","resolved":{"kind":"skill","skill":"orientarse","die":"1d20","advantage":true,"rolls":[6,12],"result":12,"source":"csprng:secrets"}}
-{"seq":9,"type":"roll","sessionId":"002","actor":"character:narivyl","resolved":{"kind":"social","target":"npc:osric","die":"1d20","result":15,"source":"csprng:secrets"}}
-{"seq":10,"type":"roll","sessionId":"002","actor":"character:zahira","resolved":{"kind":"skill","skill":"sigilo","die":"1d20","disadvantage":true,"rolls":[11,7],"result":7,"source":"csprng:secrets"}}
-{"seq":11,"type":"roll","sessionId":"002","actor":"character:calder","resolved":{"kind":"social","target":"npc:osric","die":"1d20","result":15,"source":"csprng:secrets"}}
-{"seq":12,"type":"roll","sessionId":"002","actor":"character:zahira","resolved":{"kind":"skill","skill":"perspicacia","target":"npc:tomas","die":"1d20","result":19,"source":"csprng:secrets"}}
-{"seq":13,"type":"roll","sessionId":"002","actor":"character:narivyl","resolved":{"kind":"skill","skill":"medicina","target":"character:zahira","die":"1d20","result":14,"source":"csprng:secrets"}}
-{"seq":14,"type":"roll","sessionId":"002","actor":"character:zahira","resolved":{"kind":"rest","die":"1d20","result":20,"source":"csprng:secrets"},"effects":[{"op":"memory_recovered","who":"character:zahira"}]}
-{"seq":15,"type":"roll","sessionId":"002","actor":"character:calder","resolved":{"kind":"skill","skill":"investigacion","die":"1d20","result":3,"source":"csprng:secrets"}}
-{"seq":16,"type":"roll","sessionId":"002","actor":"character:narivyl","resolved":{"kind":"skill","skill":"percepcion","die":"1d20","result":3,"source":"csprng:secrets"}}
-{"seq":17,"type":"roll","sessionId":"002","actor":"character:zahira","resolved":{"kind":"skill","skill":"ojo-de-piedra","die":"1d20","result":6,"source":"csprng:secrets"}}
-{"seq":18,"type":"inventory_change","sessionId":"002","actor":"character:calder","effects":[{"op":"gain","item":"llave-de-hierro-sin-cerradura","source":"fortuna:19"}]}
-{"seq":19,"type":"inventory_change","sessionId":"002","effects":[{"op":"gain","item":"campana-de-bronce","holder":"npc:tomas","note":"custodia acordada, 3 dias"}]}
-{"seq":20,"type":"world_event","sessionId":"002","payload":{"note":"Osric desaparece; velas apagadas, puerta entornada, NARIVYL escrito en carbon fresco sin tachar"}}
-{"seq":21,"type":"session_closed","sessionId":"002","payload":{"cliffhanger":"el nombre de Narivyl en la pared de Osric"}}
+{"seq": 1, "type": "session_started", "sessionId": "002", "recordedAt": "2026-09-05T00:00:00Z", "worldTime": "Valdoria, mañana siguiente", "payload": {"party": ["character:calder", "character:narivyl", "character:zahira"]}}
+{"seq": 2, "type": "roll", "sessionId": "002", "actor": "character:zahira", "recordedAt": "2026-09-05T00:00:00Z", "resolved": {"kind": "fortune", "die": "1d20", "result": 6, "source": "csprng:secrets"}, "visibility": {"layer": "campaign", "note": "el tier es visible para la mesa; el efecto no"}}
+{"seq": 3, "type": "discovery", "sessionId": "002", "targets": ["character:calder", "character:narivyl"], "payload": {"fact": "fact:campana-en-capilla-segundo-nivel", "confidence": "known", "method": "Osric lo dijo por la rendija"}}
+{"seq": 4, "type": "discovery", "sessionId": "002", "targets": ["character:calder", "character:narivyl"], "payload": {"fact": "fact:campana-delata-posicion", "confidence": "known", "method": "advertencia de Osric al cerrar"}}
+{"seq": 5, "type": "discovery", "sessionId": "002", "targets": ["character:zahira"], "payload": {"fact": "fact:un-medio-orco-la-subio-tocando-la-campana", "confidence": "uncertain", "method": "memoria recuperada al dormir (20 en descanso)"}}
+{"seq": 6, "type": "discovery", "sessionId": "002", "targets": ["character:calder", "character:narivyl", "character:zahira"], "payload": {"fact": "fact:alguien-toca-la-campana-abajo", "confidence": "uncertain", "method": "Tomas: en Valdoria no hay campana desde hace 30 anios"}}
+{"seq": 7, "type": "world_event", "sessionId": "002", "payload": {"note": "Tomas se une hasta la capilla y queda como custodio de la campana"}}
+{"seq": 8, "type": "roll", "sessionId": "002", "actor": "character:zahira", "resolved": {"kind": "skill", "skill": "orientarse", "die": "1d20", "advantage": true, "rolls": [6, 12], "result": 12, "source": "csprng:secrets"}}
+{"seq": 9, "type": "roll", "sessionId": "002", "actor": "character:narivyl", "resolved": {"kind": "social", "target": "npc:osric", "die": "1d20", "result": 15, "source": "csprng:secrets"}}
+{"seq": 10, "type": "roll", "sessionId": "002", "actor": "character:zahira", "resolved": {"kind": "skill", "skill": "sigilo", "die": "1d20", "disadvantage": true, "rolls": [11, 7], "result": 7, "source": "csprng:secrets"}}
+{"seq": 11, "type": "roll", "sessionId": "002", "actor": "character:calder", "resolved": {"kind": "social", "target": "npc:osric", "die": "1d20", "result": 15, "source": "csprng:secrets"}}
+{"seq": 12, "type": "roll", "sessionId": "002", "actor": "character:zahira", "resolved": {"kind": "skill", "skill": "perspicacia", "target": "npc:tomas", "die": "1d20", "result": 19, "source": "csprng:secrets"}}
+{"seq": 13, "type": "roll", "sessionId": "002", "actor": "character:narivyl", "resolved": {"kind": "skill", "skill": "medicina", "target": "character:zahira", "die": "1d20", "result": 14, "source": "csprng:secrets"}}
+{"seq": 14, "type": "roll", "sessionId": "002", "actor": "character:zahira", "resolved": {"kind": "rest", "die": "1d20", "result": 20, "source": "csprng:secrets"}, "effects": [{"op": "memory_recovered", "who": "character:zahira"}]}
+{"seq": 15, "type": "roll", "sessionId": "002", "actor": "character:calder", "resolved": {"kind": "skill", "skill": "investigacion", "die": "1d20", "result": 3, "source": "csprng:secrets"}}
+{"seq": 16, "type": "roll", "sessionId": "002", "actor": "character:narivyl", "resolved": {"kind": "skill", "skill": "percepcion", "die": "1d20", "result": 3, "source": "csprng:secrets"}}
+{"seq": 17, "type": "roll", "sessionId": "002", "actor": "character:zahira", "resolved": {"kind": "skill", "skill": "ojo-de-piedra", "die": "1d20", "result": 6, "source": "csprng:secrets"}}
+{"seq": 18, "type": "inventory_change", "sessionId": "002", "actor": "character:calder", "effects": [{"op": "gain", "item": "llave-de-hierro-sin-cerradura", "source": "fortuna:19"}]}
+{"seq": 19, "type": "inventory_change", "sessionId": "002", "effects": [{"op": "gain", "item": "campana-de-bronce", "holder": "npc:tomas", "note": "custodia acordada, 3 dias"}]}
+{"seq": 20, "type": "world_event", "sessionId": "002", "payload": {"note": "Osric desaparece; velas apagadas, puerta entornada, NARIVYL escrito en carbon fresco sin tachar"}}
+{"seq": 21, "type": "session_closed", "sessionId": "002", "payload": {"cliffhanger": "el nombre de Narivyl en la pared de Osric"}}
