@@ -1,7 +1,7 @@
 {
   "id": "pilot",
   "type": "campaign",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "name": "Los Nueve Viajeros",
   "tagline": "Diferentes caminos, un mismo destino",
   "motto": "Extraños hoy, quizás una leyenda mañana.",
@@ -17,8 +17,8 @@
     ],
     "license": "propietario",
     "createdAt": "2026-09-04",
-    "updatedAt": "2026-09-05",
-    "changelog": "0.3.0: sesion 002 registrada como jugada. 0.2.0: ataques y capacidades declarados en las nueve fichas; retratos recortados de la lamina; sesion 001 registrada como jugada; sesion 002 planeada."
+    "updatedAt": "2026-09-06",
+    "changelog": "0.4.0: sesion 003 planeada para jugadores nuevos. 0.3.0: sesion 002 registrada como jugada. 0.2.0: ataques y capacidades declarados en las nueve fichas; retratos recortados de la lamina; sesion 001 registrada como jugada; sesion 002 planeada."
   },
   "characters": [
     "dayan",
@@ -33,6 +33,7 @@
   ],
   "sessions": [
     "001",
-    "002"
+    "002",
+    "003"
   ]
 }

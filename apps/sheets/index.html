@@ -141,6 +141,14 @@
     border-radius: 8px; margin-bottom: 9px; background: var(--panel-2);
     border: 1px solid var(--border);
   }
+  .card.taken { opacity: .5; }
+  .card.taken .av { filter: grayscale(1); }
+  .card .tag {
+    display: block; margin-top: 6px; font-size: .72rem;
+    font-variant: small-caps; letter-spacing: .07em; color: var(--gold-dim);
+  }
+  .card.free { border-color: var(--gold-dim); }
+  .card.free .tag { color: var(--gold); }
 
   /* Detalle */
   .detail { display: none; }
@@ -240,6 +248,7 @@
 const BASE = '../../content/packs/pilot/';
 const STAT_LABELS = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };
 let characters = [];
+let currentSession = null;
 
 const mod = v => { const m = Math.floor((v - 10) / 2); return m >= 0 ? '+' + m : String(m); };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -255,7 +264,6 @@ async function load() {
     characters = await Promise.all(
       pack.characters.map(id => fetch(BASE + 'characters/' + id + '.json').then(r => r.json()))
     );
-    renderGrid();
 
     if (pack.sessions && pack.sessions.length) {
       try {
@@ -265,6 +273,8 @@ async function load() {
         renderSessions(sessions);
       } catch (e) { /* sesiones opcionales */ }
     }
+
+    renderGrid();
 
     if (location.hash) openFromHash();
   } catch (e) {
@@ -276,6 +286,7 @@ function renderSessions(sessions) {
   const played = sessions.filter(s => s.status === 'played');
   const current = sessions.filter(s => s.status !== 'played').pop() || sessions[sessions.length - 1];
 
+  currentSession = current || null;
   if (current) renderCurrent(current);
   if (played.length) renderChronicle(played);
 }
@@ -321,13 +332,27 @@ function renderChronicle(played) {
 }
 
 function renderGrid() {
-  document.getElementById('grid').innerHTML = characters.map(c => `
-    <button class="card" onclick="location.hash='${c.id}'">
+  const avail = currentSession && currentSession.availableCharacters;
+  const taken = {};
+  if (currentSession && currentSession.party) {
+    currentSession.party.forEach(p => { taken[p.character] = p.player; });
+  }
+  document.getElementById('grid').innerHTML = characters.map(c => {
+    const isTaken = !!taken[c.id];
+    const isFree = avail && avail.indexOf(c.id) !== -1 && !isTaken;
+    const cls = isTaken ? ' taken' : (isFree ? ' free' : (avail ? ' taken' : ''));
+    let tag = '';
+    if (isTaken) tag = `<span class="tag">${esc(taken[c.id])}</span>`;
+    else if (isFree) tag = '<span class="tag">disponible</span>';
+    return `
+    <button class="card${cls}" onclick="location.hash='${c.id}'">
       ${c.portrait ? `<img class="av" src="${BASE}${esc(c.portrait)}" alt="" loading="lazy">` : ''}
       <div class="n">${esc(c.name)}</div>
       <div class="r">${esc(c.race)}<br>${esc(c.class)}</div>
       <div class="roles">${esc((c.roles || []).join(' / '))}</div>
-    </button>`).join('');
+      ${tag}
+    </button>`;
+  }).join('');
 }
 
 function renderDetail(c) {

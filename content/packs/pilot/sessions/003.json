@@ -1,0 +1,25 @@
+{
+  "id": "003",
+  "title": "Sesión 3: El tercer nivel",
+  "date": "2026-09-06",
+  "status": "planned",
+  "briefing": "Bajaste a la mina de Valdoria hace días y no volviste a subir. No recuerdas cuánto llevas aquí abajo, ni por qué el aire huele a piedra mojada, ni por qué te cuesta tanto acordarte de tu propio nombre. Arriba, en el pueblo, nadie te recuerda. Pero alguien te está buscando.",
+  "howToPlay": [
+    "Di lo que tu personaje intenta hacer, con tus palabras. No hay lista de acciones válidas.",
+    "Cuando algo tenga riesgo, tiras un d20. El DM interpreta el resultado; nunca te dirá el número que necesitabas.",
+    "Tu hoja dice en qué eres bueno. Úsalo: el mundo reacciona distinto según quién lo intenta.",
+    "Al empezar tiras 1d20 de Fortuna. No se te dice para qué sirvió. Ya lo descubrirás.",
+    "Aquí abajo la memoria es un recurso. Lo que recuerdes, dilo en voz alta: puede que mañana ya no lo tengas."
+  ],
+  "fortune": [
+    { "range": "1-3", "label": "Mala suerte" },
+    { "range": "4-6", "label": "Incómodo" },
+    { "range": "7-14", "label": "Normal" },
+    { "range": "15-17", "label": "Buena estrella" },
+    { "range": "18-19", "label": "Afortunado" },
+    { "range": "20", "label": "Destino" }
+  ],
+  "availableCharacters": ["brorg", "dayan", "hector", "kael", "talin", "orion"],
+  "party": [],
+  "notes": "Sesión para jugadores nuevos. Se elige entre los seis viajeros que siguen en la mina. No hace falta haber jugado las anteriores: tu personaje tampoco recuerda nada. Quien ya jugó conserva su Fortuna; quien entra hoy tira la suya."
+}
