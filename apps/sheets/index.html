@@ -177,6 +177,10 @@
   .hero .who { min-width: 0; }
   .sub { color: var(--ink-dim); margin: 2px 0 0; font-size: .98rem; }
   .quote { font-style: italic; color: var(--ink); margin: 12px 0; border-left: 3px solid var(--accent); padding-left: 10px; }
+  .veil {
+    font-style: italic; color: var(--ink-dim); margin: 12px 0;
+    border-left: 3px solid var(--gold-dim); padding-left: 10px; font-size: .95rem;
+  }
   .vitals { display: flex; gap: 10px; margin: 14px 0; }
   .vital {
     flex: 1; text-align: center; background: var(--panel-2);
@@ -253,6 +257,15 @@ let currentSession = null;
 const mod = v => { const m = Math.floor((v - 10) / 2); return m >= 0 ? '+' + m : String(m); };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+// Un campo esta velado si la sesion activa lo declara y el personaje nunca ha
+// tenido dueno: a quien ya se jugo lo conoce la mesa, y ocultarlo no protege nada.
+let everPlayed = {};
+function veiled(c, field) {
+  const s = currentSession;
+  if (!s || !s.veiledFields || s.veiledFields.indexOf(field) === -1) return false;
+  return !everPlayed[c.id];
+}
+
 async function load() {
   try {
     const pack = await (await fetch(BASE + 'pack.json')).json();
@@ -286,9 +299,14 @@ function renderSessions(sessions) {
   const played = sessions.filter(s => s.status === 'played');
   const current = sessions.filter(s => s.status !== 'played').pop() || sessions[sessions.length - 1];
 
+  everPlayed = {};
+  sessions.forEach(s => (s.party || []).forEach(p => { everPlayed[p.character] = true; }));
+
   currentSession = current || null;
   if (current) renderCurrent(current);
-  if (played.length) renderChronicle(played);
+  // La sesion activa puede pedir que la cronica no se muestre: hay premisas
+  // (amnesia) que el recap de sesiones anteriores destruye antes de empezar.
+  if (played.length && !(current && current.hideChronicle)) renderChronicle(played);
 }
 
 function partyLine(s) {
@@ -366,7 +384,9 @@ function renderDetail(c) {
           <p class="sub">${esc(c.race)} &middot; ${esc(c.class)} &middot; ${esc(c.age)}</p>
         </div>
       </div>
-      <p class="quote">"${esc(c.quote)}"</p>
+      ${veiled(c, 'quote') ? '' : `<p class="quote">"${esc(c.quote)}"</p>`}
+      ${(currentSession && currentSession.veilNote && veiled(c, 'bio'))
+        ? `<p class="veil">${esc(currentSession.veilNote)}</p>` : ''}
       <div class="vitals">
         <div class="vital"><div class="v">${c.hp}</div><div class="l">Puntos de vida</div></div>
         <div class="vital"><div class="v">${c.ac}</div><div class="l">Armadura</div></div>
@@ -385,7 +405,7 @@ function renderDetail(c) {
               <span class="meta">${[a.damageType, a.range].filter(Boolean).map(esc).join(' &middot; ')}</span>
             </div>
           </div>`).join('')}</div>` : ''}
-      ${(c.abilities && c.abilities.length) ? `
+      ${(c.abilities && c.abilities.length && !veiled(c, 'abilities')) ? `
         <div class="label">Qué sabes hacer</div>
         <div class="kit">${c.abilities.map(a => `
           <div class="item">
@@ -405,10 +425,12 @@ function renderDetail(c) {
       <div class="chips">${(c.skills || []).map(s => `<span>${esc(s)}</span>`).join('')}</div>
       <div class="label">Rol en el grupo</div>
       <p class="roles-line">${esc((c.roles || []).join(' / '))}</p>
-      <div class="label">Quién eres</div>
-      <p>${esc(c.bio)}</p>
-      <div class="label">Tu objetivo</div>
-      <p class="goal">${esc(c.goal)}</p>
+      ${veiled(c, 'bio') ? '' : `
+        <div class="label">Quién eres</div>
+        <p>${esc(c.bio)}</p>`}
+      ${veiled(c, 'goal') ? '' : `
+        <div class="label">Tu objetivo</div>
+        <p class="goal">${esc(c.goal)}</p>`}
     </div>`;
   document.body.classList.add('detail-open');
   window.scrollTo(0, 0);

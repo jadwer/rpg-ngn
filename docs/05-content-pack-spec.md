@@ -72,6 +72,40 @@ ruleset concreto es responsabilidad de `packages/rules`, no del content pack.
   cuando hay limite (`descanso corto`, `descanso largo`).
 - `effect` es prosa dirigida al jugador, no una formula. La resolucion la arbitra el DM.
 
+## Visibilidad de campos
+
+No todos los campos de una ficha son publicos. Los mecanicos (`stats`, `hp`, `ac`,
+`attacks`, `skills`, `roles`) los canta la mesa en voz alta constantemente y no
+revelan nada que el juego no exponga igual. Los de carga narrativa (`bio`, `goal`,
+`quote`, y el `effect` de las capacidades pasivas) si revelan.
+
+Una sesion puede velar campos de los personajes que **nunca han tenido dueno**:
+
+```json
+{
+  "veiledFields": ["bio", "goal", "quote", "abilities"],
+  "veilNote": "Tu personaje no recuerda quien es. Elige por lo que ves.",
+  "hideChronicle": true
+}
+```
+
+- `veiledFields`: campos ocultos en el visor mientras el personaje siga libre. En
+  cuanto alguien lo juega (aparece en el `party` de cualquier sesion), su ficha se
+  muestra entera: a quien ya se jugo lo conoce la mesa, y ocultarlo no protege nada.
+- `veilNote`: por que estan ocultos, en lenguaje de ficcion.
+- `hideChronicle`: oculta el resumen de sesiones anteriores.
+
+Nacio de la sesion 003, donde los personajes disponibles no recuerdan su propio
+nombre: mostrar su biografia y su objetivo destruia la premisa antes del primer
+turno. Y una pasiva como "reconoce trabajos de canteria: si algo fue excavado, lo
+nota" le dice a la mesa que hay algo excavado que buscar, sin ningun descubrimiento
+de por medio (regla 2 del contrato de realidad).
+
+Es la version minima, resuelta en el visor, del hallazgo IL2 de
+[10-audit-2026-09-05.md](10-audit-2026-09-05.md). La version completa marca la
+visibilidad por campo en el schema y la deriva del conocimiento del observador, no
+del observado.
+
 ## Reglas
 
 0. Todo pack declara su procedencia en `pack.json` segun [07-content-provenance.md](07-content-provenance.md).
