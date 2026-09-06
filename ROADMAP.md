@@ -45,13 +45,13 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Spike de Expo con pnpm aislado: `pnpm install`, `build`, `typecheck`, `lint` y `test` pasan desde la raiz con la app en el workspace; `expo export --platform android` produce el bundle con los packages del monorepo
 - [ ] Probar en un Android y un iOS reales con Expo Go (Gabino): `pnpm --filter mobile start -- --tunnel`, instrucciones en `apps/mobile/README.md`
 
-## Entrega 4: Plataforma (en curso desde el 2026-09-06)
+## Entrega 4: Plataforma (hecha el 2026-09-06)
 
 - [x] `rpg-ngn-api` desde `templates/backend` de Atomo (solo core + payments), repo privado en GitHub, AtomoPlatform como submodule `platform/`, Postgres local, login por token verificado de punta a punta
 - [x] Secret `ATOMO_DEPLOY_KEY` en GitHub y deploy key en Gitea para que el CI clone el submodule
 - [x] Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store append-only con trigger, snapshots, proyecciones); 18 feature tests en SQLite y Postgres
 - [x] `campaign:import` de los 21 eventos con el snapshot canonico como fixture; el engine lo sustituye en la entrega 5
-- [ ] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea
+- [x] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea (SQLite y Postgres 16)
 
 ## Entrega 5: Turnos
 
