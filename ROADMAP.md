@@ -13,12 +13,13 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Alcance del SaaS a partir de la mesa ([09](docs/09-saas-scope.md))
 - [x] Auditoria del SDD ([10](docs/10-audit-2026-09-05.md)) y ADR de stack ([11](docs/11-adr-stack-saas.md))
 
-## Entrega 0: AtomoPlatform lista para consumir
+## Entrega 0: AtomoPlatform lista para consumir (hecha el 2026-09-05)
 
-- Commit y push de los fixes del smoke run de julio
-- `atomo/auth` con modo token (Expo) ademas de cookie SPA, expiracion configurada
-- `atomo/payments` con Stripe portado de api-base y su test
-- CI del core contra PostgreSQL
+- [x] Commit y push de los fixes del smoke run de julio (aca0f01)
+- [x] `atomo/auth` con modo token (Expo) ademas de cookie SPA, expiracion obligatoria; 10 feature tests (60012db)
+- [x] `atomo/payments` con Stripe portado de api-base, webhook idempotente; 16 feature tests (52df8b4)
+- [x] Template y scaffolder con `atomo/payments`; CI backend en SQLite y PostgreSQL 16 (b5f84aa)
+- [ ] Runner de Gitea Actions activo (act_runner en el MicroServer, lo levanta Gabino)
 
 ## Entrega 1: Contratos y contenido
 
