@@ -9,6 +9,7 @@ Esto es event sourcing pragmatico: el log de eventos es la fuente de verdad y la
 ```json
 {
   "id": "evt-00142",
+  "v": 1,
   "seq": 142,
   "recordedAt": "2026-09-05T21:14:03Z",
   "worldTime": "23 de Lumina 742, anochecer",
@@ -38,6 +39,8 @@ Esto es event sourcing pragmatico: el log de eventos es la fuente de verdad y la
 
 Campos clave:
 
+- `v`: version del schema de ese tipo de evento (BA1 de [10](10-audit-2026-09-05.md)). El log es inmutable, asi que un cambio de forma no migra el archivo: `packages/content` expone `upcastEvent`, una cadena de funciones puras por version con fixture del evento viejo real. Los eventos del piloto anteriores a este campo se migraron una sola vez a `v: 1` con `tools/migrate-pilot`.
+- `recordedAtPrecision`: `session` cuando el instante se completo con el inicio de la sesion durante esa migracion; ausente (exacto) en todo evento nuevo.
 - `seq`: orden total dentro de la campana. La secuencia es la historia.
 - `declared` vs `resolved`: la accion textual del jugador y su interpretacion viven separadas (regla 18 del contrato). El interprete propone `resolved`; nunca ejecuta mas de lo declarado.
 - `effects`: parches de estado validados por el ruleset. Un evento sin `effects` es narrativo puro.

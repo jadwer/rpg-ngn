@@ -14,3 +14,7 @@ coverage/
 .env
 .env.*
 .DS_Store
+
+# Build y cache de tooling
+*.tsbuildinfo
+.eslintcache

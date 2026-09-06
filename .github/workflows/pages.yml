@@ -1,0 +1,50 @@
+name: pages
+
+# Publica solo lo que la mesa usa: el visor estatico y el pack piloto.
+# Asi un merge de dev a main con el resto del monorepo no toca las fichas.
+# Requiere que Pages este configurado con source "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'apps/sheets/**'
+      - 'content/packs/pilot/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Arma el sitio con la misma estructura de rutas
+        run: |
+          mkdir -p site/apps site/content/packs
+          cp index.html site/
+          cp -r apps/sheets site/apps/sheets
+          cp -r content/packs/pilot site/content/packs/pilot
+          touch site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

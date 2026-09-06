@@ -17,7 +17,7 @@ content/packs/<id>/
 └── sessions/*.json         datos publicos de sesion (logistica, sin spoilers)
 ```
 
-Formato JSON en el piloto (lo consume fetch sin parser extra). Los schemas formales viven en `packages/content` (zod) a partir de la fase 1; `tools/validate` los aplicara en CI.
+Formato JSON en el piloto (lo consume fetch sin parser extra). Los schemas formales viven en `packages/content` (zod, `strictObject`: una clave desconocida es error) y `tools/validate` los aplica en CI sobre `content/packs/*` y `campaigns/*`. Este documento describe la intencion; ante una duda, manda el schema.
 
 ## Schema de personaje (v0, el contrato vigente)
 
@@ -71,6 +71,16 @@ ruleset concreto es responsabilidad de `packages/rules`, no del content pack.
 - `abilities[].uses`: numero de usos, o `null` si es a voluntad. Se acompania de `per`
   cuando hay limite (`descanso corto`, `descanso largo`).
 - `effect` es prosa dirigida al jugador, no una formula. La resolucion la arbitra el DM.
+- Una capacidad que hace daño (trucos y conjuros de ataque) lleva ademas `damage`,
+  `damageType` y `range`, con el mismo vocabulario que `attacks`.
+
+## Log de eventos de campaña
+
+`campaigns/<id>/events.jsonl` no forma parte del pack, pero se valida contra el pack
+de la misma id. Cada linea es un evento con `id` (`evt-NNNNN`), `v` (version del
+schema de ese tipo; hoy 1), `seq`, `type`, `sessionId` y `recordedAt`. Los eventos
+escritos antes de existir `v` se leen con `upcastEvent`; el archivo no se edita. El
+detalle esta en [08](08-event-model.md) y en `packages/content/src/event.ts`.
 
 ## Reglas
 

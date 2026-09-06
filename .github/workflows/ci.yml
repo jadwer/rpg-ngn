@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build de packages
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint (incluye la regla de dependencias de packages/*)
+        run: pnpm lint
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Valida content packs y logs de campaña
+        run: pnpm validate
+
+      - name: Estilo de docs y JSON (mismo verificador que el hook local)
+        run: bash .claude/hooks/verify.sh stop

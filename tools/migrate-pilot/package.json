@@ -1,0 +1,19 @@
+{
+  "name": "@rpg-ngn/migrate-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Migracion unica del log del piloto a la version 1 del schema de eventos (BA1)",
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx src/migrate.ts --file ../../campaigns/pilot/events.jsonl",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rpg-ngn/content": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
