@@ -44,11 +44,12 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - `packages/ui-logic` sin React
 - Spike de Expo con pnpm aislado
 
-## Entrega 4: Plataforma
+## Entrega 4: Plataforma (en curso desde el 2026-09-06)
 
-- `rpg-ngn-api` desde `templates/backend` de Atomo (solo core)
-- Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store, snapshots, proyecciones)
-- `campaign:import` de los 21 eventos via engine
+- [x] `rpg-ngn-api` desde `templates/backend` de Atomo (solo core + payments), repo privado en GitHub, AtomoPlatform como submodule `platform/`, Postgres local, login por token verificado de punta a punta
+- [ ] Secret `ATOMO_DEPLOY_KEY` en GitHub y deploy key en Gitea para que el CI clone el submodule
+- [ ] Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store, snapshots, proyecciones)
+- [ ] `campaign:import` de los 21 eventos via engine
 
 ## Entrega 5: Turnos
 
