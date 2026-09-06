@@ -41,4 +41,13 @@ Sesiones presenciales con DM Claude: 001 y 002 jugadas, 003 planeada para el 202
 
 ## Comandos
 
-Todavia no hay build ni tests (entrega 0 en curso). El visor de fichas es estatico: abrir `apps/sheets/index.html` con un server local (`python3 -m http.server` desde la raiz) porque usa fetch.
+```bash
+pnpm install
+pnpm check        # build + typecheck + lint + test + validate, lo mismo que CI
+pnpm validate     # solo content/packs/* y campaigns/* contra los schemas
+pnpm --filter @rpg-ngn/content test
+```
+
+Los tests de `packages/content` usan los fixtures reales (`content/packs/pilot`, `campaigns/pilot/events.jsonl`). `packages/*` no importa `node:*`, React, Next ni Expo (lo vigila eslint); el I/O entra por interfaces como `FileSource`.
+
+El visor de fichas es estatico: abrir `apps/sheets/index.html` con un server local (`python3 -m http.server` desde la raiz) porque usa fetch.

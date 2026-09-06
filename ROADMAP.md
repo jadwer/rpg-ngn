@@ -21,13 +21,14 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Template y scaffolder con `atomo/payments`; CI backend en SQLite y PostgreSQL 16 (b5f84aa)
 - [ ] Runner de Gitea Actions activo (act_runner en el MicroServer, lo levanta Gabino)
 
-## Entrega 1: Contratos y contenido
+## Entrega 1: Contratos y contenido (hecha el 2026-09-05)
 
-- BA1: version de schema por evento, `upcast` en `packages/content`
-- `tools/migrate-pilot`: los 21 eventos del piloto a `v:1` (unica reescritura permitida)
-- Schemas zod de evento, personaje, NPC, ubicacion, quest y pack
-- `tools/validate` en CI sobre `content/` y `campaigns/`
-- Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
+- [x] BA1: version de schema por evento, `upcastEvent` en `packages/content`
+- [x] `tools/migrate-pilot`: los 21 eventos del piloto a `v:1` (unica reescritura permitida)
+- [x] Schemas zod de evento, personaje, NPC, ubicacion, quest, sesion y pack
+- [x] `tools/validate` en CI sobre `content/` y `campaigns/`; un evento roto falla el CI (test)
+- [x] Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
+- [ ] Cambiar el source de Pages a "GitHub Actions" en la configuracion del repo (Gabino), antes del primer merge de `dev` a `main`
 
 ## Entrega 2: Motor
 
