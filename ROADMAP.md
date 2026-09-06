@@ -38,11 +38,12 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] `campaigns/pilot/snapshots/002.json`: estado canonico de la sesion 002; el test lo reproduce byte a byte
 - [ ] Segundo ruleset real (v2): es lo que valida el eje "agnostico de sistema"
 
-## Entrega 3: App movil sin servidor (en paralelo con 4 y 5)
+## Entrega 3: App movil sin servidor (hecha el 2026-09-06, pendiente la prueba en telefono)
 
-- `apps/mobile` (Expo): pack local, vistas narrativa y dialogo, fichas en modal, TTS por bloques
-- `packages/ui-logic` sin React
-- Spike de Expo con pnpm aislado
+- [x] `packages/ui-logic` sin React: bloques tipados, `sessionBlocks` desde el pack y el estado reducido, vistas narrativa y dialogo como agrupaciones del mismo array, velado de fichas (misma regla que `apps/sheets`), cola de TTS con `SpeechEngine` inyectable; tests sobre el pack piloto
+- [x] `apps/mobile` (Expo SDK 57): pack piloto empaquetado con `bundle-pack`, reduccion en el dispositivo con `fantasy-d20-lite`, selector de sesion, vistas narrativa y dialogo, fichas de la party en modal, TTS por bloques con `expo-speech`, bandera de narrador local, tema pergamino
+- [x] Spike de Expo con pnpm aislado: `pnpm install`, `build`, `typecheck`, `lint` y `test` pasan desde la raiz con la app en el workspace; `expo export --platform android` produce el bundle con los packages del monorepo
+- [ ] Probar en un Android y un iOS reales con Expo Go (Gabino): `pnpm --filter mobile start -- --tunnel`, instrucciones en `apps/mobile/README.md`
 
 ## Entrega 4: Plataforma (en curso desde el 2026-09-06)
 
