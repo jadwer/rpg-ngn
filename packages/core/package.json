@@ -1,0 +1,37 @@
+{
+  "name": "@rpg-ngn/core",
+  "version": "0.1.0",
+  "description": "Primitivas deterministas del motor: azar inyectable, dados, recursos, estado del mundo y serializacion estable",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@rpg-ngn/content": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@vitest/coverage-v8": "^3.2.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

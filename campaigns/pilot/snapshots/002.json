@@ -1,0 +1,300 @@
+{
+  "packId": "pilot",
+  "packVersion": "0.4.0",
+  "ruleset": "fantasy-d20-lite@1.0.0",
+  "seq": 21,
+  "sessionId": "002",
+  "state": {
+    "knowledge": {
+      "brorg": {
+        "characterId": "brorg",
+        "facts": {},
+        "witnessed": []
+      },
+      "calder": {
+        "characterId": "calder",
+        "facts": {
+          "fact:alguien-toca-la-campana-abajo": {
+            "confidence": "uncertain",
+            "event": "evt-00006",
+            "method": "Tomas: en Valdoria no hay campana desde hace 30 anios",
+            "seq": 6
+          },
+          "fact:campana-delata-posicion": {
+            "confidence": "known",
+            "event": "evt-00004",
+            "method": "advertencia de Osric al cerrar",
+            "seq": 4
+          },
+          "fact:campana-en-capilla-segundo-nivel": {
+            "confidence": "known",
+            "event": "evt-00003",
+            "method": "Osric lo dijo por la rendija",
+            "seq": 3
+          }
+        },
+        "witnessed": []
+      },
+      "dayan": {
+        "characterId": "dayan",
+        "facts": {},
+        "witnessed": []
+      },
+      "hector": {
+        "characterId": "hector",
+        "facts": {},
+        "witnessed": []
+      },
+      "kael": {
+        "characterId": "kael",
+        "facts": {},
+        "witnessed": []
+      },
+      "narivyl": {
+        "characterId": "narivyl",
+        "facts": {
+          "fact:alguien-toca-la-campana-abajo": {
+            "confidence": "uncertain",
+            "event": "evt-00006",
+            "method": "Tomas: en Valdoria no hay campana desde hace 30 anios",
+            "seq": 6
+          },
+          "fact:campana-delata-posicion": {
+            "confidence": "known",
+            "event": "evt-00004",
+            "method": "advertencia de Osric al cerrar",
+            "seq": 4
+          },
+          "fact:campana-en-capilla-segundo-nivel": {
+            "confidence": "known",
+            "event": "evt-00003",
+            "method": "Osric lo dijo por la rendija",
+            "seq": 3
+          }
+        },
+        "witnessed": []
+      },
+      "orion": {
+        "characterId": "orion",
+        "facts": {},
+        "witnessed": []
+      },
+      "talin": {
+        "characterId": "talin",
+        "facts": {},
+        "witnessed": []
+      },
+      "zahira": {
+        "characterId": "zahira",
+        "facts": {
+          "fact:alguien-toca-la-campana-abajo": {
+            "confidence": "uncertain",
+            "event": "evt-00006",
+            "method": "Tomas: en Valdoria no hay campana desde hace 30 anios",
+            "seq": 6
+          },
+          "fact:un-medio-orco-la-subio-tocando-la-campana": {
+            "confidence": "uncertain",
+            "event": "evt-00005",
+            "method": "memoria recuperada al dormir (20 en descanso)",
+            "seq": 5
+          }
+        },
+        "witnessed": []
+      }
+    },
+    "meta": {
+      "headEvent": "evt-00021",
+      "headSeq": 21,
+      "packId": "pilot",
+      "packVersion": "0.4.0",
+      "ruleset": "fantasy-d20-lite@1.0.0",
+      "sessions": {
+        "002": {
+          "cliffhanger": "el nombre de Narivyl en la pared de Osric",
+          "closedSeq": 21,
+          "id": "002",
+          "party": [
+            "calder",
+            "narivyl",
+            "zahira"
+          ],
+          "startedSeq": 1,
+          "status": "closed"
+        }
+      }
+    },
+    "narrative": {
+      "corrections": [],
+      "currentSession": null,
+      "lastCliffhanger": "el nombre de Narivyl en la pared de Osric",
+      "log": [
+        {
+          "event": "evt-00007",
+          "seq": 7,
+          "text": "Tomas se une hasta la capilla y queda como custodio de la campana",
+          "type": "world_event"
+        },
+        {
+          "event": "evt-00020",
+          "seq": 20,
+          "text": "Osric desaparece; velas apagadas, puerta entornada, NARIVYL escrito en carbon fresco sin tachar",
+          "type": "world_event"
+        }
+      ]
+    },
+    "world": {
+      "characters": {
+        "brorg": {
+          "conditions": [],
+          "custom": {
+            "ac": 14
+          },
+          "fortune": null,
+          "hp": {
+            "current": 14,
+            "max": 14
+          },
+          "id": "brorg",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "calder": {
+          "conditions": [],
+          "custom": {
+            "ac": 11
+          },
+          "fortune": null,
+          "hp": {
+            "current": 7,
+            "max": 7
+          },
+          "id": "calder",
+          "inventory": [
+            {
+              "id": "llave-de-hierro-sin-cerradura",
+              "note": "fortuna:19",
+              "since": "evt-00018"
+            }
+          ],
+          "memoriesRecovered": 0
+        },
+        "dayan": {
+          "conditions": [],
+          "custom": {
+            "ac": 14
+          },
+          "fortune": null,
+          "hp": {
+            "current": 12,
+            "max": 12
+          },
+          "id": "dayan",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "hector": {
+          "conditions": [],
+          "custom": {
+            "ac": 18
+          },
+          "fortune": null,
+          "hp": {
+            "current": 12,
+            "max": 12
+          },
+          "id": "hector",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "kael": {
+          "conditions": [],
+          "custom": {
+            "ac": 13
+          },
+          "fortune": null,
+          "hp": {
+            "current": 9,
+            "max": 9
+          },
+          "id": "kael",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "narivyl": {
+          "conditions": [],
+          "custom": {
+            "ac": 13
+          },
+          "fortune": null,
+          "hp": {
+            "current": 10,
+            "max": 10
+          },
+          "id": "narivyl",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "orion": {
+          "conditions": [],
+          "custom": {
+            "ac": 14
+          },
+          "fortune": null,
+          "hp": {
+            "current": 11,
+            "max": 11
+          },
+          "id": "orion",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "talin": {
+          "conditions": [],
+          "custom": {
+            "ac": 14
+          },
+          "fortune": null,
+          "hp": {
+            "current": 9,
+            "max": 9
+          },
+          "id": "talin",
+          "inventory": [],
+          "memoriesRecovered": 0
+        },
+        "zahira": {
+          "conditions": [],
+          "custom": {
+            "ac": 17
+          },
+          "fortune": {
+            "result": 6,
+            "tier": "Incómodo"
+          },
+          "hp": {
+            "current": 13,
+            "max": 13
+          },
+          "id": "zahira",
+          "inventory": [],
+          "memoriesRecovered": 1
+        }
+      },
+      "npcs": {
+        "tomas": {
+          "custom": {},
+          "id": "tomas",
+          "inventory": [
+            {
+              "id": "campana-de-bronce",
+              "note": "custodia acordada, 3 dias",
+              "since": "evt-00019"
+            }
+          ]
+        }
+      },
+      "worldTime": "Valdoria, mañana siguiente"
+    }
+  }
+}

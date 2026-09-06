@@ -21,7 +21,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ['packages/*/src/**/*.ts'],
-    ignores: ['packages/*/src/**/*.test.ts', 'packages/*/src/**/*.test-helpers.ts'],
+    ignores: ['packages/*/src/**/*.test.ts', 'packages/*/src/**/*.test-helpers.ts', 'packages/*/scripts/**'],
     rules: {
       'no-restricted-imports': ['error', { patterns: platformImports }],
     },

@@ -30,12 +30,13 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
 - [ ] Cambiar el source de Pages a "GitHub Actions" en la configuracion del repo (Gabino), antes del primer merge de `dev` a `main`
 
-## Entrega 2: Motor
+## Entrega 2: Motor (hecha el 2026-09-06)
 
-- `packages/core`: dados con `RandomSource` inyectable, checks, modificadores, efectos
-- `packages/rules`: `fantasy-d20-lite`
-- `packages/campaign`: reductor con ruleset como parametro, proyecciones, snapshots
-- Los 21 eventos y el snapshot de la sesion 002 como test de regresion
+- [x] `packages/core`: `RandomSource` inyectable (semilla, dados fisicos, Web Crypto), dados con ventaja y desventaja, recursos, estado del mundo, `stableStringify`. Cobertura 100% exigida en el test
+- [x] `packages/rules`: interfaz `Ruleset` y `fantasy-d20-lite@1.0.0` (Fortuna abierta, ops `memory_recovered`, `gain`, `lose`, `hp`, `condition`); un op desconocido lanza, no se ignora
+- [x] `packages/campaign`: `reduce` con ruleset como parametro, proyecciones de mundo, jugador y narrativa, snapshots con `diffSnapshot`
+- [x] `campaigns/pilot/snapshots/002.json`: estado canonico de la sesion 002; el test lo reproduce byte a byte
+- [ ] Segundo ruleset real (v2): es lo que valida el eje "agnostico de sistema"
 
 ## Entrega 3: App movil sin servidor (en paralelo con 4 y 5)
 

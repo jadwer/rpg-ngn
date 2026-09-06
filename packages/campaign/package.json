@@ -1,0 +1,40 @@
+{
+  "name": "@rpg-ngn/campaign",
+  "version": "0.1.0",
+  "description": "Estado vivo de campaña: reductor de eventos, proyecciones (mundo, conocimiento por personaje, narrativa) y snapshots",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "snapshot:pilot": "tsx scripts/write-pilot-snapshot.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@rpg-ngn/content": "workspace:*",
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/rules": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
