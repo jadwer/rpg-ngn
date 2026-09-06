@@ -48,9 +48,10 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 ## Entrega 4: Plataforma (en curso desde el 2026-09-06)
 
 - [x] `rpg-ngn-api` desde `templates/backend` de Atomo (solo core + payments), repo privado en GitHub, AtomoPlatform como submodule `platform/`, Postgres local, login por token verificado de punta a punta
-- [ ] Secret `ATOMO_DEPLOY_KEY` en GitHub y deploy key en Gitea para que el CI clone el submodule
-- [ ] Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store, snapshots, proyecciones)
-- [ ] `campaign:import` de los 21 eventos via engine
+- [x] Secret `ATOMO_DEPLOY_KEY` en GitHub y deploy key en Gitea para que el CI clone el submodule
+- [x] Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store append-only con trigger, snapshots, proyecciones); 18 feature tests en SQLite y Postgres
+- [x] `campaign:import` de los 21 eventos con el snapshot canonico como fixture; el engine lo sustituye en la entrega 5
+- [ ] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea
 
 ## Entrega 5: Turnos
 
