@@ -1,13 +1,14 @@
 # Alcance del SaaS
 
-Escrito el 2026-09-06, despues de tres sesiones jugadas del piloto. Este documento
-recoge lo que la mesa pidio y decide como se construye. Manda sobre el ROADMAP en
-lo que se contradigan; el contrato de realidad ([06](06-reality-contract.md)) manda
-sobre este.
+Escrito el 2026-09-05, despues de dos sesiones jugadas del piloto. Este documento
+recoge lo que la mesa pidio y las decisiones de producto. Como se construye lo
+decide el ADR de stack ([11](11-adr-stack-saas.md)), que manda sobre este en lo
+que se contradigan; el contrato de realidad ([06](06-reality-contract.md)) manda
+sobre ambos.
 
 ## Que valido el piloto
 
-Tres sesiones con cinco jugadores distintos dieron datos que no teniamos:
+Dos sesiones con tres jugadores distintos dieron datos que no teniamos:
 
 1. **Una sola pantalla pierde la atencion.** El DM narra en un dispositivo y la
    mesa se dispersa. Cada jugador necesita su propia superficie.
@@ -103,58 +104,22 @@ En mesa presencial suena en un solo dispositivo (ver Voz, mas abajo).
 
 ## Arquitectura
 
-### Monorepo, y por que
+La version original de esta seccion (2026-09-05, madrugada) proponia un
+`apps/server` sin tecnologia y un `packages/ui` generico, derivados del prototipo
+del piloto y no de lo acordado en `CLAUDE.md`. Quedo sustituida por el ADR de
+stack ([11](11-adr-stack-saas.md)): plataforma Laravel sobre el core de
+AtomoPlatform en un repo privado aparte, motor TypeScript corriendo una sola vez
+en `apps/engine`, PostgreSQL como event store, Next.js y Expo como clientes.
 
-Se mantiene el monorepo pnpm que ya define [02-architecture.md](02-architecture.md).
-La razon no es comodidad: `packages/core`, `rules`, `content` y `campaign` son una
-libreria compartida que importan la web, la app y el servidor. En repos separados
-eso obliga a publicar a un registry privado y a versionar entre repos cada vez que
-cambia una primitiva.
+Lo que se conserva de aqui porque no cambia con el stack:
 
-Costo aceptado: un repo grande, CI que tiene que filtrar por paquete afectado.
-
-Cuando separar: cuando haya que dar acceso parcial a un colaborador externo, o
-cuando un paquete tenga vida propia fuera del producto. Ese dia `packages/*` se
-publica y las apps salen. No antes.
-
-```
-rpg-ngn/
-├── packages/
-│   ├── core/          primitivas deterministas (fase 2)
-│   ├── rules/         rulesets (fase 2)
-│   ├── content/       schemas zod + loader (fase 1)
-│   ├── campaign/      estado vivo y proyecciones (fase 2)
-│   ├── narrative/     DMProvider y context builder (fase 3)
-│   └── ui/            componentes compartidos web/native
-├── apps/
-│   ├── sheets/        visor estatico actual (legacy, se mantiene)
-│   ├── web/           Next.js: mesa, DM harness, admin de packs
-│   ├── mobile/        Expo: la superficie del jugador
-│   └── server/        API + estado de campana
-└── content/packs/     contenido versionado (sin cambio)
-```
-
-`packages/ui`: la app y la web comparten la vista de narrativa y la de dialogo.
-Decidir en fase 4 si se resuelve con React Native Web o con dos implementaciones
-sobre logica compartida. No adelantar la decision.
-
-### Ramas
-
-- `main`: lo que sirve GitHub Pages. Las fichas de la mesa viven aqui.
-- `legacy`: la campana de Valdoria en curso. Se mergea a `main` para publicar.
-- `dev`: el SaaS. No toca `content/packs/pilot` salvo para migrarlo.
-
-### Que se guarda donde
-
-No cambia lo que ya define [08](08-event-model.md):
-
-- **Contenido canonico**: Git, en `content/packs/`. Versionado, revisable.
-- **Estado de campana**: `events.jsonl` append-only, y en la fase servidor una
-  tabla append-only. Las proyecciones se derivan.
-- **Secretos del DM**: fuera del repo publico (`dm/`).
-
-El SaaS anade multi-tenant: cada mesa es una campana con su log. El contenido puede
-ser publico (packs compartidos) o privado del usuario.
+- **Contenido canonico** en Git (`content/packs/`), versionado y revisable.
+- **Estado de campaña** como log append-only ([08](08-event-model.md)); en el
+  SaaS vive en la base de datos de la plataforma, no en Git. Cada mesa es una
+  campaña con su log. El contenido puede ser publico o privado del usuario.
+- **Secretos del DM** fuera del repo publico (`dm/`, o capa `dm` del event store).
+- **Ramas**: `main` sirve GitHub Pages, `legacy` es la campaña de Valdoria en
+  curso, `dev` es el SaaS y no toca `content/packs/pilot` salvo para migrarlo.
 
 ## Proveedor de LLM: configurable desde el dia uno
 
@@ -174,9 +139,11 @@ Requisito de producto, no de codigo: **tutoriales**. Configurar Ollama con un
 modelo decente no es dificil, pero si nadie lo explica, no se usa. Un tutorial por
 proveedor, con el modelo recomendado y como apuntar la app.
 
-Consecuencia tecnica: `DMProvider` ([02](02-architecture.md)) ya esta disenado para
-esto. El adapter local es el mismo patron que el de Anthropic. Lo que falta es la
-UI de configuracion y la validacion de que el endpoint responde.
+Consecuencia tecnica: el contrato de `DMProvider` ([02](02-architecture.md)) es el
+mismo para ambos casos, pero donde corre el adapter no era una decision tomada
+(hallazgo BA3 de [10](10-audit-2026-09-05.md)). Lo resuelve [11](11-adr-stack-saas.md),
+D6: nube con la clave custodiada en el servidor; modelo local a traves de un relay
+que corre junto a Ollama, con probe de capacidad al configurarlo.
 
 ### Pago por sesion (mesas constantes)
 
@@ -185,7 +152,7 @@ sesion jugada, no por suscripcion: una mesa que juega una vez al mes no paga com
 una que juega semanal.
 
 Pendiente de calcular: el coste real por sesion. Los datos que ya tenemos de las
-tres sesiones del piloto (turnos, longitud de contexto, tamano de respuesta) sirven
+dos sesiones del piloto (turnos, longitud de contexto, tamano de respuesta) sirven
 para estimarlo antes de fijar precio.
 
 ### Sesiones gratuitas para One Shot
@@ -310,7 +277,7 @@ la tabla estaba publicada en el visor.
 
 ## Lo que sigue sin definir
 
-1. **Coste real por sesion.** Calculable con los datos de las tres sesiones
+1. **Coste real por sesion.** Calculable con los datos de las dos sesiones
    jugadas. Bloquea fijar el precio del pago por sesion.
 2. **Donde viven los packs subidos.** Almacenamiento del dispositivo, bucket
    propio o un tercero. Cambia el coste de infraestructura.
@@ -318,23 +285,18 @@ la tabla estaba publicada en el visor.
 4. **Modo DM humano (v2).** Arrastra narracion por microfono y analisis de
    respuestas de texto, que son piezas del modo remoto: los dos van juntos.
 
-## Orden sugerido
+## Orden
 
 V1 es con **DM IA**. El DM humano es v2, junto con el modo remoto.
 
-1. Fase 1 del ROADMAP (schemas zod, validacion en CI). Es la base de todo y ya
-   tiene contenido real que validar: tres sesiones y nueve fichas.
-2. `apps/mobile` con el pack cargado en local y sin DM: solo lectura de narrativa,
-   fichas en modal y TTS. Es la mitad de las notas de la mesa y no necesita
-   servidor.
-3. Motor (`core`, `rules`) con los eventos de las tres sesiones como caso de test.
-4. Servidor, turnos simultaneos y configuracion de proveedor (BYOK primero, que no
-   necesita facturacion).
-5. DM IA sobre `narrative`.
-6. Packs de usuario, con el instalador y las validaciones de seguridad del zip.
-
-El punto 2 es el que da valor visible mas rapido y el que se puede probar en la
-siguiente sesion presencial.
+El orden de construccion vive en el [ROADMAP](../ROADMAP.md), derivado de
+[11](11-adr-stack-saas.md). Dos correcciones respecto a la version anterior de
+esta seccion: la app movil offline no puede ser "solo lectura de narrativa"
+porque el log del piloto no tiene ningun evento `narration` (la narrativa esta en
+los `recap` de las sesiones), y "BYOK primero porque no necesita facturacion"
+deja de aplicar cuando la plataforma ya trae el cobro. La app offline sigue
+siendo la entrega que se puede probar en la siguiente sesion presencial, y corre
+en paralelo con la plataforma.
 
 ## Aviso
 

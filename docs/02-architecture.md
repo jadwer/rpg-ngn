@@ -69,7 +69,8 @@ Los adapters (anthropic, openai, local para tests) implementan esta interfaz. Pe
 
 | Decision | Razon | Costo aceptado |
 |---|---|---|
-| TypeScript puro | Un solo motor importable desde Next, Expo y Node; SDKs de LLM first-class | No se reusa api-base (Laravel) en el motor |
+| TypeScript puro | Un solo motor importable desde Next, Expo y Node; SDKs de LLM first-class | No se reusa Laravel en el motor |
+| Plataforma Laravel (core de AtomoPlatform) con el motor en `apps/engine` (Node) | Cuentas, mesas, cobro y event store ya resueltos; el reductor corre una sola vez y el engine no tiene credenciales de DB (ver [11](11-adr-stack-saas.md)) | Dos procesos que desplegar y un contrato Laravel/engine que versionar |
 | Contenido en Git, no en DB | Historial, review de cambios de lore, cero infra | Sin edicion concurrente de contenido |
 | Local-first | No sabemos aun que merece ser servidor | Multijugador en tiempo real queda para fase 5 |
 | Tiradas fuera del modelo | El DM jamas inventa un numero; toda tirada queda registrada | Mas tool calls por turno |
@@ -77,6 +78,10 @@ Los adapters (anthropic, openai, local para tests) implementan esta interfaz. Pe
 
 ## Clientes
 
-- **apps/sheets** (existe): visor estatico de fichas, GitHub Pages, cero build. Lee los JSON del content pack por fetch relativo.
-- **DM harness** (fase 3): web minima para jugar por texto contra el DM y evaluar proveedores.
-- **Web de jugador y Expo** (fase 4): consumen los mismos packages; Expo llega cuando sepamos que necesita realmente el jugador en la mesa.
+- **apps/sheets** (existe): visor estatico de fichas para la mesa de Valdoria, GitHub Pages, cero build. No es cliente del producto.
+- **apps/mobile** (Expo): la superficie del jugador. Primero offline con el pack local, despues contra la plataforma.
+- **apps/web** (Next.js): registro, mesas, configuracion de proveedor, pago, admin, DM harness y jugador web sin app. Delgada.
+- **apps/engine** (Node): donde corren `campaign` y `narrative` en produccion, invocado por la plataforma por turno.
+- **apps/host** (CLI): relay para modelos locales, corre junto a Ollama.
+
+Detalle y orden en [11](11-adr-stack-saas.md).

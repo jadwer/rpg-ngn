@@ -1,40 +1,77 @@
 # ROADMAP
 
-## Fase 0: Diseno y piloto (en curso, 2026-09-04)
+El orden viene de [docs/11-adr-stack-saas.md](docs/11-adr-stack-saas.md), que
+manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 
-- [x] Definir alcance del motor y ejes de agnosticismo
-- [x] Estructura del repo y SDD inicial en `docs/`
-- [x] Content pack `pilot`: 9 personajes pregenerados + campana Valdoria
+## Fase 0: Diseño y piloto (cerrada el 2026-09-05)
+
+- [x] Alcance del motor y ejes de agnosticismo
+- [x] Estructura del repo y SDD en `docs/`
+- [x] Content pack `pilot`: 9 personajes pregenerados + campaña Valdoria
 - [x] Visor de fichas mobile (GitHub Pages)
-- [ ] Sesion piloto presencial (2026-09-05)
-- [ ] Retro del piloto: que pidio la mesa, que le falto al DM, que registrar
+- [x] Sesiones piloto 001 y 002 con DM Claude; 003 planeada para el 2026-09-06
+- [x] Alcance del SaaS a partir de la mesa ([09](docs/09-saas-scope.md))
+- [x] Auditoria del SDD ([10](docs/10-audit-2026-09-05.md)) y ADR de stack ([11](docs/11-adr-stack-saas.md))
 
-## Fase 1: Contratos y contenido
+## Entrega 0: AtomoPlatform lista para consumir
 
-- Schemas zod en `packages/content` (personaje, NPC, ubicacion, quest, evento)
-- `tools/validate` corriendo en CI
-- Content pack del primer mundo propio (Valdoria expandida): 1 ciudad, ~10 ubicaciones, ~10 NPCs, rumores, timeline
-- Contrato de realidad refinado con lo aprendido en el piloto
+- Commit y push de los fixes del smoke run de julio
+- `atomo/auth` con modo token (Expo) ademas de cookie SPA, expiracion configurada
+- `atomo/payments` con Stripe portado de api-base y su test
+- CI del core contra PostgreSQL
 
-## Fase 2: Motor minimo
+## Entrega 1: Contratos y contenido
 
-- `packages/core`: primitivas (dados, checks, modificadores, recursos, efectos, eventos). Determinista, sin I/O, 100% testeado
-- `packages/rules`: ruleset `fantasy-d20-lite` componiendo las primitivas
-- `packages/campaign`: estado vivo (party, quests, eventos, capas de conocimiento) sobre archivos JSON
+- BA1: version de schema por evento, `upcast` en `packages/content`
+- `tools/migrate-pilot`: los 21 eventos del piloto a `v:1` (unica reescritura permitida)
+- Schemas zod de evento, personaje, NPC, ubicacion, quest y pack
+- `tools/validate` en CI sobre `content/` y `campaigns/`
+- Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
 
-## Fase 3: DM harness
+## Entrega 2: Motor
 
-- `packages/narrative`: interfaz DMProvider + adapters (Anthropic, OpenAI)
-- Constructor de contexto narrativo (las 4 capas de conocimiento)
-- Harness web minimo para jugar por texto contra el DM
-- Blind test de proveedores con la misma escena
+- `packages/core`: dados con `RandomSource` inyectable, checks, modificadores, efectos
+- `packages/rules`: `fantasy-d20-lite`
+- `packages/campaign`: reductor con ruleset como parametro, proyecciones, snapshots
+- Los 21 eventos y el snapshot de la sesion 002 como test de regresion
 
-## Fase 4: Clientes
+## Entrega 3: App movil sin servidor (en paralelo con 4 y 5)
 
-- Web de jugador (Next.js): ficha viva, historial de sesion
-- App Expo consumiendo los mismos packages
+- `apps/mobile` (Expo): pack local, vistas narrativa y dialogo, fichas en modal, TTS por bloques
+- `packages/ui-logic` sin React
+- Spike de Expo con pnpm aislado
 
-## Fase 5: Servidor y multijugador
+## Entrega 4: Plataforma
 
-- API (decidir entonces: Node o Laravel como plataforma) cuando exista algo que sincronizar en tiempo real
-- Estado de campana en DB; el contenido canonico sigue versionado en Git
+- `rpg-ngn-api` desde `templates/backend` de Atomo (solo core)
+- Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store, snapshots, proyecciones)
+- `campaign:import` de los 21 eventos via engine
+
+## Entrega 5: Turnos
+
+- `apps/engine` (Node) con `ScriptedDMProvider`
+- Job de resolucion, NDJSON, `turn_blocks`, cierre con CAS, idempotencia, polling
+
+## Entrega 6: DM IA
+
+- `packages/narrative`: context builder de cuatro capas, adapter Anthropic, probe de capacidad
+- Clave custodiada en servidor, redaccion en logs
+- 6b: `apps/host` para modelos locales (Ollama)
+
+## Entrega 7: Cobro y cupo
+
+- Pago por sesion sobre `atomo/payments`
+- Cupo One Shot por turnos
+- Proveedor obligatorio al crear mesa
+
+## Entrega 8: Packs de usuario
+
+- Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
+- Takedown y aviso de descarga externa
+- Texto de pack como contenido no confiable en el contexto del DM
+
+## v2 (sin fecha)
+
+- DM humano y modo remoto (narracion por microfono, analisis de respuestas)
+- SSE desde el engine si el polling deja de bastar
+- Segundo ruleset real, que es cuando se valida el eje "agnostico de sistema"
