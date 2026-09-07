@@ -24,11 +24,17 @@ export function bundledSource() {
   return memorySource({ ...packFiles, ...binaries })
 }
 
-export async function loadOfflineCampaign(): Promise<OfflineCampaign> {
+/** Solo el pack empaquetado (nombres, retratos, sesiones); el modo online lo usa sin reducir nada. */
+export async function loadBundledPack(): Promise<{ pack: LoadedPack; issues: Issue[] }> {
   const { pack, issues } = await loadPack(bundledSource())
   if (!pack) {
     throw new Error(`el pack ${PACK_ID} no carga: ${issues.map((i) => `${i.path}: ${i.message}`).join('; ')}`)
   }
+  return { pack, issues }
+}
+
+export async function loadOfflineCampaign(): Promise<OfflineCampaign> {
+  const { pack, issues } = await loadBundledPack()
 
   const ruleset = RULESETS[pack.manifest.system]
   if (!ruleset) {
@@ -54,5 +60,6 @@ export function sessionList(pack: LoadedPack): Session[] {
   return pack.manifest.sessions.map((id) => pack.sessions.get(id)).filter((s): s is Session => !!s)
 }
 
+export { PACK_ID }
 export const RULESET_ID = fantasyD20Lite.id
 export const abilityModifier = (score: number): number => fantasyD20Lite.abilityModifier(score)

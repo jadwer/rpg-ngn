@@ -1,9 +1,15 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
 import { theme } from '../theme'
 
+interface Props {
+  tts: Tts
+  /** Online: leer solos los bloques que vayan llegando. */
+  autoRead?: { value: boolean; onChange: (value: boolean) => void } | undefined
+}
+
 /** Controles de la narracion por voz: leer, pausa o seguir, siguiente, parar. */
-export function TtsBar({ tts }: { tts: Tts }) {
+export function TtsBar({ tts, autoRead }: Props) {
   const { state } = tts
   const active = state.status === 'speaking' || state.status === 'paused'
   const status =
@@ -19,12 +25,20 @@ export function TtsBar({ tts }: { tts: Tts }) {
 
   return (
     <View style={styles.bar}>
-      <View style={styles.buttons}>
-        {!active ? <Button label="Leer" onPress={() => tts.start()} primary /> : null}
-        {state.status === 'speaking' ? <Button label="Pausa" onPress={tts.pause} /> : null}
-        {state.status === 'paused' ? <Button label="Seguir" onPress={tts.resume} primary /> : null}
-        {active ? <Button label="Siguiente" onPress={tts.next} /> : null}
-        {active ? <Button label="Parar" onPress={tts.stop} /> : null}
+      <View style={styles.row}>
+        <View style={styles.buttons}>
+          {!active ? <Button label="Leer" onPress={() => tts.start()} primary /> : null}
+          {state.status === 'speaking' ? <Button label="Pausa" onPress={tts.pause} /> : null}
+          {state.status === 'paused' ? <Button label="Seguir" onPress={tts.resume} primary /> : null}
+          {active ? <Button label="Siguiente" onPress={tts.next} /> : null}
+          {active ? <Button label="Parar" onPress={tts.stop} /> : null}
+        </View>
+        {autoRead ? (
+          <View style={styles.auto}>
+            <Text style={styles.autoLabel}>Leer lo nuevo</Text>
+            <Switch value={autoRead.value} onValueChange={autoRead.onChange} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.panel} />
+          </View>
+        ) : null}
       </View>
       <Text style={styles.status}>{tts.error ? `Voz: ${tts.error}` : status}</Text>
     </View>
@@ -41,7 +55,10 @@ function Button({ label, onPress, primary = false }: { label: string; onPress: (
 
 const styles = StyleSheet.create({
   bar: { gap: 4 },
-  buttons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  buttons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', flexShrink: 1 },
+  auto: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  autoLabel: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   button: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: theme.colors.panel },
   primary: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
   pressed: { opacity: 0.7 },

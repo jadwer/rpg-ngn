@@ -6,14 +6,20 @@ import { theme } from '../theme'
 interface Props {
   campaign: OfflineCampaign
   onSelect: (sessionId: string) => void
+  onBack?: (() => void) | undefined
 }
 
-export function SessionPicker({ campaign, onSelect }: Props) {
+export function SessionPicker({ campaign, onSelect, onBack }: Props) {
   const { manifest } = campaign.pack
   const sessions = sessionList(campaign.pack)
 
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
+      {onBack ? (
+        <Pressable onPress={onBack} hitSlop={10} style={styles.back}>
+          <Text style={styles.backText}>‹ Inicio</Text>
+        </Pressable>
+      ) : null}
       {manifest.motto ? <Text style={styles.motto}>{`"${manifest.motto}"`}</Text> : null}
       <Text style={styles.title}>{manifest.name}</Text>
       {manifest.tagline ? <Text style={styles.tagline}>{manifest.tagline}</Text> : null}
@@ -51,6 +57,8 @@ function SessionCard({ session, campaign, onPress }: { session: Session; campaig
 
 const styles = StyleSheet.create({
   wrap: { padding: 16, paddingBottom: 40, gap: 10 },
+  back: { alignSelf: 'flex-start' },
+  backText: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.accent },
   motto: { fontFamily: theme.fonts.serif, fontStyle: 'italic', color: theme.colors.inkDim, textAlign: 'center', fontSize: 15 },
   title: { fontFamily: theme.fonts.display, fontSize: 30, color: theme.colors.gold, textAlign: 'center', letterSpacing: 2, textTransform: 'uppercase' },
   tagline: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, textAlign: 'center', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase', fontSize: 12 },

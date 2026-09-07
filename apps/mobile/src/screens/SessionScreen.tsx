@@ -6,6 +6,7 @@ import { NarratorBanner } from '../components/NarratorBanner'
 import { TtsBar } from '../components/TtsBar'
 import { useTts } from '../hooks/useTts'
 import type { OfflineCampaign } from '../pack/offline'
+import { offlineSheetEntries } from '../sheets/entries'
 import { hasSpanishVoice } from '../speech/expoSpeechEngine'
 import { theme } from '../theme'
 import { SheetsModal } from './SheetsModal'
@@ -26,6 +27,7 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
 
   const blocks = useMemo(() => sessionBlocks({ pack: campaign.pack, session, state: campaign.state, events: campaign.events }), [campaign, session])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
+  const entries = useMemo(() => offlineSheetEntries(campaign, session), [campaign, session])
   const tts = useTts(blocks)
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
         <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
       </ScrollView>
 
-      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} campaign={campaign} session={session} />
+      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={`Estado tras ${campaign.events.length} eventos del log, sin conexión`} />
     </View>
   )
 }
