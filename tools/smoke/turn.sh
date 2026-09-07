@@ -66,4 +66,4 @@ echo "segundo cierre: $(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/api
 curl -s "$API/api/v1/tables/$TABLE_ID/state" -H "Authorization: Bearer $JAZ" -H "$A" \
   | jq '{headSeq: .data.campaign.headSeq, session: .data.session, turn: {number: .data.turn.number, status: .data.turn.status, required: .data.turn.required}, blocks: [.data.blocks[] | {type: .block.type, text: (.block.text | .[0:70]), speaker: .block.speaker}]}'
 curl -s "$API/api/v1/campaigns/$CAMP/projections/player:zahira" -H "Authorization: Bearer $JAZ" -H "$A" \
-  | jq '{seq: .meta.seq, session: .data.session, fortune: .data.character.fortune}'
+  | jq '{seq: .data.seq, session: .data.projection.session, hp: .data.projection.character.hp, fortune: .data.projection.character.fortune}'
