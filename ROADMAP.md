@@ -70,6 +70,7 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - `packages/narrative`: context builder de cuatro capas, adapter Anthropic, probe de capacidad
 - Clave custodiada en servidor, redaccion en logs
 - 6b: `apps/host` para modelos locales (Ollama)
+- 6c: voz neural por bloque para el tier de pago (docs/09, "el usuario oye lo que paga"): `SpeechProvider` del lado servidor con el contrato de OpenAI `/v1/audio/speech`, audio generado por bloque en paralelo a la resolucion del turno y expuesto como `audioUrl` en `TurnBlock`, voz por NPC via `speakerRef`. Proveedores: VoiceStudio (local o self-hosted, AGPL usado sin modificar como servicio aparte; motores con licencia comercial, no OmniVoice que es CC-BY-NC) y OpenAI TTS o ElevenLabs en produccion sin GPU. Evaluado el 2026-09-07
 
 ## Entrega 7: Cobro y cupo
 
@@ -85,6 +86,6 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 
 ## v2 (sin fecha)
 
-- DM humano y modo remoto (narracion por microfono, analisis de respuestas)
+- DM humano y modo remoto (narracion por microfono, analisis de respuestas). Candidato para el reconocimiento de voz de la mesa: VibeVoice-ASR streaming (quien dijo que, 50+ idiomas). Su TTS queda descartado: Microsoft lo declara solo para investigacion y retiro el codigo en 2025
 - SSE desde el engine si el polling deja de bastar
 - Segundo ruleset real, que es cuando se valida el eje "agnostico de sistema"
