@@ -1,7 +1,7 @@
 {
   "name": "mobile",
   "version": "0.1.0",
-  "description": "Superficie del jugador en Expo: sesiones del pack piloto sin servidor, vistas narrativa y dialogo, fichas en modal y narracion por voz",
+  "description": "Superficie del jugador en Expo: mesa en linea contra rpg-ngn-api (login por token, polling, respuesta y cierre de turno) y lectura sin conexion del pack piloto; vistas narrativa y dialogo, fichas en modal y narracion por voz",
   "license": "UNLICENSED",
   "private": true,
   "main": "index.ts",
@@ -16,6 +16,7 @@
     "doctor": "expo-doctor"
   },
   "dependencies": {
+    "@rpg-ngn/api-client": "workspace:*",
     "@rpg-ngn/campaign": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
     "@rpg-ngn/core": "workspace:*",

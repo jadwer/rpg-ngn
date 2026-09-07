@@ -78,6 +78,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@rpg-ngn/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@rpg-ngn/campaign':
         specifier: workspace:*
         version: link:../../packages/campaign
