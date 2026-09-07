@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "bundle-pack": "tsx scripts/bundle-pack.ts",
-    "doctor": "expo-doctor"
+    "doctor": "expo-doctor",
+    "smoke-api": "tsx scripts/play-turn.mts"
   },
   "dependencies": {
     "@rpg-ngn/api-client": "workspace:*",
