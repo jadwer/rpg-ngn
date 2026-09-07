@@ -27,7 +27,8 @@
   "dependencies": {
     "@rpg-ngn/campaign": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
-    "@rpg-ngn/core": "workspace:*"
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/engine-contract": "workspace:*"
   },
   "devDependencies": {
     "@rpg-ngn/rules": "workspace:*",

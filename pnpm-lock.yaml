@@ -308,6 +308,9 @@ importers:
       '@rpg-ngn/core':
         specifier: workspace:*
         version: link:../core
+      '@rpg-ngn/engine-contract':
+        specifier: workspace:*
+        version: link:../engine-contract
     devDependencies:
       '@rpg-ngn/rules':
         specifier: workspace:*

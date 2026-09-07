@@ -102,7 +102,8 @@ export function speakerOf(character: Pick<Character, 'id' | 'name' | 'portrait'>
   return { ref: `character:${character.id}`, name: character.name, portrait: character.portrait }
 }
 
-function speakerFor(ref: string | undefined, pack: LoadedPack): Speaker | null {
+/** Hablante para una referencia del pack (`character:zahira`, `npc:osric`); null si no hay referencia. */
+export function packSpeaker(ref: string | undefined, pack: LoadedPack): Speaker | null {
   if (!ref) return null
   const id = refId(ref)
   if (refKind(ref) === 'character') {
@@ -117,12 +118,12 @@ function speakerFor(ref: string | undefined, pack: LoadedPack): Speaker | null {
 }
 
 function nameFor(ref: string, pack: LoadedPack): string {
-  return speakerFor(ref, pack)?.name ?? ref
+  return packSpeaker(ref, pack)?.name ?? ref
 }
 
 function rollBlock(event: RollEvent, pack: LoadedPack, session: Session): RollBlock {
   const resolved = event.resolved
-  const actor = speakerFor(event.actor, pack)
+  const actor = packSpeaker(event.actor, pack)
   const who = actor?.name ?? 'Alguien'
   const advantage = resolved.advantage ? 'advantage' : resolved.disadvantage ? 'disadvantage' : null
   const suffix = advantage === 'advantage' ? ' con ventaja' : advantage === 'disadvantage' ? ' con desventaja' : ''
