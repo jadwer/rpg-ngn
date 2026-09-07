@@ -183,10 +183,15 @@ publica solo `apps/sheets` y `content/packs/pilot`.
 
 ### D8. Clientes
 
-- **Web: Next.js 15**, delgada: landing, registro, gestion de mesas y amigos,
-  configuracion de proveedor, pago, admin, DM harness y superficie de jugador
-  para quien no instala la app. Consume `@atomo/ui` (Radix, CSS Modules,
-  tematizable) y `@atomo/core` (auth por cookie, SWR). No usa `@lwm/*`.
+- **Web: Next.js 15, producto de primera** (directriz primaria de Gabino,
+  2026-09-06): landing, registro, gestion de mesas y amigos, configuracion de
+  proveedor, pago, admin, DM harness y la mesa completa, con implementacion
+  propia e independiente de la app movil (si un dia hay clientes nativos, la
+  web sigue sola). Es la cara de entrada prevista para streamers: el acabado
+  visual, el rendimiento percibido y la vista limpia "en pantalla" se diseñan
+  primero aqui. Consume `@atomo/ui` y `@atomo/core` en el admin; la mesa lleva
+  diseño propio con `apps/sheets` como referencia visual. No usa `@lwm/*`.
+  Mientras iOS este diferido, los iPhone entran por la web.
 - **Movil: Expo** (SDK 54 o superior, por el aislamiento de pnpm). Es la
   superficie del jugador de 09. Token de Sanctum en `expo-secure-store` y cliente
   fetch propio (`@rpg-ngn/api-client`). Modo offline con pack local y sin DM

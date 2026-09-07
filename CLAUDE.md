@@ -18,7 +18,7 @@ Del 2026-09-05 (docs/11-adr-stack-saas.md, manda sobre 09 y sobre el ROADMAP):
 - **Plataforma Laravel 12 sobre el core de AtomoPlatform** (`~/dev/AtomoSoluciones/AtomoPlatform`, packages `atomo/*`), en un repo privado aparte (`rpg-ngn-api`). No api-base. Atomo es desarrollo propio y se modifica directo cuando rpg-ngn lo necesita.
 - **PostgreSQL 16.** Event store append-only con `jsonb`.
 - **El motor corre una sola vez**, en `apps/engine` (Node) invocado por Laravel por turno. El engine no tiene credenciales de base de datos; Laravel es el unico escritor.
-- **Clientes**: Next.js 15 con `@atomo/ui` y `@atomo/core` (web delgada) y Expo (superficie del jugador). Ningun package bajo `packages/` importa React, Next, Expo ni `node:*`.
+- **Clientes**: Next.js 15 es el producto principal de cara al publico (mesa propia, independiente de la movil, cara para streamers; directriz primaria del 2026-09-06) y Expo es la superficie del jugador en el telefono. Paridad funcional entre ambos; el pulido va primero a la web. Ningun package bajo `packages/` importa React, Next, Expo ni `node:*`.
 - **Polling en V1**, sin SSE. Nube con clave custodiada en servidor; Ollama por relay `apps/host` (entrega 6b).
 
 ## Contexto del piloto
