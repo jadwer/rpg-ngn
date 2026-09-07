@@ -53,10 +53,15 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] `campaign:import` de los 21 eventos con el snapshot canonico como fixture; el engine lo sustituye en la entrega 5
 - [x] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea (SQLite y Postgres 16)
 
-## Entrega 5: Turnos
+## Entrega 5: Turnos (en curso desde el 2026-09-06)
 
-- `apps/engine` (Node) con `ScriptedDMProvider`
-- Job de resolucion, NDJSON, `turn_blocks`, cierre con CAS, idempotencia, polling
+- [x] `packages/engine-contract`: contrato versionado Laravel/engine (peticion de turno, NDJSON de bloques y resultado, validacion, reproyeccion con auditoria, probe)
+- [x] `packages/narrative` con `DMProvider` y `ScriptedDMProvider` determinista
+- [x] `apps/engine` (Hono): resuelve turnos aplicando cada evento propuesto con schema y ruleset, valida y reproyecta; `.env` opcional con `--env-file-if-exists`
+- [x] API: modulo `Turns` (abrir y cerrar sesion, respuestas con `Idempotency-Key`, cierre por compare-and-swap, job unico por turno, reapertura ante error, polling `GET /tables/{table}/state`); 8 feature tests en SQLite y Postgres
+- [x] Turno completo de punta a punta con API y engine reales (smoke con curl: 201/201/200, 202, 409, turno 2 abierto, 4 bloques, headSeq 4)
+- [ ] `apps/mobile` en modo online: login por token, mesas, sesion con polling, respuesta y cierre
+- [ ] Criterio del ADR: un turno completo desde dos telefonos por LAN (Gabino)
 
 ## Entrega 6: DM IA
 

@@ -13,6 +13,7 @@ coverage/
 *.log
 .env
 .env.*
+!.env.example
 .DS_Store
 
 # Build y cache de tooling
