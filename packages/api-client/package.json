@@ -1,0 +1,37 @@
+{
+  "name": "@rpg-ngn/api-client",
+  "version": "0.1.0",
+  "description": "Cliente fetch tipado de rpg-ngn-api para Expo, web y CLI: login por token, mesas, estado de la mesa por polling, respuestas y cierre de turno, sesiones y proyecciones",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/engine-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
