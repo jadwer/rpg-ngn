@@ -33,6 +33,49 @@ importers:
         specifier: ^3.2.0
         version: 3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0)
 
+  apps/engine:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.19.0
+        version: 1.19.17(hono@4.13.7)
+      '@rpg-ngn/campaign':
+        specifier: workspace:*
+        version: link:../../packages/campaign
+      '@rpg-ngn/content':
+        specifier: workspace:*
+        version: link:../../packages/content
+      '@rpg-ngn/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rpg-ngn/engine-contract':
+        specifier: workspace:*
+        version: link:../../packages/engine-contract
+      '@rpg-ngn/narrative':
+        specifier: workspace:*
+        version: link:../../packages/narrative
+      '@rpg-ngn/rules':
+        specifier: workspace:*
+        version: link:../../packages/rules
+      hono:
+        specifier: ^4.9.0
+        version: 4.13.7
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.0
+        version: 22.20.1
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.28)(tsx@4.23.13)(typescript@5.9.3)(yaml@2.9.0)
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.13
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0)
+
   apps/mobile:
     dependencies:
       '@rpg-ngn/campaign':
@@ -144,6 +187,59 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.2.0
         version: 3.2.7(vitest@3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0))
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.28)(tsx@4.23.13)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0)
+
+  packages/engine-contract:
+    dependencies:
+      '@rpg-ngn/content':
+        specifier: workspace:*
+        version: link:../content
+      zod:
+        specifier: ^4.1.0
+        version: 4.5.4
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.0
+        version: 22.20.1
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.28)(tsx@4.23.13)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@22.20.1)(lightningcss@1.33.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.0)
+
+  packages/narrative:
+    dependencies:
+      '@rpg-ngn/campaign':
+        specifier: workspace:*
+        version: link:../campaign
+      '@rpg-ngn/content':
+        specifier: workspace:*
+        version: link:../content
+      '@rpg-ngn/engine-contract':
+        specifier: workspace:*
+        version: link:../engine-contract
+    devDependencies:
+      '@rpg-ngn/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rpg-ngn/rules':
+        specifier: workspace:*
+        version: link:../rules
+      '@types/node':
+        specifier: ^22.19.0
+        version: 22.20.1
       tsup:
         specifier: ^8.5.0
         version: 8.5.1(postcss@8.5.28)(tsx@4.23.13)(typescript@5.9.3)(yaml@2.9.0)
@@ -1103,6 +1199,12 @@ packages:
   '@expo/xcpretty@4.4.4':
     resolution: {integrity: sha512-4aQzz9vgxcNXFfo/iyNgDDYfsU5XGKKxWxZopw0cVotHiW+U8IJbIxMaxsINs6bHhtkG3StKNPcOrn3eBuxKPw==}
     hasBin: true
+
+  '@hono/node-server@1.19.17':
+    resolution: {integrity: sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -2256,6 +2358,10 @@ packages:
 
   hermes-parser@0.36.1:
     resolution: {integrity: sha512-GApNk4zLHi2UWoWZZkx7LNCOSzLSc5lB55pZ/PhK7ycFeg7u5LcF88p/WbpIi1XUDtE0MpHE3uRR3u3KB7TjSQ==}
+
+  hono@4.13.7:
+    resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
+    engines: {node: '>=16.9.0'}
 
   hosted-git-info@7.0.2:
     resolution: {integrity: sha512-puUZAUKT5m8Zzvs72XWy3HtvVbTWljRE66cP60bxJzAqf2DgICo7lYTY2IHUmLnNpjYvw5bvmoHvPc0QO2a62w==}
@@ -4579,6 +4685,10 @@ snapshots:
       chalk: 4.1.2
       js-yaml: 4.3.2
 
+  '@hono/node-server@1.19.17(hono@4.13.7)':
+    dependencies:
+      hono: 4.13.7
+
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -5798,6 +5908,8 @@ snapshots:
   hermes-parser@0.36.1:
     dependencies:
       hermes-estree: 0.36.1
+
+  hono@4.13.7: {}
 
   hosted-git-info@7.0.2:
     dependencies:

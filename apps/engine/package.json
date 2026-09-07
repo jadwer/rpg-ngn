@@ -1,0 +1,32 @@
+{
+  "name": "engine",
+  "version": "0.1.0",
+  "description": "Servicio Node donde el motor corre en produccion: resuelve turnos, valida eventos y reproyecta campañas. Lo invoca la plataforma Laravel; no tiene credenciales de base de datos",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.0",
+    "@rpg-ngn/campaign": "workspace:*",
+    "@rpg-ngn/content": "workspace:*",
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/engine-contract": "workspace:*",
+    "@rpg-ngn/narrative": "workspace:*",
+    "@rpg-ngn/rules": "workspace:*",
+    "hono": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@rpg-ngn/narrative",
+  "version": "0.1.0",
+  "description": "El DM: interfaz DMProvider, proveedor scripted determinista y, desde la entrega 6, context builder y adapters de LLM",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@rpg-ngn/campaign": "workspace:*",
+    "@rpg-ngn/content": "workspace:*",
+    "@rpg-ngn/engine-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/rules": "workspace:*",
+    "@types/node": "^22.19.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
