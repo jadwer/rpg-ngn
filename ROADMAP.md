@@ -71,7 +71,7 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el rename en la API):
 
 - [x] En la app el asiento `dm` se muestra como anfitrion en todo (mesas, mando, forzar cierre); el DM es la IA. Crear mesa desde la app con personaje del anfitrion (retrato) y premisa, e invitar con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje) desde la mesa nueva y desde el mando. Logica pura en `apps/mobile/src/online/tableSetup.ts` con tests
-- [ ] Renombrar el asiento `dm` a `host` en la API (y en `api-client`, web y app a la vez)
+- [x] Renombrar el asiento `dm` a `host` en la API (migracion 2026_09_12_000001 sobre las filas existentes) y en `api-client`, `ui-logic`, web y app a la vez (2026-09-12)
 - [x] Android: `KeyboardAvoidingView` con `behavior="padding"` en las dos plataformas (Expo Go 57 va edge-to-edge y `resize` ya no encoge la ventana; queda explicito en `app.json`), la narracion baja al final al enfocar, chips escondidos con el teclado abierto. Pendiente de confirmar en telefono; el README dice que mirar
 - [x] Selector de voz del sistema (`getAvailableVoicesAsync` filtrado a `es*`, nombre, idioma y calidad, boton Oir para elegir de oido), voz, velocidad y tono recordados por telefono en el almacen seguro, narrador a 0.85 (ajustable), party al natural y tono fijo por NPC (hash del `speakerRef`); `TtsItem` de ui-logic lleva tipo y hablante. Aviso de sin voz en español una sola vez
 - [x] La barra de TTS y la bandera de narrador son una sola linea plegable; la narracion ocupa la pantalla
