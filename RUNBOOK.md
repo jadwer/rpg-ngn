@@ -6,16 +6,29 @@ Puertos del proyecto: engine `3100`, API `8010`, web `3010`, Expo `8081`. El `80
 
 Variables: cada servicio lee su propio `.env` (gitignored, no viaja con el repo). `apps/engine/.env` trae `ENGINE_TOKEN`, `HOST` y `PORT`; `rpg-ngn-api/.env` trae la base, `ENGINE_URL` y `ENGINE_TOKEN`. Si falta alguno, copiar el `.env.example` de al lado. No hace falta pasar variables en la linea de comandos.
 
+## 0. Antes de una partida (checklist de cinco minutos)
+
+1. Comprobar que la IP del Wi-Fi sigue siendo la del runbook: `ip -4 addr | grep 192`. Si cambio, es la nueva la que se comparte con los jugadores (`http://<ip>:3010`); nada mas cambia.
+2. Levantar los tres servicios de la seccion 1 (engine, API y web en modo produccion) en tres terminales y dejarlas abiertas.
+3. Verificar: `curl -s http://127.0.0.1:3100/health` responde `ok`, y `cd ~/dev/rpg-ngn-api && php artisan dm:probe` dice `ok=si modelo=claude-sonnet-5`.
+4. Abrir `http://<ip>:3010` desde un telefono en la misma Wi-Fi: si carga la landing, el firewall esta bien.
+5. Si vas a usar la app movil, terminal 5 (Expo) y volver a escanear el QR.
+
 ## 1. Servicios (tres terminales)
 
 ```bash
-# Terminal 1: engine (Node). Health en http://127.0.0.1:3100/health
+# Terminal 1: engine (Node). Health en http://127.0.0.1:3100/health.
+# apps/engine/.env trae DM_LINT=report (el lint de conocimiento avisa, no corta); enforce cuando se confie
 cd ~/dev/rpg-ngn && pnpm --filter engine dev
 
-# Terminal 2: API (Laravel)
+# Terminal 2: API (Laravel). DM_PROVIDER=anthropic y la clave estan en su .env
 cd ~/dev/rpg-ngn-api && php artisan serve --host 0.0.0.0 --port 8010
 
-# Terminal 3: web (Next.js), la mesa principal. Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local
+# Terminal 3: web (Next.js), la mesa principal, en modo produccion (mas rapida y estable que el dev server).
+# Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local. Tras cambiar codigo hay que repetir el build
+cd ~/dev/rpg-ngn && pnpm --filter web build && pnpm --filter web start
+
+# Terminal 3 alternativa, solo para desarrollar la web (recarga en caliente)
 cd ~/dev/rpg-ngn && pnpm --filter web dev
 
 # Terminal 4 (solo si la API tiene QUEUE_CONNECTION=database): worker que resuelve los turnos
@@ -27,7 +40,7 @@ cd ~/dev/rpg-ngn && pnpm --filter mobile start
 
 Cola: el `.env` de la API esta en `QUEUE_CONNECTION=sync` a proposito: "Cerrar turno y narrar" espera al modelo dentro de la peticion (20 a 35 s con Sonnet) y no depende de que alguien recuerde levantar el worker. Para pasar a `database` (la peticion responde 202 al instante y el worker narra): cambiar `QUEUE_CONNECTION=database` en `rpg-ngn-api/.env`, correr `php artisan config:clear` si hay cache de config, y dejar la terminal 4 arriba antes de la partida. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo (la web lo muestra) y la mesa vuelve a cerrar cuando quiera. Si el worker no esta corriendo, el turno se queda en `closing` y la web dice "El DM esta narrando..." hasta que arranque; `php artisan queue:failed` lista los jobs que murieron.
 
-La web en produccion (mas rapida en la LAN): `pnpm --filter web build && pnpm --filter web start`.
+Si un servicio no arranca por "address already in use", queda un proceso viejo: `ss -ltnp | grep :<puerto>` da el pid y `kill <pid>` lo libera.
 
 Si algo no arranca:
 
