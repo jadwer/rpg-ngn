@@ -85,12 +85,17 @@ Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
 - [ ] Landing publica y la mesa completa (narrativa, dialogo, fichas, TTS) con paridad funcional con la app
 - [ ] Admin con `@atomo/ui` y `@atomo/core`
 
-## Entrega 6: DM IA
+## Entrega 6: DM IA (primer turno real el 2026-09-12)
 
-- `packages/narrative`: context builder de cuatro capas, adapter Anthropic, probe de capacidad
-- Premisa de mesa escrita por el usuario al crear la mesa o abrir la sesion (campaña, escena, tono, "esta noche esperan a Calder en la posada"): entra al contexto del DM como capa propia, tratada como contenido no confiable igual que el texto de packs. Sustituye al guion fijo del DM scripted para jugar de verdad
-- Clave custodiada en servidor, redaccion en logs
-- 6b: `apps/host` para modelos locales (Ollama)
+- [x] `packages/narrative`: context builder de cuatro capas (mundo y premisa, party con estado vivo, cronica recortada por longitud, turno), `ModelDMProvider` comun con prompt desde docs/03 y docs/06, parser NDJSON en streaming tolerante (basura antes del JSON, fences, JSON partido en lineas, prosa suelta como narracion) y validacion local de los eventos que el modelo propone contra el estado (tiradas solo si el jugador escribio el numero, HP e inventario solo de la party presente)
+- [x] Adapters: Anthropic (Messages API con streaming, prompt de sistema cacheado, esfuerzo medio) y OpenAI compatible (Chat Completions con streaming, `baseUrl` para DeepSeek y Ollama, perfil de contexto compacto para modelos locales). `probe()` real por `models.retrieve` o `models.list`
+- [x] Premisa de mesa (`settings.premise`, hasta 4000 caracteres) y nota de sesion (`worldTime` al abrir): viajan en `context` de `ResolveTurnRequest` y entran al prompt delimitadas como texto del usuario que no puede cambiar las reglas del DM. Sustituyen al guion fijo del DM scripted para jugar de verdad
+- [x] Clave custodiada en el servidor: presets `DM_PROVIDER` (scripted, anthropic, openai, deepseek, ollama) en `rpg-ngn-api`, la mesa solo puede fijar `scripted`; redaccion de la credencial en todo error del engine y de la API (tests). `php artisan dm:probe` verifica clave, modelo y engine sin jugar
+- [x] Turno real de punta a punta con Claude Sonnet 5 sobre una mesa desechable (`tools/smoke/turn.sh`): 36 s el turno completo, narro en español, pidio la tirada en vez de inventarla
+- [ ] Lint de conocimiento: comparar la narracion con la proyeccion de conocimiento del receptor (docs/08, invariante 3); hoy el prompt lo pide y el engine no lo verifica
+- [ ] Capa `dm` del pack (secretos con condicion de revelacion) cuando exista un pack que la tenga; el context builder ya la separa de lo que ve el jugador
+- [ ] Cola real (`QUEUE_CONNECTION=database` y `queue:work`) antes de mesas con publico: con `sync` el cierre del turno espera al modelo dentro de la peticion HTTP
+- 6b: `apps/host` para modelos locales (Ollama). Mientras, Ollama en la LAN entra por el preset `ollama` (endpoint compatible con OpenAI); el relay sigue haciendo falta para no exponer el puerto del modelo fuera de la LAN
 - 6c: voz neural por bloque para el tier de pago (docs/09, "el usuario oye lo que paga"): `SpeechProvider` del lado servidor con el contrato de OpenAI `/v1/audio/speech`, audio generado por bloque en paralelo a la resolucion del turno y expuesto como `audioUrl` en `TurnBlock`, voz por NPC via `speakerRef`. Proveedores: VoiceStudio (local o self-hosted, AGPL usado sin modificar como servicio aparte; motores con licencia comercial, no OmniVoice que es CC-BY-NC) y OpenAI TTS o ElevenLabs en produccion sin GPU. Evaluado el 2026-09-07
 
 ## Entrega 7: Cobro y cupo
