@@ -2,7 +2,7 @@
 
 import { createTtsController, speechQueue, type TtsController, type TtsItem, type TtsState, type TurnBlock } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { storage } from './storage'
+import { READING_LANGUAGES, storage, type ReadingLanguage } from './storage'
 import { createWebSpeechEngine, pickVoice, speechSupported, watchVoices, type VoiceChoice } from './webSpeech'
 
 export interface Tts {
@@ -28,14 +28,18 @@ export interface Tts {
   setRate: (rate: number) => void
   autoRead: boolean
   setAutoRead: (value: boolean) => void
+  /** Idioma de lectura (filtra las voces y fija el de la locucion); se elige en Ajustes. */
+  lang: ReadingLanguage
+  setLang: (lang: ReadingLanguage) => void
 }
 
 /**
  * La cola de TTS de ui-logic sobre los bloques de la mesa, con Web Speech.
  * Si llegan bloques mientras se lee, la cola vigente sigue hasta el final
  * y la nueva se adopta al terminar; con "leer lo nuevo" la lectura continua
- * sola desde el primer bloque nuevo. Voz, velocidad y el interruptor se
- * recuerdan en localStorage.
+ * sola desde el primer bloque nuevo. Voz, velocidad, idioma y el interruptor
+ * se recuerdan en localStorage (pagina de Ajustes; la barra de la mesa es el
+ * acceso rapido).
  */
 export function useTts(blocks: readonly TurnBlock[]): Tts {
   const [error, setError] = useState<string | null>(null)
@@ -44,21 +48,29 @@ export function useTts(blocks: readonly TurnBlock[]): Tts {
   const [voiceUri, setVoiceUriState] = useState<string | null>(null)
   const [rate, setRateState] = useState(1)
   const [autoRead, setAutoReadState] = useState(false)
+  const [lang, setLangState] = useState<ReadingLanguage>('es')
+  const [langLoaded, setLangLoaded] = useState(false)
   const controllerRef = useRef<TtsController | null>(null)
-  const settingsRef = useRef({ voiceUri: null as string | null, rate: 1 })
-  settingsRef.current = { voiceUri, rate }
+  const settingsRef = useRef({ voiceUri: null as string | null, rate: 1, lang: 'es-MX' })
+  settingsRef.current = { voiceUri, rate, lang: READING_LANGUAGES.find((l) => l.code === lang)?.utterance ?? 'es-MX' }
 
   useEffect(() => {
     setVoiceUriState(storage.voice())
     setRateState(storage.rate())
     setAutoReadState(storage.autoRead())
+    setLangState(storage.lang())
+    setLangLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!langLoaded) return
     let first = true
     return watchVoices((list) => {
       setVoices(list)
       if (list.length > 0 || !first) setVoicesReady(true)
       first = false
-    })
-  }, [])
+    }, lang)
+  }, [lang, langLoaded])
 
   // Cuando llegan las voces, se fija la guardada o la primera en español.
   useEffect(() => {
@@ -166,6 +178,14 @@ export function useTts(blocks: readonly TurnBlock[]): Tts {
     setAutoRead: (value) => {
       setAutoReadState(value)
       storage.setAutoRead(value)
+    },
+    lang,
+    setLang: (value) => {
+      setLangState(value)
+      storage.setLang(value)
+      // Las voces del idioma anterior ya no valen: se vuelve a elegir entre las nuevas.
+      setVoiceUriState(null)
+      storage.setVoice(null)
     },
   }
 }

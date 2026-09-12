@@ -4,6 +4,7 @@ import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useEffect, useRef, useState } from 'react'
 import { isValidSessionCode } from '../lib/tableSetup'
+import { DmSettingsPanel } from './DmSettingsPanel'
 import { InvitePanel } from './InvitePanel'
 
 interface Props {
@@ -26,11 +27,12 @@ interface Props {
 /**
  * Mando del anfitrion: abrir la sesion (codigo de tres digitos y una nota
  * que el DM tambien recibe), cerrarla con cliffhanger, la premisa de la
- * mesa e invitaciones. El DM es la IA; el anfitrion dirige la mesa.
+ * mesa, invitaciones y el proveedor del DM. El DM es la IA; el anfitrion
+ * dirige la mesa.
  */
 export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
   const [expanded, setExpanded] = useState(false)
-  const [tab, setTab] = useState<'session' | 'invite'>('session')
+  const [tab, setTab] = useState<'session' | 'invite' | 'dm'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
   const [cliffhanger, setCliffhanger] = useState('')
@@ -68,6 +70,9 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             </button>
             <button type="button" aria-pressed={tab === 'invite'} onClick={() => setTab('invite')}>
               Invitados
+            </button>
+            <button type="button" aria-pressed={tab === 'dm'} onClick={() => setTab('dm')}>
+              DM
             </button>
           </div>
 
@@ -128,6 +133,8 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
           ) : null}
 
           {tab === 'invite' ? <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
+
+          {tab === 'dm' ? <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         </div>
       ) : null}
     </section>
