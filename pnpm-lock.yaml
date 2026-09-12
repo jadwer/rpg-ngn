@@ -372,6 +372,9 @@ importers:
 
   packages/ui-logic:
     dependencies:
+      '@rpg-ngn/api-client':
+        specifier: workspace:*
+        version: link:../api-client
       '@rpg-ngn/campaign':
         specifier: workspace:*
         version: link:../campaign
