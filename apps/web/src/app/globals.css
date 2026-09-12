@@ -679,6 +679,10 @@ h3 {
   font-size: 0.9rem;
 }
 
+.tts .status.warn {
+  color: var(--gold-bright);
+}
+
 .tts .select {
   width: auto;
   max-width: 220px;

@@ -2,8 +2,8 @@
 
 import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { isValidSessionCode } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
-import { isValidSessionCode } from '../lib/tableSetup'
 import { DmSettingsPanel } from './DmSettingsPanel'
 import { InvitePanel } from './InvitePanel'
 

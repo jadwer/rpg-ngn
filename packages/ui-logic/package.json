@@ -1,7 +1,7 @@
 {
   "name": "@rpg-ngn/ui-logic",
   "version": "0.1.0",
-  "description": "Logica de UI compartida sin React: bloques tipados de un turno, vistas narrativa y dialogo, velado de fichas y cola de TTS por bloques",
+  "description": "Logica de UI compartida sin React: bloques tipados de un turno, vistas narrativa y dialogo, velado de fichas, cola de TTS por bloques, tono por hablante, preparacion de la mesa y bandera de narrador",
   "license": "UNLICENSED",
   "private": true,
   "type": "module",
@@ -25,6 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@rpg-ngn/api-client": "workspace:*",
     "@rpg-ngn/campaign": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
     "@rpg-ngn/core": "workspace:*",

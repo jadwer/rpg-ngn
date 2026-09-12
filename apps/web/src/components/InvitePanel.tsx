@@ -2,9 +2,8 @@
 
 import { ApiError, type ApiClient, type AuthUser, type Friendship, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { acceptedFriends, characterName, freeCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { characterName } from '../lib/pack'
-import { acceptedFriends, freeCharacters, friendshipWith, memberLine, pendingReceived } from '../lib/tableSetup'
 import { CharacterPicker } from './CharacterPicker'
 import { Portrait } from './Portrait'
 
@@ -70,7 +69,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       const value = email.trim().toLowerCase()
       if (!value) return
       // Primero entre los amigos ya conocidos (no necesita permiso de busqueda).
-      const known = friendships.map((f) => (f.user.id === meId ? f.friend : f.user)).find((u) => u.email.toLowerCase() === value)
+      const known = knownByEmail(friendships, meId, value)
       if (known) {
         setFound(known)
         return
@@ -94,7 +93,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
   const state = found ? friendshipWith(friendships, meId, found.id) : null
   const alreadyMember = found ? table.members.some((m) => m.userId === found.id) : false
   const free = useMemo(() => (pack ? freeCharacters(pack, table.members) : []), [pack, table.members])
-  const taken = useMemo(() => new Map(table.members.filter((m) => m.characterId).map((m) => [m.characterId as string, m.userName ?? 'alguien'])), [table.members])
+  const taken = useMemo(() => takenCharacters(table.members), [table.members])
   const pending = pendingReceived(friendships, meId)
   const friends = acceptedFriends(friendships, meId).filter((u) => !table.members.some((m) => m.userId === u.id))
 

@@ -1,13 +1,14 @@
 import { reduce, type CampaignState } from '@rpg-ngn/campaign'
-import { loadPack, memorySource, parseEventLog, type CampaignEvent, type Character, type Issue, type LoadedPack, type Session } from '@rpg-ngn/content'
+import { loadPack, memorySource, parseEventLog, type CampaignEvent, type Issue, type LoadedPack } from '@rpg-ngn/content'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
-import { eventLog, PACK_ID, packBinaries, packFiles } from '../generated/pilot-pack'
+import { eventLog, PACK_ID, PACK_VERSION, packBinaries, packFiles } from '../generated/pilot-pack'
 
 /**
  * Campaña offline: el pack empaquetado en la app mas su log, reducidos en el
  * dispositivo con el ruleset del pack (docs/11, D8). El log empaquetado no
- * lleva capa dm, asi que reducirlo aqui no expone secretos. Sin React ni
- * Expo para poder probarlo con vitest en node.
+ * lleva capa dm, asi que reducirlo aqui no expone secretos. Las lecturas del
+ * pack (personajes, sesiones, nombres) estan en `@rpg-ngn/ui-logic`. Sin
+ * React ni Expo para poder probarlo con vitest en node.
  */
 
 export interface OfflineCampaign {
@@ -55,16 +56,9 @@ export async function loadOfflineCampaign(): Promise<OfflineCampaign> {
   }
 }
 
-/** Sesiones del pack en el orden del manifiesto. */
-export function sessionList(pack: LoadedPack): Session[] {
-  return pack.manifest.sessions.map((id) => pack.sessions.get(id)).filter((s): s is Session => !!s)
-}
-
-/** Personajes del pack en el orden del manifiesto. */
-export function packCharacters(pack: LoadedPack): Character[] {
-  return pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is Character => !!c)
-}
-
-export { PACK_ID }
+export { PACK_ID, PACK_VERSION }
 export const RULESET_ID = fantasyD20Lite.id
 export const abilityModifier = (score: number): number => fantasyD20Lite.abilityModifier(score)
+
+/** El pack que la app sabe empaquetar hoy, con el ruleset versionado como lo espera la API; la mesa nueva lo usa tal cual. */
+export const PACK_OPTION = { id: PACK_ID, version: PACK_VERSION, ruleset: `${fantasyD20Lite.id}@${fantasyD20Lite.version}` } as const

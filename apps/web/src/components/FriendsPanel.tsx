@@ -1,8 +1,8 @@
 'use client'
 
 import { ApiError, type ApiClient, type AuthUser, type Friendship } from '@rpg-ngn/api-client'
+import { acceptedFriends, friendshipWith, pendingReceived } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { acceptedFriends, friendshipWith, pendingReceived } from '../lib/tableSetup'
 
 interface Props {
   client: ApiClient

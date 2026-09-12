@@ -1,12 +1,13 @@
+'use client'
+
 import { NARRATOR_IDLE, narratorReducer, type NarratorFlag } from '@rpg-ngn/ui-logic'
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react'
 
 /**
- * Bandera de narrador (docs/09, "Voz"). Local en V1: la mesa esta en el
- * mismo cuarto y se avisa de viva voz; el estado compartido llega con la
- * plataforma. La maquina de estado vive en ui-logic (la comparte con la
- * web); aqui solo se cuelga del arbol para que sobreviva al cambio de
- * pantalla.
+ * Bandera de narrador (docs/09, "Voz"), local a este navegador como en la
+ * app: la mesa esta en el mismo cuarto y se avisa de viva voz. La maquina de
+ * estado vive en ui-logic; aqui solo se cuelga del arbol para que sobreviva
+ * al cambio de pagina. Compartirla entre dispositivos necesita un endpoint.
  */
 export interface NarratorState {
   flag: NarratorFlag

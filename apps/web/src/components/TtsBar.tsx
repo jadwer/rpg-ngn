@@ -1,20 +1,22 @@
 'use client'
 
+import { nobodyNarrates, voiceLineSummary } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
+import { useNarrator } from '../lib/narrator'
 import type { Tts } from '../lib/useTts'
 
-/** Controles de la narracion por voz: leer, pausa o seguir, siguiente, parar, voz, velocidad y leer lo nuevo. */
+/**
+ * Controles de la narracion por voz: leer, pausa o seguir, siguiente, parar,
+ * voz, velocidad, leer lo nuevo y la bandera de narrador (docs/09): quien
+ * lee en voz alta en la mesa, o el aviso de que nadie lo hace.
+ */
 export function TtsBar({ tts }: { tts: Tts }) {
   const { state } = tts
+  const narrator = useNarrator()
   const active = state.status === 'speaking' || state.status === 'paused'
-  const status =
-    state.status === 'speaking'
-      ? `Leyendo ${state.index + 1} de ${state.total}`
-      : state.status === 'paused'
-        ? `En pausa (${state.index + 1} de ${state.total})`
-        : state.status === 'done'
-          ? 'Lectura terminada'
-          : ''
+  const localSpeaking = state.status === 'speaking'
+  const summary = voiceLineSummary({ state, nativePause: tts.nativePause, error: tts.error, narrator: narrator.flag, autoRead: tts.autoRead, device: 'dispositivo' })
+  const warnNobody = nobodyNarrates(narrator.flag, localSpeaking)
 
   if (!tts.supported) {
     return <div className="tts status">Este navegador no tiene voz. La mesa se juega leyendo.</div>
@@ -50,8 +52,8 @@ export function TtsBar({ tts }: { tts: Tts }) {
       <label className="sr-only" htmlFor="tts-voice">
         Voz
       </label>
-      <select id="tts-voice" className="select" value={tts.voiceUri ?? ''} onChange={(e) => tts.setVoiceUri(e.target.value || null)} disabled={tts.voices.length === 0} title="Voz en español del navegador">
-        {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? 'Sin voces en español' : 'Cargando voces...'}</option> : null}
+      <select id="tts-voice" className="select" value={tts.voiceUri ?? ''} onChange={(e) => tts.setVoiceUri(e.target.value || null)} disabled={tts.voices.length === 0} title="Voz del navegador en el idioma de lectura">
+        {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? 'Sin voces en este idioma' : 'Cargando voces...'}</option> : null}
         {tts.voices.map((voice) => (
           <option key={voice.uri} value={voice.uri}>
             {voice.name} ({voice.lang})
@@ -67,8 +69,22 @@ export function TtsBar({ tts }: { tts: Tts }) {
         <input type="checkbox" checked={tts.autoRead} onChange={(e) => tts.setAutoRead(e.target.checked)} />
         Leer lo nuevo
       </label>
-      {tts.error ? <span className="status">Voz: {tts.error}</span> : status ? <span className="status">{status}</span> : null}
-      <Link href="/ajustes" className="btn ghost small" title="Voz por defecto, idioma y velocidad">
+      <label className="check" title={localSpeaking ? 'Este dispositivo está narrando' : 'Marca si otro dispositivo de la mesa lee en voz alta'}>
+        <input type="checkbox" checked={narrator.flag.someoneNarrating} onChange={(e) => narrator.setSomeoneNarrating(e.target.checked)} disabled={localSpeaking} />
+        Otro dispositivo narra
+      </label>
+      <span className={`status${summary.warn ? ' warn' : ''}`}>{summary.text}</span>
+      {warnNobody ? (
+        <button type="button" className="btn ghost small" onClick={narrator.dismiss} title="Quitar el aviso de que nadie narra">
+          Jugamos leyendo
+        </button>
+      ) : null}
+      {narrator.flag.dismissed && !narrator.flag.someoneNarrating && !active ? (
+        <button type="button" className="btn ghost small" onClick={narrator.restore} title="Volver a avisar si nadie narra">
+          Avisar si nadie narra
+        </button>
+      ) : null}
+      <Link href="/ajustes" className="btn ghost small" title="Voz por defecto, idioma, velocidad y tono">
         Ajustes
       </Link>
     </div>

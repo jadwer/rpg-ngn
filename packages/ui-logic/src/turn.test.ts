@@ -3,7 +3,7 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { loadPilot } from './pilot.test-helpers.js'
 import { groupBlocks } from './views.js'
 import { speechQueue } from './tts.js'
-import { apiBlockId, blocksFromApi, packSpeakerResolver, turnProgress, turnStatusLine, type ApiBlockEnvelope, type TurnSummary } from './turn.js'
+import { apiBlockId, blocksFromApi, packSpeakerResolver, turnLine, turnProgress, turnStatusLine, type ApiBlockEnvelope, type TurnSummary } from './turn.js'
 
 /** Los cuatro bloques que dejo el smoke real contra API y engine (turno 1 de la sesion 003). */
 const envelopes: ApiBlockEnvelope[] = [
@@ -80,7 +80,9 @@ describe('turnProgress', () => {
   it('mientras el DM narra no se responde ni se cierra, y el error del engine reabre', () => {
     const closing = turnProgress({ ...open, status: 'closing' }, { role: 'player', characterId: 'zahira' })
     expect(closing).toMatchObject({ narrating: true, canRespond: false, canClose: false })
-    expect(turnStatusLine({ ...open, status: 'closing' }, closing, nameOf)).toBe('El DM esta narrando...')
+    expect(turnStatusLine({ ...open, status: 'closing' }, closing, nameOf)).toBe('El DM está narrando...')
+    expect(turnLine({ ...open, status: 'closing', number: 3 }, closing, nameOf)).toBe('Turno 3: El DM está narrando...')
+    expect(turnLine(null, turnProgress(null, { role: 'player', characterId: null }), nameOf)).toBe('No hay turno abierto.')
 
     const reopened: TurnSummary = { status: 'open', required: ['zahira'], responded: ['zahira'], error: 'el DM propuso un evento invalido' }
     const progress = turnProgress(reopened, { role: 'player', characterId: 'zahira' })

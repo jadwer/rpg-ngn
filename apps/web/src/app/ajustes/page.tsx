@@ -1,22 +1,28 @@
 'use client'
 
-import { narration } from '@rpg-ngn/ui-logic'
+import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
-import { READING_LANGUAGES, type ReadingLanguage, type StoredUser } from '../../lib/storage'
+import type { StoredUser } from '../../lib/storage'
 import { useTts } from '../../lib/useTts'
 
 export default function SettingsPage() {
   return <RequireSession>{({ user, logout }) => <Settings user={user} logout={logout} />}</RequireSession>
 }
 
-const SAMPLE = [narration('sample', 'La posada huele a estofado y a leña húmeda. Afuera, la campana del pueblo suena tres veces, aunque nadie la está tocando.')]
+/** La prueba lee narracion, un dialogo de la party y uno de un NPC, para oir los tres tonos. */
+const SAMPLE = [
+  narration('sample-narration', 'La posada huele a estofado y a leña húmeda. Afuera, la campana del pueblo suena tres veces, aunque nadie la está tocando.'),
+  dialogue('sample-party', { ref: 'character:zahira', name: 'Zahira', portrait: null }, 'Yo voy a ver qué pasa con esa campana.'),
+  dialogue('sample-npc', { ref: 'npc:posadero', name: 'El posadero', portrait: null }, 'Yo que ustedes no saldría a estas horas.'),
+]
 
 /**
- * Ajustes del usuario: voz por defecto, idioma de lectura, velocidad y
- * lectura automatica. Viven en localStorage (son del navegador, no de la
- * cuenta); la barra de voz de la mesa es el acceso rapido a los mismos.
+ * Ajustes del usuario: voz por defecto, idioma de lectura, velocidad, tono
+ * del narrador y lectura automatica. Viven en localStorage (son del
+ * navegador, no de la cuenta); la barra de voz de la mesa es el acceso
+ * rapido a los mismos.
  */
 function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
   const blocks = useMemo(() => SAMPLE, [])
@@ -65,9 +71,20 @@ function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
         <label className="field">
           <span>Velocidad</span>
           <div className="row">
-            <input type="range" min={0.7} max={1.4} step={0.05} value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} style={{ flex: 1 }} />
+            <input type="range" min={RATE_MIN} max={RATE_MAX} step={RATE_STEP} value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} style={{ flex: 1 }} />
             <span className="muted">{tts.rate.toFixed(2)}x</span>
           </div>
+        </label>
+
+        <label className="field">
+          <span>Tono del narrador</span>
+          <div className="row">
+            <input type="range" min={PITCH_MIN} max={PITCH_MAX} step={PITCH_STEP} value={tts.narratorPitch} onChange={(e) => tts.setNarratorPitch(Number(e.target.value))} style={{ flex: 1 }} />
+            <span className="muted">{tts.narratorPitch.toFixed(2)}</span>
+          </div>
+          <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+            Más bajo suena más grave. Los personajes de la party hablan con el tono normal y cada NPC lleva el suyo, siempre el mismo.
+          </span>
         </label>
 
         <label className="check">

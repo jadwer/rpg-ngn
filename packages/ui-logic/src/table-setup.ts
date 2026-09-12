@@ -1,20 +1,14 @@
-import type { Friendship, SessionSummary, TableMember, TableSummary } from '@rpg-ngn/api-client'
+import type { Friendship, MemberRole, SessionSummary, TableMember, TableSummary } from '@rpg-ngn/api-client'
 import type { Character, LoadedPack } from '@rpg-ngn/content'
-import { fantasyD20Lite } from '@rpg-ngn/rules'
-import { PACK_ID, PACK_VERSION } from '../generated/pilot-pack'
-import { packCharacters } from '../pack/offline'
+import { packCharacters } from './pack.js'
 
 /**
- * Decisiones puras de la preparacion de una mesa, las mismas que la web
- * (`apps/web/src/lib/tableSetup.ts`): que codigo de sesion sugerir, que
- * personajes quedan libres, en que punto esta la amistad con alguien y como
- * describir cada asiento. El asiento del dueño se llama `dm` en la API; en
- * pantalla es el anfitrion, porque el DM es la IA. Sin React para probarlo
- * con vitest.
+ * Decisiones puras de la preparacion de una mesa, las mismas en la web y en
+ * la app: que codigo de sesion sugerir, que personajes quedan libres, en que
+ * punto esta la amistad con alguien, que puede hacer cada asiento y como se
+ * describe. El asiento del dueño es `host` en la API; en pantalla es el
+ * anfitrion, porque el DM es la IA.
  */
-
-/** El pack que la app sabe empaquetar hoy; la mesa nueva lo usa tal cual. */
-export const PACK_OPTION = { id: PACK_ID, version: PACK_VERSION, ruleset: `${fantasyD20Lite.id}@${fantasyD20Lite.version}` } as const
 
 /**
  * Codigo de tres digitos para la siguiente sesion: uno mas que la mayor ya
@@ -29,6 +23,12 @@ export function suggestedSessionCode(pack: LoadedPack | null, existing: readonly
 
 export function isValidSessionCode(code: string): boolean {
   return /^[0-9]{3}$/.test(code)
+}
+
+/** Nombre de la mesa listo para enviar; vacio o demasiado largo no vale. */
+export function cleanTableName(name: string): string | null {
+  const value = name.trim().replace(/\s+/g, ' ')
+  return value.length > 0 && value.length <= 120 ? value : null
 }
 
 /** Personajes del pack que ningun otro miembro juega (el propio asiento puede conservar el suyo). */
@@ -61,23 +61,51 @@ export function pendingReceived(friendships: readonly Friendship[], meId: string
   return friendships.filter((f) => f.status !== 'accepted' && f.friend.id === meId)
 }
 
+export interface KnownUser {
+  id: string
+  name: string
+  email: string
+}
+
 /** Amigos con amistad aceptada, con quien puedo invitar. */
-export function acceptedFriends(friendships: readonly Friendship[], meId: string): Array<{ id: string; name: string; email: string }> {
+export function acceptedFriends(friendships: readonly Friendship[], meId: string): KnownUser[] {
   return friendships.filter((f) => f.status === 'accepted').map((f) => (f.user.id === meId ? f.friend : f.user))
 }
 
 /** El otro lado de cada amistad (en cualquier estado), por si busco a alguien que ya conozco. */
-export function knownUsers(friendships: readonly Friendship[], meId: string): Array<{ id: string; name: string; email: string }> {
+export function knownUsers(friendships: readonly Friendship[], meId: string): KnownUser[] {
   return friendships.map((f) => (f.user.id === meId ? f.friend : f.user))
 }
 
-/** El dueño de la mesa: el asiento `dm` (en pantalla, el anfitrion). */
+/** Entre los conocidos, el que tiene ese correo (sin distinguir mayusculas), o null. */
+export function knownByEmail(friendships: readonly Friendship[], meId: string, email: string): KnownUser | null {
+  const value = email.trim().toLowerCase()
+  if (!value) return null
+  return knownUsers(friendships, meId).find((u) => u.email.toLowerCase() === value) ?? null
+}
+
+/** El dueño de la mesa: el asiento `host` (en pantalla, el anfitrion). */
 export function hostOf(table: Pick<TableSummary, 'members'>): TableMember | null {
   return table.members.find((m) => m.role === 'host') ?? null
 }
 
 export function isHost(member: Pick<TableMember, 'role'> | null): boolean {
   return member?.role === 'host'
+}
+
+/** Lo que el asiento puede hacer con la mesa; responder y cerrar turnos lo decide `turnProgress`. */
+export interface SeatPowers {
+  /** Invitar y aceptar invitados (la API exige amistad aceptada). */
+  canInvite: boolean
+  canOpenSession: boolean
+  canCloseSession: boolean
+  /** Elegir y probar el proveedor del DM de la mesa. */
+  canConfigureDm: boolean
+}
+
+export function seatPowers(role: MemberRole | null | undefined): SeatPowers {
+  const host = role === 'host'
+  return { canInvite: host, canOpenSession: host, canCloseSession: host, canConfigureDm: host }
 }
 
 /** Como se presenta un asiento en una lista: nombre, y su papel o personaje. */
@@ -96,8 +124,29 @@ export function seatLabel(me: TableMember | null, nameOf: (id: string) => string
   return character ? `Juegas a ${character}` : 'Sin personaje asignado'
 }
 
-/** Nombre de la mesa listo para enviar; vacio no vale. */
-export function cleanTableName(name: string): string | null {
-  const value = name.trim().replace(/\s+/g, ' ')
-  return value.length > 0 && value.length <= 120 ? value : null
+/** Un miembro ajeno en la tarjeta de la mesa: `Jaz (anfitrión): Zahira`. */
+export function memberTag(member: TableMember, nameOf: (id: string) => string): string {
+  return `${member.userName ?? '?'}${member.role === 'host' ? ' (anfitrión)' : ''}${member.characterId ? `: ${nameOf(member.characterId)}` : ''}`
+}
+
+/** Subtitulo de la cabecera de la mesa: sesion, momento del mundo, turno y quien falta. */
+export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
+  const parts = [input.sessionTitle ?? (input.loading ? 'Conectando...' : 'Sin sesión abierta')]
+  if (input.worldTime) parts.push(input.worldTime)
+  if (input.turnNumber !== null) {
+    parts.push(`Turno ${input.turnNumber}`)
+    if (input.pending.length > 0 && !input.narrating) parts.push(`faltan ${input.pending.join(', ')}`)
+  }
+  return parts.join(' · ')
+}
+
+/** Titulo de la ventana o pestaña: mesa y sesion. */
+export function tableTitle(tableName: string, sessionCode: string | null, appName = 'rpg-ngn'): string {
+  return `${tableName}${sessionCode ? `, sesión ${sessionCode}` : ''} | ${appName}`
+}
+
+/** Texto cuando la mesa no tiene bloques todavia, segun quien mira. */
+export function emptyTableText(hasSession: boolean, host: boolean): string {
+  if (hasSession) return 'El DM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
+  return host ? 'Abre la sesión desde el mando del anfitrión para que el DM presente la escena.' : 'Cuando el anfitrión abra la sesión, el primer turno aparece aquí.'
 }

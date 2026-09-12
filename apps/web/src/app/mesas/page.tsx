@@ -1,14 +1,13 @@
 'use client'
 
 import { ApiError, memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { characterName, memberTag, seatLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FriendsPanel } from '../../components/FriendsPanel'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
-import { characterName } from '../../lib/pack'
-import { seatLabel } from '../../lib/tableSetup'
 import { usePack } from '../../lib/usePack'
 import type { StoredUser } from '../../lib/storage'
 
@@ -84,9 +83,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
                   {others.map((m) => (
                     <span key={m.id} className="member">
                       <Portrait path={m.characterId ? (pack?.characters.get(m.characterId)?.portrait ?? null) : null} name={m.userName ?? '?'} size={26} />
-                      {m.userName ?? '?'}
-                      {m.role === 'host' ? ' (anfitrión)' : ''}
-                      {m.characterId ? `: ${nameOf(m.characterId)}` : ''}
+                      {memberTag(m, nameOf)}
                     </span>
                   ))}
                 </div>

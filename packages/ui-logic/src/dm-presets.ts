@@ -1,6 +1,11 @@
 import type { DmPreset, DmProviderChoice } from '@rpg-ngn/api-client'
 
-/** Nombres legibles de los presets del servidor (config/engine.php de la API). */
+/**
+ * Presets del DM que ofrece el servidor (config/engine.php de la API): como
+ * se nombran y cual se manda al crear la mesa. Las claves nunca salen de la
+ * API; aqui solo se elige cual usar.
+ */
+
 const NAMES: Record<string, string> = {
   scripted: 'DM con guion (sin modelo)',
   anthropic: 'Anthropic (Claude)',
@@ -25,4 +30,15 @@ export function selectablePresets(presets: readonly DmPreset[]): DmPreset[] {
 export function providerForNewTable(preset: string, defaultPreset: string): DmProviderChoice | null {
   if (!preset || preset === defaultPreset) return null
   return { preset, model: null }
+}
+
+/** Etiqueta de un preset en un selector: nombre, si es el del servidor y su modelo. */
+export function presetOptionLabel(preset: DmPreset): string {
+  return `${describePreset(preset.name)}${preset.default ? ' (el del servidor)' : ''}${preset.model ? `, ${preset.model}` : ''}`
+}
+
+/** Mensaje tras guardar el proveedor de la mesa. */
+export function savedProviderText(choice: DmProviderChoice | null): string {
+  if (!choice) return 'La mesa usa el DM del servidor.'
+  return `Guardado: ${describePreset(choice.preset)}${choice.model ? `, modelo ${choice.model}` : ''}.`
 }

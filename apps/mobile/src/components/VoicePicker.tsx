@@ -1,6 +1,7 @@
+import { PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, readingLanguageLabel } from '@rpg-ngn/ui-logic'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
-import { PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, voiceLabel, type VoiceInfo } from '../speech/voices'
+import { voiceLabel, type VoiceInfo } from '../speech/voices'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -11,14 +12,17 @@ interface Props {
 }
 
 /**
- * Selector de voz del sistema (docs/09, "Narracion por voz"). El telefono no
- * dice si una voz es masculina o femenina, asi que cada una se prueba de
- * oido con "Oír"; la elegida se recuerda por telefono. Velocidad y tono del
- * narrador van con pasos, sin slider nativo (una dependencia menos).
+ * Selector de voz del sistema (docs/09, "Narracion por voz"). Primero el
+ * idioma de lectura (filtra las voces y fija el de la locucion, como en los
+ * ajustes de la web); el telefono no dice si una voz es masculina o
+ * femenina, asi que cada una se prueba de oido con "Oír"; la elegida se
+ * recuerda por telefono. Velocidad y tono del narrador van con pasos, sin
+ * slider nativo (una dependencia menos).
  */
 export function VoicePicker({ visible, tts, onClose }: Props) {
   const { voices, settings } = tts
   const selectedId = tts.voice?.id ?? null
+  const language = readingLanguageLabel(settings.lang)
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -32,12 +36,25 @@ export function VoicePicker({ visible, tts, onClose }: Props) {
         </View>
 
         <ScrollView contentContainerStyle={styles.body}>
+          <Text style={styles.label}>Idioma de lectura</Text>
+          <Text style={styles.hint}>Filtra las voces del teléfono. El DM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.</Text>
+          <View style={styles.chips}>
+            {READING_LANGUAGES.map((l) => {
+              const selected = l.code === settings.lang
+              return (
+                <Pressable key={l.code} onPress={() => tts.setLang(l.code)} style={[styles.chip, selected && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected }}>
+                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>{l.label}</Text>
+                </Pressable>
+              )
+            })}
+          </View>
+
           <Text style={styles.label}>Voz del narrador</Text>
           <Text style={styles.hint}>Las voces son las que trae el teléfono. Ninguna dice si es de hombre o de mujer: elige de oído.</Text>
 
-          <VoiceRow label="La voz del sistema para español" sub="Sin elegir; el teléfono decide" selected={selectedId === null} onSelect={() => tts.setVoiceId(null)} onPreview={() => tts.preview(null)} />
+          <VoiceRow label={`La voz del sistema para ${language.toLowerCase()}`} sub="Sin elegir; el teléfono decide" selected={selectedId === null} onSelect={() => tts.setVoiceId(null)} onPreview={() => tts.preview(null)} />
           {voices === null ? <Text style={styles.hint}>El teléfono no ha contestado qué voces tiene.</Text> : null}
-          {voices?.length === 0 ? <Text style={styles.warn}>No hay voces en español instaladas. En Android: Ajustes, Texto a voz, Instalar datos de voz, Español. En iOS: Accesibilidad, Contenido leído, Voces.</Text> : null}
+          {voices?.length === 0 ? <Text style={styles.warn}>{`No hay voces en ${language.toLowerCase()} instaladas. En Android: Ajustes, Texto a voz, Instalar datos de voz. En iOS: Accesibilidad, Contenido leído, Voces.`}</Text> : null}
           {voices?.map((voice) => (
             <VoiceRow key={voice.id} label={voiceLabel(voice)} sub={voice.enhanced ? 'Mejorada: suena más natural' : null} selected={selectedId === voice.id} onSelect={() => tts.setVoiceId(voice.id)} onPreview={() => tts.preview(voice)} />
           ))}
@@ -97,6 +114,11 @@ const styles = StyleSheet.create({
   label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold, marginTop: 14 },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 19, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  chip: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5, backgroundColor: theme.colors.panel },
+  chipOn: { borderColor: theme.colors.gold, backgroundColor: theme.colors.panel2 },
+  chipText: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
+  chipTextOn: { color: theme.colors.goldBright },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   rowSelected: { borderColor: theme.colors.gold, backgroundColor: theme.colors.panel2 },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },

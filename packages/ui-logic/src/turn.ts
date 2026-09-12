@@ -109,8 +109,14 @@ export function turnProgress(turn: TurnSummary | null, viewer: Viewer): TurnProg
 /** Frase corta de estado para la barra del turno. */
 export function turnStatusLine(turn: TurnSummary | null, progress: TurnProgress, nameOf: (id: string) => string): string {
   if (!turn) return 'No hay turno abierto.'
-  if (progress.narrating) return 'El DM esta narrando...'
+  if (progress.narrating) return 'El DM está narrando...'
   if (turn.status === 'resolved') return 'Turno resuelto.'
   if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa; cualquiera puede cerrar.' : 'Todos respondieron; cualquiera puede cerrar el turno.'
   return `Faltan: ${progress.pending.map(nameOf).join(', ')}.`
+}
+
+/** La frase con el numero de turno delante, como la muestran las dos apps. */
+export function turnLine(turn: (TurnSummary & { number: number }) | null, progress: TurnProgress, nameOf: (id: string) => string): string {
+  const line = turnStatusLine(turn, progress, nameOf)
+  return turn ? `Turno ${turn.number}: ${line}` : line
 }

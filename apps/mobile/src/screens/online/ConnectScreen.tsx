@@ -10,11 +10,14 @@ interface Props {
   /** Aviso previo (sesion caducada) o error del ultimo intento. */
   notice: string | null
   onLogin: (serverUrl: string, email: string, password: string) => void
+  /** Crear cuenta y recuperar contraseña, con el servidor que este escrito. */
+  onRegister: (serverUrl: string) => void
+  onForgot: (serverUrl: string) => void
   onBack: () => void
 }
 
-/** URL del servidor (editable, se recuerda) y login por token. */
-export function ConnectScreen({ initialUrl, busy, notice, onLogin, onBack }: Props) {
+/** URL del servidor (editable, se recuerda) y login por token; enlaces a crear cuenta y recuperar contraseña. */
+export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, onForgot, onBack }: Props) {
   const [serverUrl, setServerUrl] = useState(initialUrl)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,6 +38,18 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onBack }: Pro
         <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={() => canSubmit && onLogin(serverUrl, email, password)} />
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         <Button label="Entrar" primary busy={busy} disabled={!canSubmit} onPress={() => onLogin(serverUrl, email, password)} />
+        <View style={styles.links}>
+          <Pressable onPress={() => onForgot(serverUrl)} hitSlop={6} disabled={busy}>
+            <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
+          </Pressable>
+          <Text style={styles.foot}>
+            ¿Todavía no tienes cuenta?{' '}
+            <Text style={styles.linkText} onPress={() => onRegister(serverUrl)}>
+              Créala aquí
+            </Text>
+            , toma un minuto.
+          </Text>
+        </View>
         <Text style={styles.foot}>El token se guarda en el almacén seguro del teléfono y caduca solo.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -49,5 +64,7 @@ const styles = StyleSheet.create({
   title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
   form: { padding: 20, gap: 16 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
-  foot: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center', marginTop: 8 },
+  links: { gap: 8, alignItems: 'center' },
+  linkText: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, textDecorationLine: 'underline' },
+  foot: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
 })

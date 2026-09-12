@@ -1,8 +1,8 @@
 import { ApiError, type ApiClient, type AuthUser, type Friendship, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { acceptedFriends, characterName, freeCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import { acceptedFriends, freeCharacters, friendshipWith, knownUsers, memberLine, pendingReceived, takenCharacters } from '../online/tableSetup'
 import { theme } from '../theme'
 import { Button } from './Button'
 import { CharacterPicker } from './CharacterPicker'
@@ -22,7 +22,8 @@ interface Props {
  * Invitar amigos por correo, como en la web. La API exige amistad aceptada
  * antes de invitar (docs/09, "Auth: la mesa es un contrato"), asi que aqui
  * se ve en que punto esta cada amistad, se aceptan las pendientes propias y
- * se invita con personaje cuando ya son amigos.
+ * se invita con personaje cuando ya son amigos. La cuenta se busca por
+ * correo exacto con `users/lookup`, abierto a cualquier cuenta.
  */
 export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthorized }: Props) {
   const [friendships, setFriendships] = useState<Friendship[]>([])
@@ -31,9 +32,8 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
-  const [searchDenied, setSearchDenied] = useState(false)
 
-  const nameOf = useCallback((id: string) => pack?.characters.get(id)?.name ?? id, [pack])
+  const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
 
   const loadFriendships = useCallback(async () => {
     try {
@@ -69,25 +69,16 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       setFound(null)
       const value = email.trim().toLowerCase()
       if (!value) return
-      // Primero entre los ya conocidos (no necesita permiso de busqueda).
-      const known = knownUsers(friendships, meId).find((u) => u.email.toLowerCase() === value)
+      // Primero entre los ya conocidos (no hace falta preguntar al servidor).
+      const known = knownByEmail(friendships, meId, value)
       if (known) {
         setFound(known)
         return
       }
-      try {
-        const user = await client.findUserByEmail(value)
-        if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}.`)
-        else if (user.id === meId) setNotice('Ese correo es el tuyo.')
-        else setFound(user)
-      } catch (caught) {
-        if (caught instanceof ApiError && caught.isForbidden) {
-          setSearchDenied(true)
-          setNotice('Tu cuenta no puede buscar usuarios por correo. Pídele al otro que te mande la solicitud de amistad y acéptala aquí.')
-          return
-        }
-        throw caught
-      }
+      const user = await client.lookupUser(value)
+      if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}. Pídele que se registre desde la app o la web.`)
+      else if (user.id === meId) setNotice('Ese correo es el tuyo.')
+      else setFound(user)
     })
 
   const state = found ? friendshipWith(friendships, meId, found.id) : null
@@ -154,8 +145,6 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
           ))}
         </View>
       ) : null}
-      {searchDenied && friends.length === 0 && pending.length === 0 ? <Text style={styles.hint}>Cuando alguien te mande una solicitud de amistad aparece aquí para aceptarla.</Text> : null}
-
       {notice ? <Text style={styles.notice}>{notice}</Text> : null}
 
       {found && state ? (

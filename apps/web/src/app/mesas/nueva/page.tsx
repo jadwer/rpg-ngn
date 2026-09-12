@@ -1,15 +1,14 @@
 'use client'
 
-import { ApiError, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
+import { packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
 import { RequireSession } from '../../../components/RequireSession'
 import { UserBar } from '../../../components/UserBar'
-import { describePreset, providerForNewTable, selectablePresets } from '../../../lib/dmPresets'
 import { PACK_OPTIONS } from '../../../lib/pack'
-import { packCharacters } from '../../../lib/sheets'
 import { usePack } from '../../../lib/usePack'
 import type { StoredUser } from '../../../lib/storage'
 
@@ -61,7 +60,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     setError(null)
     try {
       const provider = providerForNewTable(preset, defaultPreset)
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.ruleset, premise, ...(provider ? { settings: { provider: provider.model ? provider : { preset: provider.preset } } } : {}) })
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -126,9 +125,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             <select className="select" name="dm" value={preset} onChange={(e) => setPreset(e.target.value)}>
               {presets.map((p) => (
                 <option key={p.name} value={p.name}>
-                  {describePreset(p.name)}
-                  {p.default ? ' (el del servidor)' : ''}
-                  {p.model ? `, ${p.model}` : ''}
+                  {presetOptionLabel(p)}
                 </option>
               ))}
             </select>

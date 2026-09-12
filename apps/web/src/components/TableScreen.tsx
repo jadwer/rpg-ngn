@@ -3,20 +3,18 @@
 import { ApiError, memberOf, randomKey, type ApiClient, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksFromApi, groupBlocks, packSpeakerResolver, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { characterName } from '../lib/pack'
 import { sheetEntries } from '../lib/sheets'
 import { storage, type StoredUser } from '../lib/storage'
-import { suggestedSessionCode } from '../lib/tableSetup'
 import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { HostPanel } from './HostPanel'
 import { SheetsPanel } from './SheetsPanel'
 import { TtsBar } from './TtsBar'
-import { statusLine, TurnPanel } from './TurnPanel'
+import { TurnPanel } from './TurnPanel'
 
 interface Props {
   client: ApiClient
@@ -75,7 +73,7 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
   // Titulo de la pestaña con el nombre de la mesa (y la sesion, si hay).
   useEffect(() => {
     const previous = document.title
-    document.title = `${table.name}${sessionCode ? `, sesión ${sessionCode}` : ''} | rpg-ngn`
+    document.title = tableTitle(table.name, sessionCode)
     return () => {
       document.title = previous
     }
@@ -232,8 +230,9 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? `Sesión ${snapshot.session.code}`) : null
   const connectionNotice = connection === 'offline' ? 'Sin conexión con el servidor; reintentando...' : error
   const showVoiceNotice = tts.supported && tts.voicesReady && tts.voices.length === 0 && !voiceNoticeDismissed
-  const line = statusLine(turn, progress, nameOf)
-  const emptyText = snapshot?.session ? 'El DM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.' : isHost ? 'Abre la sesión desde el mando del anfitrión para que el DM presente la escena.' : 'Cuando el anfitrión abra la sesión, el primer turno aparece aquí.'
+  const line = turnLine(turn, progress, nameOf)
+  const emptyText = emptyTableText(!!snapshot?.session, isHost)
+  const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
 
   return (
     <div className={`table${screen ? ' screen' : ''}`}>
@@ -243,16 +242,9 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
         </Link>
         <div className="titles">
           <div className="title">{table.name}</div>
-          <div className="subtitle">
-            {sessionTitle ? <b>{sessionTitle}</b> : connection === 'loading' ? 'Conectando...' : 'Sin sesión abierta'}
-            {worldTime ? <> &middot; {worldTime}</> : null}
-            {turn ? (
-              <>
-                {' '}
-                &middot; Turno {turn.number}
-                {progress.pending.length > 0 && !progress.narrating ? <> &middot; faltan {progress.pending.map(nameOf).join(', ')}</> : null}
-              </>
-            ) : null}
+          <div className="subtitle" title={subtitle}>
+            {sessionTitle ? <b>{sessionTitle}</b> : null}
+            {sessionTitle ? subtitle.slice(sessionTitle.length) : subtitle}
           </div>
         </div>
         <div className="actions">
@@ -315,7 +307,7 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
       </div>
 
       <footer className="screen-foot">
-        <span>{turn ? `Turno ${turn.number}: ${line}` : line}</span>
+        <span>{line}</span>
         <button type="button" className="btn ghost small" onClick={() => setScreen(false)}>
           Salir de pantalla <span className="k">F</span>
         </button>

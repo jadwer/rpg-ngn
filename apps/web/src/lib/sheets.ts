@@ -1,6 +1,6 @@
 import type { CharacterState } from '@rpg-ngn/core'
 import type { Character, LoadedPack } from '@rpg-ngn/content'
-import { characterVisibility, everPlayed, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
+import { characterVisibility, everPlayed, packCharacters, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
 
 /**
  * Lo que el panel de fichas necesita de cada personaje, ya decidido: quien
@@ -20,10 +20,6 @@ export interface SheetEntry {
 }
 
 const UNVEILED: CharacterVisibility = { veiled: false, fields: Object.fromEntries(VEILABLE_FIELDS.map((f) => [f, true])) as CharacterVisibility['fields'] }
-
-export function packCharacters(pack: LoadedPack): Character[] {
-  return pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is Character => !!c)
-}
 
 export interface SheetsInput {
   pack: LoadedPack
