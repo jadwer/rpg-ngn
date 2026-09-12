@@ -1,3 +1,4 @@
+import { nobodyNarrates, readingLanguageLabel, voiceLineSummary } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
@@ -15,8 +16,10 @@ interface Props {
  * La voz en una sola linea plegable para que la narracion ocupe la pantalla
  * (pasada tras la partida del 2026-09-11). Plegada: Leer o los controles de
  * la lectura en curso y un resumen de quien narra. Desplegada: siguiente,
- * parar, leer lo nuevo, la voz elegida, la bandera de narrador (docs/09) y,
- * una sola vez por telefono, el aviso de que no hay voz en español.
+ * la voz elegida, el idioma de lectura, leer lo nuevo, la bandera de
+ * narrador (docs/09) y, una sola vez por telefono, el aviso de que no hay
+ * voz en el idioma. El resumen y la bandera vienen de ui-logic, como en la
+ * web.
  */
 export function TtsBar({ tts, autoRead = false }: Props) {
   const [expanded, setExpanded] = useState(false)
@@ -25,26 +28,9 @@ export function TtsBar({ tts, autoRead = false }: Props) {
   const { state } = tts
   const active = state.status === 'speaking' || state.status === 'paused'
   const localSpeaking = state.status === 'speaking'
-  const narrating = narrator.someoneNarrating || localSpeaking
-  const nobodyWarns = !narrating && !narrator.dismissed
-
-  const summary = tts.error
-    ? `Voz: ${tts.error}`
-    : state.status === 'speaking'
-      ? `Leyendo ${state.index + 1} de ${state.total}`
-      : state.status === 'paused'
-        ? tts.nativePause
-          ? `En pausa, ${state.index + 1} de ${state.total}`
-          : `En pausa; Seguir salta al bloque ${Math.min(state.index + 2, state.total)}`
-        : narrator.someoneNarrating
-          ? 'Otro teléfono narra'
-          : nobodyWarns
-            ? 'Nadie narra en voz alta'
-            : autoRead && tts.autoRead
-              ? 'Leerá lo nuevo'
-              : state.status === 'done'
-                ? 'Lectura terminada'
-                : 'Voz lista'
+  const narrating = narrator.flag.someoneNarrating || localSpeaking
+  const nobodyWarns = nobodyNarrates(narrator.flag, localSpeaking)
+  const summary = voiceLineSummary({ state, nativePause: tts.nativePause, error: tts.error, narrator: narrator.flag, autoRead: autoRead ? tts.autoRead : null })
 
   return (
     <View style={styles.wrap}>
@@ -54,8 +40,8 @@ export function TtsBar({ tts, autoRead = false }: Props) {
         {state.status === 'paused' ? <Small label="Seguir" primary onPress={tts.resume} /> : null}
         {active ? <Small label="Parar" onPress={tts.stop} /> : null}
         <Pressable onPress={() => setExpanded((v) => !v)} style={styles.summary} accessibilityRole="button" accessibilityState={{ expanded }} hitSlop={6}>
-          <Text style={[styles.summaryText, nobodyWarns && !active && styles.summaryWarn]} numberOfLines={1}>
-            {summary}
+          <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={1}>
+            {summary.text}
           </Text>
           <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
         </Pressable>
@@ -66,6 +52,7 @@ export function TtsBar({ tts, autoRead = false }: Props) {
           <View style={styles.row}>
             {active ? <Small label="Siguiente" onPress={tts.next} /> : null}
             <Small label={tts.voice ? `Voz: ${shortName(tts.voice.name)}` : 'Voz del sistema'} onPress={() => setPickerOpen(true)} />
+            <Small label={readingLanguageLabel(tts.settings.lang)} onPress={() => setPickerOpen(true)} />
             <Text style={styles.rate}>{`${tts.settings.rate.toFixed(2)}x`}</Text>
           </View>
 
@@ -78,7 +65,7 @@ export function TtsBar({ tts, autoRead = false }: Props) {
 
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>{localSpeaking ? 'Este teléfono está narrando' : 'Otro teléfono ya narra'}</Text>
-            <Switch value={narrator.someoneNarrating} onValueChange={narrator.setSomeoneNarrating} disabled={localSpeaking} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
+            <Switch value={narrator.flag.someoneNarrating} onValueChange={narrator.setSomeoneNarrating} disabled={localSpeaking} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
           </View>
 
           {nobodyWarns ? (
@@ -89,15 +76,15 @@ export function TtsBar({ tts, autoRead = false }: Props) {
               </Pressable>
             </View>
           ) : null}
-          {narrator.dismissed && !narrating ? (
+          {narrator.flag.dismissed && !narrating ? (
             <Pressable onPress={narrator.restore} hitSlop={6}>
               <Text style={styles.link}>Volver a avisar si nadie narra</Text>
             </Pressable>
           ) : null}
 
-          {tts.noSpanishVoice ? (
+          {tts.noVoiceInLanguage ? (
             <View style={styles.noticeRow}>
-              <Text style={styles.notice}>Este teléfono no tiene voz en español: la lectura sonará en otro idioma o no sonará. Se instala en los ajustes de texto a voz.</Text>
+              <Text style={styles.notice}>{`Este teléfono no tiene voz en ${readingLanguageLabel(tts.settings.lang).toLowerCase()}: la lectura sonará en otro idioma o no sonará. Se instala en los ajustes de texto a voz.`}</Text>
               <Pressable onPress={tts.dismissVoiceNotice} hitSlop={6}>
                 <Text style={styles.link}>Entendido</Text>
               </Pressable>

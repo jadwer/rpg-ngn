@@ -1,14 +1,16 @@
-import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { useMemo, useState } from 'react'
+import { cleanTableName, packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
+import { useEffect, useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
+import { DmSettingsPanel } from '../../components/DmSettingsPanel'
 import { Field } from '../../components/Field'
 import { InvitePanel } from '../../components/InvitePanel'
+import { RadioRow } from '../../components/RadioRow'
 import type { StoredUser } from '../../online/storage'
-import { cleanTableName, PACK_OPTION } from '../../online/tableSetup'
-import { packCharacters } from '../../pack/offline'
+import { PACK_OPTION } from '../../pack/offline'
 import { theme } from '../../theme'
 
 interface Props {
@@ -24,14 +26,18 @@ interface Props {
 const PREMISE_PLACEHOLDER = 'Campaña, escena o tono; el DM la usa como punto de partida. Por ejemplo: "Valdoria, la posada al caer la noche. Esta noche esperan a Calder, que bajó a la mina y no ha vuelto."'
 
 /**
- * Crear mesa en dos pasos, como en la web: nombre, personaje del anfitrion
- * y premisa; despues, invitar amigos (la mesa ya existe y se puede entrar
- * sin invitar). El pack es el empaquetado en la app.
+ * Crear mesa en dos pasos, como en la web: nombre, personaje del anfitrion,
+ * director de juego (entre los presets del servidor) y premisa; despues,
+ * probar el DM e invitar amigos (la mesa ya existe y se puede entrar sin
+ * invitar). El pack es el empaquetado en la app.
  */
 export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthorized }: Props) {
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
+  const [presets, setPresets] = useState<DmPreset[]>([])
+  const [defaultPreset, setDefaultPreset] = useState('')
+  const [preset, setPreset] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<TableSummary | null>(null)
@@ -39,12 +45,30 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const characters = useMemo(() => packCharacters(pack), [pack])
   const cleanName = cleanTableName(name)
 
+  // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
+  useEffect(() => {
+    let alive = true
+    void client.listDmPresets().then(
+      (result) => {
+        if (!alive) return
+        setPresets(selectablePresets(result.presets))
+        setDefaultPreset(result.defaultPreset)
+        setPreset(result.defaultPreset)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
+
   const submit = async () => {
     if (!cleanName) return
     setBusy(true)
     setError(null)
     try {
-      const table = await client.createTable({ name: cleanName, packId: PACK_OPTION.id, packVersion: PACK_OPTION.version, ruleset: PACK_OPTION.ruleset, premise })
+      const provider = providerForNewTable(preset, defaultPreset)
+      const table = await client.createTable({ name: cleanName, packId: PACK_OPTION.id, packVersion: PACK_OPTION.version, ruleset: PACK_OPTION.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -77,6 +101,8 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Text style={styles.hint}>La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</Text>
           <InvitePanel client={client} table={created} meId={user.id} pack={pack} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
+          <Text style={styles.label}>Director de juego</Text>
+          <DmSettingsPanel client={client} table={created} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
           <View style={styles.actions}>
             <Button label="Ir a la mesa" primary onPress={() => onOpen(created)} />
           </View>
@@ -92,6 +118,15 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
             <Text style={styles.label}>Tu personaje</Text>
             <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
           </View>
+          {presets.length > 0 ? (
+            <View style={styles.block}>
+              <Text style={styles.label}>Director de juego</Text>
+              {presets.map((p) => (
+                <RadioRow key={p.name} label={presetOptionLabel(p)} selected={preset === p.name} onSelect={() => setPreset(p.name)} />
+              ))}
+              <Text style={styles.hint}>Se puede cambiar y probar después desde el mando del anfitrión, botón DM.</Text>
+            </View>
+          ) : null}
           <View style={styles.block}>
             <Text style={styles.label}>Premisa de la mesa (opcional)</Text>
             <TextInput value={premise} onChangeText={setPremise} placeholder={PREMISE_PLACEHOLDER} placeholderTextColor={theme.colors.inkFaint} multiline maxLength={2000} style={styles.premise} />
@@ -99,7 +134,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.actions}>
             <Button label="Crear mesa" primary busy={busy} disabled={!cleanName} onPress={() => void submit()} />
-            <Text style={styles.hint}>Después podrás invitar a tus amigos.</Text>
+            <Text style={styles.hint}>Después podrás probar el DM e invitar a tus amigos.</Text>
           </View>
         </ScrollView>
       )}

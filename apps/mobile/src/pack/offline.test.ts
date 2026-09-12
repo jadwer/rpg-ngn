@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { sessionList } from '@rpg-ngn/ui-logic'
 import { eventLog, PACK_VERSION, packBinaries, packFiles } from '../generated/pilot-pack'
-import { loadOfflineCampaign, sessionList } from './offline'
+import { loadOfflineCampaign, PACK_OPTION } from './offline'
 
 const repoRoot = resolve(import.meta.dirname, '../../../..')
 
@@ -15,6 +16,7 @@ describe('pack empaquetado', () => {
     const manifest = JSON.parse(readFileSync(join(repoRoot, 'content/packs/pilot/pack.json'), 'utf8')) as { version: string }
     expect(manifest.version).toBe(PACK_VERSION)
     expect(packBinaries).toHaveLength(9)
+    expect(PACK_OPTION).toEqual({ id: 'pilot', version: PACK_VERSION, ruleset: 'fantasy-d20-lite@1.0.0' })
   })
 
   it('carga, valida y reduce en memoria sin tocar disco', async () => {

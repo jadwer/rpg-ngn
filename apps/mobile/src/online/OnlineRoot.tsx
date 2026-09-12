@@ -1,9 +1,12 @@
-import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { ConnectScreen } from '../screens/online/ConnectScreen'
+import { ForgotPasswordScreen } from '../screens/online/ForgotPasswordScreen'
 import { NewTableScreen } from '../screens/online/NewTableScreen'
+import { ProfileScreen } from '../screens/online/ProfileScreen'
+import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
 import { theme } from '../theme'
@@ -15,17 +18,28 @@ interface Props {
   onExit: () => void
 }
 
-type Stage = { name: 'booting' } | { name: 'connect'; notice: string | null } | { name: 'tables' } | { name: 'new-table' } | { name: 'table'; table: TableSummary }
+type Stage =
+  | { name: 'booting' }
+  | { name: 'connect'; notice: string | null }
+  | { name: 'register'; notice: string | null }
+  | { name: 'forgot' }
+  | { name: 'tables' }
+  | { name: 'profile' }
+  | { name: 'new-table' }
+  | { name: 'table'; table: TableSummary }
 
 interface Session {
   client: ApiClient
   user: StoredUser
 }
 
+const DEVICE_NAME = 'expo-rpg-ngn'
+
 /**
- * Flujo online: conexion y login, mesas, mesa nueva, mesa. El token vive en
- * el almacen seguro y se consulta por referencia en cada peticion; un 401 en
- * cualquier pantalla borra la sesion y vuelve al login con aviso.
+ * Flujo online: conexion y login (o crear cuenta, o recuperar contraseña),
+ * mesas, perfil, mesa nueva, mesa. El token vive en el almacen seguro y se
+ * consulta por referencia en cada peticion; un 401 en cualquier pantalla
+ * borra la sesion y vuelve al login con aviso.
  */
 export function OnlineRoot({ pack, onExit }: Props) {
   const tokenRef = useRef<string | null>(null)
@@ -65,6 +79,16 @@ export function OnlineRoot({ pack, onExit }: Props) {
     [unauthorized],
   )
 
+  /** Entrar con un token recien emitido (login o registro): se recuerda y se pasa a las mesas. */
+  const enter = async (client: ApiClient, url: string, token: string, user: StoredUser) => {
+    tokenRef.current = token
+    await Promise.all([storage.setServerUrl(normalizeBaseUrl(url)), storage.setToken(token), storage.setUser(user)])
+    setServerUrl(normalizeBaseUrl(url))
+    setSession({ client, user })
+    setStage({ name: 'tables' })
+    void loadTables(client)
+  }
+
   useEffect(() => {
     let alive = true
     void (async () => {
@@ -103,16 +127,31 @@ export function OnlineRoot({ pack, onExit }: Props) {
     setBusy(true)
     const client = makeClient(url)
     try {
-      const result = await client.login(email.trim(), password, 'expo-rpg-ngn')
-      tokenRef.current = result.token
-      await Promise.all([storage.setServerUrl(normalizeBaseUrl(url)), storage.setToken(result.token), storage.setUser(result.user)])
-      setServerUrl(normalizeBaseUrl(url))
-      setSession({ client, user: result.user })
-      setStage({ name: 'tables' })
-      void loadTables(client)
+      const result = await client.login(email.trim(), password, DEVICE_NAME)
+      await enter(client, url, result.token, result.user)
     } catch (caught) {
       const message = caught instanceof ApiError ? caught.message : String(caught)
       setStage({ name: 'connect', notice: message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const register = async (url: string, input: RegisterInput) => {
+    setBusy(true)
+    const client = makeClient(url)
+    try {
+      const result = await client.register(input, DEVICE_NAME)
+      if (result.kind === 'verify') {
+        // Verificacion de correo encendida en la API: sin token hasta pulsar el enlace.
+        setServerUrl(normalizeBaseUrl(url))
+        setStage({ name: 'connect', notice: `${result.message} Cuando hayas verificado el correo, entra con tu contraseña.` })
+        return
+      }
+      await enter(client, url, result.token, result.user)
+    } catch (caught) {
+      const message = caught instanceof ApiError ? caught.message : String(caught)
+      setStage({ name: 'register', notice: message })
     } finally {
       setBusy(false)
     }
@@ -126,6 +165,11 @@ export function OnlineRoot({ pack, onExit }: Props) {
     setTables(null)
     setStage({ name: 'connect', notice: null })
     void client?.logout().catch(() => undefined)
+  }
+
+  const setUser = (user: StoredUser) => {
+    void storage.setUser(user)
+    setSession((current) => (current ? { ...current, user } : current))
   }
 
   /** La mesa abierta cambio (invitacion): se vuelve a pedir y se sustituye en la etapa. */
@@ -145,12 +189,56 @@ export function OnlineRoot({ pack, onExit }: Props) {
     )
   }
 
+  if (stage.name === 'register') {
+    return <RegisterScreen key={serverUrl} initialUrl={serverUrl} busy={busy} notice={stage.notice} onRegister={(url, input) => void register(url, input)} onBack={() => setStage({ name: 'connect', notice: null })} />
+  }
+
+  if (stage.name === 'forgot') {
+    return <ForgotPasswordScreen key={serverUrl} initialUrl={serverUrl} onBack={() => setStage({ name: 'connect', notice: null })} />
+  }
+
   if (stage.name === 'connect' || !session) {
-    return <ConnectScreen key={serverUrl} initialUrl={serverUrl} busy={busy} notice={stage.name === 'connect' ? stage.notice : null} onLogin={(url, email, password) => void login(url, email, password)} onBack={onExit} />
+    return (
+      <ConnectScreen
+        key={serverUrl}
+        initialUrl={serverUrl}
+        busy={busy}
+        notice={stage.name === 'connect' ? stage.notice : null}
+        onLogin={(url, email, password) => void login(url, email, password)}
+        onRegister={(url) => {
+          setServerUrl(url)
+          setStage({ name: 'register', notice: null })
+        }}
+        onForgot={(url) => {
+          setServerUrl(url)
+          setStage({ name: 'forgot' })
+        }}
+        onBack={onExit}
+      />
+    )
   }
 
   if (stage.name === 'tables') {
-    return <TablesScreen user={session.user} tables={tables} loading={busy} error={tablesError} pack={pack} onOpen={(table) => setStage({ name: 'table', table })} onCreate={() => setStage({ name: 'new-table' })} onRefresh={() => void loadTables(session.client)} onLogout={() => void logout()} />
+    return (
+      <TablesScreen
+        client={session.client}
+        user={session.user}
+        tables={tables}
+        loading={busy}
+        error={tablesError}
+        pack={pack}
+        onOpen={(table) => setStage({ name: 'table', table })}
+        onCreate={() => setStage({ name: 'new-table' })}
+        onRefresh={() => void loadTables(session.client)}
+        onProfile={() => setStage({ name: 'profile' })}
+        onLogout={() => void logout()}
+        onUnauthorized={() => unauthorized()}
+      />
+    )
+  }
+
+  if (stage.name === 'profile') {
+    return <ProfileScreen client={session.client} user={session.user} onUserChanged={setUser} onBack={() => setStage({ name: 'tables' })} onUnauthorized={() => unauthorized()} />
   }
 
   if (stage.name === 'new-table') {

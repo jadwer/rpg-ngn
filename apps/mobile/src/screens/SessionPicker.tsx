@@ -1,6 +1,7 @@
 import type { Session } from '@rpg-ngn/content'
+import { sessionList } from '@rpg-ngn/ui-logic'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { sessionList, type OfflineCampaign } from '../pack/offline'
+import type { OfflineCampaign } from '../pack/offline'
 import { theme } from '../theme'
 
 interface Props {

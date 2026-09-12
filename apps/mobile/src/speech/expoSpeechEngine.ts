@@ -1,17 +1,17 @@
-import type { SpeechEngine } from '@rpg-ngn/ui-logic'
+import { pitchFor, utteranceLanguage, VOICE_SAMPLE, type SpeechEngine, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import * as Speech from 'expo-speech'
 import { Platform } from 'react-native'
-import { DEFAULT_LANGUAGE, pitchFor, spanishVoices, type VoiceInfo, type VoiceSettings } from './voices'
+import { voicesFor, type VoiceInfo } from './voices'
 
 /**
  * SpeechEngine sobre expo-speech (docs/09, "Narracion por voz"). Es un
  * envoltorio del TTS del sistema: gratis, sin clave, y con las tres
  * limitaciones que la cola por bloques absorbe. Los ajustes (voz, velocidad,
- * tono del narrador) se leen en cada `speak`, asi el selector aplica al
- * bloque siguiente sin recrear la cola; el tono de cada bloque lo decide
- * `pitchFor` con el hablante del item. pause/resume solo se exponen fuera
- * de Android; en Android el controlador de ui-logic salta al bloque
- * siguiente al reanudar.
+ * tono del narrador, idioma) se leen en cada `speak`, asi el selector aplica
+ * al bloque siguiente sin recrear la cola; el tono de cada bloque lo decide
+ * `pitchFor` de ui-logic con el hablante del item. pause/resume solo se
+ * exponen fuera de Android; en Android el controlador de ui-logic salta al
+ * bloque siguiente al reanudar.
  */
 
 export interface ExpoSpeechOptions {
@@ -24,7 +24,7 @@ export function createExpoSpeechEngine(options: ExpoSpeechOptions): SpeechEngine
     speak(text, onDone, item) {
       const settings = options.settings()
       Speech.speak(text, {
-        language: DEFAULT_LANGUAGE,
+        language: utteranceLanguage(settings.lang),
         ...(settings.voiceId ? { voice: settings.voiceId } : {}),
         rate: settings.rate,
         pitch: pitchFor(item, settings),
@@ -48,14 +48,14 @@ export function createExpoSpeechEngine(options: ExpoSpeechOptions): SpeechEngine
 }
 
 /**
- * Voces en español instaladas en el telefono. Null si el sistema no
- * contesto (sin motor de TTS, web sin voces cargadas): no se sabe.
+ * Voces del idioma de lectura instaladas en el telefono. Null si el sistema
+ * no contesto (sin motor de TTS, web sin voces cargadas): no se sabe.
  */
-export async function listSpanishVoices(): Promise<VoiceInfo[] | null> {
+export async function listVoices(lang: string): Promise<VoiceInfo[] | null> {
   try {
     const voices = await Speech.getAvailableVoicesAsync()
     if (voices.length === 0) return null
-    return spanishVoices(voices)
+    return voicesFor(voices, lang)
   } catch {
     return null
   }
@@ -64,8 +64,8 @@ export async function listSpanishVoices(): Promise<VoiceInfo[] | null> {
 /** Una frase corta con la voz y el tono del narrador, para elegir de oido. */
 export function previewVoice(voice: VoiceInfo | null, settings: VoiceSettings): void {
   void Speech.stop()
-  Speech.speak('La posada huele a pan y a lluvia. Alguien os mira desde la sombra.', {
-    language: voice?.language ?? DEFAULT_LANGUAGE,
+  Speech.speak(VOICE_SAMPLE, {
+    language: voice?.language ?? utteranceLanguage(settings.lang),
     ...(voice ? { voice: voice.id } : {}),
     rate: settings.rate,
     pitch: settings.narratorPitch,

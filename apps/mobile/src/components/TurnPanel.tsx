@@ -1,18 +1,9 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import type { TurnProgress } from '@rpg-ngn/ui-logic'
+import { turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
-
-/** Frase de estado del turno, con acentos (la de ui-logic va sin ellos). */
-export function statusLine(turn: TurnView | null, progress: TurnProgress, nameOf: (id: string) => string): string {
-  if (!turn) return 'No hay turno abierto.'
-  if (progress.narrating) return 'El DM está narrando...'
-  if (turn.status === 'resolved') return 'Turno resuelto.'
-  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa; cualquiera puede cerrar.' : 'Todos respondieron; cualquiera puede cerrar el turno.'
-  return `Faltan: ${progress.pending.map(nameOf).join(', ')}.`
-}
 
 interface Props {
   turn: TurnView | null
@@ -37,7 +28,7 @@ interface Props {
 export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, onRespond, onClose, onFocusInput }: Props) {
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
-  const line = statusLine(turn, progress, nameOf)
+  const line = turnLine(turn, progress, nameOf)
 
   const send = async () => {
     const value = text.trim()
@@ -50,7 +41,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       <View style={styles.statusRow}>
         {progress.narrating ? <ActivityIndicator size="small" color={theme.colors.goldBright} /> : null}
         <Text style={[styles.status, progress.narrating && styles.statusNarrating]} numberOfLines={focused ? 1 : 3}>
-          {turn ? `Turno ${turn.number}: ${line}` : line}
+          {line}
         </Text>
       </View>
 

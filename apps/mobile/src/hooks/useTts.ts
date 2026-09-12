@@ -1,8 +1,8 @@
-import { createTtsController, speechQueue, type TtsController, type TtsItem, type TtsState, type TurnBlock } from '@rpg-ngn/ui-logic'
+import { clampPitch, clampRate, createTtsController, DEFAULT_VOICE_SETTINGS, speechQueue, type ReadingLanguage, type TtsController, type TtsItem, type TtsState, type TurnBlock, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { storage } from '../online/storage'
-import { createExpoSpeechEngine, listSpanishVoices, previewVoice } from '../speech/expoSpeechEngine'
-import { clampPitch, clampRate, DEFAULT_VOICE_SETTINGS, pickVoice, type VoiceInfo, type VoiceSettings } from '../speech/voices'
+import { createExpoSpeechEngine, listVoices, previewVoice } from '../speech/expoSpeechEngine'
+import { pickVoice, type VoiceInfo } from '../speech/voices'
 
 export interface Tts {
   state: TtsState
@@ -16,7 +16,7 @@ export interface Tts {
   pause: () => void
   resume: () => void
   stop: () => void
-  /** Voces en español del telefono; vacia si no hay ninguna, null mientras se consultan o si el sistema no contesto. */
+  /** Voces del telefono en el idioma de lectura; vacia si no hay ninguna, null mientras se consultan o si el sistema no contesto. */
   voices: VoiceInfo[] | null
   /** La voz elegida si sigue instalada; null deja la voz por defecto del sistema. */
   voice: VoiceInfo | null
@@ -24,13 +24,15 @@ export interface Tts {
   setVoiceId: (id: string | null) => void
   setRate: (rate: number) => void
   setNarratorPitch: (pitch: number) => void
+  /** Idioma de lectura: filtra las voces y fija el de la locucion; cambiarlo olvida la voz elegida. */
+  setLang: (lang: ReadingLanguage) => void
   /** Lee una frase de muestra con una voz (o la del sistema) y el tono del narrador. */
   preview: (voice: VoiceInfo | null) => void
   /** Leer solos los bloques que lleguen (modo online); se recuerda por telefono. */
   autoRead: boolean
   setAutoRead: (value: boolean) => void
-  /** true si el telefono no tiene voz en español y el aviso no se ha descartado aun. */
-  noSpanishVoice: boolean
+  /** true si el telefono no tiene voz en el idioma de lectura y el aviso no se ha descartado aun. */
+  noVoiceInLanguage: boolean
   dismissVoiceNotice: () => void
 }
 
@@ -44,13 +46,14 @@ export interface TtsOptions {
  * cambian; online llegan por polling. Si llegan mientras se esta leyendo,
  * la cola vigente sigue hasta el final y la nueva se adopta al terminar; con
  * "leer lo nuevo" la lectura continua sola desde el primer bloque nuevo.
- * Voz, velocidad, tono del narrador y el interruptor se recuerdan en el
- * almacen del telefono.
+ * Voz, velocidad, tono del narrador, idioma y el interruptor se recuerdan
+ * en el almacen del telefono.
  */
 export function useTts(blocks: readonly TurnBlock[], options: TtsOptions = {}): Tts {
   const [error, setError] = useState<string | null>(null)
   const [voices, setVoices] = useState<VoiceInfo[] | null>(null)
   const [settings, setSettings] = useState<VoiceSettings>(DEFAULT_VOICE_SETTINGS)
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [autoRead, setAutoReadState] = useState(false)
   const [noticeSeen, setNoticeSeen] = useState(true)
   const controllerRef = useRef<TtsController | null>(null)
@@ -59,17 +62,30 @@ export function useTts(blocks: readonly TurnBlock[], options: TtsOptions = {}): 
 
   useEffect(() => {
     let alive = true
-    void Promise.all([storage.voiceSettings(), storage.autoRead(), storage.voiceNoticeSeen(), listSpanishVoices()]).then(([saved, auto, seen, list]) => {
+    void Promise.all([storage.voiceSettings(), storage.autoRead(), storage.voiceNoticeSeen()]).then(([saved, auto, seen]) => {
       if (!alive) return
       setSettings(saved)
       setAutoReadState(auto)
       setNoticeSeen(seen)
-      setVoices(list)
+      setSettingsLoaded(true)
     })
     return () => {
       alive = false
     }
   }, [])
+
+  // Las voces dependen del idioma de lectura; se consultan cuando ya se sabe cual es y cada vez que cambia.
+  useEffect(() => {
+    if (!settingsLoaded) return
+    let alive = true
+    setVoices(null)
+    void listVoices(settings.lang).then((list) => {
+      if (alive) setVoices(list)
+    })
+    return () => {
+      alive = false
+    }
+  }, [settingsLoaded, settings.lang])
 
   const engine = useMemo(
     () =>
@@ -168,6 +184,8 @@ export function useTts(blocks: readonly TurnBlock[], options: TtsOptions = {}): 
     setVoiceId: (id) => update({ voiceId: id }),
     setRate: (rate) => update({ rate: clampRate(rate) }),
     setNarratorPitch: (pitch) => update({ narratorPitch: clampPitch(pitch) }),
+    // Las voces del idioma anterior ya no valen: se vuelve a elegir entre las nuevas.
+    setLang: (lang) => update({ lang, voiceId: null }),
     preview: (target) => {
       controller.stop()
       previewVoice(target, settingsRef.current)
@@ -177,7 +195,7 @@ export function useTts(blocks: readonly TurnBlock[], options: TtsOptions = {}): 
       setAutoReadState(value)
       void storage.setAutoRead(value)
     },
-    noSpanishVoice: voices !== null && voices.length === 0 && !noticeSeen,
+    noVoiceInLanguage: voices !== null && voices.length === 0 && !noticeSeen,
     dismissVoiceNotice: () => {
       setNoticeSeen(true)
       void storage.setVoiceNoticeSeen()

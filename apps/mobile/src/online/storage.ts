@@ -1,6 +1,6 @@
+import { parseVoiceSettings, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
-import { parseVoiceSettings, type VoiceSettings } from '../speech/voices'
 
 /**
  * Lo que la app recuerda entre arranques: la URL del servidor, el token de
@@ -77,7 +77,7 @@ export const storage = {
     await write(KEYS.user, null)
   },
 
-  /** Voz, velocidad y tono del narrador; por telefono, no por cuenta. */
+  /** Voz, velocidad, tono del narrador e idioma de lectura; por telefono, no por cuenta. */
   async voiceSettings(): Promise<VoiceSettings> {
     const raw = await read(KEYS.voice)
     if (!raw) return parseVoiceSettings(null)

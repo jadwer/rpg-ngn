@@ -1,10 +1,11 @@
 import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { isValidSessionCode } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { isValidSessionCode } from '../online/tableSetup'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { DmSettingsPanel } from './DmSettingsPanel'
 import { InvitePanel } from './InvitePanel'
 
 interface Props {
@@ -26,13 +27,14 @@ interface Props {
 
 /**
  * Mando del anfitrion: abrir la sesion (codigo de tres digitos y una nota
- * que el DM tambien recibe), cerrarla con cliffhanger, e invitar (en un
- * modal, que en el telefono no cabe debajo de la narracion). El DM es la
- * IA; el anfitrion dirige la mesa.
+ * que el DM tambien recibe), cerrarla con cliffhanger, invitar y elegir el
+ * proveedor del DM (cada uno en un modal, que en el telefono no cabe debajo
+ * de la narracion). El DM es la IA; el anfitrion dirige la mesa.
  */
 export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [inviting, setInviting] = useState(false)
+  const [dmOpen, setDmOpen] = useState(false)
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
   const [cliffhanger, setCliffhanger] = useState('')
@@ -81,6 +83,7 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
               <View style={styles.row}>
                 <Button label="Abrir sesión" primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
                 <Button label="Invitados" onPress={() => setInviting(true)} />
+                <Button label="DM" onPress={() => setDmOpen(true)} />
               </View>
             </>
           ) : (
@@ -91,6 +94,7 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
                   <>
                     <Button label="Cerrar sesión" busy={busy} onPress={() => setConfirmClose(true)} />
                     <Button label="Invitados" onPress={() => setInviting(true)} />
+                    <Button label="DM" onPress={() => setDmOpen(true)} />
                   </>
                 ) : (
                   <>
@@ -123,6 +127,21 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
             <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+          </ScrollView>
+        </View>
+      </Modal>
+
+      <Modal visible={dmOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDmOpen(false)}>
+        <View style={styles.modal}>
+          <View style={styles.modalHeader}>
+            <View style={styles.modalSide} />
+            <Text style={styles.modalTitle}>Director de juego</Text>
+            <Pressable onPress={() => setDmOpen(false)} hitSlop={10} style={styles.modalSide}>
+              <Text style={styles.modalLink}>Cerrar</Text>
+            </Pressable>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+            <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </ScrollView>
         </View>
       </Modal>

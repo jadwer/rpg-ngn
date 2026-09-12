@@ -1,7 +1,7 @@
 import type { CharacterState } from '@rpg-ngn/core'
 import type { Character, LoadedPack, Session } from '@rpg-ngn/content'
-import { characterSlot, characterVisibility, everPlayed, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
-import { packCharacters, type OfflineCampaign } from '../pack/offline'
+import { characterSlot, characterVisibility, everPlayed, packCharacters, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
+import type { OfflineCampaign } from '../pack/offline'
 
 /**
  * Lo que el modal de fichas necesita de cada personaje, ya decidido. Offline
