@@ -38,6 +38,8 @@ export const PackManifest = z.strictObject({
   quests: z.array(KebabId).default([]),
   factions: z.array(KebabId).default([]),
   sessions: z.array(z.string().regex(/^\d{3}$/)).default([]),
+  /** Capa `dm` del pack (secret.ts): nunca llega a un jugador ni al visor de fichas. */
+  secrets: z.array(KebabId).default([]),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

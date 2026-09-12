@@ -16,6 +16,7 @@ import { upcastEvent } from './upcast.js'
  *   - `character:*` en actor, targets y party existen en el pack
  *   - `npc:*` que no esta en el pack es advertencia (puede vivir en dm/)
  *   - `rollRefs` y `discovery.payload.sourceEvent` apuntan a ids anteriores
+ *   - `secret_revealed.payload.secretId` existe en el pack
  */
 
 export interface ParsedEventLog {
@@ -170,6 +171,10 @@ function checkReferences(events: CampaignEvent[], pack: LoadedPack | undefined, 
 
     if (event.type === 'discovery' && event.payload.sourceEvent && !seen.has(event.payload.sourceEvent)) {
       issues.push({ level: 'error', path: where, message: `sourceEvent ${event.payload.sourceEvent} no existe antes en el log` })
+    }
+
+    if (event.type === 'secret_revealed' && pack && !pack.secrets.has(event.payload.secretId)) {
+      issues.push({ level: 'error', path: where, message: `secret_revealed cita el secreto ${event.payload.secretId}, que no esta en el pack` })
     }
 
     if (event.type === 'correction' && !seen.has(event.payload.corrects)) {

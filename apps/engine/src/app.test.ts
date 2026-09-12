@@ -159,26 +159,30 @@ describe('apps/engine', () => {
       '{"kind":"addressed","characterIds":["calder"]}',
     ].join('\n')
 
-    const anthropicClient: AnthropicClientLike = {
-      messages: {
-        async create(params) {
-          anthropicCalls.push(params)
-          async function* events(): AsyncGenerator<Anthropic.RawMessageStreamEvent> {
-            yield { type: 'message_start', message: { usage: { input_tokens: 900 } } } as unknown as Anthropic.RawMessageStreamEvent
-            yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: ndjson } }
-            yield { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 120 } } as unknown as Anthropic.RawMessageStreamEvent
-          }
-          return events()
-        },
-      },
-      models: {
-        async retrieve(id) {
-          if (id === 'claude-roto') throw new Error(`404 model not found (x-api-key ${KEY})`)
-          return { id, display_name: 'Claude Sonnet 5' }
-        },
-      },
-    }
     const anthropicCalls: Anthropic.MessageCreateParamsStreaming[] = []
+    /** Cliente falso de Anthropic que devuelve `text` como un solo delta. */
+    function anthropicWith(text: string): AnthropicClientLike {
+      return {
+        messages: {
+          async create(params) {
+            anthropicCalls.push(params)
+            async function* events(): AsyncGenerator<Anthropic.RawMessageStreamEvent> {
+              yield { type: 'message_start', message: { usage: { input_tokens: 900 } } } as unknown as Anthropic.RawMessageStreamEvent
+              yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } }
+              yield { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 120 } } as unknown as Anthropic.RawMessageStreamEvent
+            }
+            return events()
+          },
+        },
+        models: {
+          async retrieve(id) {
+            if (id === 'claude-roto') throw new Error(`404 model not found (x-api-key ${KEY})`)
+            return { id, display_name: 'Claude Sonnet 5' }
+          },
+        },
+      }
+    }
+    const anthropicClient = anthropicWith(ndjson)
 
     const openaiClient: OpenAIClientLike = {
       chat: {
@@ -235,6 +239,52 @@ describe('apps/engine', () => {
       expect(user).toContain('<premisa_de_la_mesa>\nEsta noche esperan a Calder en la posada.\n</premisa_de_la_mesa>')
       expect(user).toContain('Anochecer')
       expect(JSON.stringify(params)).not.toContain(KEY)
+    })
+
+    it('el lint de conocimiento corta la filtracion de un secreto, deja el motivo en result.lint y ninguna proyeccion lleva el secreto', async () => {
+      const leak = [
+        '{"kind":"block","block":{"type":"narration","text":"Zahira, lo entiendes de golpe: fue Brorg quien te empujó hacia arriba."}}',
+        '{"kind":"block","block":{"type":"narration","text":"El silencio pesa. ¿Qué hacéis?"}}',
+        '{"kind":"addressed","characterIds":["zahira"]}',
+      ].join('\n')
+      const leaking = createEngine({ token: TOKEN, packs: new PackStore(join(repoRoot, 'content/packs')), now: () => new Date('2026-09-12T20:00:00Z'), providers: { anthropicClient: anthropicWith(leak) } })
+      const provider = { kind: 'anthropic' as const, model: 'claude-sonnet-5', credential: KEY }
+
+      const lines = await readLines(await leaking.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(await request(provider)) }))
+      expect(lines.filter((l) => l.kind === 'block').map((l) => (l.kind === 'block' ? l.block : null))).toEqual([
+        { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Miro la campana.' },
+        { type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.' },
+        { type: 'narration', text: 'El silencio pesa. ¿Qué hacéis?' },
+      ])
+      const result = lines.at(-1)
+      expect(result?.kind).toBe('result')
+      if (result?.kind !== 'result') return
+      expect(result.lint).toEqual([{ level: 'error', secretId: 'brorg-pago-por-zahira', marker: 'fue Brorg', receivers: ['zahira', 'calder'], message: 'usa "fue Brorg" del secreto brorg-pago-por-zahira, que zahira, calder no conocen' }])
+      expect(result.events.map((e) => e.type)).toEqual(['player_action', 'narration'])
+      const serialized = JSON.stringify({ state: result.state, projections: result.projections })
+      expect(serialized).not.toContain('Brorg pagó')
+      expect(serialized).not.toContain('quemaduras de bronce')
+      expect(serialized).not.toContain('secrets')
+
+      // En modo report el bloque pasa y el hallazgo se anota igual; el engine acepta el campo sin subir el contrato.
+      const reported = await readLines(await leaking.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify({ ...(await request(provider)), lint: 'report' }) }))
+      expect(reported.filter((l) => l.kind === 'block').map((l) => (l.kind === 'block' ? l.block.type : ''))).toEqual(['dialogue', 'narration', 'narration'])
+      expect(reported.at(-1)?.kind === 'result' && reported.at(-1)?.kind === 'result' ? (reported.at(-1) as { lint?: unknown[] }).lint : null).toHaveLength(1)
+
+      // Un secret_revealed propuesto por el modelo entra al log con la party de testigos y queda proyectado en knowledge.
+      const revealing = createEngine({
+        token: TOKEN,
+        packs: new PackStore(join(repoRoot, 'content/packs')),
+        now: () => new Date('2026-09-12T20:00:00Z'),
+        providers: { anthropicClient: anthropicWith('{"kind":"event","event":{"type":"secret_revealed","payload":{"secretId":"osric-esta-abajo"}}}\n{"kind":"block","block":{"type":"narration","text":"Osric está abajo. Lo veis bajar."}}') },
+      })
+      const revealed = await readLines(await revealing.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(await request(provider)) }))
+      const last = revealed.at(-1)
+      expect(last?.kind).toBe('result')
+      if (last?.kind !== 'result') return
+      expect(last.lint).toBeUndefined()
+      expect(last.events.map((e) => [e.seq, e.type])).toEqual([[23, 'player_action'], [24, 'secret_revealed'], [25, 'narration']])
+      expect((last.projections.players['zahira'] as { knowledge: { secrets?: Record<string, unknown> } }).knowledge.secrets).toEqual({ 'osric-esta-abajo': { event: 'evt-00024', seq: 24, how: 'secret_revealed' } })
     })
 
     it('un fallo del modelo sale como error NDJSON sin la credencial', async () => {

@@ -1,6 +1,6 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
-import type { ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
+import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { projectionsOf, rebuildState } from './state.js'
@@ -10,6 +10,8 @@ export interface ResolveDeps {
   now(): Date
   provider?: DMProvider
   providers?: ProviderDeps
+  /** Modo del lint de conocimiento cuando la peticion no lo fija (DM_LINT del engine). */
+  lintMode?: LintMode | undefined
 }
 
 /**
@@ -52,6 +54,8 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   }
 
   const events: CampaignEvent[] = []
+  const lint: LintFinding[] = []
+  const secrets = [...pack.secrets.values()]
   let addressed: string[] = session.party
   let usage = { inputTokens: 0, outputTokens: 0 }
 
@@ -64,6 +68,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       notes: request.context,
       recentEvents,
       maxOutputTokens: request.budget?.maxOutputTokens,
+      lint: request.lint ?? deps.lintMode,
     })
     for await (const output of outputs) {
       if (output.kind === 'block') {
@@ -81,6 +86,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'lint') {
+        lint.push(output.finding)
+        continue
+      }
+
       const seq = state.meta.headSeq + 1
       const candidate = {
         ...output.event,
@@ -94,7 +104,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       if (!parsed.success) {
         throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
       }
-      state = applyEvent(state, parsed.data, ruleset)
+      state = applyEvent(state, parsed.data, ruleset, secrets)
       events.push(parsed.data)
     }
   } catch (error) {
@@ -109,5 +119,6 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     state,
     projections: projectionsOf(state),
     usage,
+    ...(lint.length ? { lint } : {}),
   }
 }

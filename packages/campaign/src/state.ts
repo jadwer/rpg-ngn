@@ -15,11 +15,24 @@ export interface KnownFact {
   seq: number
 }
 
+export interface RevealedSecret {
+  /** Evento que lo revelo. */
+  event: string
+  seq: number
+  how: 'revealWhen' | 'secret_revealed'
+}
+
 export interface PlayerKnowledge {
   characterId: string
   facts: Record<string, KnownFact>
   /** Eventos que el personaje presencio (visibility.witnesses). */
   witnessed: string[]
+  /**
+   * Secretos del pack revelados a este personaje (knowledge.ts). Solo
+   * aparece cuando hay alguno: los snapshots anteriores a la capa dm no
+   * cambian de forma.
+   */
+  secrets?: Record<string, RevealedSecret>
 }
 
 export interface SessionRecord {

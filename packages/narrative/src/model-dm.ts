@@ -1,10 +1,14 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId } from '@rpg-ngn/content'
-import { TurnBlock } from '@rpg-ngn/engine-contract'
+import { TurnBlock, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, type ContextBudget, type ContextProfile } from './context.js'
+import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { DM_SYSTEM_PROMPT, DM_SYSTEM_PROMPT_COMPACT } from './prompt.js'
 import type { DMOutput, DMProbe, DMProvider, DMTurnContext, ProposedEvent } from './provider.js'
 import { DMProviderError, errorMessage, redact } from './redact.js'
+
+/** Lo que ve la mesa cuando el lint corta un bloque. No dice cual era el secreto. */
+export const LINT_SYSTEM_TEXT = 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.'
 
 /** Lo que el DM manda al modelo en un turno. */
 export interface ModelPrompt {
@@ -83,6 +87,10 @@ const AllowedEvent = z.discriminatedUnion('type', [
     type: z.literal('world_event'),
     payload: z.strictObject({ note: z.string().min(1) }),
   }),
+  z.strictObject({
+    type: z.literal('secret_revealed'),
+    payload: z.strictObject({ secretId: KebabId, how: z.string().optional() }),
+  }),
 ])
 
 const ModelLine = z.discriminatedUnion('kind', [
@@ -133,7 +141,7 @@ export class ModelDMProvider implements DMProvider {
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
-    const interpreter = new LineInterpreter(ctx, party)
+    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce')
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -245,11 +253,26 @@ class LineInterpreter {
   ignored = 0
   addressed: string[] | null = null
   private pending: { text: string; depth: number } | null = null
+  private readonly knowledge: KnowledgeView | null
 
   constructor(
     private readonly ctx: DMTurnContext,
     private readonly party: string[],
-  ) {}
+    private readonly lintMode: LintMode,
+  ) {
+    this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
+  }
+
+  /**
+   * Lint de conocimiento sobre un texto que la mesa va a oir. Devuelve los
+   * hallazgos y si el texto debe cortarse (algun error en modo enforce).
+   */
+  private *lint(text: string): Generator<DMOutput, boolean> {
+    if (!this.knowledge) return false
+    const findings = lintText(text, this.knowledge, this.ctx.pack)
+    for (const finding of findings) yield { kind: 'lint', finding }
+    return this.lintMode === 'enforce' && findings.some((f) => f.level === 'error')
+  }
 
   *line(rawLine: string): Generator<DMOutput> {
     const text = rawLine.trim()
@@ -333,7 +356,7 @@ class LineInterpreter {
       }
       const event = this.event(parsed)
       if (event) {
-        yield { kind: 'event', event }
+        yield* this.emitEvent(event)
         return
       }
       this.ignored++
@@ -356,7 +379,7 @@ class LineInterpreter {
           this.ignored++
           return
         }
-        yield { kind: 'event', event }
+        yield* this.emitEvent(event)
         return
       }
       case 'addressed': {
@@ -370,6 +393,14 @@ class LineInterpreter {
   private *block(block: TurnBlock): Generator<DMOutput> {
     const witnesses = this.party.map((id) => `character:${id}`)
     this.blocks++
+    if (block.type === 'narration' || block.type === 'dialogue') {
+      const cut = yield* this.lint(block.text)
+      if (cut) {
+        // El bloque no llega a la mesa ni a la cronica; queda el aviso y el motivo va en result.lint.
+        yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT } }
+        return
+      }
+    }
     if (block.type === 'dialogue') {
       // speakerRef invalido no tumba el bloque: se deja sin referencia.
       const speakerRef = block.speakerRef && EntityRef.safeParse(block.speakerRef).success ? block.speakerRef : null
@@ -390,6 +421,23 @@ class LineInterpreter {
     if (block.type === 'narration') {
       yield { kind: 'event', event: { type: 'narration', payload: { text: block.text }, visibility: { layer: 'campaign', witnesses } } }
     }
+  }
+
+  /**
+   * Un evento validado sale al engine, salvo que cuente a la cronica algo
+   * que la mesa no sabe (world_event). Un secret_revealed marca el secreto
+   * como conocido para el resto del turno: el DM lo revelo a proposito.
+   */
+  private *emitEvent(event: ProposedEvent): Generator<DMOutput> {
+    if (event['type'] === 'world_event') {
+      const note = (event['payload'] as { note: string }).note
+      const cut = yield* this.lint(note)
+      if (cut) return
+    }
+    if (event['type'] === 'secret_revealed' && this.knowledge) {
+      markRevealed(this.knowledge, (event['payload'] as { secretId: string }).secretId)
+    }
+    yield { kind: 'event', event }
   }
 
   /** Valida forma y sentido del evento contra el estado; null si no se puede aplicar. */
@@ -433,6 +481,10 @@ class LineInterpreter {
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       }
       case 'world_event':
+        return { ...event, visibility: { layer: 'campaign', witnesses } }
+      case 'secret_revealed':
+        // Solo secretos del pack y solo a la party presente; el reductor lo proyecta en knowledge.
+        if (!this.ctx.pack.secrets.has(event.payload.secretId) || witnesses.length === 0) return null
         return { ...event, visibility: { layer: 'campaign', witnesses } }
     }
   }

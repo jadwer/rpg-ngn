@@ -1,13 +1,16 @@
-import type { CampaignEvent, LoadedPack } from '@rpg-ngn/content'
+import type { CampaignEvent, LoadedPack, Secret } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
 import { emptyWorld, updateCharacter, type WorldState } from '@rpg-ngn/core'
 import { rulesetRef, type Ruleset } from '@rpg-ngn/rules'
+import { revealsOf } from './knowledge.js'
 import type { CampaignState, PlayerKnowledge } from './state.js'
 
 /**
  * El reductor. `reduce(events, {pack, ruleset})` es una funcion pura: el
  * mismo log, el mismo pack y el mismo ruleset producen siempre el mismo
- * estado. El ruleset es parametro y no import (BA2).
+ * estado. El ruleset es parametro y no import (BA2). Los secretos del pack
+ * entran como parametro por la misma razon: la proyeccion de conocimiento
+ * depende de sus condiciones de revelacion.
  */
 
 export interface ReduceOptions {
@@ -40,10 +43,11 @@ export function initialState(options: ReduceOptions): CampaignState {
 }
 
 export function reduce(events: readonly CampaignEvent[], options: ReduceOptions): CampaignState {
-  return events.reduce((state, event) => applyEvent(state, event, options.ruleset), initialState(options))
+  const secrets = [...options.pack.secrets.values()]
+  return events.reduce((state, event) => applyEvent(state, event, options.ruleset, secrets), initialState(options))
 }
 
-export function applyEvent(state: CampaignState, event: CampaignEvent, ruleset: Ruleset): CampaignState {
+export function applyEvent(state: CampaignState, event: CampaignEvent, ruleset: Ruleset, secrets: readonly Secret[] = []): CampaignState {
   if (event.seq !== state.meta.headSeq + 1) {
     throw new Error(`${event.id}: seq ${event.seq} no sigue a ${state.meta.headSeq}`)
   }
@@ -60,8 +64,23 @@ export function applyEvent(state: CampaignState, event: CampaignEvent, ruleset: 
   next = applyByType(next, event, ruleset)
   next = applyEffects(next, event, ruleset)
   next = applyWitnesses(next, event)
+  next = applySecrets(next, event, secrets)
 
   return next
+}
+
+function applySecrets(state: CampaignState, event: CampaignEvent, secrets: readonly Secret[]): CampaignState {
+  const reveals = revealsOf(event, secrets, state)
+  if (reveals.length === 0) return state
+  const knowledge = { ...state.knowledge }
+  for (const reveal of reveals) {
+    for (const id of reveal.to) {
+      const current = knowledge[id] ?? { characterId: id, facts: {}, witnessed: [] }
+      if (current.secrets?.[reveal.secretId]) continue
+      knowledge[id] = { ...current, secrets: { ...current.secrets, [reveal.secretId]: { event: event.id, seq: event.seq, how: reveal.how } } }
+    }
+  }
+  return { ...state, knowledge }
 }
 
 function applyByType(state: CampaignState, event: CampaignEvent, ruleset: Ruleset): CampaignState {

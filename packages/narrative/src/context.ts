@@ -1,5 +1,5 @@
-import type { CampaignState, NarrativeEntry, SessionRecord } from '@rpg-ngn/campaign'
-import { refId, refKind, type CampaignEvent, type Character, type LoadedPack } from '@rpg-ngn/content'
+import { secretsKnownBy, type CampaignState, type NarrativeEntry, type SessionRecord } from '@rpg-ngn/campaign'
+import { isManualReveal, refId, refKind, type CampaignEvent, type Character, type LoadedPack, type Secret } from '@rpg-ngn/content'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
 import type { DMTurnContext } from './provider.js'
@@ -11,9 +11,9 @@ import type { DMTurnContext } from './provider.js'
  * la memoria se recorta por longitud para que el prompt no crezca con la
  * campaña.
  *
- * Capa `dm` del pack: los packs de este repo no la tienen (docs/07, repo
- * publico), asi que no entra nada secreto. Cuando exista, entra aqui y
- * nunca en las proyecciones del jugador.
+ * Capa `dm` del pack (secrets/): entra aqui, marcada como no revelable y
+ * con quien de la party ya la conoce, y nunca en las proyecciones del
+ * jugador. El lint (lint.ts) vigila que el modelo la respete.
  */
 
 export interface ContextBudget {
@@ -53,10 +53,40 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
     worldLayer(ctx, budget),
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
+    dmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party),
-  ]
+  ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
+}
+
+// Capa dm: secretos del pack con su estado de revelacion para la party presente.
+function dmLayer(ctx: DMTurnContext, party: string[], budget: ContextBudget): string | null {
+  const secrets = [...ctx.pack.secrets.values()]
+  if (secrets.length === 0) return null
+  const known = secretsKnownBy(ctx.state, party)
+  const names = (ids: string[]): string => ids.map((id) => ctx.pack.characters.get(id)?.name ?? id).join(', ')
+  const lines: string[] = ['# Capa del DM: secretos', '', 'Hechos que existen en el mundo y que la party NO ha descubierto salvo donde se indica. No los cuentes ni los insinúes con estas palabras a quien no los conoce; si la escena los revela de verdad, emite antes el evento secret_revealed.']
+
+  for (const secret of secrets) {
+    const knowers = [...(known.get(secret.id) ?? [])]
+    const unaware = party.filter((id) => !knowers.includes(id))
+    const status = unaware.length === 0 ? 'ya lo conoce toda la party presente' : knowers.length === 0 ? `NO REVELADO a ${names(unaware)}` : `lo conoce ${names(knowers)}; NO REVELADO a ${names(unaware)}`
+    lines.push('', `- ${secret.id} (sobre ${secret.about}; ${status}). Se revela ${describeReveal(secret)}${secret.revealedBy ? `; puede soltarlo ${secret.revealedBy}` : ''}.`)
+    lines.push(`  ${clip(secret.text, budget.sheets === 'compact' ? 240 : 600)}`)
+  }
+  return lines.join('\n')
+}
+
+function describeReveal(secret: Secret): string {
+  const when = secret.revealWhen
+  if (isManualReveal(when)) return 'solo si tú lo decides, con un evento secret_revealed'
+  const parts = [`con un evento ${when.event}`]
+  if (when.fact) parts.push(`del hecho ${when.fact}`)
+  if (when.actor) parts.push(`de ${when.actor}`)
+  if (when.target) parts.push(`hacia ${when.target}`)
+  if (when.match) parts.push(`que diga "${when.match}"`)
+  return parts.join(' ')
 }
 
 // Capa a: mundo y premisa.

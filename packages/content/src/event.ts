@@ -26,6 +26,7 @@ export const EventType = z.enum([
   // Conocimiento
   'discovery',
   'rumor_heard',
+  'secret_revealed',
   // Narrativa
   'scene_started',
   'scene_closed',
@@ -124,6 +125,23 @@ export const DiscoveryEvent = z.strictObject({
   payload: DiscoveryPayload,
 })
 
+/**
+ * El DM revela a proposito un secreto del pack (secret.ts) a los testigos.
+ * Es el puente explicito entre la capa `dm` y el conocimiento de la party
+ * cuando la condicion de revelacion es `manual` o cuando el DM decide
+ * adelantarla. Sin testigos no revela nada, asi que se exigen.
+ */
+export const SecretRevealedEvent = z.strictObject({
+  ...envelopeShape,
+  type: z.literal('secret_revealed'),
+  visibility: Visibility.extend({ witnesses: z.array(EntityRef).min(1) }),
+  payload: z.strictObject({
+    secretId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    /** Como se entero la party. */
+    how: z.string().optional(),
+  }),
+})
+
 export const SessionStartedEvent = z.strictObject({
   ...envelopeShape,
   type: z.literal('session_started'),
@@ -194,6 +212,7 @@ export const GenericEvent = z.strictObject({
 export const CampaignEvent = z.discriminatedUnion('type', [
   RollEvent,
   DiscoveryEvent,
+  SecretRevealedEvent,
   SessionStartedEvent,
   SessionClosedEvent,
   WorldEvent,
@@ -205,6 +224,7 @@ export const CampaignEvent = z.discriminatedUnion('type', [
 export type CampaignEvent = z.infer<typeof CampaignEvent>
 export type RollEvent = z.infer<typeof RollEvent>
 export type DiscoveryEvent = z.infer<typeof DiscoveryEvent>
+export type SecretRevealedEvent = z.infer<typeof SecretRevealedEvent>
 
 export function eventIdFor(seq: number): string {
   return `evt-${String(seq).padStart(5, '0')}`
