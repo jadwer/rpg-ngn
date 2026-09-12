@@ -4,7 +4,7 @@ import type { ApiError } from './errors.js'
 
 /**
  * Integracion contra una API viva. Solo corre con RPG_API_URL definido
- * (por ejemplo `RPG_API_URL=http://127.0.0.1:8000`), con la base sembrada
+ * (por ejemplo `RPG_API_URL=http://127.0.0.1:8010`), con la base sembrada
  * (`php artisan migrate --seed`) y al menos una mesa donde jaz sea miembro.
  * No abre ni cierra turnos: eso lo hace el smoke con curl.
  */

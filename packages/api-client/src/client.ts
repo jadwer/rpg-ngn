@@ -18,7 +18,7 @@ import type {
 } from './types.js'
 
 export interface ApiClientOptions {
-  /** `http://192.168.100.16:8000`, sin `/api`. */
+  /** `http://192.168.100.16:8010`, sin `/api`. */
   baseUrl: string
   /** Devuelve el token vigente o null; se consulta en cada peticion. */
   tokenProvider: TokenProvider

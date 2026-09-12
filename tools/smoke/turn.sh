@@ -3,11 +3,11 @@
 # con Jaz (Zahira) y Armando (Calder), abre la sesion 003, resuelve el turno 1
 # con el DM scripted y deja el turno 2 abierto para jugar desde telefonos.
 #
-# Requiere: API en $API (por defecto http://127.0.0.1:8000) con los usuarios
+# Requiere: API en $API (por defecto http://127.0.0.1:8010) con los usuarios
 # sembrados (gabino admin, jaz, armando; password "password") y el engine
 # arriba con el mismo ENGINE_TOKEN que la API.
 set -u
-API="${API:-http://127.0.0.1:8000}"
+API="${API:-http://127.0.0.1:8010}"
 J='Content-Type: application/json'
 A='Accept: application/json'
 JA='Accept: application/vnd.api+json'

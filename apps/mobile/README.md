@@ -9,7 +9,7 @@ Las dos comparten las vistas, las fichas en modal, la narracion por voz y la ban
 
 ## Que hace en linea
 
-- **Conexion**: URL del servidor (por defecto `http://192.168.100.16:8000`, editable y recordada) y login con correo y contraseña. El token de Sanctum va en `expo-secure-store`, nunca en AsyncStorage (docs/11, D8). Al volver a abrir la app entra sola mientras el token viva; un 401 en cualquier pantalla borra la sesion y vuelve al login con aviso.
+- **Conexion**: URL del servidor (por defecto `http://192.168.100.16:8010`, editable y recordada) y login con correo y contraseña. El token de Sanctum va en `expo-secure-store`, nunca en AsyncStorage (docs/11, D8). Al volver a abrir la app entra sola mientras el token viva; un 401 en cualquier pantalla borra la sesion y vuelve al login con aviso.
 - **Mesas**: las mesas donde el usuario es miembro, con su papel (DM o personaje) y quien mas esta.
 - **Mesa**: polling cada 1.5 s a `GET /api/v1/tables/{id}/state?after=<ultimo bloque>` (docs/11, D5). Los bloques del DM se acumulan y se pintan con las mismas vistas **narrativa** y **dialogo** del modo offline; los retratos salen del pack empaquetado por `speakerRef`. Con el interruptor "Leer lo nuevo" los bloques que llegan se leen en voz alta sin cortar la lectura en curso.
 - **Turno** (docs/09, "Respuesta y cierre"): cuadro de respuesta siempre visible, quien ya respondio y quien falta (nombres, no textos), boton de cierre cuando no falta ningun interpelado (cualquiera puede cerrar), "Forzar cierre" solo para el DM, aviso "el DM esta narrando" en `closing` y `resolving`, y el error del engine si el turno se reabre.
@@ -53,7 +53,7 @@ pnpm build                            # compila packages/*; la app importa dist/
 pnpm --filter mobile bundle-pack      # regenerar tras cambiar el pack o el log
 pnpm --filter mobile typecheck
 pnpm --filter mobile test             # tests puros: pack empaquetado y entradas de fichas
-pnpm --filter mobile smoke-api        # juega un turno contra la API viva (RPG_API_URL, por defecto 127.0.0.1:8000)
+pnpm --filter mobile smoke-api        # juega un turno contra la API viva (RPG_API_URL, por defecto 127.0.0.1:8010)
 pnpm --filter mobile start            # Metro; escanear el QR con Expo Go
 pnpm --filter mobile doctor           # expo-doctor
 ```
@@ -76,20 +76,20 @@ Dos telefonos y la laptop en el mismo Wi-Fi. La IP de la laptop es `192.168.100.
 2. **API**, desde `~/dev/rpg-ngn-api`, con `ENGINE_URL=http://127.0.0.1:3100` y el mismo `ENGINE_TOKEN` en su `.env`, y la cola en `sync` (asi resuelve el turno dentro de la peticion de cierre):
 
    ```bash
-   php artisan serve --host 0.0.0.0 --port 8000
+   php artisan serve --host 0.0.0.0 --port 8010
    ```
 
-   Comprobar desde el telefono abriendo `http://192.168.100.16:8000/api/v1/system-health/ping` en el navegador. Si no responde, WSL no esta en modo espejo de red (`networkingMode=mirrored` en `.wslconfig`) o el firewall de Windows bloquea el puerto.
+   Comprobar desde el telefono abriendo `http://192.168.100.16:8010/api/v1/system-health/ping` en el navegador. Si no responde, WSL no esta en modo espejo de red (`networkingMode=mirrored` en `.wslconfig`) o el firewall de Windows bloquea el puerto.
 
 3. **Mesa**: la API sembrada trae a `gabino@example.com` (DM), `jaz@example.com` y `armando@example.com`, contraseña `password`. Si no hay mesa con sesion planeada, `pnpm --filter mobile smoke-api` crea una y la deja con la sesion 003 cerrada; para dejarla abierta y jugar desde los telefonos, crear la mesa con los curl de amistad e invitacion de ese script y abrir la sesion desde la app (mando del DM) o con curl:
 
    ```bash
-   curl -X POST http://127.0.0.1:8000/api/v1/campaigns/<campaña>/sessions -H "Authorization: Bearer <token del DM>" -H "Content-Type: application/json" -H "Accept: application/json" -d '{"code":"003"}'
+   curl -X POST http://127.0.0.1:8010/api/v1/campaigns/<campaña>/sessions -H "Authorization: Bearer <token del DM>" -H "Content-Type: application/json" -H "Accept: application/json" -d '{"code":"003"}'
    ```
 
 4. **Metro**, desde la raiz: `pnpm --filter mobile start` (con `-- --tunnel` si los telefonos no ven la IP de WSL). Escanear el QR con Expo Go (SDK 57) en los dos telefonos.
 
-5. En cada telefono: **Jugar en mesa**, servidor `http://192.168.100.16:8000`, entrar como `jaz@example.com` en uno y `armando@example.com` en el otro, abrir la mesa.
+5. En cada telefono: **Jugar en mesa**, servidor `http://192.168.100.16:8010`, entrar como `jaz@example.com` en uno y `armando@example.com` en el otro, abrir la mesa.
 
 6. El DM abre la sesion desde un tercer dispositivo entrando como `gabino@example.com` (el mando del DM aparece encima del cuadro de respuesta), o con el curl del paso 3. En los telefonos aparece "Turno 1: Faltan: Zahira, Calder".
 

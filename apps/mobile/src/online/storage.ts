@@ -6,7 +6,7 @@ import * as SecureStore from 'expo-secure-store'
  * AsyncStorage). Cada lectura y escritura va en try/catch porque en web y en
  * simuladores sin keychain el modulo puede no estar.
  */
-export const DEFAULT_SERVER_URL = 'http://192.168.100.16:8000'
+export const DEFAULT_SERVER_URL = 'http://192.168.100.16:8010'
 
 const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user' } as const
 

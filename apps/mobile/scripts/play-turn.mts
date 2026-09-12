@@ -7,7 +7,7 @@
  */
 import { ApiError, createApiClient, memberOf, type ApiClient } from '@rpg-ngn/api-client'
 
-const API = process.env['RPG_API_URL'] ?? 'http://127.0.0.1:8000'
+const API = process.env['RPG_API_URL'] ?? 'http://127.0.0.1:8010'
 
 async function loginAs(email: string): Promise<{ api: ApiClient; id: string }> {
   let token: string | null = null
