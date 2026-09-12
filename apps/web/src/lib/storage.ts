@@ -1,3 +1,5 @@
+import { clampPitch, clampRate, DEFAULT_NARRATOR_PITCH, DEFAULT_READING_LANGUAGE, isReadingLanguage, type ReadingLanguage } from '@rpg-ngn/ui-logic'
+
 /**
  * Lo que la web recuerda entre recargas, en `localStorage`. El token de
  * Sanctum solo se guarda aqui en modo API directa (otra URL escrita a mano);
@@ -13,6 +15,7 @@ const KEYS = {
   user: 'rpg.web.user',
   voice: 'rpg.web.voice',
   rate: 'rpg.web.rate',
+  pitch: 'rpg.web.pitch',
   autoRead: 'rpg.web.autoread',
   voiceNotice: 'rpg.web.voice-notice',
   lang: 'rpg.web.lang',
@@ -23,18 +26,6 @@ export interface StoredUser {
   name: string
   email: string
 }
-
-/** Idiomas de lectura que ofrece la pagina de ajustes; el codigo filtra las voces del navegador por prefijo. */
-export const READING_LANGUAGES = [
-  { code: 'es', label: 'Español', utterance: 'es-MX' },
-  { code: 'en', label: 'English', utterance: 'en-US' },
-  { code: 'pt', label: 'Português', utterance: 'pt-BR' },
-  { code: 'fr', label: 'Français', utterance: 'fr-FR' },
-  { code: 'it', label: 'Italiano', utterance: 'it-IT' },
-  { code: 'de', label: 'Deutsch', utterance: 'de-DE' },
-] as const
-
-export type ReadingLanguage = (typeof READING_LANGUAGES)[number]['code']
 
 function read(key: string): string | null {
   if (typeof window === 'undefined') return null
@@ -97,11 +88,12 @@ export const storage = {
   voice: () => read(KEYS.voice),
   setVoice: (uri: string | null) => write(KEYS.voice, uri),
 
-  rate(): number {
-    const value = Number(read(KEYS.rate))
-    return Number.isFinite(value) && value >= 0.5 && value <= 2 ? value : 1
-  },
-  setRate: (rate: number) => write(KEYS.rate, String(rate)),
+  rate: (): number => clampRate(Number(read(KEYS.rate) ?? '1')),
+  setRate: (rate: number) => write(KEYS.rate, String(clampRate(rate))),
+
+  /** Tono del narrador (la party va al natural y cada NPC con el suyo). */
+  narratorPitch: (): number => clampPitch(Number(read(KEYS.pitch) ?? String(DEFAULT_NARRATOR_PITCH))),
+  setNarratorPitch: (pitch: number) => write(KEYS.pitch, String(clampPitch(pitch))),
 
   autoRead: () => read(KEYS.autoRead) === '1',
   setAutoRead: (value: boolean) => write(KEYS.autoRead, value ? '1' : null),
@@ -111,7 +103,7 @@ export const storage = {
 
   lang(): ReadingLanguage {
     const value = read(KEYS.lang)
-    return READING_LANGUAGES.some((l) => l.code === value) ? (value as ReadingLanguage) : 'es'
+    return isReadingLanguage(value) ? value : DEFAULT_READING_LANGUAGE
   },
-  setLang: (lang: ReadingLanguage) => write(KEYS.lang, lang === 'es' ? null : lang),
+  setLang: (lang: ReadingLanguage) => write(KEYS.lang, lang === DEFAULT_READING_LANGUAGE ? null : lang),
 }

@@ -1,12 +1,14 @@
-import { splitNarration, type SpeechEngine } from '@rpg-ngn/ui-logic'
+import { matchesLanguage, pitchFor, splitNarration, type SpeechEngine } from '@rpg-ngn/ui-logic'
 
 /**
  * SpeechEngine de ui-logic sobre la Web Speech API (docs/09, "Narracion por
  * voz"). Cada bloque se parte en trozos de pocas oraciones porque Chrome
  * corta las locuciones largas (unos 15 s) y Safari en iOS se queda mudo con
  * textos muy grandes; el bloque termina cuando termina su ultimo trozo. La
- * voz y la velocidad se leen en cada `speak`, asi el selector aplica al
- * bloque siguiente sin recrear la cola.
+ * voz, la velocidad y el tono del narrador se leen en cada `speak`, asi el
+ * selector aplica al bloque siguiente sin recrear la cola; el tono de cada
+ * bloque lo decide `pitchFor` con el hablante del item (narrador grave,
+ * party al natural, un tono fijo por NPC).
  */
 
 export interface VoiceChoice {
@@ -19,6 +21,8 @@ export interface VoiceChoice {
 export interface SpeechSettings {
   voiceUri: string | null
   rate: number
+  /** Tono del narrador; la party y los NPC se derivan de el con `pitchFor`. */
+  narratorPitch: number
   /** Idioma de la locucion si la voz elegida no existe (`es-MX`, `en-US`...). */
   lang?: string
 }
@@ -31,9 +35,8 @@ export function speechSupported(): boolean {
 
 /** Voces del navegador en un idioma (prefijo `es`, `en`...), con las locales primero. Puede venir vacia hasta `voiceschanged`. */
 export function voicesFor(all: ReadonlyArray<Pick<SpeechSynthesisVoice, 'voiceURI' | 'name' | 'lang' | 'localService'>>, lang = 'es'): VoiceChoice[] {
-  const prefix = lang.toLowerCase()
   return all
-    .filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith(prefix))
+    .filter((v) => matchesLanguage(v.lang, lang))
     .map((v) => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService }))
     .sort((a, b) => Number(b.local) - Number(a.local) || a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name))
 }
@@ -81,7 +84,7 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
   }
 
   const engine: SpeechEngine = {
-    speak(text, onDone) {
+    speak(text, onDone, item) {
       if (!speechSupported()) {
         options.onError?.('este navegador no tiene síntesis de voz')
         onDone()
@@ -94,8 +97,10 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
         onDone()
         return
       }
-      const { voiceUri, rate, lang } = options.settings()
+      const settings = options.settings()
+      const { voiceUri, rate, lang } = settings
       const voice = voiceUri ? (synth.getVoices().find((v) => v.voiceURI === voiceUri) ?? null) : null
+      const pitch = pitchFor(item, settings)
 
       const speakChunk = (index: number) => {
         if (mine !== token) return
@@ -108,6 +113,7 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
         utterance.lang = voice?.lang ?? lang ?? 'es-MX'
         if (voice) utterance.voice = voice
         utterance.rate = rate
+        utterance.pitch = pitch
         utterance.onend = () => speakChunk(index + 1)
         utterance.onerror = (event) => {
           if (mine !== token) return

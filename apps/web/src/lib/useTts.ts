@@ -1,8 +1,8 @@
 'use client'
 
-import { createTtsController, speechQueue, type TtsController, type TtsItem, type TtsState, type TurnBlock } from '@rpg-ngn/ui-logic'
+import { createTtsController, speechQueue, utteranceLanguage, type ReadingLanguage, type TtsController, type TtsItem, type TtsState, type TurnBlock } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { READING_LANGUAGES, storage, type ReadingLanguage } from './storage'
+import { storage } from './storage'
 import { createWebSpeechEngine, pickVoice, speechSupported, watchVoices, type VoiceChoice } from './webSpeech'
 
 export interface Tts {
@@ -18,7 +18,7 @@ export interface Tts {
   pause: () => void
   resume: () => void
   stop: () => void
-  /** Voces en español del navegador; vacia si no hay ninguna. */
+  /** Voces del navegador en el idioma de lectura; vacia si no hay ninguna. */
   voices: VoiceChoice[]
   /** true cuando el navegador ya entrego su lista de voces. */
   voicesReady: boolean
@@ -26,6 +26,9 @@ export interface Tts {
   setVoiceUri: (uri: string | null) => void
   rate: number
   setRate: (rate: number) => void
+  /** Tono del narrador; la party va al natural y cada NPC con el suyo. */
+  narratorPitch: number
+  setNarratorPitch: (pitch: number) => void
   autoRead: boolean
   setAutoRead: (value: boolean) => void
   /** Idioma de lectura (filtra las voces y fija el de la locucion); se elige en Ajustes. */
@@ -37,9 +40,9 @@ export interface Tts {
  * La cola de TTS de ui-logic sobre los bloques de la mesa, con Web Speech.
  * Si llegan bloques mientras se lee, la cola vigente sigue hasta el final
  * y la nueva se adopta al terminar; con "leer lo nuevo" la lectura continua
- * sola desde el primer bloque nuevo. Voz, velocidad, idioma y el interruptor
- * se recuerdan en localStorage (pagina de Ajustes; la barra de la mesa es el
- * acceso rapido).
+ * sola desde el primer bloque nuevo. Voz, velocidad, tono, idioma y el
+ * interruptor se recuerdan en localStorage (pagina de Ajustes; la barra de
+ * la mesa es el acceso rapido).
  */
 export function useTts(blocks: readonly TurnBlock[]): Tts {
   const [error, setError] = useState<string | null>(null)
@@ -47,16 +50,18 @@ export function useTts(blocks: readonly TurnBlock[]): Tts {
   const [voicesReady, setVoicesReady] = useState(false)
   const [voiceUri, setVoiceUriState] = useState<string | null>(null)
   const [rate, setRateState] = useState(1)
+  const [narratorPitch, setNarratorPitchState] = useState(storage.narratorPitch())
   const [autoRead, setAutoReadState] = useState(false)
   const [lang, setLangState] = useState<ReadingLanguage>('es')
   const [langLoaded, setLangLoaded] = useState(false)
   const controllerRef = useRef<TtsController | null>(null)
-  const settingsRef = useRef({ voiceUri: null as string | null, rate: 1, lang: 'es-MX' })
-  settingsRef.current = { voiceUri, rate, lang: READING_LANGUAGES.find((l) => l.code === lang)?.utterance ?? 'es-MX' }
+  const settingsRef = useRef({ voiceUri: null as string | null, rate: 1, narratorPitch, lang: 'es-MX' })
+  settingsRef.current = { voiceUri, rate, narratorPitch, lang: utteranceLanguage(lang) }
 
   useEffect(() => {
     setVoiceUriState(storage.voice())
     setRateState(storage.rate())
+    setNarratorPitchState(storage.narratorPitch())
     setAutoReadState(storage.autoRead())
     setLangState(storage.lang())
     setLangLoaded(true)
@@ -173,6 +178,11 @@ export function useTts(blocks: readonly TurnBlock[]): Tts {
     setRate: (value) => {
       setRateState(value)
       storage.setRate(value)
+    },
+    narratorPitch,
+    setNarratorPitch: (value) => {
+      setNarratorPitchState(value)
+      storage.setNarratorPitch(value)
     },
     autoRead,
     setAutoRead: (value) => {

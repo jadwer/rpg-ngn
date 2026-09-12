@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { PACK_VERSION, packBinaries, packFiles } from '../generated/pilot-pack'
-import { characterName, loadBundledPack, portraitUrl, RULESET_ID, sessionList } from './pack'
+import { loadBundledPack, portraitUrl, RULESET_ID } from './pack'
 
 const repoRoot = resolve(import.meta.dirname, '../../../..')
 
@@ -19,13 +19,9 @@ describe('pack empaquetado en la web', () => {
     }
   })
 
-  it('carga y valida en memoria y resuelve nombres y retratos', async () => {
+  it('carga y valida en memoria y resuelve retratos', async () => {
     const pack = await loadBundledPack()
     expect(pack.characters.size).toBe(9)
-    expect(sessionList(pack).map((s) => s.id)).toEqual(['001', '002', '003'])
-    expect(characterName(pack, 'zahira')).toBe('Zahira')
-    expect(characterName(pack, 'nadie')).toBe('nadie')
-    expect(characterName(pack, null)).toBeNull()
     expect(portraitUrl(pack.characters.get('zahira')?.portrait)).toBe('/packs/pilot/portraits/zahira.jpg')
     expect(portraitUrl(null)).toBeNull()
     expect(RULESET_ID).toBe('fantasy-d20-lite@1.0.0')

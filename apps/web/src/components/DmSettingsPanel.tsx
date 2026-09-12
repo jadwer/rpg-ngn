@@ -1,8 +1,8 @@
 'use client'
 
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
+import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
-import { describePreset } from '../lib/dmPresets'
 
 interface Props {
   client: ApiClient
@@ -83,7 +83,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const save = () =>
     run(async () => {
       await client.updateTableSettings(table.id, withProvider(table.settings, chosen))
-      setNotice({ ok: true, text: chosen ? `Guardado: ${describePreset(chosen.preset)}${chosen.model ? `, modelo ${chosen.model}` : ''}.` : 'La mesa usa el DM del servidor.' })
+      setNotice({ ok: true, text: savedProviderText(chosen) })
       onChanged()
     })
 
