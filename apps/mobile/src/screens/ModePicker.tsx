@@ -33,7 +33,7 @@ function Choice({ title, body, onPress, primary = false }: { title: string; body
 
 const styles = StyleSheet.create({
   wrap: { padding: 20, paddingTop: 36, gap: 12 },
-  motto: { fontFamily: theme.fonts.serif, fontStyle: 'italic', color: theme.colors.inkDim, textAlign: 'center', fontSize: 15 },
+  motto: { fontFamily: theme.fonts.serifItalic, color: theme.colors.inkDim, textAlign: 'center', fontSize: 15 },
   title: { fontFamily: theme.fonts.display, fontSize: 30, color: theme.colors.gold, textAlign: 'center', letterSpacing: 2, textTransform: 'uppercase' },
   rule: { height: 1, backgroundColor: theme.colors.border, marginVertical: 10, marginHorizontal: 40 },
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 16, gap: 6 },

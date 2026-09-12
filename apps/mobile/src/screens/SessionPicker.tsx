@@ -58,8 +58,8 @@ function SessionCard({ session, campaign, onPress }: { session: Session; campaig
 const styles = StyleSheet.create({
   wrap: { padding: 16, paddingBottom: 40, gap: 10 },
   back: { alignSelf: 'flex-start' },
-  backText: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.accent },
-  motto: { fontFamily: theme.fonts.serif, fontStyle: 'italic', color: theme.colors.inkDim, textAlign: 'center', fontSize: 15 },
+  backText: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright },
+  motto: { fontFamily: theme.fonts.serifItalic, color: theme.colors.inkDim, textAlign: 'center', fontSize: 15 },
   title: { fontFamily: theme.fonts.display, fontSize: 30, color: theme.colors.gold, textAlign: 'center', letterSpacing: 2, textTransform: 'uppercase' },
   tagline: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, textAlign: 'center', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase', fontSize: 12 },
   hint: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, fontSize: 14, marginTop: 6 },

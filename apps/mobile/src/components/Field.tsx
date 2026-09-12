@@ -11,7 +11,7 @@ export function Field({ label, hint, style, ...input }: Props) {
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput placeholderTextColor={theme.colors.inkDim} style={[styles.input, style]} {...input} />
+      <TextInput placeholderTextColor={theme.colors.inkFaint} style={[styles.input, style]} {...input} />
       {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
   )

@@ -27,5 +27,5 @@ const styles = StyleSheet.create({
   image: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border },
   muted: { opacity: 0.55 },
   placeholder: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center', justifyContent: 'center' },
-  initial: { fontFamily: theme.fonts.display, color: theme.colors.gold, fontWeight: '700' },
+  initial: { fontFamily: theme.fonts.displayBold, color: theme.colors.gold },
 })

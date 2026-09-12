@@ -1,4 +1,5 @@
 import type { LoadedPack } from '@rpg-ngn/content'
+import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
@@ -9,18 +10,21 @@ import { ModePicker } from './screens/ModePicker'
 import { SessionPicker } from './screens/SessionPicker'
 import { SessionScreen } from './screens/SessionScreen'
 import { NarratorProvider } from './state/narrator'
-import { theme } from './theme'
+import { FONT_ASSETS, SYSTEM_SERIF, theme } from './theme'
 
 type Screen = { name: 'mode' } | { name: 'online' } | { name: 'picker' } | { name: 'session'; sessionId: string }
 
 /**
- * Raiz de la app. El pack empaquetado se carga una vez (nombres, retratos y
- * sesiones sirven en los dos modos); la campaña offline se reduce solo si
- * se entra a leer sin conexion. Sin libreria de navegacion a proposito:
- * cada dependencia nativa es un punto fragil del spike pnpm + Expo
- * (docs/10, IA2) y unas pocas pantallas no la necesitan.
+ * Raiz de la app. Las fuentes del tema (Cinzel, Crimson Pro) y el pack
+ * empaquetado se cargan una vez; mientras tanto la pantalla de espera usa
+ * la serif del sistema. Si las fuentes fallan (no deberia: viajan en el
+ * bundle) la app arranca igual y el sistema pone su fuente. La campaña
+ * offline se reduce solo si se entra a leer sin conexion. Sin libreria de
+ * navegacion a proposito: cada dependencia nativa es un punto fragil del
+ * spike pnpm + Expo (docs/10, IA2) y unas pocas pantallas no la necesitan.
  */
 export function Root() {
+  const [fontsLoaded, fontsError] = useFonts(FONT_ASSETS)
   const [pack, setPack] = useState<LoadedPack | null>(null)
   const [campaign, setCampaign] = useState<OfflineCampaign | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -35,6 +39,8 @@ export function Root() {
     if (!campaign) loadOfflineCampaign().then(setCampaign, (e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }
 
+  const fontsReady = fontsLoaded || fontsError !== null
+
   let body
   if (error) {
     body = (
@@ -42,7 +48,7 @@ export function Root() {
         <Text style={styles.error}>{`No se pudo cargar la campaña.\n${error}`}</Text>
       </View>
     )
-  } else if (!pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
+  } else if (!fontsReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
     body = (
       <View style={styles.center}>
         <ActivityIndicator color={theme.colors.gold} />
@@ -63,7 +69,7 @@ export function Root() {
     <SafeAreaProvider>
       <NarratorProvider>
         <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           {body}
         </SafeAreaView>
       </NarratorProvider>
@@ -71,9 +77,10 @@ export function Root() {
   )
 }
 
+/** La espera y el error se pintan con la serif del sistema: pueden salir antes de que carguen las fuentes. */
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  loading: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, fontStyle: 'italic' },
-  error: { fontFamily: theme.fonts.serif, color: theme.colors.accent, textAlign: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: theme.colors.bg },
+  loading: { fontFamily: SYSTEM_SERIF, fontStyle: 'italic', fontSize: 15, color: theme.colors.inkDim },
+  error: { fontFamily: SYSTEM_SERIF, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },
 })

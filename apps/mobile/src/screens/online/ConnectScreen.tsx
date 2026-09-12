@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { theme } from '../../theme'
@@ -21,7 +21,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onBack }: Pro
   const canSubmit = serverUrl.trim().length > 0 && email.trim().length > 0 && password.length > 0 && !busy
 
   return (
-    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={10}>
           <Text style={styles.link}>‹ Inicio</Text>
@@ -44,10 +44,10 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onBack }: Pro
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.accent, minWidth: 64 },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright, minWidth: 64 },
   spacer: { minWidth: 64 },
   title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
   form: { padding: 20, gap: 16 },
-  notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.accent, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, padding: 10 },
+  notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
   foot: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center', marginTop: 8 },
 })
