@@ -1,13 +1,19 @@
-import { Cinzel_400Regular, Cinzel_700Bold } from '@expo-google-fonts/cinzel'
-import { CrimsonPro_400Regular, CrimsonPro_400Regular_Italic, CrimsonPro_600SemiBold, CrimsonPro_700Bold } from '@expo-google-fonts/crimson-pro'
+import { Cinzel_400Regular } from '@expo-google-fonts/cinzel/400Regular'
+import { Cinzel_700Bold } from '@expo-google-fonts/cinzel/700Bold'
+import { CrimsonPro_400Regular } from '@expo-google-fonts/crimson-pro/400Regular'
+import { CrimsonPro_400Regular_Italic } from '@expo-google-fonts/crimson-pro/400Regular_Italic'
+import { CrimsonPro_600SemiBold } from '@expo-google-fonts/crimson-pro/600SemiBold'
+import { CrimsonPro_700Bold } from '@expo-google-fonts/crimson-pro/700Bold'
 import { Platform } from 'react-native'
 
 /**
  * Tema oscuro de la mesa, el mismo de `apps/sheets` y de la web (docs/09: el
  * pack declara su tema; mientras no lo haga, este). Cinzel para titulos y
  * Crimson Pro para texto; los archivos viajan dentro del bundle y `Root`
- * espera a que carguen. Con fuentes propias React Native no sintetiza
- * cursiva ni negrita, asi que cada variante tiene su familia.
+ * espera a que carguen. Se importa cada peso por su subruta: el indice del
+ * paquete arrastra las 22 variantes al bundle. Con fuentes propias React
+ * Native no sintetiza cursiva ni negrita, asi que cada variante tiene su
+ * familia.
  */
 
 /** Serif del sistema, para lo que se pinta antes de que carguen las fuentes. */
