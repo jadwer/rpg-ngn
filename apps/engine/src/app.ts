@@ -1,4 +1,4 @@
-import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, ProjectRequest, ProviderConfig, ResolveTurnRequest, ValidateEventsRequest, type ProbeResponse } from '@rpg-ngn/engine-contract'
+import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, ProjectRequest, ProviderConfig, ResolveTurnRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type ProviderDeps } from '@rpg-ngn/narrative'
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
@@ -12,6 +12,8 @@ export interface EngineOptions {
   now?: () => Date
   /** Clientes de modelo inyectados (tests) y timeout hacia el proveedor. */
   providers?: ProviderDeps
+  /** Lint de conocimiento por defecto (`enforce`); la peticion puede fijar otro. */
+  lintMode?: LintMode | undefined
 }
 
 /**
@@ -45,7 +47,11 @@ export function createEngine(options: EngineOptions): Hono {
 
     c.header('Content-Type', 'application/x-ndjson; charset=utf-8')
     return stream(c, async (out) => {
-      for await (const line of resolveTurn(parsed.data, { loadPack: (ref) => options.packs.get(ref), now, providers })) {
+      for await (const line of resolveTurn(parsed.data, { loadPack: (ref) => options.packs.get(ref), now, providers, lintMode: options.lintMode })) {
+        if (line.kind === 'result' && line.lint?.length) {
+          // El motivo de cada corte queda en el log del engine; la mesa solo ve el aviso system.
+          for (const finding of line.lint) console.warn(`lint ${finding.level} turno ${parsed.data.turn.id}: ${finding.message}`)
+        }
         await out.write(JSON.stringify(line) + '\n')
       }
     })

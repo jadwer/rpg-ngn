@@ -12,13 +12,14 @@ import type { Ruleset } from '@rpg-ngn/rules'
 export function rebuildState(pack: LoadedPack, ruleset: Ruleset, snapshot: unknown, rawEvents: unknown[]): { state: CampaignState; events: CampaignEvent[] } {
   let state = snapshot === null || snapshot === undefined ? initialState({ pack, ruleset }) : (snapshot as CampaignState)
   const events: CampaignEvent[] = []
+  const secrets = [...pack.secrets.values()]
 
   for (const [index, raw] of rawEvents.entries()) {
     const parsed = CampaignEvent.safeParse(upcastEvent(raw))
     if (!parsed.success) {
       throw new Error(`evento ${index} invalido: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
     }
-    state = applyEvent(state, parsed.data, ruleset)
+    state = applyEvent(state, parsed.data, ruleset, secrets)
     events.push(parsed.data)
   }
 

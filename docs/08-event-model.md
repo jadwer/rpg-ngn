@@ -55,7 +55,7 @@ Campos clave:
 | Accion | `player_action`, `npc_action`, `world_event` | Lo que alguien intenta o el mundo hace |
 | Resolucion | `roll` | Inmutable; RNG registrado con semilla o fuente |
 | Efecto | `state_change`, `quest_update`, `inventory_change`, `relationship_change` | Siempre producidos por una resolucion o decision valida |
-| Conocimiento | `discovery`, `rumor_heard` | Cruces entre capas de conocimiento |
+| Conocimiento | `discovery`, `rumor_heard`, `secret_revealed` | Cruces entre capas de conocimiento |
 | Narrativa | `scene_started`, `scene_closed`, `narration` | Estructura y texto del DM |
 | Meta | `session_started`, `session_closed`, `correction` | Fronteras y compensaciones |
 
@@ -121,6 +121,29 @@ Invariantes:
 3. Revelar en narrativa algo sin su `discovery` correspondiente es una violacion del contrato detectable automaticamente: se puede lintear la salida del DM contra la proyeccion de conocimiento del receptor.
 
 Ese punto 3 es la promesa central del modelo: el cumplimiento del contrato de realidad deja de ser una esperanza sobre el comportamiento del LLM y se vuelve verificable por software.
+
+## Secretos del pack y `secret_revealed`
+
+La capa `dm` del pack ([05](05-content-pack-spec.md), `secrets/`) da al motor una lista finita de hechos con marcadores. Con eso el punto 3 deja de ser una promesa y se implementa en dos piezas:
+
+**Proyeccion** (`packages/campaign`, `knowledge.ts`). Un secreto queda revelado a un personaje cuando un evento visible para el cumple su `revealWhen`, o cuando un `secret_revealed` lo tiene de testigo. "Visible" son los testigos declarados, los destinatarios de un `discovery` y de `knowledgeGranted`; un evento sin testigos y sin capa `dm` se considera oido por la party de su sesion (asi se escribieron los logs del piloto). La capa `dm` no la ve nadie. El reductor escribe `knowledge[<pc>].secrets[<id>] = { event, seq, how }` solo cuando hay alguno, para que los snapshots anteriores no cambien de forma.
+
+```json
+{
+  "type": "secret_revealed",
+  "visibility": { "layer": "campaign", "witnesses": ["character:zahira", "character:calder"] },
+  "payload": { "secretId": "osric-esta-abajo", "how": "lo encuentran en el tercer nivel" }
+}
+```
+
+Es un tipo nuevo con `v: 1`; no cambia la forma de ningun tipo existente, asi que `EVENT_SCHEMA_VERSION` sigue en 1 y no hay upcast. Los testigos son obligatorios (sin testigos no revela nada) y `secretId` debe existir en el pack. El DM con modelo puede proponerlo cuando la escena revela un secreto de verdad; el engine lo valida y el reductor lo proyecta.
+
+**Lint** (`packages/narrative`, `lint.ts`). Al narrar, cada bloque `narration` o `dialogue` y la nota de cada `world_event` se comparan con lo que saben los receptores (la party presente):
+
+- `error`: aparece una keyword de un secreto que algun receptor no conoce. En modo `enforce` el bloque se sustituye por un aviso `system` ("El DM revisó su narración...") y no entra a la cronica; el motivo (secreto, keyword, receptores) va en `result.lint` del turno y al log del engine. Un `secret_revealed` emitido antes en el mismo turno lo autoriza.
+- `warning`: se nombra una entidad del pack (NPC, lugar, mision) que la mesa no ha presenciado. Solo se reporta.
+
+Lo que un jugador declaro este turno, la cronica publica y los datos publicos de sesion (briefing, recap, hilos abiertos) cuentan como oido por la mesa: el DM puede repetir lo que los jugadores ya saben. El lint no entiende prosa; si el modelo parafrasea un secreto sin usar sus marcadores, pasa. Modos por turno (`lint` en `ResolveTurnRequest`) o por engine (`DM_LINT`): `enforce`, `report`, `off`.
 
 ## Almacenamiento (fase local-first)
 

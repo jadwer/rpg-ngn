@@ -9,7 +9,8 @@ Sin I/O: recibe un `FileSource` (`readText`, `exists`, `list`) y quien lo llama 
 | Modulo | Contenido |
 |---|---|
 | `character`, `npc`, `location`, `quest`, `session`, `pack` | Schemas de entidades del pack (docs/05), todos `strictObject` |
-| `event` | `CampaignEvent` (union discriminada por `type`), `EventEnvelope`, `EVENT_SCHEMA_VERSION` |
+| `secret` | Capa `dm` del pack: `Secret` con `keywords` y `revealWhen` (por evento o manual); nunca llega a una proyeccion de jugador |
+| `event` | `CampaignEvent` (union discriminada por `type`, incluye `secret_revealed`), `EventEnvelope`, `EVENT_SCHEMA_VERSION` |
 | `upcast` | `upcastEvent(raw, ctx)`: lleva un evento viejo a la version vigente (BA1) |
 | `loader` | `loadPack(source)`: pack tipado mas lista de `Issue` |
 | `campaign-log` | `parseEventLog(text, {pack})`: eventos tipados mas `Issue`; `formatEventLog` |
