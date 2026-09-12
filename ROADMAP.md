@@ -63,7 +63,17 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] `packages/api-client`: cliente fetch tipado sin React (login por token, mesas JSON:API aplanadas, estado por polling, respuestas con `Idempotency-Key`, cierre, sesiones, proyecciones); tests con fetch falso y uno de integracion con `RPG_API_URL`
 - [x] `apps/mobile` en modo online: login por token en `expo-secure-store`, mesas, mesa con polling cada 1.5 s, las dos vistas sobre los bloques del DM, cuadro de respuesta con quien falta, cierre cuando no falta nadie (forzado solo DM), mando del DM, fichas con el estado vivo de las proyecciones; convive con el modo offline
 - [x] Turno completo desde el cliente contra API y engine reales (`pnpm --filter mobile smoke-api`: 403 al jugador que abre sesion, 201/201, 409 a la segunda respuesta, cierre, 4 bloques por polling, turno 2 abierto, proyeccion ajena 403, sesion cerrada con snapshot)
-- [ ] Criterio del ADR: un turno completo desde dos telefonos por LAN (Gabino)
+- [x] Primera partida por LAN el 2026-09-11 (mesa "Posada", dos telefonos): destapo la IP por DHCP, el firewall de Hyper-V en modo espejo y la sesion de Expo Go
+- [x] DM scripted con guion por turno (`script` en `settings.provider` de la mesa, escenas como datos en `tools/scenes/`, `tools/smoke/scene.sh`): demos sin modelo
+- [x] El dueño de la mesa fija su propio personaje (`POST tables/{t}/members` sobre si mismo)
+- [ ] Criterio del ADR: un turno completo desde dos telefonos por LAN, escena entera de principio a fin (Gabino)
+
+Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
+
+- [ ] El asiento del dueño se llama "dm" y la app dice "Eres el DM"; en V1 el DM es siempre la IA. Renombrar a anfitrion en API y app, y elegir personaje al crear la mesa desde la app
+- [ ] Android: el teclado tapa el cuadro de respuesta (`KeyboardAvoidingView` sin `behavior` en Android; `softwareKeyboardLayoutMode: "resize"` o `behavior="height"` y scroll al input)
+- [ ] Selector de voz del sistema en la barra de TTS (`getAvailableVoicesAsync`, se elige de oido porque la API no trae sexo), voz recordada por telefono, tono mas grave para el narrador y distinto por NPC. Mientras, cada jugador cambia la voz por defecto del telefono (Google TTS: Instalar datos de voz > Español > Voz II/III; iOS: Juan es-MX)
+- [ ] La banda de "nadie esta narrando" y la barra de TTS dejan poca narracion visible en pantalla chica
 
 ## Entrega 6: DM IA
 
