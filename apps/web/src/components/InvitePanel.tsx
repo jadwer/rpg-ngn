@@ -152,7 +152,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
             void search()
           }}
         >
-          <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" style={{ flex: 1, minWidth: 200 }} disabled={busy} />
+          <input className="input" type="email" name="correo" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" style={{ flex: 1, minWidth: 200 }} disabled={busy} />
           <button type="submit" className="btn" disabled={busy || !email.trim()}>
             Buscar
           </button>

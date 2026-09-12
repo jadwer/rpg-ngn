@@ -89,12 +89,12 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       <form className="card stack" onSubmit={(e) => void submit(e)}>
         <label className="field">
           <span>Nombre de la mesa</span>
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Los Nueve Viajeros, sábado" maxLength={120} required autoFocus />
+          <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder="Los Nueve Viajeros, sábado" maxLength={120} required autoFocus />
         </label>
 
         <label className="field">
           <span>Pack y sistema</span>
-          <select className="select" value={option.id} onChange={() => undefined}>
+          <select className="select" name="pack" value={option.id} onChange={() => undefined}>
             {PACK_OPTIONS.map((p) => (
               <option key={p.id} value={p.id}>
                 {pack?.manifest.name ?? p.id} ({p.label}, {p.ruleset})
@@ -111,7 +111,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
         <label className="field">
           <span>Premisa de la mesa (opcional)</span>
-          <textarea className="textarea" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={PREMISE_PLACEHOLDER} rows={4} maxLength={2000} />
+          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={PREMISE_PLACEHOLDER} rows={4} maxLength={2000} />
         </label>
 
         {error ? <div className="error">{error}</div> : null}

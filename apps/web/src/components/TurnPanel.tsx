@@ -73,7 +73,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {progress.canRespond ? (
         <>
-          <textarea className="textarea" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} placeholder="¿Qué haces? Escribe tu acción o di que no haces nada. Ctrl+Enter envía." disabled={busy} rows={3} />
+          <textarea className="textarea" name="respuesta" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} placeholder="¿Qué haces? Escribe tu acción o di que no haces nada. Ctrl+Enter envía." disabled={busy} rows={3} />
           <div className="actions">
             <button type="button" className="btn primary" onClick={() => void send()} disabled={busy || text.trim().length === 0}>
               {busy ? <span className="spinner" aria-hidden /> : null}

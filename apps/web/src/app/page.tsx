@@ -58,18 +58,18 @@ export default function AccessPage() {
           {notice ? <div className="error">{notice}</div> : null}
           <label className="field">
             <span>Servidor de la API</span>
-            <input className="input" value={server} onChange={(e) => setServer(e.target.value)} placeholder="http://192.168.100.11:8010" autoComplete="url" inputMode="url" />
+            <input className="input" name="servidor" value={server} onChange={(e) => setServer(e.target.value)} placeholder="http://192.168.100.11:8010" autoComplete="url" inputMode="url" />
             <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
               Con la dirección de esta misma web, las peticiones pasan por su proxy y no hace falta CORS.
             </span>
           </label>
           <label className="field">
             <span>Correo</span>
-            <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required autoFocus />
+            <input className="input" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required autoFocus />
           </label>
           <label className="field">
             <span>Contraseña</span>
-            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+            <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
           </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">

@@ -77,11 +77,11 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
               <div className="row">
                 <label className="field">
                   <span>Código</span>
-                  <input className="input code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 3))} inputMode="numeric" placeholder="003" />
+                  <input className="input code" name="codigo" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 3))} inputMode="numeric" placeholder="003" />
                 </label>
                 <label className="field" style={{ flex: 1, minWidth: 220 }}>
                   <span>Nota de la sesión</span>
-                  <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el DM la recibe" maxLength={120} />
+                  <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el DM la recibe" maxLength={120} />
                 </label>
               </div>
               <div className="row">
@@ -98,7 +98,7 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
               {table.premise ? <p className="premise">{table.premise}</p> : null}
               <label className="field">
                 <span>Cliffhanger para la próxima</span>
-                <input className="input" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder="Opcional: con qué se queda la mesa" />
+                <input className="input" name="cliffhanger" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder="Opcional: con qué se queda la mesa" />
               </label>
               <div className="row">
                 {!confirmClose ? (
