@@ -15,7 +15,7 @@ const platformImports = [
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.expo/**', '**/.next/**', 'apps/sheets/**', '.playwright-mcp/**', '.claude/**'],
+    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.expo/**', '**/.next/**', 'apps/web/next-env.d.ts', 'apps/sheets/**', '.playwright-mcp/**', '.claude/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

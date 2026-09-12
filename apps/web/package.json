@@ -1,0 +1,35 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "description": "La mesa en el navegador (Next.js 15): acceso, mesas, creacion e invitaciones, la mesa con narrativa y dialogo, fichas, voz con Web Speech y modo pantalla para compartir",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0 --port 3000",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bundle-pack": "tsx scripts/bundle-pack.ts",
+    "clean": "rm -rf .next"
+  },
+  "dependencies": {
+    "@rpg-ngn/api-client": "workspace:*",
+    "@rpg-ngn/content": "workspace:*",
+    "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/rules": "workspace:*",
+    "@rpg-ngn/ui-logic": "workspace:*",
+    "next": "15.5.25",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/react": "~19.2.0",
+    "@types/react-dom": "~19.2.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
