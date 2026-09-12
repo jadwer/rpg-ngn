@@ -75,9 +75,20 @@ Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
 - [ ] Selector de voz del sistema en la barra de TTS (`getAvailableVoicesAsync`, se elige de oido porque la API no trae sexo), voz recordada por telefono, tono mas grave para el narrador y distinto por NPC. Mientras, cada jugador cambia la voz por defecto del telefono (Google TTS: Instalar datos de voz > Español > Voz II/III; iOS: Juan es-MX)
 - [ ] La banda de "nadie esta narrando" y la barra de TTS dejan poca narracion visible en pantalla chica
 
+## Entrega 5b: Web, el producto principal (docs/11 D8, directriz del 2026-09-06)
+
+`apps/web` en Next.js 15 con mesa propia, independiente de la app movil; `apps/sheets` como referencia visual y una vista limpia "en pantalla" para streamers. Lo que Gabino listo el 2026-09-11 como faltante y aqui queda explicito:
+
+- [ ] Modulo de usuario: registro (Atomo ya da login por token), edicion de perfil, visualizacion, amigos
+- [ ] Crear mesas eligiendo pack, ruleset y personaje del anfitrion; invitar; abrir y cerrar sesiones. La API ya lo soporta, faltan las pantallas (tambien en la app movil)
+- [ ] Ajustes del usuario y de la mesa: proveedor de DM (BYOK local o de servicio, pago por sesion, One Shot, con probe al guardar), voz por defecto e idioma. Docs/09 exige el proveedor antes de jugar
+- [ ] Landing publica y la mesa completa (narrativa, dialogo, fichas, TTS) con paridad funcional con la app
+- [ ] Admin con `@atomo/ui` y `@atomo/core`
+
 ## Entrega 6: DM IA
 
 - `packages/narrative`: context builder de cuatro capas, adapter Anthropic, probe de capacidad
+- Premisa de mesa escrita por el usuario al crear la mesa o abrir la sesion (campaña, escena, tono, "esta noche esperan a Calder en la posada"): entra al contexto del DM como capa propia, tratada como contenido no confiable igual que el texto de packs. Sustituye al guion fijo del DM scripted para jugar de verdad
 - Clave custodiada en servidor, redaccion en logs
 - 6b: `apps/host` para modelos locales (Ollama)
 - 6c: voz neural por bloque para el tier de pago (docs/09, "el usuario oye lo que paga"): `SpeechProvider` del lado servidor con el contrato de OpenAI `/v1/audio/speech`, audio generado por bloque en paralelo a la resolucion del turno y expuesto como `audioUrl` en `TurnBlock`, voz por NPC via `speakerRef`. Proveedores: VoiceStudio (local o self-hosted, AGPL usado sin modificar como servicio aparte; motores con licencia comercial, no OmniVoice que es CC-BY-NC) y OpenAI TTS o ElevenLabs en produccion sin GPU. Evaluado el 2026-09-07
