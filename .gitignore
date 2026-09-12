@@ -22,3 +22,7 @@ coverage/
 
 # Grafo de codigo de Graphify (se regenera con graphify update .)
 graphify-out/
+
+# Next.js (apps/web): build y tipos generados
+.next/
+apps/web/next-env.d.ts
