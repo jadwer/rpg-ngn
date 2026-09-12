@@ -30,7 +30,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onBack }: Pro
         <View style={styles.spacer} />
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://192.168.100.16:8010" hint="La IP de la laptop que corre la API, en la misma red Wi-Fi." />
+        <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://IP-de-la-laptop:8010" hint="La IP de la laptop que corre la API, en la misma red Wi-Fi." />
         <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" placeholder="jaz@example.com" />
         <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={() => canSubmit && onLogin(serverUrl, email, password)} />
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}

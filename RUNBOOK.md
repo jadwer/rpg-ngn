@@ -1,6 +1,6 @@
 # Runbook local
 
-Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-11: WSL en modo espejo (IP `192.168.100.16`), Postgres 16 como servicio, engine y API en desarrollo.
+Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-11: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
 
 Puertos del proyecto: engine `3100`, API `8010`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
 
@@ -44,7 +44,7 @@ Crea una mesa nueva con Jaz (Zahira) y Armando (Calder), abre la sesion 003, res
 ## 3. Telefonos
 
 1. Expo Go en cada telefono, misma Wi-Fi que la laptop. Escanear el QR de la terminal 3.
-2. "Jugar en mesa" > servidor `http://192.168.100.16:8010`.
+2. "Jugar en mesa": el campo servidor ya trae la IP de la laptop con el puerto 8010 (la toma del QR de Metro). Si el telefono guardo una IP vieja, borrarla y escribir la nueva una vez.
 3. Telefono A: `jaz@example.com` / `password`. Telefono B: `armando@example.com` / `password`.
 4. Entrar a la mesa mas reciente. Cada uno escribe su accion; cuando los dos respondieron, cualquiera cierra el turno. En dos o tres segundos ambos ven los bloques nuevos y el turno siguiente abierto.
 

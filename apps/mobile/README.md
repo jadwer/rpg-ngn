@@ -62,16 +62,16 @@ Exportar el bundle sin telefono, como hace el CI: `pnpm --filter mobile exec exp
 
 ## Jugar en LAN
 
-Dos telefonos y la laptop en el mismo Wi-Fi. La IP de la laptop es `192.168.100.16` (si cambia, `hostname -I` en WSL con red en espejo, o `ipconfig` en Windows; la app deja editarla).
+Dos telefonos y la laptop en el mismo Wi-Fi. La app toma por defecto la IP con la que el telefono llego a Metro (la del QR) y le pone el puerto 8010, asi que no hay que escribirla salvo que la API corra en otra maquina; el campo sigue siendo editable. Para ver la IP actual: `hostname -I` en WSL con red en espejo, o `ipconfig` en Windows.
 
 1. **Engine**, desde la raiz de rpg-ngn, escuchando en todas las interfaces:
 
    ```bash
    pnpm build
-   HOST=0.0.0.0 PORT=3100 ENGINE_TOKEN=devtoken pnpm --filter engine dev
+   pnpm --filter engine dev
    ```
 
-   (o un `apps/engine/.env` con esas tres lineas, que `dev` y `start` cargan solos).
+   (`apps/engine/.env` trae `ENGINE_TOKEN`, `HOST=0.0.0.0` y `PORT=3100`; `dev` y `start` lo cargan solos. Si falta, copiar `.env.example`.)
 
 2. **API**, desde `~/dev/rpg-ngn-api`, con `ENGINE_URL=http://127.0.0.1:3100` y el mismo `ENGINE_TOKEN` en su `.env`, y la cola en `sync` (asi resuelve el turno dentro de la peticion de cierre):
 
@@ -79,7 +79,7 @@ Dos telefonos y la laptop en el mismo Wi-Fi. La IP de la laptop es `192.168.100.
    php artisan serve --host 0.0.0.0 --port 8010
    ```
 
-   Comprobar desde el telefono abriendo `http://192.168.100.16:8010/api/v1/system-health/ping` en el navegador. Si no responde, WSL no esta en modo espejo de red (`networkingMode=mirrored` en `.wslconfig`) o el firewall de Windows bloquea el puerto.
+   Comprobar desde el telefono abriendo `http://<IP de la laptop>:8010/api/v1/system-health/ping` en el navegador. Si no responde, WSL no esta en modo espejo de red (`networkingMode=mirrored` en `.wslconfig`) o el firewall de Windows bloquea el puerto.
 
 3. **Mesa**: la API sembrada trae a `gabino@example.com` (DM), `jaz@example.com` y `armando@example.com`, contraseña `password`. Si no hay mesa con sesion planeada, `pnpm --filter mobile smoke-api` crea una y la deja con la sesion 003 cerrada; para dejarla abierta y jugar desde los telefonos, crear la mesa con los curl de amistad e invitacion de ese script y abrir la sesion desde la app (mando del DM) o con curl:
 
@@ -89,7 +89,7 @@ Dos telefonos y la laptop en el mismo Wi-Fi. La IP de la laptop es `192.168.100.
 
 4. **Metro**, desde la raiz: `pnpm --filter mobile start` (con `-- --tunnel` si los telefonos no ven la IP de WSL). Escanear el QR con Expo Go (SDK 57) en los dos telefonos.
 
-5. En cada telefono: **Jugar en mesa**, servidor `http://192.168.100.16:8010`, entrar como `jaz@example.com` en uno y `armando@example.com` en el otro, abrir la mesa.
+5. En cada telefono: **Jugar en mesa**, el servidor ya viene lleno con la IP de la laptop, entrar como `jaz@example.com` en uno y `armando@example.com` en el otro, abrir la mesa.
 
 6. El DM abre la sesion desde un tercer dispositivo entrando como `gabino@example.com` (el mando del DM aparece encima del cuadro de respuesta), o con el curl del paso 3. En los telefonos aparece "Turno 1: Faltan: Zahira, Calder".
 

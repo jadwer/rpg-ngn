@@ -1,3 +1,4 @@
+import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
 
 /**
@@ -6,7 +7,21 @@ import * as SecureStore from 'expo-secure-store'
  * AsyncStorage). Cada lectura y escritura va en try/catch porque en web y en
  * simuladores sin keychain el modulo puede no estar.
  */
-export const DEFAULT_SERVER_URL = 'http://192.168.100.16:8010'
+const API_PORT = 8010
+
+/**
+ * URL por defecto de la API. En desarrollo la laptop que sirve Metro es la
+ * misma que corre la API, asi que se toma la IP con la que el telefono llego
+ * al bundle (`hostUri`, por ejemplo `192.168.100.11:8081`) y se cambia el
+ * puerto; un cambio de DHCP ya no deja la app apuntando a una IP vieja. Sin
+ * Metro (build de tienda) queda el servidor publico, que hoy no existe.
+ */
+export function defaultServerUrl(): string {
+  const host = Constants.expoConfig?.hostUri?.split(':')[0]
+  return host ? `http://${host}:${API_PORT}` : 'http://127.0.0.1:8010'
+}
+
+export const DEFAULT_SERVER_URL = defaultServerUrl()
 
 const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user' } as const
 
@@ -35,9 +50,10 @@ async function write(key: string, value: string | null): Promise<void> {
 
 export const storage = {
   async serverUrl(): Promise<string> {
-    return (await read(KEYS.serverUrl)) ?? DEFAULT_SERVER_URL
+    return (await read(KEYS.serverUrl)) ?? defaultServerUrl()
   },
-  setServerUrl: (url: string) => write(KEYS.serverUrl, url),
+  /** Solo persiste una URL escrita a mano; la derivada de Metro se recalcula en cada arranque. */
+  setServerUrl: (url: string) => write(KEYS.serverUrl, url === defaultServerUrl() ? null : url),
 
   token: () => read(KEYS.token),
   setToken: (token: string | null) => write(KEYS.token, token),
