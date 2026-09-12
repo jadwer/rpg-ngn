@@ -1,11 +1,13 @@
 'use client'
 
-import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
 import Link from 'next/link'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
 import { RequireSession } from '../../../components/RequireSession'
+import { UserBar } from '../../../components/UserBar'
+import { describePreset, providerForNewTable, selectablePresets } from '../../../lib/dmPresets'
 import { PACK_OPTIONS } from '../../../lib/pack'
 import { packCharacters } from '../../../lib/sheets'
 import { usePack } from '../../../lib/usePack'
@@ -27,18 +29,39 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
+  const [presets, setPresets] = useState<DmPreset[]>([])
+  const [defaultPreset, setDefaultPreset] = useState('')
+  const [preset, setPreset] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<TableSummary | null>(null)
 
   const characters = useMemo(() => (pack ? packCharacters(pack) : []), [pack])
 
+  // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
+  useEffect(() => {
+    let alive = true
+    void client.listDmPresets().then(
+      (result) => {
+        if (!alive) return
+        setPresets(selectablePresets(result.presets))
+        setDefaultPreset(result.defaultPreset)
+        setPreset(result.defaultPreset)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setBusy(true)
     setError(null)
     try {
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.ruleset, premise })
+      const provider = providerForNewTable(preset, defaultPreset)
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.ruleset, premise, ...(provider ? { settings: { provider: provider.model ? provider : { preset: provider.preset } } } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -56,13 +79,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   if (created) {
     return (
       <main className="page">
-        <div className="topbar">
-          <Link href="/mesas" className="btn ghost small">
-            Mesas
-          </Link>
-          <h1>{created.name}</h1>
-          <span className="who">mesa creada</span>
-        </div>
+        <UserBar title={created.name} user={user} />
         <div className="card stack">
           <p className="hint">La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</p>
           <InvitePanel client={client} table={created} meId={user.id} pack={pack} onChanged={reloadCreated} onUnauthorized={unauthorized} />
@@ -78,13 +95,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
   return (
     <main className="page">
-      <div className="topbar">
-        <Link href="/mesas" className="btn ghost small">
-          Mesas
-        </Link>
-        <h1>Nueva mesa</h1>
-        <span className="who">{user.name}</span>
-      </div>
+      <UserBar title="Nueva mesa" user={user} />
 
       <form className="card stack" onSubmit={(e) => void submit(e)}>
         <label className="field">
@@ -108,6 +119,24 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           {packError ? <div className="error">{packError}</div> : null}
           {pack ? <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone /> : <p className="hint">Cargando el pack...</p>}
         </div>
+
+        {presets.length > 0 ? (
+          <label className="field">
+            <span>Director de juego</span>
+            <select className="select" name="dm" value={preset} onChange={(e) => setPreset(e.target.value)}>
+              {presets.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {describePreset(p.name)}
+                  {p.default ? ' (el del servidor)' : ''}
+                  {p.model ? `, ${p.model}` : ''}
+                </option>
+              ))}
+            </select>
+            <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+              Se puede cambiar y probar después desde el mando del anfitrión, pestaña DM.
+            </span>
+          </label>
+        ) : null}
 
         <label className="field">
           <span>Premisa de la mesa (opcional)</span>

@@ -3,8 +3,10 @@
 import { ApiError, memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { FriendsPanel } from '../../components/FriendsPanel'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
+import { UserBar } from '../../components/UserBar'
 import { characterName } from '../../lib/pack'
 import { seatLabel } from '../../lib/tableSetup'
 import { usePack } from '../../lib/usePack'
@@ -43,13 +45,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
 
   return (
     <main className="page">
-      <div className="topbar">
-        <button type="button" className="btn ghost small" onClick={logout}>
-          Salir
-        </button>
-        <h1>Tus mesas</h1>
-        <span className="who">{user.name}</span>
-      </div>
+      <UserBar title="Tus mesas" user={user} back={null} onLogout={logout} />
 
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
         <Link href="/mesas/nueva" className="btn primary">
@@ -99,6 +95,10 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
             </Link>
           )
         })}
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <FriendsPanel client={client} meId={user.id} onUnauthorized={unauthorized} />
       </div>
     </main>
   )

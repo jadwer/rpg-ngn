@@ -76,8 +76,9 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         return
       }
       try {
-        const user = await client.findUserByEmail(value)
-        if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}.`)
+        // Lookup por correo exacto, abierto a cualquier cuenta (entrega 5b).
+        const user = await client.lookupUser(value)
+        if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}. Pídele que se registre en esta misma web.`)
         else if (user.id === meId) setNotice('Ese correo es el tuyo.')
         else setFound(user)
       } catch (caught) {
