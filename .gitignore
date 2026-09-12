@@ -22,3 +22,4 @@ coverage/
 
 # Grafo de codigo de Graphify (se regenera con graphify update .)
 graphify-out/
+.claude/worktrees/
