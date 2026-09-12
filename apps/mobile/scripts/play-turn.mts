@@ -1,9 +1,10 @@
 /**
  * Juega un turno completo contra la API y el engine vivos usando solo
  * @rpg-ngn/api-client (lo mismo que hace la app): mesa nueva, amistades e
- * invitaciones (comandos que la app no expone, por fetch directo), sesion
- * abierta por el DM, respuestas de jaz y armando, cierre, polling hasta que
- * el engine narra y el turno 2 abre, y cierre de sesion por el DM.
+ * invitaciones (aqui por fetch directo, para que el smoke no dependa de la
+ * UI), sesion abierta por el anfitrion, respuestas de jaz y armando, cierre,
+ * polling hasta que el engine narra y el turno 2 abre, y cierre de sesion
+ * por el anfitrion. El asiento se llama `dm` en la API; el DM es la IA.
  */
 import { ApiError, createApiClient, memberOf, type ApiClient } from '@rpg-ngn/api-client'
 
@@ -30,25 +31,25 @@ async function rawToken(email: string): Promise<string> {
 const log = (label: string, value: unknown) => console.log(`${label}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
 
 async function main(): Promise<void> {
-  const dm = await loginAs('gabino@example.com')
+  const host = await loginAs('gabino@example.com')
   const jaz = await loginAs('jaz@example.com')
   const armando = await loginAs('armando@example.com')
-  const dmToken = await rawToken('gabino@example.com')
+  const hostToken = await rawToken('gabino@example.com')
 
-  // Mesa nueva por JSON:API (la app no crea mesas; lo hace la web o curl).
+  // Mesa nueva por JSON:API, como hace la pantalla Crear mesa.
   const created = await fetch(`${API}/api/v1/tables`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'application/vnd.api+json', Authorization: `Bearer ${dmToken}` },
+    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'application/vnd.api+json', Authorization: `Bearer ${hostToken}` },
     body: JSON.stringify({ data: { type: 'tables', attributes: { name: `Play ${new Date().toISOString().slice(11, 19)}`, packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0' } } }),
   })
   const tableId = ((await created.json()) as { data: { id: string } }).data.id
   log('mesa', tableId)
 
   for (const [player, character] of [[jaz, 'zahira'], [armando, 'calder']] as const) {
-    const friendship = await fetch(`${API}/api/v1/friendships`, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${dmToken}` }, body: JSON.stringify({ friend_id: Number(player.id) }) })
+    const friendship = await fetch(`${API}/api/v1/friendships`, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${hostToken}` }, body: JSON.stringify({ friend_id: Number(player.id) }) })
     const friendshipId = ((await friendship.json()) as { data?: { id: number } }).data?.id
     const accepted = await command(await rawToken(player.id === jaz.id ? 'jaz@example.com' : 'armando@example.com'), `/api/v1/friendships/${friendshipId}/accept`, {})
-    const invited = await command(dmToken, `/api/v1/tables/${tableId}/members`, { user_id: Number(player.id), character_id: character })
+    const invited = await command(hostToken, `/api/v1/tables/${tableId}/members`, { user_id: Number(player.id), character_id: character })
     log(`amistad e invitacion (${character})`, { accepted, invited })
   }
 
@@ -59,8 +60,8 @@ async function main(): Promise<void> {
   const forbidden = await jaz.api.openSession(campaignId, '003').catch((e: unknown) => e)
   log('jaz intenta abrir sesion', forbidden instanceof ApiError ? `${forbidden.status} ${forbidden.message}` : 'sin error (mal)')
 
-  const turn = await dm.api.openSession(campaignId, '003', 'Valdoria, tres dias despues')
-  log('sesion abierta por el DM', { turn: turn.id, number: turn.number, status: turn.status, required: turn.required })
+  const turn = await host.api.openSession(campaignId, '003', 'Valdoria, tres dias despues')
+  log('sesion abierta por el anfitrion', { turn: turn.id, number: turn.number, status: turn.status, required: turn.required })
 
   const r1 = await jaz.api.respond(turn.id, 'Miro la campana de bronce con cuidado.')
   const r2 = await armando.api.respond(turn.id, 'La sigo de cerca, con la llave en la mano.')
@@ -94,9 +95,9 @@ async function main(): Promise<void> {
   const ajena = await jaz.api.playerProjection(campaignId, 'calder').catch((e: unknown) => e)
   log('proyecciones', { propia: { seq: mine.seq, hp: mine.projection.character.hp }, mundo: { seq: world.seq, calder: world.projection.characters['calder']?.hp }, ajena: ajena instanceof ApiError ? `${ajena.status}` : 'permitida (mal)' })
 
-  const sessions = await dm.api.listSessions(campaignId)
+  const sessions = await host.api.listSessions(campaignId)
   const open = sessions.find((s) => s.status === 'open')!
-  const ended = await dm.api.closeSession(open.id, 'La campana suena sola.')
+  const ended = await host.api.closeSession(open.id, 'La campana suena sola.')
   const final = await jaz.api.tableState(tableId, after)
   log('sesion cerrada', { ...ended, sessionAhora: final.session, turnAhora: final.turn })
 

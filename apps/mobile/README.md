@@ -2,28 +2,57 @@
 
 Superficie del jugador (docs/09) en Expo, con dos modos que se eligen al abrir la app:
 
-- **Jugar en mesa** (entrega 5): contra `rpg-ngn-api` con `@rpg-ngn/api-client`. Login por token, mesas del usuario, la mesa con polling, respuesta y cierre de turno, mando del DM, fichas con el estado vivo.
+- **Jugar en mesa** (entrega 5): contra `rpg-ngn-api` con `@rpg-ngn/api-client`. Login por token, mesas del usuario, crear mesa e invitar, la mesa con polling, respuesta y cierre de turno, mando del anfitrion, fichas con el estado vivo.
 - **Leer sin conexion** (entrega 3): el pack piloto y su log viajan dentro de la app, se reducen en el telefono con `@rpg-ngn/campaign` y no hay servidor ni DM.
 
-Las dos comparten las vistas, las fichas en modal, la narracion por voz y la bandera de narrador. Tema pergamino por defecto (serif del sistema: Georgia en iOS, la serif de Android). Los componentes viven aqui, en `src/`; la logica (bloques, vistas, velado, cola de TTS, estado del turno) esta en `packages/ui-logic` y no importa React.
+Las dos comparten las vistas, las fichas en modal, la narracion por voz y la bandera de narrador. Tema oscuro de `apps/sheets` (el mismo de la web) con Cinzel para titulos y Crimson Pro para texto. Los componentes viven aqui, en `src/`; la logica (bloques, vistas, velado, cola de TTS, estado del turno) esta en `packages/ui-logic` y no importa React.
+
+Vocabulario: el asiento del dueño se llama `dm` en la API (se renombrara despues), pero en pantalla es el **anfitrion**. El **DM** es siempre la IA; "El DM esta narrando..." se refiere a ella.
 
 ## Que hace en linea
 
-- **Conexion**: URL del servidor (por defecto `http://192.168.100.16:8010`, editable y recordada) y login con correo y contraseña. El token de Sanctum va en `expo-secure-store`, nunca en AsyncStorage (docs/11, D8). Al volver a abrir la app entra sola mientras el token viva; un 401 en cualquier pantalla borra la sesion y vuelve al login con aviso.
-- **Mesas**: las mesas donde el usuario es miembro, con su papel (DM o personaje) y quien mas esta.
-- **Mesa**: polling cada 1.5 s a `GET /api/v1/tables/{id}/state?after=<ultimo bloque>` (docs/11, D5). Los bloques del DM se acumulan y se pintan con las mismas vistas **narrativa** y **dialogo** del modo offline; los retratos salen del pack empaquetado por `speakerRef`. Con el interruptor "Leer lo nuevo" los bloques que llegan se leen en voz alta sin cortar la lectura en curso.
-- **Turno** (docs/09, "Respuesta y cierre"): cuadro de respuesta siempre visible, quien ya respondio y quien falta (nombres, no textos), boton de cierre cuando no falta ningun interpelado (cualquiera puede cerrar), "Forzar cierre" solo para el DM, aviso "el DM esta narrando" en `closing` y `resolving`, y el error del engine si el turno se reabre.
-- **Mando del DM**: abrir la sesion con su codigo de tres digitos (sugiere la siguiente planeada del pack) y un momento del mundo opcional; cerrarla con un cliffhanger opcional.
+- **Conexion**: URL del servidor (por defecto la IP con la que el telefono llego a Metro mas el puerto 8010, editable y recordada) y login con correo y contraseña. El token de Sanctum va en `expo-secure-store`, nunca en AsyncStorage (docs/11, D8). Al volver a abrir la app entra sola mientras el token viva; un 401 en cualquier pantalla borra la sesion y vuelve al login con aviso.
+- **Mesas**: las mesas donde el usuario es miembro, con su asiento (anfitrion o personaje) y quien mas esta, con retratos. Boton **Crear mesa**.
+- **Crear mesa** (paridad con la web): nombre, personaje del anfitrion con retrato (o sin personaje: solo dirige), premisa opcional que el DM usa como punto de partida (`settings.premise`). La mesa se crea con `createTable` y el personaje con `setOwnerCharacter`; despues aparece el panel de invitados y el boton para entrar.
+- **Invitar**: la API exige amistad aceptada antes de invitar. El panel muestra quien esta en la mesa, las solicitudes de amistad pendientes (para aceptarlas), un buscador por correo (primero entre los conocidos; `users?filter[email]` solo lo permite la API a cuentas admin, y si devuelve 403 la app lo dice y ofrece la lista de amigos), y por cada persona encontrada el paso que toca: pedir amistad, aceptar la suya, o elegir personaje e invitar. Vive en la mesa nueva y en el mando del anfitrion (boton Invitados, en un modal).
+- **Mesa**: polling cada 1.5 s a `GET /api/v1/tables/{id}/state?after=<ultimo bloque>` (docs/11, D5). Los bloques del DM se acumulan y se pintan con las mismas vistas **narrativa** y **dialogo** del modo offline; los retratos salen del pack empaquetado por `speakerRef`. El `viewer` del estado manda sobre el miembro con el que se entro (por si el anfitrion cambia su personaje).
+- **Turno** (docs/09, "Respuesta y cierre"): cuadro de respuesta siempre visible, quien ya respondio y quien falta (nombres, no textos), `Idempotency-Key` estable por turno (reintentar no duplica), boton de cierre cuando no falta ningun interpelado (cualquiera puede cerrar), "Forzar cierre (anfitrion)", y mientras el turno esta en `closing` o `resolving` el pie de la narracion muestra "El DM esta narrando..." con su spinner (un turno con IA tarda de 20 a 35 s; el polling sigue y los bloques llegan solos). Si el turno se reabre, el error del engine.
+- **Mando del anfitrion**: abrir la sesion con su codigo de tres digitos (sugiere uno mas que la mayor jugada, o la siguiente planeada del pack) y una nota de sesion que el DM recibe; cerrarla con cliffhanger opcional y confirmacion; ver la premisa; invitados.
 - **Fichas** en modal, como en offline, con el estado vivo: la propia desde `player:<personaje>`, las ajenas desde `world`. Misma regla de velado; un personaje que un miembro de la mesa ha tomado deja de estar velado.
 - **Red**: si el servidor no responde, la app lo dice y sigue reintentando; un 409 refresca el estado (el turno cambio por debajo); 403 y 422 muestran el mensaje de la API.
+
+## Voz
+
+- `expo-speech` sobre el TTS del sistema, bloque a bloque. En Android no hay pausa nativa: Pausa detiene y Seguir salta al bloque siguiente (docs/09).
+- **Una linea plegable** debajo del selector de vista: Leer (o Pausa, Seguir, Parar durante la lectura) y un resumen de estado ("Leyendo 2 de 5", "Otro telefono narra", "Nadie narra en voz alta"). Desplegada: Siguiente, la voz elegida, la velocidad, "Leer lo nuevo desde este telefono" (online), la bandera de narrador y los avisos. Asi la narracion ocupa la pantalla.
+- **Selector de voz**: `Speech.getAvailableVoicesAsync()` filtrado a `es*`. El sistema no dice si una voz es de hombre o de mujer, asi que cada fila tiene **Oir** y se elige de oido; se muestran nombre, idioma y calidad (mejorada o normal). La elegida viaja en `voice` (identificador) a `speak` y se recuerda por telefono en el almacen seguro, junto con la velocidad (0.70x a 1.40x en pasos de 0.05) y el tono del narrador (0.85 por defecto, entre 0.70 y 1.10). Sin voz elegida, el sistema usa la suya para `es-MX`.
+- **Tono por hablante** (`src/speech/voices.ts`, con tests): narracion y bloques de sistema con el tono del narrador (mas grave); la party al natural (1.0); cada NPC con un tono fijo entre 0.90 y 1.12 elegido por hash de su `speakerRef`, asi el posadero suena igual en todos los turnos. Las tiradas llevan el tono de quien tira.
+- Si el telefono no tiene voz en español, aviso una sola vez (se recuerda con Entendido). Para instalar una: Android, Ajustes > Texto a voz > Instalar datos de voz > Español; iOS, Accesibilidad > Contenido leido > Voces.
+
+## Teclado en Android
+
+Expo Go 57 dibuja la app de borde a borde en Android, y con eso el sistema ya no encoge la ventana al abrir el teclado aunque `softwareKeyboardLayoutMode` sea `resize` (es el valor por defecto y queda explicito en `app.json`; el propio esquema de configuracion de Expo avisa de que con la barra de estado translucida hay que usar `KeyboardAvoidingView`). Por eso la mesa, la conexion y la mesa nueva usan `KeyboardAvoidingView` con `behavior="padding"` **en las dos plataformas**: acolcha el fondo con la altura del teclado y la columna se reparte de nuevo, la lista de narracion (flex 1) se encoge y el cuadro con Enviar queda encima del teclado. Se descarto `height` porque fija la altura con la del primer layout y se descuadra cuando aparece un aviso o cambia la orientacion.
+
+Ademas, al enfocar el cuadro la narracion baja al final (se sigue viendo lo ultimo que dijo el DM sobre el teclado), los chips de quien respondio se esconden mientras se escribe, el cuadro crece hasta 120 px y la lista cierra el teclado al arrastrar.
+
+Que mirar en el telefono (no hay emulador en la laptop):
+
+1. Android, mesa con turno abierto: tocar el cuadro. El teclado debe subir el panel entero (cuadro y Enviar visibles) y la narracion debe quedar con lo ultimo a la vista. Si el panel sube el doble de la altura del teclado (hueco vacio entre el panel y el teclado), la ventana si se esta encogiendo: quitar `behavior` en Android en `TableScreen`.
+2. iOS: mismo gesto; `padding` es lo que RN recomienda ahi.
+3. Escribir tres lineas: el cuadro crece y Enviar sigue visible. Arrastrar la narracion hacia abajo cierra el teclado.
+4. Anfitrion con el mando desplegado y el teclado abierto: si el mando mas el cuadro no caben, plegar el mando (toca su cabecera). Queda pendiente meter el pie en un scroll propio si estorba.
 
 ## Que hace sin conexion
 
 - Selector de sesion (001, 002, 003) con briefing, fecha y quien esta en la mesa.
 - Vista de sesion con las dos formas de pintar los mismos bloques.
 - Fichas de toda la party con HP, Fortuna, inventario y condiciones del estado reducido. En la sesion 003 los seis viajeros sin dueño salen velados, igual que en `apps/sheets`.
-- Narracion por voz con `expo-speech`, bloque a bloque. En Android no hay pausa nativa: Pausa detiene y Seguir salta al bloque siguiente (docs/09).
+- Narracion por voz con la misma linea plegable y el mismo selector.
 - Bandera de narrador local.
+
+## Diseño
+
+Tema oscuro de `apps/sheets` (`src/theme.ts`): fondos `#17120e`, `#221a13`, `#2b2118`; dorado `#c9a35c` con sus variantes; tinta `#e8dcc8`; granate `#7d2f28` para la accion principal. Fuentes con `expo-font` y `@expo-google-fonts/cinzel` y `crimson-pro`, importadas por peso para que al bundle solo vayan las seis que se usan (regular y bold de Cinzel; regular, cursiva, semibold y bold de Crimson Pro). `Root` espera a `useFonts` antes de pintar, con la serif del sistema en la pantalla de espera; si las fuentes fallaran (viajan dentro del bundle, no deberia) la app arranca igual y el sistema pone la suya. Con fuentes propias React Native no sintetiza cursiva ni negrita: se usa la familia de la variante (`serifItalic`, `displayBold`), nunca `fontStyle` ni `fontWeight`. Las fichas en modal se conservan tal cual.
 
 ## Estructura
 
@@ -32,18 +61,21 @@ Las dos comparten las vistas, las fichas en modal, la narracion por voz y la ban
 | `scripts/bundle-pack.ts` | Empaqueta `content/packs/<pack>` y `campaigns/<pack>/events.jsonl` en `src/generated/` y copia los retratos a `assets/pack/` |
 | `scripts/play-turn.mts` | Smoke del cliente contra la API viva: mesa nueva, sesion, respuestas, cierre, polling, proyecciones, cierre de sesion (`pnpm --filter mobile smoke-api`) |
 | `src/generated/` | Generado, versionado. El test `src/pack/offline.test.ts` falla si esta desactualizado |
-| `src/pack/offline.ts` | `loadBundledPack` (pack en memoria, para los dos modos) y `loadOfflineCampaign` (ademas valida el log y reduce) |
-| `src/online/storage.ts` | URL del servidor, token y usuario en `expo-secure-store` |
+| `src/theme.ts` | Colores, familias de fuente por variante, `FONT_ASSETS` para `useFonts` |
+| `src/pack/offline.ts` | `loadBundledPack` (pack en memoria, para los dos modos), `loadOfflineCampaign` (ademas valida el log y reduce), `packCharacters`, `sessionList` |
+| `src/online/storage.ts` | URL del servidor, token, usuario y preferencias de voz en `expo-secure-store` |
+| `src/online/tableSetup.ts` | Decisiones puras de la mesa, espejo de `apps/web/src/lib/tableSetup.ts`: codigo sugerido, personajes libres, estado de cada amistad, textos de asiento; probado con vitest |
 | `src/online/useTableState.ts` | Polling del estado de la mesa; acumula bloques, distingue red caida de errores y avisa del 401 |
-| `src/online/OnlineRoot.tsx` | Flujo en linea: conexion, mesas, mesa |
+| `src/online/OnlineRoot.tsx` | Flujo en linea: conexion, mesas, mesa nueva, mesa |
 | `src/sheets/entries.ts` | Que se ve de cada ficha, offline (sesion y log) y online (miembros y proyecciones); probado con vitest |
-| `src/speech/expoSpeechEngine.ts` | `SpeechEngine` de ui-logic sobre `expo-speech` |
-| `src/hooks/useTts.ts` | La cola de TTS de ui-logic como hook; admite bloques nuevos y lectura automatica |
+| `src/speech/voices.ts` | Voces en español, ajustes acotados y tono por hablante, sin expo-speech; probado con vitest |
+| `src/speech/expoSpeechEngine.ts` | `SpeechEngine` de ui-logic sobre `expo-speech`: voz, velocidad y tono por item; lista de voces; muestra de voz |
+| `src/hooks/useTts.ts` | La cola de TTS de ui-logic como hook; voces, ajustes persistidos, lectura automatica y el aviso de sin voz en español |
 | `src/state/narrator.tsx` | Bandera de narrador (contexto local) |
-| `src/screens/` | `ModePicker`, `SessionPicker`, `SessionScreen`, `SheetsModal`, `online/ConnectScreen`, `online/TablesScreen`, `online/TableScreen` |
-| `src/components/` | `BlockGroups` (las dos vistas), `Sheet`, `TtsBar`, `NarratorBanner`, `Portrait`, `TurnPanel`, `DmPanel`, `Button`, `Field` |
+| `src/screens/` | `ModePicker`, `SessionPicker`, `SessionScreen`, `SheetsModal`, `online/ConnectScreen`, `online/TablesScreen`, `online/NewTableScreen`, `online/TableScreen` |
+| `src/components/` | `BlockGroups` (las dos vistas), `Sheet`, `TtsBar` (linea de voz plegable con la bandera de narrador), `VoicePicker`, `Portrait`, `TurnPanel`, `HostPanel`, `InvitePanel`, `CharacterPicker`, `Button`, `Field` |
 
-Sin libreria de navegacion a proposito: unas pocas pantallas y un modal no la necesitan, y cada dependencia nativa es un punto fragil del spike pnpm + Expo (docs/10, IA2).
+Sin libreria de navegacion a proposito: unas pocas pantallas y un modal no la necesitan, y cada dependencia nativa es un punto fragil del spike pnpm + Expo (docs/10, IA2). Por lo mismo no hay slider nativo (la velocidad y el tono van con pasos) ni AsyncStorage (las preferencias van al almacen seguro que ya estaba).
 
 ## Comandos
 
@@ -52,54 +84,28 @@ pnpm install                          # desde la raiz del monorepo
 pnpm build                            # compila packages/*; la app importa dist/
 pnpm --filter mobile bundle-pack      # regenerar tras cambiar el pack o el log
 pnpm --filter mobile typecheck
-pnpm --filter mobile test             # tests puros: pack empaquetado y entradas de fichas
+pnpm --filter mobile test             # tests puros: pack empaquetado, fichas, voces, preparacion de mesa
 pnpm --filter mobile smoke-api        # juega un turno contra la API viva (RPG_API_URL, por defecto 127.0.0.1:8010)
 pnpm --filter mobile start            # Metro; escanear el QR con Expo Go
 pnpm --filter mobile doctor           # expo-doctor
 ```
 
-Exportar el bundle sin telefono, como hace el CI: `pnpm --filter mobile exec expo export --platform android`.
+Exportar el bundle sin telefono, como hace el CI: `pnpm --filter mobile exec expo export --platform android` (debe listar seis `.ttf`).
 
-## Jugar en LAN
+## Probar en el telefono
 
-Dos telefonos y la laptop en el mismo Wi-Fi. La app toma por defecto la IP con la que el telefono llego a Metro (la del QR) y le pone el puerto 8010, asi que no hay que escribirla salvo que la API corra en otra maquina; el campo sigue siendo editable. Para ver la IP actual: `hostname -I` en WSL con red en espejo, o `ipconfig` en Windows.
+Servicios como en `RUNBOOK.md` (engine, API, Metro). Expo Go 57 en cada telefono, misma Wi-Fi.
 
-1. **Engine**, desde la raiz de rpg-ngn, escuchando en todas las interfaces:
-
-   ```bash
-   pnpm build
-   pnpm --filter engine dev
-   ```
-
-   (`apps/engine/.env` trae `ENGINE_TOKEN`, `HOST=0.0.0.0` y `PORT=3100`; `dev` y `start` lo cargan solos. Si falta, copiar `.env.example`.)
-
-2. **API**, desde `~/dev/rpg-ngn-api`, con `ENGINE_URL=http://127.0.0.1:3100` y el mismo `ENGINE_TOKEN` en su `.env`, y la cola en `sync` (asi resuelve el turno dentro de la peticion de cierre):
-
-   ```bash
-   php artisan serve --host 0.0.0.0 --port 8010
-   ```
-
-   Comprobar desde el telefono abriendo `http://<IP de la laptop>:8010/api/v1/system-health/ping` en el navegador. Si no responde, WSL no esta en modo espejo de red (`networkingMode=mirrored` en `.wslconfig`) o el firewall de Windows bloquea el puerto.
-
-3. **Mesa**: la API sembrada trae a `gabino@example.com` (DM), `jaz@example.com` y `armando@example.com`, contraseña `password`. Si no hay mesa con sesion planeada, `pnpm --filter mobile smoke-api` crea una y la deja con la sesion 003 cerrada; para dejarla abierta y jugar desde los telefonos, crear la mesa con los curl de amistad e invitacion de ese script y abrir la sesion desde la app (mando del DM) o con curl:
-
-   ```bash
-   curl -X POST http://127.0.0.1:8010/api/v1/campaigns/<campaña>/sessions -H "Authorization: Bearer <token del DM>" -H "Content-Type: application/json" -H "Accept: application/json" -d '{"code":"003"}'
-   ```
-
-4. **Metro**, desde la raiz: `pnpm --filter mobile start` (con `-- --tunnel` si los telefonos no ven la IP de WSL). Escanear el QR con Expo Go (SDK 57) en los dos telefonos.
-
-5. En cada telefono: **Jugar en mesa**, el servidor ya viene lleno con la IP de la laptop, entrar como `jaz@example.com` en uno y `armando@example.com` en el otro, abrir la mesa.
-
-6. El DM abre la sesion desde un tercer dispositivo entrando como `gabino@example.com` (el mando del DM aparece encima del cuadro de respuesta), o con el curl del paso 3. En los telefonos aparece "Turno 1: Faltan: Zahira, Calder".
-
-7. Cada jugador escribe su accion y envia. Cuando los dos han respondido, cualquiera toca **Cerrar turno y narrar**; en unos segundos llegan los bloques del DM a los dos telefonos, y el turno 2 abre con los interpelados. Con "Leer lo nuevo" activo en un solo telefono, ese narra en voz alta (docs/09, bandera de narrador).
-
-8. Al terminar, el DM cierra la sesion desde su mando (o `POST /api/v1/sessions/<id>/close`); la API congela el snapshot y la mesa queda sin sesion abierta.
+1. **Tema y fuentes**: al abrir, la espera sale en serif del sistema sobre fondo oscuro y en menos de un segundo entra la portada con Cinzel (titulo) y Crimson Pro (texto). Si Expo Go se queda en la espera, mirar la consola de Metro: es la carga de fuentes.
+2. **Anfitrion** (`gabino@example.com` / `password`): Jugar en mesa, Crear mesa. Nombre "Prueba movil ...", elegir personaje con retrato, escribir una premisa, Crear. En el panel de invitados: escribir `jaz@example.com`, Buscar (sale como conocida porque ya son amigos), elegir personaje, Invitar; lo mismo con `armando@example.com`. Ir a la mesa: el mando del anfitrion aparece desplegado; Abrir sesion con el codigo sugerido y una nota.
+3. **Jugadores** (`jaz@example.com`, `armando@example.com`): entrar a la mesa. Tocar el cuadro de respuesta (ver la seccion del teclado), escribir, Enviar. Cuando los dos respondieron, cualquiera toca Cerrar turno y narrar: el pie muestra "El DM esta narrando..." con spinner durante 20 a 35 s y los bloques llegan solos.
+4. **Voz**: desplegar la linea de voz (toca el resumen a la derecha de Leer), tocar el boton de la voz, Oir varias, elegir una, subir la velocidad, Oir con estos ajustes, Cerrar. Leer: la narracion debe sonar mas grave que un dialogo de la party, y un NPC con otro tono. Cerrar la app y volver: la voz elegida sigue.
+5. **Sin voz en español**: en un telefono sin datos de voz en español, al entrar a una mesa aparece el aviso dentro de la linea desplegada; Entendido lo quita y no vuelve.
 
 ## Lo que no hace todavia
 
-- No crea mesas ni invita: eso lo hace la web (entrega 6 en adelante) o curl. La app solo entra a mesas donde ya es miembro.
+- Registro de usuarios, perfil y amigos fuera de la mesa (entrega 5b, pendiente tambien en la web).
 - La bandera de narrador sigue siendo local; compartirla entre telefonos necesita un endpoint.
 - Los bloques del turno se piden desde el primero cada vez que se entra a la mesa (`after=0`); con sesiones largas convendra guardar el ultimo id.
-- El tema lo fija la app y usa la serif del sistema; las fuentes de `apps/sheets` (Cinzel, Crimson Pro) quedan para la pasada de acabado.
+- La premisa se escribe al crear; editarla despues no esta en la API.
+- El tema lo fija la app; el del pack (docs/09) llega cuando exista un pack que lo declare.

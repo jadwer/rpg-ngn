@@ -68,12 +68,14 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] El dueño de la mesa fija su propio personaje (`POST tables/{t}/members` sobre si mismo)
 - [x] Criterio del ADR: escena entera desde dos telefonos por LAN (Posada, 2026-09-11). Entrega 5 cerrada
 
-Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
+Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el rename en la API):
 
-- [ ] El asiento del dueño se llama "dm" y la app dice "Eres el DM"; en V1 el DM es siempre la IA. Renombrar a anfitrion en API y app, y elegir personaje al crear la mesa desde la app
-- [ ] Android: el teclado tapa el cuadro de respuesta (`KeyboardAvoidingView` sin `behavior` en Android; `softwareKeyboardLayoutMode: "resize"` o `behavior="height"` y scroll al input)
-- [ ] Selector de voz del sistema en la barra de TTS (`getAvailableVoicesAsync`, se elige de oido porque la API no trae sexo), voz recordada por telefono, tono mas grave para el narrador y distinto por NPC. Mientras, cada jugador cambia la voz por defecto del telefono (Google TTS: Instalar datos de voz > Español > Voz II/III; iOS: Juan es-MX)
-- [ ] La banda de "nadie esta narrando" y la barra de TTS dejan poca narracion visible en pantalla chica
+- [x] En la app el asiento `dm` se muestra como anfitrion en todo (mesas, mando, forzar cierre); el DM es la IA. Crear mesa desde la app con personaje del anfitrion (retrato) y premisa, e invitar con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje) desde la mesa nueva y desde el mando. Logica pura en `apps/mobile/src/online/tableSetup.ts` con tests
+- [ ] Renombrar el asiento `dm` a `host` en la API (y en `api-client`, web y app a la vez)
+- [x] Android: `KeyboardAvoidingView` con `behavior="padding"` en las dos plataformas (Expo Go 57 va edge-to-edge y `resize` ya no encoge la ventana; queda explicito en `app.json`), la narracion baja al final al enfocar, chips escondidos con el teclado abierto. Pendiente de confirmar en telefono; el README dice que mirar
+- [x] Selector de voz del sistema (`getAvailableVoicesAsync` filtrado a `es*`, nombre, idioma y calidad, boton Oir para elegir de oido), voz, velocidad y tono recordados por telefono en el almacen seguro, narrador a 0.85 (ajustable), party al natural y tono fijo por NPC (hash del `speakerRef`); `TtsItem` de ui-logic lleva tipo y hablante. Aviso de sin voz en español una sola vez
+- [x] La barra de TTS y la bandera de narrador son una sola linea plegable; la narracion ocupa la pantalla
+- [x] Tema oscuro de `apps/sheets` con Cinzel y Crimson Pro (`expo-font`, seis pesos importados por subruta); las fichas en modal se conservan
 
 ## Entrega 5b: Web, el producto principal (docs/11 D8, directriz del 2026-09-06)
 
