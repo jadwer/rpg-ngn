@@ -39,6 +39,8 @@ export interface TableSummary {
   oneShot: boolean
   /** `settings.premise`: la premisa que el anfitrion escribio y el DM usa como punto de partida. */
   premise: string | null
+  /** Ajustes crudos de la mesa (premisa, proveedor del DM); `providerChoice` y `withProvider` los interpretan. */
+  settings: Record<string, unknown>
   /** Viene con `include=campaign`; null si la mesa no tiene campaña. */
   campaignId: string | null
   /** Viene con `include=members.user`. */
