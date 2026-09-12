@@ -72,6 +72,15 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
     setVoiceNoticeDismissed(storage.voiceNoticeSeen())
   }, [])
 
+  // Titulo de la pestaña con el nombre de la mesa (y la sesion, si hay).
+  useEffect(() => {
+    const previous = document.title
+    document.title = `${table.name}${sessionCode ? `, sesión ${sessionCode}` : ''} | rpg-ngn`
+    return () => {
+      document.title = previous
+    }
+  }, [table.name, sessionCode])
+
   // El momento del mundo vive en la proyeccion world; se refresca cuando avanza la campaña.
   useEffect(() => {
     if (!campaignId || !sessionCode) {
