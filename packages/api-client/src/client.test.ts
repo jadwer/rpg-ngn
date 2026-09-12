@@ -36,7 +36,7 @@ const tablesDocument = {
     },
   ],
   included: [
-    { type: 'table-members', id: '4', attributes: { role: 'dm', characterId: null }, relationships: { user: { data: { type: 'users', id: '2' } } } },
+    { type: 'table-members', id: '4', attributes: { role: 'host', characterId: null }, relationships: { user: { data: { type: 'users', id: '2' } } } },
     { type: 'table-members', id: '5', attributes: { role: 'player', characterId: 'zahira' }, relationships: { user: { data: { type: 'users', id: '4' } } } },
     { type: 'users', id: '2', attributes: { name: 'Gabino', email: 'gabino@example.com' } },
     { type: 'users', id: '4', attributes: { name: 'Jaz', email: 'jaz@example.com' } },
@@ -95,7 +95,7 @@ describe('mesas', () => {
     const table = tables[0]!
     expect(table).toMatchObject({ id: '2', name: 'Smoke', packId: 'pilot', campaignId: '2' })
     expect(table.members).toEqual([
-      { id: '4', role: 'dm', characterId: null, userId: '2', userName: 'Gabino' },
+      { id: '4', role: 'host', characterId: null, userId: '2', userName: 'Gabino' },
       { id: '5', role: 'player', characterId: 'zahira', userId: '4', userName: 'Jaz' },
     ])
     expect(memberOf(table, 4)).toMatchObject({ role: 'player', characterId: 'zahira' })
@@ -128,14 +128,14 @@ describe('mesas', () => {
   it('crea la mesa como JSON:API con la premisa en settings y devuelve la mesa aplanada', async () => {
     const created = {
       data: { type: 'tables', id: '9', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', status: 'active', oneShot: false, settings: { premise: 'La posada al caer la noche.' } }, relationships: { members: { data: [{ type: 'table-members', id: '20' }] }, campaign: { data: { type: 'campaigns', id: '9' } } } },
-      included: [{ type: 'table-members', id: '20', attributes: { role: 'dm', characterId: null }, relationships: { user: { data: { type: 'users', id: '2' } } } }, { type: 'users', id: '2', attributes: { name: 'Gabino', email: 'gabino@example.com' } }],
+      included: [{ type: 'table-members', id: '20', attributes: { role: 'host', characterId: null }, relationships: { user: { data: { type: 'users', id: '2' } } } }, { type: 'users', id: '2', attributes: { name: 'Gabino', email: 'gabino@example.com' } }],
     }
     const { api, calls } = client({ 'POST /api/v1/tables?include=campaign%2Cmembers.user': { status: 201, body: created } })
     const table = await api.createTable({ name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: ' La posada al caer la noche. ' })
     expect(calls[0]?.init.headers['Content-Type']).toBe('application/vnd.api+json')
     expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ data: { type: 'tables', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', settings: { premise: 'La posada al caer la noche.' } } } })
     expect(table).toMatchObject({ id: '9', name: 'Posada', premise: 'La posada al caer la noche.', campaignId: '9' })
-    expect(table.members).toEqual([{ id: '20', role: 'dm', characterId: null, userId: '2', userName: 'Gabino' }])
+    expect(table.members).toEqual([{ id: '20', role: 'host', characterId: null, userId: '2', userName: 'Gabino' }])
 
     await api.createTable({ name: 'Sin premisa', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: '   ' })
     expect(JSON.parse(calls[1]?.init.body ?? '{}').data.attributes.settings).toBeUndefined()
@@ -145,10 +145,10 @@ describe('mesas', () => {
     const { api, calls } = client({
       'POST /api/v1/tables/9/members': (init) => {
         const body = JSON.parse(init.body ?? '{}') as { user_id: number; character_id: string | null }
-        return { status: body.user_id === 2 ? 200 : 201, body: { data: { id: body.user_id === 2 ? 20 : 21, table_id: 9, user_id: body.user_id, role: body.user_id === 2 ? 'dm' : 'player', character_id: body.character_id } } }
+        return { status: body.user_id === 2 ? 200 : 201, body: { data: { id: body.user_id === 2 ? 20 : 21, table_id: 9, user_id: body.user_id, role: body.user_id === 2 ? 'host' : 'player', character_id: body.character_id } } }
       },
     })
-    expect(await api.setOwnerCharacter('9', '2', 'narivyl')).toEqual({ id: 20, tableId: 9, userId: 2, role: 'dm', characterId: 'narivyl' })
+    expect(await api.setOwnerCharacter('9', '2', 'narivyl')).toEqual({ id: 20, tableId: 9, userId: 2, role: 'host', characterId: 'narivyl' })
     expect(await api.invite(9, 4, 'zahira')).toEqual({ id: 21, tableId: 9, userId: 4, role: 'player', characterId: 'zahira' })
     expect(calls.map((c) => JSON.parse(c.init.body ?? '{}'))).toEqual([{ user_id: 2, character_id: 'narivyl' }, { user_id: 4, character_id: 'zahira' }])
   })

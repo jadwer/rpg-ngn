@@ -19,7 +19,7 @@ export interface Profile extends AuthUser {
   role: string | null
 }
 
-export type MemberRole = 'dm' | 'player'
+export type MemberRole = 'host' | 'player'
 
 export interface TableMember {
   id: string

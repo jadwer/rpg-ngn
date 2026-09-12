@@ -66,7 +66,7 @@ describe('turnProgress', () => {
   })
 
   it('el DM sin personaje no responde pero puede forzar el cierre con faltantes', () => {
-    const dm = turnProgress(open, { role: 'dm', characterId: null })
+    const dm = turnProgress(open, { role: 'host', characterId: null })
     expect(dm).toMatchObject({ canRespond: false, canClose: false, canForceClose: true })
   })
 

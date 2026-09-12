@@ -63,7 +63,7 @@ export function TablesScreen({ user, tables, loading, error, pack, onOpen, onCre
                   {others.map((m) => (
                     <View key={m.id} style={styles.member}>
                       <Portrait path={m.characterId ? (pack?.characters.get(m.characterId)?.portrait ?? null) : null} name={m.userName ?? '?'} size={24} />
-                      <Text style={styles.memberText}>{`${m.userName ?? '?'}${m.role === 'dm' ? ' (anfitrión)' : ''}${m.characterId ? `: ${nameOf(m.characterId)}` : ''}`}</Text>
+                      <Text style={styles.memberText}>{`${m.userName ?? '?'}${m.role === 'host' ? ' (anfitrión)' : ''}${m.characterId ? `: ${nameOf(m.characterId)}` : ''}`}</Text>
                     </View>
                   ))}
                 </View>

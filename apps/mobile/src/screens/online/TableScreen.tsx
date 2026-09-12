@@ -54,7 +54,7 @@ export function TableScreen({ client, table, me, user, pack, onBack, onTableChan
 
   const turn = snapshot?.turn ?? null
   const viewer = useMemo(() => ({ role: snapshot?.viewer.role ?? me.role, characterId: snapshot?.viewer.characterId ?? me.characterId }), [snapshot?.viewer.role, snapshot?.viewer.characterId, me.role, me.characterId])
-  const isHost = viewer.role === 'dm'
+  const isHost = viewer.role === 'host'
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => pack?.characters.get(id)?.name ?? id, [pack])
   const sessionCode = snapshot?.session?.code ?? null

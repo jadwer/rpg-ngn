@@ -4,7 +4,7 @@ import { loadBundledPack } from '../pack/offline'
 import { acceptedFriends, cleanTableName, freeCharacters, friendshipWith, hostOf, isValidSessionCode, knownUsers, memberLine, PACK_OPTION, pendingReceived, seatLabel, suggestedSessionCode, takenCharacters } from './tableSetup'
 
 const members: TableMember[] = [
-  { id: '1', role: 'dm', characterId: 'narivyl', userId: '2', userName: 'Gabino' },
+  { id: '1', role: 'host', characterId: 'narivyl', userId: '2', userName: 'Gabino' },
   { id: '2', role: 'player', characterId: 'zahira', userId: '4', userName: 'Jaz' },
   { id: '3', role: 'player', characterId: null, userId: '5', userName: 'Armando' },
 ]

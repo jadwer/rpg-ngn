@@ -85,7 +85,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
                     <span key={m.id} className="member">
                       <Portrait path={m.characterId ? (pack?.characters.get(m.characterId)?.portrait ?? null) : null} name={m.userName ?? '?'} size={26} />
                       {m.userName ?? '?'}
-                      {m.role === 'dm' ? ' (anfitrión)' : ''}
+                      {m.role === 'host' ? ' (anfitrión)' : ''}
                       {m.characterId ? `: ${nameOf(m.characterId)}` : ''}
                     </span>
                   ))}

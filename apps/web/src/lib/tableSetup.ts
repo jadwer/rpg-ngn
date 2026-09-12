@@ -55,18 +55,18 @@ export function acceptedFriends(friendships: readonly Friendship[], meId: string
 
 /** El dueño de la mesa: el asiento `dm` (en la web se le llama anfitrion). */
 export function hostOf(table: Pick<TableSummary, 'members'>): TableMember | null {
-  return table.members.find((m) => m.role === 'dm') ?? null
+  return table.members.find((m) => m.role === 'host') ?? null
 }
 
 export function isHost(member: Pick<TableMember, 'role'> | null): boolean {
-  return member?.role === 'dm'
+  return member?.role === 'host'
 }
 
 /** Como se presenta un asiento en una lista: nombre, y su papel o personaje. */
 export function memberLine(member: TableMember, nameOf: (id: string) => string): string {
   const who = member.userName ?? 'Alguien'
   const character = member.characterId ? nameOf(member.characterId) : null
-  if (member.role === 'dm') return character ? `${who}, anfitrión, juega a ${character}` : `${who}, anfitrión`
+  if (member.role === 'host') return character ? `${who}, anfitrión, juega a ${character}` : `${who}, anfitrión`
   return character ? `${who} juega a ${character}` : `${who}, sin personaje`
 }
 
@@ -74,6 +74,6 @@ export function memberLine(member: TableMember, nameOf: (id: string) => string):
 export function seatLabel(me: TableMember | null, nameOf: (id: string) => string): string {
   if (!me) return 'No eres miembro de esta mesa'
   const character = me.characterId ? nameOf(me.characterId) : null
-  if (me.role === 'dm') return character ? `Eres el anfitrión y juegas a ${character}` : 'Eres el anfitrión, sin personaje'
+  if (me.role === 'host') return character ? `Eres el anfitrión y juegas a ${character}` : 'Eres el anfitrión, sin personaje'
   return character ? `Juegas a ${character}` : 'Sin personaje asignado'
 }

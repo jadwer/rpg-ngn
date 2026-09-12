@@ -62,7 +62,7 @@ export interface TurnSummary {
 }
 
 export interface Viewer {
-  role: 'dm' | 'player'
+  role: 'host' | 'player'
   characterId: string | null
 }
 
@@ -102,7 +102,7 @@ export function turnProgress(turn: TurnSummary | null, viewer: Viewer): TurnProg
     canRespond: open && viewer.characterId !== null && !hasResponded,
     hasResponded,
     canClose: open && complete,
-    canForceClose: open && !complete && viewer.role === 'dm',
+    canForceClose: open && !complete && viewer.role === 'host',
   }
 }
 
