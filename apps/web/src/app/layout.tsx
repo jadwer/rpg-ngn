@@ -7,9 +7,14 @@ import './globals.css'
 const cinzel = Cinzel({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-cinzel', display: 'swap' })
 const crimson = Crimson_Pro({ subsets: ['latin'], weight: ['400', '600'], style: ['normal', 'italic'], variable: '--font-crimson', display: 'swap' })
 
+export const APP_NAME = 'rpg-ngn'
+
 export const metadata: Metadata = {
-  title: 'rpg-ngn',
-  description: 'La mesa de rol con DM asistido por IA, en el navegador',
+  title: { default: `${APP_NAME}, la mesa de rol con DM de IA`, template: `%s | ${APP_NAME}` },
+  applicationName: APP_NAME,
+  description: 'Mesas de rol con amigos y un director de juego asistido por inteligencia artificial, en el navegador.',
+  appleWebApp: { title: APP_NAME, statusBarStyle: 'black-translucent', capable: true },
+  formatDetection: { telephone: false },
 }
 
 export const viewport: Viewport = {

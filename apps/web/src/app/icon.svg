@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#17120e"/>
+  <polygon points="32,6 55,19 55,45 32,58 9,45 9,19" fill="none" stroke="#c9a35c" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="32,16 46,40 18,40" fill="none" stroke="#c9a35c" stroke-width="2.5" stroke-linejoin="round"/>
+  <line x1="32" y1="6" x2="32" y2="16" stroke="#c9a35c" stroke-width="2.5"/>
+  <line x1="55" y1="45" x2="46" y2="40" stroke="#c9a35c" stroke-width="2.5"/>
+  <line x1="9" y1="45" x2="18" y2="40" stroke="#c9a35c" stroke-width="2.5"/>
+  <line x1="55" y1="19" x2="46" y2="40" stroke="#c9a35c" stroke-width="2"/>
+  <line x1="9" y1="19" x2="18" y2="40" stroke="#c9a35c" stroke-width="2"/>
+  <line x1="32" y1="58" x2="46" y2="40" stroke="#c9a35c" stroke-width="2"/>
+  <line x1="32" y1="58" x2="18" y2="40" stroke="#c9a35c" stroke-width="2"/>
+  <text x="32" y="36" text-anchor="middle" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#e6c67d">20</text>
+</svg>

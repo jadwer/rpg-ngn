@@ -1,9 +1,10 @@
 /**
- * Lo que la web recuerda entre recargas. Todo en `localStorage`, que es
- * provisional: el token de Sanctum deberia viajar en una cookie httpOnly
- * cuando la plataforma la exponga (docs/11, D8). Mientras, cada lectura y
- * escritura va en try/catch porque Safari en privado y algunas politicas
- * lanzan al tocar el almacen; sin el, la sesion dura lo que dure la pestaña.
+ * Lo que la web recuerda entre recargas, en `localStorage`. El token de
+ * Sanctum solo se guarda aqui en modo API directa (otra URL escrita a mano);
+ * por defecto viaja en una cookie httpOnly que el navegador no puede leer
+ * (ver server/apiProxy.ts). Cada lectura y escritura va en try/catch porque
+ * Safari en privado y algunas politicas lanzan al tocar el almacen; sin el,
+ * la sesion dura lo que dure la pestaña.
  */
 
 const KEYS = {
@@ -14,6 +15,7 @@ const KEYS = {
   rate: 'rpg.web.rate',
   autoRead: 'rpg.web.autoread',
   voiceNotice: 'rpg.web.voice-notice',
+  lang: 'rpg.web.lang',
 } as const
 
 export interface StoredUser {
@@ -21,6 +23,18 @@ export interface StoredUser {
   name: string
   email: string
 }
+
+/** Idiomas de lectura que ofrece la pagina de ajustes; el codigo filtra las voces del navegador por prefijo. */
+export const READING_LANGUAGES = [
+  { code: 'es', label: 'Español', utterance: 'es-MX' },
+  { code: 'en', label: 'English', utterance: 'en-US' },
+  { code: 'pt', label: 'Português', utterance: 'pt-BR' },
+  { code: 'fr', label: 'Français', utterance: 'fr-FR' },
+  { code: 'it', label: 'Italiano', utterance: 'it-IT' },
+  { code: 'de', label: 'Deutsch', utterance: 'de-DE' },
+] as const
+
+export type ReadingLanguage = (typeof READING_LANGUAGES)[number]['code']
 
 function read(key: string): string | null {
   if (typeof window === 'undefined') return null
@@ -43,8 +57,8 @@ function write(key: string, value: string | null): void {
 
 /**
  * URL de la API por defecto. Vacia significa "el propio origen de la web",
- * que Next reenvia a la API (next.config.ts); asi no hay CORS en la LAN.
- * `NEXT_PUBLIC_API_URL` la sustituye cuando la API vive en otro host.
+ * que Next reenvia a la API con el token de la cookie; asi no hay CORS en la
+ * LAN. `NEXT_PUBLIC_API_URL` la sustituye cuando la API vive en otro host.
  */
 export function defaultServerUrl(): string {
   return (process.env['NEXT_PUBLIC_API_URL'] ?? '').trim().replace(/\/+$/, '')
@@ -94,4 +108,10 @@ export const storage = {
 
   voiceNoticeSeen: () => read(KEYS.voiceNotice) === '1',
   setVoiceNoticeSeen: () => write(KEYS.voiceNotice, '1'),
+
+  lang(): ReadingLanguage {
+    const value = read(KEYS.lang)
+    return READING_LANGUAGES.some((l) => l.code === value) ? (value as ReadingLanguage) : 'es'
+  },
+  setLang: (lang: ReadingLanguage) => write(KEYS.lang, lang === 'es' ? null : lang),
 }

@@ -16,7 +16,7 @@ export function RequireSession({ children }: Props) {
   const router = useRouter()
 
   useEffect(() => {
-    if (session.stage.name === 'anonymous') router.replace('/')
+    if (session.stage.name === 'anonymous') router.replace('/entrar')
   }, [session.stage, router])
 
   if (session.stage.name !== 'ready' || !session.client || !session.user) {

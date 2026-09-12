@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { Tts } from '../lib/useTts'
 
 /** Controles de la narracion por voz: leer, pausa o seguir, siguiente, parar, voz, velocidad y leer lo nuevo. */
@@ -67,6 +68,9 @@ export function TtsBar({ tts }: { tts: Tts }) {
         Leer lo nuevo
       </label>
       {tts.error ? <span className="status">Voz: {tts.error}</span> : status ? <span className="status">{status}</span> : null}
+      <Link href="/ajustes" className="btn ghost small" title="Voz por defecto, idioma y velocidad">
+        Ajustes
+      </Link>
     </div>
   )
 }

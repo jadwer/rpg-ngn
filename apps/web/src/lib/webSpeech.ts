@@ -19,6 +19,8 @@ export interface VoiceChoice {
 export interface SpeechSettings {
   voiceUri: string | null
   rate: number
+  /** Idioma de la locucion si la voz elegida no existe (`es-MX`, `en-US`...). */
+  lang?: string
 }
 
 const CHUNK_CHARS = 220
@@ -27,10 +29,11 @@ export function speechSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function'
 }
 
-/** Voces en español que ofrece el navegador, con las locales primero. Puede venir vacia hasta `voiceschanged`. */
-export function spanishVoices(all: ReadonlyArray<Pick<SpeechSynthesisVoice, 'voiceURI' | 'name' | 'lang' | 'localService'>>): VoiceChoice[] {
+/** Voces del navegador en un idioma (prefijo `es`, `en`...), con las locales primero. Puede venir vacia hasta `voiceschanged`. */
+export function voicesFor(all: ReadonlyArray<Pick<SpeechSynthesisVoice, 'voiceURI' | 'name' | 'lang' | 'localService'>>, lang = 'es'): VoiceChoice[] {
+  const prefix = lang.toLowerCase()
   return all
-    .filter((v) => v.lang.toLowerCase().startsWith('es'))
+    .filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith(prefix))
     .map((v) => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService }))
     .sort((a, b) => Number(b.local) - Number(a.local) || a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name))
 }
@@ -41,19 +44,19 @@ export function pickVoice(voices: readonly VoiceChoice[], savedUri: string | nul
   return voices.find((v) => v.uri === savedUri) ?? voices[0] ?? null
 }
 
-export function listVoices(): VoiceChoice[] {
+export function listVoices(lang = 'es'): VoiceChoice[] {
   if (!speechSupported()) return []
-  return spanishVoices(window.speechSynthesis.getVoices())
+  return voicesFor(window.speechSynthesis.getVoices(), lang)
 }
 
-/** Llama a `listener` con las voces ahora y cada vez que el navegador las cargue. */
-export function watchVoices(listener: (voices: VoiceChoice[]) => void): () => void {
+/** Llama a `listener` con las voces del idioma ahora y cada vez que el navegador las cargue. */
+export function watchVoices(listener: (voices: VoiceChoice[]) => void, lang = 'es'): () => void {
   if (!speechSupported()) {
     listener([])
     return () => undefined
   }
   const synth = window.speechSynthesis
-  const notify = () => listener(spanishVoices(synth.getVoices()))
+  const notify = () => listener(voicesFor(synth.getVoices(), lang))
   notify()
   synth.addEventListener('voiceschanged', notify)
   // Safari no dispara voiceschanged de forma fiable: reintento corto.
@@ -91,7 +94,7 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
         onDone()
         return
       }
-      const { voiceUri, rate } = options.settings()
+      const { voiceUri, rate, lang } = options.settings()
       const voice = voiceUri ? (synth.getVoices().find((v) => v.voiceURI === voiceUri) ?? null) : null
 
       const speakChunk = (index: number) => {
@@ -102,7 +105,7 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
           return
         }
         const utterance = new SpeechSynthesisUtterance(chunk)
-        utterance.lang = voice?.lang ?? 'es-MX'
+        utterance.lang = voice?.lang ?? lang ?? 'es-MX'
         if (voice) utterance.voice = voice
         utterance.rate = rate
         utterance.onend = () => speakChunk(index + 1)

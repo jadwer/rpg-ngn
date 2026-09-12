@@ -1,4 +1,6 @@
+import { accountApi, type AccountApi } from './account.js'
 import { createHttp, query, type FetchLike, type TokenProvider } from './http.js'
+import { settingsApi, type SettingsApi } from './settings.js'
 import { attr, Included, relationMany, relationOne, type Document, type Resource } from './jsonapi.js'
 import type {
   AuthUser,
@@ -32,7 +34,7 @@ export interface ApiClientOptions {
   idempotencyKey?: (() => string) | undefined
 }
 
-export interface ApiClient {
+export interface ApiClient extends AccountApi, SettingsApi {
   readonly baseUrl: string
   login(email: string, password: string, deviceName: string): Promise<LoginResult>
   logout(): Promise<void>
@@ -49,7 +51,7 @@ export interface ApiClient {
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
   acceptFriendship(friendshipId: string | number): Promise<FriendshipRecord>
-  /** Busca un usuario por correo exacto (`users?filter[email]=`); null si no existe. Hoy la API solo lo permite a cuentas admin (403 al resto). */
+  /** Busca un usuario por correo exacto (`users?filter[email]=`); null si no existe. Solo cuentas admin (403 al resto); `lookupUser` sirve a cualquiera. */
   findUserByEmail(email: string): Promise<AuthUser | null>
   tableState(tableId: string | number, after?: number): Promise<TableState>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
@@ -74,6 +76,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   }
 
   return {
+    ...accountApi(request),
+    ...settingsApi(request),
     baseUrl: options.baseUrl,
 
     async login(email, password, deviceName) {
@@ -232,6 +236,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     status: attr(resource, 'status', ''),
     oneShot: attr(resource, 'oneShot', false),
     premise,
+    settings: settings ?? {},
     campaignId: campaign ? String(campaign.id) : null,
     members,
   }
