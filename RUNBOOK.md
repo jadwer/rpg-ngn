@@ -18,9 +18,14 @@ cd ~/dev/rpg-ngn-api && php artisan serve --host 0.0.0.0 --port 8010
 # Terminal 3: web (Next.js), la mesa principal. Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local
 cd ~/dev/rpg-ngn && pnpm --filter web dev
 
-# Terminal 4 (opcional): app (Expo). Sin --tunnel: WSL ya comparte la IP del Wi-Fi
+# Terminal 4 (solo si la API tiene QUEUE_CONNECTION=database): worker que resuelve los turnos
+cd ~/dev/rpg-ngn-api && php artisan queue:work --queue=turns,default --timeout=600
+
+# Terminal 5 (opcional): app (Expo). Sin --tunnel: WSL ya comparte la IP del Wi-Fi
 cd ~/dev/rpg-ngn && pnpm --filter mobile start
 ```
+
+Cola: el `.env` de la API esta en `QUEUE_CONNECTION=sync` a proposito: "Cerrar turno y narrar" espera al modelo dentro de la peticion (20 a 35 s con Sonnet) y no depende de que alguien recuerde levantar el worker. Para pasar a `database` (la peticion responde 202 al instante y el worker narra): cambiar `QUEUE_CONNECTION=database` en `rpg-ngn-api/.env`, correr `php artisan config:clear` si hay cache de config, y dejar la terminal 4 arriba antes de la partida. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo (la web lo muestra) y la mesa vuelve a cerrar cuando quiera. Si el worker no esta corriendo, el turno se queda en `closing` y la web dice "El DM esta narrando..." hasta que arranque; `php artisan queue:failed` lista los jobs que murieron.
 
 La web en produccion (mas rapida en la LAN): `pnpm --filter web build && pnpm --filter web start`.
 
@@ -75,16 +80,17 @@ Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dol
 
 ## 3b. Web (laptops e iPhone por Safari)
 
-1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.11:3010`). El campo "Servidor de la API" ya trae esa misma direccion: las peticiones pasan por el proxy de Next y no hace falta CORS. Solo si se escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
-2. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, premisa opcional; despues invita a Jaz y Armando (ya son amigos) eligiendo personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional).
-3. Jugadores: `jaz@example.com` y `armando@example.com`, `password`. Entrar a la mesa, escribir la accion y Enviar (Ctrl+Enter). Cuando no falta nadie, cualquiera pulsa "Cerrar turno y narrar"; el anfitrion puede "Forzar cierre".
-4. Pantalla compartida: en la laptop del anfitrion, "Pantalla" o tecla `F` deja solo narrativa y dialogos en grande; `Esc` sale. La voz sale del dispositivo que pulse Leer (o tenga "Leer lo nuevo"); en iPhone hay que tocar Leer una vez antes de que suene sola.
+1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.11:3010`). Sale la landing; "Entrar" o "Crear cuenta". La sesion va en una cookie httpOnly y las peticiones pasan por el proxy de Next: no hace falta CORS. Solo si alguien pulsa "Cambiar servidor" y escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
+2. Jugadora nueva desde el iPhone: abrir la URL en Safari, "Crear cuenta", escribir nombre, correo, contraseña (8 caracteres o mas) y repetirla, "Crear cuenta". Entra directo a "Tus mesas" (la API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`; no llega ningun correo). Le dice su correo al anfitrion y espera la invitacion; al recargar "Tus mesas" ya ve la mesa. Si cierra Safari, la sesion sigue (30 dias); "Salir" la borra.
+3. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, director de juego (por defecto el del servidor, Anthropic) y premisa opcional. Amistad antes de invitar: en "Invitados" (o en "Amigos" al pie de "Tus mesas") escribe el correo de la jugadora, "Buscar" y "Enviar solicitud de amistad"; ella la acepta en "Amigos" al pie de su "Tus mesas" (o al reves: ella busca `gabino@example.com` y manda la solicitud, y el anfitrion acepta). Con amistad aceptada, en "Invitados" buscar el correo otra vez e "Invitar a la mesa" con personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional). Antes de abrir, pestaña "DM" del mando y "Probar": debe decir "Listo: Anthropic: Claude Sonnet 5 disponible".
+4. Jugadores: entrar a la mesa, escribir la accion y Enviar (Ctrl+Enter). Cuando no falta nadie, cualquiera pulsa "Cerrar turno y narrar"; el anfitrion puede "Forzar cierre". Jaz y Armando siguen siendo `jaz@example.com` y `armando@example.com`, `password`.
+5. Pantalla compartida: en la laptop del anfitrion, "Pantalla" o tecla `F` deja solo narrativa y dialogos en grande; `Esc` sale. La voz sale del dispositivo que pulse Leer (o tenga "Leer lo nuevo"); en iPhone hay que tocar Leer una vez antes de que suene sola. Voz, idioma y velocidad se eligen en "Ajustes" (barra superior) y quedan en ese navegador.
 
 ## 4. Verificacion sin telefonos
 
 ```bash
 cd ~/dev/rpg-ngn && pnpm check                 # motor, contrato, engine, app, web (incluye next build)
-cd ~/dev/rpg-ngn-api && composer test          # API en SQLite, 35 tests
+cd ~/dev/rpg-ngn-api && composer test          # API en SQLite, 51 tests
 cd ~/dev/rpg-ngn-api && composer test:pgsql    # lo mismo contra Postgres
 cd ~/dev/rpg-ngn && pnpm --filter mobile smoke-api   # turno completo con el cliente de la app
 ```
@@ -92,6 +98,9 @@ cd ~/dev/rpg-ngn && pnpm --filter mobile smoke-api   # turno completo con el cli
 ## 5. Si algo se rompe
 
 - 401 en la app o en la web: token caducado o servidor mal escrito; volver a iniciar sesion.
+- "Petición rechazada: falta la cabecera de la web" (403 del proxy): algo llamo a `/api/*` sin la cabecera `X-Requested-With: rpg-ngn-web`; la web la pone sola, un curl contra el 3010 debe añadirla o ir directo al 8010 con Bearer.
+- Una jugadora no aparece al buscar por correo: se registro con otro correo o con espacios; el lookup es exacto (sin distinguir mayusculas).
+- "El preset X no está configurado": falta la clave en `rpg-ngn-api/.env`; la pestaña DM solo deja elegir presets con clave.
 - La web no carga desde otro dispositivo: `pnpm --filter web dev` escucha en `0.0.0.0`; revisar firewall del 3010 y que la IP sea la actual (`hostname -I`).
 - Voz muda en Safari: tocar Leer una vez (iOS exige un gesto) y elegir una voz `es` en el selector.
 - 409 al cerrar: alguien cerro antes; refrescar.
