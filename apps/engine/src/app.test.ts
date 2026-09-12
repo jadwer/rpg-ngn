@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { ENGINE_CONTRACT_VERSION, ResolveLine, type ProjectResponse, type ResolveTurnRequest } from '@rpg-ngn/engine-contract'
+import type Anthropic from '@anthropic-ai/sdk'
+import { ENGINE_CONTRACT_VERSION, ResolveLine, type ProbeResponse, type ProjectResponse, type ResolveTurnRequest } from '@rpg-ngn/engine-contract'
+import type { AnthropicClientLike, OpenAIClientLike } from '@rpg-ngn/narrative'
 import { describe, expect, it } from 'vitest'
 import { createEngine } from './app.js'
 import { PackStore } from './packs.js'
@@ -147,5 +149,129 @@ describe('apps/engine', () => {
   it('probe del proveedor scripted', async () => {
     const response = await app.request('/v1/providers/probe?kind=scripted', { headers })
     expect(await response.json()).toMatchObject({ ok: true, provider: 'scripted' })
+  })
+
+  describe('con proveedores de modelo falsos', () => {
+    const KEY = 'sk-ant-api03-SECRETA-abcdefghijklmnop'
+    const ndjson = [
+      '{"kind":"block","block":{"type":"narration","text":"La campana suena sola."}}',
+      '{"kind":"event","event":{"type":"world_event","payload":{"note":"La campana suena sola"}}}',
+      '{"kind":"addressed","characterIds":["calder"]}',
+    ].join('\n')
+
+    const anthropicClient: AnthropicClientLike = {
+      messages: {
+        async create(params) {
+          anthropicCalls.push(params)
+          async function* events(): AsyncGenerator<Anthropic.RawMessageStreamEvent> {
+            yield { type: 'message_start', message: { usage: { input_tokens: 900 } } } as unknown as Anthropic.RawMessageStreamEvent
+            yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: ndjson } }
+            yield { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 120 } } as unknown as Anthropic.RawMessageStreamEvent
+          }
+          return events()
+        },
+      },
+      models: {
+        async retrieve(id) {
+          if (id === 'claude-roto') throw new Error(`404 model not found (x-api-key ${KEY})`)
+          return { id, display_name: 'Claude Sonnet 5' }
+        },
+      },
+    }
+    const anthropicCalls: Anthropic.MessageCreateParamsStreaming[] = []
+
+    const openaiClient: OpenAIClientLike = {
+      chat: {
+        completions: {
+          async create() {
+            throw new Error(`401 Incorrect API key provided: ${KEY}`)
+          },
+        },
+      },
+      models: {
+        async *list() {
+          yield { id: 'qwen2.5:14b' }
+        },
+      },
+    }
+
+    const withFakes = createEngine({
+      token: TOKEN,
+      packs: new PackStore(join(repoRoot, 'content/packs')),
+      now: () => new Date('2026-09-12T20:00:00Z'),
+      providers: { anthropicClient, openaiClient },
+    })
+
+    async function request(provider: ResolveTurnRequest['provider']): Promise<ResolveTurnRequest> {
+      const snapshot = await pilotSnapshot()
+      return {
+        contract: ENGINE_CONTRACT_VERSION,
+        campaignId: '1',
+        pack: { id: 'pilot', version: '0.4.0' },
+        ruleset: 'fantasy-d20-lite@1.0.0',
+        snapshot: snapshot.state,
+        events: [sessionStarted(22)],
+        turn: { id: 't-1', number: 1, sessionId: '003', responses: [{ characterId: 'zahira', playerId: 'jaz', text: 'Miro la campana.', submittedAt: '2026-09-12T19:30:00Z', late: false }] },
+        provider,
+        context: { premise: 'Esta noche esperan a Calder en la posada.', sessionNote: 'Anochecer' },
+        budget: { maxOutputTokens: 1200 },
+      }
+    }
+
+    it('resuelve un turno con anthropic: bloques al vuelo, eventos validados, contexto y presupuesto en el prompt', async () => {
+      const response = await withFakes.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(await request({ kind: 'anthropic', model: 'claude-sonnet-5', credential: KEY })) })
+      const lines = await readLines(response)
+      const result = lines.at(-1)
+      expect(lines.filter((l) => l.kind === 'block').map((l) => (l.kind === 'block' ? l.block.type : ''))).toEqual(['dialogue', 'narration'])
+      expect(result?.kind).toBe('result')
+      if (result?.kind !== 'result') return
+      expect(result.events.map((e) => [e.seq, e.type])).toEqual([[23, 'player_action'], [24, 'narration'], [25, 'world_event']])
+      expect(result.addressed).toEqual(['calder'])
+      expect(result.usage).toEqual({ inputTokens: 900, outputTokens: 120 })
+
+      const params = anthropicCalls.at(-1)!
+      expect(params.max_tokens).toBe(1200)
+      const user = String(params.messages[0]?.content)
+      expect(user).toContain('<premisa_de_la_mesa>\nEsta noche esperan a Calder en la posada.\n</premisa_de_la_mesa>')
+      expect(user).toContain('Anochecer')
+      expect(JSON.stringify(params)).not.toContain(KEY)
+    })
+
+    it('un fallo del modelo sale como error NDJSON sin la credencial', async () => {
+      const response = await withFakes.request('/v1/turns/resolve', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(await request({ kind: 'openai', model: 'qwen2.5:14b', credential: KEY, baseUrl: 'http://127.0.0.1:11434/v1', contextProfile: 'compact' })),
+      })
+      const text = await response.text()
+      expect(text).not.toContain(KEY)
+      expect(text).not.toContain('SECRETA')
+      const lines = text.split('\n').filter((l) => l.trim() !== '').map((l) => ResolveLine.parse(JSON.parse(l)))
+      const error = lines.at(-1)
+      expect(error?.kind).toBe('error')
+      expect(error?.kind === 'error' && error.message).toMatch(/openai\/qwen2\.5:14b falló: 401/)
+      expect(error?.kind === 'error' && error.message).toContain('[credencial redactada]')
+    })
+
+    it('probe de anthropic y de un compatible con OpenAI, con la credencial en cabecera y nunca en la respuesta', async () => {
+      const probeHeaders = { ...headers, 'x-provider-credential': KEY }
+      const ok = await withFakes.request('/v1/providers/probe?kind=anthropic&model=claude-sonnet-5', { headers: probeHeaders })
+      expect(await ok.json()).toEqual({ ok: true, provider: 'anthropic', model: 'claude-sonnet-5', message: 'Anthropic: Claude Sonnet 5 disponible' })
+
+      const broken = await withFakes.request('/v1/providers/probe?kind=anthropic&model=claude-roto', { headers: probeHeaders })
+      const brokenBody = (await broken.json()) as ProbeResponse
+      expect(brokenBody.ok).toBe(false)
+      expect(JSON.stringify(brokenBody)).not.toContain('SECRETA')
+
+      const ollama = await withFakes.request(`/v1/providers/probe?kind=openai&model=qwen2.5:14b&baseUrl=${encodeURIComponent('http://127.0.0.1:11434/v1')}`, { headers: { ...headers, 'x-provider-credential': 'ollama' } })
+      expect(await ollama.json()).toMatchObject({ ok: true, provider: 'openai', model: 'qwen2.5:14b' })
+
+      const missing = await withFakes.request(`/v1/providers/probe?kind=openai&model=llama3.1:8b&baseUrl=${encodeURIComponent('http://127.0.0.1:11434/v1')}`, { headers: { ...headers, 'x-provider-credential': 'ollama' } })
+      expect(((await missing.json()) as ProbeResponse).message).toContain('ollama pull llama3.1:8b')
+
+      const invalid = await withFakes.request('/v1/providers/probe?kind=anthropic', { headers })
+      expect(invalid.status).toBe(400)
+      expect(((await invalid.json()) as ProbeResponse).message).toContain('configuracion invalida')
+    })
   })
 })

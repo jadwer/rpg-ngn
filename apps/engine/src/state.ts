@@ -6,10 +6,12 @@ import type { Ruleset } from '@rpg-ngn/rules'
 /**
  * Reconstruye el estado a partir de un snapshot (o del inicio) y una cola
  * de eventos crudos. Los eventos pasan por upcast y por el schema antes de
- * aplicarse; un evento invalido tumba la peticion, no se salta.
+ * aplicarse; un evento invalido tumba la peticion, no se salta. Devuelve
+ * tambien los eventos ya validados: son la memoria corta del DM.
  */
-export function rebuildState(pack: LoadedPack, ruleset: Ruleset, snapshot: unknown, rawEvents: unknown[]): CampaignState {
+export function rebuildState(pack: LoadedPack, ruleset: Ruleset, snapshot: unknown, rawEvents: unknown[]): { state: CampaignState; events: CampaignEvent[] } {
   let state = snapshot === null || snapshot === undefined ? initialState({ pack, ruleset }) : (snapshot as CampaignState)
+  const events: CampaignEvent[] = []
 
   for (const [index, raw] of rawEvents.entries()) {
     const parsed = CampaignEvent.safeParse(upcastEvent(raw))
@@ -17,9 +19,10 @@ export function rebuildState(pack: LoadedPack, ruleset: Ruleset, snapshot: unkno
       throw new Error(`evento ${index} invalido: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
     }
     state = applyEvent(state, parsed.data, ruleset)
+    events.push(parsed.data)
   }
 
-  return state
+  return { state, events }
 }
 
 export function projectionsOf(state: CampaignState): TurnProjections {
