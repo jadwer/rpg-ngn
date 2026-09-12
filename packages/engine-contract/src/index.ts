@@ -34,11 +34,6 @@ export const TurnInput = z.strictObject({
 })
 export type TurnInput = z.infer<typeof TurnInput>
 
-/**
- * Proveedor de LLM. `scripted` narra de forma determinista (entrega 5);
- * `anthropic` llega en la entrega 6 con la credencial custodiada por la
- * plataforma, que viaja solo por localhost y nunca vuelve al cliente.
- */
 /** Linea de un NPC que el DM scripted mete antes de su narracion. */
 export const ScriptedLine = z.strictObject({
   speaker: z.string().min(1),
@@ -67,19 +62,59 @@ export const ScriptedScene = z.strictObject({
 })
 export type ScriptedScene = z.infer<typeof ScriptedScene>
 
+/**
+ * Proveedor de LLM. `scripted` narra de forma determinista (entrega 5);
+ * `anthropic` (entrega 6) recibe la credencial custodiada por la plataforma,
+ * que viaja solo por localhost, vive en memoria durante la llamada y nunca
+ * vuelve al cliente ni aparece en logs.
+ */
+/**
+ * `compact` recorta el contexto a menos de 3000 tokens de entrada (fichas
+ * resumidas, memoria de 12 a 15 eventos): para modelos locales en maquinas
+ * chicas. `full` es el perfil de los proveedores de nube.
+ */
+export const ContextProfile = z.enum(['full', 'compact'])
+
 export const ProviderConfig = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('scripted'), script: ScriptedScene.optional() }),
   z.strictObject({
     kind: z.literal('anthropic'),
     model: z.string().min(1),
     credential: z.string().min(1),
+    contextProfile: ContextProfile.optional(),
+  }),
+  /**
+   * Cualquier API compatible con OpenAI (Chat Completions con streaming).
+   * `baseUrl` apunta a otro proveedor: DeepSeek es `https://api.deepseek.com`,
+   * Ollama es `http://<host>:11434/v1` (con credencial fija `ollama`).
+   */
+  z.strictObject({
+    kind: z.literal('openai'),
+    model: z.string().min(1),
+    credential: z.string().min(1),
+    baseUrl: z.string().url().optional(),
+    contextProfile: ContextProfile.optional(),
   }),
 ])
 export type ProviderConfig = z.infer<typeof ProviderConfig>
+export type ProviderKind = ProviderConfig['kind']
+export const PROVIDER_KINDS: readonly ProviderKind[] = ['scripted', 'anthropic', 'openai']
 
 export const TurnBudget = z.strictObject({
-  maxOutputTokens: z.number().int().positive().default(1500),
+  /** Tope de salida del modelo por turno. Con pensamiento adaptativo el razonamiento tambien cuenta aqui. */
+  maxOutputTokens: z.number().int().positive().default(4000),
 })
+
+/**
+ * Texto libre que el usuario escribe al crear la mesa (`premise`) o al abrir
+ * la sesion (`sessionNote`). Entra al contexto del DM como contenido no
+ * confiable, delimitado; no puede cambiar las reglas del DM (entrega 6).
+ */
+export const TurnContext = z.strictObject({
+  premise: z.string().max(4000).optional(),
+  sessionNote: z.string().max(1000).optional(),
+})
+export type TurnContext = z.infer<typeof TurnContext>
 
 export const ResolveTurnRequest = z.strictObject({
   contract: ContractVersion,
@@ -93,6 +128,8 @@ export const ResolveTurnRequest = z.strictObject({
   turn: TurnInput,
   provider: ProviderConfig,
   budget: TurnBudget.optional(),
+  /** Opcional y sin subir la version: un campo nuevo opcional no rompe el contrato. */
+  context: TurnContext.optional(),
 })
 export type ResolveTurnRequest = z.infer<typeof ResolveTurnRequest>
 

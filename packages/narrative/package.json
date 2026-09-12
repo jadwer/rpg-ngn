@@ -25,9 +25,12 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.125.0",
     "@rpg-ngn/campaign": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
-    "@rpg-ngn/engine-contract": "workspace:*"
+    "@rpg-ngn/engine-contract": "workspace:*",
+    "openai": "^7.15.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@rpg-ngn/core": "workspace:*",

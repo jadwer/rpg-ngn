@@ -17,6 +17,23 @@ describe('engine-contract', () => {
     expect(result.success).toBe(true)
   })
 
+  it('acepta el contexto de mesa opcional y acota su tamaño', () => {
+    const base = {
+      contract: ENGINE_CONTRACT_VERSION,
+      campaignId: '1',
+      pack: { id: 'pilot', version: '0.4.0' },
+      ruleset: 'fantasy-d20-lite@1.0.0',
+      snapshot: null,
+      events: [],
+      turn: { id: 't1', number: 1, sessionId: '003', responses: [] },
+      provider: { kind: 'anthropic', model: 'claude-sonnet-5', credential: 'k' },
+    }
+    expect(ResolveTurnRequest.safeParse({ ...base, context: { premise: 'Esta noche esperan a Calder.', sessionNote: 'anochecer' } }).success).toBe(true)
+    expect(ResolveTurnRequest.safeParse({ ...base, context: {} }).success).toBe(true)
+    expect(ResolveTurnRequest.safeParse({ ...base, context: { premise: 'x'.repeat(4001) } }).success).toBe(false)
+    expect(ResolveTurnRequest.safeParse({ ...base, context: { extra: 1 } }).success).toBe(false)
+  })
+
   it('rechaza otra version de contrato y claves desconocidas', () => {
     expect(ResolveTurnRequest.safeParse({ contract: 2 }).success).toBe(false)
     expect(ProviderConfig.safeParse({ kind: 'anthropic', model: 'x' }).success).toBe(false)
