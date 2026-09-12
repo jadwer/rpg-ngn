@@ -11,6 +11,8 @@ export const POLL_INTERVAL_MS = 1500
 
 export interface TableSnapshot {
   campaign: TableState['campaign']
+  /** Quien consulta, con su asiento y personaje al dia (por si el anfitrion cambio el suyo). */
+  viewer: TableState['viewer']
   session: TableState['session']
   turn: TableState['turn']
   /** Todos los bloques recibidos hasta ahora, en orden. Misma referencia mientras no lleguen nuevos. */
@@ -60,7 +62,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, session: state.session, turn: state.turn, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

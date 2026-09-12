@@ -3,6 +3,7 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { ConnectScreen } from '../screens/online/ConnectScreen'
+import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
 import { theme } from '../theme'
@@ -14,7 +15,7 @@ interface Props {
   onExit: () => void
 }
 
-type Stage = { name: 'booting' } | { name: 'connect'; notice: string | null } | { name: 'tables' } | { name: 'table'; table: TableSummary }
+type Stage = { name: 'booting' } | { name: 'connect'; notice: string | null } | { name: 'tables' } | { name: 'new-table' } | { name: 'table'; table: TableSummary }
 
 interface Session {
   client: ApiClient
@@ -22,9 +23,9 @@ interface Session {
 }
 
 /**
- * Flujo online: conexion y login, mesas, mesa. El token vive en el almacen
- * seguro y se consulta por referencia en cada peticion; un 401 en cualquier
- * pantalla borra la sesion y vuelve al login con aviso.
+ * Flujo online: conexion y login, mesas, mesa nueva, mesa. El token vive en
+ * el almacen seguro y se consulta por referencia en cada peticion; un 401 en
+ * cualquier pantalla borra la sesion y vuelve al login con aviso.
  */
 export function OnlineRoot({ pack, onExit }: Props) {
   const tokenRef = useRef<string | null>(null)
@@ -127,6 +128,14 @@ export function OnlineRoot({ pack, onExit }: Props) {
     void client?.logout().catch(() => undefined)
   }
 
+  /** La mesa abierta cambio (invitacion): se vuelve a pedir y se sustituye en la etapa. */
+  const reloadTable = (client: ApiClient, tableId: string) => {
+    void client.table(tableId).then(
+      (table) => setStage((current) => (current.name === 'table' && current.table.id === tableId ? { name: 'table', table } : current)),
+      () => undefined,
+    )
+  }
+
   if (stage.name === 'booting') {
     return (
       <View style={styles.center}>
@@ -141,7 +150,23 @@ export function OnlineRoot({ pack, onExit }: Props) {
   }
 
   if (stage.name === 'tables') {
-    return <TablesScreen user={session.user} tables={tables} loading={busy} error={tablesError} pack={pack} onOpen={(table) => setStage({ name: 'table', table })} onRefresh={() => void loadTables(session.client)} onLogout={() => void logout()} />
+    return <TablesScreen user={session.user} tables={tables} loading={busy} error={tablesError} pack={pack} onOpen={(table) => setStage({ name: 'table', table })} onCreate={() => setStage({ name: 'new-table' })} onRefresh={() => void loadTables(session.client)} onLogout={() => void logout()} />
+  }
+
+  if (stage.name === 'new-table') {
+    return (
+      <NewTableScreen
+        client={session.client}
+        user={session.user}
+        pack={pack}
+        onBack={() => {
+          setStage({ name: 'tables' })
+          void loadTables(session.client)
+        }}
+        onOpen={(table) => setStage({ name: 'table', table })}
+        onUnauthorized={() => unauthorized()}
+      />
+    )
   }
 
   const me = memberOf(stage.table, session.user.id)
@@ -159,11 +184,13 @@ export function OnlineRoot({ pack, onExit }: Props) {
       client={session.client}
       table={stage.table}
       me={me}
+      user={session.user}
       pack={stage.table.packId === pack.manifest.id ? pack : null}
       onBack={() => {
         setStage({ name: 'tables' })
         void loadTables(session.client)
       }}
+      onTableChanged={() => reloadTable(session.client, stage.table.id)}
       onUnauthorized={() => unauthorized()}
     />
   )
@@ -171,6 +198,6 @@ export function OnlineRoot({ pack, onExit }: Props) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: theme.colors.bg },
-  loading: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, fontStyle: 'italic' },
-  error: { fontFamily: theme.fonts.serif, color: theme.colors.accent, textAlign: 'center' },
+  loading: { fontFamily: theme.fonts.serifItalic, fontSize: 15, color: theme.colors.inkDim },
+  error: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },
 })

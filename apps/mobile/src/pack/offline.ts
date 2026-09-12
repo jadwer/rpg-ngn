@@ -1,5 +1,5 @@
 import { reduce, type CampaignState } from '@rpg-ngn/campaign'
-import { loadPack, memorySource, parseEventLog, type CampaignEvent, type Issue, type LoadedPack, type Session } from '@rpg-ngn/content'
+import { loadPack, memorySource, parseEventLog, type CampaignEvent, type Character, type Issue, type LoadedPack, type Session } from '@rpg-ngn/content'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
 import { eventLog, PACK_ID, packBinaries, packFiles } from '../generated/pilot-pack'
 
@@ -58,6 +58,11 @@ export async function loadOfflineCampaign(): Promise<OfflineCampaign> {
 /** Sesiones del pack en el orden del manifiesto. */
 export function sessionList(pack: LoadedPack): Session[] {
   return pack.manifest.sessions.map((id) => pack.sessions.get(id)).filter((s): s is Session => !!s)
+}
+
+/** Personajes del pack en el orden del manifiesto. */
+export function packCharacters(pack: LoadedPack): Character[] {
+  return pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is Character => !!c)
 }
 
 export { PACK_ID }

@@ -1,7 +1,7 @@
 import type { CharacterState } from '@rpg-ngn/core'
 import type { Character, LoadedPack, Session } from '@rpg-ngn/content'
 import { characterSlot, characterVisibility, everPlayed, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
-import type { OfflineCampaign } from '../pack/offline'
+import { packCharacters, type OfflineCampaign } from '../pack/offline'
 
 /**
  * Lo que el modal de fichas necesita de cada personaje, ya decidido. Offline
@@ -22,10 +22,6 @@ export interface SheetEntry {
 }
 
 const UNVEILED: CharacterVisibility = { veiled: false, fields: Object.fromEntries(VEILABLE_FIELDS.map((f) => [f, true])) as CharacterVisibility['fields'] }
-
-function packCharacters(pack: LoadedPack): Character[] {
-  return pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is Character => !!c)
-}
 
 export function offlineSheetEntries(campaign: OfflineCampaign, session: Session): SheetEntry[] {
   const played = everPlayed(campaign.pack.sessions.values())
