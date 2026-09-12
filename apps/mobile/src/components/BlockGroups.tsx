@@ -1,6 +1,7 @@
-import { proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { DICE_FACES } from '../generated/dice'
 import { theme } from '../theme'
 import { Portrait } from './Portrait'
 
@@ -92,10 +93,27 @@ function Roll({ group, currentBlockId, onPressBlock }: GroupProps<RollGroup>) {
         <Text style={styles.rollLabel}>{block.label}</Text>
         <Text style={styles.rollText}>{block.text}</Text>
       </View>
+      <DiceFaces block={block} />
       <View style={styles.die}>
         <Text style={styles.dieText}>{block.result}</Text>
       </View>
     </Pressable>
+  )
+}
+
+/** Las caras de la lamina de dados (d20, d8, d6); con ventaja o desventaja se atenua el dado que no cuenta. */
+function DiceFaces({ block }: { block: RollGroup['block'] }) {
+  const faces = facesOf(block)
+  if (faces.length === 0) return null
+  const kept = keptFace(block)
+  return (
+    <View style={styles.diceFaces}>
+      {faces.map((face, index) => {
+        const source = DICE_FACES[face.asset]
+        if (!source) return null
+        return <Image key={`${face.asset}-${index}`} source={source} style={[styles.diceFace, kept !== null && kept !== index && styles.diceDropped]} accessibilityLabel={`Dado ${face.value}`} />
+      })}
+    </View>
   )
 }
 
@@ -131,6 +149,9 @@ const styles = StyleSheet.create({
   lineText: { fontFamily: theme.fonts.serif, fontSize: 17, lineHeight: 24, color: theme.colors.ink },
   roll: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 8 },
   rollSpacer: { width: 30 },
+  diceFaces: { flexDirection: 'row', gap: 6 },
+  diceFace: { width: 44, height: 44, borderRadius: 8, borderWidth: 1, borderColor: theme.colors.border },
+  diceDropped: { opacity: 0.35 },
   rollBody: { flex: 1 },
   rollLabel: { fontFamily: theme.fonts.display, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim },
   rollText: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },

@@ -42,7 +42,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text }
     case 'roll': {
       const actor = block.actor ? (block.actor.includes(':') ? resolve(block.actor, null) : resolve(null, block.actor)) : null
-      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text }
+      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text }
     }
     case 'system':
       return { kind: 'system', id, title: null, text: block.text, items: [] }

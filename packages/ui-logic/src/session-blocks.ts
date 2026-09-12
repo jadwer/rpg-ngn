@@ -142,7 +142,7 @@ function rollBlock(event: RollEvent, pack: LoadedPack, session: Session): RollBl
     text = `${who} tira ${resolved.die}${what}${suffix}${target}: ${resolved.result}.`
   }
 
-  return { kind: 'roll', id: `${session.id}:roll:${event.id}`, actor, rollKind: resolved.kind, die: resolved.die, result: resolved.result, label, advantage, text }
+  return { kind: 'roll', id: `${session.id}:roll:${event.id}`, actor, rollKind: resolved.kind, die: resolved.die, result: resolved.result, rolls: resolved.rolls ?? null, label, advantage, text }
 }
 
 function capitalize(value: string): string {

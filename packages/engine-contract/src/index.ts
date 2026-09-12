@@ -173,6 +173,8 @@ export const TurnBlock = z.discriminatedUnion('type', [
     actor: z.string(),
     die: z.string(),
     result: z.number().int(),
+    /** Cada dado por separado (dos con ventaja o desventaja, varios en 2d6): para pintar las caras. */
+    rolls: z.array(z.number().int()).optional(),
   }),
   z.strictObject({ type: z.literal('system'), text: z.string().min(1) }),
 ])

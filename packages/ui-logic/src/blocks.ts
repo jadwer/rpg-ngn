@@ -34,6 +34,8 @@ export interface RollBlock {
   rollKind: string
   die: string
   result: number
+  /** Cada dado por separado cuando se conocen (ventaja, desventaja, 2d6); null si solo hay total. */
+  rolls: number[] | null
   /** Etiqueta corta para la UI: `Fortuna`, `sigilo`, `medicina`. */
   label: string
   advantage: 'advantage' | 'disadvantage' | null

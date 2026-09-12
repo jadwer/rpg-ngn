@@ -452,7 +452,17 @@ class LineInterpreter {
       const detail = resolved.skill ? ` (${resolved.skill})` : ''
       const dice = resolved.rolls && resolved.rolls.length > 1 ? ` [${resolved.rolls.join(', ')}]` : ''
       const origin = resolved.source === 'physical' ? ' con su dado' : ''
-      yield { kind: 'block', block: { type: 'roll', text: `${name} tira ${resolved.die}${detail}${origin}: ${resolved.result}${dice}`, actor, die: resolved.die, result: resolved.result } }
+      yield {
+        kind: 'block',
+        block: {
+          type: 'roll',
+          text: `${name} tira ${resolved.die}${detail}${origin}: ${resolved.result}${dice}`,
+          actor,
+          die: resolved.die,
+          result: resolved.result,
+          ...(resolved.rolls ? { rolls: resolved.rolls } : {}),
+        },
+      }
     }
     yield { kind: 'event', event }
   }

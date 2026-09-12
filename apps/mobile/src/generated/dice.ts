@@ -1,0 +1,41 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+// Generado por tools/dice/crop.py a partir de img/dices.png; no editar a mano.
+// Caras de dado de la lamina: React Native exige require() estatico por archivo.
+import type { ImageSourcePropType } from 'react-native'
+
+export const DICE_FACES: Record<string, ImageSourcePropType> = {
+  "d20-1": require("../../assets/dice/d20-1.png"),
+  "d20-2": require("../../assets/dice/d20-2.png"),
+  "d20-3": require("../../assets/dice/d20-3.png"),
+  "d20-4": require("../../assets/dice/d20-4.png"),
+  "d20-5": require("../../assets/dice/d20-5.png"),
+  "d20-6": require("../../assets/dice/d20-6.png"),
+  "d20-7": require("../../assets/dice/d20-7.png"),
+  "d20-8": require("../../assets/dice/d20-8.png"),
+  "d20-9": require("../../assets/dice/d20-9.png"),
+  "d20-10": require("../../assets/dice/d20-10.png"),
+  "d20-11": require("../../assets/dice/d20-11.png"),
+  "d20-12": require("../../assets/dice/d20-12.png"),
+  "d20-13": require("../../assets/dice/d20-13.png"),
+  "d20-14": require("../../assets/dice/d20-14.png"),
+  "d20-15": require("../../assets/dice/d20-15.png"),
+  "d20-16": require("../../assets/dice/d20-16.png"),
+  "d20-17": require("../../assets/dice/d20-17.png"),
+  "d20-18": require("../../assets/dice/d20-18.png"),
+  "d20-19": require("../../assets/dice/d20-19.png"),
+  "d20-20": require("../../assets/dice/d20-20.png"),
+  "d8-1": require("../../assets/dice/d8-1.png"),
+  "d8-2": require("../../assets/dice/d8-2.png"),
+  "d8-3": require("../../assets/dice/d8-3.png"),
+  "d8-4": require("../../assets/dice/d8-4.png"),
+  "d8-5": require("../../assets/dice/d8-5.png"),
+  "d8-6": require("../../assets/dice/d8-6.png"),
+  "d8-7": require("../../assets/dice/d8-7.png"),
+  "d8-8": require("../../assets/dice/d8-8.png"),
+  "d6-1": require("../../assets/dice/d6-1.png"),
+  "d6-2": require("../../assets/dice/d6-2.png"),
+  "d6-3": require("../../assets/dice/d6-3.png"),
+  "d6-4": require("../../assets/dice/d6-4.png"),
+  "d6-5": require("../../assets/dice/d6-5.png"),
+  "d6-6": require("../../assets/dice/d6-6.png"),
+}

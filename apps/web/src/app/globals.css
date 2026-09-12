@@ -861,6 +861,31 @@ h3 {
   height: 34px;
 }
 
+.dice-faces {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dice-face {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.dice-face.dropped {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.screen .dice-face {
+  width: 72px;
+  height: 72px;
+}
+
 .roll .body {
   flex: 1;
   min-width: 0;

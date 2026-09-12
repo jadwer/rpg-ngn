@@ -1,6 +1,6 @@
 'use client'
 
-import { proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
 
@@ -95,8 +95,23 @@ function Roll({ group, currentBlockId, onPressBlock }: GroupProps<RollGroup>) {
         <div className="kind">{block.label}</div>
         <p className="text">{block.text}</p>
       </div>
+      <DiceFaces block={block} />
       <span className="die">{block.result}</span>
     </div>
+  )
+}
+
+/** Las caras de la lamina de dados (d20, d8, d6); con ventaja o desventaja se atenua el dado que no cuenta. */
+function DiceFaces({ block }: { block: RollGroup['block'] }) {
+  const faces = facesOf(block)
+  if (faces.length === 0) return null
+  const kept = keptFace(block)
+  return (
+    <span className="dice-faces" aria-hidden="true">
+      {faces.map((face, index) => (
+        <img key={`${face.asset}-${index}`} src={`/dice/${face.asset}.png`} alt="" className={`dice-face${kept !== null && kept !== index ? ' dropped' : ''}`} width={48} height={48} />
+      ))}
+    </span>
   )
 }
 
