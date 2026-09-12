@@ -1,33 +1,35 @@
 import type { SpeechEngine } from '@rpg-ngn/ui-logic'
 import * as Speech from 'expo-speech'
 import { Platform } from 'react-native'
+import { DEFAULT_LANGUAGE, pitchFor, spanishVoices, type VoiceInfo, type VoiceSettings } from './voices'
 
 /**
  * SpeechEngine sobre expo-speech (docs/09, "Narracion por voz"). Es un
  * envoltorio del TTS del sistema: gratis, sin clave, y con las tres
- * limitaciones que la cola por bloques absorbe. pause/resume solo se
- * exponen fuera de Android; en Android el controlador de ui-logic salta al
- * bloque siguiente al reanudar.
+ * limitaciones que la cola por bloques absorbe. Los ajustes (voz, velocidad,
+ * tono del narrador) se leen en cada `speak`, asi el selector aplica al
+ * bloque siguiente sin recrear la cola; el tono de cada bloque lo decide
+ * `pitchFor` con el hablante del item. pause/resume solo se exponen fuera
+ * de Android; en Android el controlador de ui-logic salta al bloque
+ * siguiente al reanudar.
  */
 
 export interface ExpoSpeechOptions {
-  language?: string
-  rate?: number
-  pitch?: number
-  onError?: (message: string) => void
+  settings: () => VoiceSettings
+  onError?: ((message: string) => void) | undefined
 }
 
-export const DEFAULT_LANGUAGE = 'es-MX'
-
-export function createExpoSpeechEngine(options: ExpoSpeechOptions = {}): SpeechEngine {
+export function createExpoSpeechEngine(options: ExpoSpeechOptions): SpeechEngine {
   const engine: SpeechEngine = {
-    speak(text, onDone) {
+    speak(text, onDone, item) {
+      const settings = options.settings()
       Speech.speak(text, {
-        language: options.language ?? DEFAULT_LANGUAGE,
-        rate: options.rate ?? 1,
-        pitch: options.pitch ?? 1,
+        language: DEFAULT_LANGUAGE,
+        ...(settings.voiceId ? { voice: settings.voiceId } : {}),
+        rate: settings.rate,
+        pitch: pitchFor(item, settings),
         onDone,
-        onError: (error) => options.onError?.(error.message || 'el motor de voz fallo'),
+        onError: (error) => options.onError?.(error.message || 'el motor de voz falló'),
       })
     },
     stop() {
@@ -46,15 +48,26 @@ export function createExpoSpeechEngine(options: ExpoSpeechOptions = {}): SpeechE
 }
 
 /**
- * Si el dispositivo tiene alguna voz en español. En Android, sin la voz
- * descargada y sin datos no suena; se avisa una vez (docs/09).
+ * Voces en español instaladas en el telefono. Null si el sistema no
+ * contesto (sin motor de TTS, web sin voces cargadas): no se sabe.
  */
-export async function hasSpanishVoice(): Promise<boolean | null> {
+export async function listSpanishVoices(): Promise<VoiceInfo[] | null> {
   try {
     const voices = await Speech.getAvailableVoicesAsync()
     if (voices.length === 0) return null
-    return voices.some((v) => v.language.toLowerCase().startsWith('es'))
+    return spanishVoices(voices)
   } catch {
     return null
   }
+}
+
+/** Una frase corta con la voz y el tono del narrador, para elegir de oido. */
+export function previewVoice(voice: VoiceInfo | null, settings: VoiceSettings): void {
+  void Speech.stop()
+  Speech.speak('La posada huele a pan y a lluvia. Alguien os mira desde la sombra.', {
+    language: voice?.language ?? DEFAULT_LANGUAGE,
+    ...(voice ? { voice: voice.id } : {}),
+    rate: settings.rate,
+    pitch: settings.narratorPitch,
+  })
 }

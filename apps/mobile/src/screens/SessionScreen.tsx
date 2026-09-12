@@ -1,13 +1,11 @@
 import { groupBlocks, sessionBlocks, type ViewMode } from '@rpg-ngn/ui-logic'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { BlockGroups } from '../components/BlockGroups'
-import { NarratorBanner } from '../components/NarratorBanner'
 import { TtsBar } from '../components/TtsBar'
 import { useTts } from '../hooks/useTts'
 import type { OfflineCampaign } from '../pack/offline'
 import { offlineSheetEntries } from '../sheets/entries'
-import { hasSpanishVoice } from '../speech/expoSpeechEngine'
 import { theme } from '../theme'
 import { SheetsModal } from './SheetsModal'
 
@@ -23,22 +21,11 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [sheetsOpen, setSheetsOpen] = useState(false)
-  const [spanishVoice, setSpanishVoice] = useState<boolean | null>(null)
 
   const blocks = useMemo(() => sessionBlocks({ pack: campaign.pack, session, state: campaign.state, events: campaign.events }), [campaign, session])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
   const entries = useMemo(() => offlineSheetEntries(campaign, session), [campaign, session])
   const tts = useTts(blocks)
-
-  useEffect(() => {
-    let alive = true
-    void hasSpanishVoice().then((value) => {
-      if (alive) setSpanishVoice(value)
-    })
-    return () => {
-      alive = false
-    }
-  }, [])
 
   return (
     <View style={styles.screen}>
@@ -60,7 +47,6 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
           <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
         </View>
         <TtsBar tts={tts} />
-        <NarratorBanner localSpeaking={tts.state.status === 'speaking'} spanishVoice={spanishVoice} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -83,15 +69,15 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.accent },
-  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center' },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright },
+  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.gold, textAlign: 'center' },
   sheetsButton: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  sheetsText: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.gold },
-  toolbar: { paddingHorizontal: 16, paddingVertical: 10, gap: 10, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
-  segment: { paddingHorizontal: 16, paddingVertical: 6, backgroundColor: theme.colors.panel },
+  sheetsText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold },
+  toolbar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, overflow: 'hidden' },
+  segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
   segmentActive: { backgroundColor: theme.colors.gold },
-  segmentText: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.gold },
-  segmentTextActive: { color: theme.colors.panel },
+  segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.gold },
+  segmentTextActive: { color: theme.colors.bg },
   content: { padding: 16, paddingBottom: 48 },
 })

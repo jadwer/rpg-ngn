@@ -1,68 +1,149 @@
+import { useState } from 'react'
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
+import { useNarrator } from '../state/narrator'
 import { theme } from '../theme'
+import { VoicePicker } from './VoicePicker'
 
 interface Props {
   tts: Tts
-  /** Online: leer solos los bloques que vayan llegando. */
-  autoRead?: { value: boolean; onChange: (value: boolean) => void } | undefined
+  /** Online: ofrecer "leer lo nuevo". */
+  autoRead?: boolean | undefined
 }
 
-/** Controles de la narracion por voz: leer, pausa o seguir, siguiente, parar. */
-export function TtsBar({ tts, autoRead }: Props) {
+/**
+ * La voz en una sola linea plegable para que la narracion ocupe la pantalla
+ * (pasada tras la partida del 2026-09-11). Plegada: Leer o los controles de
+ * la lectura en curso y un resumen de quien narra. Desplegada: siguiente,
+ * parar, leer lo nuevo, la voz elegida, la bandera de narrador (docs/09) y,
+ * una sola vez por telefono, el aviso de que no hay voz en español.
+ */
+export function TtsBar({ tts, autoRead = false }: Props) {
+  const [expanded, setExpanded] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const narrator = useNarrator()
   const { state } = tts
   const active = state.status === 'speaking' || state.status === 'paused'
-  const status =
-    state.status === 'speaking'
+  const localSpeaking = state.status === 'speaking'
+  const narrating = narrator.someoneNarrating || localSpeaking
+  const nobodyWarns = !narrating && !narrator.dismissed
+
+  const summary = tts.error
+    ? `Voz: ${tts.error}`
+    : state.status === 'speaking'
       ? `Leyendo ${state.index + 1} de ${state.total}`
       : state.status === 'paused'
         ? tts.nativePause
-          ? `En pausa (${state.index + 1} de ${state.total})`
-          : `En pausa; seguir salta al bloque ${Math.min(state.index + 2, state.total)}`
-        : state.status === 'done'
-          ? 'Lectura terminada'
-          : 'Sin narrar'
+          ? `En pausa, ${state.index + 1} de ${state.total}`
+          : `En pausa; Seguir salta al bloque ${Math.min(state.index + 2, state.total)}`
+        : narrator.someoneNarrating
+          ? 'Otro teléfono narra'
+          : nobodyWarns
+            ? 'Nadie narra en voz alta'
+            : autoRead && tts.autoRead
+              ? 'Leerá lo nuevo'
+              : state.status === 'done'
+                ? 'Lectura terminada'
+                : 'Voz lista'
 
   return (
-    <View style={styles.bar}>
-      <View style={styles.row}>
-        <View style={styles.buttons}>
-          {!active ? <Button label="Leer" onPress={() => tts.start()} primary /> : null}
-          {state.status === 'speaking' ? <Button label="Pausa" onPress={tts.pause} /> : null}
-          {state.status === 'paused' ? <Button label="Seguir" onPress={tts.resume} primary /> : null}
-          {active ? <Button label="Siguiente" onPress={tts.next} /> : null}
-          {active ? <Button label="Parar" onPress={tts.stop} /> : null}
-        </View>
-        {autoRead ? (
-          <View style={styles.auto}>
-            <Text style={styles.autoLabel}>Leer lo nuevo</Text>
-            <Switch value={autoRead.value} onValueChange={autoRead.onChange} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.panel} />
-          </View>
-        ) : null}
+    <View style={styles.wrap}>
+      <View style={styles.line}>
+        {!active ? <Small label="Leer" primary onPress={() => tts.start()} disabled={tts.count === 0} /> : null}
+        {state.status === 'speaking' ? <Small label="Pausa" onPress={tts.pause} /> : null}
+        {state.status === 'paused' ? <Small label="Seguir" primary onPress={tts.resume} /> : null}
+        {active ? <Small label="Parar" onPress={tts.stop} /> : null}
+        <Pressable onPress={() => setExpanded((v) => !v)} style={styles.summary} accessibilityRole="button" accessibilityState={{ expanded }} hitSlop={6}>
+          <Text style={[styles.summaryText, nobodyWarns && !active && styles.summaryWarn]} numberOfLines={1}>
+            {summary}
+          </Text>
+          <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
+        </Pressable>
       </View>
-      <Text style={styles.status}>{tts.error ? `Voz: ${tts.error}` : status}</Text>
+
+      {expanded ? (
+        <View style={styles.panel}>
+          <View style={styles.row}>
+            {active ? <Small label="Siguiente" onPress={tts.next} /> : null}
+            <Small label={tts.voice ? `Voz: ${shortName(tts.voice.name)}` : 'Voz del sistema'} onPress={() => setPickerOpen(true)} />
+            <Text style={styles.rate}>{`${tts.settings.rate.toFixed(2)}x`}</Text>
+          </View>
+
+          {autoRead ? (
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Leer lo nuevo desde este teléfono</Text>
+              <Switch value={tts.autoRead} onValueChange={tts.setAutoRead} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
+            </View>
+          ) : null}
+
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>{localSpeaking ? 'Este teléfono está narrando' : 'Otro teléfono ya narra'}</Text>
+            <Switch value={narrator.someoneNarrating} onValueChange={narrator.setSomeoneNarrating} disabled={localSpeaking} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
+          </View>
+
+          {nobodyWarns ? (
+            <View style={styles.noticeRow}>
+              <Text style={styles.notice}>Nadie narra en voz alta: toca Leer aquí o marca que otro teléfono ya lo hace.</Text>
+              <Pressable onPress={narrator.dismiss} hitSlop={6}>
+                <Text style={styles.link}>Jugamos leyendo</Text>
+              </Pressable>
+            </View>
+          ) : null}
+          {narrator.dismissed && !narrating ? (
+            <Pressable onPress={narrator.restore} hitSlop={6}>
+              <Text style={styles.link}>Volver a avisar si nadie narra</Text>
+            </Pressable>
+          ) : null}
+
+          {tts.noSpanishVoice ? (
+            <View style={styles.noticeRow}>
+              <Text style={styles.notice}>Este teléfono no tiene voz en español: la lectura sonará en otro idioma o no sonará. Se instala en los ajustes de texto a voz.</Text>
+              <Pressable onPress={tts.dismissVoiceNotice} hitSlop={6}>
+                <Text style={styles.link}>Entendido</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
+      <VoicePicker visible={pickerOpen} tts={tts} onClose={() => setPickerOpen(false)} />
     </View>
   )
 }
 
-function Button({ label, onPress, primary = false }: { label: string; onPress: () => void; primary?: boolean }) {
+/** Android nombra las voces `es-mx-x-mxa-local`; para la linea plegada basta el ultimo tramo util. */
+function shortName(name: string): string {
+  const trimmed = name.replace(/-local$|-network$/i, '')
+  return trimmed.length > 18 ? `${trimmed.slice(0, 17)}…` : trimmed
+}
+
+function Small({ label, onPress, primary = false, disabled = false }: { label: string; onPress: () => void; primary?: boolean; disabled?: boolean }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.button, primary && styles.primary, pressed && styles.pressed]} accessibilityRole="button">
+    <Pressable onPress={onPress} disabled={disabled} style={({ pressed }) => [styles.button, primary && styles.primary, disabled && styles.disabled, pressed && !disabled && styles.pressed]} accessibilityRole="button">
       <Text style={[styles.buttonText, primary && styles.primaryText]}>{label}</Text>
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
-  bar: { gap: 4 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  buttons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', flexShrink: 1 },
-  auto: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  autoLabel: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
-  button: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: theme.colors.panel },
+  wrap: { gap: 6 },
+  line: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  summary: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, minHeight: 30 },
+  summaryText: { flexShrink: 1, fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'right' },
+  summaryWarn: { color: theme.colors.goldBright },
+  chevron: { color: theme.colors.gold, fontSize: 13 },
+  panel: { gap: 8, paddingTop: 2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  rate: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.inkDim },
+  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  switchLabel: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
+  noticeRow: { gap: 4 },
+  notice: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
+  link: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, textDecorationLine: 'underline' },
+  button: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 5, backgroundColor: theme.colors.panel, minHeight: 30, justifyContent: 'center' },
   primary: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
+  disabled: { opacity: 0.45 },
   pressed: { opacity: 0.7 },
-  buttonText: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.gold, letterSpacing: 0.5 },
-  primaryText: { color: '#fff5e1' },
-  status: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, fontStyle: 'italic' },
+  buttonText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold, letterSpacing: 0.5 },
+  primaryText: { color: theme.colors.onAccent },
 })

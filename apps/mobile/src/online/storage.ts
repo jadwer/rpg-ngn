@@ -1,11 +1,14 @@
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
+import { parseVoiceSettings, type VoiceSettings } from '../speech/voices'
 
 /**
- * Lo que la app recuerda entre arranques: la URL del servidor y el token de
- * Sanctum, ambos en el almacen seguro del dispositivo (docs/11, D8: nunca en
- * AsyncStorage). Cada lectura y escritura va en try/catch porque en web y en
- * simuladores sin keychain el modulo puede no estar.
+ * Lo que la app recuerda entre arranques: la URL del servidor, el token de
+ * Sanctum y las preferencias de voz, todo en el almacen seguro del
+ * dispositivo (docs/11, D8: el token nunca en AsyncStorage; las preferencias
+ * van al mismo sitio para no sumar otra dependencia nativa). Cada lectura y
+ * escritura va en try/catch porque en web y en simuladores sin keychain el
+ * modulo puede no estar.
  */
 const API_PORT = 8010
 
@@ -23,7 +26,7 @@ export function defaultServerUrl(): string {
 
 export const DEFAULT_SERVER_URL = defaultServerUrl()
 
-const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user' } as const
+const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user', voice: 'rpg.voice', autoRead: 'rpg.autoread', voiceNotice: 'rpg.voice-notice' } as const
 
 export interface StoredUser {
   id: string
@@ -73,4 +76,23 @@ export const storage = {
     await write(KEYS.token, null)
     await write(KEYS.user, null)
   },
+
+  /** Voz, velocidad y tono del narrador; por telefono, no por cuenta. */
+  async voiceSettings(): Promise<VoiceSettings> {
+    const raw = await read(KEYS.voice)
+    if (!raw) return parseVoiceSettings(null)
+    try {
+      return parseVoiceSettings(JSON.parse(raw) as Record<string, unknown>)
+    } catch {
+      return parseVoiceSettings(null)
+    }
+  },
+  setVoiceSettings: (settings: VoiceSettings) => write(KEYS.voice, JSON.stringify(settings)),
+
+  autoRead: async () => (await read(KEYS.autoRead)) === '1',
+  setAutoRead: (value: boolean) => write(KEYS.autoRead, value ? '1' : null),
+
+  /** El aviso de "sin voz en español" se muestra una vez por telefono. */
+  voiceNoticeSeen: async () => (await read(KEYS.voiceNotice)) === '1',
+  setVoiceNoticeSeen: () => write(KEYS.voiceNotice, '1'),
 }
