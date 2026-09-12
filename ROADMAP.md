@@ -53,7 +53,7 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] `campaign:import` de los 21 eventos con el snapshot canonico como fixture; el engine lo sustituye en la entrega 5
 - [x] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea (SQLite y Postgres 16)
 
-## Entrega 5: Turnos (en curso desde el 2026-09-06)
+## Entrega 5: Turnos (hecha el 2026-09-11)
 
 - [x] `packages/engine-contract`: contrato versionado Laravel/engine (peticion de turno, NDJSON de bloques y resultado, validacion, reproyeccion con auditoria, probe)
 - [x] `packages/narrative` con `DMProvider` y `ScriptedDMProvider` determinista
@@ -66,7 +66,7 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Primera partida por LAN el 2026-09-11 (mesa "Posada", dos telefonos): destapo la IP por DHCP, el firewall de Hyper-V en modo espejo y la sesion de Expo Go
 - [x] DM scripted con guion por turno (`script` en `settings.provider` de la mesa, escenas como datos en `tools/scenes/`, `tools/smoke/scene.sh`): demos sin modelo
 - [x] El dueño de la mesa fija su propio personaje (`POST tables/{t}/members` sobre si mismo)
-- [ ] Criterio del ADR: un turno completo desde dos telefonos por LAN, escena entera de principio a fin (Gabino)
+- [x] Criterio del ADR: escena entera desde dos telefonos por LAN (Posada, 2026-09-11). Entrega 5 cerrada
 
 Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
 
