@@ -83,11 +83,9 @@ codigo compilando y los tests en verde por package; ver "Que falta" para lo que 
 
 ## A medias o sin hacer
 
-- `pnpm check` completo (incluye `next build`) no llego a correr entero en esta sesion. Corrieron
-  en verde por separado: `pnpm --filter @rpg-ngn/content test` (26), `@rpg-ngn/campaign` (15),
-  `@rpg-ngn/narrative` (41), `engine` (9), `pnpm --filter engine typecheck`. Al cerrar quedo
-  lanzado `pnpm typecheck && pnpm lint && pnpm test && pnpm validate`; si algo falla sera en
-  `apps/mobile` (bundle regenerado) o en lint de estilo, no en logica.
+- `pnpm check` completo (build, typecheck, lint, tests, validate, `next build`) paso en verde
+  en el ultimo commit. `apps/web` recibio el cambio minimo que exige el contrato: su
+  `scripts/bundle-pack.ts` tambien omite `secrets/` (regenerado `src/generated/pilot-pack.ts`).
 - La API (`~/dev/rpg-ngn-api`) no se toco. `TurnService::commitResult` solo lee `events`, `state`
   y `addressed` del `result`, asi que `lint` se ignora sin romper nada; la mesa ve el bloque
   `system`. Guardarlo pide una columna en `turns` (migracion en plena partida, descartado hoy) o
