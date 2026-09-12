@@ -1,6 +1,6 @@
 # Runbook local
 
-Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-11: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
+Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-12: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
 
 Puertos del proyecto: engine `3100`, API `8010`, web `3010`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
 
@@ -15,7 +15,7 @@ cd ~/dev/rpg-ngn && pnpm --filter engine dev
 # Terminal 2: API (Laravel)
 cd ~/dev/rpg-ngn-api && php artisan serve --host 0.0.0.0 --port 8010
 
-# Terminal 3: web (Next.js). Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local
+# Terminal 3: web (Next.js), la mesa principal. Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local
 cd ~/dev/rpg-ngn && pnpm --filter web dev
 
 # Terminal 4 (opcional): app (Expo). Sin --tunnel: WSL ya comparte la IP del Wi-Fi
@@ -29,7 +29,15 @@ Si algo no arranca:
 - `pnpm install && pnpm build` en `rpg-ngn` (el engine importa los packages construidos).
 - `composer install && php artisan migrate --seed` en `rpg-ngn-api` si la base esta vacia.
 - Postgres: `systemctl status postgresql`; rol `rpg`, base `rpg_ngn`.
-- El Firewall de Windows pregunta la primera vez por los puertos 8010, 3010, 8081 y 3100: aceptar.
+- Firewall de Windows con WSL en modo espejo: la red del Wi-Fi debe ser "Private" y los puertos abiertos para WSL en el firewall de Hyper-V (PowerShell como administrador, una sola vez):
+
+  ```powershell
+  Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private
+  New-NetFirewallHyperVRule -Name 'rpg-ngn-dev' -DisplayName 'rpg-ngn dev' -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts 8081,8010,3100,3010 -Action Allow
+  New-NetFirewallRule -DisplayName 'rpg-ngn dev' -Direction Inbound -Protocol TCP -LocalPort 8081,8010,3100,3010 -Action Allow -Profile Private
+  ```
+
+  Si la regla ya existe sin el 3010: `Set-NetFirewallHyperVRule -Name 'rpg-ngn-dev' -LocalPorts 8081,8010,3100,3010` y `Set-NetFirewallRule -DisplayName 'rpg-ngn dev' -LocalPort 8081,8010,3100,3010`.
 
 Comprobacion rapida:
 
@@ -53,7 +61,17 @@ Crea una mesa nueva con Jaz (Zahira) y Armando (Calder), abre la sesion 003, res
 3. Telefono A: `jaz@example.com` / `password`. Telefono B: `armando@example.com` / `password`.
 4. Entrar a la mesa mas reciente. Cada uno escribe su accion; cuando los dos respondieron, cualquiera cierra el turno. En dos o tres segundos ambos ven los bloques nuevos y el turno siguiente abierto.
 
-El DM es `gabino@example.com` / `password` (abre y cierra sesiones, fuerza cierres; no tiene personaje, no responde).
+El anfitrion es `gabino@example.com` / `password` (abre y cierra sesiones, invita, fuerza cierres, y juega con su personaje). El DM es la IA.
+
+## 3a. El DM (entrega 6)
+
+La API elige el proveedor con `DM_PROVIDER` en `rpg-ngn-api/.env`: `anthropic` (el de la partida, `ANTHROPIC_MODEL=claude-sonnet-5`, `ANTHROPIC_API_KEY`), `openai`, `deepseek`, `ollama` (M1 en la LAN, `OLLAMA_URL`, `OLLAMA_MODEL`) o `scripted` (sin modelo; las mesas con guion en `settings.provider` siguen usando scripted aunque el default sea otro). Comprobar sin gastar:
+
+```bash
+cd ~/dev/rpg-ngn-api && php artisan dm:probe          # ok=si modelo=claude-sonnet-5
+```
+
+Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dolar; con la cola en `sync`, "Cerrar turno y narrar" espera esa respuesta dentro de la peticion y la web muestra "El DM esta narrando...". La premisa de la mesa (al crearla) y la nota de la sesion (al abrirla) llegan al DM como contexto. Si el engine se reinicia, el probe lo confirma; si el turno vuelve a `open` con un bloque de sistema, el error esta en la terminal del engine.
 
 ## 3b. Web (laptops e iPhone por Safari)
 
@@ -66,7 +84,7 @@ El DM es `gabino@example.com` / `password` (abre y cierra sesiones, fuerza cierr
 
 ```bash
 cd ~/dev/rpg-ngn && pnpm check                 # motor, contrato, engine, app, web (incluye next build)
-cd ~/dev/rpg-ngn-api && composer test          # API en SQLite, 27 tests
+cd ~/dev/rpg-ngn-api && composer test          # API en SQLite, 35 tests
 cd ~/dev/rpg-ngn-api && composer test:pgsql    # lo mismo contra Postgres
 cd ~/dev/rpg-ngn && pnpm --filter mobile smoke-api   # turno completo con el cliente de la app
 ```
@@ -74,7 +92,7 @@ cd ~/dev/rpg-ngn && pnpm --filter mobile smoke-api   # turno completo con el cli
 ## 5. Si algo se rompe
 
 - 401 en la app o en la web: token caducado o servidor mal escrito; volver a iniciar sesion.
-- La web no carga desde otro dispositivo: `pnpm --filter web dev` escucha en `0.0.0.0`; revisar firewall del 3000 y que la IP sea la actual (`hostname -I`).
+- La web no carga desde otro dispositivo: `pnpm --filter web dev` escucha en `0.0.0.0`; revisar firewall del 3010 y que la IP sea la actual (`hostname -I`).
 - Voz muda en Safari: tocar Leer una vez (iOS exige un gesto) y elegir una voz `es` en el selector.
 - 409 al cerrar: alguien cerro antes; refrescar.
 - El turno vuelve a `open` con un bloque de sistema: el engine fallo; ver la terminal 1.
