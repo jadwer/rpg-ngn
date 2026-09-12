@@ -1,4 +1,4 @@
-import { speechTextOf, type TurnBlock } from './blocks.js'
+import { speechTextOf, type BlockKind, type TurnBlock } from './blocks.js'
 
 /**
  * Cola de TTS por bloques (docs/09, "Narracion por voz"). La maquina de
@@ -10,7 +10,8 @@ import { speechTextOf, type TurnBlock } from './blocks.js'
  */
 
 export interface SpeechEngine {
-  speak(text: string, onDone: () => void): void
+  /** `item` trae el tipo de bloque y quien habla, por si el motor cambia la voz o el tono por hablante. */
+  speak(text: string, onDone: () => void, item?: TtsItem): void
   stop(): void
   pause?(): void
   resume?(): void
@@ -64,11 +65,20 @@ function advance(state: TtsState): TtsState {
 export interface TtsItem {
   blockId: string
   text: string
+  kind: BlockKind
+  /** `character:zahira`, `npc:osric`; null en narracion, sistema y tiradas sin actor. */
+  speakerRef: string | null
+}
+
+function speakerRefOf(block: TurnBlock): string | null {
+  if (block.kind === 'dialogue') return block.speaker.ref
+  if (block.kind === 'roll') return block.actor?.ref ?? null
+  return null
 }
 
 /** Lo que el TTS lee de un array de bloques, en orden, sin bloques vacios. */
 export function speechQueue(blocks: readonly TurnBlock[]): TtsItem[] {
-  return blocks.map((block) => ({ blockId: block.id, text: speechTextOf(block) })).filter((item) => item.text.trim().length > 0)
+  return blocks.map((block) => ({ blockId: block.id, text: speechTextOf(block), kind: block.kind, speakerRef: speakerRefOf(block) })).filter((item) => item.text.trim().length > 0)
 }
 
 export interface TtsController {
@@ -99,10 +109,14 @@ export function createTtsController(engine: SpeechEngine, items: readonly TtsIte
     const item = items[state.index]
     if (!item) return
     const mine = ++token
-    engine.speak(item.text, () => {
-      if (mine !== token) return
-      dispatch({ type: 'finished' })
-    })
+    engine.speak(
+      item.text,
+      () => {
+        if (mine !== token) return
+        dispatch({ type: 'finished' })
+      },
+      item,
+    )
   }
 
   const dispatch = (action: TtsAction): void => {

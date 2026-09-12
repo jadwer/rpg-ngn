@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { narration, system } from './blocks.js'
+import { dialogue, narration, system } from './blocks.js'
 import { createTtsController, speechQueue, TTS_IDLE, ttsReducer, type SpeechEngine, type TtsState } from './tts.js'
 
 /** Motor falso: no termina solo, el test decide cuando acaba cada bloque. */
@@ -191,8 +191,18 @@ describe('speechQueue', () => {
   it('convierte bloques en items y descarta los vacios', () => {
     const queue = speechQueue([narration('n', 'Hola.'), system('s', {}), system('t', { title: 'Fortuna', items: ['1-3: Mala suerte'] })])
     expect(queue).toEqual([
-      { blockId: 'n', text: 'Hola.' },
-      { blockId: 't', text: 'Fortuna. 1-3: Mala suerte' },
+      { blockId: 'n', text: 'Hola.', kind: 'narration', speakerRef: null },
+      { blockId: 't', text: 'Fortuna. 1-3: Mala suerte', kind: 'system', speakerRef: null },
     ])
+  })
+
+  it('anota quien habla en dialogos y tiradas para que el motor elija el tono', () => {
+    const osric = { ref: 'npc:osric', name: 'Osric', portrait: null }
+    const queue = speechQueue([dialogue('d', osric, 'Bienvenidos.'), { kind: 'roll', id: 'r', actor: osric, rollKind: 'roll', die: 'd20', result: 12, label: 'Tirada', advantage: null, text: 'Osric saca 12.' }])
+    expect(queue.map((i) => [i.kind, i.speakerRef])).toEqual([
+      ['dialogue', 'npc:osric'],
+      ['roll', 'npc:osric'],
+    ])
+    expect(queue[0]?.text).toBe('Osric: Bienvenidos.')
   })
 })
