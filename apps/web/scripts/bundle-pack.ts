@@ -39,9 +39,21 @@ statSync(packDir)
 const files = walk(packDir)
 const manifest = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) as { id: string; version: string }
 
-const textFiles = files.filter((f) => TEXT.test(f))
+// La capa dm del pack (secrets/) nunca llega al navegador: el manifiesto empaquetado la declara vacia.
+const isSecret = (f: string): boolean => relPosix(f).startsWith('secrets/')
+const textFiles = files.filter((f) => TEXT.test(f) && !isSecret(f))
 const imageFiles = files.filter((f) => IMAGE.test(f))
 for (const file of files.filter((f) => !TEXT.test(f) && !IMAGE.test(f))) console.warn(`omitido (ni texto ni imagen): ${relPosix(file)}`)
+const secretsOmitted = files.filter(isSecret).length
+if (secretsOmitted > 0) console.warn(`omitidos ${secretsOmitted} secretos del pack (capa dm, no se empaquetan)`)
+
+function textOf(file: string): string {
+  const text = readFileSync(file, 'utf8')
+  if (relPosix(file) !== 'pack.json') return text
+  const parsed = JSON.parse(text) as Record<string, unknown>
+  if (!('secrets' in parsed)) return text
+  return JSON.stringify({ ...parsed, secrets: [] }, null, 2) + '\n'
+}
 
 rmSync(publicDir, { recursive: true, force: true })
 for (const file of imageFiles) {
@@ -60,7 +72,7 @@ const packModule = [
   '',
   '/** Archivos de texto del pack, ruta relativa a la raiz del pack. */',
   'export const packFiles: Readonly<Record<string, string>> = {',
-  ...textFiles.map((f) => `  ${JSON.stringify(relPosix(f))}: ${JSON.stringify(readFileSync(f, 'utf8'))},`),
+  ...textFiles.map((f) => `  ${JSON.stringify(relPosix(f))}: ${JSON.stringify(textOf(f))},`),
   '}',
   '',
   '/** Retratos copiados a public/packs/<pack>/; se sirven como estaticos. */',

@@ -7,10 +7,15 @@ import { characterName, loadBundledPack, portraitUrl, RULESET_ID, sessionList } 
 const repoRoot = resolve(import.meta.dirname, '../../../..')
 
 describe('pack empaquetado en la web', () => {
-  it('coincide byte a byte con content/packs/pilot; si no, correr bundle-pack', () => {
+  it('coincide byte a byte con content/packs/pilot, sin la capa dm; si no, correr bundle-pack', () => {
     for (const [path, text] of Object.entries(packFiles)) {
-      expect(readFileSync(join(repoRoot, 'content/packs/pilot', path), 'utf8'), path).toBe(text)
+      expect(path.startsWith('secrets/'), path).toBe(false)
+      const original = readFileSync(join(repoRoot, 'content/packs/pilot', path), 'utf8')
+      // El manifiesto empaquetado declara secrets vacio: los secretos nunca llegan al navegador.
+      const expected = path === 'pack.json' ? JSON.stringify({ ...(JSON.parse(original) as object), secrets: [] }, null, 2) + '\n' : original
+      expect(expected, path).toBe(text)
     }
+    expect(JSON.stringify(packFiles)).not.toContain('secrets/')
     const manifest = JSON.parse(readFileSync(join(repoRoot, 'content/packs/pilot/pack.json'), 'utf8')) as { version: string }
     expect(manifest.version).toBe(PACK_VERSION)
     expect(packBinaries).toHaveLength(9)
