@@ -98,6 +98,14 @@ Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el re
 - [ ] BYOK: clave propia por mesa en `provider_configs` con cast `encrypted` (docs/11, D6), cuando exista cobro; hoy la mesa solo elige preset del servidor
 - [ ] Admin con `@atomo/ui` y `@atomo/core`
 
+### Paridad web y movil (revisada el 2026-09-12, se atiende despues de la partida)
+
+Le falta a la movil: crear cuenta, perfil (nombre y contraseña), recuperar contraseña, proveedor del DM por mesa con Probar (al crear y en el mando), busqueda por correo con `users/lookup` (hoy usa la vieja que da 403 y cae a conocidos), amigos fuera de la mesa, idioma de lectura, titulo con mesa y sesion, "bajar a lo nuevo". Le falta a la web: tono por hablante (narrador grave, party normal, un tono por NPC; `ui-logic` ya manda `kind` y `speakerRef` y la web los ignora), bandera de narrador local, y una cronica publica de la campaña (equivalente al modo sin conexion de la app, util para streamers y para Pages). A las dos: BYOK, bandera de narrador compartida, avatar.
+
+- [ ] Mover a `packages/ui-logic` lo que hoy esta duplicado a mano: `tableSetup` (web y movil son espejo), eleccion de tono por hablante (`apps/mobile/src/speech/voices.ts`), reglas de quien invita o cierra y los textos de estado del asiento. Con eso la paridad deja de ser una lista
+- [ ] Movil: pantallas de cuenta, presets de DM y lookup usando lo que `api-client` ya expone
+- [ ] Web: tono por hablante y bandera local
+
 ## Entrega 6: DM IA (primer turno real el 2026-09-12)
 
 - [x] `packages/narrative`: context builder de cuatro capas (mundo y premisa, party con estado vivo, cronica recortada por longitud, turno), `ModelDMProvider` comun con prompt desde docs/03 y docs/06, parser NDJSON en streaming tolerante (basura antes del JSON, fences, JSON partido en lineas, prosa suelta como narracion) y validacion local de los eventos que el modelo propone contra el estado (tiradas solo si el jugador escribio el numero, HP e inventario solo de la party presente)
