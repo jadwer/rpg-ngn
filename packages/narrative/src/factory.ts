@@ -6,7 +6,7 @@ import { ScriptedDMProvider } from './scripted.js'
 export function createProvider(config: ProviderConfig): DMProvider {
   switch (config.kind) {
     case 'scripted':
-      return new ScriptedDMProvider()
+      return new ScriptedDMProvider(config.script)
     case 'anthropic':
       throw new Error('el proveedor anthropic llega en la entrega 6; usa scripted')
   }

@@ -39,8 +39,36 @@ export type TurnInput = z.infer<typeof TurnInput>
  * `anthropic` llega en la entrega 6 con la credencial custodiada por la
  * plataforma, que viaja solo por localhost y nunca vuelve al cliente.
  */
+/** Linea de un NPC que el DM scripted mete antes de su narracion. */
+export const ScriptedLine = z.strictObject({
+  speaker: z.string().min(1),
+  speakerRef: z.string().min(1).optional(),
+  text: z.string().min(1),
+})
+
+/**
+ * Guion opcional del DM scripted: narracion fija por numero de turno, para
+ * escenas cortas y demos sin modelo. Es contenido, viaja en `settings` de la
+ * mesa; el codigo del provider no sabe de lore. Un turno sin entrada en el
+ * guion recibe la narracion generica.
+ */
+export const ScriptedScene = z.strictObject({
+  /** Narracion del turno 1 cuando se cierra sin respuestas: presenta la escena. */
+  opening: z.string().min(1).optional(),
+  turns: z
+    .array(
+      z.strictObject({
+        turn: z.number().int().positive(),
+        lines: z.array(ScriptedLine).optional(),
+        narration: z.string().min(1),
+      }),
+    )
+    .optional(),
+})
+export type ScriptedScene = z.infer<typeof ScriptedScene>
+
 export const ProviderConfig = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('scripted') }),
+  z.strictObject({ kind: z.literal('scripted'), script: ScriptedScene.optional() }),
   z.strictObject({
     kind: z.literal('anthropic'),
     model: z.string().min(1),

@@ -74,6 +74,45 @@ describe('ScriptedDMProvider', () => {
     expect(outputs[0]).toMatchObject({ block: { type: 'system' } })
   })
 
+  it('con guion presenta la escena en el turno 1 vacio y narra lo fijado en los turnos cubiertos', async () => {
+    const { pack, state } = await pilotContext()
+    const provider = createProvider({
+      kind: 'scripted',
+      script: {
+        opening: 'La posada huele a estofado.',
+        turns: [{ turn: 2, lines: [{ speaker: 'Tomas', text: 'Las tablas eran de mi abuelo.' }], narration: 'Eligen y el posadero asiente.' }],
+      },
+    })
+
+    const opening = await collect(provider.narrate({ pack, state, session: undefined, turn: { id: 't1', number: 1, sessionId: '002', responses: [] } }))
+    expect(opening.map((o) => o.kind)).toEqual(['block', 'event', 'addressed'])
+    expect(opening[0]).toMatchObject({ block: { type: 'narration', text: 'La posada huele a estofado.' } })
+    expect(opening[1]).toMatchObject({ event: { type: 'narration', payload: { text: 'La posada huele a estofado.' } } })
+
+    const second = await collect(
+      provider.narrate({
+        pack,
+        state,
+        session: undefined,
+        turn: { id: 't2', number: 2, sessionId: '002', responses: [{ characterId: 'zahira', playerId: 'u1', text: 'Dados.', submittedAt: '2026-09-11T00:00:00Z', late: false }] },
+      }),
+    )
+    const blocks = second.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+    expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'dialogue', 'narration'])
+    expect(blocks[1]).toMatchObject({ speaker: 'Tomas', text: 'Las tablas eran de mi abuelo.' })
+    expect(blocks[2]).toMatchObject({ text: 'Eligen y el posadero asiente.' })
+
+    const third = await collect(
+      provider.narrate({
+        pack,
+        state,
+        session: undefined,
+        turn: { id: 't3', number: 3, sessionId: '002', responses: [{ characterId: 'zahira', playerId: 'u1', text: 'Sigo.', submittedAt: '2026-09-11T00:00:00Z', late: false }] },
+      }),
+    )
+    expect(third.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['system', 'dialogue', 'narration'])
+  })
+
   it('anthropic todavia no existe', () => {
     expect(() => createProvider({ kind: 'anthropic', model: 'x', credential: 'y' })).toThrow(/entrega 6/)
   })

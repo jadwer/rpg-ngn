@@ -1,0 +1,33 @@
+{
+  "kind": "scripted",
+  "script": {
+    "opening": "Valdoria, al caer la noche. La posada huele a estofado y a leña humeda. Zahira y Narivyl ocupan la mesa del rincon, todavia con el polvo de la mina en las botas y en las manos: el dia entero alla abajo y nada que mostrar salvo cansancio. Calder dijo que subiria mas tarde, que tenia que revisar algo en los planos. Su silla espera vacia. Tomas, el posadero, deja dos jarras sin que nadie las pida y una caja de madera gastada: dados de hueso, un tablero de tablas con las lineas casi borradas y una baraja de Reyes y Cuervos con las esquinas dobladas. \"Para que la espera no se haga larga\", dice, y vuelve a la barra. ¿A que juegan?",
+    "turns": [
+      {
+        "turn": 2,
+        "lines": [
+          {
+            "speaker": "Tomas",
+            "text": "Las tablas eran de mi abuelo. Los dados los dejo un minero que no volvio a subir, y nadie quiere tocarlos. La baraja es la que usan los carreteros para quedarse sin paga."
+          }
+        ],
+        "narration": "Eligen, y el posadero asiente como si hubiera apostado por esa respuesta. Dos mineros de la mesa de al lado giran la silla para mirar. Primera ronda: cada una pone algo en el centro de la mesa, aunque sea una promesa. La regla de la casa es simple: quien pierda paga la siguiente jarra. ¿Que apuestan y como abren la partida?"
+      },
+      {
+        "turn": 3,
+        "narration": "La partida arranca y la posada baja la voz para escuchar el golpe sobre la madera. Narivyl juega a leer la cara de su rival; Zahira juega a no tener cara. Va reñida: dos rondas para una, dos para la otra, y la ultima jarra en juego. Afuera el viento empuja la puerta contra el marco, dos veces, como si alguien dudara en entrar. Nadie entra. Ultima mano, todo o nada. ¿Que hacen?"
+      },
+      {
+        "turn": 4,
+        "lines": [
+          {
+            "speaker": "Calder",
+            "speakerRef": "character:calder",
+            "text": "¡La mina! ¡Algo se movio en la galeria cerrada, y no fue un derrumbe! ¡Hay luz alla abajo, luz, y alguien respondio cuando grite!"
+          }
+        ],
+        "narration": "La ultima mano se queda a medio jugar. La puerta se abre de golpe y Calder entra sin aliento, con la capa desgarrada y una lampara todavia encendida en la mano, aunque subio corriendo y ya es de noche. La posada entera enmudece; Tomas suelta la jarra que estaba secando y el estruendo es lo unico que se oye. Nadie recuerda quien iba ganando. Fin de la escena."
+      }
+    ]
+  }
+}
