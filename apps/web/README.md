@@ -1,6 +1,6 @@
 # apps/web
 
-La mesa en el navegador (docs/11, D8: la web es el producto principal, con implementacion propia e independiente de la app movil). Next.js 15 con App Router, sin Tailwind: CSS global con variables y el tema oscuro de `apps/sheets` (Cinzel para titulos, Crimson Pro para texto, cargadas con `next/font`). Consume `@rpg-ngn/api-client` (API), `@rpg-ngn/ui-logic` (bloques, vistas, velado, cola de TTS, estado del turno) y `@rpg-ngn/content` (el pack empaquetado).
+La mesa en el navegador (docs/11, D8: la web es el producto principal, con implementacion propia e independiente de la app movil). Next.js 15 con App Router, sin Tailwind: CSS global con variables y el tema oscuro de `apps/sheets` (Cinzel para titulos, Crimson Pro para texto, cargadas con `next/font`). Consume `@rpg-ngn/api-client` (API), `@rpg-ngn/ui-logic` (bloques, vistas, velado, cola de TTS, estado del turno, preparacion de la mesa, tono por hablante, bandera de narrador, presets del DM; la misma logica que la app movil) y `@rpg-ngn/content` (el pack empaquetado).
 
 ## Levantar
 
@@ -38,15 +38,16 @@ Modo API directa: el campo "Servidor de la API" (plegado tras "Cambiar servidor"
 2. **Crear cuenta** (`/crear-cuenta`): nombre, correo, contraseña y confirmacion (8 caracteres minimo). Usa `POST /api/auth/register` de atomo/auth en modo token. Con `ATOMO_REQUIRE_EMAIL_VERIFICATION=false` en la API (lo de hoy en local) se entra directo a las mesas; con `true` la API no devuelve token, la pantalla muestra "verifica tu correo" y el login responde 403 hasta pulsar el enlace del correo (`GET /api/auth/email/verify/{id}/{hash}`, firmado; el enlace lo construye la API con `FRONTEND_URL`). Eso requiere `MAIL_MAILER` real; en local el correo va al log.
 3. **Acceso** (`/entrar`): correo y contraseña. "Olvide mi contraseña" (`/recuperar`) pide el correo de recuperacion a `POST /api/auth/forgot-password`; solo llega si el servidor tiene correo configurado, y la pagina lo dice.
 4. **Perfil** (`/perfil`, el nombre en la barra): cambiar el nombre visible (`PATCH /api/v1/profile`) y la contraseña (`PATCH /api/v1/profile/password`, pide la actual). El correo se muestra y no se edita.
-5. **Ajustes** (`/ajustes`): idioma de lectura (filtra las voces del navegador y fija el idioma de la locucion), voz por defecto, velocidad y "leer lo nuevo", con boton de prueba. Se guardan en `localStorage` de ese navegador; la barra de voz de la mesa es el acceso rapido a lo mismo.
-6. **Mesas** (`/mesas`): las mesas donde el usuario es miembro, con su asiento, pack y quien esta con que personaje. El dueño de la mesa es el **anfitrion** (la API lo llama `dm`; el DM es la IA). Al pie, **Amigos**: solicitudes recibidas para aceptar (una jugadora nueva no tiene mesa donde hacerlo), buscar por correo y pedir amistad, y la lista de amigos.
+5. **Ajustes** (`/ajustes`): idioma de lectura (filtra las voces del navegador y fija el idioma de la locucion), voz por defecto, velocidad, tono del narrador y "leer lo nuevo", con boton de prueba que lee narracion, un dialogo de la party y uno de un NPC para oir los tres tonos. Se guardan en `localStorage` de ese navegador; la barra de voz de la mesa es el acceso rapido a lo mismo.
+6. **Mesas** (`/mesas`): las mesas donde el usuario es miembro, con su asiento, pack y quien esta con que personaje. El dueño de la mesa es el **anfitrion** (la API lo llama `host`; el DM es la IA). Al pie, **Amigos**: solicitudes recibidas para aceptar (una jugadora nueva no tiene mesa donde hacerlo), buscar por correo y pedir amistad, y la lista de amigos.
 7. **Crear mesa** (`/mesas/nueva`): nombre, pack (hoy solo `pilot@0.4.0`), personaje del anfitrion con retrato, director de juego (entre los presets configurados en el servidor; por defecto el del servidor y entonces no se guarda nada en la mesa) y premisa opcional (`settings.premise`). Al crearla aparece la seccion de invitados.
 8. **Invitar**: la API exige amistad aceptada antes de invitar. La seccion busca la cuenta por correo exacto (`GET /api/v1/users/lookup?email=`, abierto a cualquier cuenta), muestra el estado de la amistad (pedir, aceptar la pendiente propia, amigos), y con amistad aceptada invita con personaje. Tambien vive en el mando del anfitrion, pestaña "Invitados".
 9. **La mesa** (`/mesas/[id]`): polling cada 1.5 s a `GET /tables/{id}/state`. Cabecera con sesion, momento del mundo, turno y quien falta; la pestaña del navegador lleva el nombre de la mesa y la sesion. Vistas **Narrativa** y **Dialogo** sobre los mismos bloques. Cuadro de respuesta si tienes personaje y no has respondido (Ctrl+Enter envia; `Idempotency-Key` estable por turno). "Cerrar turno y narrar" cuando no falta nadie; "Forzar cierre" solo el anfitrion. Mientras el DM resuelve, "El DM esta narrando..." hasta que llegan bloques nuevos. Autoscroll al bloque nuevo, con "Bajar a lo nuevo" si subiste a leer.
 10. **Mando del anfitrion**: pestaña Sesion (abrir con codigo de tres digitos sugerido y nota que el DM recibe como `worldTime`; cerrar con cliffhanger), Invitados, y **DM**: el proveedor de la mesa entre los presets del servidor (`scripted`, `anthropic`, `openai`, `deepseek`, `ollama`; los sin clave salen deshabilitados), modelo opcional, "Probar" (`POST /api/v1/tables/{t}/dm/probe`, llama al engine con el preset sin gastar un turno) y "Guardar" (`settings.provider = {preset, model?}` por `PATCH /api/v1/tables/{t}`, conservando la premisa). Las claves nunca salen del `.env` de la API; traer clave propia (BYOK) queda para la entrega 7.
 11. **Fichas**: panel lateral (pantalla completa en el telefono) con la party, el estado vivo (la propia desde `player:<id>`, las ajenas desde `world`) y el mismo velado que `apps/sheets` y la app movil.
-12. **Voz**: Web Speech API con la cola de TTS de ui-logic. Leer, pausa, siguiente, parar; voz, velocidad y "Leer lo nuevo" en la barra, mas el enlace a Ajustes. Cada bloque se lee en trozos de pocas oraciones porque Chrome corta locuciones largas. Si el navegador no tiene voces en el idioma elegido avisa una vez.
-13. **Modo pantalla** (tecla `F` o boton "Pantalla", `Esc` sale): solo narrativa y dialogos en grande, sin controles, para compartir pantalla o stream. Abajo una linea con el estado del turno.
+12. **Voz**: Web Speech API con la cola de TTS de ui-logic. Leer, pausa, siguiente, parar; voz, velocidad y "Leer lo nuevo" en la barra, mas el enlace a Ajustes. Cada bloque se lee en trozos de pocas oraciones porque Chrome corta locuciones largas. **Tono por hablante** (`pitchFor` de ui-logic, el mismo que la app): la narracion y los bloques de sistema con el tono del narrador (0.85 por defecto, ajustable en Ajustes), la party al natural y cada NPC con un tono fijo elegido por hash de su `speakerRef`, asi el posadero suena igual en todos los turnos y dispositivos. Si el navegador no tiene voces en el idioma elegido avisa una vez.
+13. **Bandera de narrador** (docs/09, "Voz"), en la misma barra: "Otro dispositivo narra" para marcar que alguien mas lee en voz alta (se apaga sola mientras este navegador lee), y el resumen "Nadie narra en voz alta" con "Jugamos leyendo" para descartarlo ("Avisar si nadie narra" lo restaura). Es local a este navegador, como en la app; sobrevive al cambio de pagina pero no a la recarga.
+14. **Modo pantalla** (tecla `F` o boton "Pantalla", `Esc` sale): solo narrativa y dialogos en grande, sin controles, para compartir pantalla o stream. Abajo una linea con el estado del turno.
 
 ## Estructura
 
@@ -57,29 +58,31 @@ Modo API directa: el campo "Servidor de la API" (plegado tras "Cambiar servidor"
 | `src/server/apiProxy.ts` | Cookie de sesion, guardia CSRF y reenvio a la API con Bearer (lado servidor) |
 | `src/app/api/[...path]/route.ts` | El proxy de `/api/*` |
 | `src/app/auth/session`, `src/app/auth/register` | Route handlers de entrar, salir y registrarse (ponen y quitan la cookie) |
-| `src/lib/storage.ts` | `localStorage`: servidor, token (solo modo directo), usuario, voz, velocidad, idioma, leer lo nuevo |
+| `src/lib/storage.ts` | `localStorage`: servidor, token (solo modo directo), usuario, voz, velocidad, tono del narrador, idioma, leer lo nuevo |
 | `src/lib/session.tsx` | `SessionProvider`: cliente de la API, login, registro, logout, 401, modos proxy y directo |
-| `src/lib/pack.ts` | Pack en memoria, URL de retratos, ruleset, packs disponibles |
+| `src/lib/narrator.tsx` | `NarratorProvider`: la bandera de narrador de ui-logic en un contexto local |
+| `src/lib/pack.ts` | Pack en memoria, URL de retratos, ruleset, packs disponibles (personajes, sesiones y nombres vienen de ui-logic) |
 | `src/lib/sheets.ts` | Entradas de fichas (quien juega que, velado, estado vivo); probado |
-| `src/lib/tableSetup.ts` | Codigo de sesion sugerido, personajes libres, estado de amistad, etiquetas de asiento; probado |
-| `src/lib/dmPresets.ts` | Nombres legibles de los presets del DM y que se manda al crear la mesa |
-| `src/lib/webSpeech.ts` | `SpeechEngine` de ui-logic sobre `speechSynthesis`, voces por idioma; probado |
+| `src/lib/webSpeech.ts` | `SpeechEngine` de ui-logic sobre `speechSynthesis`: voces por idioma, tono por hablante; probado |
 | `src/lib/useTableState.ts` | Polling del estado de la mesa |
-| `src/lib/useTts.ts` | La cola de TTS como hook, con voz, velocidad, idioma y lectura automatica |
-| `src/components/` | `TableScreen` (la mesa), `Blocks` (las dos vistas), `TurnPanel`, `HostPanel`, `DmSettingsPanel`, `InvitePanel`, `FriendsPanel`, `SheetsPanel`, `Sheet`, `CharacterPicker`, `TtsBar`, `Portrait`, `RequireSession`, `UserBar`, `ServerField`, `SessionCta` |
+| `src/lib/useTts.ts` | La cola de TTS como hook, con voz, velocidad, tono, idioma y lectura automatica |
+| `src/components/` | `TableScreen` (la mesa), `Blocks` (las dos vistas), `TurnPanel`, `HostPanel`, `DmSettingsPanel`, `InvitePanel`, `FriendsPanel`, `SheetsPanel`, `Sheet`, `CharacterPicker`, `TtsBar` (voz y bandera de narrador), `Portrait`, `RequireSession`, `UserBar`, `ServerField`, `SessionCta` |
+
+La preparacion de la mesa (codigo sugerido, personajes libres, estado de amistad, textos de asiento y cabecera), los presets del DM y el tono por hablante viven en `packages/ui-logic` y son los mismos que usa la app movil.
 | `src/app/` | `/` landing, `/entrar`, `/crear-cuenta`, `/recuperar`, `/perfil`, `/ajustes`, `/mesas`, `/mesas/nueva`, `/mesas/[id]`; `icon.svg`, `apple-icon.png` y `favicon.ico` |
 
 ## Comandos
 
 ```bash
 pnpm --filter web typecheck
-pnpm --filter web test        # logica pura con vitest (pack, fichas, preparacion de la mesa, voces)
+pnpm --filter web test        # logica pura con vitest (pack, fichas, voces y tono con un speechSynthesis falso)
 pnpm --filter web build       # tambien lo corre pnpm check desde la raiz
 ```
 
 ## Lo que no hace todavia
 
 - La bandera de narrador compartida entre dispositivos (sigue siendo local a cada navegador): necesita un endpoint que cualquier miembro pueda escribir y que `state` lo devuelva; queda anotada en el ROADMAP.
+- Una cronica publica de la campaña (para streamers y Pages): `GET campaigns/{c}/projections/narrative` exige ser miembro y la API no tiene ruta publica ni token de invitado; queda anotada en el ROADMAP hasta que exista.
 - Un solo pack: el selector existe pero solo ofrece `pilot`.
 - BYOK: la mesa elige entre los presets del servidor; una clave propia por mesa es la entrega 7.
 - Cambiar el correo de la cuenta (exige verificar el nuevo).

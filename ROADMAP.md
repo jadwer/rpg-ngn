@@ -70,10 +70,10 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 
 Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el rename en la API):
 
-- [x] En la app el asiento `dm` se muestra como anfitrion en todo (mesas, mando, forzar cierre); el DM es la IA. Crear mesa desde la app con personaje del anfitrion (retrato) y premisa, e invitar con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje) desde la mesa nueva y desde el mando. Logica pura en `apps/mobile/src/online/tableSetup.ts` con tests
+- [x] En la app el asiento `dm` se muestra como anfitrion en todo (mesas, mando, forzar cierre); el DM es la IA. Crear mesa desde la app con personaje del anfitrion (retrato) y premisa, e invitar con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje) desde la mesa nueva y desde el mando. Logica pura con tests (hoy en `packages/ui-logic`, `table-setup`)
 - [x] Renombrar el asiento `dm` a `host` en la API (migracion 2026_09_12_000001 sobre las filas existentes) y en `api-client`, `ui-logic`, web y app a la vez (2026-09-12)
 - [x] Android: `KeyboardAvoidingView` con `behavior="padding"` en las dos plataformas (Expo Go 57 va edge-to-edge y `resize` ya no encoge la ventana; queda explicito en `app.json`), la narracion baja al final al enfocar, chips escondidos con el teclado abierto. Pendiente de confirmar en telefono; el README dice que mirar
-- [x] Selector de voz del sistema (`getAvailableVoicesAsync` filtrado a `es*`, nombre, idioma y calidad, boton Oir para elegir de oido), voz, velocidad y tono recordados por telefono en el almacen seguro, narrador a 0.85 (ajustable), party al natural y tono fijo por NPC (hash del `speakerRef`); `TtsItem` de ui-logic lleva tipo y hablante. Aviso de sin voz en español una sola vez
+- [x] Selector de voz del sistema (`getAvailableVoicesAsync` filtrado al idioma de lectura, nombre, idioma y calidad, boton Oir para elegir de oido), voz, velocidad y tono recordados por telefono en el almacen seguro, narrador a 0.85 (ajustable), party al natural y tono fijo por NPC (hash del `speakerRef`, hoy en `ui-logic`); `TtsItem` de ui-logic lleva tipo y hablante. Aviso de sin voz en el idioma una sola vez
 - [x] La barra de TTS y la bandera de narrador son una sola linea plegable; la narracion ocupa la pantalla
 - [x] Tema oscuro de `apps/sheets` con Cinzel y Crimson Pro (`expo-font`, seis pesos importados por subruta); las fichas en modal se conservan
 
@@ -98,13 +98,15 @@ Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el re
 - [ ] BYOK: clave propia por mesa en `provider_configs` con cast `encrypted` (docs/11, D6), cuando exista cobro; hoy la mesa solo elige preset del servidor
 - [ ] Admin con `@atomo/ui` y `@atomo/core`
 
-### Paridad web y movil (revisada el 2026-09-12, se atiende despues de la partida)
+### Paridad web y movil (revisada el 2026-09-12, hecha tras la partida)
 
-Le falta a la movil: crear cuenta, perfil (nombre y contraseña), recuperar contraseña, proveedor del DM por mesa con Probar (al crear y en el mando), busqueda por correo con `users/lookup` (hoy usa la vieja que da 403 y cae a conocidos), amigos fuera de la mesa, idioma de lectura, titulo con mesa y sesion, "bajar a lo nuevo". Le falta a la web: tono por hablante (narrador grave, party normal, un tono por NPC; `ui-logic` ya manda `kind` y `speakerRef` y la web los ignora), bandera de narrador local, y una cronica publica de la campaña (equivalente al modo sin conexion de la app, util para streamers y para Pages). A las dos: BYOK, bandera de narrador compartida, avatar.
+La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM, lookup, amigos fuera de la mesa, idioma de lectura, cabecera completa ni "bajar a lo nuevo"; web sin tono por hablante ni bandera de narrador) queda cerrada. Lo que sigue faltando a las dos: BYOK, bandera de narrador compartida, avatar, cambio de correo.
 
-- [ ] Mover a `packages/ui-logic` lo que hoy esta duplicado a mano: `tableSetup` (web y movil son espejo), eleccion de tono por hablante (`apps/mobile/src/speech/voices.ts`), reglas de quien invita o cierra y los textos de estado del asiento. Con eso la paridad deja de ser una lista
-- [ ] Movil: pantallas de cuenta, presets de DM y lookup usando lo que `api-client` ya expone
-- [ ] Web: tono por hablante y bandera local
+- [x] `packages/ui-logic` absorbe lo que estaba duplicado a mano: preparacion de la mesa (`table-setup`: codigo sugerido, personajes libres, estado de cada amistad, `seatPowers`, textos de asiento y cabecera), voz sin plataforma (`voice`: idiomas de lectura, ajustes acotados, `pitchFor` con narrador grave, party al natural y tono fijo por NPC), bandera de narrador (`narrator`: reducer y resumen de la linea de voz), presets del DM (`dm-presets`) y lecturas del pack (`pack`). `turnStatusLine` con acentos y `turnLine` sustituyen a los `statusLine` de cada app. Los tests viven en `ui-logic`; `apps/web/src/lib/tableSetup.ts`, `dmPresets.ts` y `apps/mobile/src/online/tableSetup.ts` desaparecen y `speech/voices.ts` solo conserva lo que depende de expo-speech
+- [x] Movil: crear cuenta (registro en modo token, entra directo), perfil (nombre y contraseña), recuperar contraseña; director de juego al crear la mesa y boton DM del mando con Probar y Guardar; busqueda por correo con `users/lookup` (ya no cae a conocidos por el 403); panel de amigos al pie de "Tus mesas"; idioma de lectura en el selector de voz y en la linea plegada; cabecera con sesion, momento del mundo, turno y faltantes; "Bajar a lo nuevo" cuando se subio a leer. Sin telefono ni emulador: `expo export` en verde, los llamados probados contra la API con `tools/smoke` a mano; los pasos de prueba manual estan en `apps/mobile/README.md`
+- [x] Web: tono por hablante en Web Speech (`utterance.pitch` con `pitchFor`; tono del narrador ajustable en `/ajustes`, la prueba lee narracion, party y NPC) y bandera de narrador local en la barra de voz ("Otro dispositivo narra", aviso de que nadie narra con "Jugamos leyendo")
+- [ ] API: `POST /api/auth/forgot-password` responde 500 (`Route [password.reset] not defined`) al armar el correo; hasta que atomo/auth tenga esa ruta o un `FRONTEND_URL` para el enlace, "olvide mi contraseña" falla igual en web y movil (visto el 2026-09-12 con el smoke de paridad)
+- [ ] Cronica publica de la campaña (para streamers y Pages): no es barata hoy. `GET campaigns/{c}/projections/narrative` exige ser miembro y no hay endpoint publico ni token de solo lectura; necesita en la API una ruta `GET /public/campaigns/{c}/chronicle` (o un token de invitado por mesa) antes de que la web pueda pintarla
 
 ## Entrega 6: DM IA (primer turno real el 2026-09-12)
 
