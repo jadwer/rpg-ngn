@@ -116,6 +116,15 @@ export const TurnContext = z.strictObject({
 })
 export type TurnContext = z.infer<typeof TurnContext>
 
+/**
+ * Lint de conocimiento (docs/08, invariante 3). `enforce` sustituye por un
+ * aviso `system` todo bloque que cuente un secreto no revelado; `report`
+ * solo lo anota en `result.lint`; `off` no revisa. Si la peticion no lo
+ * trae, decide el engine (variable `DM_LINT`, por defecto `enforce`).
+ */
+export const LintMode = z.enum(['enforce', 'report', 'off'])
+export type LintMode = z.infer<typeof LintMode>
+
 export const ResolveTurnRequest = z.strictObject({
   contract: ContractVersion,
   campaignId: z.string().min(1),
@@ -130,8 +139,24 @@ export const ResolveTurnRequest = z.strictObject({
   budget: TurnBudget.optional(),
   /** Opcional y sin subir la version: un campo nuevo opcional no rompe el contrato. */
   context: TurnContext.optional(),
+  lint: LintMode.optional(),
 })
 export type ResolveTurnRequest = z.infer<typeof ResolveTurnRequest>
+
+/** Hallazgo del lint de conocimiento sobre un bloque o evento del turno. */
+export const LintFinding = z.strictObject({
+  level: z.enum(['error', 'warning']),
+  /** Secreto del pack cuya keyword aparecio (error). */
+  secretId: z.string().optional(),
+  /** Entidad del pack nombrada sin haberla presenciado (warning). */
+  entity: z.string().optional(),
+  /** La keyword o el nombre que disparo el hallazgo. */
+  marker: z.string(),
+  /** Personajes presentes que no lo conocen. */
+  receivers: z.array(KebabId),
+  message: z.string().min(1),
+})
+export type LintFinding = z.infer<typeof LintFinding>
 
 /** Bloques tipados de un turno (docs/09): lo que el jugador ve y oye. */
 export const TurnBlock = z.discriminatedUnion('type', [
@@ -176,6 +201,8 @@ export const ResolveLine = z.discriminatedUnion('kind', [
     state: z.unknown(),
     projections: TurnProjections,
     usage: TurnUsage,
+    /** Hallazgos del lint de conocimiento; ausente si no hubo ninguno. Opcional: no sube la version. */
+    lint: z.array(LintFinding).optional(),
   }),
   z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
 ])

@@ -54,9 +54,10 @@ describe('loadPack con secretos', () => {
     const { pack, issues } = await loadPack(fsSource(pilotPackDir))
 
     expect(issues.filter((i) => i.level === 'error')).toEqual([])
-    expect([...pack!.secrets.keys()].sort()).toEqual(['brorg-pago-por-zahira', 'osric-subio-solo'])
-    expect(pack!.secrets.get('osric-subio-solo')?.revealWhen).toEqual({ event: 'discovery', fact: 'fact:campana-en-capilla-segundo-nivel' })
-    expect(issues).toContainEqual(expect.objectContaining({ level: 'warning', path: 'secrets/osric-subio-solo.json', message: expect.stringContaining('npc:osric') }))
+    expect([...pack!.secrets.keys()].sort()).toEqual(['brorg-pago-por-zahira', 'osric-esta-abajo'])
+    expect(pack!.secrets.get('osric-esta-abajo')?.revealWhen).toEqual({ manual: true })
+    expect(pack!.secrets.get('brorg-pago-por-zahira')?.revealWhen).toEqual({ event: 'discovery', fact: 'fact:brorg-pago-por-zahira' })
+    expect(issues).toContainEqual(expect.objectContaining({ level: 'warning', path: 'secrets/osric-esta-abajo.json', message: expect.stringContaining('npc:osric') }))
   })
 
   it('carga la coleccion secrets/ de un pack en memoria', async () => {

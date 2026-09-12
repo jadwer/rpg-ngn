@@ -181,6 +181,85 @@ describe('ModelDMProvider', () => {
     expect(probe.message).not.toContain('SECRETA')
   })
 
+  describe('lint de conocimiento', () => {
+    // Sesion 003 con Zahira y Calder: ninguno sabe que Osric bajo anoche ni que fue Brorg quien pago por Zahira.
+    const leak = [
+      '{"kind":"block","block":{"type":"narration","text":"Las velas de Osric siguen apagadas. Zahira, tú lo entiendes de golpe: fue Brorg quien te empujó hacia arriba."}}',
+      '{"kind":"block","block":{"type":"dialogue","speaker":"Un minero flaco","speakerRef":null,"text":"Osric está abajo, muchacha. Bajó anoche."}}',
+      '{"kind":"event","event":{"type":"world_event","payload":{"note":"Zahira entiende que Brorg pagó por ella"}}}',
+      '{"kind":"block","block":{"type":"narration","text":"El silencio pesa en la casa. ¿Qué hacéis?"}}',
+      '{"kind":"addressed","characterIds":["zahira","calder"]}',
+    ].join('\n')
+
+    it('corta los bloques que revelan un secreto antes de tiempo, no los registra y deja el motivo en el resultado', async () => {
+      const base = await openSession003()
+      const outputs = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Entro en la casa de Osric.')]))))
+
+      const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'system', 'system', 'narration'])
+      expect(blocks[1]).toEqual({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.' })
+      expect(JSON.stringify(blocks)).not.toContain('Brorg')
+      expect(JSON.stringify(blocks)).not.toContain('está abajo')
+
+      // Ni la narracion cortada ni el world_event entran a la cronica.
+      const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
+      expect(events.map((e) => e?.['type'])).toEqual(['player_action', 'narration'])
+      expect(JSON.stringify(events)).not.toContain('Brorg')
+
+      const findings = outputs.filter((o) => o.kind === 'lint').map((o) => (o.kind === 'lint' ? o.finding : null))
+      expect(findings.map((f) => [f?.level, f?.secretId, f?.marker, f?.receivers.join()])).toEqual([
+        ['error', 'brorg-pago-por-zahira', 'fue Brorg', 'zahira,calder'],
+        ['error', 'osric-esta-abajo', 'Osric está abajo', 'zahira,calder'],
+        ['error', 'brorg-pago-por-zahira', 'Brorg pagó', 'zahira,calder'],
+      ])
+      expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira', 'calder'] })
+    })
+
+    it('un turno limpio pasa sin hallazgos y el contexto lleva la capa del DM marcada', async () => {
+      const base = await openSession003()
+      const transport = new FakeTransport(goodTurn)
+      const outputs = await collect(new ModelDMProvider(transport, KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]))))
+
+      expect(outputs.some((o) => o.kind === 'lint')).toBe(false)
+      expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+      const user = transport.prompts[0]!.user
+      expect(user).toContain('# Capa del DM: secretos')
+      expect(user).toContain('- osric-esta-abajo (sobre npc:osric; NO REVELADO a Zahira, Calder). Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric.')
+      expect(user).toContain('- brorg-pago-por-zahira (sobre character:brorg; NO REVELADO a Zahira, Calder). Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira; puede soltarlo character:brorg.')
+    })
+
+    it('un secret_revealed emitido antes del bloque lo autoriza y llega al engine con la party de testigos', async () => {
+      const base = await openSession003()
+      const text = [
+        '{"kind":"event","event":{"type":"secret_revealed","payload":{"secretId":"osric-esta-abajo","how":"lo encuentran en el tercer nivel"}}}',
+        '{"kind":"block","block":{"type":"dialogue","speaker":"Osric","speakerRef":"npc:osric","text":"Bajé anoche. Vengo a devolver lo que debo."}}',
+        '{"kind":"event","event":{"type":"secret_revealed","payload":{"secretId":"no-existe"}}}',
+        '{"kind":"addressed","characterIds":["zahira"]}',
+      ].join('\n')
+      const outputs = await collect(new ModelDMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
+
+      expect(outputs.some((o) => o.kind === 'lint')).toBe(false)
+      const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
+      expect(events[0]).toEqual({ type: 'secret_revealed', payload: { secretId: 'osric-esta-abajo', how: 'lo encuentran en el tercer nivel' }, visibility: { layer: 'campaign', witnesses: ['character:zahira', 'character:calder'] } })
+      expect(events.map((e) => e?.['type'])).toEqual(['secret_revealed', 'narration'])
+      const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'system'])
+      expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/1 línea que no se pudo aplicar/)
+    })
+
+    it('en modo report el bloque pasa y el hallazgo se anota; en modo off no se revisa', async () => {
+      const base = await openSession003()
+      const report = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'report' })))
+      expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['narration', 'dialogue', 'narration'])
+      expect(report.filter((o) => o.kind === 'lint')).toHaveLength(3)
+      expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['narration', 'narration', 'world_event', 'narration'])
+
+      const off = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'off' })))
+      expect(off.some((o) => o.kind === 'lint')).toBe(false)
+      expect(off.filter((o) => o.kind === 'block')).toHaveLength(3)
+    })
+  })
+
   it('respeta el presupuesto de salida de la peticion', async () => {
     const base = await openSession003()
     const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Breve."}}')

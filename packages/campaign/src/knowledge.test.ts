@@ -9,19 +9,30 @@ const event = (overrides: Record<string, unknown>): CampaignEvent =>
   CampaignEvent.parse({ id: 'evt-00030', v: 1, seq: 30, sessionId: '002', recordedAt: '2026-09-05T00:00:00Z', ...overrides })
 
 describe('proyeccion de secretos sobre el log del piloto', () => {
-  it('la confesion de Osric queda revelada a Calder y Narivyl por el discovery de la campana, y Brorg sigue en secreto', async () => {
+  it('al cierre de la 002 ningun secreto del pack esta revelado y el estado no cambia de forma', async () => {
     const { pack, events } = await loadPilot()
     const state = reduce(events, { pack, ruleset: fantasyD20Lite })
+
+    expect(Object.values(state.knowledge).every((k) => k.secrets === undefined)).toBe(true)
+    expect(revealedSecrets(state, 'zahira')).toEqual([])
+    expect(secretsKnownBy(state, ['zahira', 'calder']).size).toBe(0)
+  })
+
+  it('un secreto con condicion por evento queda revelado a quienes presenciaron el evento que la cumple', async () => {
+    const { pack, events } = await loadPilot()
+    const osric: Secret = {
+      id: 'osric-subio-solo', about: 'npc:osric', text: 'Subio solo.', keywords: ['subio solo'],
+      revealWhen: { event: 'discovery', fact: 'fact:campana-en-capilla-segundo-nivel' },
+    }
+    const state = reduce(events, { pack: { ...pack, secrets: new Map([[osric.id, osric]]) }, ruleset: fantasyD20Lite })
 
     expect(revealedSecrets(state, 'calder')).toEqual(['osric-subio-solo'])
     expect(revealedSecrets(state, 'narivyl')).toEqual(['osric-subio-solo'])
     expect(revealedSecrets(state, 'zahira')).toEqual([])
     expect(state.knowledge['calder']?.secrets?.['osric-subio-solo']).toEqual({ event: 'evt-00003', seq: 3, how: 'revealWhen' })
-    expect(state.knowledge['brorg']?.secrets).toBeUndefined()
 
     const known = secretsKnownBy(state, ['zahira', 'calder'])
     expect([...(known.get('osric-subio-solo') ?? [])]).toEqual(['calder'])
-    expect(known.has('brorg-pago-por-zahira')).toBe(false)
   })
 
   it('secret_revealed revela a sus testigos y no se duplica', async () => {
@@ -37,11 +48,6 @@ describe('proyeccion de secretos sobre el log del piloto', () => {
     expect(state.knowledge['zahira']?.secrets?.['brorg-pago-por-zahira']?.event).toBe('evt-00003')
   })
 
-  it('sin secretos en el reductor, el estado no cambia de forma', async () => {
-    const { pack, events } = await loadPilot()
-    const state = events.reduce((s, e) => applyEvent(s, e, fantasyD20Lite), reduce([], { pack, ruleset: fantasyD20Lite }))
-    expect(Object.values(state.knowledge).every((k) => k.secrets === undefined)).toBe(true)
-  })
 })
 
 describe('visibleTo', () => {

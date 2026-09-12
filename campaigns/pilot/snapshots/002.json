@@ -33,13 +33,6 @@
             "seq": 3
           }
         },
-        "secrets": {
-          "osric-subio-solo": {
-            "event": "evt-00003",
-            "how": "revealWhen",
-            "seq": 3
-          }
-        },
         "witnessed": []
       },
       "dayan": {
@@ -76,13 +69,6 @@
             "confidence": "known",
             "event": "evt-00003",
             "method": "Osric lo dijo por la rendija",
-            "seq": 3
-          }
-        },
-        "secrets": {
-          "osric-subio-solo": {
-            "event": "evt-00003",
-            "how": "revealWhen",
             "seq": 3
           }
         },

@@ -1,6 +1,6 @@
 import type { CampaignState } from '@rpg-ngn/campaign'
 import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
-import type { TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
+import type { LintFinding, LintMode, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
  * Lo que el DM recibe para narrar un turno. El estado completo llega tal
@@ -18,6 +18,8 @@ export interface DMTurnContext {
   recentEvents?: readonly CampaignEvent[] | undefined
   /** Tope de tokens de salida del modelo (budget.maxOutputTokens de la peticion). */
   maxOutputTokens?: number | undefined
+  /** Lint de conocimiento (lint.ts); por defecto `enforce`. */
+  lint?: LintMode | undefined
 }
 
 /**
@@ -32,6 +34,8 @@ export type DMOutput =
   | { kind: 'event'; event: ProposedEvent }
   | { kind: 'addressed'; characterIds: string[] }
   | { kind: 'usage'; inputTokens: number; outputTokens: number }
+  /** Hallazgo del lint de conocimiento; el engine lo acumula en `result.lint`. */
+  | { kind: 'lint'; finding: LintFinding }
 
 export interface DMProbe {
   ok: boolean
