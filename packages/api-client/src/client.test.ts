@@ -116,9 +116,110 @@ describe('mesas', () => {
     expect(calls.map((c) => c.url)).toEqual(['http://api.test/api/v1/tables/2/state', 'http://api.test/api/v1/tables/2/state?after=3'])
   })
 
+  it('expone la premisa de settings y null cuando no hay', async () => {
+    const withPremise = { ...tablesDocument, data: [{ ...tablesDocument.data[0], attributes: { ...tablesDocument.data[0]!.attributes, settings: { premise: '  Esta noche esperan a Calder. ', provider: { kind: 'scripted' } } } }] }
+    const { api } = client({ 'GET /api/v1/tables?include=campaign%2Cmembers.user&page%5Bsize%5D=50': { body: withPremise } })
+    const [table] = await api.listTables()
+    expect(table?.premise).toBe('Esta noche esperan a Calder.')
+    const { api: plain } = client({ 'GET /api/v1/tables?include=campaign%2Cmembers.user&page%5Bsize%5D=50': { body: tablesDocument } })
+    expect((await plain.listTables())[0]?.premise).toBeNull()
+  })
+
+  it('crea la mesa como JSON:API con la premisa en settings y devuelve la mesa aplanada', async () => {
+    const created = {
+      data: { type: 'tables', id: '9', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', status: 'active', oneShot: false, settings: { premise: 'La posada al caer la noche.' } }, relationships: { members: { data: [{ type: 'table-members', id: '20' }] }, campaign: { data: { type: 'campaigns', id: '9' } } } },
+      included: [{ type: 'table-members', id: '20', attributes: { role: 'dm', characterId: null }, relationships: { user: { data: { type: 'users', id: '2' } } } }, { type: 'users', id: '2', attributes: { name: 'Gabino', email: 'gabino@example.com' } }],
+    }
+    const { api, calls } = client({ 'POST /api/v1/tables?include=campaign%2Cmembers.user': { status: 201, body: created } })
+    const table = await api.createTable({ name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: ' La posada al caer la noche. ' })
+    expect(calls[0]?.init.headers['Content-Type']).toBe('application/vnd.api+json')
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ data: { type: 'tables', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', settings: { premise: 'La posada al caer la noche.' } } } })
+    expect(table).toMatchObject({ id: '9', name: 'Posada', premise: 'La posada al caer la noche.', campaignId: '9' })
+    expect(table.members).toEqual([{ id: '20', role: 'dm', characterId: null, userId: '2', userName: 'Gabino' }])
+
+    await api.createTable({ name: 'Sin premisa', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: '   ' })
+    expect(JSON.parse(calls[1]?.init.body ?? '{}').data.attributes.settings).toBeUndefined()
+  })
+
+  it('el dueño fija su personaje e invita con la misma llamada de miembros', async () => {
+    const { api, calls } = client({
+      'POST /api/v1/tables/9/members': (init) => {
+        const body = JSON.parse(init.body ?? '{}') as { user_id: number; character_id: string | null }
+        return { status: body.user_id === 2 ? 200 : 201, body: { data: { id: body.user_id === 2 ? 20 : 21, table_id: 9, user_id: body.user_id, role: body.user_id === 2 ? 'dm' : 'player', character_id: body.character_id } } }
+      },
+    })
+    expect(await api.setOwnerCharacter('9', '2', 'narivyl')).toEqual({ id: 20, tableId: 9, userId: 2, role: 'dm', characterId: 'narivyl' })
+    expect(await api.invite(9, 4, 'zahira')).toEqual({ id: 21, tableId: 9, userId: 4, role: 'player', characterId: 'zahira' })
+    expect(calls.map((c) => JSON.parse(c.init.body ?? '{}'))).toEqual([{ user_id: 2, character_id: 'narivyl' }, { user_id: 4, character_id: 'zahira' }])
+  })
+
+  it('invitar sin amistad es un 422 con el mensaje de la API; repetir es 409', async () => {
+    let hits = 0
+    const { api } = client({ 'POST /api/v1/tables/9/members': () => (++hits === 1 ? { status: 422, body: { error: 'Solo puedes invitar a tus amigos.' } } : { status: 409, body: { error: 'Ya es miembro de la mesa.' } }) })
+    const first = await api.invite(9, 5, 'calder').catch((e: unknown) => e)
+    expect((first as ApiError).isValidation).toBe(true)
+    expect((first as ApiError).message).toBe('Solo puedes invitar a tus amigos.')
+    const second = await api.invite(9, 5, 'calder').catch((e: unknown) => e)
+    expect((second as ApiError).isConflict).toBe(true)
+  })
+
   it('lista las sesiones de una campaña por filtro', async () => {
     const { api } = client({ 'GET /api/v1/game-sessions?filter%5Bcampaign%5D=2': { body: { data: [{ type: 'game-sessions', id: '1', attributes: { code: '003', status: 'open', openedSeq: 1, closedSeq: null } }] } } })
     expect(await api.listSessions(2)).toEqual([{ id: '1', code: '003', status: 'open', openedSeq: 1, closedSeq: null }])
+  })
+})
+
+describe('amistades', () => {
+  const friendshipsDocument = {
+    data: [
+      { type: 'friendships', id: '1', attributes: { status: 'accepted', acceptedAt: '2026-09-07T03:19:01.000000Z' }, relationships: { user: { data: { type: 'users', id: '2' } }, friend: { data: { type: 'users', id: '4' } } } },
+      { type: 'friendships', id: '3', attributes: { status: 'pending', acceptedAt: null }, relationships: { user: { data: { type: 'users', id: '5' } }, friend: { data: { type: 'users', id: '2' } } } },
+    ],
+    included: [
+      { type: 'users', id: '2', attributes: { name: 'Gabino', email: 'gabino@example.com', role: 'admin' } },
+      { type: 'users', id: '4', attributes: { name: 'Jaz', email: 'jaz@example.com' } },
+      { type: 'users', id: '5', attributes: { name: 'Armando', email: 'armando@example.com' } },
+    ],
+  }
+
+  it('lista las amistades con quien pide y quien recibe, aplanados', async () => {
+    const { api, calls } = client({ 'GET /api/v1/friendships?include=user%2Cfriend&page%5Bsize%5D=100': { body: friendshipsDocument } })
+    const friendships = await api.listFriendships()
+    expect(calls[0]?.init.headers['Accept']).toBe('application/vnd.api+json')
+    expect(friendships).toEqual([
+      { id: '1', status: 'accepted', user: { id: '2', name: 'Gabino', email: 'gabino@example.com' }, friend: { id: '4', name: 'Jaz', email: 'jaz@example.com' }, acceptedAt: '2026-09-07T03:19:01.000000Z' },
+      { id: '3', status: 'pending', user: { id: '5', name: 'Armando', email: 'armando@example.com' }, friend: { id: '2', name: 'Gabino', email: 'gabino@example.com' }, acceptedAt: null },
+    ])
+  })
+
+  it('pedir amistad distingue nueva (201) de existente (200) y aceptar manda el POST sin cuerpo', async () => {
+    let hits = 0
+    const raw = { id: 7, user_id: 2, friend_id: 5, status: 'pending', accepted_at: null }
+    const { api, calls } = client({
+      'POST /api/v1/friendships': () => ({ status: ++hits === 1 ? 201 : 200, body: { data: raw } }),
+      'POST /api/v1/friendships/7/accept': { body: { data: { ...raw, status: 'accepted', accepted_at: '2026-09-11T00:00:00+00:00' } } },
+    })
+    expect(await api.requestFriendship('5')).toEqual({ id: 7, userId: 2, friendId: 5, status: 'pending', created: true })
+    expect((await api.requestFriendship(5)).created).toBe(false)
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ friend_id: 5 })
+    expect(await api.acceptFriendship(7)).toMatchObject({ id: 7, status: 'accepted', created: false })
+    expect(calls[2]?.init.body).toBeUndefined()
+  })
+
+  it('busca usuarios por correo exacto y devuelve null si no hay', async () => {
+    const { api, calls } = client({
+      'GET /api/v1/users?filter%5Bemail%5D=jaz%40example.com&page%5Bsize%5D=1': { body: { data: [{ type: 'users', id: '4', attributes: { name: 'Jaz', email: 'jaz@example.com' } }] } },
+      'GET /api/v1/users?filter%5Bemail%5D=nadie%40example.com&page%5Bsize%5D=1': { body: { data: [] } },
+    })
+    expect(await api.findUserByEmail(' jaz@example.com ')).toEqual({ id: '4', name: 'Jaz', email: 'jaz@example.com' })
+    expect(await api.findUserByEmail('nadie@example.com')).toBeNull()
+    expect(calls[0]?.init.headers['Accept']).toBe('application/vnd.api+json')
+  })
+
+  it('buscar sin permiso es un 403 que la web explica', async () => {
+    const { api } = client({ 'GET /api/v1/users?filter%5Bemail%5D=jaz%40example.com&page%5Bsize%5D=1': { status: 403, body: { message: 'This action is unauthorized.' } } })
+    const error = await api.findUserByEmail('jaz@example.com').catch((e: unknown) => e)
+    expect((error as ApiError).isForbidden).toBe(true)
   })
 })
 

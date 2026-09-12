@@ -37,10 +37,53 @@ export interface TableSummary {
   ruleset: string
   status: string
   oneShot: boolean
+  /** `settings.premise`: la premisa que el anfitrion escribio y el DM usa como punto de partida. */
+  premise: string | null
   /** Viene con `include=campaign`; null si la mesa no tiene campaña. */
   campaignId: string | null
   /** Viene con `include=members.user`. */
   members: TableMember[]
+}
+
+export interface NewTable {
+  name: string
+  packId: string
+  packVersion: string
+  ruleset: string
+  /** Se guarda en `settings.premise` si viene con texto. */
+  premise?: string | null | undefined
+  /** Otros ajustes de la mesa (por ejemplo `provider` para el DM scripted con guion). */
+  settings?: Record<string, unknown> | undefined
+}
+
+/** Lo que devuelve `POST tables/{t}/members`, sea invitacion o el personaje del propio dueño. */
+export interface TableMemberRecord {
+  id: number
+  tableId: number
+  userId: number
+  role: MemberRole
+  characterId: string | null
+}
+
+export type FriendshipStatus = 'pending' | 'accepted' | string
+
+export interface Friendship {
+  id: string
+  status: FriendshipStatus
+  /** Quien pidio la amistad. */
+  user: AuthUser
+  /** Quien la recibe y la acepta. */
+  friend: AuthUser
+  acceptedAt: string | null
+}
+
+export interface FriendshipRecord {
+  id: number
+  userId: number
+  friendId: number
+  status: FriendshipStatus
+  /** false si la amistad ya existia (la API devolvio 200). */
+  created: boolean
 }
 
 export type TurnStatus = 'open' | 'closing' | 'resolving' | 'resolved'
@@ -66,9 +109,17 @@ export interface BlockEnvelope {
   block: EngineTurnBlock
 }
 
+export interface TableViewer {
+  memberId: number
+  role: MemberRole
+  characterId: string | null
+}
+
 export interface TableState {
   campaign: { id: number; headSeq: number }
-  session: { code: string; status: string } | null
+  /** Quien consulta, para no cruzar `members.user` en el cliente. */
+  viewer: TableViewer
+  session: { id: number; code: string; status: string } | null
   turn: TurnView | null
   blocks: BlockEnvelope[]
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */

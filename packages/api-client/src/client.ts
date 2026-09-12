@@ -1,9 +1,13 @@
 import { createHttp, query, type FetchLike, type TokenProvider } from './http.js'
 import { attr, Included, relationMany, relationOne, type Document, type Resource } from './jsonapi.js'
 import type {
+  AuthUser,
   BlockEnvelope,
+  Friendship,
+  FriendshipRecord,
   LoginResult,
   MemberRole,
+  NewTable,
   PlayerProjection,
   Profile,
   Projection,
@@ -11,6 +15,7 @@ import type {
   SessionClosed,
   SessionSummary,
   TableMember,
+  TableMemberRecord,
   TableState,
   TableSummary,
   TurnView,
@@ -34,6 +39,18 @@ export interface ApiClient {
   profile(): Promise<Profile>
   listTables(): Promise<TableSummary[]>
   table(tableId: string | number): Promise<TableSummary>
+  /** Crea la mesa (JSON:API); el que la crea queda como dueño con el asiento `dm` y sin personaje. */
+  createTable(input: NewTable): Promise<TableSummary>
+  /** El dueño fija o cambia su propio personaje (`POST tables/{t}/members` sobre si mismo). */
+  setOwnerCharacter(tableId: string | number, ownerUserId: string | number, characterId: string | null): Promise<TableMemberRecord>
+  /** Invita a un amigo (amistad aceptada) con un personaje; 422 sin amistad, 409 si ya es miembro. */
+  invite(tableId: string | number, userId: string | number, characterId: string | null): Promise<TableMemberRecord>
+  /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
+  listFriendships(): Promise<Friendship[]>
+  requestFriendship(friendId: string | number): Promise<FriendshipRecord>
+  acceptFriendship(friendshipId: string | number): Promise<FriendshipRecord>
+  /** Busca un usuario por correo exacto (`users?filter[email]=`); null si no existe. Hoy la API solo lo permite a cuentas admin (403 al resto). */
+  findUserByEmail(email: string): Promise<AuthUser | null>
   tableState(tableId: string | number, after?: number): Promise<TableState>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
   closeTurn(turnId: number, force?: boolean): Promise<TurnView>
@@ -47,6 +64,14 @@ export interface ApiClient {
 export function createApiClient(options: ApiClientOptions): ApiClient {
   const request = createHttp(options)
   const newKey = options.idempotencyKey ?? randomKey
+
+  const addMember = async (tableId: string | number, userId: string | number, characterId: string | null): Promise<TableMemberRecord> => {
+    const { data } = await request<{ data: RawMember }>(`/api/v1/tables/${tableId}/members`, {
+      method: 'POST',
+      body: { user_id: Number(userId), character_id: characterId },
+    })
+    return { id: data.data.id, tableId: data.data.table_id, userId: data.data.user_id, role: data.data.role, characterId: data.data.character_id ?? null }
+  }
 
   return {
     baseUrl: options.baseUrl,
@@ -79,6 +104,55 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async table(tableId) {
       const { data } = await request<Document<Resource>>(`/api/v1/tables/${tableId}${query({ include: 'campaign,members.user' })}`, { media: 'jsonapi' })
       return tableFrom(data.data, new Included(data.included))
+    },
+
+    async createTable(input) {
+      const premise = input.premise?.trim() ?? ''
+      const settings: Record<string, unknown> = { ...(input.settings ?? {}), ...(premise ? { premise } : {}) }
+      const attributes: Record<string, unknown> = { name: input.name, packId: input.packId, packVersion: input.packVersion, ruleset: input.ruleset }
+      if (Object.keys(settings).length > 0) attributes['settings'] = settings
+      const { data } = await request<Document<Resource>>(`/api/v1/tables${query({ include: 'campaign,members.user' })}`, {
+        method: 'POST',
+        media: 'jsonapi',
+        body: { data: { type: 'tables', attributes } },
+      })
+      return tableFrom(data.data, new Included(data.included))
+    },
+
+    async setOwnerCharacter(tableId, ownerUserId, characterId) {
+      return addMember(tableId, ownerUserId, characterId)
+    },
+
+    async invite(tableId, userId, characterId) {
+      return addMember(tableId, userId, characterId)
+    },
+
+    async listFriendships() {
+      const { data } = await request<Document<Resource[]>>(`/api/v1/friendships${query({ include: 'user,friend', 'page[size]': 100 })}`, { media: 'jsonapi' })
+      const included = new Included(data.included)
+      return data.data.map((resource) => ({
+        id: String(resource.id),
+        status: attr(resource, 'status', 'pending'),
+        user: userFrom(included.get(relationOne(resource, 'user')), relationOne(resource, 'user')?.id ?? ''),
+        friend: userFrom(included.get(relationOne(resource, 'friend')), relationOne(resource, 'friend')?.id ?? ''),
+        acceptedAt: attr<string | null>(resource, 'acceptedAt', null),
+      }))
+    },
+
+    async requestFriendship(friendId) {
+      const { status, data } = await request<{ data: RawFriendship }>('/api/v1/friendships', { method: 'POST', body: { friend_id: Number(friendId) } })
+      return friendshipRecord(data.data, status === 201)
+    },
+
+    async acceptFriendship(friendshipId) {
+      const { data } = await request<{ data: RawFriendship }>(`/api/v1/friendships/${friendshipId}/accept`, { method: 'POST' })
+      return friendshipRecord(data.data, false)
+    },
+
+    async findUserByEmail(email) {
+      const { data } = await request<Document<Resource[]>>(`/api/v1/users${query({ 'filter[email]': email.trim(), 'page[size]': 1 })}`, { media: 'jsonapi' })
+      const resource = data.data[0]
+      return resource ? userFrom(resource, resource.id) : null
     },
 
     async tableState(tableId, after = 0) {
@@ -147,6 +221,8 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     }
   })
   const campaign = relationOne(resource, 'campaign')
+  const settings = attr<Record<string, unknown> | null>(resource, 'settings', null)
+  const premise = settings && typeof settings['premise'] === 'string' && settings['premise'].trim() ? settings['premise'].trim() : null
   return {
     id: String(resource.id),
     name: attr(resource, 'name', ''),
@@ -155,9 +231,34 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     ruleset: attr(resource, 'ruleset', ''),
     status: attr(resource, 'status', ''),
     oneShot: attr(resource, 'oneShot', false),
+    premise,
     campaignId: campaign ? String(campaign.id) : null,
     members,
   }
+}
+
+interface RawMember {
+  id: number
+  table_id: number
+  user_id: number
+  role: MemberRole
+  character_id: string | null
+}
+
+interface RawFriendship {
+  id: number
+  user_id: number
+  friend_id: number
+  status: string
+  accepted_at: string | null
+}
+
+function friendshipRecord(raw: RawFriendship, created: boolean): FriendshipRecord {
+  return { id: raw.id, userId: raw.user_id, friendId: raw.friend_id, status: raw.status, created }
+}
+
+function userFrom(resource: Resource | null, id: string): AuthUser {
+  return { id: String(resource?.id ?? id), name: attr(resource, 'name', ''), email: attr(resource, 'email', '') }
 }
 
 /** El miembro que corresponde a un usuario, o null si no esta en la mesa. */
