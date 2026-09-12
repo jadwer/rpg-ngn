@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { dialogue, narration, system } from './blocks.js'
-import { createTtsController, speechQueue, TTS_IDLE, ttsReducer, type SpeechEngine, type TtsState } from './tts.js'
+import { createTtsController, speechQueue, TTS_IDLE, ttsReducer, type SpeechEngine, type TtsItem, type TtsState } from './tts.js'
 
 /** Motor falso: no termina solo, el test decide cuando acaba cada bloque. */
 function fakeEngine(options: { native?: boolean } = {}) {
@@ -35,10 +35,10 @@ function fakeEngine(options: { native?: boolean } = {}) {
   }
 }
 
-const items = [
-  { blockId: 'a', text: 'Uno' },
-  { blockId: 'b', text: 'Dos' },
-  { blockId: 'c', text: 'Tres' },
+const items: TtsItem[] = [
+  { blockId: 'a', text: 'Uno', kind: 'narration', speakerRef: null },
+  { blockId: 'b', text: 'Dos', kind: 'narration', speakerRef: null },
+  { blockId: 'c', text: 'Tres', kind: 'narration', speakerRef: null },
 ]
 
 describe('ttsReducer', () => {
