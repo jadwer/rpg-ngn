@@ -1,4 +1,5 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId } from '@rpg-ngn/content'
+import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import { TurnBlock, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, type ContextBudget, type ContextProfile } from './context.js'
@@ -43,6 +44,8 @@ export interface ModelDMOptions {
   budget?: ContextBudget
   /** Tope por defecto cuando la peticion no trae budget. */
   maxOutputTokens?: number
+  /** Fuente de azar para las tiradas que pide el DM; Web Crypto por defecto, semilla en tests. */
+  random?: RandomSource
 }
 
 const DEFAULT_MAX_OUTPUT_TOKENS = 4000
@@ -66,11 +69,14 @@ const AllowedEvent = z.discriminatedUnion('type', [
     resolved: z.strictObject({
       kind: z.enum(['fortune', 'skill', 'social', 'attack', 'save', 'rest', 'other']),
       die: DiceSpec,
-      result: z.number().int(),
-      source: z.literal('physical'),
+      /** Sin `result` el engine tira el dado con su generador; con `result` es un numero que el jugador escribio. */
+      result: z.number().int().optional(),
+      source: z.string().optional(),
       skill: z.string().optional(),
       target: EntityRef.optional(),
       modifier: z.number().int().optional(),
+      advantage: z.boolean().optional(),
+      disadvantage: z.boolean().optional(),
     }),
   }),
   z.strictObject({
@@ -141,7 +147,7 @@ export class ModelDMProvider implements DMProvider {
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
-    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce')
+    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom())
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -259,6 +265,7 @@ class LineInterpreter {
     private readonly ctx: DMTurnContext,
     private readonly party: string[],
     private readonly lintMode: LintMode,
+    private readonly random: RandomSource,
   ) {
     this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
   }
@@ -437,6 +444,16 @@ class LineInterpreter {
     if (event['type'] === 'secret_revealed' && this.knowledge) {
       markRevealed(this.knowledge, (event['payload'] as { secretId: string }).secretId)
     }
+    if (event['type'] === 'roll') {
+      // La mesa ve el dado caer: un bloque roll con el resultado, tirado por el engine o escrito por el jugador.
+      const resolved = event['resolved'] as { die: string; result: number; skill?: string; source: string; rolls?: number[] }
+      const actor = event['actor'] as string
+      const name = this.ctx.pack.characters.get(refId(actor))?.name ?? refId(actor)
+      const detail = resolved.skill ? ` (${resolved.skill})` : ''
+      const dice = resolved.rolls && resolved.rolls.length > 1 ? ` [${resolved.rolls.join(', ')}]` : ''
+      const origin = resolved.source === 'physical' ? ' con su dado' : ''
+      yield { kind: 'block', block: { type: 'roll', text: `${name} tira ${resolved.die}${detail}${origin}: ${resolved.result}${dice}`, actor, die: resolved.die, result: resolved.result } }
+    }
     yield { kind: 'event', event }
   }
 
@@ -452,12 +469,22 @@ class LineInterpreter {
 
     switch (event.type) {
       case 'roll': {
-        // Solo tiradas que un jugador escribio este turno: el DM no inventa numeros (regla 1).
         const actorId = refId(event.actor)
         if (!present(event.actor)) return null
+        const { result, source: _source, advantage, disadvantage, ...rest } = event.resolved
+        if (result === undefined) {
+          // El DM pide la tirada y el engine la hace con su generador: el modelo nunca inventa el numero (regla 1).
+          const d20 = /^1d20$/.test(rest.die) && (advantage || disadvantage)
+          const rolled = d20 ? rollD20(this.random, { advantage, disadvantage }) : rollDice(rest.die, this.random)
+          // `total` ya incluye el modificador de la expresion (2d6+1); `modifier` es el bono del personaje que el DM añade aparte.
+          const total = ('total' in rolled ? rolled.total : rolled.result) + (rest.modifier ?? 0)
+          const resolved = { ...rest, result: total, rolls: rolled.rolls, source: rolled.source, ...(advantage ? { advantage } : {}), ...(disadvantage ? { disadvantage } : {}) }
+          return { ...event, resolved, visibility: { layer: 'campaign', witnesses } }
+        }
+        // Un numero escrito por el jugador este turno vale como tirada fisica; cualquier otro se descarta.
         const response = this.ctx.turn.responses.find((r) => r.characterId === actorId)
-        if (!response || !new RegExp(`(?<![\\d])${event.resolved.result}(?![\\d])`).test(response.text)) return null
-        return { ...event, visibility: { layer: 'campaign', witnesses } }
+        if (!response || !new RegExp(`(?<![\\d])${result}(?![\\d])`).test(response.text)) return null
+        return { ...event, resolved: { ...rest, result, source: 'physical' }, visibility: { layer: 'campaign', witnesses } }
       }
       case 'state_change': {
         for (const effect of event.effects) {

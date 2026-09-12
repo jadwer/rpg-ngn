@@ -1,3 +1,4 @@
+import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
 import { ModelDMProvider, parseLoose } from './model-dm.js'
 import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
@@ -15,6 +16,36 @@ const goodTurn = [
 ].join('\n')
 
 describe('ModelDMProvider', () => {
+  it('cuando el DM pide una tirada sin resultado, el engine tira el dado y la mesa ve el bloque roll', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"block","block":{"type":"narration","text":"Las runas exigen atención. Zahira, tu ojo de piedra las recorre."}}',
+      '{"kind":"event","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Historia"}}}',
+      '{"kind":"event","event":{"type":"roll","actor":"character:calder","resolved":{"kind":"attack","die":"2d6+1"}}}',
+      '{"kind":"event","event":{"type":"roll","actor":"character:calder","resolved":{"kind":"save","die":"1d20","advantage":true}}}',
+      '{"kind":"addressed","characterIds":["zahira"]}',
+    ].join('\n')
+    const provider = new ModelDMProvider(new FakeTransport(lines), KEY, { random: seededRandom(7) })
+    const expected = seededRandom(7)
+    const zahira = expected.nextInt(20) + 1
+    const calder = [expected.nextInt(6) + 1, expected.nextInt(6) + 1]
+    const narivyl = [expected.nextInt(20) + 1, expected.nextInt(20) + 1]
+
+    const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'Examino las runas sin tocarlas.')]))))
+
+    const rolls = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null)).filter((e) => e?.['type'] === 'roll')
+    expect(rolls).toHaveLength(3)
+    expect(rolls[0]).toMatchObject({ actor: 'character:zahira', resolved: { die: '1d20', result: zahira, rolls: [zahira], source: 'seed:7', skill: 'Historia' } })
+    expect(rolls[1]).toMatchObject({ actor: 'character:calder', resolved: { die: '2d6+1', result: calder[0]! + calder[1]! + 1, rolls: calder } })
+    expect(rolls[2]).toMatchObject({ actor: 'character:calder', resolved: { die: '1d20', result: Math.max(...narivyl), rolls: narivyl, advantage: true } })
+    expect(rolls[0]).not.toHaveProperty('resolved.advantage')
+
+    const rollBlocks = outputs.filter((o) => o.kind === 'block' && o.block.type === 'roll').map((o) => (o.kind === 'block' ? o.block : null))
+    expect(rollBlocks.map((b) => b?.type)).toEqual(['roll', 'roll', 'roll'])
+    expect(rollBlocks[0]).toMatchObject({ actor: 'character:zahira', die: '1d20', result: zahira, text: `Zahira tira 1d20 (Historia): ${zahira}` })
+    expect(rollBlocks[2]?.type === 'roll' ? rollBlocks[2].text : '').toContain(`[${narivyl.join(', ')}]`)
+  })
+
   it('registra las declaraciones, emite bloques al vuelo y solo acepta eventos que el engine puede aplicar', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)
@@ -23,9 +54,10 @@ describe('ModelDMProvider', () => {
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.'), response('calder', 'La sigo.')]))))
 
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-    expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'dialogue', 'narration', 'dialogue', 'narration'])
+    expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'dialogue', 'narration', 'dialogue', 'roll', 'narration'])
     expect(blocks[0]).toMatchObject({ speaker: 'Zahira', speakerRef: 'character:zahira' })
     expect(blocks[3]).toMatchObject({ speaker: 'Tomás', speakerRef: 'npc:tomas' })
+    expect(blocks[4]).toMatchObject({ type: 'roll', actor: 'character:zahira', die: '1d20', result: 14, text: 'Zahira tira 1d20 (Historia) con su dado: 14' })
 
     const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
     expect(events.map((e) => e?.['type'])).toEqual(['player_action', 'player_action', 'narration', 'narration', 'roll', 'state_change', 'narration'])
