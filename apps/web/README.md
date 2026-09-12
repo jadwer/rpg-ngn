@@ -7,11 +7,11 @@ La mesa en el navegador (docs/11, D8: la web es el producto principal, con imple
 ```bash
 pnpm install && pnpm build            # desde la raiz; la web importa packages/*/dist
 pnpm --filter web bundle-pack         # solo si cambio content/packs/pilot (regenera src/generated y public/packs)
-pnpm --filter web dev                 # http://localhost:3000, escucha en 0.0.0.0 para la LAN
+pnpm --filter web dev                 # http://localhost:3010, escucha en 0.0.0.0 para la LAN
 pnpm --filter web build && pnpm --filter web start   # produccion, mismo puerto
 ```
 
-Otro puerto: `pnpm --filter web exec next dev -H 0.0.0.0 -p 3002`.
+Otro puerto: `pnpm --filter web exec next dev -H 0.0.0.0 -p 3020`.
 
 Variables (`.env.example`):
 

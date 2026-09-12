@@ -2,7 +2,7 @@
 
 Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-11: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
 
-Puertos del proyecto: engine `3100`, API `8010`, web `3000`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
+Puertos del proyecto: engine `3100`, API `8010`, web `3010`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
 
 Variables: cada servicio lee su propio `.env` (gitignored, no viaja con el repo). `apps/engine/.env` trae `ENGINE_TOKEN`, `HOST` y `PORT`; `rpg-ngn-api/.env` trae la base, `ENGINE_URL` y `ENGINE_TOKEN`. Si falta alguno, copiar el `.env.example` de al lado. No hace falta pasar variables en la linea de comandos.
 
@@ -15,7 +15,7 @@ cd ~/dev/rpg-ngn && pnpm --filter engine dev
 # Terminal 2: API (Laravel)
 cd ~/dev/rpg-ngn-api && php artisan serve --host 0.0.0.0 --port 8010
 
-# Terminal 3: web (Next.js). Escucha en 0.0.0.0:3000 y reenvia /api/* a la API local
+# Terminal 3: web (Next.js). Escucha en 0.0.0.0:3010 y reenvia /api/* a la API local
 cd ~/dev/rpg-ngn && pnpm --filter web dev
 
 # Terminal 4 (opcional): app (Expo). Sin --tunnel: WSL ya comparte la IP del Wi-Fi
@@ -29,7 +29,7 @@ Si algo no arranca:
 - `pnpm install && pnpm build` en `rpg-ngn` (el engine importa los packages construidos).
 - `composer install && php artisan migrate --seed` en `rpg-ngn-api` si la base esta vacia.
 - Postgres: `systemctl status postgresql`; rol `rpg`, base `rpg_ngn`.
-- El Firewall de Windows pregunta la primera vez por los puertos 8010, 3000, 8081 y 3100: aceptar.
+- El Firewall de Windows pregunta la primera vez por los puertos 8010, 3010, 8081 y 3100: aceptar.
 
 Comprobacion rapida:
 
@@ -57,7 +57,7 @@ El DM es `gabino@example.com` / `password` (abre y cierra sesiones, fuerza cierr
 
 ## 3b. Web (laptops e iPhone por Safari)
 
-1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3000` (hoy `http://192.168.100.11:3000`). El campo "Servidor de la API" ya trae esa misma direccion: las peticiones pasan por el proxy de Next y no hace falta CORS. Solo si se escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
+1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.11:3010`). El campo "Servidor de la API" ya trae esa misma direccion: las peticiones pasan por el proxy de Next y no hace falta CORS. Solo si se escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
 2. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, premisa opcional; despues invita a Jaz y Armando (ya son amigos) eligiendo personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional).
 3. Jugadores: `jaz@example.com` y `armando@example.com`, `password`. Entrar a la mesa, escribir la accion y Enviar (Ctrl+Enter). Cuando no falta nadie, cualquiera pulsa "Cerrar turno y narrar"; el anfitrion puede "Forzar cierre".
 4. Pantalla compartida: en la laptop del anfitrion, "Pantalla" o tecla `F` deja solo narrativa y dialogos en grande; `Esc` sale. La voz sale del dispositivo que pulse Leer (o tenga "Leer lo nuevo"); en iPhone hay que tocar Leer una vez antes de que suene sola.
