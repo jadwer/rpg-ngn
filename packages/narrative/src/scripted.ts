@@ -30,7 +30,7 @@ export class ScriptedDMProvider implements DMProvider {
         yield { kind: 'addressed', characterIds: addressed }
         return
       }
-      yield { kind: 'block', block: { type: 'system', text: 'El turno se cerro sin declaraciones. El DM espera.' } }
+      yield { kind: 'block', block: { type: 'system', text: 'El turno se cerró sin declaraciones. El DM espera.' } }
       yield { kind: 'addressed', characterIds: party }
       return
     }
