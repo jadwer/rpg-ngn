@@ -161,6 +161,11 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
     if (atBottomRef.current) setTimeout(() => scrollToEnd(true), 30)
     else setBehind(true)
   }, [blocks.length, scrollToEnd])
+  // Al entrar o salir del modo pantalla cambia la altura: se vuelve al final.
+  useEffect(() => {
+    const timer = setTimeout(() => scrollToEnd(false), 50)
+    return () => clearTimeout(timer)
+  }, [screen, scrollToEnd])
   useEffect(() => {
     if (!tts.currentBlockId || !atBottomRef.current) return
     const el = scrollRef.current?.querySelector(`[data-block="${tts.currentBlockId}"]`)
@@ -308,7 +313,7 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
       </footer>
 
       <div className="table-footer hide-on-screen">
-        {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
+        {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} onRespond={respond} onClose={closeTurn} />
       </div>
     </div>

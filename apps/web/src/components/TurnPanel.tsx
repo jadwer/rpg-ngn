@@ -52,25 +52,24 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       <div className={`status${progress.narrating ? ' narrating-line' : ''}`}>
         {progress.narrating ? <span className="spinner" aria-hidden /> : null}
         <span>{turn ? `Turno ${turn.number}: ${line}` : line}</span>
+        {turn && !progress.narrating && (progress.responded.length > 0 || progress.pending.length > 0) ? (
+          <span className="chips">
+            {progress.responded.map((id) => (
+              <span key={id} className="chip done">
+                {nameOf(id)} ya respondió
+              </span>
+            ))}
+            {progress.pending.map((id) => (
+              <span key={id} className="chip">
+                falta {nameOf(id)}
+              </span>
+            ))}
+          </span>
+        ) : null}
       </div>
 
-      {turn && (progress.responded.length > 0 || progress.pending.length > 0) ? (
-        <div className="chips">
-          {progress.responded.map((id) => (
-            <span key={id} className="chip done">
-              {nameOf(id)} ya respondió
-            </span>
-          ))}
-          {progress.pending.map((id) => (
-            <span key={id} className="chip">
-              falta {nameOf(id)}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
       {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
-      {notice ? <div className="error">{notice}</div> : null}
+      {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 
       {progress.canRespond ? (
         <>

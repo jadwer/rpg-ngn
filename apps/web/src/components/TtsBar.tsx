@@ -22,7 +22,7 @@ export function TtsBar({ tts }: { tts: Tts }) {
   return (
     <div className="tts">
       {!active ? (
-        <button type="button" className="btn small primary" onClick={() => tts.start()} disabled={state.total === 0}>
+        <button type="button" className="btn small primary" onClick={() => tts.start()} disabled={tts.count === 0}>
           Leer
         </button>
       ) : null}

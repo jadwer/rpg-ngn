@@ -8,6 +8,8 @@ import { createWebSpeechEngine, pickVoice, speechSupported, watchVoices, type Vo
 export interface Tts {
   state: TtsState
   currentBlockId: string | null
+  /** Bloques con texto que la cola puede leer. */
+  count: number
   nativePause: boolean
   supported: boolean
   error: string | null
@@ -135,6 +137,7 @@ export function useTts(blocks: readonly TurnBlock[]): Tts {
   return {
     state,
     currentBlockId,
+    count: items.length,
     nativePause: controller.nativePause,
     supported: speechSupported(),
     error,

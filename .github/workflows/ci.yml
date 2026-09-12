@@ -35,5 +35,8 @@ jobs:
       - name: Valida content packs y logs de campaña
         run: pnpm validate
 
+      - name: Build de la web (Next.js)
+        run: pnpm build:web
+
       - name: Estilo de docs y JSON (mismo verificador que el hook local)
         run: bash .claude/hooks/verify.sh stop

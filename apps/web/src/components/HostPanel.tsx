@@ -2,7 +2,7 @@
 
 import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isValidSessionCode } from '../lib/tableSetup'
 import { InvitePanel } from './InvitePanel'
 
@@ -12,6 +12,8 @@ interface Props {
   meId: string
   pack: LoadedPack | null
   session: { code: string; status: string } | null
+  /** true cuando ya llego el primer estado de la mesa (para abrir el mando solo si no hay sesion). */
+  loaded: boolean
   /** Codigo sugerido (la siguiente de la campaña). */
   suggestedCode: string
   busy: boolean
@@ -26,17 +28,30 @@ interface Props {
  * que el DM tambien recibe), cerrarla con cliffhanger, la premisa de la
  * mesa e invitaciones. El DM es la IA; el anfitrion dirige la mesa.
  */
-export function HostPanel({ client, table, meId, pack, session, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
-  const [expanded, setExpanded] = useState(!session)
+export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+  const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'invite'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
   const [cliffhanger, setCliffhanger] = useState('')
   const [confirmClose, setConfirmClose] = useState(false)
+  const decidedRef = useRef(false)
 
   useEffect(() => {
     setCode(suggestedCode)
   }, [suggestedCode])
+
+  // Al entrar: abierto si no hay sesion (hay que abrirla), plegado si ya se juega.
+  useEffect(() => {
+    if (!loaded || decidedRef.current) return
+    decidedRef.current = true
+    setExpanded(!session)
+  }, [loaded, session])
+
+  // Al cerrarse la sesion, el mando vuelve a mostrarse para abrir la siguiente.
+  useEffect(() => {
+    if (loaded && !session) setExpanded(true)
+  }, [loaded, session])
 
   return (
     <section className="host" aria-label="Mando del anfitrión">

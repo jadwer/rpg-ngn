@@ -577,9 +577,15 @@ h3 {
 
 .table {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto 1fr auto;
   min-height: 100dvh;
   height: 100dvh;
+  overflow-x: hidden;
+}
+
+.table > * {
+  min-width: 0;
 }
 
 .table-header {
@@ -945,6 +951,8 @@ h3 {
 .table-footer {
   border-top: 1px solid var(--border);
   background: var(--panel);
+  max-height: 55dvh;
+  overflow-y: auto;
 }
 
 .turn {
@@ -958,8 +966,9 @@ h3 {
 
 .turn .status {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
   font-size: 1rem;
 }
 
@@ -975,7 +984,7 @@ h3 {
 }
 
 .turn textarea {
-  min-height: 72px;
+  min-height: 58px;
   max-height: 180px;
   font-size: 1.08rem;
 }
@@ -1050,10 +1059,15 @@ h3 {
 /* Fichas */
 
 .aside {
-  width: min(440px, 100%);
-  flex: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(460px, 100%);
+  z-index: 6;
   border-left: 1px solid var(--border);
   background: var(--bg);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -1507,11 +1521,8 @@ h3 {
   }
 
   .aside {
-    position: absolute;
-    inset: 0;
     width: 100%;
     border-left: 0;
-    z-index: 4;
   }
 
   .table.screen .blocks {

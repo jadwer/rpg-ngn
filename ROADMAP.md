@@ -79,10 +79,14 @@ Pasada a la app tras la partida del 2026-09-11 (antes de la entrega 6):
 
 `apps/web` en Next.js 15 con mesa propia, independiente de la app movil; `apps/sheets` como referencia visual y una vista limpia "en pantalla" para streamers. Lo que Gabino listo el 2026-09-11 como faltante y aqui queda explicito:
 
-- [ ] Modulo de usuario: registro (Atomo ya da login por token), edicion de perfil, visualizacion, amigos
-- [ ] Crear mesas eligiendo pack, ruleset y personaje del anfitrion; invitar; abrir y cerrar sesiones. La API ya lo soporta, faltan las pantallas (tambien en la app movil)
+- [x] `apps/web` (Next.js 15, App Router, CSS con el tema de `apps/sheets`, Cinzel y Crimson Pro): acceso con URL de la API, correo y contraseña; token en `localStorage` (provisional); `/api/*` reenviado a la API por Next para que la LAN y el iPhone entren sin CORS (2026-09-12)
+- [x] Mesas del usuario con asiento, pack y party; crear mesa con pack, personaje del anfitrion con retrato y premisa (`settings.premise`); invitar por correo con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje). El asiento `dm` se muestra como "anfitrion"
+- [x] La mesa: polling, cabecera con sesion, momento del mundo, turno y faltantes; vistas narrativa y dialogo; cuadro de respuesta con Ctrl+Enter e `Idempotency-Key` estable por turno; cierre y cierre forzado; "El DM esta narrando..."; mando del anfitrion (abrir con codigo sugerido y nota, cerrar con cliffhanger); fichas con estado vivo y velado; voz con Web Speech (voz en español elegible, velocidad, leer lo nuevo); modo pantalla (tecla F) para streamers; autoscroll con pausa
+- [x] `api-client`: `createTable`, `setOwnerCharacter`, `invite`, `listFriendships`, `requestFriendship`, `acceptFriendship`, `findUserByEmail`, `premise` y `viewer`; tests con fetch falso. `apps/web` en `pnpm check` (build, typecheck, lint, tests)
+- [ ] Modulo de usuario: registro (Atomo ya da login por token), edicion de perfil, visualizacion, amigos fuera de la mesa
+- [ ] Buscar usuarios por correo para cualquier cuenta (hoy `users?filter[email]` solo lo permite a admin; la web cae a la lista de amigos aceptados)
 - [ ] Ajustes del usuario y de la mesa: proveedor de DM (BYOK local o de servicio, pago por sesion, One Shot, con probe al guardar), voz por defecto e idioma. Docs/09 exige el proveedor antes de jugar
-- [ ] Landing publica y la mesa completa (narrativa, dialogo, fichas, TTS) con paridad funcional con la app
+- [ ] Landing publica; token en cookie httpOnly en vez de `localStorage`; bandera de narrador compartida
 - [ ] Admin con `@atomo/ui` y `@atomo/core`
 
 ## Entrega 6: DM IA
