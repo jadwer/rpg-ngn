@@ -163,6 +163,30 @@ Contrato Laravel/engine, privado, con `X-Engine-Token` y `X-Engine-Contract`:
 El relay se construye despues del primer turno real con nube (entrega 6b), no
 antes: con la plataforma resolviendo cobro, ya no hace falta "BYOK primero".
 
+Decisiones de contrato tomadas al construir la entrega 6 (2026-09-12):
+
+- `ResolveTurnRequest` gana `context: { premise?, sessionNote? }`, opcional y
+  sin subir `ENGINE_CONTRACT_VERSION`: un campo opcional no rompe a los
+  clientes del engine nuevo. Si rompe a un engine viejo que reciba la API
+  nueva (rechaza claves desconocidas), asi que API y engine se despliegan
+  juntos, como ya exige D3.
+- `ProviderConfig` admite `anthropic` y `openai`; el segundo cubre cualquier
+  API compatible con Chat Completions via `baseUrl` (DeepSeek, Ollama). No hay
+  un adapter por proveedor: hay un `ModelDMProvider` comun (contexto, prompt,
+  parser, validacion, redaccion) y transportes finos por SDK. `contextProfile:
+  compact` recorta el contexto a menos de 3000 tokens para modelos locales.
+- En V1 la clave no vive en `provider_configs` con cast `encrypted` sino en el
+  `.env` del servidor como preset (`DM_PROVIDER`): una mesa solo puede fijar
+  `scripted`. La tabla cifrada por mesa queda para el BYOK de la entrega 7,
+  cuando exista la pantalla de proveedor. La redaccion si esta: el engine y la
+  API quitan la credencial de todo mensaje de error y hay tests que lo prueban.
+- El modelo no registra las acciones de los jugadores ni la narracion: el
+  engine lo hace a partir de las respuestas y de los bloques. Los eventos que
+  el modelo si propone (tirada reportada, HP, condicion, inventario, hecho del
+  mundo) se validan contra el estado antes de entrar al log, y una tirada solo
+  entra si el jugador escribio el numero (regla 1 de 06). Lo que no se puede
+  aplicar se ignora con un aviso `system`; el turno no se cae por una linea.
+
 ### D7. Repos: dos
 
 - `rpg-ngn` (publico, este): monorepo pnpm con `packages/*` (motor,

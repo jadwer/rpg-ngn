@@ -113,7 +113,8 @@ describe('ScriptedDMProvider', () => {
     expect(third.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['system', 'dialogue', 'narration'])
   })
 
-  it('anthropic todavia no existe', () => {
-    expect(() => createProvider({ kind: 'anthropic', model: 'x', credential: 'y' })).toThrow(/entrega 6/)
+  it('la fabrica construye los proveedores con modelo sin tocar la red', () => {
+    expect(createProvider({ kind: 'anthropic', model: 'claude-sonnet-5', credential: 'k' }).kind).toBe('anthropic')
+    expect(createProvider({ kind: 'openai', model: 'deepseek-chat', credential: 'k', baseUrl: 'https://api.deepseek.com' }).kind).toBe('openai')
   })
 })

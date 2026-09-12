@@ -1,7 +1,7 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
 import type { ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
-import { createProvider, type DMProvider } from '@rpg-ngn/narrative'
+import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { projectionsOf, rebuildState } from './state.js'
 
@@ -9,6 +9,7 @@ export interface ResolveDeps {
   loadPack(ref: ResolveTurnRequest['pack']): Promise<LoadedPack>
   now(): Date
   provider?: DMProvider
+  providers?: ProviderDeps
 }
 
 /**
@@ -16,18 +17,23 @@ export interface ResolveDeps {
  * bloques y eventos; aqui cada evento recibe id, seq y recordedAt, pasa por
  * el schema y por el ruleset, y solo entonces cuenta. Si algo falla se
  * emite `error` y la plataforma reabre el turno sin haber escrito nada.
+ * Ningun mensaje de error sale con la credencial del proveedor dentro.
  */
 export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDeps): AsyncGenerator<ResolveLine> {
+  const credential = request.provider.kind === 'scripted' ? undefined : request.provider.credential
+  const fail = (error: unknown): ResolveLine => ({ kind: 'error', message: redact(error instanceof Error ? error.message : String(error), credential) })
+
   let pack: LoadedPack
   let ruleset: Ruleset
   let state: CampaignState
+  let recentEvents: CampaignEvent[]
 
   try {
     pack = await deps.loadPack(request.pack)
     ruleset = resolveRuleset(request.ruleset)
-    state = rebuildState(pack, ruleset, request.snapshot, request.events)
+    ;({ state, events: recentEvents } = rebuildState(pack, ruleset, request.snapshot, request.events))
   } catch (error) {
-    yield { kind: 'error', message: (error as Error).message }
+    yield fail(error)
     return
   }
 
@@ -37,12 +43,29 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     return
   }
 
-  const provider = deps.provider ?? createProvider(request.provider)
+  let provider: DMProvider
+  try {
+    provider = deps.provider ?? createProvider(request.provider, deps.providers ?? {})
+  } catch (error) {
+    yield fail(error)
+    return
+  }
+
   const events: CampaignEvent[] = []
   let addressed: string[] = session.party
+  let usage = { inputTokens: 0, outputTokens: 0 }
 
   try {
-    for await (const output of provider.narrate({ pack, state, session: pack.sessions.get(request.turn.sessionId), turn: request.turn })) {
+    const outputs = provider.narrate({
+      pack,
+      state,
+      session: pack.sessions.get(request.turn.sessionId),
+      turn: request.turn,
+      notes: request.context,
+      recentEvents,
+      maxOutputTokens: request.budget?.maxOutputTokens,
+    })
+    for await (const output of outputs) {
       if (output.kind === 'block') {
         yield { kind: 'block', block: output.block }
         continue
@@ -50,6 +73,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 
       if (output.kind === 'addressed') {
         addressed = output.characterIds
+        continue
+      }
+
+      if (output.kind === 'usage') {
+        usage = { inputTokens: output.inputTokens, outputTokens: output.outputTokens }
         continue
       }
 
@@ -70,7 +98,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       events.push(parsed.data)
     }
   } catch (error) {
-    yield { kind: 'error', message: (error as Error).message }
+    yield fail(error)
     return
   }
 
@@ -80,6 +108,6 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     addressed,
     state,
     projections: projectionsOf(state),
-    usage: { inputTokens: 0, outputTokens: 0 },
+    usage,
   }
 }

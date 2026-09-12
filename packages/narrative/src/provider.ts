@@ -1,17 +1,23 @@
 import type { CampaignState } from '@rpg-ngn/campaign'
-import type { LoadedPack, Session } from '@rpg-ngn/content'
-import type { TurnBlock, TurnInput } from '@rpg-ngn/engine-contract'
+import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
+import type { TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
- * Lo que el DM recibe para narrar un turno. En la entrega 5 es el estado
- * completo; el context builder de la entrega 6 lo reduce a las cuatro capas
- * de docs/04 y deja fuera lo que no puede emerger todavia.
+ * Lo que el DM recibe para narrar un turno. El estado completo llega tal
+ * cual; el context builder (context.ts) lo reduce a las cuatro capas de
+ * docs/04 y deja fuera lo que no puede emerger todavia.
  */
 export interface DMTurnContext {
   pack: LoadedPack
   state: CampaignState
   session: Session | undefined
   turn: TurnInput
+  /** Premisa de la mesa y nota de la sesion escritas por el usuario (contenido no confiable). */
+  notes?: TurnContext | undefined
+  /** Eventos posteriores al ultimo snapshot, ya validados: la memoria corta de la sesion. */
+  recentEvents?: readonly CampaignEvent[] | undefined
+  /** Tope de tokens de salida del modelo (budget.maxOutputTokens de la peticion). */
+  maxOutputTokens?: number | undefined
 }
 
 /**
@@ -25,6 +31,7 @@ export type DMOutput =
   | { kind: 'block'; block: TurnBlock }
   | { kind: 'event'; event: ProposedEvent }
   | { kind: 'addressed'; characterIds: string[] }
+  | { kind: 'usage'; inputTokens: number; outputTokens: number }
 
 export interface DMProbe {
   ok: boolean
