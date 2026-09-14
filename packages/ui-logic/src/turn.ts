@@ -45,7 +45,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text }
     }
     case 'system':
-      return { kind: 'system', id, title: null, text: block.text, items: [] }
+      return { kind: 'system', id, title: null, text: block.text, items: [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null }
   }
 }
 

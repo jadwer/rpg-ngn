@@ -176,7 +176,23 @@ export const TurnBlock = z.discriminatedUnion('type', [
     /** Cada dado por separado (dos con ventaja o desventaja, varios en 2d6): para pintar las caras. */
     rolls: z.array(z.number().int()).optional(),
   }),
-  z.strictObject({ type: z.literal('system'), text: z.string().min(1) }),
+  z.strictObject({
+    type: z.literal('system'),
+    text: z.string().min(1),
+    /**
+     * Quien necesita leerlo. `table` es para todos; `host` es ruido tecnico
+     * que solo el anfitrion puede accionar y que a un jugador solo le estorba.
+     * Sin el campo, la mesa entera lo ve (compatible con lo ya guardado).
+     */
+    audience: z.enum(['table', 'host']).optional(),
+    /**
+     * Que hacer: `info` no pide nada, `action` si (volver a cerrar el turno,
+     * responder). La UI puede resaltar solo los `action`.
+     */
+    tone: z.enum(['info', 'action']).optional(),
+    /** Detalle largo para el anfitrion (que linea se ignoro y por que). */
+    detail: z.string().optional(),
+  }),
 ])
 export type TurnBlock = z.infer<typeof TurnBlock>
 

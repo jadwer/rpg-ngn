@@ -39,6 +39,16 @@ export interface SystemGroup {
 
 export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup
 
+/**
+ * Quita los avisos tecnicos que solo el anfitrion puede accionar (una linea
+ * que el motor ignoro, un corte del lint). Un jugador no puede hacer nada con
+ * ellos y le ensucian la narracion. Todo lo demas pasa igual para todos.
+ */
+export function blocksForSeat(blocks: readonly TurnBlock[], isHost: boolean): TurnBlock[] {
+  if (isHost) return [...blocks]
+  return blocks.filter((block) => block.kind !== 'system' || block.audience !== 'host')
+}
+
 export function groupBlocks(blocks: readonly TurnBlock[], mode: ViewMode): ViewGroup[] {
   const groups: ViewGroup[] = []
   for (const block of blocks) {

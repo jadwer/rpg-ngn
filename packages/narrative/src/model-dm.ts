@@ -10,6 +10,8 @@ import { DMProviderError, errorMessage, redact } from './redact.js'
 
 /** Lo que ve la mesa cuando el lint corta un bloque. No dice cual era el secreto. */
 export const LINT_SYSTEM_TEXT = 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.'
+/** Los avisos de calidad del turno son para el anfitrion: un jugador no puede hacer nada con ellos. */
+const HOST_NOTICE = { audience: 'host', tone: 'info' } as const
 
 /** Lo que el DM manda al modelo en un turno. */
 export interface ModelPrompt {
@@ -184,10 +186,19 @@ export class ModelDMProvider implements DMProvider {
     }
 
     if (reply.finish === 'length') {
-      yield { kind: 'block', block: { type: 'system', text: 'La narración se cortó por el presupuesto de salida del DM.' } }
+      yield { kind: 'block', block: { type: 'system', text: 'La narración se cortó a medias: el DM llegó a su límite de escritura.', audience: 'table', tone: 'action', detail: 'El modelo agotó maxOutputTokens. Cierra otro turno para que siga, o sube el presupuesto de salida.' } }
     }
     if (interpreter.ignored > 0) {
-      yield { kind: 'block', block: { type: 'system', text: `El DM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.` } }
+      // Ruido tecnico: el modelo propuso un evento que el motor no pudo aplicar. La narracion esta intacta.
+      yield {
+        kind: 'block',
+        block: {
+          type: 'system',
+          text: `El DM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.`,
+          ...HOST_NOTICE,
+          detail: 'Suele ser un evento con un personaje que no está en la sesión, un objeto que nadie tiene o una tirada mal formada. La narración que leyó la mesa no cambia y no hay nada que hacer.',
+        },
+      }
     }
 
     yield { kind: 'addressed', characterIds: interpreter.addressed ?? party }
@@ -404,7 +415,7 @@ class LineInterpreter {
       const cut = yield* this.lint(block.text)
       if (cut) {
         // El bloque no llega a la mesa ni a la cronica; queda el aviso y el motivo va en result.lint.
-        yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT } }
+        yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con DM_LINT o por mesa.' } }
         return
       }
     }

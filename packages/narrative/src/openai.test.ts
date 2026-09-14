@@ -129,6 +129,6 @@ describe('OpenAITransport (OpenAI y compatibles como DeepSeek)', () => {
     const outputs = await collect(createOpenAIProvider({ model: 'deepseek-chat', credential: KEY, client }).narrate(contextFor(base, turn(1, []))))
     const texts = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' && o.block.type !== 'roll' ? o.block.text : ''))
     expect(texts[0]).toBe('Empieza a llover y')
-    expect(texts.some((t) => t.includes('se cortó por el presupuesto'))).toBe(true)
+    expect(texts.some((t) => t.includes('llegó a su límite de escritura'))).toBe(true)
   })
 })

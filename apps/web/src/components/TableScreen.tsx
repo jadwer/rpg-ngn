@@ -3,7 +3,7 @@
 import { ApiError, memberOf, randomKey, type ApiClient, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
@@ -48,13 +48,16 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
 
   const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
-  const blocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
-  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
-  const tts = useTts(blocks)
+  const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
 
   const fallbackMember = memberOf(table, user.id)
   const viewer: TableViewer = snapshot?.viewer ?? { memberId: Number(fallbackMember?.id ?? 0), role: fallbackMember?.role ?? 'player', characterId: fallbackMember?.characterId ?? null }
   const isHost = viewer.role === 'host'
+
+  // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
+  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
+  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
+  const tts = useTts(blocks)
   const turn = snapshot?.turn ?? null
   const progress = useMemo(() => turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }), [turn, viewer.role, viewer.characterId])
   const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])

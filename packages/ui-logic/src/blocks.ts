@@ -50,6 +50,12 @@ export interface SystemBlock {
   text: string | null
   /** Lista de puntos (como se juega, cabos sueltos, tabla de Fortuna). */
   items: string[]
+  /** `host` solo lo ve el anfitrion; `table` lo ve todo el mundo. */
+  audience: 'table' | 'host'
+  /** `action` pide algo a quien lo lee; `info` solo informa. */
+  tone: 'info' | 'action'
+  /** Explicacion larga, para el anfitrion. */
+  detail: string | null
 }
 
 export type TurnBlock = NarrationBlock | DialogueBlock | RollBlock | SystemBlock
@@ -63,8 +69,20 @@ export function dialogue(id: string, speaker: Speaker, text: string): DialogueBl
   return { kind: 'dialogue', id, speaker, text }
 }
 
-export function system(id: string, fields: { title?: string | null; text?: string | null; items?: string[] }): SystemBlock {
-  return { kind: 'system', id, title: fields.title ?? null, text: fields.text ?? null, items: fields.items ?? [] }
+export function system(
+  id: string,
+  fields: { title?: string | null; text?: string | null; items?: string[]; audience?: 'table' | 'host'; tone?: 'info' | 'action'; detail?: string | null },
+): SystemBlock {
+  return {
+    kind: 'system',
+    id,
+    title: fields.title ?? null,
+    text: fields.text ?? null,
+    items: fields.items ?? [],
+    audience: fields.audience ?? 'table',
+    tone: fields.tone ?? 'info',
+    detail: fields.detail ?? null,
+  }
 }
 
 /**

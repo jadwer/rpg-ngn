@@ -70,7 +70,7 @@ describe('AnthropicTransport', () => {
     const base = await openSession003()
     const cut = fakeClient(['{"kind":"block","block":{"type":"narration","text":"Corto."}}'], { stop: 'max_tokens' })
     const outputs = await collect(createAnthropicProvider({ model: 'claude-sonnet-5', credential: KEY, client: cut.client }).narrate(contextFor(base, turn(1, []))))
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('presupuesto'))).toBe(true)
+    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('límite de escritura'))).toBe(true)
 
     const refused = fakeClient(['{"kind":"block","block":{"type":"narration","text":"..."}}'], { stop: 'refusal' })
     await expect(collect(createAnthropicProvider({ model: 'claude-sonnet-5', credential: KEY, client: refused.client }).narrate(contextFor(base, turn(1, []))))).rejects.toThrow(/rechazó narrar/)

@@ -198,7 +198,7 @@ describe('speechQueue', () => {
 
   it('anota quien habla en dialogos y tiradas para que el motor elija el tono', () => {
     const osric = { ref: 'npc:osric', name: 'Osric', portrait: null }
-    const queue = speechQueue([dialogue('d', osric, 'Bienvenidos.'), { kind: 'roll', id: 'r', actor: osric, rollKind: 'roll', die: 'd20', result: 12, label: 'Tirada', advantage: null, text: 'Osric saca 12.' }])
+    const queue = speechQueue([dialogue('d', osric, 'Bienvenidos.'), { kind: 'roll', id: 'r', actor: osric, rollKind: 'roll', die: 'd20', result: 12, rolls: null, label: 'Tirada', advantage: null, text: 'Osric saca 12.' }])
     expect(queue.map((i) => [i.kind, i.speakerRef])).toEqual([
       ['dialogue', 'npc:osric'],
       ['roll', 'npc:osric'],

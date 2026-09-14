@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { dialogue, narration, system, type RollBlock, type TurnBlock } from './blocks.js'
-import { groupBlockIds, groupBlocks, proseExcerpt } from './views.js'
+import { blocksForSeat, groupBlockIds, groupBlocks, proseExcerpt } from './views.js'
 
 const speaker = { ref: 'character:zahira', name: 'Zahira', portrait: 'portraits/zahira.jpg' }
-const roll: RollBlock = { kind: 'roll', id: 'r1', actor: speaker, rollKind: 'skill', die: '1d20', result: 7, label: 'Sigilo', advantage: null, text: 'Zahira tira 1d20 de sigilo: 7.' }
+const roll: RollBlock = { kind: 'roll', id: 'r1', actor: speaker, rollKind: 'skill', die: '1d20', result: 7, rolls: null, label: 'Sigilo', advantage: null, text: 'Zahira tira 1d20 de sigilo: 7.' }
 
 const blocks: TurnBlock[] = [
   system('s1', { title: 'Sesión', text: 'Briefing.' }),
@@ -50,5 +50,24 @@ describe('proseExcerpt', () => {
     expect(excerpt).toHaveLength(20)
     expect(excerpt.endsWith('…')).toBe(true)
     expect(remaining).toBe(0)
+  })
+})
+
+describe('blocksForSeat', () => {
+  const ruido = system('s1', { text: 'El DM propuso 1 línea que no se pudo aplicar.', audience: 'host' })
+  const paraTodos = system('s2', { text: 'El turno se cerró sin declaraciones.', audience: 'table', tone: 'action' })
+  const blocks: TurnBlock[] = [narration('n1', 'La mina huele a piedra mojada.'), ruido, paraTodos]
+
+  it('el anfitrion ve todo, incluidos los avisos tecnicos', () => {
+    expect(blocksForSeat(blocks, true).map((b) => b.id)).toEqual(['n1', 's1', 's2'])
+  })
+
+  it('un jugador no ve los avisos que solo el anfitrion puede accionar', () => {
+    expect(blocksForSeat(blocks, false).map((b) => b.id)).toEqual(['n1', 's2'])
+  })
+
+  it('un bloque de sistema sin destinatario lo ve la mesa entera (compatibilidad)', () => {
+    const viejo = system('s3', { text: 'Aviso de antes del cambio' })
+    expect(blocksForSeat([viejo], false).map((b) => b.id)).toEqual(['s3'])
   })
 })

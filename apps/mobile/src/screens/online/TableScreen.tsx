@@ -1,7 +1,7 @@
 import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -52,13 +52,16 @@ export function TableScreen({ client, table, me, user, pack, onBack, onTableChan
 
   const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
-  const blocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
-  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
-  const tts = useTts(blocks, { autoRead: true })
+  const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
 
   const turn = snapshot?.turn ?? null
   const viewer = useMemo(() => ({ role: snapshot?.viewer.role ?? me.role, characterId: snapshot?.viewer.characterId ?? me.characterId }), [snapshot?.viewer.role, snapshot?.viewer.characterId, me.role, me.characterId])
   const isHost = viewer.role === 'host'
+
+  // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
+  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
+  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
+  const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
   const sessionCode = snapshot?.session?.code ?? null

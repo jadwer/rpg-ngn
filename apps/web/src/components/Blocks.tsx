@@ -118,9 +118,18 @@ function DiceFaces({ block }: { block: RollGroup['block'] }) {
 function System({ group, currentBlockId, onPressBlock }: GroupProps<SystemGroup>) {
   const { block } = group
   return (
-    <div data-block={block.id} className={`block system${block.id === currentBlockId ? ' current' : ''}`} onClick={() => onPressBlock?.(block.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onPressBlock?.(block.id)}>
+    <div
+      data-block={block.id}
+      className={`block system${block.id === currentBlockId ? ' current' : ''}${block.tone === 'action' ? ' action' : ''}${block.audience === 'host' ? ' host-only' : ''}`}
+      onClick={() => onPressBlock?.(block.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onPressBlock?.(block.id)}
+    >
+      {block.audience === 'host' ? <div className="host-tag">Solo para ti, anfitrión</div> : null}
       {block.title ? <div className="title">{block.title}</div> : null}
       {block.text ? <p>{block.text}</p> : null}
+      {block.detail ? <p className="detail">{block.detail}</p> : null}
       {block.items.length > 0 ? (
         <ul>
           {block.items.map((item, index) => (

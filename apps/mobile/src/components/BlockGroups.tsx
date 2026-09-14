@@ -120,9 +120,14 @@ function DiceFaces({ block }: { block: RollGroup['block'] }) {
 function System({ group, currentBlockId, onPressBlock }: GroupProps<SystemGroup>) {
   const { block } = group
   return (
-    <Pressable onPress={() => onPressBlock?.(block.id)} style={[styles.system, block.id === currentBlockId && styles.current]}>
+    <Pressable
+      onPress={() => onPressBlock?.(block.id)}
+      style={[styles.system, block.tone === 'action' && styles.systemAction, block.audience === 'host' && styles.systemHostOnly, block.id === currentBlockId && styles.current]}
+    >
+      {block.audience === 'host' ? <Text style={styles.hostTag}>Solo para ti, anfitrión</Text> : null}
       {block.title ? <Text style={styles.systemTitle}>{block.title}</Text> : null}
       {block.text ? <Text style={styles.systemText}>{block.text}</Text> : null}
+      {block.detail ? <Text style={styles.systemDetail}>{block.detail}</Text> : null}
       {block.items.map((item, index) => (
         <View key={index} style={styles.item}>
           <Text style={styles.bullet}>{'•'}</Text>
@@ -160,6 +165,10 @@ const styles = StyleSheet.create({
   system: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 12, gap: 6 },
   systemTitle: { fontFamily: theme.fonts.display, fontSize: 14, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   systemText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.ink },
+  systemAction: { borderLeftWidth: 3, borderLeftColor: theme.colors.gold },
+  systemHostOnly: { opacity: 0.72 },
+  hostTag: { fontFamily: theme.fonts.display, fontSize: 11, letterSpacing: 1.2, textTransform: 'uppercase', color: theme.colors.inkDim },
+  systemDetail: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
   item: { flexDirection: 'row', gap: 8, paddingRight: 8 },
   bullet: { color: theme.colors.gold, fontSize: 16, lineHeight: 22 },
   itemText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 15, lineHeight: 22, color: theme.colors.ink },

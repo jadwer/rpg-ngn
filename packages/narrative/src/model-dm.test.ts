@@ -115,7 +115,7 @@ describe('ModelDMProvider', () => {
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['narration', 'system'])
-    expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/se cortó por el presupuesto/)
+    expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/llegó a su límite de escritura/)
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
   })
 
@@ -229,7 +229,8 @@ describe('ModelDMProvider', () => {
 
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
       expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'system', 'system', 'narration'])
-      expect(blocks[1]).toEqual({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.' })
+      // El aviso del lint es para el anfitrion: un jugador no puede hacer nada con el.
+      expect(blocks[1]).toMatchObject({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
       expect(JSON.stringify(blocks)).not.toContain('Brorg')
       expect(JSON.stringify(blocks)).not.toContain('está abajo')
 
