@@ -28,11 +28,17 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const [working, setWorking] = useState(false)
   const [probe, setProbe] = useState<DmProbeResult | null>(null)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
+  const savedLint = typeof table.settings?.['lint'] === 'string' ? (table.settings['lint'] as string) : ''
+  const [lint, setLint] = useState<string>(savedLint)
 
   useEffect(() => {
     setPreset(saved?.preset ?? '')
     setModel(saved?.model ?? '')
   }, [saved])
+
+  useEffect(() => {
+    setLint(savedLint)
+  }, [savedLint])
 
   useEffect(() => {
     let alive = true
@@ -82,7 +88,10 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   const save = () =>
     run(async () => {
-      await client.updateTableSettings(table.id, withProvider(table.settings, chosen))
+      const base = withProvider(table.settings, chosen)
+      // Sin modo elegido se quita la clave: manda el del engine.
+      const { lint: _previous, ...rest } = base
+      await client.updateTableSettings(table.id, lint === '' ? rest : { ...rest, lint })
       setNotice({ ok: true, text: savedProviderText(chosen) })
       onChanged()
     })
@@ -115,6 +124,19 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
           </span>
         </label>
       ) : null}
+
+      <label className="field">
+        <span>Secretos del pack</span>
+        <select className="select" name="lint" value={lint} onChange={(e) => setLint(e.target.value)} disabled={disabled}>
+          <option value="">El del servidor</option>
+          <option value="enforce">Cortar lo que revele un secreto</option>
+          <option value="report">Dejar pasar y avisarme</option>
+          <option value="off">No revisar</option>
+        </select>
+        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+          El motor compara cada bloque del DM con lo que la mesa ha descubierto. Los avisos solo los ves tú.
+        </span>
+      </label>
 
       {probe ? (
         <div className={probe.ok ? 'ok' : 'error'}>
