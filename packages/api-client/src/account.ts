@@ -26,7 +26,8 @@ export type RegisterResult = ({ kind: 'token' } & LoginResult) | { kind: 'verify
 export interface AccountApi {
   register(input: RegisterInput, deviceName: string): Promise<RegisterResult>
   /** Cambia el nombre visible (`PATCH /api/v1/profile`). */
-  updateProfile(input: { name: string }): Promise<AuthUser>
+  /** Cambiar el correo lo deja sin verificar; `emailVerified` dice como quedo. */
+  updateProfile(input: { name?: string; email?: string }): Promise<AuthUser & { emailVerified: boolean }>
   /** `PATCH /api/v1/profile/password`; 422 si la actual no coincide. */
   changePassword(currentPassword: string, password: string, passwordConfirmation: string): Promise<void>
   /** Pide el correo de recuperacion; la API responde igual exista o no la cuenta. Devuelve el mensaje. */
@@ -58,8 +59,12 @@ export function accountApi(request: Request): AccountApi {
     },
 
     async updateProfile(input) {
-      const { data } = await request<{ data: { id: string; attributes: { name: string; email: string } } }>('/api/v1/profile', { method: 'PATCH', body: { name: input.name.trim() } })
-      return { id: String(data.data.id), name: data.data.attributes.name, email: data.data.attributes.email }
+      const body: Record<string, string> = {}
+      if (input.name !== undefined) body['name'] = input.name.trim()
+      if (input.email !== undefined) body['email'] = input.email.trim()
+      const { data } = await request<{ data: { id: string; attributes: { name: string; email: string; emailVerified?: boolean } } }>('/api/v1/profile', { method: 'PATCH', body })
+      const attributes = data.data.attributes
+      return { id: String(data.data.id), name: attributes.name, email: attributes.email, emailVerified: attributes.emailVerified ?? true }
     },
 
     async changePassword(currentPassword, password, passwordConfirmation) {

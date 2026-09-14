@@ -23,6 +23,7 @@ interface Props {
  */
 export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthorized }: Props) {
   const [name, setName] = useState(user.name)
+  const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
   const [nameNotice, setNameNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -41,9 +42,13 @@ export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthori
     setNameBusy(true)
     setNameNotice(null)
     try {
-      const updated = await client.updateProfile({ name })
+      const emailChanged = email.trim() !== user.email
+      const updated = await client.updateProfile({ name, email })
       onUserChanged({ id: updated.id, name: updated.name, email: updated.email })
-      setNameNotice({ ok: true, text: 'Nombre guardado.' })
+      setNameNotice({
+        ok: true,
+        text: emailChanged ? 'Guardado. Tu correo nuevo está sin verificar: entra con él la próxima vez.' : 'Guardado.',
+      })
     } catch (caught) {
       fail(caught, setNameNotice)
     } finally {
@@ -83,13 +88,20 @@ export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthori
         <View style={styles.card}>
           <Text style={styles.label}>Cuenta</Text>
           <Field label="Nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />
-          <View style={styles.block}>
-            <Text style={styles.fieldLabel}>Correo</Text>
-            <Text style={styles.static}>{user.email}</Text>
-          </View>
+          <Field
+            label="Correo"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            textContentType="emailAddress"
+            maxLength={255}
+            hint="Con él entras a la mesa. Si lo cambias, el nuevo empieza sin verificar."
+          />
           {nameNotice ? <Text style={[styles.notice, nameNotice.ok ? styles.ok : styles.error]}>{nameNotice.text}</Text> : null}
           <View style={styles.actions}>
-            <Button label="Guardar nombre" primary busy={nameBusy} disabled={!name.trim() || name.trim() === user.name} onPress={() => void saveName()} />
+            <Button label="Guardar cuenta" primary busy={nameBusy} disabled={!name.trim() || !email.trim() || (name.trim() === user.name && email.trim() === user.email)} onPress={() => void saveName()} />
           </View>
         </View>
 

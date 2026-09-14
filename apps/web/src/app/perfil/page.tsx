@@ -11,10 +11,11 @@ export default function ProfilePage() {
   return <RequireSession>{({ client, user, unauthorized, logout }) => <Profile client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
 }
 
-/** Perfil: ver y cambiar el nombre visible y la contraseña. El correo se muestra pero no se edita (cambiarlo exige verificarlo). */
+/** Perfil: nombre visible, correo y contraseña. Cambiar el correo lo deja sin verificar. */
 function Profile({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
   const session = useSession()
   const [name, setName] = useState(user.name)
+  const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
   const [nameNotice, setNameNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -34,9 +35,13 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
     setNameBusy(true)
     setNameNotice(null)
     try {
-      const updated = await client.updateProfile({ name })
+      const emailChanged = email.trim() !== user.email
+      const updated = await client.updateProfile({ name, email })
       session.setUser({ id: updated.id, name: updated.name, email: updated.email })
-      setNameNotice({ ok: true, text: 'Nombre guardado.' })
+      setNameNotice({
+        ok: true,
+        text: emailChanged ? 'Guardado. Tu correo nuevo está sin verificar: entra con él la próxima vez.' : 'Guardado.',
+      })
     } catch (caught) {
       fail(caught, setNameNotice)
     } finally {
@@ -75,15 +80,18 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
           <span>Nombre</span>
           <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={80} required />
         </label>
-        <div className="field">
+        <label className="field">
           <span>Correo</span>
-          <div className="static">{user.email}</div>
-        </div>
+          <input className="input" type="email" name="correo" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} required />
+          <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+            Con él entras a la mesa. Si lo cambias, el nuevo empieza sin verificar.
+          </span>
+        </label>
         {nameNotice ? <div className={nameNotice.ok ? 'ok' : 'error'}>{nameNotice.text}</div> : null}
         <div className="row">
-          <button type="submit" className="btn primary" disabled={nameBusy || !name.trim() || name.trim() === user.name}>
+          <button type="submit" className="btn primary" disabled={nameBusy || !name.trim() || !email.trim() || (name.trim() === user.name && email.trim() === user.email)}>
             {nameBusy ? <span className="spinner" aria-hidden /> : null}
-            Guardar nombre
+            Guardar cuenta
           </button>
         </div>
       </form>

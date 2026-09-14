@@ -47,9 +47,20 @@ describe('cuenta', () => {
       'PATCH /api/v1/profile': { body: { data: { type: 'users', id: '4', attributes: { name: 'Jazmín', email: 'jaz@example.com' } } } },
       'PATCH /api/v1/profile/password': { body: { message: 'ok' } },
     })
-    expect(await api.updateProfile({ name: 'Jazmín ' })).toEqual({ id: '4', name: 'Jazmín', email: 'jaz@example.com' })
+    // Una API vieja sin `emailVerified` se lee como verificado: no alarma sin motivo.
+    expect(await api.updateProfile({ name: 'Jazmín ' })).toEqual({ id: '4', name: 'Jazmín', email: 'jaz@example.com', emailVerified: true })
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ name: 'Jazmín' })
     await api.changePassword('password', 'nueva-clave', 'nueva-clave')
     expect(JSON.parse(calls[1]?.init.body ?? '{}')).toEqual({ current_password: 'password', password: 'nueva-clave', password_confirmation: 'nueva-clave' })
+  })
+
+  it('cambiar el correo lo manda recortado y avisa de que queda sin verificar', async () => {
+    const { api, calls } = client({
+      'PATCH /api/v1/profile': { body: { data: { type: 'users', id: '4', attributes: { name: 'Jaz', email: 'zahira@example.com', emailVerified: false } } } },
+    })
+
+    expect(await api.updateProfile({ name: 'Jaz', email: ' zahira@example.com ' })).toEqual({ id: '4', name: 'Jaz', email: 'zahira@example.com', emailVerified: false })
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ name: 'Jaz', email: 'zahira@example.com' })
   })
 
   it('busca por correo exacto y devuelve null si no existe', async () => {

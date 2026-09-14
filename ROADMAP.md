@@ -28,7 +28,7 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] Schemas zod de evento, personaje, NPC, ubicacion, quest, sesion y pack
 - [x] `tools/validate` en CI sobre `content/` y `campaigns/`; un evento roto falla el CI (test)
 - [x] Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
-- [ ] Cambiar el source de Pages a "GitHub Actions" en la configuracion del repo (Gabino), antes del primer merge de `dev` a `main`
+- [x] Pages sirve desde "GitHub Actions" (Gabino lo configuro; confirmado el 2026-09-14)
 
 ## Entrega 2: Motor (hecha el 2026-09-06)
 
@@ -94,7 +94,7 @@ Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el re
 - [x] Nombre de la app en metadatos y titulo de pestaña con la mesa y la sesion; `icon.svg`, `apple-icon.png` y `favicon.ico`
 - [x] Bandera de narrador compartida (2026-09-14): `POST tables/{t}/narrator` que cualquier miembro escribe y `state` devuelve en `narrators`. El dispositivo que lee lo anuncia solo mientras habla y lo refresca cada 12 s; el anuncio caduca a los 25 s, asi que si se apaga o cierra la app la mesa deja de verlo sin que nadie lo suelte. Web y movil muestran quien narra por su personaje ("Zahira narra"); desaparece la casilla manual
 - [x] Amigos fuera de la mesa: panel al pie de `/mesas` con solicitudes recibidas, busqueda por correo y lista de amigos (una jugadora nueva no tiene mesa donde aceptar)
-- [ ] Cambio de correo con verificacion del nuevo
+- [x] Cambio de correo (2026-09-14): el perfil lo edita en web y movil. En AtomoPlatform se cerro un agujero real (`PATCH /api/v1/profile` aceptaba el correo de otra cuenta y dejaba cambiarse el `status`): ahora exige unicidad entre usuarios vivos, ignora `status` y deja el correo nuevo sin verificar, con `emailVerified` en la respuesta. El aviso de verificacion solo sale si el proyecto marca su usuario como `MustVerifyEmail`; el de Atomo no lo hace todavia y esta API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`
 - [ ] BYOK: clave propia por mesa en `provider_configs` con cast `encrypted` (docs/11, D6), cuando exista cobro; hoy la mesa solo elige preset del servidor
 - [ ] Admin con `@atomo/ui` y `@atomo/core`
 
