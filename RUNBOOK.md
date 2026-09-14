@@ -1,6 +1,6 @@
 # Runbook local
 
-Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-12: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
+Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-14: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
 
 Puertos del proyecto: engine `3100`, API `8010`, web `3010`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
 
@@ -9,12 +9,12 @@ Variables: cada servicio lee su propio `.env` (gitignored, no viaja con el repo)
 ## 0. Antes de una partida (checklist de cinco minutos)
 
 1. Comprobar que la IP del Wi-Fi sigue siendo la del runbook: `ip -4 addr | grep 192`. Si cambio, es la nueva la que se comparte con los jugadores (`http://<ip>:3010`); nada mas cambia.
-2. Levantar los tres servicios de la seccion 1 (engine, API y web en modo produccion) en tres terminales y dejarlas abiertas.
+2. Levantar los cuatro servicios de la seccion 1 (engine, API, web en modo produccion y el worker de la cola) y dejar las terminales abiertas.
 3. Verificar: `curl -s http://127.0.0.1:3100/health` responde `ok`, y `cd ~/dev/rpg-ngn-api && php artisan dm:probe` dice `ok=si modelo=claude-sonnet-5`.
 4. Abrir `http://<ip>:3010` desde un telefono en la misma Wi-Fi: si carga la landing, el firewall esta bien.
 5. Si vas a usar la app movil, terminal 5 (Expo) y volver a escanear el QR.
 
-## 1. Servicios (tres terminales)
+## 1. Servicios (cuatro terminales)
 
 ```bash
 # Terminal 1: engine (Node). Health en http://127.0.0.1:3100/health.
@@ -31,14 +31,14 @@ cd ~/dev/rpg-ngn && pnpm --filter web build && pnpm --filter web start
 # Terminal 3 alternativa, solo para desarrollar la web (recarga en caliente)
 cd ~/dev/rpg-ngn && pnpm --filter web dev
 
-# Terminal 4 (solo si la API tiene QUEUE_CONNECTION=database): worker que resuelve los turnos
+# Terminal 4: worker que narra los turnos. Sin el, un turno cerrado se queda esperando
 cd ~/dev/rpg-ngn-api && php artisan queue:work --queue=turns,default --timeout=600
 
 # Terminal 5 (opcional): app (Expo). Sin --tunnel: WSL ya comparte la IP del Wi-Fi
 cd ~/dev/rpg-ngn && pnpm --filter mobile start
 ```
 
-Cola: el `.env` de la API esta en `QUEUE_CONNECTION=sync` a proposito: "Cerrar turno y narrar" espera al modelo dentro de la peticion (20 a 35 s con Sonnet) y no depende de que alguien recuerde levantar el worker. Para pasar a `database` (la peticion responde 202 al instante y el worker narra): cambiar `QUEUE_CONNECTION=database` en `rpg-ngn-api/.env`, correr `php artisan config:clear` si hay cache de config, y dejar la terminal 4 arriba antes de la partida. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo (la web lo muestra) y la mesa vuelve a cerrar cuando quiera. Si el worker no esta corriendo, el turno se queda en `closing` y la web dice "El DM esta narrando..." hasta que arranque; `php artisan queue:failed` lista los jobs que murieron.
+Cola: el `.env` de la API esta en `QUEUE_CONNECTION=database` desde el 2026-09-14, y la terminal 4 es obligatoria. "Cerrar turno y narrar" responde 202 en menos de 100 ms y el worker narra por detras; la web y la app muestran "El DM esta narrando..." hasta que llegan los bloques. Medido el 14: 0.09 s el cierre, contra los 20 a 35 s que esperaba la peticion con `sync`. **Si el worker no esta corriendo, el turno se queda en `resolving` para siempre**: esa es la unica pega de este modo, y se arregla levantando la terminal 4. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo y la mesa lo cierra otra vez. `php artisan queue:failed` lista los que murieron. Para volver al modo de una sola terminal: `QUEUE_CONNECTION=sync` en el `.env` y `php artisan config:clear`.
 
 Si un servicio no arranca por "address already in use", queda un proceso viejo: `ss -ltnp | grep :<puerto>` da el pid y `kill <pid>` lo libera.
 
@@ -89,7 +89,7 @@ La API elige el proveedor con `DM_PROVIDER` en `rpg-ngn-api/.env`: `anthropic` (
 cd ~/dev/rpg-ngn-api && php artisan dm:probe          # ok=si modelo=claude-sonnet-5
 ```
 
-Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dolar; con la cola en `sync`, "Cerrar turno y narrar" espera esa respuesta dentro de la peticion y la web muestra "El DM esta narrando...". La premisa de la mesa (al crearla) y la nota de la sesion (al abrirla) llegan al DM como contexto. Si el engine se reinicia, el probe lo confirma; si el turno vuelve a `open` con un bloque de sistema, el error esta en la terminal del engine.
+Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dolar; con la cola en `database` el cierre responde al instante y el worker narra por detras, mientras la web y la app muestran "El DM esta narrando...". La premisa de la mesa (al crearla) y la nota de la sesion (al abrirla) llegan al DM como contexto. Si el engine se reinicia, el probe lo confirma; si el turno vuelve a `open` con un bloque de sistema, el error esta en la terminal del engine.
 
 ## 3b. Web (laptops e iPhone por Safari)
 
