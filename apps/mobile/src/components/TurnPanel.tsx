@@ -1,7 +1,7 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import { turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, QUICK_DICE, quickRoll, turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -76,6 +76,22 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             onBlur={() => setFocused(false)}
           />
           <Button label="Enviar" primary busy={busy} disabled={text.trim().length === 0} onPress={() => void send()} />
+          {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la resuelve el motor. */}
+          <View style={styles.dice}>
+          <Text style={styles.diceLabel}>Tirar</Text>
+          {QUICK_DICE.map((die) => (
+            <Pressable
+              key={die}
+              onPress={() => setText((current) => appendRoll(current, quickRoll(die)))}
+              disabled={busy}
+              style={({ pressed }) => [styles.dieButton, busy && styles.dieDisabled, pressed && !busy && styles.diePressed]}
+              accessibilityRole="button"
+              accessibilityLabel={`Tirar ${die}`}
+            >
+              <Text style={styles.dieText}>{die}</Text>
+            </Pressable>
+          ))}
+          </View>
         </View>
       ) : null}
       {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</Text> : null}
@@ -102,6 +118,12 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 8, padding: 8 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   compose: { gap: 8 },
+  dice: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
+  diceLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim, marginRight: 2 },
+  dieButton: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: theme.colors.panel },
+  dieText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold },
+  dieDisabled: { opacity: 0.45 },
+  diePressed: { opacity: 0.7 },
   input: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
   sent: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.gold },
   actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },

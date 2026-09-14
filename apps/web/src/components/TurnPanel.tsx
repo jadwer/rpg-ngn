@@ -1,7 +1,7 @@
 'use client'
 
 import type { TurnView } from '@rpg-ngn/api-client'
-import { turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, QUICK_DICE, quickRoll, turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState, type KeyboardEvent } from 'react'
 
 interface Props {
@@ -23,6 +23,7 @@ interface Props {
  */
 export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, onRespond, onClose }: Props) {
   const [text, setText] = useState('')
+  const [die, setDie] = useState<string>(QUICK_DICE[0])
   const line = turnLine(turn, progress, nameOf)
 
   const send = async () => {
@@ -70,6 +71,19 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               {busy ? <span className="spinner" aria-hidden /> : null}
               Enviar
             </button>
+            {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la resuelve el motor. */}
+            <span className="dice-picker">
+              <select className="select" name="dado" value={die} onChange={(e) => setDie(e.target.value)} disabled={busy} aria-label="Dado">
+                {QUICK_DICE.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+              <button type="button" className="btn" onClick={() => setText((current) => appendRoll(current, quickRoll(die)))} disabled={busy} title="Tira el dado y escribe el resultado en tu respuesta">
+                Tirar
+              </button>
+            </span>
             <span className="hint">Ctrl+Enter también envía.</span>
           </div>
         </>

@@ -1062,6 +1062,19 @@ h3 {
   align-items: center;
 }
 
+/* Dado y boton de tirar, juntos como un solo control. */
+.dice-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dice-picker .select {
+  width: auto;
+  padding: 6px 28px 6px 10px;
+  font-size: 0.9rem;
+}
+
 .turn .sent {
   color: var(--gold);
   font-style: italic;
