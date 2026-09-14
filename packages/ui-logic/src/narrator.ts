@@ -36,6 +36,33 @@ export function nobodyNarrates(flag: NarratorFlag, localSpeaking: boolean): bool
   return !flag.someoneNarrating && !localSpeaking && !flag.dismissed
 }
 
+/** Un miembro que anuncio que lee en voz alta (`narrators` del estado de la mesa). */
+export interface NarratorPresence {
+  memberId: number
+  name: string | null
+  characterId: string | null
+}
+
+/**
+ * Traduce los narradores que devuelve la API a la bandera local. Al propio
+ * dispositivo no se le cuenta: ya sabe si esta leyendo. Asi el aviso "nadie
+ * narra" desaparece solo cuando otro pulsa Leer, sin que nadie marque nada.
+ */
+export function narratorsToFlag(narrators: readonly NarratorPresence[], ownMemberId: number, previous: NarratorFlag): NarratorFlag {
+  const others = narrators.filter((n) => n.memberId !== ownMemberId)
+  const someoneNarrating = others.length > 0
+  return someoneNarrating === previous.someoneNarrating ? previous : { ...previous, someoneNarrating }
+}
+
+/** Como se llama a quien narra, para el aviso: su personaje, su nombre, o algo generico. */
+export function narratorLabel(narrators: readonly NarratorPresence[], ownMemberId: number, nameOf: (characterId: string) => string, device = 'dispositivo'): string | null {
+  const other = narrators.find((n) => n.memberId !== ownMemberId)
+  if (!other) return null
+  if (other.characterId) return `${nameOf(other.characterId)} narra`
+  if (other.name) return `${other.name} narra`
+  return `Otro ${device} narra`
+}
+
 export interface VoiceLineInput {
   state: TtsState
   nativePause: boolean

@@ -9,6 +9,7 @@ import type {
   FriendshipRecord,
   LoginResult,
   MemberRole,
+  Narrator,
   NewTable,
   PlayerProjection,
   Profile,
@@ -54,6 +55,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   /** Busca un usuario por correo exacto (`users?filter[email]=`); null si no existe. Solo cuentas admin (403 al resto); `lookupUser` sirve a cualquiera. */
   findUserByEmail(email: string): Promise<AuthUser | null>
   tableState(tableId: string | number, after?: number): Promise<TableState>
+  /** Anuncia (o retira) que este dispositivo lee en voz alta; devuelve quien narra ahora. */
+  setNarrating(tableId: string | number, narrating: boolean): Promise<Narrator[]>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
   closeTurn(turnId: number, force?: boolean): Promise<TurnView>
   openSession(campaignId: string | number, code: string, worldTime?: string): Promise<TurnView>
@@ -161,7 +164,13 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async tableState(tableId, after = 0) {
       const { data } = await request<{ data: Omit<TableState, 'lastBlockId'>; meta: { lastBlockId: number } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
-      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], lastBlockId: data.meta.lastBlockId }
+      // `narrators` no existia antes de la bandera compartida: una API vieja no rompe al cliente.
+      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], lastBlockId: data.meta.lastBlockId }
+    },
+
+    async setNarrating(tableId, narrating) {
+      const { data } = await request<{ data: Narrator[] }>(`/api/v1/tables/${tableId}/narrator`, { method: 'POST', body: { narrating } })
+      return data.data
     },
 
     async respond(turnId, text, idempotencyKey) {

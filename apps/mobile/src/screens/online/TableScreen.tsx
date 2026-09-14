@@ -1,7 +1,7 @@
 import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -12,6 +12,7 @@ import { TurnPanel } from '../../components/TurnPanel'
 import { useTts } from '../../hooks/useTts'
 import type { StoredUser } from '../../online/storage'
 import { useTableState } from '../../online/useTableState'
+import { useNarrator } from '../../state/narrator'
 import { onlineSheetEntries } from '../../sheets/entries'
 import { theme } from '../../theme'
 import { SheetsModal } from '../SheetsModal'
@@ -41,6 +42,7 @@ const NEAR_BOTTOM = 160
 export function TableScreen({ client, table, me, user, pack, onBack, onTableChanged, onUnauthorized }: Props) {
   const campaignId = table.campaignId
   const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
+  const narrator = useNarrator()
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [sheetsOpen, setSheetsOpen] = useState(false)
@@ -92,6 +94,38 @@ export function TableScreen({ client, table, me, user, pack, onBack, onTableChan
     if (atBottomRef.current) scrollToEnd()
     else setBehind(true)
   }, [blocks.length, progress.narrating, scrollToEnd])
+
+  // Bandera de narrador compartida: este telefono anuncia mientras lee (y
+  // refresca el anuncio, que caduca solo), y refleja a quien lea en otro.
+  const speaking = tts.state.status === 'speaking'
+  useEffect(() => {
+    if (!speaking) return
+    let alive = true
+    const announce = () => {
+      void client.setNarrating(table.id, true).catch(() => undefined)
+    }
+    announce()
+    const timer = setInterval(() => {
+      if (alive) announce()
+    }, 12_000)
+    return () => {
+      alive = false
+      clearInterval(timer)
+      void client.setNarrating(table.id, false).catch(() => undefined)
+    }
+  }, [client, table.id, speaking])
+
+  const narrators = snapshot?.narrators ?? EMPTY
+  const ownMemberId = snapshot?.viewer.memberId ?? Number(me.id)
+  // `narrator` cambia de identidad en cada render (contexto); la referencia lo
+  // mantiene fuera de las dependencias sin quedarse con una version vieja.
+  const narratorRef = useRef(narrator)
+  narratorRef.current = narrator
+  useEffect(() => {
+    const current = narratorRef.current
+    current.setSomeoneNarrating(narratorsToFlag(narrators, ownMemberId, current.flag).someoneNarrating)
+    current.setLabel(narratorLabel(narrators, ownMemberId, nameOf, 'teléfono'))
+  }, [narrators, ownMemberId, nameOf])
 
   // El momento del mundo vive en la proyeccion world; se refresca cuando avanza la campaña.
   useEffect(() => {

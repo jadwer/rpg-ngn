@@ -1,17 +1,20 @@
 'use client'
 
 import { NARRATOR_IDLE, narratorReducer, type NarratorFlag } from '@rpg-ngn/ui-logic'
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, useReducer, useState, type ReactNode } from 'react'
 
 /**
- * Bandera de narrador (docs/09, "Voz"), local a este navegador como en la
- * app: la mesa esta en el mismo cuarto y se avisa de viva voz. La maquina de
- * estado vive en ui-logic; aqui solo se cuelga del arbol para que sobreviva
- * al cambio de pagina. Compartirla entre dispositivos necesita un endpoint.
+ * Bandera de narrador (docs/09, "Voz"). La mesa la comparte: el dispositivo
+ * que lee lo anuncia a la API y los demas lo ven en su siguiente sondeo, sin
+ * que nadie marque nada a mano. La maquina de estado vive en ui-logic; aqui
+ * solo se cuelga del arbol para que sobreviva al cambio de pagina.
  */
 export interface NarratorState {
   flag: NarratorFlag
+  /** Quien narra, ya con nombre ("Zahira narra"); null si nadie mas. */
+  label: string | null
   setSomeoneNarrating: (value: boolean) => void
+  setLabel: (value: string | null) => void
   dismiss: () => void
   restore: () => void
 }
@@ -20,14 +23,17 @@ const NarratorContext = createContext<NarratorState | null>(null)
 
 export function NarratorProvider({ children }: { children: ReactNode }) {
   const [flag, dispatch] = useReducer(narratorReducer, NARRATOR_IDLE)
+  const [label, setLabel] = useState<string | null>(null)
   const value = useMemo<NarratorState>(
     () => ({
       flag,
+      label,
       setSomeoneNarrating: (v) => dispatch({ type: 'set', value: v }),
+      setLabel,
       dismiss: () => dispatch({ type: 'dismiss' }),
       restore: () => dispatch({ type: 'restore' }),
     }),
-    [flag],
+    [flag, label],
   )
   return <NarratorContext.Provider value={value}>{children}</NarratorContext.Provider>
 }

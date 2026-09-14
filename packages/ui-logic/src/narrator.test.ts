@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NARRATOR_IDLE, narratorReducer, nobodyNarrates, voiceLineSummary } from './narrator.js'
+import { NARRATOR_IDLE, narratorLabel, narratorReducer, narratorsToFlag, nobodyNarrates, voiceLineSummary } from './narrator.js'
 import type { TtsState } from './tts.js'
 
 const idle: TtsState = { status: 'idle', index: -1, total: 4 }
@@ -43,5 +43,33 @@ describe('resumen de la linea de voz', () => {
     expect(voiceLineSummary({ state: idle, nativePause: true, error: null, narrator: quiet, autoRead: true }).text).toBe('Leerá lo nuevo')
     expect(voiceLineSummary({ state: done, nativePause: true, error: null, narrator: quiet, autoRead: false }).text).toBe('Lectura terminada')
     expect(voiceLineSummary({ state: idle, nativePause: true, error: null, narrator: quiet, autoRead: null }).text).toBe('Voz lista')
+  })
+})
+
+describe('narratorsToFlag', () => {
+  const jaz = { memberId: 2, name: 'Jaz', characterId: 'zahira' }
+  const armando = { memberId: 3, name: 'Armando', characterId: null }
+
+  it('otro dispositivo narrando enciende la bandera', () => {
+    expect(narratorsToFlag([jaz], 9, NARRATOR_IDLE).someoneNarrating).toBe(true)
+  })
+
+  it('uno mismo narrando no cuenta: ya lo sabe', () => {
+    expect(narratorsToFlag([jaz], 2, NARRATOR_IDLE).someoneNarrating).toBe(false)
+    expect(narratorsToFlag([], 2, NARRATOR_IDLE)).toBe(NARRATOR_IDLE)
+  })
+
+  it('conserva lo descartado por la mesa y no cambia el objeto si nada cambio', () => {
+    const dismissed = { someoneNarrating: true, dismissed: true }
+    expect(narratorsToFlag([jaz], 9, dismissed)).toBe(dismissed)
+    expect(narratorsToFlag([], 9, dismissed)).toEqual({ someoneNarrating: false, dismissed: true })
+  })
+
+  it('nombra a quien narra por su personaje, su nombre o generico', () => {
+    const nameOf = (id: string) => (id === 'zahira' ? 'Zahira' : id)
+    expect(narratorLabel([jaz], 9, nameOf)).toBe('Zahira narra')
+    expect(narratorLabel([armando], 9, nameOf)).toBe('Armando narra')
+    expect(narratorLabel([{ memberId: 4, name: null, characterId: null }], 9, nameOf, 'teléfono')).toBe('Otro teléfono narra')
+    expect(narratorLabel([jaz], 2, nameOf)).toBeNull()
   })
 })

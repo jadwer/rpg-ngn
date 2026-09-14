@@ -683,6 +683,12 @@ h3 {
   color: var(--gold-bright);
 }
 
+/* Otro dispositivo de la mesa esta leyendo en voz alta ahora mismo. */
+.tts .status.narrating {
+  color: var(--gold);
+  font-style: normal;
+}
+
 .tts .select {
   width: auto;
   max-width: 220px;

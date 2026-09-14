@@ -3,10 +3,11 @@
 import { ApiError, memberOf, randomKey, type ApiClient, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, blocksFromApi, characterName, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
+import { useNarrator } from '../lib/narrator'
 import { storage, type StoredUser } from '../lib/storage'
 import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
@@ -35,6 +36,7 @@ const EMPTY: never[] = []
 export function TableScreen({ client, table, user, pack, onTableChanged, onUnauthorized }: Props) {
   const campaignId = table.campaignId
   const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
+  const narrator = useNarrator()
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [screen, setScreen] = useState(false)
@@ -72,6 +74,37 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
   useEffect(() => {
     setVoiceNoticeDismissed(storage.voiceNoticeSeen())
   }, [])
+
+  // Bandera de narrador compartida: este dispositivo anuncia mientras lee (y
+  // refresca el anuncio, que caduca solo), y refleja a quien lea en otro.
+  const speaking = tts.state.status === 'speaking'
+  useEffect(() => {
+    if (!speaking) return
+    let alive = true
+    const announce = () => {
+      void client.setNarrating(table.id, true).catch(() => undefined)
+    }
+    announce()
+    const timer = setInterval(() => {
+      if (alive) announce()
+    }, 12_000)
+    return () => {
+      alive = false
+      clearInterval(timer)
+      void client.setNarrating(table.id, false).catch(() => undefined)
+    }
+  }, [client, table.id, speaking])
+
+  const narrators = snapshot?.narrators ?? EMPTY
+  // `narrator` cambia de identidad en cada render (contexto); la referencia lo
+  // mantiene fuera de las dependencias sin quedarse con una version vieja.
+  const narratorRef = useRef(narrator)
+  narratorRef.current = narrator
+  useEffect(() => {
+    const current = narratorRef.current
+    current.setSomeoneNarrating(narratorsToFlag(narrators, viewer.memberId, current.flag).someoneNarrating)
+    current.setLabel(narratorLabel(narrators, viewer.memberId, nameOf))
+  }, [narrators, viewer.memberId, nameOf])
 
   // Titulo de la pestaña con el nombre de la mesa (y la sesion, si hay).
   useEffect(() => {

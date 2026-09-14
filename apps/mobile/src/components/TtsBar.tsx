@@ -63,14 +63,15 @@ export function TtsBar({ tts, autoRead = false }: Props) {
             </View>
           ) : null}
 
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{localSpeaking ? 'Este teléfono está narrando' : 'Otro teléfono ya narra'}</Text>
-            <Switch value={narrator.flag.someoneNarrating} onValueChange={narrator.setSomeoneNarrating} disabled={localSpeaking} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
-          </View>
+          {narrator.label ? (
+            <View style={styles.switchRow}>
+              <Text style={styles.narrating}>{narrator.label}</Text>
+            </View>
+          ) : null}
 
           {nobodyWarns ? (
             <View style={styles.noticeRow}>
-              <Text style={styles.notice}>Nadie narra en voz alta: toca Leer aquí o marca que otro teléfono ya lo hace.</Text>
+              <Text style={styles.notice}>Nadie narra en voz alta: toca Leer aquí y la mesa lo verá.</Text>
               <Pressable onPress={narrator.dismiss} hitSlop={6}>
                 <Text style={styles.link}>Jugamos leyendo</Text>
               </Pressable>
@@ -124,6 +125,7 @@ const styles = StyleSheet.create({
   rate: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.inkDim },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   switchLabel: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
+  narrating: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.gold },
   noticeRow: { gap: 4 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   link: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, textDecorationLine: 'underline' },

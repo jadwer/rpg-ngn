@@ -124,8 +124,16 @@ export interface TableState {
   session: { id: number; code: string; status: string } | null
   turn: TurnView | null
   blocks: BlockEnvelope[]
+  /** Quien lee en voz alta ahora mismo (anuncio que caduca solo). */
+  narrators: Narrator[]
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
+}
+
+export interface Narrator {
+  memberId: number
+  name: string | null
+  characterId: string | null
 }
 
 export interface ResponseReceipt {

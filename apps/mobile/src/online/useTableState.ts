@@ -16,6 +16,7 @@ export interface TableSnapshot {
   session: TableState['session']
   turn: TableState['turn']
   /** Todos los bloques recibidos hasta ahora, en orden. Misma referencia mientras no lleguen nuevos. */
+  narrators: TableState['narrators']
   envelopes: BlockEnvelope[]
   lastBlockId: number
 }
@@ -62,7 +63,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

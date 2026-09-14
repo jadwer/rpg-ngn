@@ -69,10 +69,7 @@ export function TtsBar({ tts }: { tts: Tts }) {
         <input type="checkbox" checked={tts.autoRead} onChange={(e) => tts.setAutoRead(e.target.checked)} />
         Leer lo nuevo
       </label>
-      <label className="check" title={localSpeaking ? 'Este dispositivo está narrando' : 'Marca si otro dispositivo de la mesa lee en voz alta'}>
-        <input type="checkbox" checked={narrator.flag.someoneNarrating} onChange={(e) => narrator.setSomeoneNarrating(e.target.checked)} disabled={localSpeaking} />
-        Otro dispositivo narra
-      </label>
+      {narrator.label ? <span className="status narrating">{narrator.label}</span> : null}
       <span className={`status${summary.warn ? ' warn' : ''}`}>{summary.text}</span>
       {warnNobody ? (
         <button type="button" className="btn ghost small" onClick={narrator.dismiss} title="Quitar el aviso de que nadie narra">
