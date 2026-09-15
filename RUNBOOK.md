@@ -1,6 +1,6 @@
 # Runbook local
 
-Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-14: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y cambia; hoy `192.168.100.11`), Postgres 16 como servicio, engine y API en desarrollo.
+Levantar todo en la laptop y probar la app desde telefonos en la misma Wi-Fi. Estado al 2026-09-15: WSL en modo espejo (la IP del Wi-Fi la asigna DHCP y va rotando entre `.11` y `.16`; hoy `192.168.100.16`; pendiente reservarla por MAC en el router nuevo), Postgres 16 como servicio, engine y API en desarrollo.
 
 Puertos del proyecto: engine `3100`, API `8010`, web `3010`, Expo `8081`. El `8000` queda libre para api-base y otros proyectos de Atomo; el `80` es de Apache.
 
@@ -93,7 +93,7 @@ Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dol
 
 ## 3b. Web (laptops e iPhone por Safari)
 
-1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.11:3010`). Sale la landing; "Entrar" o "Crear cuenta". La sesion va en una cookie httpOnly y las peticiones pasan por el proxy de Next: no hace falta CORS. Solo si alguien pulsa "Cambiar servidor" y escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
+1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.16:3010`; comprobar con `ip -4 addr | grep -oE 'inet 192[0-9.]+'`). Sale la landing; "Entrar" o "Crear cuenta". La sesion va en una cookie httpOnly y las peticiones pasan por el proxy de Next: no hace falta CORS. Solo si alguien pulsa "Cambiar servidor" y escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
 2. Jugadora nueva desde el iPhone: abrir la URL en Safari, "Crear cuenta", escribir nombre, correo, contraseña (8 caracteres o mas) y repetirla, "Crear cuenta". Entra directo a "Tus mesas" (la API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`; no llega ningun correo). Le dice su correo al anfitrion y espera la invitacion; al recargar "Tus mesas" ya ve la mesa. Si cierra Safari, la sesion sigue (30 dias); "Salir" la borra.
 3. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, director de juego (por defecto el del servidor, Anthropic) y premisa opcional. Amistad antes de invitar: en "Invitados" (o en "Amigos" al pie de "Tus mesas") escribe el correo de la jugadora, "Buscar" y "Enviar solicitud de amistad"; ella la acepta en "Amigos" al pie de su "Tus mesas" (o al reves: ella busca `gabino@example.com` y manda la solicitud, y el anfitrion acepta). Con amistad aceptada, en "Invitados" buscar el correo otra vez e "Invitar a la mesa" con personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional). Antes de abrir, pestaña "DM" del mando y "Probar": debe decir "Listo: Anthropic: Claude Sonnet 5 disponible".
 4. Jugadores: entrar a la mesa, escribir la accion y Enviar (Ctrl+Enter). Cuando no falta nadie, cualquiera pulsa "Cerrar turno y narrar"; el anfitrion puede "Forzar cierre". Jaz y Armando siguen siendo `jaz@example.com` y `armando@example.com`, `password`.
