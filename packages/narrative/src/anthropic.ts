@@ -56,7 +56,7 @@ export class AnthropicTransport implements ModelTransport {
       stream: true,
       system: [{ type: 'text', text: prompt.system, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: prompt.user }],
-      output_config: { effort: this.effort },
+      ...(acceptsEffort(this.model) ? { output_config: { effort: this.effort } } : {}),
     })
 
     let finish: ModelReply['finish'] = 'other'
@@ -89,6 +89,15 @@ export class AnthropicTransport implements ModelTransport {
     const info = await this.client.models.retrieve(this.model)
     return { ok: true, model: info.id, message: `Anthropic: ${info.display_name} disponible` }
   }
+}
+
+/**
+ * Si el modelo acepta `output_config.effort` (pensamiento adaptativo). Los
+ * Haiku no lo soportan y responden 400, y el cupo gratuito narra justo con
+ * Haiku: mandarlo a ciegas rompia el turno.
+ */
+function acceptsEffort(model: string): boolean {
+  return !/haiku/i.test(model)
 }
 
 export function createAnthropicProvider(options: AnthropicProviderOptions): ModelDMProvider {

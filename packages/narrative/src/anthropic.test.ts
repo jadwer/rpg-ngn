@@ -66,6 +66,13 @@ describe('AnthropicTransport', () => {
     expect(params.messages).toHaveLength(1)
   })
 
+  it('a Haiku no le manda output_config, que no lo acepta', async () => {
+    const base = await openSession003()
+    const fake = fakeClient(['{"kind":"block","block":{"type":"narration","text":"Llueve."}}'])
+    await collect(createAnthropicProvider({ model: 'claude-haiku-4-5-20251001', credential: KEY, client: fake.client }).narrate(contextFor(base, turn(1, []))))
+    expect(fake.calls[0]).not.toHaveProperty('output_config')
+  })
+
   it('max_tokens agotado avisa; refusal falla el turno', async () => {
     const base = await openSession003()
     const cut = fakeClient(['{"kind":"block","block":{"type":"narration","text":"Corto."}}'], { stop: 'max_tokens' })
