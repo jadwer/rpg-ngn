@@ -24,12 +24,19 @@ export function selectablePresets(presets: readonly DmPreset[]): DmPreset[] {
 }
 
 /**
- * Lo que se manda al crear la mesa: nada si el anfitrion dejo el preset del
- * servidor (asi la mesa sigue al servidor si cambia), o el preset elegido.
+ * Lo que se manda al crear la mesa. Desde la entrega 7 el proveedor es
+ * obligatorio al crear: se manda siempre el preset elegido, aunque sea el
+ * del servidor. Quien abre la mesa decide con que se narra y que cuesta, y
+ * eso queda escrito en la mesa en vez de depender de la configuracion del
+ * servidor en ese momento.
+ *
+ * `defaultPreset` sigue en la firma porque la UI lo usa para preseleccionar,
+ * y devolvemos null solo si no hay ninguno elegido (la API lo rechaza).
  */
 export function providerForNewTable(preset: string, defaultPreset: string): DmProviderChoice | null {
-  if (!preset || preset === defaultPreset) return null
-  return { preset, model: null }
+  const chosen = preset || defaultPreset
+  if (!chosen) return null
+  return { preset: chosen, model: null }
 }
 
 /** Etiqueta de un preset en un selector: nombre, si es el del servidor y su modelo. */

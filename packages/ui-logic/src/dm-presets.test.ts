@@ -16,11 +16,14 @@ describe('presets del DM', () => {
     expect(presetOptionLabel(presets[0]!)).toBe('DM con guion (sin modelo)')
   })
 
-  it('al crear la mesa ofrece solo los configurados, con el del servidor primero, y no manda nada si se deja ese', () => {
+  it('al crear la mesa ofrece solo los configurados, con el del servidor primero, y manda siempre el elegido', () => {
     expect(selectablePresets(presets).map((p) => p.name)).toEqual(['anthropic', 'scripted'])
-    expect(providerForNewTable('anthropic', 'anthropic')).toBeNull()
-    expect(providerForNewTable('', 'anthropic')).toBeNull()
+    // Desde la entrega 7 el proveedor es obligatorio al crear: elegir el del
+    // servidor tambien se escribe en la mesa, no se deja implicito.
+    expect(providerForNewTable('anthropic', 'anthropic')).toEqual({ preset: 'anthropic', model: null })
+    expect(providerForNewTable('', 'anthropic')).toEqual({ preset: 'anthropic', model: null })
     expect(providerForNewTable('scripted', 'anthropic')).toEqual({ preset: 'scripted', model: null })
+    expect(providerForNewTable('', '')).toBeNull()
   })
 
   it('describe lo guardado', () => {
