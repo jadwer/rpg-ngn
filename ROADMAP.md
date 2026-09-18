@@ -128,15 +128,24 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 ## Entrega 7: Cobro y cupo
 
 - [x] Medicion del consumo: `usage` del engine guardado por turno (`input_tokens`, `output_tokens`, `model`) y acumulado en la campaña; `php artisan turns:usage` lo reporta en tokens y en dinero con los precios de `config/engine.php`. Primer dato real (2026-09-18, turno 2 de una campaña corta con Sonnet 5): 4,056 de entrada y 455 de salida, 0.019 USD. El contexto crece con la campaña, asi que el coste por turno sube dentro de la sesion: la curva se mide con la columna por turno antes de fijar precio
-- Pago por sesion sobre `atomo/payments`
-- Cupo One Shot por turnos
+- [x] Cupo One Shot por turnos: tabla `quotas` por usuario (`granted_turns`, `used_turns`), `QuotaService` y `php artisan quota:grant`. Solo las mesas One Shot consumen; lo paga el dueño, no cada jugador; se descuenta al resolver, no al cerrar, asi que un turno que falla no cobra. Sin cupo, cerrar da 409 y el turno se queda abierto; `GET tables/{t}/state` devuelve `quota.remainingTurns` para avisar antes de chocar. Cupo inicial en `QUOTA_FREE_TURNS` (20 por defecto)
+- Pago por sesion sobre `atomo/payments`. **Bloqueado: faltan las claves de Stripe en modo prueba** (las variables ya existen vacias en el `.env` de la API)
 - Proveedor obligatorio al crear mesa
+- Pendiente de decidir con datos: el precio por sesion, y si el cupo gratuito usa el modelo barato (`QUOTA_MODEL`, hoy configurado a Haiku pero todavia no forzado al resolver)
 
 ## Entrega 8: Packs de usuario
 
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
 - Takedown y aviso de descarga externa
 - Texto de pack como contenido no confiable en el contexto del DM
+- Informacion asimetrica para packs de deduccion social (issue #2, analisis de GPT del 2026-09-18). Verificado contra el codigo: las primitivas ya existen (`visibility.layer` con `canon`/`campaign`/`player`/`dm`, `visibility.witnesses`, `visibleTo()` en `packages/campaign/src/knowledge.ts`, `discovery` como puente, proyecciones `player:<id>` con 403 en `CampaignReadController`). No hace falta arquitectura nueva, hace falta usar la que hay. Lo que si falta es el modelo de audiencias mas alla de `table`/`host` (por personaje, por rol, por faccion), y se diseña con un pack concreto delante, no antes. Reuniones, votos y condiciones de victoria quedan para v2 si algun pack los pide
+- Principio de coste que manda sobre el diseño (del mismo issue): las llamadas al proveedor escalan con eventos del mundo, no con el numero de jugadores. Cinco jugadores que ven la misma explosion son una generacion narrativa y cinco proyecciones deterministas. A 0.019 USD por turno medidos, la version ingenua multiplica el coste por jugador y ahi no hay negocio
+
+## Deuda tecnica (sin entrega asignada)
+
+- **Los bloques del turno se filtran en el cliente, no en el servidor.** `TurnService::blocksAfter` (rpg-ngn-api) devuelve todos los bloques a cualquier miembro, y quien esconde los de anfitrion es `blocksForSeat` en `packages/ui-logic/src/views.ts`, que corre en el navegador. Un jugador con las herramientas de desarrollo ve el JSON crudo. Hoy solo expondria avisos tecnicos del lint (comprobado el 2026-09-18: cero bloques `audience: host` guardados, nunca se disparo en partida), asi que es una fuga latente y no una activa. Se cierra pasando el filtro al servidor con el asiento del miembro, mas un test de fuga. Media hora. Bloquea cualquier pack con roles ocultos (ver entrega 8): es el "invariante critico" del issue #2, informacion secreta que viaja en el payload y solo se oculta con logica de frontend
+- `composer analyse` esta declarado en el composer.json de la API pero no existe `phpstan.neon`, asi que falla con "At least one path must be specified". O se configura Larastan o se quita el script
+- Un solo comando que levante los cuatro servicios (engine, API, web, worker), y a futuro que vivan en el MicroServer ProLiant en vez de en la laptop
 
 ## v2 (sin fecha)
 
