@@ -127,6 +127,7 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 
 ## Entrega 7: Cobro y cupo
 
+- [x] Medicion del consumo: `usage` del engine guardado por turno (`input_tokens`, `output_tokens`, `model`) y acumulado en la campaña; `php artisan turns:usage` lo reporta en tokens y en dinero con los precios de `config/engine.php`. Primer dato real (2026-09-18, turno 2 de una campaña corta con Sonnet 5): 4,056 de entrada y 455 de salida, 0.019 USD. El contexto crece con la campaña, asi que el coste por turno sube dentro de la sesion: la curva se mide con la columna por turno antes de fijar precio
 - Pago por sesion sobre `atomo/payments`
 - Cupo One Shot por turnos
 - Proveedor obligatorio al crear mesa
