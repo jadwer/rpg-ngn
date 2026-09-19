@@ -70,7 +70,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
             , toma un minuto.
           </Text>
         </View>
-        <Text style={styles.foot}>El token se guarda en el almacén seguro del teléfono y caduca solo.</Text>
+        <Text style={styles.foot}>Tu sesión queda guardada en el almacén seguro del teléfono, así no tienes que entrar cada vez.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   )

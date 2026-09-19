@@ -139,7 +139,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
                 <RadioRow key={`${p.id}@${p.version}`} label={packOptionLabel(p)} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
               ))
             ) : (
-              <Text style={styles.value}>{`${option?.name ?? pack.manifest.name} (${option?.id ?? PACK_OPTION.id}@${option?.version ?? PACK_OPTION.version}, ${option?.system ?? PACK_OPTION.ruleset})`}</Text>
+              <Text style={styles.value}>{option ? packOptionLabel(option) : pack.manifest.name}</Text>
             )}
             {packSummaryText(option) ? <Text style={styles.hint}>{packSummaryText(option)}</Text> : null}
           </View>

@@ -37,9 +37,10 @@ export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): str
 export function premisePlaceholder(pack: Pick<PackOption, 'name' | 'tagline'> | null): string {
   const base = 'Campaña, escena o tono; el director de juego la usa como punto de partida.'
   if (!pack) return `${base} Por ejemplo: "Primera noche, todos se conocen por primera vez y algo va mal desde el principio."`
-  // El lema del pack es una frase suelta: entra entre comillas y con su punto,
-  // o se lee pegado al resto ("...Nueve Viajeros. Diferentes caminos Tono de").
-  const gancho = pack.tagline ? ` "${pack.tagline}".` : ''
+  // El lema es una frase suelta y necesita su punto, o se lee pegada a la
+  // siguiente ("...Nueve Viajeros. Diferentes caminos Tono de misterio"). Sin
+  // comillas: el ejemplo entero ya va entre comillas y anidarlas queda peor.
+  const gancho = pack.tagline ? ` ${pack.tagline.replace(/[.,;:]$/, '')}.` : ''
   return `${base} Por ejemplo: "Jugamos ${pack.name}.${gancho} Tono de misterio, ritmo ágil, español de México."`
 }
 

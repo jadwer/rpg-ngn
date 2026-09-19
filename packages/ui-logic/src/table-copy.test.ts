@@ -37,9 +37,13 @@ describe('table-copy', () => {
     expect(premisePlaceholder(sinLema)).not.toContain('..')
   })
 
-  it('el lema no se pega a la frase siguiente', () => {
+  it('el lema no se pega a la frase siguiente ni anida comillas', () => {
     // Se leia: "Jugamos Los Nueve Viajeros. Diferentes caminos Tono de misterio".
-    expect(premisePlaceholder(pack())).toContain('"Diferentes caminos, un mismo destino". Tono de misterio')
+    expect(premisePlaceholder(pack())).toContain('Diferentes caminos, un mismo destino. Tono de misterio')
+    // El ejemplo entero ya va entre comillas; el lema no lleva las suyas.
+    expect(premisePlaceholder(pack())).not.toContain('"Diferentes')
+    // Un lema que ya trae punto no acaba con dos.
+    expect(premisePlaceholder(pack({ tagline: 'Alguien sabía que ella no estaría.' }))).not.toContain('..')
   })
 
   it('la opcion del selector no lleva la version ni el nombre del sistema', () => {
