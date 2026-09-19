@@ -83,10 +83,18 @@ export async function forwardToApi(request: NextRequest, path: string): Promise<
     return NextResponse.json({ error: `No hay conexión con la API (${apiTarget()}): ${(error as Error).message}` }, { status: 502 })
   }
 
-  const text = await upstream.text()
-  const response = new NextResponse(text, { status: upstream.status })
   const type = upstream.headers.get('content-type')
+
+  // El cuerpo se reenvia como bytes, no como texto: `text()` reinterpreta el
+  // binario como UTF-8 y corrompe lo que no lo sea (un retrato de pack
+  // llegaba al doble de tamaño y el navegador no lo pintaba).
+  const bytes = await upstream.arrayBuffer()
+  const response = new NextResponse(bytes, { status: upstream.status })
   if (type) response.headers.set('content-type', type)
-  response.headers.set('cache-control', 'no-store')
+
+  // Las imagenes del pack cambian cuando cambia el pack, no entre
+  // peticiones; el resto son datos de la mesa y no se cachean.
+  const cacheable = type?.startsWith('image/') ?? false
+  response.headers.set('cache-control', cacheable ? (upstream.headers.get('cache-control') ?? 'public, max-age=86400') : 'no-store')
   return response
 }
