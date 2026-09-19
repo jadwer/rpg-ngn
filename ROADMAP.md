@@ -183,6 +183,8 @@ que falta para que entre alguien que no seamos nosotros.
 
 ## Deuda tecnica (sin entrega asignada)
 
+- **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
+
 Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
 abierto.
 
