@@ -46,8 +46,19 @@ export function comingSoonPacks(packs: readonly CreditPack[]): CreditPack[] {
   return packs.filter((p) => !p.available).sort((a, b) => a.amount - b.amount)
 }
 
-/** El saldo, dicho en lo que le importa a quien juega. */
-export function balanceText(balance: CreditBalance): string {
+/**
+ * El saldo, dicho en lo que le importa a quien juega.
+ *
+ * Con clave propia el cupo no se gasta, asi que anunciar "te quedan 80 turnos,
+ * unas 4 partidas" promete un limite que no existe y esconde el que si importa
+ * (lo que el proveedor le cobre). El saldo sigue ahi, guardado, por si quita
+ * la clave.
+ */
+export function balanceText(balance: CreditBalance, ownKey = false): string {
+  if (ownKey) {
+    const guardados = balance.remainingTurns > 0 ? ` Tienes ${balance.remainingTurns} en reserva por si la quitas.` : ''
+    return `Juegas con tu clave: estos turnos no se gastan.${guardados}`
+  }
   if (balance.remainingTurns === 0) return 'Te quedaste sin turnos. Recarga para seguir jugando.'
   const sesiones = Math.floor(balance.remainingTurns / TURNS_PER_SESSION)
   const turnos = `${balance.remainingTurns} ${balance.remainingTurns === 1 ? 'turno' : 'turnos'}`
@@ -55,9 +66,9 @@ export function balanceText(balance: CreditBalance): string {
   return `Te quedan ${turnos}, unas ${sesiones} ${sesiones === 1 ? 'partida' : 'partidas'}.`
 }
 
-/** Si conviene avisarle de que se le acaba. */
-export function lowBalance(balance: CreditBalance): boolean {
-  return balance.remainingTurns > 0 && balance.remainingTurns < TURNS_PER_SESSION
+/** Si conviene avisarle de que se le acaba. Con clave propia no se le acaba. */
+export function lowBalance(balance: CreditBalance, ownKey = false): boolean {
+  return !ownKey && balance.remainingTurns > 0 && balance.remainingTurns < TURNS_PER_SESSION
 }
 
 /**

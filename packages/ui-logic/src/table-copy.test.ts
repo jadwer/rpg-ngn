@@ -1,6 +1,6 @@
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { characterNameFrom, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
+import { characterNameFrom, packOptionLabel, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
 
 const pack = (over: Partial<PackOption> = {}): PackOption => ({
   id: 'pilot',
@@ -33,8 +33,20 @@ describe('table-copy', () => {
 
   it('un pack sin lema no deja un hueco raro en el ejemplo', () => {
     const sinLema = pack({ name: 'Algo', tagline: null })
-    expect(premisePlaceholder(sinLema)).toContain('Empezamos en Algo.')
+    expect(premisePlaceholder(sinLema)).toContain('Jugamos Algo.')
     expect(premisePlaceholder(sinLema)).not.toContain('..')
+  })
+
+  it('el lema no se pega a la frase siguiente', () => {
+    // Se leia: "Jugamos Los Nueve Viajeros. Diferentes caminos Tono de misterio".
+    expect(premisePlaceholder(pack())).toContain('"Diferentes caminos, un mismo destino". Tono de misterio')
+  })
+
+  it('la opcion del selector no lleva la version ni el nombre del sistema', () => {
+    expect(packOptionLabel(pack())).toBe('Los Nueve Viajeros (campaña)')
+    expect(packOptionLabel(pack({ type: 'setting', name: 'Valdoria' }))).toBe('Valdoria (mundo)')
+    expect(packOptionLabel(pack())).not.toContain('0.4.0')
+    expect(packOptionLabel(pack())).not.toContain('fantasy-d20-lite')
   })
 
   it('resume el pack en lo que le importa a quien elige', () => {

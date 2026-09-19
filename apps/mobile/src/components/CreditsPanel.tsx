@@ -23,9 +23,15 @@ interface Props {
 export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
   const [packs, setPacks] = useState<CreditPack[]>([])
   const [balance, setBalance] = useState<CreditBalance | null>(null)
+  const [ownKey, setOwnKey] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(() => {
+    // Con clave propia el cupo no se gasta y no se anuncia como su limite.
+    void client.listOwnKeys().then(
+      (keys) => setOwnKey(keys.some((k) => k.configured)),
+      () => undefined,
+    )
     void client.listCredits().then(
       ({ packs: lista, balance: saldo }) => {
         setPacks(lista)
@@ -47,7 +53,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
     <View style={styles.card}>
       <Text style={styles.label}>Tus créditos</Text>
 
-      {balance ? <Text style={lowBalance(balance) ? styles.warn : styles.hint}>{balanceText(balance)}</Text> : <Text style={styles.hint}>Cargando…</Text>}
+      {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>Cargando…</Text>}
 
       {venta.length > 0 ? (
         <>

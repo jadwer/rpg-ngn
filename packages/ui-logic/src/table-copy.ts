@@ -37,8 +37,20 @@ export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): str
 export function premisePlaceholder(pack: Pick<PackOption, 'name' | 'tagline'> | null): string {
   const base = 'Campaña, escena o tono; el director de juego la usa como punto de partida.'
   if (!pack) return `${base} Por ejemplo: "Primera noche, todos se conocen por primera vez y algo va mal desde el principio."`
-  const gancho = pack.tagline ? ` ${pack.tagline}` : ''
-  return `${base} Por ejemplo: "Empezamos en ${pack.name}.${gancho} Tono de misterio, ritmo ágil, español de México."`
+  // El lema del pack es una frase suelta: entra entre comillas y con su punto,
+  // o se lee pegado al resto ("...Nueve Viajeros. Diferentes caminos Tono de").
+  const gancho = pack.tagline ? ` "${pack.tagline}".` : ''
+  return `${base} Por ejemplo: "Jugamos ${pack.name}.${gancho} Tono de misterio, ritmo ágil, español de México."`
+}
+
+/**
+ * Cada opcion del selector de pack. Decia `Nombre (pilot@0.4.0,
+ * fantasy-d20-lite)`: la version y el id son cosa del motor, y el sistema con
+ * su nombre tecnico no le dice nada a quien va a elegir con que jugar. El
+ * detalle de que trae el pack ya se lee debajo, en `packSummaryText`.
+ */
+export function packOptionLabel(pack: Pick<PackOption, 'name' | 'type'>): string {
+  return `${pack.name} (${pack.type === 'campaign' ? 'campaña' : 'mundo'})`
 }
 
 /** Lo que se lee bajo el selector de pack: de que va y cuanto trae. */

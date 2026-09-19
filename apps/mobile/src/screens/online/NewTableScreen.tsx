@@ -1,6 +1,6 @@
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { cleanTableName, packCharacters, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
@@ -133,10 +133,10 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Field label="Nombre de la mesa" value={name} onChangeText={setName} placeholder={tableNamePlaceholder(option)} maxLength={120} autoFocus />
           <View style={styles.block}>
-            <Text style={styles.label}>Pack y sistema</Text>
+            <Text style={styles.label}>Qué van a jugar</Text>
             {packs.length > 1 ? (
               packs.map((p) => (
-                <RadioRow key={`${p.id}@${p.version}`} label={`${p.name} (${p.id}@${p.version}, ${p.system})`} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
+                <RadioRow key={`${p.id}@${p.version}`} label={packOptionLabel(p)} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
               ))
             ) : (
               <Text style={styles.value}>{`${option?.name ?? pack.manifest.name} (${option?.id ?? PACK_OPTION.id}@${option?.version ?? PACK_OPTION.version}, ${option?.system ?? PACK_OPTION.ruleset})`}</Text>

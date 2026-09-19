@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { packCharacters, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
@@ -146,12 +146,12 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
         </label>
 
         <label className="field">
-          <span>Pack y sistema</span>
+          <span>Qué van a jugar</span>
           <select className="select" name="pack" value={packId} onChange={(e) => setPackId(e.target.value)} disabled={packs.length < 2}>
             {packs.length === 0 ? <option value="">Cargando…</option> : null}
             {packs.map((p) => (
               <option key={`${p.id}@${p.version}`} value={p.id}>
-                {p.name} ({p.id}@{p.version}, {p.system})
+                {packOptionLabel(p)}
               </option>
             ))}
           </select>

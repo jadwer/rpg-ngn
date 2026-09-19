@@ -45,6 +45,19 @@ describe('credits', () => {
     expect(lowBalance({ remainingTurns: 0, usedTurns: 0 })).toBe(false)
   })
 
+  it('con clave propia el cupo no se gasta, y no se anuncia como si se gastara', () => {
+    const saldo = { remainingTurns: 80, usedTurns: 0 }
+    // Decia "Te quedan 80 turnos, unas 4 partidas" a quien no gasta ninguno.
+    expect(balanceText(saldo, true)).toContain('no se gastan')
+    expect(balanceText(saldo, true)).not.toContain('4 partidas')
+    expect(balanceText(saldo, true)).toContain('80 en reserva')
+    // Sin turnos guardados no se inventa una reserva de cero.
+    expect(balanceText({ remainingTurns: 0, usedTurns: 0 }, true)).not.toContain('reserva')
+
+    // Y no se le avisa de que se le acaba algo que no esta gastando.
+    expect(lowBalance({ remainingTurns: 8, usedTurns: 0 }, true)).toBe(false)
+  })
+
   it('manda a recargar a nuestra web, no a Stripe', () => {
     // En produccion la web y la API comparten dominio.
     expect(topUpUrl('https://rpg-worlds.gabinoramirez.com')).toBe('https://rpg-worlds.gabinoramirez.com/ajustes')

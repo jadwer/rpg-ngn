@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unauthorized: (notice?: string) => void }) {
   const [packs, setPacks] = useState<CreditPack[]>([])
   const [balance, setBalance] = useState<CreditBalance | null>(null)
+  const [ownKey, setOwnKey] = useState(false)
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
   const [buying, setBuying] = useState<{ pack: CreditPack; clientSecret: string } | null>(null)
   const [busy, setBusy] = useState(false)
@@ -27,6 +28,9 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       const { packs: lista, balance: saldo, publishableKey } = await client.listCredits()
       setPacks(lista)
       setBalance(saldo)
+      // Con clave propia el cupo no se gasta: el saldo se cuenta igual pero no
+      // se anuncia como el limite de lo que puede jugar.
+      setOwnKey((await client.listOwnKeys().catch(() => [])).some((k) => k.configured))
       // La clave la manda la API: cambiar de cuenta de Stripe no obliga a
       // reconstruir la web.
       if (publishableKey) setStripePromise((actual) => actual ?? loadStripe(publishableKey))
@@ -71,8 +75,8 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       </div>
 
       {balance ? (
-        <p className={lowBalance(balance) ? 'error' : 'hint'} style={{ margin: 0 }}>
-          {balanceText(balance)}
+        <p className={lowBalance(balance, ownKey) ? 'error' : 'hint'} style={{ margin: 0 }}>
+          {balanceText(balance, ownKey)}
         </p>
       ) : (
         <p className="hint">Cargando…</p>
