@@ -160,7 +160,10 @@ que falta para que entre alguien que no seamos nosotros.
 - [ ] **Contraseñas de produccion.** Los usuarios sembrados (`gabino`, `jaz`, `armando`) tienen `password` en el servidor publico. Cambiarlas o borrar las que no se usen
 - [ ] **Stripe en modo real**: resolver la tarea vencida de la cuenta (transferencias suspendidas) y pasar a claves `live`. Hoy todo esta en sandbox
 - [ ] **Terminos de servicio y aviso de privacidad**: se cobra dinero y se guardan datos de terceros
-- [ ] **Correo saliente.** `MAIL_MAILER=log` en el servidor: no sale ningun correo. La verificacion esta desactivada (`ATOMO_REQUIRE_EMAIL_VERIFICATION=false`) asi que registrarse funciona igual, pero **recuperar contraseña no sirve de nada**: el enlace se escribe en un log que nadie lee. Hace falta un SMTP real (Resend, Postmark, SES) antes de que entre gente que pueda olvidar su clave
+- [ ] **Correo saliente.** `MAIL_MAILER=log` en el servidor: no sale ningun correo. Hace falta un SMTP real (Resend, Postmark, SES). Desbloquea tres cosas distintas:
+  - **Recuperar contraseña**: hoy el enlace se escribe en un log que nadie lee, asi que no sirve de nada. Es lo urgente, porque alguien olvidara su clave.
+  - **Correo de bienvenida** (pedido por Gabino el 19-09): **no para verificar la cuenta**, sino para que quien se registra recuerde dias despues que tiene una mesa esperando y vuelva. No existe: `atomo-auth` no manda nada ni emite evento al registrar. Hay que añadir el evento en la plataforma y un mailable propio de rpg-ngn con el enlace a su mesa.
+  - **Avisos de mesa** (mas adelante): "es tu turno", "abrieron sesion". Es lo que trae a la gente de vuelta sin que tenga que acordarse sola.
 - [ ] Revisar que pasa cuando un usuario sin creditos entra: hoy choca con un 409 al cerrar turno, que es correcto pero seco
 
 ## Entrega 8: Packs de usuario
