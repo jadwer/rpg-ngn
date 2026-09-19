@@ -978,10 +978,6 @@ h3 {
   color: var(--ink-dim);
 }
 
-.screen .system.host-only {
-  display: none;
-}
-
 .narrating {
   display: flex;
   align-items: center;

@@ -58,10 +58,23 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const viewer: TableViewer = snapshot?.viewer ?? { memberId: Number(fallbackMember?.id ?? 0), role: fallbackMember?.role ?? 'player', characterId: fallbackMember?.characterId ?? null }
   const isHost = viewer.role === 'host'
 
-  // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
-  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
+  // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le
+  // estorban. Y el modo pantalla es un asiento, no un estilo: lo que se
+  // comparte por OBS es lo que veria un jugador, y eso vale tambien para la
+  // voz. Antes se escondian con CSS y el TTS los leia igual en directo.
+  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost && !screen), [allBlocks, isHost, screen])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
   const tts = useTts(blocks)
+
+  // Entrar en pantalla corta la lectura en curso: la cola que ya sonaba puede
+  // llevar un bloque de anfitrion, y `useTts` no adopta la cola nueva hasta
+  // terminar la actual. Es un acto explicito (tecla F), asi que no corta nada
+  // que el anfitrion no haya decidido.
+  const ttsRef = useRef(tts)
+  ttsRef.current = tts
+  useEffect(() => {
+    if (screen) ttsRef.current.stop()
+  }, [screen])
   const turn = snapshot?.turn ?? null
   const progress = useMemo(() => turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }), [turn, viewer.role, viewer.characterId])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
@@ -289,7 +302,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
           <button type="button" className={`btn small${sheetsOpen ? ' active' : ''}`} onClick={() => setSheetsOpen((v) => !v)}>
             Fichas
           </button>
-          <button type="button" className="btn small" onClick={() => setScreen(true)} title="Solo narrativa y diálogos, en grande (tecla F)">
+          <button type="button" className="btn small" onClick={() => setScreen(true)} title="Solo narrativa y diálogos, en grande, como los ve un jugador (tecla F). Corta la lectura en voz alta en curso.">
             Pantalla
           </button>
         </div>

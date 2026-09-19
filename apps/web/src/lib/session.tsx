@@ -54,13 +54,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   /** Proxy: base vacia (mismo origen) y sin token; directo: base y token en memoria. */
   const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => (baseUrl ? tokenRef.current : null), fetch: browserFetch }), [])
 
+  // Un 401 limpia lo local y manda a entrar, pero NO revoca el token en el
+  // servidor: un 401 transitorio (PHP-FPM reiniciando en un despliegue) no
+  // debe cerrar diez sesiones sanas. Revocar es cosa de `logout`, que es un
+  // acto del usuario. (VAM del 19-09, web A8.)
   const unauthorized = useCallback((notice = 'La sesión caducó. Vuelve a entrar.') => {
     tokenRef.current = null
     storage.clearSession()
     setClient(null)
     setUserState(null)
     setStage({ name: 'anonymous', notice })
-    void fetch('/auth/session', { method: 'DELETE', headers: WEB_HEADER, credentials: 'same-origin' }).catch(() => undefined)
   }, [])
 
   const enter = useCallback(
