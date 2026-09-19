@@ -36,7 +36,8 @@ manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 - [x] `packages/rules`: interfaz `Ruleset` y `fantasy-d20-lite@1.0.0` (Fortuna abierta, ops `memory_recovered`, `gain`, `lose`, `hp`, `condition`); un op desconocido lanza, no se ignora
 - [x] `packages/campaign`: `reduce` con ruleset como parametro, proyecciones de mundo, jugador y narrativa, snapshots con `diffSnapshot`
 - [x] `campaigns/pilot/snapshots/002.json`: estado canonico de la sesion 002; el test lo reproduce byte a byte
-- [ ] Segundo ruleset real (v2): es lo que valida el eje "agnostico de sistema"
+- [x] **Segundo ruleset real** (2026-09-19): `court-intrigue`, investigacion de corte sin combate. No hay puntos de vida ni iniciativa: se gasta **credito** (cuanto te abren las puertas) y sube la **sospecha**; las pistas se acumulan y un envenenamiento es una `condition`. Siete tests, y rechaza los effects del d20 en vez de ignorarlos. **El engine carga los dos packs a la vez, cada uno con su sistema: el eje "agnostico de sistema" deja de ser una promesa.** Lo estrena un pack privado (`rpg-packs/boticaria` en Gitea)
+- [x] El schema de personaje deja de asumir D&D: `ac` y `attacks` son opcionales, y hay `faction` y `rank` para los rulesets que reparten acceso en vez de golpes. **Lo descubrio el segundo pack**, que es para lo que servia: un personaje sin armas obligaba a inventar datos falsos
 
 ## Entrega 3: App movil sin servidor (hecha el 2026-09-06)
 
@@ -147,6 +148,8 @@ ellos, de punta a punta en produccion.
 - [x] **https://rpg-worlds.gabinoramirez.com** en Hetzner CX23 (Nuremberg, 7.09 USD/mes): Ubuntu 24.04, HTTPS con Let's Encrypt y renovacion automatica, ufw con solo 22/80/443, fail2ban. Postgres, engine y API cerrados desde fuera
 - [x] Seis servicios de systemd con arranque automatico (`rpg-engine`, `rpg-worker`, `rpg-web`, nginx, php8.3-fpm, postgresql). **Comprobado en un reinicio real el 19-09**: vuelven solos
 - [x] Nginx: la web de Next sirve `/api/*` (su proxy traduce la cookie httpOnly a Bearer) y Laravel escucha en 127.0.0.1:8010. El webhook de Stripe va directo a Laravel, sin pasar por el proxy
+- [x] **Packs privados en Gitea** (organizacion `rpg-packs`, un repo por pack): el repo publico solo admite contenido original o licenciado (docs/07), asi que lo demas vive versionado y respaldado en privado. `tools/packs/new-pack.sh` crea el repo y lo sube; el pack se enlaza a `content/packs` y **la carpeta debe llamarse como el `id` del pack**, porque el engine busca por id
+- [x] Los personajes y retratos de un pack del servidor los sirve la API: la web solo lleva empaquetado el piloto, asi que sin esto no se podia elegir personaje en otro pack
 - [ ] Despliegue automatico: hoy es `git pull` a mano por SSH
 - [ ] Copias de seguridad de Postgres. **No hay ninguna**, y ya hay pagos registrados
 - [ ] Vigilancia: nadie avisa si un servicio se cae
