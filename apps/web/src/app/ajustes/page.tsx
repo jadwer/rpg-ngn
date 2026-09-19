@@ -1,14 +1,16 @@
 'use client'
 
+import type { ApiClient } from '@rpg-ngn/api-client'
 import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
+import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
 import type { StoredUser } from '../../lib/storage'
 import { useTts } from '../../lib/useTts'
 
 export default function SettingsPage() {
-  return <RequireSession>{({ user, logout }) => <Settings user={user} logout={logout} />}</RequireSession>
+  return <RequireSession>{({ client, user, unauthorized, logout }) => <Settings client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
 }
 
 /** La prueba lee narracion, un dialogo de la party y uno de un NPC, para oir los tres tonos. */
@@ -24,7 +26,7 @@ const SAMPLE = [
  * navegador, no de la cuenta); la barra de voz de la mesa es el acceso
  * rapido a los mismos.
  */
-function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
+function Settings({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
   const blocks = useMemo(() => SAMPLE, [])
   const tts = useTts(blocks)
   const speaking = tts.state.status === 'speaking'
@@ -106,12 +108,7 @@ function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
         </div>
       </section>
 
-      <section className="card stack" style={{ marginTop: 16 }}>
-        <div className="label" style={{ marginTop: 0 }}>
-          Del DM de cada mesa
-        </div>
-        <p className="hint">El proveedor del director de juego (Anthropic, OpenAI, DeepSeek, Ollama o el DM con guion) se elige por mesa, en el mando del anfitrión, pestaña DM.</p>
-      </section>
+      <OwnKeys client={client} unauthorized={unauthorized} />
     </main>
   )
 }

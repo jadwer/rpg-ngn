@@ -3,4 +3,4 @@ export { ApiError, NetworkError, defaultMessage, describeError, type ValidationE
 export { normalizeBaseUrl, type FetchLike, type HttpResponse, type HttpRequestInit, type TokenProvider } from './http.js'
 export type * from './types.js'
 export { accountApi, type AccountApi, type RegisterInput, type RegisterResult } from './account.js'
-export { providerChoice, settingsApi, withProvider, type DmPreset, type DmProbeResult, type DmProviderChoice, type SettingsApi } from './settings.js'
+export { providerChoice, settingsApi, withProvider, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, type SettingsApi } from './settings.js'

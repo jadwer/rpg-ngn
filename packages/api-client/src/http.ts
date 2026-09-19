@@ -27,7 +27,7 @@ export const JSON_MEDIA = 'application/json'
 export const JSONAPI_MEDIA = 'application/vnd.api+json'
 
 export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   body?: unknown
   /** `json` para los comandos del juego y auth; `jsonapi` para los recursos. */
   media?: 'json' | 'jsonapi'

@@ -34,8 +34,29 @@ export interface DmProbeResult {
   message: string
 }
 
+/**
+ * Clave propia del usuario (BYOK). La credencial nunca vuelve del servidor:
+ * de ella solo llega `hint`, las ultimas cuatro letras, para reconocerla.
+ */
+export interface OwnKey {
+  /** anthropic, openai o deepseek. */
+  preset: string
+  configured: boolean
+  /** Ultimas cuatro letras de la clave guardada; null si no hay. */
+  hint: string | null
+  /** Modelo propio, si eligio uno distinto al del preset. */
+  model: string | null
+  verifiedAt: string | null
+}
+
 export interface SettingsApi {
   listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
+  /** Las claves propias del usuario: cuales hay, sin la credencial. */
+  listOwnKeys(): Promise<OwnKey[]>
+  /** Guarda la clave del usuario; el servidor la comprueba antes (422 si el proveedor la rechaza). */
+  saveOwnKey(preset: string, credential: string, model?: string | null): Promise<{ keys: OwnKey[]; message: string }>
+  /** Quita la clave: las mesas vuelven al DM del servidor. */
+  deleteOwnKey(preset: string): Promise<{ keys: OwnKey[]; message: string }>
   /** Solo el anfitrion; 422 si el preset no esta configurado, 502 si el engine no responde. */
   probeDm(tableId: string | number, choice: DmProviderChoice): Promise<DmProbeResult>
   /** Sustituye `settings` entero (JSON:API PATCH); usa `withProvider` para conservar la premisa. Solo el dueño. */
@@ -49,6 +70,24 @@ export function settingsApi(request: Request): SettingsApi {
     async listDmPresets() {
       const { data } = await request<{ data: DmPreset[]; meta: { default: string } }>('/api/v1/dm/presets')
       return { presets: data.data, defaultPreset: data.meta.default }
+    },
+
+    async listOwnKeys() {
+      const { data } = await request<{ data: OwnKey[] }>('/api/v1/profile/keys')
+      return data.data
+    },
+
+    async saveOwnKey(preset, credential, model) {
+      const { data } = await request<{ data: OwnKey[]; meta: { message: string } }>('/api/v1/profile/keys', {
+        method: 'PUT',
+        body: model ? { preset, credential, model } : { preset, credential },
+      })
+      return { keys: data.data, message: data.meta.message }
+    },
+
+    async deleteOwnKey(preset) {
+      const { data } = await request<{ data: OwnKey[]; meta: { message: string } }>(`/api/v1/profile/keys/${encodeURIComponent(preset)}`, { method: 'DELETE' })
+      return { keys: data.data, message: data.meta.message }
     },
 
     async probeDm(tableId, choice) {
