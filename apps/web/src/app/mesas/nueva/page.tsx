@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
+import { packCharacters, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
@@ -16,8 +16,6 @@ import type { StoredUser } from '../../../lib/storage'
 export default function NewTablePage() {
   return <RequireSession>{({ client, user, unauthorized }) => <NewTable client={client} user={user} unauthorized={unauthorized} />}</RequireSession>
 }
-
-const PREMISE_PLACEHOLDER = 'Campaña, escena o tono; el DM la usa como punto de partida. Por ejemplo: "Valdoria, la posada al caer la noche. Esta noche esperan a Calder, que bajó a la mina y no ha vuelto."'
 
 /**
  * Crear mesa en dos pasos: nombre, pack, personaje del anfitrion y premisa;
@@ -144,7 +142,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       <form className="card stack" onSubmit={(e) => void submit(e)}>
         <label className="field">
           <span>Nombre de la mesa</span>
-          <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder="Los Nueve Viajeros, sábado" maxLength={120} required autoFocus />
+          <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder={tableNamePlaceholder(option)} maxLength={120} required autoFocus />
         </label>
 
         <label className="field">
@@ -157,7 +155,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
               </option>
             ))}
           </select>
-          {option?.tagline ? <span className="hint">{option.tagline}</span> : null}
+          {packSummaryText(option) ? <span className="hint">{packSummaryText(option)}</span> : null}
         </label>
 
         <div className="field">
@@ -194,7 +192,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
         <label className="field">
           <span>Premisa de la mesa (opcional)</span>
-          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={PREMISE_PLACEHOLDER} rows={4} maxLength={2000} />
+          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={premisePlaceholder(option)} rows={4} maxLength={2000} />
         </label>
 
         {error ? <div className="error">{error}</div> : null}

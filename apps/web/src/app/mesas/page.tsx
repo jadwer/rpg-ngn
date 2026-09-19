@@ -1,13 +1,14 @@
 'use client'
 
-import { ApiError, memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { characterName, memberTag, seatLabel } from '@rpg-ngn/ui-logic'
+import { ApiError, memberOf, type ApiClient, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
+import { characterName, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FriendsPanel } from '../../components/FriendsPanel'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
+import { PACK_ID } from '../../lib/pack'
 import { usePack } from '../../lib/usePack'
 import type { StoredUser } from '../../lib/storage'
 
@@ -19,6 +20,9 @@ export default function TablesPage() {
 function Tables({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
   const { pack } = usePack()
   const [tables, setTables] = useState<TableSummary[] | null>(null)
+  const [packs, setPacks] = useState<PackOption[]>([])
+  // Nombre de personaje por id, para los packs que la web no lleva dentro.
+  const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -40,7 +44,35 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
     void load()
   }, [load])
 
-  const nameOf = (id: string) => characterName(pack, id) ?? id
+  // Los packs de las mesas, como una clave estable: `tables` es un array nuevo
+  // en cada refresco y no queremos volver a pedir el catalogo por eso.
+  const packIds = [...new Set((tables ?? []).map((t) => t.packId))].sort().join(',')
+
+  // El catalogo del servidor da el nombre del pack; de los que la web no
+  // lleva dentro, tambien hay que pedir los personajes para no enseñar ids.
+  useEffect(() => {
+    if (packIds === '') return
+    let alive = true
+    void client.listPacks().then(
+      async (catalogo) => {
+        if (!alive) return
+        setPacks(catalogo)
+        const usados = new Set(packIds.split(','))
+        const nombres: Record<string, string> = {}
+        for (const p of catalogo.filter((p) => p.id !== PACK_ID && usados.has(p.id))) {
+          const personajes = await client.listPackCharacters(p.id, p.version).catch(() => [])
+          for (const c of personajes) nombres[c.id] = c.name
+        }
+        if (alive && Object.keys(nombres).length > 0) setRemoteNames((actual) => ({ ...actual, ...nombres }))
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, packIds])
+
+  const nameOf = (id: string) => characterName(pack, id) ?? remoteNames[id] ?? id
 
   return (
     <main className="page">
@@ -75,8 +107,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
               </div>
               <div className="seat">{seatLabel(me, nameOf)}</div>
               <div className="meta">
-                {table.packId}@{table.packVersion} &middot; {table.ruleset}
-                {table.premise ? <> &middot; con premisa</> : null}
+                {tableCardMeta(table, packs)}
               </div>
               {others.length > 0 ? (
                 <div className="party">

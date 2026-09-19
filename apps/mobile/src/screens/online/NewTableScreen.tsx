@@ -1,6 +1,6 @@
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { cleanTableName, packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
+import { cleanTableName, packCharacters, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
@@ -22,8 +22,6 @@ interface Props {
   onOpen: (table: TableSummary) => void
   onUnauthorized: () => void
 }
-
-const PREMISE_PLACEHOLDER = 'Campaña, escena o tono; el DM la usa como punto de partida. Por ejemplo: "Valdoria, la posada al caer la noche. Esta noche esperan a Calder, que bajó a la mina y no ha vuelto."'
 
 /**
  * Crear mesa en dos pasos, como en la web: nombre, personaje del anfitrion,
@@ -133,7 +131,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-          <Field label="Nombre de la mesa" value={name} onChangeText={setName} placeholder="Los Nueve Viajeros, sábado" maxLength={120} autoFocus />
+          <Field label="Nombre de la mesa" value={name} onChangeText={setName} placeholder={tableNamePlaceholder(option)} maxLength={120} autoFocus />
           <View style={styles.block}>
             <Text style={styles.label}>Pack y sistema</Text>
             {packs.length > 1 ? (
@@ -143,7 +141,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
             ) : (
               <Text style={styles.value}>{`${option?.name ?? pack.manifest.name} (${option?.id ?? PACK_OPTION.id}@${option?.version ?? PACK_OPTION.version}, ${option?.system ?? PACK_OPTION.ruleset})`}</Text>
             )}
-            {option?.tagline ? <Text style={styles.hint}>{option.tagline}</Text> : null}
+            {packSummaryText(option) ? <Text style={styles.hint}>{packSummaryText(option)}</Text> : null}
           </View>
           <View style={styles.block}>
             <Text style={styles.label}>Tu personaje</Text>
@@ -164,7 +162,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
           ) : null}
           <View style={styles.block}>
             <Text style={styles.label}>Premisa de la mesa (opcional)</Text>
-            <TextInput value={premise} onChangeText={setPremise} placeholder={PREMISE_PLACEHOLDER} placeholderTextColor={theme.colors.inkFaint} multiline maxLength={2000} style={styles.premise} />
+            <TextInput value={premise} onChangeText={setPremise} placeholder={premisePlaceholder(option)} placeholderTextColor={theme.colors.inkFaint} multiline maxLength={2000} style={styles.premise} />
           </View>
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.actions}>
