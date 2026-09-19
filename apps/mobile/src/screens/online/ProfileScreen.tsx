@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
+import { OwnKeysPanel } from '../../components/OwnKeysPanel'
 import type { StoredUser } from '../../online/storage'
 import { theme } from '../../theme'
 
@@ -116,6 +117,8 @@ export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthori
             <Button label="Cambiar contraseña" primary busy={passBusy} disabled={!canChange} onPress={() => void savePassword()} />
           </View>
         </View>
+
+        <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
       </ScrollView>
     </KeyboardAvoidingView>
   )

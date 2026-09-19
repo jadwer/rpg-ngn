@@ -1,4 +1,4 @@
-import { ApiError, withProvider, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { cleanTableName, packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
@@ -38,12 +38,34 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const [presets, setPresets] = useState<DmPreset[]>([])
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
+  const [packs, setPacks] = useState<PackOption[]>([])
+  const [packId, setPackId] = useState<string>(PACK_OPTION.id)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<TableSummary | null>(null)
 
   const characters = useMemo(() => packCharacters(pack), [pack])
   const cleanName = cleanTableName(name)
+  const option = useMemo(() => packs.find((p) => p.id === packId) ?? null, [packs, packId])
+  // La app lleva el pack piloto dentro para pintar retratos y fichas sin red.
+  // Si el servidor ofrece otro, la mesa se crea igual pero los personajes se
+  // eligen al invitar.
+  const bundled = packId === PACK_OPTION.id
+
+  // Packs que el servidor puede jugar; antes la app solo sabia del suyo.
+  useEffect(() => {
+    let alive = true
+    void client.listPacks().then(
+      (result) => {
+        if (!alive) return
+        setPacks(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
 
   // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
@@ -68,7 +90,9 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
     setError(null)
     try {
       const provider = providerForNewTable(preset, defaultPreset)
-      const table = await client.createTable({ name: cleanName, packId: PACK_OPTION.id, packVersion: PACK_OPTION.version, ruleset: PACK_OPTION.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      // El ruleset lo pone la app (el manifiesto lo declara sin version).
+      const elegido = option ?? PACK_OPTION
+      const table = await client.createTable({ name: cleanName, packId: elegido.id, packVersion: elegido.version, ruleset: PACK_OPTION.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -112,11 +136,22 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
           <Field label="Nombre de la mesa" value={name} onChangeText={setName} placeholder="Los Nueve Viajeros, sábado" maxLength={120} autoFocus />
           <View style={styles.block}>
             <Text style={styles.label}>Pack y sistema</Text>
-            <Text style={styles.value}>{`${pack.manifest.name} (${PACK_OPTION.id}@${PACK_OPTION.version}, ${PACK_OPTION.ruleset})`}</Text>
+            {packs.length > 1 ? (
+              packs.map((p) => (
+                <RadioRow key={`${p.id}@${p.version}`} label={`${p.name} (${p.id}@${p.version}, ${p.system})`} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
+              ))
+            ) : (
+              <Text style={styles.value}>{`${option?.name ?? pack.manifest.name} (${option?.id ?? PACK_OPTION.id}@${option?.version ?? PACK_OPTION.version}, ${option?.system ?? PACK_OPTION.ruleset})`}</Text>
+            )}
+            {option?.tagline ? <Text style={styles.hint}>{option.tagline}</Text> : null}
           </View>
           <View style={styles.block}>
             <Text style={styles.label}>Tu personaje</Text>
-            <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
+            {bundled ? (
+              <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
+            ) : (
+              <Text style={styles.hint}>Este pack se juega desde el servidor; los personajes se eligen al invitar.</Text>
+            )}
           </View>
           {presets.length > 0 ? (
             <View style={styles.block}>
