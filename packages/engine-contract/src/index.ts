@@ -196,6 +196,23 @@ export const TurnBlock = z.discriminatedUnion('type', [
 ])
 export type TurnBlock = z.infer<typeof TurnBlock>
 
+/**
+ * Un pack que este servidor puede jugar. La plataforma lo ofrece al crear
+ * una mesa; hasta ahora la lista vivia escrita a mano en cada cliente.
+ */
+export const PackSummary = z.strictObject({
+  id: KebabId,
+  version: z.string().min(1),
+  type: z.enum(['setting', 'campaign']),
+  name: z.string().min(1),
+  tagline: z.string().nullable(),
+  /** Ruleset que el pack asume; la mesa se crea con el. */
+  system: KebabId,
+  characters: z.number().int().nonnegative(),
+  sessions: z.number().int().nonnegative(),
+})
+export type PackSummary = z.infer<typeof PackSummary>
+
 export const TurnUsage = z.strictObject({
   inputTokens: z.number().int().nonnegative(),
   outputTokens: z.number().int().nonnegative(),

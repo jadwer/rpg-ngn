@@ -1,6 +1,6 @@
 'use client'
 
-import { ApiError, withProvider, type ApiClient, type DmPreset, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
@@ -8,7 +8,7 @@ import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
 import { RequireSession } from '../../../components/RequireSession'
 import { UserBar } from '../../../components/UserBar'
-import { PACK_OPTIONS } from '../../../lib/pack'
+import { PACK_ID, RULESET_ID } from '../../../lib/pack'
 import { usePack } from '../../../lib/usePack'
 import type { StoredUser } from '../../../lib/storage'
 
@@ -24,7 +24,8 @@ const PREMISE_PLACEHOLDER = 'Campaña, escena o tono; el DM la usa como punto de
  */
 function NewTable({ client, user, unauthorized }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void }) {
   const { pack, error: packError } = usePack()
-  const option = PACK_OPTIONS[0]
+  const [packs, setPacks] = useState<PackOption[]>([])
+  const [packId, setPackId] = useState('')
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
@@ -36,6 +37,27 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [created, setCreated] = useState<TableSummary | null>(null)
 
   const characters = useMemo(() => (pack ? packCharacters(pack) : []), [pack])
+  const option = useMemo(() => packs.find((p) => p.id === packId) ?? null, [packs, packId])
+  // La web lleva el pack piloto dentro para pintar retratos y fichas sin pedir
+  // nada. Si el servidor ofrece otro, se puede crear la mesa igual, pero esta
+  // pantalla no tiene sus personajes.
+  const bundled = option?.id === PACK_ID
+
+  // Los packs que el servidor puede jugar (antes era una lista escrita a mano).
+  useEffect(() => {
+    let alive = true
+    void client.listPacks().then(
+      (result) => {
+        if (!alive) return
+        setPacks(result)
+        setPackId((actual) => actual || result.find((p) => p.id === PACK_ID)?.id || result[0]?.id || '')
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
 
   // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
@@ -59,8 +81,11 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     setBusy(true)
     setError(null)
     try {
+      if (!option) throw new Error('Elige un pack para la mesa.')
       const provider = providerForNewTable(preset, defaultPreset)
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      // El pack declara el ruleset sin version (`fantasy-d20-lite`) y la mesa
+      // se crea con la que el motor implementa.
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: RULESET_ID, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -104,19 +129,27 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
         <label className="field">
           <span>Pack y sistema</span>
-          <select className="select" name="pack" value={option.id} onChange={() => undefined}>
-            {PACK_OPTIONS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {pack?.manifest.name ?? p.id} ({p.label}, {p.ruleset})
+          <select className="select" name="pack" value={packId} onChange={(e) => setPackId(e.target.value)} disabled={packs.length < 2}>
+            {packs.length === 0 ? <option value="">Cargando…</option> : null}
+            {packs.map((p) => (
+              <option key={`${p.id}@${p.version}`} value={p.id}>
+                {p.name} ({p.id}@{p.version}, {p.system})
               </option>
             ))}
           </select>
+          {option?.tagline ? <span className="hint">{option.tagline}</span> : null}
         </label>
 
         <div className="field">
           <span>Tu personaje</span>
           {packError ? <div className="error">{packError}</div> : null}
-          {pack ? <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone /> : <p className="hint">Cargando el pack...</p>}
+          {!bundled && option ? (
+            <p className="hint">Este pack se juega desde el servidor; los personajes se eligen al invitar.</p>
+          ) : pack ? (
+            <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
+          ) : (
+            <p className="hint">Cargando el pack...</p>
+          )}
         </div>
 
         {presets.length > 0 ? (

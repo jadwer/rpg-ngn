@@ -49,8 +49,24 @@ export interface OwnKey {
   verifiedAt: string | null
 }
 
+/** Un pack que el servidor puede jugar; se elige al crear la mesa. */
+export interface PackOption {
+  id: string
+  version: string
+  type: 'setting' | 'campaign'
+  /** Nombre de cara al jugador ("Los Nueve Viajeros"), no el id. */
+  name: string
+  tagline: string | null
+  /** Ruleset que el pack asume; la mesa se crea con el. */
+  system: string
+  characters: number
+  sessions: number
+}
+
 export interface SettingsApi {
   listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
+  /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
+  listPacks(): Promise<PackOption[]>
   /** Las claves propias del usuario: cuales hay, sin la credencial. */
   listOwnKeys(): Promise<OwnKey[]>
   /** Guarda la clave del usuario; el servidor la comprueba antes (422 si el proveedor la rechaza). */
@@ -70,6 +86,11 @@ export function settingsApi(request: Request): SettingsApi {
     async listDmPresets() {
       const { data } = await request<{ data: DmPreset[]; meta: { default: string } }>('/api/v1/dm/presets')
       return { presets: data.data, defaultPreset: data.meta.default }
+    },
+
+    async listPacks() {
+      const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
     },
 
     async listOwnKeys() {

@@ -39,6 +39,9 @@ export function createEngine(options: EngineOptions): Hono {
     await next()
   })
 
+  /** Los packs que este servidor puede jugar, para que la mesa se cree con uno de verdad. */
+  app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog() }))
+
   app.post('/v1/turns/resolve', async (c) => {
     const parsed = ResolveTurnRequest.safeParse(await c.req.json())
     if (!parsed.success) {

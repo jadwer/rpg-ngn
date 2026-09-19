@@ -1,7 +1,7 @@
 import { access, readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadPack, type FileSource, type LoadedPack } from '@rpg-ngn/content'
-import type { PackRef } from '@rpg-ngn/engine-contract'
+import type { PackRef, PackSummary } from '@rpg-ngn/engine-contract'
 
 /**
  * Los packs oficiales viven en disco junto al engine (`content/packs` del
@@ -12,6 +12,37 @@ export class PackStore {
   private readonly cache = new Map<string, Promise<LoadedPack>>()
 
   constructor(private readonly root: string) {}
+
+  /**
+   * Los packs que este servidor puede jugar, leyendo el manifiesto de cada
+   * carpeta. La plataforma lo usa para ofrecerlos al crear una mesa, en vez
+   * de que el cliente lleve la lista escrita a mano. Un pack que no carga se
+   * omite en vez de tumbar el catalogo: el resto sigue siendo jugable.
+   */
+  async catalog(): Promise<PackSummary[]> {
+    const dirs = await readdir(this.root, { withFileTypes: true }).then(
+      (e) => e.filter((x) => x.isDirectory()).map((x) => x.name),
+      () => [],
+    )
+
+    const packs: PackSummary[] = []
+    for (const id of dirs.sort()) {
+      const { pack } = await loadPack(fsSource(join(this.root, id)))
+      if (!pack) continue
+      const m = pack.manifest
+      packs.push({
+        id: m.id,
+        version: m.version,
+        type: m.type,
+        name: m.name,
+        tagline: m.tagline ?? null,
+        system: m.system,
+        characters: m.characters.length,
+        sessions: m.sessions.length,
+      })
+    }
+    return packs
+  }
 
   get(ref: PackRef): Promise<LoadedPack> {
     const key = `${ref.id}@${ref.version}`
