@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
+import { DICE_MODES, describePreset, diceModeHint, diceModeLabel, diceModeOf, savedProviderText, withDiceMode, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
@@ -30,6 +30,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
   const savedLint = typeof table.settings?.['lint'] === 'string' ? (table.settings['lint'] as string) : ''
   const [lint, setLint] = useState<string>(savedLint)
+  const [dice, setDice] = useState<DiceMode>(diceModeOf(table.settings))
 
   useEffect(() => {
     setPreset(saved?.preset ?? '')
@@ -91,7 +92,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
       const base = withProvider(table.settings, chosen)
       // Sin modo elegido se quita la clave: manda el del engine.
       const { lint: _previous, ...rest } = base
-      await client.updateTableSettings(table.id, lint === '' ? rest : { ...rest, lint })
+      const conLint = lint === '' ? rest : { ...rest, lint }
+      await client.updateTableSettings(table.id, withDiceMode(conLint, dice))
       setNotice({ ok: true, text: savedProviderText(chosen) })
       onChanged()
     })
@@ -124,6 +126,20 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
           </span>
         </label>
       ) : null}
+
+      <label className="field">
+        <span>Dados</span>
+        <select className="select" name="dice" value={dice} onChange={(e) => setDice(e.target.value as DiceMode)} disabled={disabled}>
+          {DICE_MODES.map((m) => (
+            <option key={m} value={m}>
+              {diceModeLabel(m)}
+            </option>
+          ))}
+        </select>
+        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+          {diceModeHint(dice)}
+        </span>
+      </label>
 
       <label className="field">
         <span>Secretos del pack</span>

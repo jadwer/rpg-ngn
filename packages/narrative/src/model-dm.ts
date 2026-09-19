@@ -1,6 +1,6 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId } from '@rpg-ngn/content'
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
-import { TurnBlock, type LintMode } from '@rpg-ngn/engine-contract'
+import { TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
@@ -149,7 +149,7 @@ export class ModelDMProvider implements DMProvider {
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
-    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom())
+    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom(), ctx.dice ?? 'table')
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -277,6 +277,7 @@ class LineInterpreter {
     private readonly party: string[],
     private readonly lintMode: LintMode,
     private readonly random: RandomSource,
+    private readonly diceMode: DiceMode,
   ) {
     this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
   }
@@ -493,7 +494,10 @@ class LineInterpreter {
         const actorId = refId(event.actor)
         if (!present(event.actor)) return null
         const { result, source: _source, advantage, disadvantage, ...rest } = event.resolved
-        if (result === undefined) {
+        // Con dados del motor, el numero que escriba un jugador no cuenta: se
+        // tira igual aqui. Sin esto, en una mesa en linea cualquiera escribe
+        // "tiro 20" y el engine lo da por bueno.
+        if (result === undefined || this.diceMode === 'engine') {
           // El DM pide la tirada y el engine la hace con su generador: el modelo nunca inventa el numero (regla 1).
           const d20 = /^1d20$/.test(rest.die) && (advantage || disadvantage)
           const rolled = d20 ? rollD20(this.random, { advantage, disadvantage }) : rollDice(rest.die, this.random)

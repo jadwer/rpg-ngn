@@ -69,6 +69,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       recentEvents,
       maxOutputTokens: request.budget?.maxOutputTokens,
       lint: request.lint ?? deps.lintMode,
+      dice: request.dice,
     })
     for await (const output of outputs) {
       if (output.kind === 'block') {

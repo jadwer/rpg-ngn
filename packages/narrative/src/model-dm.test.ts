@@ -293,6 +293,22 @@ describe('ModelDMProvider', () => {
     })
   })
 
+  it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
+    const base = await openSession003()
+    const transport = new FakeTransport(goodTurn)
+    const outputs = await collect(
+      new ModelDMProvider(transport, KEY, { random: seededRandom(7) }).narrate(
+        contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]), { dice: 'engine' }),
+      ),
+    )
+
+    const roll = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null)).find((e) => e?.['type'] === 'roll')
+    // El 14 que escribio el jugador no vale: la tirada la hizo el motor.
+    const resolved = roll?.['resolved'] as { source?: string; result?: number } | undefined
+    expect(resolved?.source).toBe('seed:7')
+    expect(resolved?.result).not.toBe(14)
+  })
+
   it('respeta el presupuesto de salida de la peticion', async () => {
     const base = await openSession003()
     const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Breve."}}')

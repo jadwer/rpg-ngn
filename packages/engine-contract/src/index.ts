@@ -125,6 +125,21 @@ export type TurnContext = z.infer<typeof TurnContext>
 export const LintMode = z.enum(['enforce', 'report', 'off'])
 export type LintMode = z.infer<typeof LintMode>
 
+/**
+ * Quien tira los dados de la mesa.
+ *
+ * `table` (por defecto): la mesa juega con dados reales, asi que un numero
+ * escrito por el jugador vale como tirada fisica. Es lo que pide el contrato
+ * de realidad para una partida presencial.
+ *
+ * `engine`: solo tira el servidor. El numero que escriba un jugador se
+ * ignora y la tirada se resuelve igual con el generador del motor. Es lo que
+ * corresponde cuando la mesa no se ve las caras, y lo unico honesto en
+ * cuanto haya roles ocultos: si no, cualquiera escribe "tiro 20".
+ */
+export const DiceMode = z.enum(['table', 'engine'])
+export type DiceMode = z.infer<typeof DiceMode>
+
 export const ResolveTurnRequest = z.strictObject({
   contract: ContractVersion,
   campaignId: z.string().min(1),
@@ -140,6 +155,7 @@ export const ResolveTurnRequest = z.strictObject({
   /** Opcional y sin subir la version: un campo nuevo opcional no rompe el contrato. */
   context: TurnContext.optional(),
   lint: LintMode.optional(),
+  dice: DiceMode.optional(),
 })
 export type ResolveTurnRequest = z.infer<typeof ResolveTurnRequest>
 

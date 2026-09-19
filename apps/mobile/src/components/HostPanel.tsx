@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { DiceModePanel } from './DiceModePanel'
 import { DmSettingsPanel } from './DmSettingsPanel'
 import { InvitePanel } from './InvitePanel'
 
@@ -142,6 +143,7 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
             <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </ScrollView>
         </View>
       </Modal>

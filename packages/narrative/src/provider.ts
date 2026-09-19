@@ -1,6 +1,6 @@
 import type { CampaignState } from '@rpg-ngn/campaign'
 import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
-import type { LintFinding, LintMode, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
+import type { DiceMode, LintFinding, LintMode, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
  * Lo que el DM recibe para narrar un turno. El estado completo llega tal
@@ -20,6 +20,8 @@ export interface DMTurnContext {
   maxOutputTokens?: number | undefined
   /** Lint de conocimiento (lint.ts); por defecto `enforce`. */
   lint?: LintMode | undefined
+  /** Quien tira los dados; por defecto `table` (se aceptan numeros del jugador). */
+  dice?: DiceMode | undefined
 }
 
 /**
