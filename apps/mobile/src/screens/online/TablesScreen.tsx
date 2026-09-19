@@ -1,6 +1,6 @@
-import { memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { memberOf, type ApiClient, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { characterName, memberTag, seatLabel } from '@rpg-ngn/ui-logic'
+import { characterNameFrom, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { FriendsPanel } from '../../components/FriendsPanel'
@@ -15,6 +15,10 @@ interface Props {
   loading: boolean
   error: string | null
   pack: LoadedPack | null
+  /** Catalogo del servidor, para nombrar el pack de cada mesa. */
+  packs?: readonly PackOption[]
+  /** Nombres de personaje de los packs que la app no lleva dentro. */
+  remoteNames?: Readonly<Record<string, string>>
   onOpen: (table: TableSummary) => void
   onCreate: () => void
   onRefresh: () => void
@@ -29,8 +33,8 @@ interface Props {
  * `host` se muestra como anfitrion. Al pie, los amigos fuera de la mesa
  * (solicitudes recibidas, busqueda por correo y lista), como en la web.
  */
-export function TablesScreen({ client, user, tables, loading, error, pack, onOpen, onCreate, onRefresh, onProfile, onLogout, onUnauthorized }: Props) {
-  const nameOf = (id: string) => characterName(pack, id) ?? id
+export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, onOpen, onCreate, onRefresh, onProfile, onLogout, onUnauthorized }: Props) {
+  const nameOf = (id: string) => characterNameFrom(pack, remoteNames, id)
   const sorted = tables ? [...tables].sort((a, b) => Number(b.id) - Number(a.id)) : null
 
   return (
@@ -68,7 +72,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, onOpe
                 <Text style={styles.badge}>{table.status === 'active' ? 'activa' : table.status}</Text>
               </View>
               <Text style={styles.role}>{seatLabel(me, nameOf)}</Text>
-              <Text style={styles.meta}>{`${table.packId}@${table.packVersion} · ${table.ruleset}${table.premise ? ' · con premisa' : ''}`}</Text>
+              <Text style={styles.meta}>{tableCardMeta(table, packs)}</Text>
               {others.length > 0 ? (
                 <View style={styles.party}>
                   {others.map((m) => (

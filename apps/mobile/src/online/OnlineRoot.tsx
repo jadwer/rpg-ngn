@@ -1,4 +1,4 @@
-import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type PackOption, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
@@ -49,6 +49,10 @@ export function OnlineRoot({ pack, onExit }: Props) {
   const [busy, setBusy] = useState(false)
   const [tables, setTables] = useState<TableSummary[] | null>(null)
   const [tablesError, setTablesError] = useState<string | null>(null)
+  // El catalogo del servidor y los nombres de personaje de los packs que la
+  // app no lleva dentro: sin esto las mesas enseñan ids y jerga del motor.
+  const [packs, setPacks] = useState<PackOption[]>([])
+  const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
 
   const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => tokenRef.current }), [])
 
@@ -60,12 +64,34 @@ export function OnlineRoot({ pack, onExit }: Props) {
     setStage({ name: 'connect', notice })
   }, [])
 
+  /**
+   * Nombre de pack y de personaje para las mesas que juegan algo que esta app
+   * no trae empaquetado. Es informativo: si falla, las mesas siguen abriendose
+   * y solo se lee el id, que es lo que pasaba antes.
+   */
+  const completarNombres = useCallback(
+    async (client: ApiClient, lista: readonly TableSummary[]) => {
+      const catalogo = await client.listPacks().catch(() => null)
+      if (!catalogo) return
+      setPacks(catalogo)
+      const usados = new Set(lista.map((t) => t.packId))
+      const nombres: Record<string, string> = {}
+      for (const p of catalogo.filter((p) => p.id !== pack.manifest.id && usados.has(p.id))) {
+        for (const c of await client.listPackCharacters(p.id, p.version).catch(() => [])) nombres[c.id] = c.name
+      }
+      if (Object.keys(nombres).length > 0) setRemoteNames((actual) => ({ ...actual, ...nombres }))
+    },
+    [pack],
+  )
+
   const loadTables = useCallback(
     async (client: ApiClient) => {
       setBusy(true)
       setTablesError(null)
       try {
-        setTables(await client.listTables())
+        const lista = await client.listTables()
+        setTables(lista)
+        void completarNombres(client, lista)
       } catch (caught) {
         if (caught instanceof ApiError && caught.isUnauthorized) {
           unauthorized()
@@ -76,7 +102,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
         setBusy(false)
       }
     },
-    [unauthorized],
+    [unauthorized, completarNombres],
   )
 
   /** Entrar con un token recien emitido (login o registro): se recuerda y se pasa a las mesas. */
@@ -227,6 +253,8 @@ export function OnlineRoot({ pack, onExit }: Props) {
         loading={busy}
         error={tablesError}
         pack={pack}
+        packs={packs}
+        remoteNames={remoteNames}
         onOpen={(table) => setStage({ name: 'table', table })}
         onCreate={() => setStage({ name: 'new-table' })}
         onRefresh={() => void loadTables(session.client)}
@@ -274,6 +302,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
       me={me}
       user={session.user}
       pack={stage.table.packId === pack.manifest.id ? pack : null}
+      remoteNames={remoteNames}
       onBack={() => {
         setStage({ name: 'tables' })
         void loadTables(session.client)

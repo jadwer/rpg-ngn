@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, memberOf, type ApiClient, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { characterName, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
+import { characterNameFrom, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FriendsPanel } from '../../components/FriendsPanel'
@@ -72,7 +72,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
     }
   }, [client, packIds])
 
-  const nameOf = (id: string) => characterName(pack, id) ?? remoteNames[id] ?? id
+  const nameOf = (id: string) => characterNameFrom(pack, remoteNames, id)
 
   return (
     <main className="page">

@@ -3,7 +3,7 @@
 import { ApiError, memberOf, randomKey, type ApiClient, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterName, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
@@ -22,6 +22,8 @@ interface Props {
   table: TableSummary
   user: StoredUser
   pack: LoadedPack | null
+  /** Nombres de personaje cuando la mesa juega un pack que la web no trae. */
+  remoteNames?: Readonly<Record<string, string>>
   onTableChanged: () => void
   onUnauthorized: () => void
 }
@@ -33,7 +35,7 @@ const EMPTY: never[] = []
  * cuadro de respuesta, cierre de turno, mando del anfitrion, fichas con el
  * estado vivo, voz y modo pantalla para compartir.
  */
-export function TableScreen({ client, table, user, pack, onTableChanged, onUnauthorized }: Props) {
+export function TableScreen({ client, table, user, pack, remoteNames = {}, onTableChanged, onUnauthorized }: Props) {
   const campaignId = table.campaignId
   const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
   const narrator = useNarrator()
@@ -62,7 +64,7 @@ export function TableScreen({ client, table, user, pack, onTableChanged, onUnaut
   const tts = useTts(blocks)
   const turn = snapshot?.turn ?? null
   const progress = useMemo(() => turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }), [turn, viewer.role, viewer.characterId])
-  const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
+  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
   const headSeq = snapshot?.campaign.headSeq ?? 0
   const sessionCode = snapshot?.session?.code ?? null
 

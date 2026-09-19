@@ -1,6 +1,6 @@
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
+import { characterNameFrom, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
 
 const pack = (over: Partial<PackOption> = {}): PackOption => ({
   id: 'pilot',
@@ -44,6 +44,19 @@ describe('table-copy', () => {
     // Sin lema, al menos se dice con qué sistema se juega.
     expect(packSummaryText(pack({ tagline: null }))).toContain('Sistema fantasy-d20-lite')
     expect(packSummaryText(null)).toBeNull()
+  })
+
+  it('el nombre remoto gana cuando el cliente no lleva ese pack dentro', () => {
+    const piloto = { characters: new Map([['narivyl', { name: 'Narivyl' }]]) }
+    const remoto = { shiho: 'Shiho' }
+
+    // Lo que se veia en produccion: "juegas a shiho", con el id en minuscula.
+    expect(characterNameFrom(piloto, remoto, 'shiho')).toBe('Shiho')
+    // El pack empaquetado sigue mandando sobre el catalogo remoto.
+    expect(characterNameFrom(piloto, { narivyl: 'Otro' }, 'narivyl')).toBe('Narivyl')
+    // Sin nadie que lo conozca, el id es lo unico que queda.
+    expect(characterNameFrom(piloto, {}, 'nadie')).toBe('nadie')
+    expect(characterNameFrom(null, remoto, 'shiho')).toBe('Shiho')
   })
 
   it('la tarjeta de mesa dice el nombre del pack, no su id y version', () => {

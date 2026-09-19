@@ -18,6 +18,9 @@ export default function TablePage() {
 function TableLoader({ client, user, tableId, unauthorized }: { client: ApiClient; user: StoredUser; tableId: string; unauthorized: (notice?: string) => void }) {
   const { pack } = usePack()
   const [table, setTable] = useState<TableSummary | null>(null)
+  // Nombres de personaje de un pack que esta web no lleva dentro, para que la
+  // mesa no hable de "shiho" cuando el personaje se llama Shiho.
+  const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -32,6 +35,22 @@ function TableLoader({ client, user, tableId, unauthorized }: { client: ApiClien
   useEffect(() => {
     void load()
   }, [load])
+
+  const ajeno = table && table.packId !== pack?.manifest.id ? table : null
+  useEffect(() => {
+    if (!ajeno) return
+    let alive = true
+    void client.listPackCharacters(ajeno.packId, ajeno.packVersion).then(
+      (personajes) => {
+        if (!alive) return
+        setRemoteNames(Object.fromEntries(personajes.map((c) => [c.id, c.name])))
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, ajeno?.packId, ajeno?.packVersion])
 
   if (error) {
     return (
@@ -59,5 +78,16 @@ function TableLoader({ client, user, tableId, unauthorized }: { client: ApiClien
       </main>
     )
   }
-  return <TableScreen key={table.id} client={client} table={table} user={user} pack={table.packId === pack?.manifest.id ? pack : null} onTableChanged={() => void load()} onUnauthorized={unauthorized} />
+  return (
+    <TableScreen
+      key={table.id}
+      client={client}
+      table={table}
+      user={user}
+      pack={table.packId === pack?.manifest.id ? pack : null}
+      remoteNames={remoteNames}
+      onTableChanged={() => void load()}
+      onUnauthorized={unauthorized}
+    />
+  )
 }

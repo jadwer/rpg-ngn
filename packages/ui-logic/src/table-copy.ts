@@ -8,6 +8,23 @@ import type { PackOption } from '@rpg-ngn/api-client'
  * a jugar. Un ejemplo que habla de otro mundo confunde mas que ayudar.
  */
 
+/**
+ * Nombre de un personaje cuando la mesa puede jugar un pack que el cliente no
+ * lleva empaquetado.
+ *
+ * `characterName` cae en el id cuando el pack no lo conoce, asi que encadenarle
+ * un `?? remoto[id]` no sirve de nada: nunca devuelve null y el nombre remoto
+ * jamas gana. Aqui el orden esta explicito, que es lo que hacia falta para que
+ * la mesa no diga "juegas a shiho".
+ */
+export function characterNameFrom(
+  local: { characters: { get(id: string): { name: string } | undefined } } | null,
+  remote: Readonly<Record<string, string>>,
+  id: string,
+): string {
+  return local?.characters.get(id)?.name ?? remote[id] ?? id
+}
+
 /** Nombre sugerido para la mesa, a partir del pack. */
 export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): string {
   return pack ? `${pack.name}, sábado` : 'La mesa del sábado'

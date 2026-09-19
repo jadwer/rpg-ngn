@@ -1,7 +1,7 @@
 import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterName, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -24,6 +24,8 @@ interface Props {
   user: StoredUser
   /** Pack empaquetado si coincide con el de la mesa; sin el no hay retratos ni nombres. */
   pack: LoadedPack | null
+  /** Nombres de personaje cuando la mesa juega un pack que la app no trae. */
+  remoteNames?: Readonly<Record<string, string>>
   onBack: () => void
   /** La mesa cambio (invitacion nueva): que el padre la recargue. */
   onTableChanged: () => void
@@ -39,7 +41,7 @@ const NEAR_BOTTOM = 160
  * el estado vivo de las proyecciones. El DM es la IA; el anfitrion es la
  * persona con el asiento `host` de la API.
  */
-export function TableScreen({ client, table, me, user, pack, onBack, onTableChanged, onUnauthorized }: Props) {
+export function TableScreen({ client, table, me, user, pack, remoteNames = {}, onBack, onTableChanged, onUnauthorized }: Props) {
   const campaignId = table.campaignId
   const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
   const narrator = useNarrator()
@@ -65,7 +67,7 @@ export function TableScreen({ client, table, me, user, pack, onBack, onTableChan
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
-  const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
+  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
   const sessionCode = snapshot?.session?.code ?? null
   const headSeq = snapshot?.campaign.headSeq ?? 0
 
