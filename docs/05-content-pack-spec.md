@@ -55,6 +55,13 @@ Notas:
 - `stats` usa las seis caracteristicas clasicas en espanol abreviado (fue, des, con, int, sab, car), valores 3 a 20.
 - `hp` y `ac` son valores de nivel 1. En el pack piloto fueron derivados por clase; la lamina original no los traia.
 - `portrait` es una ruta relativa al pack o null.
+- **Estandar de retrato (2026-09-19): cuadrado de 512x512, WebP (calidad
+  82), encuadrado en cara y hombros con la cara en el tercio superior.** Los
+  tres clientes pintan el retrato como un cuadrado con recorte centrado, de 24
+  a 96 px de lado (hasta unos 200 en los selectores), asi que un retrato
+  vertical pierde la cabeza y uno mas grande solo pesa. JPG se acepta por
+  compatibilidad (el piloto sigue en 512x512 JPG hasta su paso a WebP). De una
+  lamina de varios personajes se sacan con `tools/packs/crop-portraits.py`.
 - `skills` y `roles` son texto libre en v0; en fase 1 se normalizan a catalogos.
 
 ### attacks y abilities
