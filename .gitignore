@@ -4,7 +4,9 @@ dm/
 # Packs privados: el repo publico solo admite contenido original o licenciado
 # redistribuible (docs/07). Un pack basado en obra ajena vive aqui, se juega
 # en local o en el servidor, y no se publica ni se distribuye.
-content/packs/private-*/
+content/packs/private-*
+# Laminas de packs privados (el pack vive en su repo; aqui solo se recortan)
+img/ElTeQueNadieProbo/
 
 # Overrides personales de configuracion Claude (el settings.json del equipo si se versiona)
 .claude/settings.local.json

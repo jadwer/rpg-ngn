@@ -57,9 +57,16 @@ export async function validateRepo(root: string): Promise<ValidationReport> {
 
 async function subdirectories(dir: string): Promise<string[]> {
   try {
-    const entries = await readdir(dir, { withFileTypes: true })
-    const dirs = entries.filter((entry) => entry.isDirectory()).map((entry) => join(dir, entry.name))
-    const checked = await Promise.all(dirs.map(async (d) => ((await stat(d)).isDirectory() ? d : null)))
+    // Sin `withFileTypes`: `isDirectory()` da false para un enlace simbolico
+    // y los packs privados se enlazan desde su propio repo. `stat` sigue el
+    // enlace, que es lo que interesa.
+    const names = await readdir(dir)
+    const checked = await Promise.all(
+      names.map(async (name) => {
+        const full = join(dir, name)
+        return (await stat(full).then((s) => s.isDirectory(), () => false)) ? full : null
+      }),
+    )
     return checked.filter((d): d is string => d !== null).sort()
   } catch {
     return []

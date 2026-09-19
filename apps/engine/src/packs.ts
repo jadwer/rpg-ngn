@@ -1,4 +1,4 @@
-import { access, readdir, readFile } from 'node:fs/promises'
+import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadPack, type FileSource, type LoadedPack } from '@rpg-ngn/content'
 import type { PackRef, PackSummary } from '@rpg-ngn/engine-contract'
@@ -20,10 +20,18 @@ export class PackStore {
    * omite en vez de tumbar el catalogo: el resto sigue siendo jugable.
    */
   async catalog(): Promise<PackSummary[]> {
-    const dirs = await readdir(this.root, { withFileTypes: true }).then(
-      (e) => e.filter((x) => x.isDirectory()).map((x) => x.name),
-      () => [],
+    // `withFileTypes` da false en `isDirectory()` para un enlace simbolico,
+    // y los packs privados se enlazan desde su propio repo. `stat` sigue el
+    // enlace, que es lo que interesa: importa que haya un pack detras.
+    const entries = await readdir(this.root).then(
+      (names) => names,
+      () => [] as string[],
     )
+    const dirs: string[] = []
+    for (const name of entries) {
+      const isDir = await stat(join(this.root, name)).then((s) => s.isDirectory(), () => false)
+      if (isDir) dirs.push(name)
+    }
 
     const packs: PackSummary[] = []
     for (const id of dirs.sort()) {
