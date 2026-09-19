@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
+import { PUBLIC_SERVER_URL } from '../../online/storage'
 import { theme } from '../../theme'
 
 interface Props {
@@ -57,7 +58,7 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
         ) : (
           <>
             <Text style={styles.hint}>Escribe tu correo y, si el servidor tiene el correo configurado, te llegará un enlace para cambiar la contraseña.</Text>
-            <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://IP-de-la-laptop:8010" />
+            <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
             <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoFocus onSubmitEditing={() => void submit()} />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <Button label="Enviar enlace" primary busy={busy} disabled={!canSubmit} onPress={() => void submit()} />

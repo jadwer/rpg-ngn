@@ -12,16 +12,31 @@ import * as SecureStore from 'expo-secure-store'
  */
 const API_PORT = 8010
 
+/** El servidor de verdad. Es a donde va la app salvo que se le diga otra cosa. */
+export const PUBLIC_SERVER_URL = 'https://rpg-worlds.gabinoramirez.com'
+
 /**
- * URL por defecto de la API. En desarrollo la laptop que sirve Metro es la
- * misma que corre la API, asi que se toma la IP con la que el telefono llego
- * al bundle (`hostUri`, por ejemplo `192.168.100.11:8081`) y se cambia el
- * puerto; un cambio de DHCP ya no deja la app apuntando a una IP vieja. Sin
- * Metro (build de tienda) queda el servidor publico, que hoy no existe.
+ * URL por defecto de la API: **el servidor publico**.
+ *
+ * Antes se derivaba de `hostUri` de Metro para apuntar a la laptop que
+ * servia el bundle, porque no habia otro sitio al que ir. Desde que existe
+ * rpg-worlds, eso solo confundia: quien abre la app espera entrar a su mesa,
+ * no montar un servidor.
+ *
+ * Para desarrollar contra la laptop se pone `EXPO_PUBLIC_API_URL` en el
+ * `.env` de la app, o se escribe la direccion en "Cambiar servidor". Lo que
+ * se escriba a mano manda sobre esto (lo guarda `setServerUrl`).
  */
 export function defaultServerUrl(): string {
+  const configured = process.env['EXPO_PUBLIC_API_URL']
+  if (typeof configured === 'string' && configured.trim() !== '') return configured.trim()
+  return PUBLIC_SERVER_URL
+}
+
+/** La API en la maquina que sirve el bundle, para desarrollar en LAN. */
+export function metroServerUrl(): string | null {
   const host = Constants.expoConfig?.hostUri?.split(':')[0]
-  return host ? `http://${host}:${API_PORT}` : 'http://127.0.0.1:8010'
+  return host ? `http://${host}:${API_PORT}` : null
 }
 
 export const DEFAULT_SERVER_URL = defaultServerUrl()
@@ -51,11 +66,25 @@ async function write(key: string, value: string | null): Promise<void> {
   }
 }
 
+/**
+ * Una direccion de red local (la laptop de alguien) que quedo guardada de
+ * cuando no habia servidor publico. Esas IP las reparte el router y cambian,
+ * asi que apuntan a un sitio que ya no responde: mejor volver al servidor.
+ */
+function isStaleLocalUrl(url: string): boolean {
+  return /^https?:\/\/(127\.0\.0\.1|localhost|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(url)
+}
+
 export const storage = {
   async serverUrl(): Promise<string> {
-    return (await read(KEYS.serverUrl)) ?? defaultServerUrl()
+    const saved = await read(KEYS.serverUrl)
+    if (saved && !isStaleLocalUrl(saved)) return saved
+    // Se descarta en silencio: quien de verdad juegue en LAN puede volver a
+    // escribirla en "Cambiar servidor".
+    if (saved) await write(KEYS.serverUrl, null)
+    return defaultServerUrl()
   },
-  /** Solo persiste una URL escrita a mano; la derivada de Metro se recalcula en cada arranque. */
+  /** Solo persiste una URL escrita a mano; la de por defecto no se guarda. */
   setServerUrl: (url: string) => write(KEYS.serverUrl, url === defaultServerUrl() ? null : url),
 
   token: () => read(KEYS.token),

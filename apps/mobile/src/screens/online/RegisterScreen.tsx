@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
+import { PUBLIC_SERVER_URL } from '../../online/storage'
 import { theme } from '../../theme'
 
 interface Props {
@@ -45,7 +46,7 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
         <View style={styles.spacer} />
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://IP-de-la-laptop:8010" />
+        <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
         <Field label="Tu nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" placeholder="Como te verán en la mesa" maxLength={80} autoFocus />
         <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" />
         <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint="Al menos 8 caracteres." />
