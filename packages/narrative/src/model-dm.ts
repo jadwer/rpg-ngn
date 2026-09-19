@@ -196,6 +196,10 @@ export class ModelDMProvider implements DMProvider {
       }
       if (buffer.trim() !== '') yield* interpreter.line(buffer)
       yield* interpreter.finish()
+      // Con DM_LOG_RAW=1 el engine deja en su log lo que el modelo dijo tal
+      // cual. Es la unica forma de afinar un prompt sin adivinar; nunca en
+      // produccion con mesas ajenas, porque el texto lleva la escena entera.
+      if (wantsRawLog()) console.warn(`[dm raw ${this.transport.kind}/${this.transport.model}]\n${raw}\n[/dm raw]`)
     } catch (error) {
       throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
     }
@@ -319,7 +323,9 @@ class LineInterpreter {
 
   *line(rawLine: string): Generator<DMOutput> {
     const text = rawLine.trim()
-    if (text === '' || text.startsWith('```')) return
+    // Fences de markdown y etiquetas sueltas (`<json>`, `</output>`) con las
+    // que algunos modelos envuelven la salida: no son ni bloque ni evento.
+    if (text === '' || text.startsWith('```') || /^<\/?[a-z][\w-]*>$/i.test(text)) return
 
     // Un objeto o array que empezo en una linea anterior y sigue aqui (JSON con formato).
     if (this.pending !== null) {
@@ -564,4 +570,10 @@ class LineInterpreter {
         return { ...event, visibility: { layer: 'campaign', witnesses } }
     }
   }
+}
+
+/** Solo con `DM_LOG_RAW=1` en el entorno del engine; los packages no importan node, asi que se mira el global. */
+function wantsRawLog(): boolean {
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
+  return env?.['DM_LOG_RAW'] === '1'
 }

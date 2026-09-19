@@ -135,7 +135,11 @@ const COMPACT_EVENTS_MARK = 'Eventos permitidos'
 
 const INTRIGUE_EVENTS = `# Eventos que puedes proponer
 
-Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Lo normal es proponer entre 0 y 2 por turno. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". En esta corte no hay puntos de vida ni combate: lo que se gana y se pierde es crédito, sospecha y pistas. Usa solo estas formas, exactamente con estas claves:
+Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". En esta corte no hay puntos de vida ni combate: lo que se gana y se pierde es crédito, sospecha y pistas, y eso solo existe si lo registras. Reglas de esta mesa:
+- Cada vez que un personaje averigua algo nuevo en la escena (una marca, un nombre que no cuadra, un objeto fuera de sitio, una mentira detectada), registra la pista con "clue" en ESE MISMO turno, con una frase corta y concreta. Un turno de investigación en el que se descubre algo y no hay ningún evento "clue" es un turno mal cerrado.
+- Si alguien lo ve donde no debía, pregunta de más o lo pillan mintiendo, sube "suspicion". Si alguien lo cubre o se gana a un superior, baja.
+- Si se gana o pierde el favor de la corte (un aliado nuevo, una puerta que se cierra), mueve "standing".
+Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas formas, exactamente con estas claves:
 
 - Tirada que pides y el motor resuelve (sin "result"; "kind" es fortune, skill, social, save u other; "advantage" o "disadvantage" opcionales para 1d20):
   {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
@@ -160,7 +164,7 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
 
 No propongas "hp": aquí nadie tiene puntos de vida; un envenenamiento es una condición. Los ids de personaje son los de la party ("character:<id>"). Si no estás seguro de poder llenar un evento correctamente, no lo propongas: la narración basta.`
 
-const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es crédito, sospecha y pistas):
+const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es crédito, sospecha y pistas. Cada cosa que un personaje averigua se registra con "clue" en el mismo turno; quien es visto donde no debía sube "suspicion"):
 {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
 {"type":"state_change","actor":"character:shiho","effects":[{"op":"standing","who":"character:shiho","delta":-1}]}
 {"type":"state_change","actor":"character:ryomen","effects":[{"op":"suspicion","who":"character:ryomen","delta":2}]}
