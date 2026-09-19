@@ -229,6 +229,24 @@ export const PackSummary = z.strictObject({
 })
 export type PackSummary = z.infer<typeof PackSummary>
 
+/**
+ * Un personaje jugable de un pack, para elegirlo al crear la mesa o al
+ * invitar. Es lo justo para pintar la tarjeta: el resto de la ficha lo da la
+ * proyeccion cuando ya se juega.
+ */
+export const PackCharacter = z.strictObject({
+  id: KebabId,
+  name: z.string().min(1),
+  /** Raza y clase, o lo que el pack use para describirse en una linea. */
+  race: z.string(),
+  characterClass: z.string(),
+  quote: z.string(),
+  roles: z.array(z.string()),
+  /** Ruta del retrato dentro del pack, o null. */
+  portrait: z.string().nullable(),
+})
+export type PackCharacter = z.infer<typeof PackCharacter>
+
 export const TurnUsage = z.strictObject({
   inputTokens: z.number().int().nonnegative(),
   outputTokens: z.number().int().nonnegative(),

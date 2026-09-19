@@ -42,6 +42,33 @@ export function createEngine(options: EngineOptions): Hono {
   /** Los packs que este servidor puede jugar, para que la mesa se cree con uno de verdad. */
   app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog() }))
 
+  /** Personajes jugables de un pack, para elegir al crear mesa o invitar. */
+  app.get('/v1/packs/:id/:version/characters', async (c) => {
+    try {
+      return c.json({ characters: await options.packs.characters({ id: c.req.param('id'), version: c.req.param('version') }) })
+    } catch (error) {
+      return c.json({ error: error instanceof Error ? error.message : String(error) }, 404)
+    }
+  })
+
+  /**
+   * Un retrato del pack. La web lleva los del piloto empaquetados, pero los
+   * de un pack instalado en el servidor solo los tiene el engine.
+   */
+  app.get('/v1/packs/:id/portraits/:file', async (c) => {
+    const file = c.req.param('file')
+    // Solo un nombre de archivo: nada de subir por el arbol.
+    if (!/^[a-z0-9][a-z0-9._-]*\.(jpg|jpeg|png|webp)$/i.test(file)) {
+      return c.json({ error: 'nombre de retrato invalido' }, 400)
+    }
+    const bytes = await options.packs.portrait(c.req.param('id'), file)
+    if (!bytes) return c.json({ error: 'retrato no encontrado' }, 404)
+    const type = file.toLowerCase().endsWith('.png') ? 'image/png' : file.toLowerCase().endsWith('.webp') ? 'image/webp' : 'image/jpeg'
+    c.header('Content-Type', type)
+    c.header('Cache-Control', 'public, max-age=86400')
+    return c.body(bytes as unknown as ArrayBuffer)
+  })
+
   app.post('/v1/turns/resolve', async (c) => {
     const parsed = ResolveTurnRequest.safeParse(await c.req.json())
     if (!parsed.success) {

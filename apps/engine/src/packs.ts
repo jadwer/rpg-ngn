@@ -1,7 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadPack, type FileSource, type LoadedPack } from '@rpg-ngn/content'
-import type { PackRef, PackSummary } from '@rpg-ngn/engine-contract'
+import type { PackCharacter, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
 
 /**
  * Los packs oficiales viven en disco junto al engine (`content/packs` del
@@ -50,6 +50,34 @@ export class PackStore {
       })
     }
     return packs
+  }
+
+  /**
+   * Los personajes jugables de un pack. La web lleva el pack piloto
+   * empaquetado, pero de los demas no sabe nada: sin esto, quien crea una
+   * mesa con otro pack no puede elegir personaje.
+   */
+  async characters(ref: PackRef): Promise<PackCharacter[]> {
+    const pack = await this.get(ref)
+    return [...pack.characters.values()].map((c) => ({
+      id: c.id,
+      name: c.name,
+      race: c.race,
+      characterClass: c.class,
+      quote: c.quote,
+      roles: c.roles,
+      portrait: c.portrait ?? null,
+    }))
+  }
+
+  /**
+   * Los bytes de un retrato, o null si no esta. `file` ya viene validado
+   * como nombre simple por quien llama.
+   */
+  async portrait(packId: string, file: string): Promise<Buffer | null> {
+    // `packId` viene de la URL: se limita a un id de pack, sin separadores.
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(packId)) return null
+    return readFile(join(this.root, packId, 'portraits', file)).catch(() => null)
   }
 
   get(ref: PackRef): Promise<LoadedPack> {

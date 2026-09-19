@@ -1,11 +1,12 @@
 'use client'
 
-import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { packCharacters, presetOptionLabel, providerForNewTable, selectablePresets } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
+import { RemoteCharacterPicker } from '../../../components/RemoteCharacterPicker'
 import { RequireSession } from '../../../components/RequireSession'
 import { UserBar } from '../../../components/UserBar'
 import { PACK_ID, RULESET_ID } from '../../../lib/pack'
@@ -26,6 +27,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const { pack, error: packError } = usePack()
   const [packs, setPacks] = useState<PackOption[]>([])
   const [packId, setPackId] = useState('')
+  const [remoteCharacters, setRemoteCharacters] = useState<PackCharacter[]>([])
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
@@ -58,6 +60,24 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       alive = false
     }
   }, [client])
+
+  // De un pack que la web no lleva dentro, los personajes los da el servidor.
+  useEffect(() => {
+    if (!option || option.id === PACK_ID) {
+      setRemoteCharacters([])
+      return
+    }
+    let alive = true
+    void client.listPackCharacters(option.id, option.version).then(
+      (result) => {
+        if (alive) setRemoteCharacters(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, option])
 
   // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
@@ -144,7 +164,11 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           <span>Tu personaje</span>
           {packError ? <div className="error">{packError}</div> : null}
           {!bundled && option ? (
-            <p className="hint">Este pack se juega desde el servidor; los personajes se eligen al invitar.</p>
+            remoteCharacters.length > 0 ? (
+              <RemoteCharacterPicker packId={option.id} characters={remoteCharacters} value={characterId} onChange={setCharacterId} allowNone />
+            ) : (
+              <p className="hint">Cargando los personajes del pack...</p>
+            )
           ) : pack ? (
             <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
           ) : (

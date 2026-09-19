@@ -64,6 +64,18 @@ export interface PackOption {
 }
 
 /** Un paquete de creditos de prepago. `amount` va en la unidad menor (centavos). */
+/** Un personaje jugable de un pack del servidor, para elegirlo al crear mesa. */
+export interface PackCharacter {
+  id: string
+  name: string
+  race: string
+  characterClass: string
+  quote: string
+  roles: string[]
+  /** Ruta dentro del pack; se pinta con `packPortraitUrl`. */
+  portrait: string | null
+}
+
 export interface CreditPack {
   id: string
   name: string
@@ -94,6 +106,8 @@ export interface SettingsApi {
   listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
+  /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
+  listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
   /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
   listCredits(): Promise<{ packs: CreditPack[]; balance: CreditBalance; publishableKey: string }>
   /** Arranca la compra: devuelve el clientSecret para confirmar contra Stripe. Los turnos los suma el webhook. */
@@ -121,6 +135,11 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPacks() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
+    },
+
+    async listPackCharacters(packId, version) {
+      const { data } = await request<{ data: PackCharacter[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/characters`)
       return data.data
     },
 
@@ -186,4 +205,13 @@ export function withProvider(settings: Record<string, unknown> | null | undefine
   const { provider: _previous, ...rest } = settings ?? {}
   if (!choice) return rest
   return { ...rest, provider: choice.model ? { preset: choice.preset, model: choice.model } : { preset: choice.preset } }
+}
+
+/** URL del retrato de un pack servido por la API (los del piloto van empaquetados). */
+export function packPortraitUrl(packId: string, portrait: string | null | undefined): string | null {
+  if (!portrait) return null
+  // El pack guarda `portraits/shiho.jpg`; la ruta sirve solo el nombre.
+  const file = portrait.split('/').pop()
+  if (!file) return null
+  return `/api/v1/packs/${encodeURIComponent(packId)}/portraits/${encodeURIComponent(file)}`
 }
