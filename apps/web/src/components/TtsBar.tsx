@@ -49,10 +49,15 @@ export function TtsBar({ tts }: { tts: Tts }) {
           Parar
         </button>
       ) : null}
+      {/*
+        En el telefono todo esto se esconde (`.tts-fino`, globals.css): son
+        ajustes finos de lectura y, apilados, empujaban la narracion fuera de
+        la primera pantalla. Los mismos estan completos en /ajustes.
+      */}
       <label className="sr-only" htmlFor="tts-voice">
         Voz
       </label>
-      <select id="tts-voice" className="select" value={tts.voiceUri ?? ''} onChange={(e) => tts.setVoiceUri(e.target.value || null)} disabled={tts.voices.length === 0} title="Voz del navegador en el idioma de lectura">
+      <select id="tts-voice" className="select tts-fino" value={tts.voiceUri ?? ''} onChange={(e) => tts.setVoiceUri(e.target.value || null)} disabled={tts.voices.length === 0} title="Voz del navegador en el idioma de lectura">
         {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? 'Sin voces en este idioma' : 'Cargando voces...'}</option> : null}
         {tts.voices.map((voice) => (
           <option key={voice.uri} value={voice.uri}>
@@ -60,28 +65,28 @@ export function TtsBar({ tts }: { tts: Tts }) {
           </option>
         ))}
       </select>
-      <label className="rate" title="Velocidad de lectura">
+      <label className="rate tts-fino" title="Velocidad de lectura">
         <span>Velocidad</span>
         <input type="range" min={0.7} max={1.4} step={0.05} value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} />
         <span>{tts.rate.toFixed(2)}x</span>
       </label>
-      <label className="check">
+      <label className="check tts-fino">
         <input type="checkbox" checked={tts.autoRead} onChange={(e) => tts.setAutoRead(e.target.checked)} />
         Leer lo nuevo
       </label>
       {narrator.label ? <span className="status narrating">{narrator.label}</span> : null}
-      <span className={`status${summary.warn ? ' warn' : ''}`}>{summary.text}</span>
+      <span className={`status tts-fino${summary.warn ? ' warn' : ''}`}>{summary.text}</span>
       {warnNobody ? (
-        <button type="button" className="btn ghost small" onClick={narrator.dismiss} title="Quitar el aviso de que nadie narra">
+        <button type="button" className="btn ghost small tts-fino" onClick={narrator.dismiss} title="Quitar el aviso de que nadie narra">
           Jugamos leyendo
         </button>
       ) : null}
       {narrator.flag.dismissed && !narrator.flag.someoneNarrating && !active ? (
-        <button type="button" className="btn ghost small" onClick={narrator.restore} title="Volver a avisar si nadie narra">
+        <button type="button" className="btn ghost small tts-fino" onClick={narrator.restore} title="Volver a avisar si nadie narra">
           Avisar si nadie narra
         </button>
       ) : null}
-      <Link href="/ajustes" className="btn ghost small" title="Voz por defecto, idioma, velocidad y tono">
+      <Link href="/ajustes" className="btn ghost small tts-fino" title="Voz por defecto, idioma, velocidad y tono">
         Ajustes
       </Link>
     </div>

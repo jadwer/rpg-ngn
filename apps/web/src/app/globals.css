@@ -1811,8 +1811,30 @@ a.plain {
     gap: 6px 10px;
   }
 
-  .tts .select {
-    max-width: 150px;
+  /*
+    En el telefono la barra de voz se queda en lo justo para leer: Leer,
+    Pausa, Siguiente y Parar. Los ajustes finos (voz, velocidad, leer lo
+    nuevo, avisos de narrador y el enlace a Ajustes) se apilaban encima de
+    la narracion y dejaban la mesa injugable: habia que bajar media pantalla
+    de controles para llegar al primer parrafo. Estan enteros en /ajustes.
+  */
+  .tts .tts-fino {
+    display: none;
+  }
+
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* La franja no crece: si algo no cabe, se arrastra de lado. */
+    scrollbar-width: none;
+  }
+
+  .toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toolbar > * {
+    flex: 0 0 auto;
   }
 
   .blocks {

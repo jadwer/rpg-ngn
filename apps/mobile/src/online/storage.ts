@@ -1,6 +1,7 @@
 import { parseVoiceSettings, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
+import { isUnusableServerUrl, PUBLIC_SERVER_URL } from './server-url'
 
 /**
  * Lo que la app recuerda entre arranques: la URL del servidor, el token de
@@ -12,8 +13,7 @@ import * as SecureStore from 'expo-secure-store'
  */
 const API_PORT = 8010
 
-/** El servidor de verdad. Es a donde va la app salvo que se le diga otra cosa. */
-export const PUBLIC_SERVER_URL = 'https://rpg-worlds.gabinoramirez.com'
+export { PUBLIC_SERVER_URL }
 
 /**
  * URL por defecto de la API: **el servidor publico**.
@@ -66,19 +66,10 @@ async function write(key: string, value: string | null): Promise<void> {
   }
 }
 
-/**
- * Una direccion de red local (la laptop de alguien) que quedo guardada de
- * cuando no habia servidor publico. Esas IP las reparte el router y cambian,
- * asi que apuntan a un sitio que ya no responde: mejor volver al servidor.
- */
-function isStaleLocalUrl(url: string): boolean {
-  return /^https?:\/\/(127\.0\.0\.1|localhost|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(url)
-}
-
 export const storage = {
   async serverUrl(): Promise<string> {
     const saved = await read(KEYS.serverUrl)
-    if (saved && !isStaleLocalUrl(saved)) return saved
+    if (saved && !isUnusableServerUrl(saved)) return saved
     // Se descarta en silencio: quien de verdad juegue en LAN puede volver a
     // escribirla en "Cambiar servidor".
     if (saved) await write(KEYS.serverUrl, null)
