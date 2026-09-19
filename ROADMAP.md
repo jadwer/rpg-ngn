@@ -125,14 +125,42 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 - 6b: `apps/host` para modelos locales (Ollama). Mientras, Ollama en la LAN entra por el preset `ollama` (endpoint compatible con OpenAI); el relay sigue haciendo falta para no exponer el puerto del modelo fuera de la LAN
 - 6c: voz neural por bloque para el tier de pago (docs/09, "el usuario oye lo que paga"): `SpeechProvider` del lado servidor con el contrato de OpenAI `/v1/audio/speech`, audio generado por bloque en paralelo a la resolucion del turno y expuesto como `audioUrl` en `TurnBlock`, voz por NPC via `speakerRef`. Proveedores: VoiceStudio (local o self-hosted, AGPL usado sin modificar como servicio aparte; motores con licencia comercial, no OmniVoice que es CC-BY-NC) y OpenAI TTS o ElevenLabs en produccion sin GPU. Evaluado el 2026-09-07
 
-## Entrega 7: Cobro y cupo
+## Entrega 7: Cobro y cupo (cerrada el 2026-09-19)
 
-- [x] Medicion del consumo: `usage` del engine guardado por turno (`input_tokens`, `output_tokens`, `model`) y acumulado en la campaña; `php artisan turns:usage` lo reporta en tokens y en dinero con los precios de `config/engine.php`. Primer dato real (2026-09-18, turno 2 de una campaña corta con Sonnet 5): 4,056 de entrada y 455 de salida, 0.019 USD. El contexto crece con la campaña, asi que el coste por turno sube dentro de la sesion: la curva se mide con la columna por turno antes de fijar precio
-- [x] Cupo One Shot por turnos: tabla `quotas` por usuario (`granted_turns`, `used_turns`), `QuotaService` y `php artisan quota:grant`. Solo las mesas One Shot consumen; lo paga el dueño, no cada jugador; se descuenta al resolver, no al cerrar, asi que un turno que falla no cobra. Sin cupo, cerrar da 409 y el turno se queda abierto; `GET tables/{t}/state` devuelve `quota.remainingTurns` para avisar antes de chocar. Cupo inicial en `QUOTA_FREE_TURNS` (20 por defecto)
-- Pago por sesion sobre `atomo/payments`. **Bloqueado: faltan las claves de Stripe en modo prueba** (las variables ya existen vacias en el `.env` de la API)
-- [x] Proveedor obligatorio al crear mesa: `settings.provider` con su `preset` es requerido en el POST (la forma vieja `kind: scripted` sigue valiendo). Quien abre la mesa elige con que se narra y que cuesta, en vez de caer callando en `DM_PROVIDER` del servidor. **La regla es de creacion, no de resolucion**: las mesas de antes, que no eligieron, se siguen jugando y editando con el preset por defecto. En web y movil, `providerForNewTable` manda ahora siempre el preset elegido, incluso si es el del servidor
-- [x] El cupo gratuito narra con el modelo barato (`QUOTA_MODEL`, Haiku por defecto): una One Shot que juega gratis sale al modelo barato aunque la mesa tenga elegido otro, porque ese turno lo pagamos nosotros (docs/09). No toca al DM con guion ni a Ollama, que no cuestan tokens, ni a las mesas de pago. El modelo que de verdad corrio es el que se apunta en el turno, asi que `turns:usage` no miente
-- Pendiente de decidir con datos: el precio por sesion, cuando haya una sesion larga medida (el coste por turno sube dentro de la partida porque el contexto crece)
+Criterio del ADR cumplido: un usuario compra creditos con tarjeta y juega con
+ellos, de punta a punta en produccion.
+
+- [x] Medicion del consumo: `usage` del engine guardado por turno (`input_tokens`, `output_tokens`, `model`) y acumulado en la campaña; `php artisan turns:usage` lo reporta en tokens y en dinero con los precios de `config/engine.php`
+- [x] **Curva de coste medida** (2026-09-19, seis turnos consecutivos reales con un jugador): entrada 2,248 / 2,525 / 2,872 / 3,302 / 3,667 / 4,118. **Crece 374 tokens por turno**, y el snapshot al cerrar sesion la reinicia. Una sesion de 20 turnos con cuatro jugadores cuesta **1.26 USD en Sonnet y 0.42 en Haiku**
+- [x] Cupo por turnos: tabla `quotas` por usuario, `QuotaService`, `php artisan quota:grant`. Lo paga el dueño de la mesa, no cada jugador; se descuenta al resolver y no al cerrar, asi que un turno que falla no cobra. Sin cupo, cerrar da 409 y el turno se queda abierto; `GET tables/{t}/state` devuelve `quota.remainingTurns`
+- [x] **Cualquier mesa que use nuestra clave gasta cupo**, no solo las One Shot: era lo que quedaba sin cobrar
+- [x] Las mesas que gastan cupo narran con el modelo barato (`QUOTA_MODEL`, Haiku). **Probado en produccion el 19-09**: narra bien, el estilo es mas directo que Sonnet pero no se cae. Quien trae su clave conserva el modelo que quiera
+- [x] Proveedor obligatorio al crear mesa. **La regla es de creacion, no de resolucion**: las mesas de antes se siguen jugando con el preset por defecto
+- [x] **BYOK** (docs/11 D6, con el alcance cambiado a **por usuario** en vez de por mesa): `provider_configs` con la credencial cifrada, `GET/PUT/DELETE /api/v1/profile/keys`, pantalla en web y movil. Se comprueba contra el proveedor antes de guardarla y **no vuelve a salir** (solo las ultimas cuatro letras). Quien trae su clave no gasta cupo ni se le cobra
+- [x] **Creditos de prepago con Stripe**: `config/credits.php` con cuatro paquetes (2, 5, 10 y 15 USD) y tres planes con beneficios sin definir, visibles pero apagados. **Solo el webhook acredita** y es idempotente porque Stripe reintenta. Pantalla con Stripe Elements en la web; la movil enseña el saldo y manda a **nuestra** web a recargar (el SDK nativo romperia Expo Go)
+- [ ] **Revisar los turnos por paquete con una sesion de cuatro jugadores medida.** Los numeros actuales salen de seis turnos con **un** jugador; el factor de cuatro esta extrapolado
+- [ ] Pago dentro de la app movil, cuando existan builds propias con EAS
+- [ ] Definir que incluyen Plata, Oro y Diamante (decision de Gabino)
+
+## Produccion (desplegada el 2026-09-18)
+
+- [x] **https://rpg-worlds.gabinoramirez.com** en Hetzner CX23 (Nuremberg, 7.09 USD/mes): Ubuntu 24.04, HTTPS con Let's Encrypt y renovacion automatica, ufw con solo 22/80/443, fail2ban. Postgres, engine y API cerrados desde fuera
+- [x] Seis servicios de systemd con arranque automatico (`rpg-engine`, `rpg-worker`, `rpg-web`, nginx, php8.3-fpm, postgresql). **Comprobado en un reinicio real el 19-09**: vuelven solos
+- [x] Nginx: la web de Next sirve `/api/*` (su proxy traduce la cookie httpOnly a Bearer) y Laravel escucha en 127.0.0.1:8010. El webhook de Stripe va directo a Laravel, sin pasar por el proxy
+- [ ] Despliegue automatico: hoy es `git pull` a mano por SSH
+- [ ] Copias de seguridad de Postgres. **No hay ninguna**, y ya hay pagos registrados
+- [ ] Vigilancia: nadie avisa si un servicio se cae
+
+## Antes de abrir a usuarios reales
+
+El servidor ya es publico (https://rpg-worlds.gabinoramirez.com). Esto es lo
+que falta para que entre alguien que no seamos nosotros.
+
+- [ ] **Documentacion de usuario.** No existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
+- [ ] **Contraseñas de produccion.** Los usuarios sembrados (`gabino`, `jaz`, `armando`) tienen `password` en el servidor publico. Cambiarlas o borrar las que no se usen
+- [ ] **Stripe en modo real**: resolver la tarea vencida de la cuenta (transferencias suspendidas) y pasar a claves `live`. Hoy todo esta en sandbox
+- [ ] **Terminos de servicio y aviso de privacidad**: se cobra dinero y se guardan datos de terceros
+- [ ] Revisar que pasa cuando un usuario sin creditos entra: hoy choca con un 409 al cerrar turno, que es correcto pero seco
 
 ## Entrega 8: Packs de usuario
 
@@ -144,11 +172,15 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 
 ## Deuda tecnica (sin entrega asignada)
 
-- [x] **Quien tira los dados es del anfitrion** (2026-09-19). Un jugador podia escribir "tiro 20" y el engine lo aceptaba como tirada fisica. `settings.dice`: `table` (por defecto, dados reales en la mesa) o `engine` (tira el servidor y el numero escrito se ignora). Comprobado en produccion escribiendo un 20 a proposito: se registro un 13 con `source: csprng:webcrypto`. **Requisito para cualquier pack con roles ocultos**
+Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
+abierto.
 
-- [x] **Los bloques del turno ya se filtran en el servidor** (2026-09-18). `TurnService::blocksAfter` recibe el asiento y no serializa los bloques `system` con `audience: host` para un jugador; `blocksForSeat` en ui-logic se queda como segunda capa, que es presentacion. El defecto del parametro es el seguro (`forHost: false`): quien quiera verlo todo tiene que pedirlo. Test de fuga en `TurnFlowTest`, comprobado que falla si se quita el filtro. Era el "invariante critico" del issue #2 y bloqueaba cualquier pack con roles ocultos
-- `composer analyse` esta declarado en el composer.json de la API pero no existe `phpstan.neon`, asi que falla con "At least one path must be specified". O se configura Larastan o se quita el script
-- Un solo comando que levante los cuatro servicios (engine, API, web, worker), y a futuro que vivan en el MicroServer ProLiant en vez de en la laptop
+- [ ] `composer analyse` esta declarado en el composer.json de la API pero no existe `phpstan.neon`, asi que falla con "At least one path must be specified". O se configura Larastan o se quita el script
+- [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
+- [ ] Renombre DM a GM: plan escrito en `docs/12-plan-renombre-gm.md`, sin ejecutar. La capa de visibilidad `dm` de los eventos **no** se renombra (es dato guardado; pediria subir version de esquema con upcast)
+- [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
+- [ ] Migrar la campaña de la mina al servidor (12 eventos; hoy vive solo en la laptop)
+- [ ] APKs de Android: falta `eas.json` y el CLI. Con el servidor publico ya tiene sentido, porque la app puede apuntar a un sitio estable
 
 ## v2 (sin fecha)
 
