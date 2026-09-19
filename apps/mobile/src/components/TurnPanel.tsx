@@ -1,5 +1,5 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, QUICK_DICE, quickRoll, turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, QUICK_DICE, quickRoll, turnLine, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -13,6 +13,8 @@ interface Props {
   /** Ultimo aviso de una accion (409, 422, 403). */
   notice: string | null
   hasCharacter: boolean
+  /** Quien tira en esta mesa; con `engine` los dados de aqui no pintan nada. */
+  diceMode: DiceMode
   onRespond: (text: string) => Promise<boolean>
   onClose: (force: boolean) => void
   /** El cuadro tomo el foco: la pantalla baja la narracion al final para que se vea lo ultimo sobre el teclado. */
@@ -25,7 +27,7 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, onRespond, onClose, onFocusInput }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, onRespond, onClose, onFocusInput }: Props) {
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
@@ -76,22 +78,28 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             onBlur={() => setFocused(false)}
           />
           <Button label="Enviar" primary busy={busy} disabled={text.trim().length === 0} onPress={() => void send()} />
-          {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la resuelve el motor. */}
-          <View style={styles.dice}>
-          <Text style={styles.diceLabel}>Tirar</Text>
-          {QUICK_DICE.map((die) => (
-            <Pressable
-              key={die}
-              onPress={() => setText((current) => appendRoll(current, quickRoll(die)))}
-              disabled={busy}
-              style={({ pressed }) => [styles.dieButton, busy && styles.dieDisabled, pressed && !busy && styles.diePressed]}
-              accessibilityRole="button"
-              accessibilityLabel={`Tirar ${die}`}
-            >
-              <Text style={styles.dieText}>{die}</Text>
-            </Pressable>
-          ))}
-          </View>
+          {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la
+              resuelve el motor. En una mesa donde tira el servidor no se
+              ofrece: el numero que escribieras se ignoraria. */}
+          {diceMode === 'engine' ? (
+            <Text style={styles.diceNotice}>En esta mesa los dados los tira el servidor.</Text>
+          ) : (
+            <View style={styles.dice}>
+              <Text style={styles.diceLabel}>Tirar</Text>
+              {QUICK_DICE.map((die) => (
+                <Pressable
+                  key={die}
+                  onPress={() => setText((current) => appendRoll(current, quickRoll(die)))}
+                  disabled={busy}
+                  style={({ pressed }) => [styles.dieButton, busy && styles.dieDisabled, pressed && !busy && styles.diePressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Tirar ${die}`}
+                >
+                  <Text style={styles.dieText}>{die}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
       ) : null}
       {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</Text> : null}
@@ -119,6 +127,7 @@ const styles = StyleSheet.create({
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   compose: { gap: 8 },
   dice: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
+  diceNotice: { fontFamily: theme.fonts.serif, fontSize: 12, lineHeight: 16, color: theme.colors.inkDim },
   diceLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim, marginRight: 2 },
   dieButton: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: theme.colors.panel },
   dieText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold },

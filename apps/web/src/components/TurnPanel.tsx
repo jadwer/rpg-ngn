@@ -1,7 +1,7 @@
 'use client'
 
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, QUICK_DICE, quickRoll, turnLine, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, QUICK_DICE, quickRoll, turnLine, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState, type KeyboardEvent } from 'react'
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   /** Ultimo aviso de una accion (409, 422, 403). */
   notice: string | null
   hasCharacter: boolean
+  /** Quien tira en esta mesa; con `engine` los dados de aqui no pintan nada. */
+  diceMode: DiceMode
   onRespond: (text: string) => Promise<boolean>
   onClose: (force: boolean) => void
 }
@@ -21,7 +23,7 @@ interface Props {
  * nunca textos), el cuadro para escribir si toca (Ctrl+Enter envia), y el
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, onRespond, onClose }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, onRespond, onClose }: Props) {
   const [text, setText] = useState('')
   const [die, setDie] = useState<string>(QUICK_DICE[0])
   const line = turnLine(turn, progress, nameOf)
@@ -71,7 +73,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               {busy ? <span className="spinner" aria-hidden /> : null}
               Enviar
             </button>
-            {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la resuelve el motor. */}
+            {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la
+                resuelve el motor. En una mesa donde tira el servidor no se
+                ofrece: el numero que escribieras se ignoraria. */}
+            {diceMode === 'engine' ? null : (
             <span className="dice-picker">
               <select className="select" name="dado" value={die} onChange={(e) => setDie(e.target.value)} disabled={busy} aria-label="Dado">
                 {QUICK_DICE.map((d) => (
@@ -84,7 +89,8 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
                 Tirar
               </button>
             </span>
-            <span className="hint">Ctrl+Enter también envía.</span>
+            )}
+            <span className="hint">{diceMode === 'engine' ? 'En esta mesa los dados los tira el servidor. Ctrl+Enter también envía.' : 'Ctrl+Enter también envía.'}</span>
           </div>
         </>
       ) : null}
