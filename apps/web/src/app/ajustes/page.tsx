@@ -3,6 +3,7 @@
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
+import { CreditsPanel } from '../../components/CreditsPanel'
 import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
@@ -107,6 +108,8 @@ function Settings({ client, user, unauthorized, logout }: { client: ApiClient; u
           {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">Se guarda en este navegador.</span>}
         </div>
       </section>
+
+      <CreditsPanel client={client} unauthorized={unauthorized} />
 
       <OwnKeys client={client} unauthorized={unauthorized} />
     </main>

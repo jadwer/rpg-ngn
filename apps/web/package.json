@@ -20,6 +20,8 @@
     "@rpg-ngn/core": "workspace:*",
     "@rpg-ngn/rules": "workspace:*",
     "@rpg-ngn/ui-logic": "workspace:*",
+    "@stripe/react-stripe-js": "^6.10.0",
+    "@stripe/stripe-js": "^9.16.0",
     "next": "15.5.25",
     "react": "19.2.3",
     "react-dom": "19.2.3"

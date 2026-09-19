@@ -63,10 +63,41 @@ export interface PackOption {
   sessions: number
 }
 
+/** Un paquete de creditos de prepago. `amount` va en la unidad menor (centavos). */
+export interface CreditPack {
+  id: string
+  name: string
+  description: string
+  amount: number
+  currency: string
+  /** Turnos que suma al cupo; 0 en los planes que todavia no se venden. */
+  turns: number
+  /** false: se enseña pero no se puede comprar todavia. */
+  available: boolean
+}
+
+export interface CreditBalance {
+  remainingTurns: number
+  usedTurns: number
+}
+
+/** Lo que hace falta para confirmar el pago en el navegador. */
+export interface CreditPurchase {
+  transactionId: number
+  clientSecret: string
+  amount: number
+  currency: string
+  turns: number
+}
+
 export interface SettingsApi {
   listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
+  /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
+  listCredits(): Promise<{ packs: CreditPack[]; balance: CreditBalance; publishableKey: string }>
+  /** Arranca la compra: devuelve el clientSecret para confirmar contra Stripe. Los turnos los suma el webhook. */
+  buyCredits(packId: string): Promise<CreditPurchase>
   /** Las claves propias del usuario: cuales hay, sin la credencial. */
   listOwnKeys(): Promise<OwnKey[]>
   /** Guarda la clave del usuario; el servidor la comprueba antes (422 si el proveedor la rechaza). */
@@ -90,6 +121,16 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPacks() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
+    },
+
+    async listCredits() {
+      const { data } = await request<{ data: { packs: CreditPack[]; balance: CreditBalance; publishableKey: string } }>('/api/v1/credits')
+      return data.data
+    },
+
+    async buyCredits(packId) {
+      const { data } = await request<{ data: CreditPurchase }>('/api/v1/credits/purchases', { method: 'POST', body: { pack: packId } })
       return data.data
     },
 
