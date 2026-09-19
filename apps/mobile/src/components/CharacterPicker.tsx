@@ -1,10 +1,23 @@
-import type { Character } from '@rpg-ngn/content'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { Portrait } from './Portrait'
 
+/**
+ * Lo minimo para elegir: vale tanto para un `Character` del pack empaquetado
+ * como para un `PackCharacter` que llega del servidor (con `portraitUri`).
+ */
+export interface Pickable {
+  id: string
+  name: string
+  race: string
+  class: string
+  roles: readonly string[]
+  portrait?: string | null | undefined
+  portraitUri?: string | null | undefined
+}
+
 interface Props {
-  characters: readonly Character[]
+  characters: readonly Pickable[]
   /** Personajes que ya juega alguien (no se pueden elegir), con el nombre de quien. */
   taken?: ReadonlyMap<string, string> | undefined
   value: string | null
@@ -31,7 +44,7 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
         const selected = value === character.id
         return (
           <Pressable key={character.id} onPress={() => onChange(character.id)} disabled={!!owner} style={({ pressed }) => [styles.card, selected && styles.selected, owner && styles.taken, pressed && !owner && styles.pressed]} accessibilityRole="radio" accessibilityState={{ selected, disabled: !!owner }}>
-            <Portrait path={character.portrait} name={character.name} size={72} muted={!!owner} />
+            <Portrait path={character.portrait} uri={character.portraitUri} name={character.name} size={72} muted={!!owner} />
             <Text style={[styles.name, selected && styles.nameSelected]}>{character.name}</Text>
             <Text style={styles.sub}>{`${character.race}, ${character.class}`}</Text>
             <Text style={[styles.tag, owner && styles.tagTaken]}>{owner ? `lo juega ${owner}` : character.roles.join(' / ')}</Text>

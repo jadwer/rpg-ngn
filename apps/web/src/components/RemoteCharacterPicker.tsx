@@ -5,6 +5,8 @@ import { packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 interface Props {
   packId: string
   characters: readonly PackCharacter[]
+  /** Personajes que ya juega alguien (no se pueden elegir), con el nombre de quien. */
+  taken?: ReadonlyMap<string, string> | undefined
   value: string | null
   onChange: (characterId: string | null) => void
   /** Permite dejarlo sin personaje (anfitrion que solo mira). */
@@ -18,7 +20,7 @@ interface Props {
  * en la web (el piloto). De un pack instalado en el servidor solo llega lo
  * justo para elegir, y el retrato lo sirve la API.
  */
-export function RemoteCharacterPicker({ packId, characters, value, onChange, allowNone = false }: Props) {
+export function RemoteCharacterPicker({ packId, characters, taken, value, onChange, allowNone = false }: Props) {
   return (
     <div className="picker" role="radiogroup">
       {allowNone ? (
@@ -33,14 +35,18 @@ export function RemoteCharacterPicker({ packId, characters, value, onChange, all
 
       {characters.map((character) => {
         const src = packPortraitUrl(packId, character.portrait)
+        const owner = taken?.get(character.id) ?? null
         return (
           <button
             key={character.id}
             type="button"
             role="radio"
             aria-checked={value === character.id}
-            className={`option${value === character.id ? ' selected' : ''}`}
+            aria-disabled={!!owner}
+            disabled={!!owner}
+            className={`option${value === character.id ? ' selected' : ''}${owner ? ' taken' : ''}`}
             onClick={() => onChange(character.id)}
+            title={owner ? `Lo juega ${owner}` : undefined}
           >
             {src ? (
               <img src={src} alt={`Retrato de ${character.name}`} className="portrait" style={{ width: '100%', height: 'auto', aspectRatio: '1', objectFit: 'cover', marginBottom: 8 }} />
@@ -51,7 +57,7 @@ export function RemoteCharacterPicker({ packId, characters, value, onChange, all
             )}
             <div className="name">{character.name}</div>
             <div className="hint">{character.characterClass}</div>
-            {character.roles.length > 0 ? <div className="hint">{character.roles.join(' / ')}</div> : null}
+            {owner ? <div className="hint">lo juega {owner}</div> : character.roles.length > 0 ? <div className="hint">{character.roles.join(' / ')}</div> : null}
           </button>
         )
       })}

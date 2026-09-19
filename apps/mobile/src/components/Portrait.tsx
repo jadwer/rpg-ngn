@@ -4,14 +4,16 @@ import { theme } from '../theme'
 
 interface Props {
   path: string | null | undefined
+  /** Retrato servido por la API (packs que la app no lleva dentro); manda sobre `path`. */
+  uri?: string | null | undefined
   name: string
   size?: number
   /** Escala de grises: personaje fuera de la mesa. */
   muted?: boolean
 }
 
-export function Portrait({ path, name, size = 48, muted = false }: Props) {
-  const source = portraitSource(path)
+export function Portrait({ path, uri, name, size = 48, muted = false }: Props) {
+  const source = uri ? { uri } : portraitSource(path)
   const box = { width: size, height: size, borderRadius: Math.round(size / 5) }
   if (source) {
     return <Image source={source} style={[styles.image, box, muted && styles.muted]} accessibilityLabel={`Retrato de ${name}`} />

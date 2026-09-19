@@ -101,9 +101,11 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     try {
       if (!option) throw new Error('Elige un pack para la mesa.')
       const provider = providerForNewTable(preset, defaultPreset)
-      // El pack declara el ruleset sin version (`fantasy-d20-lite`) y la mesa
-      // se crea con la que el motor implementa.
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: RULESET_ID, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      // El ruleset lo declara el pack (`system`), no esta web. Antes se mandaba
+      // siempre el del piloto y una mesa de intriga nacia con reglas de combate
+      // (VAM del 19-09, motor A1). Sin version: el motor resuelve la unica que
+      // tiene; el 422 que lo vigile en la API esta pendiente (R2).
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -124,7 +126,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
         <UserBar title={created.name} user={user} />
         <div className="card stack">
           <p className="hint">La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</p>
-          <InvitePanel client={client} table={created} meId={user.id} pack={pack} onChanged={reloadCreated} onUnauthorized={unauthorized} />
+          <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack?.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={unauthorized} />
           <div className="row" style={{ marginTop: 8 }}>
             <Link href={`/mesas/${created.id}`} className="btn primary">
               Ir a la mesa

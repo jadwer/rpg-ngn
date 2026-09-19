@@ -1,11 +1,12 @@
 'use client'
 
-import { ApiError, type ApiClient, type AuthUser, type Friendship, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { acceptedFriends, characterName, freeCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, takenCharacters } from '@rpg-ngn/ui-logic'
+import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CharacterPicker } from './CharacterPicker'
 import { Portrait } from './Portrait'
+import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 
 interface Props {
   client: ApiClient
@@ -32,7 +33,25 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
   const [notice, setNotice] = useState<string | null>(null)
   const [searchDenied, setSearchDenied] = useState(false)
 
-  const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
+  // De un pack que la web no lleva dentro, los personajes los da la API. Sin
+  // esto, invitar a la boticaria ofrecia cero personajes (VAM del 19-09).
+  const [remote, setRemote] = useState<PackCharacter[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackCharacters(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemote(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const remoteNames = useMemo(() => remoteCharacterNames(remote), [remote])
+  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
+  const freeRemote = useMemo(() => freeRemoteCharacters(remote, table.members), [remote, table.members])
 
   const loadFriendships = useCallback(async () => {
     try {
@@ -206,7 +225,13 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       {found && state?.kind === 'accepted' && !alreadyMember ? (
         <div className="stack">
           <div className="label">Personaje para {found.name}</div>
-          {pack ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone /> : <p className="hint">Cargando el pack...</p>}
+          {pack ? (
+            <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone />
+          ) : remote.length > 0 ? (
+            <RemoteCharacterPicker packId={table.packId} characters={freeRemote} taken={taken} value={characterId} onChange={setCharacterId} allowNone />
+          ) : (
+            <p className="hint">Cargando los personajes del pack...</p>
+          )}
           <div className="row">
             <button type="button" className="btn primary" onClick={() => void invite()} disabled={busy}>
               {busy ? <span className="spinner" aria-hidden /> : null}

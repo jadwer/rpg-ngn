@@ -1,4 +1,4 @@
-import { ApiError, withProvider, type ApiClient, type DmPreset, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, packPortraitUrl, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
@@ -46,9 +46,30 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const cleanName = cleanTableName(name)
   const option = useMemo(() => packs.find((p) => p.id === packId) ?? null, [packs, packId])
   // La app lleva el pack piloto dentro para pintar retratos y fichas sin red.
-  // Si el servidor ofrece otro, la mesa se crea igual pero los personajes se
-  // eligen al invitar.
+  // De cualquier otro pack, los personajes y sus retratos los da la API.
   const bundled = packId === PACK_OPTION.id
+  const [remoteCharacters, setRemoteCharacters] = useState<PackCharacter[]>([])
+  const remotePickables = useMemo(
+    () => remoteCharacters.map((c) => ({ id: c.id, name: c.name, race: c.race, class: c.characterClass, roles: c.roles, portraitUri: portraitUri(client.baseUrl, option?.id ?? '', c.portrait) })),
+    [remoteCharacters, client.baseUrl, option?.id],
+  )
+
+  useEffect(() => {
+    if (!option || bundled) {
+      setRemoteCharacters([])
+      return
+    }
+    let alive = true
+    void client.listPackCharacters(option.id, option.version).then(
+      (result) => {
+        if (alive) setRemoteCharacters(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, option, bundled])
 
   // Packs que el servidor puede jugar; antes la app solo sabia del suyo.
   useEffect(() => {
@@ -88,9 +109,12 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
     setError(null)
     try {
       const provider = providerForNewTable(preset, defaultPreset)
-      // El ruleset lo pone la app (el manifiesto lo declara sin version).
+      // El ruleset lo declara el pack (`system`), no la app. Antes iba siempre
+      // el del piloto y una mesa de intriga nacia con reglas de combate (VAM
+      // del 19-09, movil A1). Sin version: el motor resuelve la unica que tiene.
       const elegido = option ?? PACK_OPTION
-      const table = await client.createTable({ name: cleanName, packId: elegido.id, packVersion: elegido.version, ruleset: PACK_OPTION.ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      const ruleset = option ? option.system : PACK_OPTION.ruleset
+      const table = await client.createTable({ name: cleanName, packId: elegido.id, packVersion: elegido.version, ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -122,7 +146,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
       {created ? (
         <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Text style={styles.hint}>La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</Text>
-          <InvitePanel client={client} table={created} meId={user.id} pack={pack} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
+          <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
           <Text style={styles.label}>Director de juego</Text>
           <DmSettingsPanel client={client} table={created} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
           <View style={styles.actions}>
@@ -147,8 +171,10 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
             <Text style={styles.label}>Tu personaje</Text>
             {bundled ? (
               <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
+            ) : remotePickables.length > 0 ? (
+              <CharacterPicker characters={remotePickables} value={characterId} onChange={setCharacterId} allowNone />
             ) : (
-              <Text style={styles.hint}>Este pack se juega desde el servidor; los personajes se eligen al invitar.</Text>
+              <Text style={styles.hint}>Cargando los personajes del pack...</Text>
             )}
           </View>
           {presets.length > 0 ? (
@@ -190,3 +216,9 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger },
   actions: { gap: 8, alignItems: 'flex-start', marginTop: 4 },
 })
+
+/** URL absoluta del retrato que sirve la API; el cliente trae la base (con `/movil`). */
+function portraitUri(baseUrl: string, packId: string, portrait: string | null | undefined): string | null {
+  const path = packPortraitUrl(packId, portrait)
+  return path ? `${baseUrl}${path}` : null
+}

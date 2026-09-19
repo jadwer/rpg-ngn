@@ -1,6 +1,6 @@
-import { ApiError, type ApiClient, type AuthUser, type Friendship, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, packPortraitUrl, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { acceptedFriends, characterName, freeCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, takenCharacters } from '@rpg-ngn/ui-logic'
+import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, remoteCharacterNames, remotePortraitOf, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -33,7 +33,31 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
 
-  const nameOf = useCallback((id: string) => characterName(pack, id) ?? id, [pack])
+  // De un pack que la app no lleva dentro, los personajes y retratos los da la
+  // API. Sin esto, invitar a la boticaria ofrecia cero personajes.
+  const [remote, setRemote] = useState<PackCharacter[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackCharacters(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemote(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const remoteNames = useMemo(() => remoteCharacterNames(remote), [remote])
+  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
+  const uriOf = useCallback(
+    (characterId: string | null | undefined) => {
+      const path = packPortraitUrl(table.packId, remotePortraitOf(remote, characterId))
+      return path ? `${client.baseUrl}${path}` : null
+    },
+    [client.baseUrl, table.packId, remote],
+  )
 
   const loadFriendships = useCallback(async () => {
     try {
@@ -83,7 +107,10 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
   const state = found ? friendshipWith(friendships, meId, found.id) : null
   const alreadyMember = found ? table.members.some((m) => m.userId === found.id) : false
-  const free = useMemo(() => (pack ? freeCharacters(pack, table.members) : []), [pack, table.members])
+  const free = useMemo(
+    () => (pack ? freeCharacters(pack, table.members) : freeRemoteCharacters(remote, table.members).map((c) => ({ id: c.id, name: c.name, race: c.race, class: c.characterClass, roles: c.roles, portraitUri: uriOf(c.id) }))),
+    [pack, remote, table.members, uriOf],
+  )
   const taken = useMemo(() => takenCharacters(table.members), [table.members])
   const pending = pendingReceived(friendships, meId)
   const friends = acceptedFriends(friendships, meId).filter((u) => !table.members.some((m) => m.userId === u.id))
@@ -105,7 +132,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       <Text style={styles.label}>En la mesa</Text>
       {table.members.map((member) => (
         <View key={member.id} style={styles.member}>
-          <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} size={32} />
+          <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} uri={pack ? null : uriOf(member.characterId)} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} size={32} />
           <Text style={styles.memberText}>{memberLine(member, nameOf)}</Text>
         </View>
       ))}
@@ -162,7 +189,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       {found && state?.kind === 'accepted' && !alreadyMember ? (
         <>
           <Text style={styles.label}>{`Personaje para ${found.name}`}</Text>
-          {pack ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone /> : <Text style={styles.hint}>Sin pack empaquetado para esta mesa.</Text>}
+          {pack || remote.length > 0 ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone /> : <Text style={styles.hint}>Cargando los personajes del pack...</Text>}
           <Text style={styles.hint}>{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: podrá mirar pero no responder.'}</Text>
           <Button label="Invitar a la mesa" primary busy={busy} onPress={() => void invite()} />
         </>
