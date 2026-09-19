@@ -1,6 +1,11 @@
 # Notas privadas del DM: el repo es publico, los secretos de campana no se versionan aqui
 dm/
 
+# Packs privados: el repo publico solo admite contenido original o licenciado
+# redistribuible (docs/07). Un pack basado en obra ajena vive aqui, se juega
+# en local o en el servidor, y no se publica ni se distribuye.
+content/packs/private-*/
+
 # Overrides personales de configuracion Claude (el settings.json del equipo si se versiona)
 .claude/settings.local.json
 

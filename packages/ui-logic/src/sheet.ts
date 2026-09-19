@@ -35,7 +35,8 @@ export interface SheetView {
   roles: string[]
   stats: StatView[]
   hp: { current: number; max: number }
-  ac: number
+  /** Clase de armadura; null en rulesets sin combate (intriga de corte). */
+  ac: number | null
   fortune: { result: number; tier: string } | null
   inventory: Array<{ id: string; note: string | null }>
   conditions: string[]
@@ -80,7 +81,7 @@ export function characterSheet(character: Character, options: SheetOptions): She
     roles: character.roles,
     stats: STAT_ORDER.map((key) => ({ key, label: STAT_LABELS[key], value: character.stats[key], modifier: formatModifier(modifier(character.stats[key])) })),
     hp: state ? { current: state.hp.current, max: state.hp.max } : { current: character.hp, max: character.hp },
-    ac: typeof state?.custom['ac'] === 'number' ? (state.custom['ac'] as number) : character.ac,
+    ac: typeof state?.custom['ac'] === 'number' ? (state.custom['ac'] as number) : (character.ac ?? null),
     fortune: state?.fortune ?? null,
     inventory: (state?.inventory ?? []).map((item) => ({ id: item.id, note: item.note ?? null })),
     conditions: state?.conditions ?? [],

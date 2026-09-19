@@ -49,6 +49,17 @@ export const Ability = z.strictObject({
   range: z.string().min(1).nullable().optional(),
 })
 
+/**
+ * Ficha de personaje.
+ *
+ * El nucleo (id, nombre, bio, stats, habilidades, meta) vale para cualquier
+ * genero. Lo que solo tiene sentido peleando (`ac`, `attacks`) es opcional:
+ * el pack `pilot` es d20 y los trae, pero un pack de intriga de corte no
+ * tiene armadura ni ataques, y exigirselos obligaria a inventar datos falsos.
+ *
+ * `faction` y `rank` los usan los rulesets que reparten acceso en vez de
+ * golpes; el d20 los ignora.
+ */
 export const Character = z.strictObject({
   id: KebabId,
   name: z.string().min(1),
@@ -59,12 +70,18 @@ export const Character = z.strictObject({
   bio: z.string().min(1),
   stats: Stats,
   hp: z.number().int().positive(),
-  ac: z.number().int().positive(),
-  attacks: z.array(Attack).min(1),
+  /** Clase de armadura; solo en rulesets con combate. */
+  ac: z.number().int().positive().optional(),
+  /** Ataques; solo en rulesets con combate. */
+  attacks: z.array(Attack).default([]),
   abilities: z.array(Ability),
   skills: z.array(z.string().min(1)).min(1),
   roles: z.array(z.string().min(1)).min(1),
   goal: z.string().min(1),
+  /** A quien le debe lealtad; lo leen los rulesets de intriga. */
+  faction: KebabId.optional(),
+  /** Posicion en la jerarquia, en palabras del setting. */
+  rank: z.string().min(1).optional(),
   /** Ruta relativa al pack, o null. */
   portrait: z.string().min(1).nullable(),
 })
