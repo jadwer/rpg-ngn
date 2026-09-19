@@ -59,3 +59,27 @@ export function balanceText(balance: CreditBalance): string {
 export function lowBalance(balance: CreditBalance): boolean {
   return balance.remainingTurns > 0 && balance.remainingTurns < TURNS_PER_SESSION
 }
+
+/**
+ * A donde manda la app para recargar.
+ *
+ * Se recarga en **nuestra web**, no en una pagina de Stripe: quien solo
+ * conoce la app descubre asi que hay un sitio detras. El pago dentro de la
+ * app queda pendiente (el SDK de Stripe es nativo y hoy romperia Expo Go).
+ *
+ * La URL sale de la del servidor con el que habla la app, quitando el puerto
+ * de la API: en produccion la web y la API comparten origen, y en local el
+ * `:8010` se cambia por el `:3010` de la web.
+ */
+export function topUpUrl(serverUrl: string): string {
+  try {
+    const url = new URL(serverUrl)
+    // En desarrollo la API va en 8010 y la web en 3010; en produccion ambas
+    // cuelgan del mismo dominio sin puerto.
+    if (url.port === '8010') url.port = '3010'
+    else if (url.port !== '') url.port = ''
+    return `${url.origin}/ajustes`
+  } catch {
+    return ''
+  }
+}

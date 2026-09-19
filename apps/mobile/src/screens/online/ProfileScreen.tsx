@@ -2,6 +2,7 @@ import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
+import { CreditsPanel } from '../../components/CreditsPanel'
 import { Field } from '../../components/Field'
 import { OwnKeysPanel } from '../../components/OwnKeysPanel'
 import type { StoredUser } from '../../online/storage'
@@ -10,6 +11,8 @@ import { theme } from '../../theme'
 interface Props {
   client: ApiClient
   user: StoredUser
+  /** El servidor con el que habla la app; de ahi sale la web para recargar. */
+  serverUrl: string
   /** El nombre cambio: el padre lo recuerda y lo pinta. */
   onUserChanged: (user: StoredUser) => void
   onBack: () => void
@@ -22,7 +25,7 @@ interface Props {
  * pide la actual). El correo se muestra pero no se edita (cambiarlo exige
  * verificarlo).
  */
-export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthorized }: Props) {
+export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized }: Props) {
   const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
@@ -117,6 +120,8 @@ export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthori
             <Button label="Cambiar contraseña" primary busy={passBusy} disabled={!canChange} onPress={() => void savePassword()} />
           </View>
         </View>
+
+        <CreditsPanel client={client} serverUrl={serverUrl} onUnauthorized={onUnauthorized} />
 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
       </ScrollView>

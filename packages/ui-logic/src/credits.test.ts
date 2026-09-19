@@ -1,6 +1,6 @@
 import type { CreditPack } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packPrice, packSessions, packValue } from './credits.js'
+import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packPrice, packSessions, packValue, topUpUrl } from './credits.js'
 
 const pack = (over: Partial<CreditPack>): CreditPack => ({
   id: 'prepago-5',
@@ -43,5 +43,14 @@ describe('credits', () => {
     expect(lowBalance({ remainingTurns: 110, usedTurns: 0 })).toBe(false)
     // Sin saldo no es "poco saldo": es otro aviso.
     expect(lowBalance({ remainingTurns: 0, usedTurns: 0 })).toBe(false)
+  })
+
+  it('manda a recargar a nuestra web, no a Stripe', () => {
+    // En produccion la web y la API comparten dominio.
+    expect(topUpUrl('https://rpg-worlds.gabinoramirez.com')).toBe('https://rpg-worlds.gabinoramirez.com/ajustes')
+    // En desarrollo la API va en 8010 y la web en 3010.
+    expect(topUpUrl('http://192.168.100.16:8010')).toBe('http://192.168.100.16:3010/ajustes')
+    // Una URL rota no tumba la pantalla: simplemente no se ofrece el enlace.
+    expect(topUpUrl('no-es-una-url')).toBe('')
   })
 })

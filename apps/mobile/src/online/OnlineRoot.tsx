@@ -238,7 +238,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
   }
 
   if (stage.name === 'profile') {
-    return <ProfileScreen client={session.client} user={session.user} onUserChanged={setUser} onBack={() => setStage({ name: 'tables' })} onUnauthorized={() => unauthorized()} />
+    return <ProfileScreen client={session.client} user={session.user} serverUrl={serverUrl} onUserChanged={setUser} onBack={() => setStage({ name: 'tables' })} onUnauthorized={() => unauthorized()} />
   }
 
   if (stage.name === 'new-table') {
