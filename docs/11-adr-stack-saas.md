@@ -95,9 +95,14 @@ Tres tablas con reglas distintas:
   (version del schema del tipo, BA1), `type`, `session_id`, `turn_id`,
   `recorded_at`, `world_time`, `payload jsonb`, `idempotency_key`. Columnas
   generadas desde `payload` para `actor` y `visibility_layer`; GIN sobre
-  `payload`. `UNIQUE (campaign_id, seq)`. El rol de la aplicacion no tiene
-  `UPDATE` ni `DELETE`; el modelo lanza excepcion en ambos; un test lo prueba.
-  Las correcciones son eventos `correction` (regla 16).
+  `payload`. `UNIQUE (campaign_id, seq)`. Un trigger `BEFORE DELETE OR UPDATE`
+  rechaza ambos y el modelo lanza excepcion; un test prueba el trigger.
+  Corregido el 2026-09-19 (VAM): el rol de la aplicacion es dueño de la tabla y
+  conserva `UPDATE`, `DELETE` y `TRUNCATE`; `TRUNCATE` no dispara el trigger.
+  La garantia real es "sin ediciones desde el ORM", no "sin ediciones". La
+  separacion en dos roles (dueño de migraciones, rol de aplicacion sin
+  `TRUNCATE`) es trabajo pendiente. Las correcciones son eventos `correction`
+  (regla 16).
 - `campaign_snapshots`: inmutables, escritos solo al procesar `session_closed`,
   con `pack_version` y `ruleset_version` (BA2). El replay audita; si difiere,
   gana el snapshot y se registra la divergencia.
