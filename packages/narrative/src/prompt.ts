@@ -121,3 +121,64 @@ Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos 
 {"type":"inventory_change","actor":"character:calder","effects":[{"op":"gain","item":"llave-de-hierro","holder":"character:calder"}]}
 {"type":"world_event","payload":{"note":"Tomás cierra la posada"}}
 Si dudas de cómo llenar un evento, no lo propongas.`
+
+/**
+ * La seccion de eventos depende del ruleset. `court-intrigue` no tiene puntos
+ * de vida ni combate: lo que se mueve es credito, sospecha y pistas. Antes el
+ * prompt era el del d20 para cualquier mesa, y una mesa de intriga narraba
+ * bien sin mover el estado (VAM del 19-09, motor A8). El texto del d20 no se
+ * toca: `systemPromptFor('fantasy-d20-lite')` es el prompt de siempre, byte a
+ * byte, para que la cache de prefijo del proveedor siga valiendo.
+ */
+const EVENTS_MARK = '# Eventos que puedes proponer'
+const COMPACT_EVENTS_MARK = 'Eventos permitidos'
+
+const INTRIGUE_EVENTS = `# Eventos que puedes proponer
+
+Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Lo normal es proponer entre 0 y 2 por turno. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". En esta corte no hay puntos de vida ni combate: lo que se gana y se pierde es crédito, sospecha y pistas. Usa solo estas formas, exactamente con estas claves:
+
+- Tirada que pides y el motor resuelve (sin "result"; "kind" es fortune, skill, social, save u other; "advantage" o "disadvantage" opcionales para 1d20):
+  {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
+- Tirada que un jugador reportó con su propio dado (solo si escribió el número):
+  {"type":"roll","actor":"character:shiho","resolved":{"kind":"skill","die":"1d20","result":14,"source":"physical","skill":"Observación"}}
+- Crédito en la corte: cuánto le abren las puertas a ese personaje (de 0 a 10; "delta" entero, negativo cuando pierde favor):
+  {"type":"state_change","actor":"character:shiho","effects":[{"op":"standing","who":"character:shiho","delta":-1}]}
+- Sospecha: cuánto creen que tuvo que ver con el atentado (de 0 a 10; al llegar a 10 lo detienen; sube cuando lo ven donde no debía, baja cuando alguien lo cubre):
+  {"type":"state_change","actor":"character:ryomen","effects":[{"op":"suspicion","who":"character:ryomen","delta":2}]}
+- Pista averiguada de verdad en la escena (una frase corta; la misma pista dos veces no cuenta):
+  {"type":"state_change","actor":"character:kogen","effects":[{"op":"clue","who":"character:kogen","clue":"la tetera salió de las cocinas del oeste"}]}
+- Condición que empieza o termina (envenenado, vigilado, en desgracia, convocado):
+  {"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","add":"vigilado"}]}
+  {"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","remove":"vigilado"}]}
+- Objeto ganado o perdido ("item" en kebab-case; "holder" puede ser character:<id> o npc:<id>; para perder, el objeto debe estar en su inventario):
+  {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"gain","item":"carta-lacrada","holder":"character:kogen","note":"se la dio la consorte"}]}
+  {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"lose","item":"carta-lacrada","holder":"character:kogen"}]}
+- Algo que pasa en el mundo y conviene recordar (un NPC se va, se cierra un pabellón, cambia la guardia):
+  {"type":"world_event","payload":{"note":"La guardia del pabellón de jade se dobla al anochecer"}}
+- Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
+  {"type":"secret_revealed","payload":{"secretId":"quien-cambio-la-tetera","how":"la ayudante de cocina lo confiesa"}}
+
+No propongas "hp": aquí nadie tiene puntos de vida; un envenenamiento es una condición. Los ids de personaje son los de la party ("character:<id>"). Si no estás seguro de poder llenar un evento correctamente, no lo propongas: la narración basta.`
+
+const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es crédito, sospecha y pistas):
+{"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
+{"type":"state_change","actor":"character:shiho","effects":[{"op":"standing","who":"character:shiho","delta":-1}]}
+{"type":"state_change","actor":"character:ryomen","effects":[{"op":"suspicion","who":"character:ryomen","delta":2}]}
+{"type":"state_change","actor":"character:kogen","effects":[{"op":"clue","who":"character:kogen","clue":"la tetera salió de las cocinas del oeste"}]}
+{"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","add":"vigilado"}]}
+{"type":"inventory_change","actor":"character:kogen","effects":[{"op":"gain","item":"carta-lacrada","holder":"character:kogen"}]}
+{"type":"world_event","payload":{"note":"Se dobla la guardia del pabellón"}}
+Si dudas de cómo llenar un evento, no lo propongas.`
+
+/** Rulesets con seccion de eventos propia; el resto usa la del d20 del piloto. */
+export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue']
+
+/** El prompt de sistema para un ruleset; sin ruleset o con uno desconocido, el del d20 tal cual. */
+export function systemPromptFor(rulesetId: string | undefined, compact = false): string {
+  const base = compact ? DM_SYSTEM_PROMPT_COMPACT : DM_SYSTEM_PROMPT
+  if (rulesetId !== 'court-intrigue') return base
+  const mark = compact ? COMPACT_EVENTS_MARK : EVENTS_MARK
+  const at = base.indexOf(mark)
+  if (at === -1) return base
+  return base.slice(0, at) + (compact ? INTRIGUE_EVENTS_COMPACT : INTRIGUE_EVENTS)
+}

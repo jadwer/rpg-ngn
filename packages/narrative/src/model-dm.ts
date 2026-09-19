@@ -4,7 +4,7 @@ import { TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contrac
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
-import { DM_SYSTEM_PROMPT, DM_SYSTEM_PROMPT_COMPACT } from './prompt.js'
+import { systemPromptFor } from './prompt.js'
 import type { DMOutput, DMProbe, DMProvider, DMTurnContext, ProposedEvent } from './provider.js'
 import { DMProviderError, errorMessage, redact } from './redact.js'
 
@@ -55,7 +55,8 @@ const DEFAULT_MAX_OUTPUT_TOKENS = 4000
 const MAX_PENDING_CHARS = 8000
 
 // Formas de evento que el prompt ofrece. Son mas estrictas que el schema de
-// content a proposito: solo lo que el ruleset del piloto sabe aplicar.
+// content a proposito: solo lo que el ruleset de la mesa sabe aplicar. Los
+// effects de `state_change` dependen del ruleset; el resto es comun.
 const HpEffect = z.strictObject({ op: z.literal('hp'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const ConditionEffect = z
   .strictObject({ op: z.literal('condition'), who: CharacterRef, add: z.string().min(1).optional(), remove: z.string().min(1).optional() })
@@ -63,43 +64,64 @@ const ConditionEffect = z
 const MemoryEffect = z.strictObject({ op: z.literal('memory_recovered'), who: CharacterRef })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
 const LoseEffect = z.strictObject({ op: z.literal('lose'), item: KebabId, holder: EntityRef.optional() })
+// court-intrigue: credito, sospecha y pistas (packages/rules/src/court-intrigue.ts).
+const StandingEffect = z.strictObject({ op: z.literal('standing'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+const SuspicionEffect = z.strictObject({ op: z.literal('suspicion'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+const ClueEffect = z.strictObject({ op: z.literal('clue'), who: CharacterRef, clue: z.string().trim().min(3).max(160) })
 
-const AllowedEvent = z.discriminatedUnion('type', [
-  z.strictObject({
-    type: z.literal('roll'),
-    actor: CharacterRef,
-    resolved: z.strictObject({
-      kind: z.enum(['fortune', 'skill', 'social', 'attack', 'save', 'rest', 'other']),
-      die: DiceSpec,
-      /** Sin `result` el engine tira el dado con su generador; con `result` es un numero que el jugador escribio. */
-      result: z.number().int().optional(),
-      source: z.string().optional(),
-      skill: z.string().optional(),
-      target: EntityRef.optional(),
-      modifier: z.number().int().optional(),
-      advantage: z.boolean().optional(),
-      disadvantage: z.boolean().optional(),
-    }),
+const RollEvent = z.strictObject({
+  type: z.literal('roll'),
+  actor: CharacterRef,
+  resolved: z.strictObject({
+    kind: z.enum(['fortune', 'skill', 'social', 'attack', 'save', 'rest', 'other']),
+    die: DiceSpec,
+    /** Sin `result` el engine tira el dado con su generador; con `result` es un numero que el jugador escribio. */
+    result: z.number().int().optional(),
+    source: z.string().optional(),
+    skill: z.string().optional(),
+    target: EntityRef.optional(),
+    modifier: z.number().int().optional(),
+    advantage: z.boolean().optional(),
+    disadvantage: z.boolean().optional(),
   }),
-  z.strictObject({
-    type: z.literal('state_change'),
-    actor: CharacterRef.optional(),
-    effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect])).min(1),
-  }),
-  z.strictObject({
-    type: z.literal('inventory_change'),
-    actor: CharacterRef.optional(),
-    effects: z.array(z.union([GainEffect, LoseEffect])).min(1),
-  }),
-  z.strictObject({
-    type: z.literal('world_event'),
-    payload: z.strictObject({ note: z.string().min(1) }),
-  }),
-  z.strictObject({
-    type: z.literal('secret_revealed'),
-    payload: z.strictObject({ secretId: KebabId, how: z.string().optional() }),
-  }),
+})
+const InventoryEvent = z.strictObject({
+  type: z.literal('inventory_change'),
+  actor: CharacterRef.optional(),
+  effects: z.array(z.union([GainEffect, LoseEffect])).min(1),
+})
+const WorldEvent = z.strictObject({
+  type: z.literal('world_event'),
+  payload: z.strictObject({ note: z.string().min(1) }),
+})
+const SecretEvent = z.strictObject({
+  type: z.literal('secret_revealed'),
+  payload: z.strictObject({ secretId: KebabId, how: z.string().optional() }),
+})
+
+const D20_EVENT = z.discriminatedUnion('type', [
+  RollEvent,
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect])).min(1) }),
+  InventoryEvent,
+  WorldEvent,
+  SecretEvent,
 ])
+const INTRIGUE_EVENT = z.discriminatedUnion('type', [
+  RollEvent,
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, StandingEffect, SuspicionEffect, ClueEffect])).min(1) }),
+  InventoryEvent,
+  WorldEvent,
+  SecretEvent,
+])
+
+/**
+ * Los eventos que el provider acepta del modelo para un ruleset. `hp` no
+ * existe en la corte y `suspicion` no existe en el d20: lo que el ruleset no
+ * sabe aplicar se descarta aqui, antes de llegar al reductor.
+ */
+export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT {
+  return rulesetId === 'court-intrigue' ? INTRIGUE_EVENT : D20_EVENT
+}
 
 const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('block'), block: z.unknown() }),
@@ -144,7 +166,7 @@ export class ModelDMProvider implements DMProvider {
     }
 
     const prompt: ModelPrompt = {
-      system: compact ? DM_SYSTEM_PROMPT_COMPACT : DM_SYSTEM_PROMPT,
+      system: systemPromptFor(ctx.rulesetId, compact),
       user: built.user,
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
@@ -271,6 +293,7 @@ class LineInterpreter {
   addressed: string[] | null = null
   private pending: { text: string; depth: number } | null = null
   private readonly knowledge: KnowledgeView | null
+  private readonly allowed: ReturnType<typeof allowedEventFor>
 
   constructor(
     private readonly ctx: DMTurnContext,
@@ -280,6 +303,7 @@ class LineInterpreter {
     private readonly diceMode: DiceMode,
   ) {
     this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
+    this.allowed = allowedEventFor(ctx.rulesetId)
   }
 
   /**
@@ -481,7 +505,7 @@ class LineInterpreter {
 
   /** Valida forma y sentido del evento contra el estado; null si no se puede aplicar. */
   private event(raw: unknown): ProposedEvent | null {
-    const parsed = AllowedEvent.safeParse(raw)
+    const parsed = this.allowed.safeParse(raw)
     if (!parsed.success) return null
     const event = parsed.data
     const characters = this.ctx.state.world.characters

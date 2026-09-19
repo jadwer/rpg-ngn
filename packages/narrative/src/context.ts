@@ -2,6 +2,7 @@ import { secretsKnownBy, type CampaignState, type NarrativeEntry, type SessionRe
 import { isManualReveal, refId, refKind, type CampaignEvent, type Character, type LoadedPack, type Secret } from '@rpg-ngn/content'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
+import { secretTouchesScene } from './lint.js'
 import type { DMTurnContext } from './provider.js'
 
 /**
@@ -60,9 +61,11 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
   return { user: sections.join('\n\n'), party }
 }
 
-// Capa dm: secretos del pack con su estado de revelacion para la party presente.
+// Capa dm: secretos del pack con su estado de revelacion para la party
+// presente. Solo los que la escena roza (`secretTouchesScene`): lo que el
+// modelo no tiene delante no lo puede parafrasear.
 function dmLayer(ctx: DMTurnContext, party: string[], budget: ContextBudget): string | null {
-  const secrets = [...ctx.pack.secrets.values()]
+  const secrets = [...ctx.pack.secrets.values()].filter((s) => secretTouchesScene(s, ctx, party))
   if (secrets.length === 0) return null
   const known = secretsKnownBy(ctx.state, party)
   const names = (ids: string[]): string => ids.map((id) => ctx.pack.characters.get(id)?.name ?? id).join(', ')
@@ -170,8 +173,12 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     lines.push(sheet.bio)
     lines.push(`Meta: ${sheet.goal}`)
     const stats = Object.entries(sheet.stats).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(', ')
-    lines.push(`Características: ${stats}. CA ${sheet.ac}. Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
-    lines.push(`Ataques: ${sheet.attacks.map((a) => `${a.name} (${a.damage} ${a.damageType}, ${a.range})`).join('; ')}.`)
+    // CA y ataques son del d20; un personaje de corte no los tiene y antes
+    // salia "CA undefined" y "Ataques: ." (VAM del 19-09, motor A8).
+    const ca = sheet.ac !== undefined && sheet.ac !== null ? ` CA ${sheet.ac}.` : ''
+    lines.push(`Características: ${stats}.${ca} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
+    if (sheet.attacks.length) lines.push(`Ataques: ${sheet.attacks.map((a) => `${a.name} (${a.damage} ${a.damageType}, ${a.range})`).join('; ')}.`)
+    if (sheet.faction || sheet.rank) lines.push(`Posición: ${[sheet.faction, sheet.rank].filter(Boolean).join(', ')}.`)
     if (sheet.abilities.length) {
       lines.push(`Capacidades: ${sheet.abilities.map((a) => `${a.name}${a.uses ? ` (${a.uses}/${a.per ?? 'sesión'})` : ''}: ${a.effect}`).join(' | ')}`)
     }
@@ -182,6 +189,13 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     parts.push(live.inventory.length ? `inventario: ${live.inventory.map((i) => i.note ? `${i.id} (${i.note})` : i.id).join(', ')}` : 'inventario vacío')
     if (live.fortune) parts.push(`Fortuna: ${live.fortune.result} (${live.fortune.tier})`)
     if (live.memoriesRecovered > 0) parts.push(`recuerdos recuperados: ${live.memoriesRecovered}`)
+    // Lo que guardan los rulesets sin combate (court-intrigue): si el modelo
+    // no lo ve, no puede narrar sus consecuencias ni proponer cambiarlo.
+    const custom = live.custom
+    if (typeof custom['standing'] === 'number') parts.push(`crédito en la corte: ${custom['standing']}/10`)
+    if (typeof custom['suspicion'] === 'number') parts.push(`sospecha: ${custom['suspicion']}/10`)
+    const clues = custom['clues']
+    if (Array.isArray(clues) && clues.length) parts.push(`pistas: ${clues.map(String).join('; ')}`)
     lines.push(`Estado: ${parts.join('; ')}.`)
   }
   const facts = Object.keys(state.knowledge[id]?.facts ?? {})

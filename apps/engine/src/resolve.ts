@@ -70,6 +70,8 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       maxOutputTokens: request.budget?.maxOutputTokens,
       lint: request.lint ?? deps.lintMode,
       dice: request.dice,
+      // El prompt y los eventos aceptados dependen del ruleset de la mesa.
+      rulesetId: ruleset.id,
     })
     for await (const output of outputs) {
       if (output.kind === 'block') {

@@ -49,7 +49,11 @@ describe('buildTurnContext', () => {
     expect(dm).toContain('NO REVELADO a Zahira, Calder')
     expect(dm).toContain('Osric no huyó del pueblo: bajó a la mina anoche por su cuenta')
     expect(dm).toContain('Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric')
-    expect(dm).toContain('Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira')
+    // El secreto sobre Brorg no entra mientras la escena no lo roce: Brorg no
+    // esta en la party y nadie lo ha nombrado (docs/04, regla 2).
+    expect(dm).not.toContain('brorg-pago-por-zahira')
+    const conBrorg = buildTurnContext(contextFor(base, turn(1, [response('zahira', '¿Dónde está Brorg? Lo busco entre los ganchos.')]))).user
+    expect(conBrorg).toContain('Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira')
 
     // Revelado a Calder y no a Zahira; y revelado a toda la party presente.
     const revealed = CampaignEvent.parse({

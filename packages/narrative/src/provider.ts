@@ -22,6 +22,12 @@ export interface DMTurnContext {
   lint?: LintMode | undefined
   /** Quien tira los dados; por defecto `table` (se aceptan numeros del jugador). */
   dice?: DiceMode | undefined
+  /**
+   * Id del ruleset de la campaña (`court-intrigue`, `fantasy-d20-lite`). El
+   * prompt ofrece los eventos que ese ruleset sabe aplicar y el provider solo
+   * acepta esos. Sin el, se asume el d20 del piloto, que es lo que habia.
+   */
+  rulesetId?: string | undefined
 }
 
 /**

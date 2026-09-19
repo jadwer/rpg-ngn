@@ -258,7 +258,14 @@ describe('ModelDMProvider', () => {
       const user = transport.prompts[0]!.user
       expect(user).toContain('# Capa del DM: secretos')
       expect(user).toContain('- osric-esta-abajo (sobre npc:osric; NO REVELADO a Zahira, Calder). Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric.')
-      expect(user).toContain('- brorg-pago-por-zahira (sobre character:brorg; NO REVELADO a Zahira, Calder). Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira; puede soltarlo character:brorg.')
+      // El de Brorg no viaja: nadie lo nombro y no esta en la party. El modelo
+      // no puede parafrasear lo que no tiene delante (docs/04, regla 2).
+      expect(user).not.toContain('brorg-pago-por-zahira')
+
+      // En cuanto la escena lo roza, entra con su condicion de revelacion.
+      const transport2 = new FakeTransport(goodTurn)
+      await collect(new ModelDMProvider(transport2, KEY).narrate(contextFor(base, turn(1, [response('zahira', '¿Y Brorg? Lo busco entre los ganchos.')]))))
+      expect(transport2.prompts[0]!.user).toContain('- brorg-pago-por-zahira (sobre character:brorg; NO REVELADO a Zahira, Calder). Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira; puede soltarlo character:brorg.')
     })
 
     it('un secret_revealed emitido antes del bloque lo autoriza y llega al engine con la party de testigos', async () => {
