@@ -144,6 +144,8 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 
 ## Deuda tecnica (sin entrega asignada)
 
+- [x] **Quien tira los dados es del anfitrion** (2026-09-19). Un jugador podia escribir "tiro 20" y el engine lo aceptaba como tirada fisica. `settings.dice`: `table` (por defecto, dados reales en la mesa) o `engine` (tira el servidor y el numero escrito se ignora). Comprobado en produccion escribiendo un 20 a proposito: se registro un 13 con `source: csprng:webcrypto`. **Requisito para cualquier pack con roles ocultos**
+
 - [x] **Los bloques del turno ya se filtran en el servidor** (2026-09-18). `TurnService::blocksAfter` recibe el asiento y no serializa los bloques `system` con `audience: host` para un jugador; `blocksForSeat` en ui-logic se queda como segunda capa, que es presentacion. El defecto del parametro es el seguro (`forHost: false`): quien quiera verlo todo tiene que pedirlo. Test de fuga en `TurnFlowTest`, comprobado que falla si se quita el filtro. Era el "invariante critico" del issue #2 y bloqueaba cualquier pack con roles ocultos
 - `composer analyse` esta declarado en el composer.json de la API pero no existe `phpstan.neon`, asi que falla con "At least one path must be specified". O se configura Larastan o se quita el script
 - Un solo comando que levante los cuatro servicios (engine, API, web, worker), y a futuro que vivan en el MicroServer ProLiant en vez de en la laptop
