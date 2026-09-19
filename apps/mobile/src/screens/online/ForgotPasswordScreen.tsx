@@ -52,12 +52,12 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
         {done ? (
           <>
             <Text style={styles.body}>{done}</Text>
-            <Text style={styles.hint}>Si este servidor no tiene correo configurado, pídele al anfitrión de tu mesa que te ayude.</Text>
+            <Text style={styles.hint}>Si no te llega en unos minutos, escríbele al anfitrión de tu mesa: él puede ayudarte a entrar.</Text>
             <Button label="Volver a entrar" onPress={onBack} />
           </>
         ) : (
           <>
-            <Text style={styles.hint}>Escribe tu correo y, si el servidor tiene el correo configurado, te llegará un enlace para cambiar la contraseña.</Text>
+            <Text style={styles.hint}>Escribe tu correo y te llegará un enlace para poner una contraseña nueva.</Text>
             <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
             <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoFocus onSubmitEditing={() => void submit()} />
             {error ? <Text style={styles.error}>{error}</Text> : null}

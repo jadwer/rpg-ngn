@@ -46,14 +46,14 @@ export default function ForgotPasswordPage() {
       {done ? (
         <div className="card stack">
           <p>{done}</p>
-          <p className="hint">Si este servidor no tiene correo configurado, pídele al anfitrión de tu mesa que te ayude.</p>
+          <p className="hint">Si no te llega en unos minutos, escríbele al anfitrión de tu mesa: él puede ayudarte a entrar.</p>
           <Link href="/entrar" className="btn">
             Volver a entrar
           </Link>
         </div>
       ) : (
         <form className="card stack" onSubmit={(e) => void submit(e)}>
-          <p className="hint">Escribe tu correo y, si el servidor tiene el correo configurado, te llegará un enlace para cambiar la contraseña.</p>
+          <p className="hint">Escribe tu correo y te llegará un enlace para poner una contraseña nueva.</p>
           <label className="field">
             <span>Correo</span>
             <input className="input" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required autoFocus />
