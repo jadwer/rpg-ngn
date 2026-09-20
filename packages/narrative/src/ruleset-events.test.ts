@@ -76,6 +76,10 @@ describe('eventos aceptados por ruleset', () => {
     const bond = { type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'interes' }] }
     expect(allowed.safeParse(bond).success).toBe(true)
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'amor' }] }).success).toBe(false)
+    // Con tilde, como lo escribe el modelo, y sale normalizado (Haiku en produccion, mesa 9, 20-09).
+    const accented = allowed.safeParse({ type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'Atracción' }] })
+    expect(accented.success).toBe(true)
+    expect((accented.data as { effects: Array<{ state: string }> }).effects[0]!.state).toBe('atraccion')
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'rumor', who: 'character:camille', rumor: 'la dama de rojo llegó sola' }] }).success).toBe(true)
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'scandal', who: 'character:camille', delta: 2 }] }).success).toBe(true)
     expect(allowed.safeParse(condition).success).toBe(true)

@@ -72,7 +72,16 @@ const ClueEffect = z.strictObject({ op: z.literal('clue'), who: CharacterRef, cl
 const PrestigeEffect = z.strictObject({ op: z.literal('prestige'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const ScandalEffect = z.strictObject({ op: z.literal('scandal'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const RumorEffect = z.strictObject({ op: z.literal('rumor'), who: CharacterRef, rumor: z.string().trim().min(3).max(160) })
-const BondEffect = z.strictObject({ op: z.literal('bond'), who: CharacterRef, with: EntityRef, state: z.enum(['interes', 'atraccion', 'confianza', 'quimica', 'decepcion', 'desconfianza']) })
+// El modelo escribe "interés" o "atracción" con tilde aunque el prompt las liste sin ella; se normaliza antes de validar.
+const BondEffect = z.strictObject({
+  op: z.literal('bond'),
+  who: CharacterRef,
+  with: EntityRef,
+  state: z
+    .string()
+    .transform((v) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim())
+    .pipe(z.enum(['interes', 'atraccion', 'confianza', 'quimica', 'decepcion', 'desconfianza'])),
+})
 
 const RollEvent = z.strictObject({
   type: z.literal('roll'),
