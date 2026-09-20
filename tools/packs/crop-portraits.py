@@ -12,7 +12,7 @@ arranca la cabeza, y se escala a 512.
 
 Uso, desde la raiz del repo:
 
-    python3 tools/packs/crop-portraits.py <lamina> <destino> <id1> <id2> ... [--top 0.245] [--side 0.03]
+    python3 tools/packs/crop-portraits.py <lamina> <destino> <id1> <id2> ... [--top 0.245] [--side 0.03] [--rows 1] [--header 0]
 
 Ejemplo:
 
@@ -23,7 +23,11 @@ Ejemplo:
 
 `--top` es la fraccion de la altura donde empieza el cuadrado (la cenefa del
 titulo queda arriba); `--side` el margen lateral dentro de la columna para no
-arrastrar el marco del panel. Si la lamina es mas pequeña que 512 por
+arrastrar el marco del panel. Con `--rows 2` la lamina es una rejilla (los ids
+van por filas, de izquierda a derecha): `--header` es la fraccion de la altura
+que ocupa el titulo de la lamina antes de la primera fila, y `--top` se mide
+dentro de cada celda. La lamina de La Mascarada (img/jugables.png del pack,
+4x2 con tarjetas) sale con `--rows 2 --header 0.05 --top 0.02 --side 0.06`. Si la lamina es mas pequeña que 512 por
 personaje, el retrato sale escalado hacia arriba: mejor pedir al generador
 retratos sueltos de 1024 cuando se quiera mas nitidez.
 """
@@ -49,6 +53,8 @@ def main() -> int:
     ids = args[2:]
     top = float(opts.get("--top", 0.245))
     side = float(opts.get("--side", 0.03))
+    rows = int(opts.get("--rows", 1))
+    header = float(opts.get("--header", 0))
 
     if not lamina.is_file():
         print(f"no existe la lamina: {lamina}", file=sys.stderr)
@@ -57,15 +63,22 @@ def main() -> int:
     destino.mkdir(parents=True, exist_ok=True)
     image = Image.open(lamina).convert("RGB")
     width, height = image.size
-    column = width / len(ids)
+    if len(ids) % rows != 0:
+        print(f"{len(ids)} ids no se reparten en {rows} filas", file=sys.stderr)
+        return 1
+    cols = len(ids) // rows
+    column = width / cols
     inner = int(column * (1 - 2 * side))
-    y0 = int(height * top)
-    if y0 + inner > height:
-        print(f"el cuadrado de {inner}px no cabe desde y={y0} en una lamina de {height}px de alto", file=sys.stderr)
+    grid_top = height * header
+    cell = (height - grid_top) / rows
+    if cell * top + inner > cell:
+        print(f"el cuadrado de {inner}px no cabe en una celda de {int(cell)}px de alto desde {int(cell * top)}", file=sys.stderr)
         return 1
 
     for index, character in enumerate(ids):
-        left = int(index * column + column * side)
+        row, col = divmod(index, cols)
+        left = int(col * column + column * side)
+        y0 = int(grid_top + row * cell + cell * top)
         box = (left, y0, left + inner, y0 + inner)
         out = destino / f"{character}.webp"
         image.crop(box).resize((SIZE, SIZE), Image.LANCZOS).save(out, "WEBP", quality=QUALITY, method=6)

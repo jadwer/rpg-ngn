@@ -155,14 +155,14 @@ function partyLayer(ctx: DMTurnContext, party: string[], budget: ContextBudget):
   for (const id of party) {
     const sheet = ctx.pack.characters.get(id)
     const live = ctx.state.world.characters[id]
-    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets))
+    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack))
     lines.push('')
   }
 
   return lines.join('\n').trimEnd()
 }
 
-function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets']): string {
+function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack): string {
   const lines: string[] = []
   const name = sheet?.name ?? id
   lines.push(`## ${name} (character:${id})`)
@@ -196,11 +196,26 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     if (typeof custom['suspicion'] === 'number') parts.push(`sospecha: ${custom['suspicion']}/10`)
     const clues = custom['clues']
     if (Array.isArray(clues) && clues.length) parts.push(`pistas: ${clues.map(String).join('; ')}`)
+    // Lo de la mascarada: prestigio, escandalo, rumores oidos y como esta con cada persona.
+    if (typeof custom['prestige'] === 'number') parts.push(`prestigio: ${custom['prestige']}/10`)
+    if (typeof custom['scandal'] === 'number') parts.push(`escándalo: ${custom['scandal']}/10`)
+    const rumors = custom['rumors']
+    if (Array.isArray(rumors) && rumors.length) parts.push(`rumores oídos: ${rumors.map(String).join('; ')}`)
+    const bonds = custom['bonds']
+    if (Array.isArray(bonds) && bonds.length) parts.push(`vínculos: ${bonds.map((b) => `${refName(pack, String((b as { with: string }).with))} (${String((b as { state: string }).state)})`).join(', ')}`)
     lines.push(`Estado: ${parts.join('; ')}.`)
   }
   const facts = Object.keys(state.knowledge[id]?.facts ?? {})
   if (facts.length) lines.push(`Sabe (descubierto): ${facts.map((f) => refId(f)).join(', ')}.`)
   return lines.join('\n')
+}
+
+/** Nombre de un npc:<id> o character:<id> segun el pack; si no lo conoce, la referencia tal cual. */
+function refName(pack: LoadedPack, ref: string): string {
+  const id = refId(ref)
+  if (refKind(ref) === 'character') return pack.characters.get(id)?.name ?? ref
+  if (refKind(ref) === 'npc') return pack.npcs.get(id)?.name ?? ref
+  return ref
 }
 
 // Capa c: memoria, recortada por longitud.
@@ -301,6 +316,20 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
       return `${target} pierde ${String(effect['item'])}`
     case 'memory_recovered':
       return `${target} recupera un recuerdo`
+    case 'standing':
+      return `${target} ${Number(effect['delta']) < 0 ? 'pierde' : 'gana'} ${Math.abs(Number(effect['delta']))} de crédito`
+    case 'suspicion':
+      return `sospecha sobre ${target} ${Number(effect['delta']) < 0 ? 'baja' : 'sube'} ${Math.abs(Number(effect['delta']))}`
+    case 'clue':
+      return `${target} averigua: ${String(effect['clue'])}`
+    case 'prestige':
+      return `${target} ${Number(effect['delta']) < 0 ? 'pierde' : 'gana'} ${Math.abs(Number(effect['delta']))} de prestigio`
+    case 'scandal':
+      return `escándalo sobre ${target} ${Number(effect['delta']) < 0 ? 'baja' : 'sube'} ${Math.abs(Number(effect['delta']))}`
+    case 'rumor':
+      return `${target} oye: ${String(effect['rumor'])}`
+    case 'bond':
+      return `${target} con ${who(String(effect['with']))}: ${String(effect['state'])}`
     default:
       return `${op} sobre ${target}`
   }

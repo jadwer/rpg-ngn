@@ -178,15 +178,69 @@ const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "pla
 {"type":"world_event","payload":{"note":"Se dobla la guardia del pabellón"}}
 Si dudas de cómo llenar un evento, no lo propongas.`
 
+const MASQUERADE_EVENTS = `# Eventos que puedes proponer
+
+Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". En esta mesa no hay puntos de vida ni combate: es una velada social. Lo que se gana y se pierde es prestigio, escándalo, rumores y, sobre todo, vínculos entre personas, y eso solo existe si lo registras. Reglas de esta mesa:
+- Cada NPC tiene en su ficha lo que busca, lo que no soporta y cómo coquetea. Juégalo así, siempre: un NPC que solo disfruta conquistar dice cosas bonitas a varias personas la misma noche y no miente del todo; el amigo de siempre no necesita impresionar; la sirvienta que quiere un ascenso es encantadora con quien le conviene. Nunca digas al jugador lo que un NPC siente: muéstralo con gestos, con lo que dice y con lo que calla. Los falsos positivos son parte del juego (quien parece interesado puede estar aburrido o jugando; quien parece indiferente puede estar mirando).
+- Cuando una conversación cambia de verdad cómo está un personaje jugador con alguien (le interesa, le atrae, confía, hay química, se decepciona, desconfía), registra el vínculo con "bond" en ESE MISMO turno. Un vínculo nuevo con la misma persona sustituye al anterior. Registra lo que la escena mostró, no lo que el jugador dice sentir: eso lo decide él.
+- Cuando alguien oye un chisme, un rumor o un secreto a medias (verdadero o no), regístralo con "rumor" en el mismo turno, con la frase tal como la oyó.
+- Un baile memorable, un brindis afortunado o un favor sube "prestige"; un desaire o una mentira pillada lo baja. Ser visto besando a la persona equivocada, una escena en público o una carta comprometida sube "scandal". A 10 de escándalo el anfitrión invita a esa persona a retirarse.
+- Coquetear, mentir sobre quién eres, sonsacar a un sirviente o pedir un baile a quien no te conoce tiene riesgo: usa el dado de ese personaje con "kind":"social".
+Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas formas, exactamente con estas claves:
+
+- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es social, skill, fortune, save u other):
+  {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","result":14,"source":"engine","skill":"Seducción"}}
+- Tirada extra que pides y el motor resuelve (sin "result"). Solo si hace falta un segundo dado; la consecuencia se narra el turno siguiente:
+  {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","skill":"Baile"}}
+- Tirada que un jugador reportó con su propio dado (solo si escribió el número y la mesa juega con dados reales):
+  {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","result":14,"source":"physical","skill":"Etiqueta"}}
+- Vínculo: cómo queda ese personaje con alguien tras la escena ("with" es npc:<id> o character:<id>; "state" es uno de interes, atraccion, confianza, quimica, decepcion, desconfianza):
+  {"type":"state_change","actor":"character:camille","effects":[{"op":"bond","who":"character:camille","with":"npc:julien","state":"interes"}]}
+- Rumor oído (una frase corta, tal como la oyó; el mismo rumor dos veces no cuenta):
+  {"type":"state_change","actor":"character:etienne","effects":[{"op":"rumor","who":"character:etienne","rumor":"la dama de rojo llegó acompañada y su acompañante desapareció"}]}
+- Prestigio: qué tan bien visto es en el salón (de 0 a 10; "delta" entero, negativo cuando pierde):
+  {"type":"state_change","actor":"character:armand","effects":[{"op":"prestige","who":"character:armand","delta":1}]}
+- Escándalo: cuánto se habla de él, y no bien (de 0 a 10; a 10 lo invitan a retirarse):
+  {"type":"state_change","actor":"character:lucien","effects":[{"op":"scandal","who":"character:lucien","delta":2}]}
+- Condición que empieza o termina (mareado, intoxicada, sin máscara, comprometido, en el balcón):
+  {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","add":"sin máscara"}]}
+  {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","remove":"sin máscara"}]}
+- Objeto ganado o perdido ("item" en kebab-case; "holder" puede ser character:<id> o npc:<id>; para perder, el objeto debe estar en su inventario):
+  {"type":"inventory_change","actor":"character:margot","effects":[{"op":"gain","item":"rosa-blanca","holder":"character:margot","note":"se la dio Théo"}]}
+  {"type":"inventory_change","actor":"character:margot","effects":[{"op":"lose","item":"rosa-blanca","holder":"character:margot"}]}
+- Algo que pasa en la fiesta y conviene recordar (se sirve la cena, se va la luz, alguien abandona el salón llorando):
+  {"type":"world_event","payload":{"note":"Se apagan las lámparas del salón grande; solo quedan las velas del pasillo"}}
+- Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
+  {"type":"secret_revealed","payload":{"secretId":"el-invitado-que-no-existe","how":"la duquesa lo confiesa entre risas"}}
+
+No propongas "hp": aquí nadie sangra; una intoxicación es una condición. Los ids de personaje son los de la party ("character:<id>"). Si no estás seguro de poder llenar un evento correctamente, no lo propongas: la narración basta.`
+
+const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es prestigio, escándalo, rumores y vínculos. Juega a cada NPC por lo que busca y lo que no soporta, sin decir lo que siente. Cuando una escena cambia cómo está un personaje con alguien, registra "bond" ese mismo turno; lo que oye por ahí, "rumor"):
+{"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","skill":"Seducción"}}
+{"type":"state_change","actor":"character:camille","effects":[{"op":"bond","who":"character:camille","with":"npc:julien","state":"interes"}]}
+{"type":"state_change","actor":"character:etienne","effects":[{"op":"rumor","who":"character:etienne","rumor":"la dama de rojo llegó acompañada"}]}
+{"type":"state_change","actor":"character:armand","effects":[{"op":"prestige","who":"character:armand","delta":1}]}
+{"type":"state_change","actor":"character:lucien","effects":[{"op":"scandal","who":"character:lucien","delta":2}]}
+{"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","add":"sin máscara"}]}
+{"type":"inventory_change","actor":"character:margot","effects":[{"op":"gain","item":"rosa-blanca","holder":"character:margot"}]}
+{"type":"world_event","payload":{"note":"Se apagan las lámparas del salón"}}
+Estados de vínculo: interes, atraccion, confianza, quimica, decepcion, desconfianza. Si dudas de cómo llenar un evento, no lo propongas.`
+
 /** Rulesets con seccion de eventos propia; el resto usa la del d20 del piloto. */
-export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue']
+export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue', 'masquerade']
+
+const OWN_EVENTS: Record<string, { full: string; compact: string }> = {
+  'court-intrigue': { full: INTRIGUE_EVENTS, compact: INTRIGUE_EVENTS_COMPACT },
+  masquerade: { full: MASQUERADE_EVENTS, compact: MASQUERADE_EVENTS_COMPACT },
+}
 
 /** El prompt de sistema para un ruleset; sin ruleset o con uno desconocido, el del d20 tal cual. */
 export function systemPromptFor(rulesetId: string | undefined, compact = false): string {
   const base = compact ? DM_SYSTEM_PROMPT_COMPACT : DM_SYSTEM_PROMPT
-  if (rulesetId !== 'court-intrigue') return base
+  const own = rulesetId ? OWN_EVENTS[rulesetId] : undefined
+  if (!own) return base
   const mark = compact ? COMPACT_EVENTS_MARK : EVENTS_MARK
   const at = base.indexOf(mark)
   if (at === -1) return base
-  return base.slice(0, at) + (compact ? INTRIGUE_EVENTS_COMPACT : INTRIGUE_EVENTS)
+  return base.slice(0, at) + (compact ? own.compact : own.full)
 }

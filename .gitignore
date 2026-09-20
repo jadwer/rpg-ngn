@@ -34,3 +34,5 @@ graphify-out/
 # Next.js (apps/web): build y tipos generados
 .next/
 apps/web/next-env.d.ts
+# Borrador de La Mascarada: vive en Gitea (rpg-packs/mascarada) hasta que se juegue; despues se versiona aqui
+content/packs/mascarada

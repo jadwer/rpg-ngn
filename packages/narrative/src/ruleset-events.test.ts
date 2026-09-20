@@ -32,6 +32,20 @@ describe('prompt por ruleset', () => {
   })
 })
 
+describe('prompt de la mascarada', () => {
+  it('ofrece vinculos, rumores, prestigio y escandalo, y ni hp ni sospecha', () => {
+    const prompt = systemPromptFor('masquerade')
+    for (const op of ['bond', 'rumor', 'prestige', 'scandal']) expect(prompt).toContain(`"op":"${op}"`)
+    expect(prompt).not.toContain('"op":"hp"')
+    expect(prompt).not.toContain('"op":"suspicion"')
+    expect(prompt).toContain('Nunca digas al jugador lo que un NPC siente')
+    expect(prompt.startsWith(DM_SYSTEM_PROMPT.slice(0, DM_SYSTEM_PROMPT.indexOf('# Eventos que puedes proponer')))).toBe(true)
+    const compact = systemPromptFor('masquerade', true)
+    expect(compact).toContain('"op":"bond"')
+    expect(compact.length).toBeLessThan(DM_SYSTEM_PROMPT.length)
+  })
+})
+
 describe('eventos aceptados por ruleset', () => {
   const suspicion = { type: 'state_change', actor: 'character:ryomen', effects: [{ op: 'suspicion', who: 'character:ryomen', delta: 2 }] }
   const clue = { type: 'state_change', effects: [{ op: 'clue', who: 'character:kogen', clue: 'la tetera salió de las cocinas del oeste' }] }
@@ -55,6 +69,18 @@ describe('eventos aceptados por ruleset', () => {
     expect(allowed.safeParse(condition).success).toBe(true)
     expect(allowed.safeParse(suspicion).success).toBe(false)
     expect(allowed.safeParse(clue).success).toBe(false)
+  })
+
+  it('la mascarada acepta vinculos con estado conocido y rechaza lo de la corte', () => {
+    const allowed = allowedEventFor('masquerade')
+    const bond = { type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'interes' }] }
+    expect(allowed.safeParse(bond).success).toBe(true)
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'amor' }] }).success).toBe(false)
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'rumor', who: 'character:camille', rumor: 'la dama de rojo llegó sola' }] }).success).toBe(true)
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'scandal', who: 'character:camille', delta: 2 }] }).success).toBe(true)
+    expect(allowed.safeParse(condition).success).toBe(true)
+    expect(allowed.safeParse(suspicion).success).toBe(false)
+    expect(allowed.safeParse(hp).success).toBe(false)
   })
 
   it('lo comun (tiradas, objetos, mundo, secretos) vale en los dos', () => {

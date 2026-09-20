@@ -68,6 +68,11 @@ const LoseEffect = z.strictObject({ op: z.literal('lose'), item: KebabId, holder
 const StandingEffect = z.strictObject({ op: z.literal('standing'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const SuspicionEffect = z.strictObject({ op: z.literal('suspicion'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const ClueEffect = z.strictObject({ op: z.literal('clue'), who: CharacterRef, clue: z.string().trim().min(3).max(160) })
+// masquerade: prestigio, escandalo, rumores y vinculos (packages/rules/src/masquerade.ts).
+const PrestigeEffect = z.strictObject({ op: z.literal('prestige'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+const ScandalEffect = z.strictObject({ op: z.literal('scandal'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+const RumorEffect = z.strictObject({ op: z.literal('rumor'), who: CharacterRef, rumor: z.string().trim().min(3).max(160) })
+const BondEffect = z.strictObject({ op: z.literal('bond'), who: CharacterRef, with: EntityRef, state: z.enum(['interes', 'atraccion', 'confianza', 'quimica', 'decepcion', 'desconfianza']) })
 
 const RollEvent = z.strictObject({
   type: z.literal('roll'),
@@ -113,14 +118,23 @@ const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   WorldEvent,
   SecretEvent,
 ])
+const MASQUERADE_EVENT = z.discriminatedUnion('type', [
+  RollEvent,
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, RumorEffect, BondEffect])).min(1) }),
+  InventoryEvent,
+  WorldEvent,
+  SecretEvent,
+])
 
 /**
  * Los eventos que el provider acepta del modelo para un ruleset. `hp` no
  * existe en la corte y `suspicion` no existe en el d20: lo que el ruleset no
  * sabe aplicar se descarta aqui, antes de llegar al reductor.
  */
-export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT {
-  return rulesetId === 'court-intrigue' ? INTRIGUE_EVENT : D20_EVENT
+export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT | typeof MASQUERADE_EVENT {
+  if (rulesetId === 'court-intrigue') return INTRIGUE_EVENT
+  if (rulesetId === 'masquerade') return MASQUERADE_EVENT
+  return D20_EVENT
 }
 
 const ModelLine = z.discriminatedUnion('kind', [
