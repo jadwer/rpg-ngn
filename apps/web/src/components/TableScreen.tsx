@@ -78,6 +78,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const fallbackMember = memberOf(table, user.id)
   const viewer: TableViewer = snapshot?.viewer ?? { memberId: Number(fallbackMember?.id ?? 0), role: fallbackMember?.role ?? 'player', characterId: fallbackMember?.characterId ?? null }
   const isHost = viewer.role === 'host'
+  const ownMember = table.members.find((m) => String(m.id) === String(viewer.memberId)) ?? fallbackMember ?? null
 
   // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le
   // estorban. Y el modo pantalla es un asiento, no un estilo: lo que se
@@ -386,6 +387,25 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       </footer>
 
       <div className="table-footer hide-on-screen">
+        {ownMember && ownMember.characterId && snapshot?.session ? (
+          <div className="row" style={{ justifyContent: 'flex-end', padding: '4px 12px 0' }}>
+            <button
+              type="button"
+              className="btn ghost small"
+              disabled={busy}
+              title={ownMember.present === false ? 'Vuelves a contar para el turno y el DM te devuelve la palabra' : 'El DM aparta a tu personaje sin matarlo y la mesa no te espera para cerrar el turno'}
+              onClick={() => {
+                void act(async () => {
+                  await client.setPresence(table.id, ownMember.id, ownMember.present === false)
+                  onTableChanged()
+                  refresh()
+                }, 'No se pudo cambiar tu presencia.')
+              }}
+            >
+              {ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
+            </button>
+          </div>
+        ) : null}
         {viewer.characterId === null && snapshot !== null ? (
           <section className="card stack" aria-label="Elige tu personaje">
             <div className="label" style={{ marginTop: 0 }}>

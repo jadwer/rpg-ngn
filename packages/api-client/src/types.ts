@@ -27,6 +27,8 @@ export interface TableMember {
   characterId: string | null
   userId: string | null
   userName: string | null
+  /** false cuando tuvo que irse: no se le espera para cerrar el turno y el DM lo aparta de la escena. */
+  present?: boolean
 }
 
 export interface TableSummary {

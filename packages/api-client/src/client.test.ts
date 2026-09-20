@@ -95,8 +95,8 @@ describe('mesas', () => {
     const table = tables[0]!
     expect(table).toMatchObject({ id: '2', name: 'Smoke', packId: 'pilot', campaignId: '2' })
     expect(table.members).toEqual([
-      { id: '4', role: 'host', characterId: null, userId: '2', userName: 'Gabino' },
-      { id: '5', role: 'player', characterId: 'zahira', userId: '4', userName: 'Jaz' },
+      { id: '4', role: 'host', characterId: null, userId: '2', userName: 'Gabino', present: true },
+      { id: '5', role: 'player', characterId: 'zahira', userId: '4', userName: 'Jaz', present: true },
     ])
     expect(memberOf(table, 4)).toMatchObject({ role: 'player', characterId: 'zahira' })
     expect(memberOf(table, '99')).toBeNull()
@@ -135,7 +135,7 @@ describe('mesas', () => {
     expect(calls[0]?.init.headers['Content-Type']).toBe('application/vnd.api+json')
     expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ data: { type: 'tables', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', settings: { premise: 'La posada al caer la noche.' } } } })
     expect(table).toMatchObject({ id: '9', name: 'Posada', premise: 'La posada al caer la noche.', campaignId: '9' })
-    expect(table.members).toEqual([{ id: '20', role: 'host', characterId: null, userId: '2', userName: 'Gabino' }])
+    expect(table.members).toEqual([{ id: '20', role: 'host', characterId: null, userId: '2', userName: 'Gabino', present: true }])
 
     await api.createTable({ name: 'Sin premisa', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: '   ' })
     expect(JSON.parse(calls[1]?.init.body ?? '{}').data.attributes.settings).toBeUndefined()

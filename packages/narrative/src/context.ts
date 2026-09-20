@@ -55,7 +55,7 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
     dmLayer(ctx, party, budget),
-    turnLayer(ctx.pack, ctx.turn, party),
+    turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}),
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
@@ -307,7 +307,7 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
 }
 
 // Capa d: el turno.
-function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[]): string {
+function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled: Readonly<Record<string, number>> = {}): string {
   const lines: string[] = [`# Turno ${turn.number}`, '']
   if (turn.responses.length === 0) {
     lines.push(turn.number === 1
@@ -327,6 +327,11 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[]): string {
   }
   const silent = party.filter((id) => !turn.responses.some((r) => r.characterId === id))
   if (silent.length && turn.responses.length) lines.push('', `Sin declaración este turno: ${silent.map((id) => pack.characters.get(id)?.name ?? id).join(', ')}.`)
+  const dice = Object.entries(preRolled)
+  if (dice.length) {
+    lines.push('', 'Dados de este turno (un d20 por personaje, ya tirado por el motor; úsalo solo si su acción tiene riesgo, con "result" igual a este número y "source":"engine", y narra la consecuencia ahora):')
+    lines.push(dice.map(([id, n]) => `- ${pack.characters.get(id)?.name ?? id} (character:${id}): ${n}`).join('\n'))
+  }
   lines.push('', `Ids válidos para "addressed": ${party.join(', ') || '(ninguno)'}.`)
   return lines.join('\n')
 }

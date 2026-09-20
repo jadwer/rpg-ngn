@@ -134,6 +134,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         <View key={member.id} style={styles.member}>
           <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} uri={pack ? null : uriOf(member.characterId)} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} size={32} />
           <Text style={styles.memberText}>{memberLine(member, nameOf)}</Text>
+          {member.characterId ? <Button label={member.present === false ? 'Presente' : 'Ausente'} small busy={busy} onPress={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))} /> : null}
         </View>
       ))}
 

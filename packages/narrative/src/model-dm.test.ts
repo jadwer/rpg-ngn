@@ -27,6 +27,9 @@ describe('ModelDMProvider', () => {
     ].join('\n')
     const provider = new ModelDMProvider(new FakeTransport(lines), KEY, { random: seededRandom(7) })
     const expected = seededRandom(7)
+    // Con el servidor tirando, el motor pre-tira un d20 por cada personaje
+    // que declaro (Zahira) antes de llamar al modelo; consume el primer valor.
+    expected.nextInt(20)
     const zahira = expected.nextInt(20) + 1
     const calder = [expected.nextInt(6) + 1, expected.nextInt(6) + 1]
     const narivyl = [expected.nextInt(20) + 1, expected.nextInt(20) + 1]

@@ -151,7 +151,17 @@ export class ModelDMProvider implements DMProvider {
 
   async *narrate(ctx: DMTurnContext): AsyncIterable<DMOutput> {
     const compact = this.options.contextProfile === 'compact'
-    const built = buildTurnContext(ctx, this.options.budget ?? budgetFor(this.options.contextProfile))
+    const random = this.options.random ?? webCryptoRandom()
+    // Sin modo, tira el servidor: aceptar numeros escritos es una eleccion
+    // explicita para la mesa presencial, nunca lo que pasa por omision.
+    const diceMode: DiceMode = ctx.dice ?? 'engine'
+    // Con el servidor tirando, un d20 por cada personaje que declaro algo,
+    // ANTES de llamar al modelo: el DM lo ve, lo usa si la accion tiene
+    // riesgo y narra la consecuencia en el mismo turno. Antes pedia la
+    // tirada y la pagaba un turno despues, o no la pedia (seis turnos de
+    // una mesa de cinco sin un solo dado, 19-09).
+    const preRolled = diceMode === 'engine' ? preRollFor(ctx.turn.responses.map((r) => r.characterId), random) : {}
+    const built = buildTurnContext({ ...ctx, preRolled }, this.options.budget ?? budgetFor(this.options.contextProfile))
     const party = built.party
     const witnesses = party.map((id) => `character:${id}`)
 
@@ -171,9 +181,7 @@ export class ModelDMProvider implements DMProvider {
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
-    // Sin modo, tira el servidor: aceptar numeros escritos es una eleccion
-    // explicita para la mesa presencial, nunca lo que pasa por omision.
-    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom(), ctx.dice ?? 'engine')
+    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', random, diceMode, preRolled)
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -300,6 +308,8 @@ class LineInterpreter {
   private pending: { text: string; depth: number } | null = null
   private readonly knowledge: KnowledgeView | null
   private readonly allowed: ReturnType<typeof allowedEventFor>
+  /** Dados ya usados este turno: el mismo d20 no vale para dos acciones. */
+  private readonly usedPreRoll = new Set<string>()
 
   constructor(
     private readonly ctx: DMTurnContext,
@@ -307,6 +317,7 @@ class LineInterpreter {
     private readonly lintMode: LintMode,
     private readonly random: RandomSource,
     private readonly diceMode: DiceMode,
+    private readonly preRolled: Readonly<Record<string, number>> = {},
   ) {
     this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
     this.allowed = allowedEventFor(ctx.rulesetId)
@@ -532,6 +543,14 @@ class LineInterpreter {
         const actorId = refId(event.actor)
         if (!present(event.actor)) return null
         const { result, source: _source, advantage, disadvantage, ...rest } = event.resolved
+        // El d20 que el motor ya tiro para ese personaje este turno: el DM lo
+        // devuelve tal cual y narra su consecuencia ahora. Solo vale una vez y
+        // solo si coincide; cualquier otro numero se ignora y se tira aqui.
+        if (this.diceMode === 'engine' && result !== undefined && this.preRolled[actorId] === result && !this.usedPreRoll.has(actorId)) {
+          this.usedPreRoll.add(actorId)
+          const resolved = { ...rest, result: result + (rest.modifier ?? 0), rolls: [result], source: 'engine' }
+          return { ...event, resolved, visibility: { layer: 'campaign', witnesses } }
+        }
         // Con dados del motor, el numero que escriba un jugador no cuenta: se
         // tira igual aqui. Sin esto, en una mesa en linea cualquiera escribe
         // "tiro 20" y el engine lo da por bueno.
@@ -621,4 +640,14 @@ export function splitJsonObjects(text: string): string[] {
     }
   }
   return pieces.length > 0 ? pieces : [text]
+}
+
+/** Un d20 por personaje que declaro algo, en orden de llegada y sin repetir. */
+export function preRollFor(characterIds: readonly string[], random: RandomSource): Record<string, number> {
+  const rolled: Record<string, number> = {}
+  for (const id of characterIds) {
+    if (id in rolled) continue
+    rolled[id] = rollD20(random, {}).result
+  }
+  return rolled
 }

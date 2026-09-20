@@ -139,6 +139,17 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
             <div key={member.id} className="member">
               <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} />
               <span>{memberLine(member, nameOf)}</span>
+              {member.characterId ? (
+                <button
+                  type="button"
+                  className="btn ghost small"
+                  disabled={busy}
+                  title={member.present === false ? 'Vuelve a contar para el turno' : 'Si tuvo que irse: la mesa no lo espera y el DM lo aparta sin matarlo'}
+                  onClick={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))}
+                >
+                  {member.present === false ? 'Marcar presente' : 'Marcar ausente'}
+                </button>
+              ) : null}
             </div>
           ))}
         </div>

@@ -48,6 +48,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   setOwnerCharacter(tableId: string | number, ownerUserId: string | number, characterId: string | null): Promise<TableMemberRecord>
   /** Invita a un amigo (amistad aceptada) con un personaje; 422 sin amistad, 409 si ya es miembro. */
   invite(tableId: string | number, userId: string | number, characterId: string | null): Promise<TableMemberRecord>
+  /** "Me tengo que ir" / "he vuelto" (el propio miembro) o marcar ausente a otro (solo el anfitrion). */
+  setPresence(tableId: string | number, memberId: string | number, present: boolean): Promise<void>
   /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
@@ -132,6 +134,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async invite(tableId, userId, characterId) {
       return addMember(tableId, userId, characterId)
+    },
+
+    async setPresence(tableId, memberId, present) {
+      await request(`/api/v1/tables/${tableId}/members/${memberId}/presence`, { method: 'POST', body: { present } })
     },
 
     async listFriendships() {
@@ -231,6 +237,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
       characterId: attr<string | null>(member, 'characterId', null),
       userId: userRef ? String(userRef.id) : null,
       userName: attr<string | null>(user, 'name', null),
+      present: attr<boolean>(member, 'present', true),
     }
   })
   const campaign = relationOne(resource, 'campaign')

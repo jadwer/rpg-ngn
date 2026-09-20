@@ -62,6 +62,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const turn = snapshot?.turn ?? null
   const viewer = useMemo(() => ({ role: snapshot?.viewer.role ?? me.role, characterId: snapshot?.viewer.characterId ?? me.characterId }), [snapshot?.viewer.role, snapshot?.viewer.characterId, me.role, me.characterId])
   const isHost = viewer.role === 'host'
+  const ownMember = table.members.find((m) => m.id === me.id) ?? me
 
   // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
   const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
@@ -296,6 +297,22 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         ) : null}
       </View>
 
+      {ownMember && ownMember.characterId && snapshot?.session ? (
+        <View style={styles.presence}>
+          <Button
+            label={ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
+            small
+            busy={busy}
+            onPress={() => {
+              void act(async () => {
+                await client.setPresence(table.id, ownMember.id, ownMember.present === false)
+                onTableChanged()
+                refresh()
+              }, 'No se pudo cambiar tu presencia.')
+            }}
+          />
+        </View>
+      ) : null}
       {viewer.characterId === null && snapshot !== null ? (
         <View style={styles.choose}>
           <Text style={styles.chooseLabel}>Elige tu personaje</Text>
@@ -336,6 +353,7 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 }
 
 const styles = StyleSheet.create({
+  presence: { alignItems: 'flex-end', paddingHorizontal: 12, paddingTop: 6, backgroundColor: theme.colors.panel },
   choose: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border, padding: 12, gap: 8 },
   chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.goldDim },
   chooseHint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },

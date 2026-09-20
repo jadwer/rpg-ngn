@@ -112,8 +112,9 @@ export function seatPowers(role: MemberRole | null | undefined): SeatPowers {
 export function memberLine(member: TableMember, nameOf: (id: string) => string): string {
   const who = member.userName ?? 'Alguien'
   const character = member.characterId ? nameOf(member.characterId) : null
-  if (member.role === 'host') return character ? `${who}, anfitrión, juega a ${character}` : `${who}, anfitrión`
-  return character ? `${who} juega a ${character}` : `${who}, sin personaje`
+  const away = member.present === false ? ' (ausente)' : ''
+  if (member.role === 'host') return (character ? `${who}, anfitrión, juega a ${character}` : `${who}, anfitrión`) + away
+  return (character ? `${who} juega a ${character}` : `${who}, sin personaje`) + away
 }
 
 /** Lo que el usuario es en una mesa, para la tarjeta de la lista. */

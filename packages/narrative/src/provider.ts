@@ -28,6 +28,13 @@ export interface DMTurnContext {
    * acepta esos. Sin el, se asume el d20 del piloto, que es lo que habia.
    */
   rulesetId?: string | undefined
+  /**
+   * Un d20 ya tirado por el motor para cada personaje que declaro algo este
+   * turno (`characterId -> resultado`). El DM lo usa cuando la accion tiene
+   * riesgo y narra la consecuencia en el mismo turno; antes pedia la tirada
+   * y la pagaba un turno despues, o no la pedia. Lo rellena el provider.
+   */
+  preRolled?: Readonly<Record<string, number>> | undefined
 }
 
 /**
