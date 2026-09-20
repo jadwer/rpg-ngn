@@ -200,7 +200,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
         {error ? <div className="error">{error}</div> : null}
 
         <div className="row">
-          <button type="submit" className="btn primary" disabled={busy || !name.trim()}>
+          <button type="submit" className="btn primary" disabled={busy || !name.trim() || !option}>
             {busy ? <span className="spinner" aria-hidden /> : null}
             Crear mesa
           </button>
