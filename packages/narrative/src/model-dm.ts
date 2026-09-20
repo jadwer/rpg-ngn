@@ -1,4 +1,4 @@
-import { CharacterRef, DiceSpec, EntityRef, KebabId, refId } from '@rpg-ngn/content'
+import { CharacterRef, DiceSpec, EntityRef, KebabId, refId, refKind } from '@rpg-ngn/content'
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import { TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
@@ -113,26 +113,61 @@ const SecretEvent = z.strictObject({
   payload: z.strictObject({ secretId: KebabId, how: z.string().optional() }),
 })
 
+/**
+ * Lo que pasa en una escena social y hasta hoy se tiraba a la basura: un NPC
+ * actua, alguien averigua algo, o un NPC cambia como trata a un personaje.
+ * `npc_action` y `discovery` ya eran tipos validos del dominio; el prompt no
+ * los ofrecia y el interprete no los aceptaba, asi que el modelo los
+ * proponia y se perdian en silencio (mesa de prueba, 20-09).
+ */
+const NpcActionEvent = z.strictObject({
+  type: z.literal('npc_action'),
+  actor: EntityRef,
+  payload: z.strictObject({ text: z.string().min(1) }),
+})
+const DiscoveryEvent = z.strictObject({
+  type: z.literal('discovery'),
+  targets: z.array(CharacterRef).min(1),
+  payload: z.strictObject({
+    fact: z.string().regex(/^fact:[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    confidence: z.enum(['cierta', 'probable', 'dudosa']),
+    method: z.string().min(1),
+  }),
+})
+/** Como trata un NPC a un personaje: -5 enemigo, 5 aliado. */
+const RelationshipEffect = z.strictObject({
+  op: z.literal('relationship'),
+  who: z.string().regex(/^npc:[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  with: CharacterRef,
+  delta: z.number().int().min(-3).max(3).refine((d) => d !== 0, 'delta 0 no cambia nada'),
+})
+
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
+  NpcActionEvent,
+  DiscoveryEvent,
 ])
 const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, StandingEffect, SuspicionEffect, ClueEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, StandingEffect, SuspicionEffect, ClueEffect, RelationshipEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
+  NpcActionEvent,
+  DiscoveryEvent,
 ])
 const MASQUERADE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, RumorEffect, BondEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, RumorEffect, BondEffect, RelationshipEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
+  NpcActionEvent,
+  DiscoveryEvent,
 ])
 
 /**
@@ -629,6 +664,20 @@ class LineInterpreter {
       }
       case 'world_event':
         return { ...event, visibility: { layer: 'campaign', witnesses } }
+      case 'npc_action': {
+        // Lo que hace un NPC delante de la mesa. Solo NPCs del pack: si el
+        // modelo inventa uno, la narracion ya lo cuenta y no hace falta
+        // registrarlo como hecho.
+        if (refKind(event.actor) !== 'npc' || !this.ctx.pack.npcs.has(refId(event.actor))) return null
+        return { ...event, visibility: { layer: 'campaign', witnesses } }
+      }
+      case 'discovery': {
+        // Quien averigua algo tiene que estar en la escena; el reductor lo
+        // proyecta en lo que ese personaje sabe (knowledge).
+        const targets = event.targets.filter((t) => present(t))
+        if (targets.length === 0) return null
+        return { ...event, targets, visibility: { layer: 'campaign', witnesses } }
+      }
       case 'secret_revealed':
         // Solo secretos del pack y solo a la party presente; el reductor lo proyecta en knowledge.
         if (!this.ctx.pack.secrets.has(event.payload.secretId) || witnesses.length === 0) return null

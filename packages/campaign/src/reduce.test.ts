@@ -125,3 +125,51 @@ describe('diffSnapshot', () => {
     expect(divergences.map((d) => d.path)).toEqual(['state.narrative.log', 'state.world.characters.zahira.memoriesRecovered'])
   })
 })
+
+describe('relaciones con NPC', () => {
+  /** Un `state_change` con el efecto `relationship`, como lo propone el DM. */
+  const trato = (delta: number, seq: number): CampaignEvent =>
+    ({
+      id: `evt-rel-${seq}`,
+      v: 1,
+      seq,
+      type: 'state_change',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      effects: [{ op: 'relationship', who: 'npc:tomas', with: 'character:calder', delta }],
+    }) as unknown as CampaignEvent
+
+  it('se acumulan por NPC y personaje, y no se salen de la escala', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const seq = state.meta.headSeq
+
+    state = applyEvent(state, trato(2, seq + 1), fantasyD20Lite)
+    expect((state.world.npcs['tomas']?.custom['relationships'] as Record<string, number>)['character:calder']).toBe(2)
+
+    state = applyEvent(state, trato(-3, seq + 2), fantasyD20Lite)
+    expect((state.world.npcs['tomas']?.custom['relationships'] as Record<string, number>)['character:calder']).toBe(-1)
+
+    // Tope: por mucho que el DM insista, de -5 a 5.
+    for (let i = 3; i <= 8; i++) state = applyEvent(state, trato(3, seq + i), fantasyD20Lite)
+    expect((state.world.npcs['tomas']?.custom['relationships'] as Record<string, number>)['character:calder']).toBe(5)
+
+    // Y no toca el inventario del NPC ni el resto de su estado.
+    expect(state.world.npcs['tomas']?.inventory.map((i) => i.id)).toEqual(['campana-de-bronce'])
+  })
+
+  it('un NPC que no existe en el mundo no crea estado de la nada', async () => {
+    const { pack, events } = await loadPilot()
+    const state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const fantasma = {
+      id: 'evt-rel-x',
+      v: 1,
+      seq: state.meta.headSeq + 1,
+      type: 'state_change',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      effects: [{ op: 'relationship', who: 'npc:nadie', with: 'character:calder', delta: 1 }],
+    } as unknown as CampaignEvent
+    expect(applyEvent(state, fantasma, fantasyD20Lite).world.npcs['nadie']).toBeUndefined()
+  })
+})

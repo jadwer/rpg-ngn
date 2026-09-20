@@ -96,3 +96,38 @@ describe('eventos aceptados por ruleset', () => {
     }
   })
 })
+
+describe('lo que pasa en una escena social', () => {
+  const npcAction = { type: 'npc_action', actor: 'npc:tomas', payload: { text: 'Cierra la puerta' } }
+  const discovery = { type: 'discovery', targets: ['character:calder'], payload: { fact: 'fact:osric-bajo-anoche', confidence: 'probable', method: 'se contradice' } }
+  const relationship = { type: 'state_change', effects: [{ op: 'relationship', who: 'npc:tomas', with: 'character:calder', delta: 1 }] }
+
+  it('los tres rulesets aceptan npc_action, discovery y relationship', () => {
+    // El modelo los proponia y el motor los tiraba en silencio: un turno
+    // entero podia irse en "4 lineas que no se pudieron aplicar" (20-09).
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse(npcAction).success).toBe(true)
+      expect(allowed.safeParse(discovery).success).toBe(true)
+      expect(allowed.safeParse(relationship).success).toBe(true)
+    }
+  })
+
+  it('rechaza lo mal formado: sin fact, confianza inventada, delta fuera de escala o sujeto que no es NPC', () => {
+    const allowed = allowedEventFor('fantasy-d20-lite')
+    expect(allowed.safeParse({ ...discovery, payload: { ...discovery.payload, fact: 'osric' } }).success).toBe(false)
+    expect(allowed.safeParse({ ...discovery, payload: { ...discovery.payload, confidence: 'segurisima' } }).success).toBe(false)
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'relationship', who: 'npc:tomas', with: 'character:calder', delta: 9 }] }).success).toBe(false)
+    // El sujeto de una relacion es el NPC, que es quien tiene la actitud.
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'relationship', who: 'character:calder', with: 'npc:tomas', delta: 1 }] }).success).toBe(false)
+  })
+
+  it('el prompt se las ofrece al DM en los tres rulesets', () => {
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const prompt = systemPromptFor(id)
+      expect(prompt).toContain('"type":"npc_action"')
+      expect(prompt).toContain('"type":"discovery"')
+      expect(prompt).toContain('"op":"relationship"')
+    }
+  })
+})

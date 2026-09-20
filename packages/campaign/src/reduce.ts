@@ -169,9 +169,41 @@ function applyEffects(state: CampaignState, event: CampaignEvent, ruleset: Rules
   if (!event.effects || event.effects.length === 0) return state
   let world = state.world
   for (const effect of event.effects) {
+    // Como trata un NPC a un personaje no depende del sistema de juego: un
+    // guardia sobornado recela igual en la corte que en la mina. Se aplica
+    // aqui, comun a todos los rulesets, y no en cada uno.
+    if (effect['op'] === 'relationship') {
+      world = applyRelationship(world, effect)
+      continue
+    }
     world = ruleset.applyEffect(world, effect, event)
   }
   return { ...state, world }
+}
+
+/** Escala de actitud de un NPC hacia un personaje: de -5 (enemigo) a 5 (aliado). */
+const RELATION_MIN = -5
+const RELATION_MAX = 5
+
+/**
+ * `{"op":"relationship","who":"npc:bren","with":"character:calder","delta":1}`.
+ * Vive en `custom.relationships` del NPC, que ya existe en el estado, asi que
+ * no cambia la forma de los snapshots anteriores. El sujeto es el NPC porque
+ * es quien tiene la actitud; el personaje solo la recibe.
+ */
+function applyRelationship(world: WorldState, effect: Record<string, unknown>): WorldState {
+  const npcId = refId(String(effect['who'] ?? ''))
+  const withRef = String(effect['with'] ?? '')
+  const delta = Number(effect['delta'] ?? 0)
+  const npc = world.npcs[npcId]
+  if (!npc || withRef === '' || !Number.isFinite(delta) || delta === 0) return world
+
+  const current = (npc.custom['relationships'] as Record<string, number> | undefined) ?? {}
+  const value = Math.max(RELATION_MIN, Math.min(RELATION_MAX, (current[withRef] ?? 0) + delta))
+  return {
+    ...world,
+    npcs: { ...world.npcs, [npcId]: { ...npc, custom: { ...npc.custom, relationships: { ...current, [withRef]: value } } } },
+  }
 }
 
 function applyWitnesses(state: CampaignState, event: CampaignEvent): CampaignState {
