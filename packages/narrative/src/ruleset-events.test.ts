@@ -224,3 +224,15 @@ describe('misiones', () => {
     expect(systemPromptFor('masquerade')).toContain('quest:la-cena')
   })
 })
+
+describe('NPCs improvisados', () => {
+  it('un NPC que el DM inventa sobre la marcha tambien puede actuar', () => {
+    // El pack piloto no declara ningun NPC y su historia esta llena de
+    // ellos (Tomas, Osric, Bren). Un bloque `dialogue` de un desconocido ya
+    // se aceptaba; su npc_action se descartaba (20-09).
+    const allowed = allowedEventFor('fantasy-d20-lite')
+    expect(allowed.safeParse({ type: 'npc_action', actor: 'npc:bren', payload: { text: 'Aprieta la empuñadura' } }).success).toBe(true)
+    // Pero el actor sigue teniendo que ser un NPC.
+    expect(allowed.safeParse({ type: 'npc_action', actor: 'character:zahira', payload: { text: 'Se va' } }).success).toBe(false)
+  })
+})

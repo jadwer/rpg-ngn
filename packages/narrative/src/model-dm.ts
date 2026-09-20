@@ -127,7 +127,8 @@ const SecretEvent = z.strictObject({
  */
 const NpcActionEvent = z.strictObject({
   type: z.literal('npc_action'),
-  actor: EntityRef,
+  /** Siempre un NPC, tambien uno que el DM invente sobre la marcha. */
+  actor: z.string().regex(/^npc:[a-z0-9]+(?:-[a-z0-9]+)*$/),
   payload: z.strictObject({ text: z.string().min(1) }),
 })
 const DiscoveryEvent = z.strictObject({
@@ -738,10 +739,13 @@ class LineInterpreter {
         // `worldTime` pasa a ser el momento actual.
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       case 'npc_action': {
-        // Lo que hace un NPC delante de la mesa. Solo NPCs del pack: si el
-        // modelo inventa uno, la narracion ya lo cuenta y no hace falta
-        // registrarlo como hecho.
-        if (refKind(event.actor) !== 'npc' || !this.ctx.pack.npcs.has(refId(event.actor))) return null
+        // Lo que hace un NPC delante de la mesa. No se exige que este en el
+        // pack: un DM inventa NPCs sobre la marcha (el piloto no declara
+        // ninguno y su historia esta llena de ellos), y un bloque `dialogue`
+        // de un NPC desconocido ya se acepta. Rechazarlo aqui era la
+        // incoherencia que dejaba "1 linea que no se pudo aplicar" en mesas
+        // con NPCs improvisados (20-09).
+        if (refKind(event.actor) !== 'npc') return null
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       }
       case 'discovery': {
