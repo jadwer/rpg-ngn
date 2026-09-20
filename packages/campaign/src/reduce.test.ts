@@ -173,3 +173,112 @@ describe('relaciones con NPC', () => {
     expect(applyEvent(state, fantasma, fantasyD20Lite).world.npcs['nadie']).toBeUndefined()
   })
 })
+
+describe('condiciones de NPC', () => {
+  const condicion = (add: string | null, remove: string | null, seq: number): CampaignEvent =>
+    ({
+      id: `evt-cond-${seq}`,
+      v: 1,
+      seq,
+      type: 'state_change',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      effects: [{ op: 'condition', who: 'npc:tomas', ...(add ? { add } : {}), ...(remove ? { remove } : {}) }],
+    }) as unknown as CampaignEvent
+
+  it('se acumulan sin repetirse y se quitan, sin tocar el resto del NPC', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const seq = state.meta.headSeq
+
+    state = applyEvent(state, condicion('receloso', null, seq + 1), fantasyD20Lite)
+    state = applyEvent(state, condicion('receloso', null, seq + 2), fantasyD20Lite)
+    state = applyEvent(state, condicion('agradecido', null, seq + 3), fantasyD20Lite)
+    expect(state.world.npcs['tomas']?.custom['conditions']).toEqual(['receloso', 'agradecido'])
+
+    state = applyEvent(state, condicion(null, 'receloso', seq + 4), fantasyD20Lite)
+    expect(state.world.npcs['tomas']?.custom['conditions']).toEqual(['agradecido'])
+    expect(state.world.npcs['tomas']?.inventory.map((i) => i.id)).toEqual(['campana-de-bronce'])
+  })
+
+  it('la condicion sobre un personaje sigue siendo cosa del ruleset', async () => {
+    const { pack, events } = await loadPilot()
+    const state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const sobrePersonaje = {
+      id: 'evt-cond-pj',
+      v: 1,
+      seq: state.meta.headSeq + 1,
+      type: 'state_change',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      effects: [{ op: 'condition', who: 'character:zahira', add: 'envenenada' }],
+    } as unknown as CampaignEvent
+    const next = applyEvent(state, sobrePersonaje, fantasyD20Lite)
+    expect(next.world.characters['zahira']?.conditions).toContain('envenenada')
+  })
+})
+
+describe('rumores oidos', () => {
+  const rumor = (text: string, seq: number, falso = false): CampaignEvent =>
+    ({
+      id: `evt-rum-${seq}`,
+      v: 1,
+      seq,
+      type: 'rumor_heard',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      targets: ['character:zahira'],
+      payload: { text, from: 'npc:tomas', ...(falso ? { false: true } : {}) },
+    }) as unknown as CampaignEvent
+
+  it('se guardan aparte de los hechos, sin repetirse, y marcan los falsos', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const seq = state.meta.headSeq
+    const factsAntes = Object.keys(state.knowledge['zahira']?.facts ?? {}).length
+
+    state = applyEvent(state, rumor('Osric subió con los bolsillos llenos', seq + 1, true), fantasyD20Lite)
+    state = applyEvent(state, rumor('Osric subió con los bolsillos llenos', seq + 2), fantasyD20Lite)
+    state = applyEvent(state, rumor('la campana suena sola de noche', seq + 3), fantasyD20Lite)
+
+    const rumores = state.knowledge['zahira']?.rumors ?? []
+    expect(rumores.map((r) => r.text)).toEqual(['Osric subió con los bolsillos llenos', 'la campana suena sola de noche'])
+    expect(rumores[0]?.false).toBe(true)
+    expect(rumores[0]?.from).toBe('npc:tomas')
+    // Un rumor NO es un hecho: no entra en lo que el personaje sabe.
+    expect(Object.keys(state.knowledge['zahira']?.facts ?? {})).toHaveLength(factsAntes)
+    // Pero si queda en la cronica, para que el DM pueda retomarlo.
+    expect(state.narrative.log.some((e) => e.text.includes('la campana suena sola'))).toBe(true)
+  })
+})
+
+describe('progreso de misiones', () => {
+  const avance = (seq: number, payload: Record<string, unknown>): CampaignEvent =>
+    ({
+      id: `evt-q-${seq}`,
+      v: 1,
+      seq,
+      type: 'quest_update',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      payload: { quest: 'quest:la-campana', ...payload },
+    }) as unknown as CampaignEvent
+
+  it('acumula objetivos sin repetir y cierra la mision', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const seq = state.meta.headSeq
+    expect(state.quests).toBeUndefined()
+
+    state = applyEvent(state, avance(seq + 1, { objective: 'encontrar-la-campana', note: 'Estaba en la capilla' }), fantasyD20Lite)
+    state = applyEvent(state, avance(seq + 2, { objective: 'encontrar-la-campana' }), fantasyD20Lite)
+    expect(state.quests?.['la-campana']?.completed).toEqual(['encontrar-la-campana'])
+    expect(state.quests?.['la-campana']?.status).toBe('active')
+    expect(state.quests?.['la-campana']?.note).toBe('Estaba en la capilla')
+
+    state = applyEvent(state, avance(seq + 3, { status: 'done' }), fantasyD20Lite)
+    expect(state.quests?.['la-campana']?.status).toBe('done')
+    // Cerrarla no borra lo conseguido.
+    expect(state.quests?.['la-campana']?.completed).toEqual(['encontrar-la-campana'])
+  })
+})

@@ -8,20 +8,22 @@ import { UnknownEffectError, type Ruleset } from './ruleset.js'
  * equivoca de persona. Es el tercer ruleset del motor, y el primero cuyo
  * estado son relaciones, no recursos.
  *
- * Cuatro cosas en `custom`, porque core no las modela:
+ * Tres cosas en `custom`, porque core no las modela:
  *
  * - **Prestigio** (0 a 10): que tan bien visto es el personaje en el salon.
  *   Empieza segun su faccion (la nobleza entra con ventaja). Sube con un
  *   baile memorable o un favor; baja con un desaire o una mentira pillada.
  * - **Escandalo** (0 a 10): cuanto se habla de el, y no bien. A 10 el
  *   anfitrion lo invita a retirarse y su noche termina.
- * - **Rumores**: lo que el personaje ha oido, por frase. Pueden ser falsos;
- *   el ruleset no lo sabe ni le importa. No se repiten.
  * - **Vinculos**: como esta el personaje con cada persona de la fiesta, un
  *   estado por persona (`interes`, `atraccion`, `confianza`, `quimica`,
  *   `decepcion`, `desconfianza`). Un vinculo nuevo con la misma persona
  *   sustituye al anterior: la noche cambia de opinion. El jugador no lo ve
  *   en pantalla; el DM si, y de ahi sale el resumen de la noche.
+ *
+ * Los rumores NO viven aqui: son un evento del dominio (`rumor_heard`) que
+ * el reductor guarda en lo que ha oido cada personaje, porque un rumor puede
+ * ser falso y eso no es conocimiento.
  *
  * `hp` existe porque `CharacterState` lo exige, pero aqui vale 1 y no se
  * toca: en una fiesta nadie sangra, se intoxica, y eso es un `condition`.
@@ -74,7 +76,6 @@ export const masquerade: Ruleset = {
       custom: {
         prestige: PRESTIGE[faction] ?? 5,
         scandal: 0,
-        rumors: [] as string[],
         bonds: [] as Bond[],
       },
     }
@@ -111,16 +112,6 @@ export const masquerade: Ruleset = {
         const delta = Number(effect['delta'] ?? 0)
         const current = Number(character.custom['scandal'] ?? 0)
         return withCustom(world, who, { scandal: CLAMP(current + delta) })
-      }
-
-      case 'rumor': {
-        const character = world.characters[who]
-        if (!character) return world
-        const rumor = String(effect['rumor'] ?? '')
-        const rumors = (character.custom['rumors'] as string[] | undefined) ?? []
-        // Oir dos veces lo mismo no cuenta dos veces.
-        if (rumor === '' || rumors.includes(rumor)) return world
-        return withCustom(world, who, { rumors: [...rumors, rumor] })
       }
 
       case 'bond': {

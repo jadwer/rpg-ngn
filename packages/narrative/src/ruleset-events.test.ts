@@ -35,7 +35,9 @@ describe('prompt por ruleset', () => {
 describe('prompt de la mascarada', () => {
   it('ofrece vinculos, rumores, prestigio y escandalo, y ni hp ni sospecha', () => {
     const prompt = systemPromptFor('masquerade')
-    for (const op of ['bond', 'rumor', 'prestige', 'scandal']) expect(prompt).toContain(`"op":"${op}"`)
+    for (const op of ['bond', 'prestige', 'scandal']) expect(prompt).toContain(`"op":"${op}"`)
+    // Los rumores dejaron de ser un efecto del ruleset y son un evento del dominio.
+    expect(prompt).toContain('"type":"rumor_heard"')
     expect(prompt).not.toContain('"op":"hp"')
     expect(prompt).not.toContain('"op":"suspicion"')
     expect(prompt).toContain('Nunca digas al jugador lo que un NPC siente')
@@ -80,7 +82,7 @@ describe('eventos aceptados por ruleset', () => {
     const accented = allowed.safeParse({ type: 'state_change', effects: [{ op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'Atracción' }] })
     expect(accented.success).toBe(true)
     expect((accented.data as { effects: Array<{ state: string }> }).effects[0]!.state).toBe('atraccion')
-    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'rumor', who: 'character:camille', rumor: 'la dama de rojo llegó sola' }] }).success).toBe(true)
+    expect(allowed.safeParse({ type: 'rumor_heard', targets: ['character:camille'], payload: { text: 'la dama de rojo llegó sola' } }).success).toBe(true)
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'scandal', who: 'character:camille', delta: 2 }] }).success).toBe(true)
     expect(allowed.safeParse(condition).success).toBe(true)
     expect(allowed.safeParse(suspicion).success).toBe(false)
@@ -129,5 +131,96 @@ describe('lo que pasa en una escena social', () => {
       expect(prompt).toContain('"type":"discovery"')
       expect(prompt).toContain('"op":"relationship"')
     }
+  })
+})
+
+describe('escenas y paso del tiempo', () => {
+  const escena = { type: 'scene_started', worldTime: 'Valdoria, a la mañana siguiente', payload: { text: 'Amanece sobre el pueblo' } }
+
+  it('los tres rulesets aceptan abrir y cerrar escena, con o sin worldTime', () => {
+    // El reductor ya guardaba scene_started/scene_closed y ya aplicaba
+    // worldTime; el DM no podia emitirlos, asi que una sesion nueva
+    // arrastraba el momento de la anterior (20-09).
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse(escena).success).toBe(true)
+      expect(allowed.safeParse({ type: 'scene_closed', payload: { text: 'Cae la noche' } }).success).toBe(true)
+      expect(allowed.safeParse({ type: 'world_event', worldTime: 'Valdoria, medianoche', payload: { note: 'Dan las doce' } }).success).toBe(true)
+    }
+  })
+
+  it('rechaza un momento del mundo vacio o interminable, y una escena sin texto', () => {
+    const allowed = allowedEventFor('fantasy-d20-lite')
+    expect(allowed.safeParse({ ...escena, worldTime: '' }).success).toBe(false)
+    expect(allowed.safeParse({ ...escena, worldTime: 'x'.repeat(121) }).success).toBe(false)
+    expect(allowed.safeParse({ type: 'scene_started', payload: {} }).success).toBe(false)
+  })
+
+  it('el prompt se las ofrece al DM', () => {
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      expect(systemPromptFor(id)).toContain('"type":"scene_started"')
+      expect(systemPromptFor(id)).toContain('"worldTime"')
+    }
+  })
+})
+
+describe('condiciones sobre NPC', () => {
+  it('un NPC puede quedar receloso, y el sujeto sigue sin poder ser otra cosa', () => {
+    // Lo que mas intentaba el DM y mas se descartaba: los rulesets solo
+    // saben aplicar condiciones a personajes jugadores (20-09).
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'condition', who: 'npc:tomas', add: 'receloso' }] }).success).toBe(true)
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'condition', who: 'character:zahira', add: 'envenenada' }] }).success).toBe(true)
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'condition', who: 'location:mina', add: 'inundada' }] }).success).toBe(false)
+    }
+  })
+})
+
+describe('rumores', () => {
+  const rumor = { type: 'rumor_heard', targets: ['character:zahira'], payload: { text: 'dicen que Osric subió con los bolsillos llenos', from: 'npc:tomas' } }
+
+  it('los tres rulesets aceptan rumor_heard, y ya no existe el efecto propio de la mascarada', () => {
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse(rumor).success).toBe(true)
+      expect(allowed.safeParse({ ...rumor, payload: { ...rumor.payload, false: true } }).success).toBe(true)
+      // El `rumor` de la mascarada se migro a rumor_heard: un rumor puede ser
+      // falso y eso no es estado del personaje, es lo que oyo.
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'rumor', who: 'character:camille', rumor: 'algo' }] }).success).toBe(false)
+    }
+  })
+
+  it('rechaza un rumor vacio, sin destinatario o interminable', () => {
+    const allowed = allowedEventFor('masquerade')
+    expect(allowed.safeParse({ ...rumor, payload: { text: 'no' } }).success).toBe(false)
+    expect(allowed.safeParse({ ...rumor, targets: [] }).success).toBe(false)
+    expect(allowed.safeParse({ ...rumor, payload: { text: 'x'.repeat(301) } }).success).toBe(false)
+  })
+})
+
+describe('misiones', () => {
+  const avance = { type: 'quest_update', payload: { quest: 'quest:la-mina', objective: 'llegar-al-pueblo', note: 'Cruzaron el portón' } }
+
+  it('los tres rulesets aceptan el avance de una mision', () => {
+    // El schema de quest.ts decia desde el principio "el progreso vive en el
+    // estado de campaña", y ese estado no existia (20-09).
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse(avance).success).toBe(true)
+      expect(allowed.safeParse({ type: 'quest_update', payload: { quest: 'quest:la-mina', status: 'done' } }).success).toBe(true)
+    }
+  })
+
+  it('rechaza una referencia mal formada o un estado inventado', () => {
+    const allowed = allowedEventFor('fantasy-d20-lite')
+    expect(allowed.safeParse({ type: 'quest_update', payload: { quest: 'la-mina' } }).success).toBe(false)
+    expect(allowed.safeParse({ type: 'quest_update', payload: { quest: 'quest:la-mina', status: 'casi' } }).success).toBe(false)
+  })
+
+  it('cada ruleset cita una mision de su propio pack en el prompt', () => {
+    expect(systemPromptFor('fantasy-d20-lite')).toContain('quest:la-mina')
+    expect(systemPromptFor('court-intrigue')).toContain('quest:el-te-envenenado')
+    expect(systemPromptFor('masquerade')).toContain('quest:la-cena')
   })
 })

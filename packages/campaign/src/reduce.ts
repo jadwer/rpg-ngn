@@ -141,6 +141,52 @@ function applyByType(state: CampaignState, event: CampaignEvent, ruleset: Rulese
       return { ...state, knowledge }
     }
 
+    case 'rumor_heard': {
+      // Un rumor no es un hecho: se guarda aparte, porque puede ser falso y
+      // el personaje debe poder repetirlo sin que el motor lo de por cierto.
+      const knowledge = { ...state.knowledge }
+      for (const target of event.targets) {
+        if (refKind(target) !== 'character') continue
+        const id = refId(target)
+        const current = knowledge[id] ?? { characterId: id, facts: {}, witnessed: [] }
+        const rumors = current.rumors ?? []
+        // El mismo rumor dos veces no cuenta dos veces.
+        if (rumors.some((r) => r.text === event.payload.text)) continue
+        knowledge[id] = {
+          ...current,
+          rumors: [
+            ...rumors,
+            {
+              text: event.payload.text,
+              ...(event.payload.from ? { from: event.payload.from } : {}),
+              ...(event.payload.false ? { false: true } : {}),
+              event: event.id,
+              seq: event.seq,
+            },
+          ],
+        }
+      }
+      return appendLog({ ...state, knowledge }, event, event.payload.text)
+    }
+
+    case 'quest_update': {
+      // El pack define la mision; aqui se registra que ha pasado con ella en
+      // esta campaña. El schema de quest.ts ya decia "el progreso vive en el
+      // estado de campaña", y ese estado no existia (20-09).
+      const payload = (event.payload ?? {}) as { quest?: unknown; status?: unknown; objective?: unknown; note?: unknown }
+      const questId = refId(String(payload.quest ?? ''))
+      if (questId === '') return state
+      const previo = state.quests?.[questId] ?? { id: questId, status: 'active' as const, completed: [], seq: event.seq }
+      const status = payload.status === 'done' || payload.status === 'failed' || payload.status === 'active' ? payload.status : previo.status
+      const objective = typeof payload.objective === 'string' ? payload.objective : null
+      const completed = objective && !previo.completed.includes(objective) ? [...previo.completed, objective] : previo.completed
+      const note = typeof payload.note === 'string' && payload.note !== '' ? payload.note : previo.note
+      return {
+        ...state,
+        quests: { ...state.quests, [questId]: { ...previo, status, completed, ...(note ? { note } : {}), seq: event.seq } },
+      }
+    }
+
     case 'world_event':
       return appendLog(state, event, event.payload.note)
 
@@ -176,9 +222,34 @@ function applyEffects(state: CampaignState, event: CampaignEvent, ruleset: Rules
       world = applyRelationship(world, effect)
       continue
     }
+    // Una condicion sobre un NPC ("el guardia queda receloso") tampoco
+    // depende del sistema de juego, y los rulesets solo saben aplicarla a
+    // personajes jugadores. Es lo que mas veces intentaba el DM y se
+    // descartaba (20-09).
+    if (effect['op'] === 'condition' && refKind(String(effect['who'] ?? '')) === 'npc') {
+      world = applyNpcCondition(world, effect)
+      continue
+    }
     world = ruleset.applyEffect(world, effect, event)
   }
   return { ...state, world }
+}
+
+/**
+ * `{"op":"condition","who":"npc:bren","add":"receloso"}`. Vive en
+ * `custom.conditions` del NPC: `NpcState` no tiene el campo y añadirlo
+ * cambiaria la forma de todos los snapshots guardados.
+ */
+function applyNpcCondition(world: WorldState, effect: Record<string, unknown>): WorldState {
+  const id = refId(String(effect['who'] ?? ''))
+  const npc = world.npcs[id]
+  if (!npc) return world
+  const add = effect['add']
+  const remove = effect['remove']
+  let conditions = (npc.custom['conditions'] as string[] | undefined) ?? []
+  if (typeof add === 'string' && !conditions.includes(add)) conditions = [...conditions, add]
+  if (typeof remove === 'string') conditions = conditions.filter((c) => c !== remove)
+  return { ...world, npcs: { ...world.npcs, [id]: { ...npc, custom: { ...npc.custom, conditions } } } }
 }
 
 /** Escala de actitud de un NPC hacia un personaje: de -5 (enemigo) a 5 (aliado). */

@@ -33,6 +33,37 @@ export interface PlayerKnowledge {
    * cambian de forma.
    */
   secrets?: Record<string, RevealedSecret>
+  /**
+   * Rumores que ha oido, en orden. NO son conocimiento: un rumor puede ser
+   * falso, y por eso no entra en `facts`. Opcional para que los snapshots
+   * anteriores no cambien de forma.
+   */
+  rumors?: HeardRumor[]
+}
+
+export interface HeardRumor {
+  text: string
+  /** De quien vino, si se sabe. */
+  from?: string
+  /** El DM o el pack saben que es falso; el jugador no lo ve. */
+  false?: boolean
+  event: string
+  seq: number
+}
+
+/**
+ * Progreso de una mision del pack. La definicion (titulo, objetivos) vive en
+ * el pack; aqui solo lo que ha pasado con ella en ESTA campaña, que es lo
+ * que el schema de quest.ts daba por hecho desde el principio.
+ */
+export interface QuestProgress {
+  id: string
+  status: 'active' | 'done' | 'failed'
+  /** Ids de objetivos cumplidos, en el orden en que se cumplieron. */
+  completed: string[]
+  /** Ultima nota del DM sobre esta mision. */
+  note?: string
+  seq: number
 }
 
 export interface SessionRecord {
@@ -74,4 +105,10 @@ export interface CampaignState {
   world: WorldState
   knowledge: Record<string, PlayerKnowledge>
   narrative: NarrativeState
+  /**
+   * Progreso de las misiones del pack, por id. Opcional para que los
+   * snapshots anteriores a esto sigan siendo validos: una campaña sin
+   * misiones tocadas no lo trae.
+   */
+  quests?: Record<string, QuestProgress>
 }

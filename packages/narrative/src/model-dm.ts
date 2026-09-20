@@ -58,9 +58,13 @@ const MAX_PENDING_CHARS = 8000
 // content a proposito: solo lo que el ruleset de la mesa sabe aplicar. Los
 // effects de `state_change` dependen del ruleset; el resto es comun.
 const HpEffect = z.strictObject({ op: z.literal('hp'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+// El sujeto puede ser un personaje o un NPC: "el guardia queda receloso" es
+// tan valido como "Kael queda envenenado". La del NPC la aplica el reductor
+// comun (packages/campaign), porque no depende del sistema de juego.
 const ConditionEffect = z
-  .strictObject({ op: z.literal('condition'), who: CharacterRef, add: z.string().min(1).optional(), remove: z.string().min(1).optional() })
+  .strictObject({ op: z.literal('condition'), who: EntityRef, add: z.string().min(1).optional(), remove: z.string().min(1).optional() })
   .refine((e) => Boolean(e.add || e.remove), 'condition requiere add o remove')
+  .refine((e) => e.who.startsWith('character:') || e.who.startsWith('npc:'), 'condition solo sobre personajes o NPCs')
 const MemoryEffect = z.strictObject({ op: z.literal('memory_recovered'), who: CharacterRef })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
 const LoseEffect = z.strictObject({ op: z.literal('lose'), item: KebabId, holder: EntityRef.optional() })
@@ -71,7 +75,6 @@ const ClueEffect = z.strictObject({ op: z.literal('clue'), who: CharacterRef, cl
 // masquerade: prestigio, escandalo, rumores y vinculos (packages/rules/src/masquerade.ts).
 const PrestigeEffect = z.strictObject({ op: z.literal('prestige'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const ScandalEffect = z.strictObject({ op: z.literal('scandal'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
-const RumorEffect = z.strictObject({ op: z.literal('rumor'), who: CharacterRef, rumor: z.string().trim().min(3).max(160) })
 // El modelo escribe "interés" o "atracción" con tilde aunque el prompt las liste sin ella; se normaliza antes de validar.
 const BondEffect = z.strictObject({
   op: z.literal('bond'),
@@ -106,6 +109,8 @@ const InventoryEvent = z.strictObject({
 })
 const WorldEvent = z.strictObject({
   type: z.literal('world_event'),
+  /** Avanza el reloj del mundo si esto lo cambia (cae la noche, pasan tres dias). */
+  worldTime: z.string().min(1).max(120).optional(),
   payload: z.strictObject({ note: z.string().min(1) }),
 })
 const SecretEvent = z.strictObject({
@@ -144,6 +149,46 @@ const RelationshipEffect = z.strictObject({
   delta: z.number().int().min(-3).max(3).refine((d) => d !== 0, 'delta 0 no cambia nada'),
 })
 
+/**
+ * Abrir y cerrar escena, y mover el momento del mundo. El reductor ya
+ * guardaba `scene_started`/`scene_closed` en la cronica y ya aplicaba
+ * `worldTime` de cualquier evento, pero el DM no podia emitirlos: por eso
+ * una sesion nueva arrastraba el "anochecer" de la anterior y las escenas no
+ * tenian principio (20-09).
+ */
+const SceneEvent = z.strictObject({
+  type: z.enum(['scene_started', 'scene_closed']),
+  /** Donde y cuando queda el mundo a partir de aqui ("Valdoria, a la mañana siguiente"). */
+  worldTime: z.string().min(1).max(120).optional(),
+  payload: z.strictObject({ text: z.string().min(1) }),
+})
+
+/**
+ * Un rumor que alguien oye. No es conocimiento: puede ser falso, y el
+ * reductor lo guarda aparte de los hechos. Sustituye al efecto `rumor` que
+ * solo tenia La Mascarada.
+ */
+const RumorHeardEvent = z.strictObject({
+  type: z.literal('rumor_heard'),
+  targets: z.array(CharacterRef).min(1),
+  payload: z.strictObject({
+    text: z.string().trim().min(3).max(300),
+    from: EntityRef.optional(),
+    false: z.boolean().optional(),
+  }),
+})
+
+/** Avance de una mision del pack: un objetivo cumplido, o la mision cerrada. */
+const QuestUpdateEvent = z.strictObject({
+  type: z.literal('quest_update'),
+  payload: z.strictObject({
+    quest: z.string().regex(/^quest:[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    status: z.enum(['active', 'done', 'failed']).optional(),
+    objective: KebabId.optional(),
+    note: z.string().min(1).max(300).optional(),
+  }),
+})
+
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
   z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect])).min(1) }),
@@ -152,6 +197,9 @@ const D20_EVENT = z.discriminatedUnion('type', [
   SecretEvent,
   NpcActionEvent,
   DiscoveryEvent,
+  SceneEvent,
+  RumorHeardEvent,
+  QuestUpdateEvent,
 ])
 const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
@@ -161,15 +209,21 @@ const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   SecretEvent,
   NpcActionEvent,
   DiscoveryEvent,
+  SceneEvent,
+  RumorHeardEvent,
+  QuestUpdateEvent,
 ])
 const MASQUERADE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, RumorEffect, BondEffect, RelationshipEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, BondEffect, RelationshipEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
   NpcActionEvent,
   DiscoveryEvent,
+  SceneEvent,
+  RumorHeardEvent,
+  QuestUpdateEvent,
 ])
 
 /**
@@ -665,6 +719,23 @@ class LineInterpreter {
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       }
       case 'world_event':
+        return { ...event, visibility: { layer: 'campaign', witnesses } }
+      case 'rumor_heard': {
+        // Quien lo oye tiene que estar en la escena.
+        const targets = event.targets.filter((t) => present(t))
+        if (targets.length === 0) return null
+        return { ...event, targets, visibility: { layer: 'campaign', witnesses } }
+      }
+      case 'quest_update': {
+        // Solo misiones que el pack declara: el DM no inventa misiones.
+        if (!this.ctx.pack.quests.has(refId(event.payload.quest))) return null
+        return { ...event, visibility: { layer: 'campaign', witnesses } }
+      }
+      case 'scene_started':
+      case 'scene_closed':
+        // Marca el principio o el final de una escena, y de paso deja el
+        // mundo en su sitio: el reductor guarda el texto en la cronica y
+        // `worldTime` pasa a ser el momento actual.
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       case 'npc_action': {
         // Lo que hace un NPC delante de la mesa. Solo NPCs del pack: si el

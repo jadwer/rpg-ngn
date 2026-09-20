@@ -138,8 +138,19 @@ function worldLayer(ctx: DMTurnContext, budget: ContextBudget): string {
 
   const quests = [...ctx.pack.quests.values()]
   if (quests.length) {
-    lines.push('', 'Misiones del pack:')
-    for (const quest of quests) lines.push(`- ${quest.title}: ${quest.summary}`)
+    lines.push('', 'Misiones del pack (con lo conseguido en esta campaña):')
+    for (const quest of quests) {
+      const progreso = ctx.state.quests?.[quest.id]
+      const hechos = progreso?.completed ?? []
+      const pendientes = quest.objectives.filter((o) => !hechos.includes(o.id))
+      const estado = progreso ? ({ active: 'en marcha', done: 'cumplida', failed: 'fracasada' }[progreso.status]) : 'sin empezar'
+      lines.push(`- ${quest.title} (quest:${quest.id}, ${estado}): ${quest.summary}`)
+      if (hechos.length) lines.push(`  Ya conseguido: ${hechos.join(', ')}.`)
+      if (pendientes.length && progreso?.status !== 'done') {
+        lines.push(`  Pendiente: ${pendientes.map((o) => `${o.id}${o.optional ? ' (opcional)' : ''}: ${o.text}`).join(' | ')}`)
+      }
+      if (progreso?.note) lines.push(`  Nota: ${progreso.note}`)
+    }
   }
 
   const premise = ctx.notes?.premise?.trim()
@@ -205,14 +216,16 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     // Lo de la mascarada: prestigio, escandalo, rumores oidos y como esta con cada persona.
     if (typeof custom['prestige'] === 'number') parts.push(`prestigio: ${custom['prestige']}/10`)
     if (typeof custom['scandal'] === 'number') parts.push(`escándalo: ${custom['scandal']}/10`)
-    const rumors = custom['rumors']
-    if (Array.isArray(rumors) && rumors.length) parts.push(`rumores oídos: ${rumors.map(String).join('; ')}`)
     const bonds = custom['bonds']
     if (Array.isArray(bonds) && bonds.length) parts.push(`vínculos: ${bonds.map((b) => `${refName(pack, String((b as { with: string }).with))} (${String((b as { state: string }).state)})`).join(', ')}`)
     lines.push(`Estado: ${parts.join('; ')}.`)
   }
   const facts = Object.keys(state.knowledge[id]?.facts ?? {})
   if (facts.length) lines.push(`Sabe (descubierto): ${facts.map((f) => refId(f)).join(', ')}.`)
+  // Lo que ha oido, aparte de lo que sabe: un rumor puede ser falso, y el DM
+  // tiene que poder jugarlo como tal.
+  const rumors = state.knowledge[id]?.rumors ?? []
+  if (rumors.length) lines.push(`Ha oído (rumores, no hechos): ${rumors.map((r) => (r.false ? `${r.text} [FALSO]` : r.text)).join('; ')}.`)
   // Lo escribio su jugador: describe al personaje (como es, que busca, que no
   // soporta, como coquetea, su defecto, su secreto). Es texto del usuario,
   // delimitado como la premisa; su secreto es del personaje, no de la mesa.
@@ -299,6 +312,13 @@ function describeEvent(event: CampaignEvent, pack: LoadedPack): string | null {
     }
     case 'world_event':
       return `Mundo: ${clip(event.payload.note, 300)}`
+    case 'quest_update': {
+      const p = event.payload as { quest: string; status?: string; objective?: string; note?: string }
+      const partes = [p.objective ? `objetivo ${p.objective} cumplido` : null, p.status ? `estado ${p.status}` : null, p.note ?? null].filter(Boolean)
+      return `Misión ${refId(p.quest)}: ${partes.join('; ')}`
+    }
+    case 'rumor_heard':
+      return `${event.targets.map(who).join(', ')} oye: ${clip(event.payload.text, 200)}`
     case 'roll':
       return `Tirada de ${who(event.actor)}: ${event.resolved.die} = ${event.resolved.result} (${event.resolved.kind}${event.resolved.skill ? `, ${event.resolved.skill}` : ''})`
     case 'discovery':
@@ -337,8 +357,6 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
       return `${target} ${Number(effect['delta']) < 0 ? 'pierde' : 'gana'} ${Math.abs(Number(effect['delta']))} de prestigio`
     case 'scandal':
       return `escándalo sobre ${target} ${Number(effect['delta']) < 0 ? 'baja' : 'sube'} ${Math.abs(Number(effect['delta']))}`
-    case 'rumor':
-      return `${target} oye: ${String(effect['rumor'])}`
     case 'bond':
       return `${target} con ${who(String(effect['with']))}: ${String(effect['state'])}`
     default:

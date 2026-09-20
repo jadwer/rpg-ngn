@@ -77,22 +77,31 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
   {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","result":14,"source":"physical","skill":"Percepción"}}
 - Daño o curación ("delta" entero, negativo para daño):
   {"type":"state_change","actor":"character:zahira","effects":[{"op":"hp","who":"character:zahira","delta":-3}]}
-- Condición que empieza o termina:
+- Condición que empieza o termina, en un personaje o en un NPC (un NPC receloso, asustado o agradecido sigue estándolo el turno siguiente):
   {"type":"state_change","actor":"character:kael","effects":[{"op":"condition","who":"character:kael","add":"envenenado"}]}
+  {"type":"state_change","effects":[{"op":"condition","who":"npc:tomas","add":"receloso"}]}
   {"type":"state_change","actor":"character:kael","effects":[{"op":"condition","who":"character:kael","remove":"envenenado"}]}
 - Un personaje recupera un recuerdo (campañas con amnesia):
   {"type":"state_change","actor":"character:calder","effects":[{"op":"memory_recovered","who":"character:calder"}]}
 - Objeto ganado o perdido ("item" en kebab-case; "holder" puede ser character:<id> o npc:<id>; para perder, el objeto debe estar en su inventario):
   {"type":"inventory_change","actor":"character:calder","effects":[{"op":"gain","item":"llave-de-hierro","holder":"character:calder","note":"se la dio Tomás"}]}
   {"type":"inventory_change","actor":"character:calder","effects":[{"op":"lose","item":"llave-de-hierro","holder":"character:calder"}]}
-- Algo que pasa en el mundo y conviene recordar (un NPC se va, cambia el clima, se cierra una puerta):
+- Algo que pasa en el mundo y conviene recordar (un NPC se va, cambia el clima, se cierra una puerta). Puede llevar "worldTime" si el suceso mueve el reloj:
   {"type":"world_event","payload":{"note":"Tomás cierra la posada y apaga las velas"}}
+  {"type":"world_event","worldTime":"Valdoria, medianoche","payload":{"note":"Las campanas dan las doce"}}
+- Empieza una escena nueva (otro lugar u otro momento) o se cierra la actual. Usa "worldTime" para dejar dicho dónde y cuándo queda el mundo; lo que escribas ahí es lo que la mesa vera como momento actual:
+  {"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo y la posada huele a pan"}}
+  {"type":"scene_closed","payload":{"text":"La noche se cierra sobre la mina"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
 - Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
+  {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
+- Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
+  {"type":"quest_update","payload":{"quest":"quest:la-mina","objective":"llegar-al-pueblo","note":"Cruzaron el portón con el guardia de testigo"}}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
   {"type":"secret_revealed","payload":{"secretId":"osric-subio-solo","how":"Osric lo confiesa por la rendija"}}
 
@@ -128,6 +137,8 @@ Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos 
 {"type":"state_change","actor":"character:kael","effects":[{"op":"condition","who":"character:kael","add":"envenenado"}]}
 {"type":"inventory_change","actor":"character:calder","effects":[{"op":"gain","item":"llave-de-hierro","holder":"character:calder"}]}
 {"type":"world_event","payload":{"note":"Tomás cierra la posada"}}
+{"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo"}}
+{"type":"quest_update","payload":{"quest":"quest:la-mina","objective":"llegar-al-pueblo"}}
 {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta y se guarda la llave"}}
 {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
@@ -164,26 +175,35 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"state_change","actor":"character:ryomen","effects":[{"op":"suspicion","who":"character:ryomen","delta":2}]}
 - Pista averiguada de verdad en la escena (una frase corta; la misma pista dos veces no cuenta):
   {"type":"state_change","actor":"character:kogen","effects":[{"op":"clue","who":"character:kogen","clue":"la tetera salió de las cocinas del oeste"}]}
-- Condición que empieza o termina (envenenado, vigilado, en desgracia, convocado):
+- Condición que empieza o termina (envenenado, vigilado, en desgracia, convocado), en un personaje o en un NPC:
   {"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","add":"vigilado"}]}
+  {"type":"state_change","effects":[{"op":"condition","who":"npc:jinshi","add":"receloso"}]}
   {"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","remove":"vigilado"}]}
 - Objeto ganado o perdido ("item" en kebab-case; "holder" puede ser character:<id> o npc:<id>; para perder, el objeto debe estar en su inventario):
   {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"gain","item":"carta-lacrada","holder":"character:kogen","note":"se la dio la consorte"}]}
   {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"lose","item":"carta-lacrada","holder":"character:kogen"}]}
-- Algo que pasa en el mundo y conviene recordar (un NPC se va, se cierra un pabellón, cambia la guardia):
+- Algo que pasa en el mundo y conviene recordar (un NPC se va, se cierra un pabellón, cambia la guardia). Puede llevar "worldTime" si el suceso mueve el reloj:
   {"type":"world_event","payload":{"note":"La guardia del pabellón de jade se dobla al anochecer"}}
+  {"type":"world_event","worldTime":"Palacio interior, al anochecer","payload":{"note":"Cierran los portones del pabellón"}}
+- Empieza una escena nueva (otro lugar u otro momento) o se cierra la actual. Usa "worldTime" para dejar dicho dónde y cuándo queda el mundo; lo que escribas ahí es lo que la mesa vera como momento actual:
+  {"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo y la posada huele a pan"}}
+  {"type":"scene_closed","payload":{"text":"La noche se cierra sobre la mina"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
 - Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
+  {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
+- Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
+  {"type":"quest_update","payload":{"quest":"quest:el-te-envenenado","objective":"reconstruir-la-bandeja","note":"Siguieron la bandeja desde la cocina hasta la mesa"}}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
   {"type":"secret_revealed","payload":{"secretId":"quien-cambio-la-tetera","how":"la ayudante de cocina lo confiesa"}}
 
 No propongas "hp": aquí nadie tiene puntos de vida; un envenenamiento es una condición. Los ids de personaje son los de la party ("character:<id>"). Si no estás seguro de poder llenar un evento correctamente, no lo propongas: la narración basta.`
 
-const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es crédito, sospecha y pistas. Cada cosa que un personaje averigua se registra con "clue" en el mismo turno; quien es visto donde no debía sube "suspicion"):
+const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es crédito, sospecha y pistas. Cada cosa que un personaje averigua se registra con "clue" en el mismo turno, y lo que solo oye por ahi con "rumor_heard"; quien es visto donde no debía sube "suspicion"):
 {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
 {"type":"state_change","actor":"character:shiho","effects":[{"op":"standing","who":"character:shiho","delta":-1}]}
 {"type":"state_change","actor":"character:ryomen","effects":[{"op":"suspicion","who":"character:ryomen","delta":2}]}
@@ -191,6 +211,8 @@ const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "pla
 {"type":"state_change","actor":"character:tenma","effects":[{"op":"condition","who":"character:tenma","add":"vigilado"}]}
 {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"gain","item":"carta-lacrada","holder":"character:kogen"}]}
 {"type":"world_event","payload":{"note":"Se dobla la guardia del pabellón"}}
+{"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo"}}
+{"type":"quest_update","payload":{"quest":"quest:el-te-envenenado","objective":"reconstruir-la-bandeja"}}
 {"type":"npc_action","actor":"npc:jinshi","payload":{"text":"Se retira sin despedirse"}}
 {"type":"discovery","targets":["character:shiho"],"payload":{"fact":"fact:la-tetera-cambio","confidence":"uncertain","method":"la marca del asa no coincide"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:jinshi","with":"character:shiho","delta":1}]}
@@ -214,26 +236,35 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","result":14,"source":"physical","skill":"Etiqueta"}}
 - Vínculo: cómo queda ese personaje con alguien tras la escena ("with" es npc:<id> o character:<id>; "state" es uno de interes, atraccion, confianza, quimica, decepcion, desconfianza):
   {"type":"state_change","actor":"character:camille","effects":[{"op":"bond","who":"character:camille","with":"npc:julien","state":"interes"}]}
-- Rumor oído (una frase corta, tal como la oyó; el mismo rumor dos veces no cuenta):
-  {"type":"state_change","actor":"character:etienne","effects":[{"op":"rumor","who":"character:etienne","rumor":"la dama de rojo llegó acompañada y su acompañante desapareció"}]}
+- Rumor que alguien oye (una frase, tal como la oyó; puede ser falso, y por eso no es un hecho: "from" es quien lo cuenta, y "false" solo si TÚ sabes que es mentira):
+  {"type":"rumor_heard","targets":["character:etienne"],"payload":{"text":"la dama de rojo llegó acompañada y su acompañante desapareció","from":"npc:abbe-gregoire"}}
 - Prestigio: qué tan bien visto es en el salón (de 0 a 10; "delta" entero, negativo cuando pierde):
   {"type":"state_change","actor":"character:armand","effects":[{"op":"prestige","who":"character:armand","delta":1}]}
 - Escándalo: cuánto se habla de él, y no bien (de 0 a 10; a 10 lo invitan a retirarse):
   {"type":"state_change","actor":"character:lucien","effects":[{"op":"scandal","who":"character:lucien","delta":2}]}
-- Condición que empieza o termina (mareado, intoxicada, sin máscara, comprometido, en el balcón):
+- Condición que empieza o termina (mareado, intoxicada, sin máscara, comprometido, en el balcón), en un personaje o en un NPC:
   {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","add":"sin máscara"}]}
+  {"type":"state_change","effects":[{"op":"condition","who":"npc:julien","add":"ofendido"}]}
   {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","remove":"sin máscara"}]}
 - Objeto ganado o perdido ("item" en kebab-case; "holder" puede ser character:<id> o npc:<id>; para perder, el objeto debe estar en su inventario):
   {"type":"inventory_change","actor":"character:margot","effects":[{"op":"gain","item":"rosa-blanca","holder":"character:margot","note":"se la dio Théo"}]}
   {"type":"inventory_change","actor":"character:margot","effects":[{"op":"lose","item":"rosa-blanca","holder":"character:margot"}]}
-- Algo que pasa en la fiesta y conviene recordar (se sirve la cena, se va la luz, alguien abandona el salón llorando):
+- Algo que pasa en la fiesta y conviene recordar (se sirve la cena, se va la luz, alguien abandona el salón llorando). Puede llevar "worldTime" si el suceso mueve el reloj:
   {"type":"world_event","payload":{"note":"Se apagan las lámparas del salón grande; solo quedan las velas del pasillo"}}
+  {"type":"world_event","worldTime":"Palacio de Montclair, pasada la medianoche","payload":{"note":"El reloj del salón da las doce"}}
+- Empieza una escena nueva (otro lugar u otro momento) o se cierra la actual. Usa "worldTime" para dejar dicho dónde y cuándo queda el mundo; lo que escribas ahí es lo que la mesa vera como momento actual:
+  {"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo y la posada huele a pan"}}
+  {"type":"scene_closed","payload":{"text":"La noche se cierra sobre la mina"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
 - Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
+  {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
+- Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
+  {"type":"quest_update","payload":{"quest":"quest:la-cena","objective":"elegir-asiento","note":"Consiguió sentarse junto a quien quería"}}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
   {"type":"secret_revealed","payload":{"secretId":"el-invitado-que-no-existe","how":"la duquesa lo confiesa entre risas"}}
 
@@ -242,12 +273,14 @@ No propongas "hp": aquí nadie sangra; una intoxicación es una condición. Los 
 const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "player_action" ni "narration", esos ya se registran solos; aquí no hay "hp": lo que se mueve es prestigio, escándalo, rumores y vínculos. Juega a cada NPC por lo que busca y lo que no soporta, sin decir lo que siente. Cuando una escena cambia cómo está un personaje con alguien, registra "bond" ese mismo turno; lo que oye por ahí, "rumor"):
 {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","skill":"Seducción"}}
 {"type":"state_change","actor":"character:camille","effects":[{"op":"bond","who":"character:camille","with":"npc:julien","state":"interes"}]}
-{"type":"state_change","actor":"character:etienne","effects":[{"op":"rumor","who":"character:etienne","rumor":"la dama de rojo llegó acompañada"}]}
+{"type":"rumor_heard","targets":["character:etienne"],"payload":{"text":"la dama de rojo llegó acompañada","from":"npc:abbe-gregoire"}}
+{"type":"quest_update","payload":{"quest":"quest:la-cena","objective":"elegir-asiento"}}
 {"type":"state_change","actor":"character:armand","effects":[{"op":"prestige","who":"character:armand","delta":1}]}
 {"type":"state_change","actor":"character:lucien","effects":[{"op":"scandal","who":"character:lucien","delta":2}]}
 {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","add":"sin máscara"}]}
 {"type":"inventory_change","actor":"character:margot","effects":[{"op":"gain","item":"rosa-blanca","holder":"character:margot"}]}
 {"type":"world_event","payload":{"note":"Se apagan las lámparas del salón"}}
+{"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo"}}
 {"type":"npc_action","actor":"npc:julien","payload":{"text":"Se lleva a la marquesa a bailar"}}
 {"type":"discovery","targets":["character:camille"],"payload":{"fact":"fact:julien-prometio-a-otra","confidence":"known","method":"lo oye decir la misma frase dos veces"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:julien","with":"character:camille","delta":-1}]}

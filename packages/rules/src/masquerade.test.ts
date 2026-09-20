@@ -46,7 +46,6 @@ describe('masquerade', () => {
     const noble = masquerade.initialCharacterState(debutante())
     expect(noble.custom['prestige']).toBe(7)
     expect(noble.custom['scandal']).toBe(0)
-    expect(noble.custom['rumors']).toEqual([])
     expect(noble.custom['bonds']).toEqual([])
     expect(noble.hp).toEqual({ current: 1, max: 1 })
 
@@ -55,7 +54,7 @@ describe('masquerade', () => {
   })
 
   it('prestigio y escandalo se mueven dentro de la escala', () => {
-    let world = salon({ prestige: 7, scandal: 0, rumors: [], bonds: [] })
+    let world = salon({ prestige: 7, scandal: 0, bonds: [] })
     world = masquerade.applyEffect(world, { op: 'prestige', who: 'character:camille', delta: -3 }, evento)
     expect(world.characters['camille']!.custom['prestige']).toBe(4)
     world = masquerade.applyEffect(world, { op: 'scandal', who: 'character:camille', delta: 12 }, evento)
@@ -64,16 +63,8 @@ describe('masquerade', () => {
     expect(world.characters['camille']!.custom['prestige']).toBe(0)
   })
 
-  it('los rumores se acumulan sin repetirse', () => {
-    let world = salon({ prestige: 7, scandal: 0, rumors: [], bonds: [] })
-    world = masquerade.applyEffect(world, { op: 'rumor', who: 'character:camille', rumor: 'la dama de rojo llegó sola' }, evento)
-    world = masquerade.applyEffect(world, { op: 'rumor', who: 'character:camille', rumor: 'la dama de rojo llegó sola' }, evento)
-    world = masquerade.applyEffect(world, { op: 'rumor', who: 'character:camille', rumor: 'hay un invitado ilustre' }, evento)
-    expect(world.characters['camille']!.custom['rumors']).toEqual(['la dama de rojo llegó sola', 'hay un invitado ilustre'])
-  })
-
   it('un vinculo nuevo con la misma persona sustituye al anterior; con otra, se suma', () => {
-    let world = salon({ prestige: 7, scandal: 0, rumors: [], bonds: [] })
+    let world = salon({ prestige: 7, scandal: 0, bonds: [] })
     world = masquerade.applyEffect(world, { op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'interes' }, evento)
     world = masquerade.applyEffect(world, { op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'atraccion' }, evento)
     world = masquerade.applyEffect(world, { op: 'bond', who: 'character:camille', with: 'character:armand', state: 'confianza' }, evento)
@@ -90,12 +81,12 @@ describe('masquerade', () => {
   })
 
   it('un estado de vinculo inventado no entra', () => {
-    const world = salon({ prestige: 7, scandal: 0, rumors: [], bonds: [] })
+    const world = salon({ prestige: 7, scandal: 0, bonds: [] })
     expect(bonds(masquerade.applyEffect(world, { op: 'bond', who: 'character:camille', with: 'npc:julien', state: 'amor-eterno' }, evento))).toEqual([])
   })
 
   it('una intoxicacion es una condicion, no daño; hp de otro ruleset se rechaza', () => {
-    let world = salon({ prestige: 7, scandal: 0, rumors: [], bonds: [] })
+    let world = salon({ prestige: 7, scandal: 0, bonds: [] })
     world = masquerade.applyEffect(world, { op: 'condition', who: 'character:camille', add: 'mareada' }, evento)
     expect(world.characters['camille']!.conditions).toEqual(['mareada'])
     expect(() => masquerade.applyEffect(world, { op: 'hp', who: 'character:camille', delta: -3 }, evento)).toThrow(UnknownEffectError)

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CharacterRef, DiceSpec, EntityRef, FactRef, IsoDateTime } from './common.js'
+import { CharacterRef, DiceSpec, EntityRef, FactRef, IsoDateTime, KebabId } from './common.js'
 
 /**
  * Schema del evento de campaña, version 1 (08 + BA1 de 10).
@@ -126,6 +126,45 @@ export const DiscoveryEvent = z.strictObject({
 })
 
 /**
+ * Avance de una mision del pack: se cumple un objetivo, o la mision entera
+ * se da por terminada o fracasada. La definicion vive en el pack; el
+ * progreso, en el estado de campaña.
+ */
+export const QuestUpdateEvent = z.strictObject({
+  ...envelopeShape,
+  type: z.literal('quest_update'),
+  payload: z.strictObject({
+    /** `quest:<id>` del pack. */
+    quest: z.string().regex(/^quest:[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    status: z.enum(['active', 'done', 'failed']).optional(),
+    /** Id del objetivo que se acaba de cumplir, si es uno concreto. */
+    objective: KebabId.optional(),
+    note: z.string().min(1).max(300).optional(),
+  }),
+})
+
+/**
+ * Un rumor que llega a oidos de alguien. A diferencia de `discovery`, un
+ * rumor NO es conocimiento: puede ser falso, y por eso se guarda aparte de
+ * los hechos que el personaje da por sabidos. Es la materia prima de los
+ * packs de intriga (quien te cuenta que, y si era verdad).
+ */
+export const RumorHeardEvent = z.strictObject({
+  ...envelopeShape,
+  type: z.literal('rumor_heard'),
+  /** Quien lo oye. */
+  targets: z.array(EntityRef).min(1),
+  payload: z.strictObject({
+    /** El rumor tal como se oyo, en una frase. */
+    text: z.string().min(3).max(300),
+    /** De quien viene, si se sabe. */
+    from: EntityRef.optional(),
+    /** Si el pack o el DM saben ya que es falso; el jugador no lo ve. */
+    false: z.boolean().optional(),
+  }),
+})
+
+/**
  * El DM revela a proposito un secreto del pack (secret.ts) a los testigos.
  * Es el puente explicito entre la capa `dm` y el conocimiento de la party
  * cuando la condicion de revelacion es `manual` o cuando el DM decide
@@ -198,9 +237,7 @@ export const GenericEvent = z.strictObject({
     'player_action',
     'npc_action',
     'state_change',
-    'quest_update',
     'relationship_change',
-    'rumor_heard',
     'scene_started',
     'scene_closed',
     'narration',
@@ -212,6 +249,8 @@ export const GenericEvent = z.strictObject({
 export const CampaignEvent = z.discriminatedUnion('type', [
   RollEvent,
   DiscoveryEvent,
+  RumorHeardEvent,
+  QuestUpdateEvent,
   SecretRevealedEvent,
   SessionStartedEvent,
   SessionClosedEvent,
@@ -224,6 +263,8 @@ export const CampaignEvent = z.discriminatedUnion('type', [
 export type CampaignEvent = z.infer<typeof CampaignEvent>
 export type RollEvent = z.infer<typeof RollEvent>
 export type DiscoveryEvent = z.infer<typeof DiscoveryEvent>
+export type RumorHeardEvent = z.infer<typeof RumorHeardEvent>
+export type QuestUpdateEvent = z.infer<typeof QuestUpdateEvent>
 export type SecretRevealedEvent = z.infer<typeof SecretRevealedEvent>
 
 export function eventIdFor(seq: number): string {
