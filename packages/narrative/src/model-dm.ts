@@ -450,6 +450,21 @@ class LineInterpreter {
         yield* this.emitEvent(event)
         return
       }
+      // `{"kind":"dialogue","speaker":...}` en vez de
+      // `{"kind":"block","block":{"type":"dialogue",...}}`: el modelo usa el
+      // tipo de bloque como `kind`, que es la abreviacion natural. Se
+      // entiende igual. Sin esto, un turno entero podia quedarse sin ningun
+      // bloque y morir con "el modelo no devolvio ningun bloque" (mesa de
+      // prueba con Sonnet, 20-09).
+      const asKind = parsed as { kind?: unknown }
+      if (asKind && typeof asKind === 'object' && typeof asKind.kind === 'string') {
+        const { kind, ...rest } = asKind as Record<string, unknown>
+        const shorthand = TurnBlock.safeParse({ type: kind, ...rest })
+        if (shorthand.success) {
+          yield* this.block(shorthand.data)
+          return
+        }
+      }
       this.ignored++
       return
     }
