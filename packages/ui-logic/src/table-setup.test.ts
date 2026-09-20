@@ -7,6 +7,7 @@ import {
   acceptedFriends,
   cleanTableName,
   emptyTableText,
+  startCard,
   freeCharacters,
   friendshipWith,
   hostOf,
@@ -143,7 +144,41 @@ describe('cabecera de la mesa', () => {
 
   it('explica la mesa vacia segun quien mira', () => {
     expect(emptyTableText(true, false)).toContain('todavía no ha narrado')
-    expect(emptyTableText(false, true)).toContain('mando del anfitrión')
-    expect(emptyTableText(false, false)).toContain('Cuando el anfitrión abra')
+    expect(emptyTableText(false, true)).toContain('Iniciar partida')
+    expect(emptyTableText(false, false)).toContain('inicie la partida')
+  })
+})
+
+describe('startCard', () => {
+  const base = { hasSession: false, hostName: 'Gabino', nextCode: '001', firstSession: true, dice: 'engine' as const }
+
+  it('con sesión abierta no hay tarjeta: manda la narración', () => {
+    expect(startCard({ ...base, host: true, hasSession: true })).toBeNull()
+  })
+
+  it('el anfitrión ve el botón de iniciar y los pasos', () => {
+    const card = startCard({ ...base, host: true })!
+    expect(card.action).toBe('Iniciar partida')
+    expect(card.title).toBe('La mesa está lista')
+    expect(card.steps).toHaveLength(4)
+    expect(card.steps[2]).toContain('los tira la mesa')
+  })
+
+  it('tras una sesión cerrada, el botón nombra la siguiente', () => {
+    const card = startCard({ ...base, host: true, firstSession: false, nextCode: '004' })!
+    expect(card.action).toBe('Iniciar sesión 004')
+    expect(card.text).toContain('retoma')
+  })
+
+  it('el jugador espera al anfitrión por su nombre, sin botón', () => {
+    const card = startCard({ ...base, host: false })!
+    expect(card.action).toBeNull()
+    expect(card.text).toContain('Gabino inicia la partida')
+    const anonymous = startCard({ ...base, host: false, hostName: null })!
+    expect(anonymous.text).toContain('El anfitrión inicia la partida')
+  })
+
+  it('con dados en la mesa física, el paso de dados cambia', () => {
+    expect(startCard({ ...base, host: false, dice: 'table' })!.steps[2]).toContain('mesa física')
   })
 })

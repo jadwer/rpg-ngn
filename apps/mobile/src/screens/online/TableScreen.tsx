@@ -1,7 +1,7 @@
 import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -249,6 +249,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? `Sesión ${snapshot.session.code}`) : null
   const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
+  const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingSessions.length === 0, dice: diceModeOf(table.settings) }) : null
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
@@ -281,8 +282,19 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
       <View style={styles.body}>
         <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScroll={onScroll} scrollEventThrottle={100}>
-          {blocks.length === 0 && connection !== 'loading' ? <Text style={styles.empty}>{emptyText}</Text> : null}
+          {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
+          {start ? (
+            <View style={styles.start}>
+              <Text style={styles.startTitle}>{start.title}</Text>
+              <Text style={styles.startText}>{start.text}</Text>
+              {start.steps.map((step, i) => (
+                <Text key={step} style={styles.startStep}>{`${i + 1}. ${step}`}</Text>
+              ))}
+              {start.action ? <Button label={start.action} primary busy={busy} onPress={() => openSession(suggestedCode, null)} /> : null}
+              {start.action ? <Text style={styles.startHint}>Para otro código o una nota al DM, usa el mando del anfitrión de abajo.</Text> : null}
+            </View>
+          ) : null}
           {progress.narrating ? (
             <View style={styles.narrating}>
               <ActivityIndicator size="small" color={theme.colors.goldBright} />
@@ -377,6 +389,11 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 24 },
   jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
   empty: { fontFamily: theme.fonts.serifItalic, fontSize: 15, lineHeight: 22, color: theme.colors.inkDim, textAlign: 'center', paddingVertical: 24 },
+  start: { marginVertical: 16, padding: 18, gap: 10, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldBright, borderRadius: theme.radius },
+  startTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.goldBright, textAlign: 'center' },
+  startText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.ink, textAlign: 'center' },
+  startStep: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
+  startHint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
   narrating: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
   narratingText: { fontFamily: theme.fonts.serifItalic, fontSize: 15, color: theme.colors.goldBright },
 })

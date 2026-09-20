@@ -149,5 +149,46 @@ export function tableTitle(tableName: string, sessionCode: string | null, appNam
 /** Texto cuando la mesa no tiene bloques todavia, segun quien mira. */
 export function emptyTableText(hasSession: boolean, host: boolean): string {
   if (hasSession) return 'El DM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
-  return host ? 'Para empezar, abre la sesión: el botón está abajo, en el mando del anfitrión. El DM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión abra la sesión, el DM presenta la escena aquí y podrás responder.'
+  return host ? 'Para empezar, pulsa Iniciar partida. El DM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión inicie la partida, el DM presenta la escena aquí y podrás responder.'
+}
+
+export interface StartCard {
+  title: string
+  text: string
+  /** Como se juega en esta mesa, en el orden en que pasa. */
+  steps: string[]
+  /** Etiqueta del boton de arranque; null para quien no puede iniciar. */
+  action: string | null
+}
+
+/**
+ * La tarjeta que ocupa la mesa mientras no hay sesion abierta: que va a
+ * pasar, como se juega y, para el anfitrion, el boton que lo arranca. Hasta
+ * hoy el arranque estaba escondido en el mando del anfitrion y la mesa solo
+ * decia "turno, esperando a todos"; nadie sabia por donde empezar. Con
+ * sesion abierta no hay tarjeta: la narracion manda.
+ */
+export function startCard(input: { hasSession: boolean; host: boolean; hostName: string | null; nextCode: string; firstSession: boolean; dice: 'engine' | 'table' }): StartCard | null {
+  if (input.hasSession) return null
+  const host = input.hostName ?? 'el anfitrión'
+  const steps = [
+    'El DM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el DM narra.',
+    'Cuando todos hayan respondido, el anfitrión cierra el turno y el DM narra las consecuencias.',
+    input.dice === 'engine' ? 'Los dados los tira la mesa: si tu acción tiene riesgo, el resultado sale en la narración.' : 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
+    'Si te tienes que ir, pulsa "Me tengo que ir": el DM aparta a tu personaje sin matarlo y la mesa no te espera.',
+  ]
+  if (input.host) {
+    return {
+      title: input.firstSession ? 'La mesa está lista' : 'La sesión anterior terminó',
+      text: input.firstSession ? 'Cuando todos tengan personaje, inicia la partida. El DM presenta la escena, explica cómo se juega y abre el primer turno.' : `Inicia la sesión ${input.nextCode}: el DM retoma donde se quedaron y abre el primer turno.`,
+      steps,
+      action: input.firstSession ? 'Iniciar partida' : `Iniciar sesión ${input.nextCode}`,
+    }
+  }
+  return {
+    title: input.firstSession ? 'Esperando a que empiece la partida' : 'Esperando la siguiente sesión',
+    text: `Elige tu personaje si aún no lo tienes. ${host.charAt(0).toUpperCase()}${host.slice(1)} inicia la partida y el DM presenta la escena aquí.`,
+    steps,
+    action: null,
+  }
 }

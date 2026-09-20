@@ -3,7 +3,7 @@
 import { ApiError, memberOf, randomKey, type ApiClient, type PackCharacter, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, remoteCharacterNames, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, remoteCharacterNames, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
@@ -305,6 +305,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const showVoiceNotice = tts.supported && tts.voicesReady && tts.voices.length === 0 && !voiceNoticeDismissed
   const line = turnLine(turn, progress, nameOf)
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
+  const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingCodes.length === 0, dice: diceModeOf(table.settings) }) : null
   const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
 
   return (
@@ -362,8 +363,25 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       <div className="table-body">
         <div className="scroll" ref={scrollRef} onScroll={onScroll}>
           <div className="blocks">
-            {blocks.length === 0 && connection !== 'loading' ? <p className="empty">{emptyText}</p> : null}
+            {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
             <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
+            {start ? (
+              <section className="start-card hide-on-screen" aria-label="Inicio de la partida">
+                <h2>{start.title}</h2>
+                <p>{start.text}</p>
+                <ol>
+                  {start.steps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+                {start.action ? (
+                  <button type="button" className="btn primary big" disabled={busy} onClick={() => openSession(suggestedCode, null)}>
+                    {start.action}
+                  </button>
+                ) : null}
+                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al DM, usa el mando del anfitrión de abajo.</p> : null}
+              </section>
+            ) : null}
             {progress.narrating ? (
               <div className="narrating">
                 <span className="spinner" aria-hidden /> El DM está narrando...
