@@ -11,14 +11,21 @@ import { packCharacters } from './pack.js'
  */
 
 /**
- * Codigo de tres digitos para la siguiente sesion: uno mas que la mayor ya
- * jugada en esta campaña; si no hay ninguna, la primera planeada del pack.
+ * Codigo de tres digitos para la siguiente sesion de ESTA campaña: uno mas
+ * que la mayor que ella misma jugo; si no ha jugado ninguna, la PRIMERA del
+ * pack.
+ *
+ * Antes devolvia la primera sesion `planned` del pack, y eso hacia que toda
+ * mesa nueva del piloto empezara en la 003 ("bajaste a la mina y no volviste
+ * a subir"), porque las 001 y 002 estan marcadas `played` por la campaña
+ * presencial de Gabino. Cinco mesas de produccion abrieron asi (20-09). El
+ * estado `played` es la bitacora del autor del pack, no el punto de partida
+ * de las mesas ajenas: cada campaña lleva su propia cuenta.
  */
 export function suggestedSessionCode(pack: LoadedPack | null, existing: readonly SessionSummary[]): string {
   const numbers = existing.map((s) => Number(s.code)).filter((n) => Number.isInteger(n) && n >= 0)
   if (numbers.length > 0) return String(Math.min(999, Math.max(...numbers) + 1)).padStart(3, '0')
-  const planned = pack ? pack.manifest.sessions.map((id) => pack.sessions.get(id)).find((s) => s?.status === 'planned') : undefined
-  return planned?.id ?? '001'
+  return pack?.manifest.sessions[0] ?? '001'
 }
 
 export function isValidSessionCode(code: string): boolean {
@@ -205,4 +212,35 @@ export function cleanPersona(text: string): { persona: string | null; error: str
   if (value === '') return { persona: null, error: null }
   if (value.length > PERSONA_MAX) return { persona: null, error: `Demasiado largo: ${value.length} caracteres, y caben ${PERSONA_MAX}.` }
   return { persona: value, error: null }
+}
+
+export interface SessionOption {
+  code: string
+  title: string
+  /** Una linea de que va, para elegir sin abrir el pack. */
+  summary: string
+  /** Ya la jugo ESTA campaña (no el autor del pack). */
+  played: boolean
+}
+
+/**
+ * Las sesiones del pack como opciones para el anfitrion, con las que esta
+ * campaña ya jugo marcadas. El `status` del pack no cuenta aqui: es la
+ * bitacora de quien lo escribio.
+ */
+export function sessionOptions(pack: LoadedPack | null, existing: readonly SessionSummary[]): SessionOption[] {
+  if (!pack) return []
+  const jugadas = new Set(existing.map((s) => s.code))
+  return pack.manifest.sessions
+    .map((id) => pack.sessions.get(id))
+    .filter((s): s is NonNullable<typeof s> => !!s)
+    .map((s) => ({ code: s.id, title: s.title, summary: firstSentence(s.briefing), played: jugadas.has(s.id) }))
+}
+
+/** La primera frase de un texto, para una linea de resumen. */
+function firstSentence(text: string, max = 120): string {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  const end = clean.search(/[.!?](\s|$)/)
+  const first = end > 0 ? clean.slice(0, end + 1) : clean
+  return first.length > max ? `${first.slice(0, max - 1).trimEnd()}...` : first
 }

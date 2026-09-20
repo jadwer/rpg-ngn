@@ -47,6 +47,7 @@ export class PackStore {
         system: m.system,
         characters: m.characters.length,
         sessions: m.sessions.length,
+        playerPersona: m.playerPersona,
       })
     }
     return packs

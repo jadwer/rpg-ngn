@@ -231,6 +231,8 @@ export const PackSummary = z.strictObject({
   system: KebabId,
   characters: z.number().int().nonnegative(),
   sessions: z.number().int().nonnegative(),
+  /** El pack pide que cada jugador escriba la personalidad de su personaje. */
+  playerPersona: z.boolean().default(false),
 })
 export type PackSummary = z.infer<typeof PackSummary>
 

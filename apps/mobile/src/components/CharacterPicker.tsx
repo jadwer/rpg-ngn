@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { noCharacterText } from '@rpg-ngn/ui-logic'
 import { theme } from '../theme'
 import { Portrait } from './Portrait'
 
@@ -24,10 +25,12 @@ interface Props {
   onChange: (characterId: string | null) => void
   /** Permite dejarlo sin personaje (anfitrion que solo mira). */
   allowNone?: boolean | undefined
+  noneContext?: 'create' | 'invite'
 }
 
 /** Selector de personaje con retrato, la misma cuadricula que las fichas en modal. */
-export function CharacterPicker({ characters, taken, value, onChange, allowNone = false }: Props) {
+export function CharacterPicker({ characters, taken, value, onChange, allowNone = false, noneContext = 'create' }: Props) {
+  const none = noCharacterText(noneContext)
   return (
     <View style={styles.grid} accessibilityRole="radiogroup">
       {allowNone ? (
@@ -35,8 +38,8 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
           <View style={styles.none}>
             <Text style={styles.noneMark}>?</Text>
           </View>
-          <Text style={styles.name}>Sin personaje</Text>
-          <Text style={styles.sub}>Solo miras y diriges la mesa</Text>
+          <Text style={styles.name}>{none.title}</Text>
+          <Text style={styles.sub}>{none.hint}</Text>
         </Pressable>
       ) : null}
       {characters.map((character) => {

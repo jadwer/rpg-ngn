@@ -22,6 +22,7 @@ import {
   pendingReceived,
   seatLabel,
   seatPowers,
+  sessionOptions,
   suggestedSessionCode,
   tableSubtitle,
   tableTitle,
@@ -67,7 +68,10 @@ describe('mesa nueva', () => {
 
 describe('codigo de sesion sugerido', () => {
   it('sigue a la mayor de la campaña, o la primera planeada del pack, o 001', () => {
-    expect(suggestedSessionCode(pack, [])).toBe('003')
+    // Una mesa nueva empieza en la PRIMERA del pack, no en la primera
+    // `planned`: las 001 y 002 del piloto estan `played` por la campaña
+    // presencial, y eso hacia nacer toda mesa nueva dentro de la mina.
+    expect(suggestedSessionCode(pack, [])).toBe('001')
     expect(suggestedSessionCode(null, [])).toBe('001')
     expect(suggestedSessionCode(pack, [{ id: '1', code: '101', status: 'closed', openedSeq: 1, closedSeq: 9 }, { id: '2', code: '003', status: 'closed', openedSeq: 10, closedSeq: 12 }])).toBe('102')
     expect(suggestedSessionCode(pack, [{ id: '1', code: '999', status: 'closed', openedSeq: 1, closedSeq: 9 }])).toBe('999')
@@ -192,5 +196,18 @@ describe('cleanPersona', () => {
     const long = cleanPersona('x'.repeat(PERSONA_MAX + 1))
     expect(long.persona).toBeNull()
     expect(long.error).toContain('Demasiado largo')
+  })
+})
+
+describe('sessionOptions', () => {
+  it('lista las sesiones del pack y marca las que jugo esta campaña, no las del autor', () => {
+    const opciones = sessionOptions(pack, [{ id: '1', code: '001', status: 'closed', openedSeq: 1, closedSeq: 9 }])
+    expect(opciones.map((o) => o.code)).toEqual(['001', '002', '003'])
+    expect(opciones[0]!.played).toBe(true)
+    // La 002 esta `played` en el pack (campaña de Gabino) pero esta mesa no la jugo.
+    expect(opciones[1]!.played).toBe(false)
+    expect(opciones[0]!.title).toContain('Camino a Valdoria')
+    expect(opciones[0]!.summary.length).toBeLessThanOrEqual(120)
+    expect(sessionOptions(null, [])).toEqual([])
   })
 })

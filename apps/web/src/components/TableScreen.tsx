@@ -72,6 +72,23 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   }, [client, pack, table.packId, table.packVersion])
   const remoteNamesAll = useMemo(() => ({ ...remoteNames, ...remoteCharacterNames(remote) }), [remoteNames, remote])
 
+  // Si el pack de esta mesa pide personalidad escrita por el jugador (La
+  // Mascarada). No todos: en el piloto la ficha ya trae bio y meta, y pedir
+  // un texto mas antes de jugar estorba (mesas del 20-09).
+  const [wantsPersona, setWantsPersona] = useState(false)
+  useEffect(() => {
+    let alive = true
+    void client.listPacks().then(
+      (packs) => {
+        if (alive) setWantsPersona(packs.find((p) => p.id === table.packId)?.playerPersona === true)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.packId])
+
   const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
   const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
@@ -425,7 +442,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </button>
           </div>
         ) : null}
-        {viewer.characterId !== null && snapshot !== null ? (
+        {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
           <PersonaPanel
             characterName={nameOf(viewer.characterId)}
             saved={snapshot.viewer?.persona ?? null}
@@ -470,7 +487,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
+        {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} />
       </div>
     </div>

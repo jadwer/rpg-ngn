@@ -1,8 +1,8 @@
 'use client'
 
-import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
+import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { isValidSessionCode } from '@rpg-ngn/ui-logic'
+import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { DmSettingsPanel } from './DmSettingsPanel'
 import { InvitePanel } from './InvitePanel'
@@ -17,6 +17,8 @@ interface Props {
   loaded: boolean
   /** Codigo sugerido (la siguiente de la campaña). */
   suggestedCode: string
+  /** Sesiones ya jugadas por ESTA campaña, para marcarlas en el selector. */
+  playedSessions?: readonly SessionSummary[]
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
@@ -30,7 +32,7 @@ interface Props {
  * mesa, invitaciones y el proveedor del DM. El DM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'invite' | 'dm'>('session')
   const [code, setCode] = useState(suggestedCode)
@@ -38,6 +40,8 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
   const [cliffhanger, setCliffhanger] = useState('')
   const [confirmClose, setConfirmClose] = useState(false)
   const decidedRef = useRef(false)
+  const opciones = sessionOptions(pack, playedSessions)
+  const elegida = opciones.find((o) => o.code === code) ?? null
 
   useEffect(() => {
     setCode(suggestedCode)
@@ -80,10 +84,23 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             <div className="stack">
               {table.premise ? <p className="premise">{table.premise}</p> : null}
               <div className="row">
-                <label className="field">
-                  <span>Código</span>
-                  <input className="input code" name="codigo" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 3))} inputMode="numeric" placeholder="003" />
-                </label>
+                {opciones.length > 0 ? (
+                  <label className="field" style={{ minWidth: 260 }}>
+                    <span>Qué sesión juegan</span>
+                    <select className="select" name="sesion" value={code} onChange={(e) => setCode(e.target.value)}>
+                      {opciones.map((o) => (
+                        <option key={o.code} value={o.code}>
+                          {`${o.code} · ${o.title}${o.played ? ' (ya jugada)' : ''}`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <label className="field">
+                    <span>Código</span>
+                    <input className="input code" name="codigo" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 3))} inputMode="numeric" placeholder="001" />
+                  </label>
+                )}
                 <label className="field" style={{ flex: 1, minWidth: 220 }}>
                   <span>Nota de la sesión</span>
                   <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el DM la recibe" maxLength={120} />
@@ -93,7 +110,7 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
                 <button type="button" className="btn primary" onClick={() => onOpenSession(code, note.trim() || null)} disabled={busy || !isValidSessionCode(code)}>
                   Abrir sesión
                 </button>
-                <span className="hint">Abre el turno 1 e interpela a la party.</span>
+                <span className="hint">{elegida ? elegida.summary : 'Abre el turno 1 e interpela a la party.'}</span>
               </div>
             </div>
           ) : null}

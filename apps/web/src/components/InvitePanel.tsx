@@ -237,9 +237,9 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         <div className="stack">
           <div className="label">Personaje para {found.name}</div>
           {pack ? (
-            <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone />
+            <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone noneContext="invite" />
           ) : remote.length > 0 ? (
-            <RemoteCharacterPicker packId={table.packId} characters={freeRemote} taken={taken} value={characterId} onChange={setCharacterId} allowNone />
+            <RemoteCharacterPicker packId={table.packId} characters={freeRemote} taken={taken} value={characterId} onChange={setCharacterId} allowNone noneContext="invite" />
           ) : (
             <p className="hint">Cargando los personajes del pack...</p>
           )}

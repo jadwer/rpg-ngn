@@ -1,6 +1,6 @@
-import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
+import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { isValidSessionCode } from '@rpg-ngn/ui-logic'
+import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -19,6 +19,8 @@ interface Props {
   loaded: boolean
   /** Codigo sugerido: la siguiente sesion de la campaña. */
   suggestedCode: string
+  /** Sesiones que ESTA campaña ya jugo, para marcarlas en el selector. */
+  playedSessions?: readonly SessionSummary[]
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
@@ -32,7 +34,9 @@ interface Props {
  * proveedor del DM (cada uno en un modal, que en el telefono no cabe debajo
  * de la narracion). El DM es la IA; el anfitrion dirige la mesa.
  */
-export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+  const opciones = sessionOptions(pack, playedSessions)
+  const elegida = opciones.find((o) => o.code === code) ?? null
   const [expanded, setExpanded] = useState(false)
   const [inviting, setInviting] = useState(false)
   const [dmOpen, setDmOpen] = useState(false)
@@ -77,8 +81,18 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
           ) : null}
           {!session ? (
             <>
+              {opciones.length > 0 ? (
+                <View style={styles.sessions}>
+                  {opciones.map((o) => (
+                    <Pressable key={o.code} onPress={() => setCode(o.code)} style={[styles.session, code === o.code && styles.sessionOn]} accessibilityRole="radio" accessibilityState={{ selected: code === o.code }}>
+                      <Text style={styles.sessionTitle}>{`${o.code} · ${o.title}${o.played ? ' (ya jugada)' : ''}`}</Text>
+                    </Pressable>
+                  ))}
+                  {elegida ? <Text style={styles.sessionHint}>{elegida.summary}</Text> : null}
+                </View>
+              ) : null}
               <View style={styles.row}>
-                <TextInput value={code} onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 3))} keyboardType="number-pad" maxLength={3} placeholder="003" placeholderTextColor={theme.colors.inkFaint} style={[styles.input, styles.code]} />
+                {opciones.length === 0 ? <TextInput value={code} onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 3))} keyboardType="number-pad" maxLength={3} placeholder="001" placeholderTextColor={theme.colors.inkFaint} style={[styles.input, styles.code]} /> : null}
                 <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el DM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={[styles.input, styles.grow]} />
               </View>
               <View style={styles.row}>
@@ -152,6 +166,11 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
 }
 
 const styles = StyleSheet.create({
+  sessions: { gap: 6 },
+  session: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 },
+  sessionOn: { borderColor: theme.colors.goldBright, backgroundColor: theme.colors.panel2 ?? theme.colors.panel },
+  sessionTitle: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },
+  sessionHint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
   panel: { borderTopWidth: 1, borderTopColor: theme.colors.border, backgroundColor: theme.colors.panel2, paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },

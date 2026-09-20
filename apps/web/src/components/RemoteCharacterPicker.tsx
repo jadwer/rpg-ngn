@@ -1,5 +1,6 @@
 'use client'
 
+import { noCharacterText } from '@rpg-ngn/ui-logic'
 import { packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
   onChange: (characterId: string | null) => void
   /** Permite dejarlo sin personaje (anfitrion que solo mira). */
   allowNone?: boolean | undefined
+  noneContext?: 'create' | 'invite'
 }
 
 /**
@@ -20,7 +22,8 @@ interface Props {
  * en la web (el piloto). De un pack instalado en el servidor solo llega lo
  * justo para elegir, y el retrato lo sirve la API.
  */
-export function RemoteCharacterPicker({ packId, characters, taken, value, onChange, allowNone = false }: Props) {
+export function RemoteCharacterPicker({ packId, characters, taken, value, onChange, allowNone = false, noneContext = 'create' }: Props) {
+  const none = noCharacterText(noneContext)
   return (
     <div className="picker" role="radiogroup">
       {allowNone ? (
@@ -28,8 +31,8 @@ export function RemoteCharacterPicker({ packId, characters, taken, value, onChan
           <span className="portrait placeholder" style={{ width: '100%', height: 'auto', aspectRatio: '1', display: 'flex', fontSize: '2rem', marginBottom: 8 }}>
             ?
           </span>
-          <div className="name">Sin personaje</div>
-          <div className="hint">Solo miras y diriges la mesa</div>
+          <div className="name">{none.title}</div>
+          <div className="hint">{none.hint}</div>
         </button>
       ) : null}
 

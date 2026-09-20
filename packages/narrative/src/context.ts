@@ -104,7 +104,13 @@ function worldLayer(ctx: DMTurnContext, budget: ContextBudget): string {
   if (packSession) {
     lines.push('', `Sesión ${packSession.id}: ${packSession.title}`)
     lines.push(`Planteamiento: ${packSession.briefing}`)
-    if (packSession.recap) lines.push(`Resumen previo: ${clip(packSession.recap, budget.sheets === 'compact' ? 500 : 2000)}`)
+    // El `recap` de una sesion del pack cuenta lo que paso en ELLA, asi que
+    // solo vale si esta campaña la jugo. El piloto trae los recaps de la
+    // campaña presencial de Gabino en las sesiones 001 y 002; sin esta
+    // condicion, una mesa de desconocidos abria leyendo lo que vivio otro
+    // grupo (spoiler entre mesas, 20-09).
+    const jugadaAqui = ctx.state.meta.sessions[packSession.id]?.status === 'closed'
+    if (packSession.recap && jugadaAqui) lines.push(`Resumen previo: ${clip(packSession.recap, budget.sheets === 'compact' ? 500 : 2000)}`)
     if (packSession.openThreads?.length) lines.push(`Hilos abiertos: ${packSession.openThreads.join('; ')}`)
     if (budget.sheets === 'full') {
       if (packSession.notes) lines.push(`Notas de la sesión: ${packSession.notes}`)

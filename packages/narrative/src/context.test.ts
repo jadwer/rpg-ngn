@@ -69,6 +69,23 @@ describe('buildTurnContext', () => {
     expect(buildTurnContext(contextFor({ ...base, pack: bare }, turn(1, []))).user).not.toContain('# Capa del DM')
   })
 
+  it('el resumen previo de una sesion del pack solo llega si ESTA campaña la jugo', async () => {
+    const { pack, state } = await pilotContext()
+    const sesion002 = pack.sessions.get('002')!
+    expect(sesion002.recap).toBeTruthy()
+
+    // Mesa nueva: nunca jugo la 002, asi que su recap (la campaña presencial
+    // de Gabino) no debe aparecer. Era el spoiler entre mesas del 20-09.
+    const nueva = { ...state, meta: { ...state.meta, sessions: {} } }
+    const virgen = buildTurnContext({ pack, state: nueva, session: sesion002, turn: turn(1, []) })
+    expect(virgen.user).not.toContain('Resumen previo')
+
+    // La campaña que si la jugo y la cerro lo conserva.
+    const jugada: typeof state = { ...state, meta: { ...state.meta, sessions: { '002': { id: '002', status: 'closed', startedSeq: 1, closedSeq: 21, party: ['zahira'], cliffhanger: null } } } }
+    const continua = buildTurnContext({ pack, state: jugada, session: sesion002, turn: turn(1, []) })
+    expect(continua.user).toContain('Resumen previo')
+  })
+
   it('la personalidad escrita por el jugador va en su ficha, delimitada, y solo en la suya', async () => {
     const base = await openSession003()
     const built = buildTurnContext(contextFor(base, turn(3, [response('zahira', 'Bajo.'), response('calder', 'La sigo.')]), {

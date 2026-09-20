@@ -1,6 +1,7 @@
 'use client'
 
 import type { Character } from '@rpg-ngn/content'
+import { noCharacterText } from '@rpg-ngn/ui-logic'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -11,10 +12,13 @@ interface Props {
   onChange: (characterId: string | null) => void
   /** Permite dejarlo sin personaje (anfitrion que solo mira). */
   allowNone?: boolean | undefined
+  /** Que significa no elegir: al crear mesa diriges sin jugar; al invitar, el invitado elige al entrar. */
+  noneContext?: 'create' | 'invite'
 }
 
 /** Selector de personaje con retrato, como la cuadricula de apps/sheets. */
-export function CharacterPicker({ characters, taken, value, onChange, allowNone = false }: Props) {
+export function CharacterPicker({ characters, taken, value, onChange, allowNone = false, noneContext = 'create' }: Props) {
+  const none = noCharacterText(noneContext)
   return (
     <div className="picker" role="radiogroup">
       {allowNone ? (
@@ -22,8 +26,8 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
           <span className="portrait placeholder" style={{ width: '100%', height: 'auto', aspectRatio: '1', display: 'flex', fontSize: '2rem', marginBottom: 8 }}>
             ?
           </span>
-          <div className="n">Sin personaje</div>
-          <div className="r">Solo miras y diriges la mesa</div>
+          <div className="n">{none.title}</div>
+          <div className="r">{none.hint}</div>
         </button>
       ) : null}
       {characters.map((character) => {

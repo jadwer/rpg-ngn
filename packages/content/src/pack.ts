@@ -40,6 +40,14 @@ export const PackManifest = z.strictObject({
   sessions: z.array(z.string().regex(/^\d{3}$/)).default([]),
   /** Capa `dm` del pack (secret.ts): nunca llega a un jugador ni al visor de fichas. */
   secrets: z.array(KebabId).default([]),
+  /**
+   * El pack pide que cada jugador escriba la personalidad de su personaje
+   * (como es, que busca, que no soporta, su secreto). Lo usa La Mascarada,
+   * donde el arquetipo viene hecho y quien lo juega decide quien es. Por
+   * omision NO: en el piloto la ficha ya trae bio y meta, y pedir un texto
+   * mas antes de jugar estorba (mesas del 20-09).
+   */
+  playerPersona: z.boolean().default(false),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

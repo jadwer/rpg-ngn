@@ -61,6 +61,8 @@ export interface PackOption {
   system: string
   characters: number
   sessions: number
+  /** El pack pide que cada jugador escriba la personalidad de su personaje (La Mascarada). */
+  playerPersona?: boolean
 }
 
 /** Un paquete de creditos de prepago. `amount` va en la unidad menor (centavos). */

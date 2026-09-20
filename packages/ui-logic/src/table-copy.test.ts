@@ -1,6 +1,6 @@
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { characterNameFrom, packOptionLabel, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
+import { characterNameFrom, noCharacterText, packOptionLabel, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
 
 const pack = (over: Partial<PackOption> = {}): PackOption => ({
   id: 'pilot',
@@ -82,5 +82,14 @@ describe('table-copy', () => {
     expect(tableCardMeta({ packId: 'pilot', packVersion: '0.4.0' }, packs)).toBe('Los Nueve Viajeros')
     // Sin catalogo cargado, el id es mejor que nada y no rompe la tarjeta.
     expect(tableCardMeta({ packId: 'pilot', packVersion: '0.4.0' })).toBe('pilot')
+  })
+})
+
+describe('noCharacterText', () => {
+  it('al invitar dice que elegira al entrar; al crear mesa, que solo diriges', () => {
+    expect(noCharacterText('invite').title).toBe('Que elija al entrar')
+    expect(noCharacterText('invite').hint).toContain('al abrir la mesa')
+    expect(noCharacterText('create').title).toBe('Sin personaje')
+    expect(noCharacterText('create').hint).toContain('diriges la mesa')
   })
 })

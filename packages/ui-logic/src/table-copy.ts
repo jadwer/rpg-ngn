@@ -80,3 +80,13 @@ export function tableCardMeta(
   if (table.premise) partes.push('con premisa')
   return partes.join(' · ')
 }
+
+/**
+ * Que significa "sin personaje" segun donde se elige. Decia siempre "Solo
+ * miras y diriges la mesa", que es falso al invitar: ahi el invitado SI va a
+ * jugar, solo que elige su personaje al entrar (Gabino, 20-09).
+ */
+export function noCharacterText(context: 'create' | 'invite'): { title: string; hint: string } {
+  if (context === 'invite') return { title: 'Que elija al entrar', hint: 'Escoge su personaje al abrir la mesa, entre los libres' }
+  return { title: 'Sin personaje', hint: 'Solo miras y diriges la mesa' }
+}

@@ -65,6 +65,21 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const isHost = viewer.role === 'host'
   const ownMember = table.members.find((m) => m.id === me.id) ?? me
 
+  // Personalidad escrita por el jugador: solo si el pack la pide (La Mascarada).
+  const [wantsPersona, setWantsPersona] = useState(false)
+  useEffect(() => {
+    let alive = true
+    void client.listPacks().then(
+      (packs) => {
+        if (alive) setWantsPersona(packs.find((p) => p.id === table.packId)?.playerPersona === true)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.packId])
+
   // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
   const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
@@ -326,7 +341,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
-      {viewer.characterId !== null && snapshot !== null ? (
+      {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
         <PersonaPanel
           characterName={nameOf(viewer.characterId)}
           saved={snapshot.viewer?.persona ?? null}
@@ -360,7 +375,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
-      {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
+      {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} onFocusInput={scrollToEnd} />
 
       <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} />
