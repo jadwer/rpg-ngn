@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, memberOf, type ApiClient, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { characterNameFrom, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
+import { characterNameFrom, memberTag, pendingReceived, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FriendsPanel } from '../../components/FriendsPanel'
@@ -26,22 +26,36 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const list = await client.listTables()
-      setTables([...list].sort((a, b) => Number(b.id) - Number(a.id)))
-    } catch (caught) {
-      if (caught instanceof ApiError && caught.isUnauthorized) unauthorized()
-      else setError(caught instanceof Error ? caught.message : String(caught))
-    } finally {
-      setLoading(false)
-    }
-  }, [client, unauthorized])
+  // Solicitudes de amistad que esperan respuesta: se avisan arriba, no solo
+  // al fondo en el panel de amigos.
+  const [pendingFriends, setPendingFriends] = useState(0)
 
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!quiet) setLoading(true)
+      setError(null)
+      try {
+        const [list, friendships] = await Promise.all([client.listTables(), client.listFriendships().catch(() => [])])
+        setTables([...list].sort((a, b) => Number(b.id) - Number(a.id)))
+        setPendingFriends(pendingReceived(friendships, user.id).length)
+      } catch (caught) {
+        if (caught instanceof ApiError && caught.isUnauthorized) unauthorized()
+        else if (!quiet) setError(caught instanceof Error ? caught.message : String(caught))
+      } finally {
+        if (!quiet) setLoading(false)
+      }
+    },
+    [client, unauthorized, user.id],
+  )
+
+  // Una invitacion o una solicitud nuevas aparecen solas: antes habia que
+  // pulsar "Actualizar" para enterarse.
   useEffect(() => {
     void load()
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') void load(true)
+    }, 10_000)
+    return () => clearInterval(timer)
   }, [load])
 
   // Los packs de las mesas, como una clave estable: `tables` es un array nuevo
@@ -88,6 +102,11 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
       </div>
 
       {error ? <div className="error">{error}</div> : null}
+      {pendingFriends > 0 ? (
+        <a href="#amigos" className="notice" style={{ display: 'block', marginBottom: 14 }}>
+          {pendingFriends === 1 ? 'Tienes una solicitud de amistad esperando. Acéptala abajo, en Amigos.' : `Tienes ${pendingFriends} solicitudes de amistad esperando. Acéptalas abajo, en Amigos.`}
+        </a>
+      ) : null}
       {tables === null && loading ? (
         <p className="hint" style={{ textAlign: 'center' }}>
           Buscando tus mesas...
@@ -125,7 +144,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
         })}
       </div>
 
-      <div style={{ marginTop: 24 }}>
+      <div id="amigos" style={{ marginTop: 24 }}>
         <FriendsPanel client={client} meId={user.id} onUnauthorized={unauthorized} />
       </div>
     </main>

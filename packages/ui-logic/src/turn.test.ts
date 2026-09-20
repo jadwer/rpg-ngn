@@ -59,7 +59,7 @@ describe('turnProgress', () => {
   it('el que falta puede responder; el que ya respondio, no; nadie cierra todavia', () => {
     const zahira = turnProgress(open, { role: 'player', characterId: 'zahira' })
     expect(zahira).toMatchObject({ pending: ['zahira'], responded: ['calder'], complete: false, canRespond: true, hasResponded: false, canClose: false, canForceClose: false })
-    expect(turnStatusLine(open, zahira, nameOf)).toBe('Faltan: Zahira.')
+    expect(turnStatusLine(open, zahira, nameOf)).toBe('Faltan por responder: Zahira.')
 
     const calder = turnProgress(open, { role: 'player', characterId: 'calder' })
     expect(calder).toMatchObject({ canRespond: false, hasResponded: true, canClose: false })
@@ -74,7 +74,7 @@ describe('turnProgress', () => {
     const complete: TurnSummary = { ...open, responded: ['calder', 'zahira'] }
     const other = turnProgress(complete, { role: 'player', characterId: 'kael' })
     expect(other).toMatchObject({ complete: true, canRespond: true, canClose: true, canForceClose: false })
-    expect(turnStatusLine(complete, other, nameOf)).toBe('Todos respondieron; cualquiera puede cerrar el turno.')
+    expect(turnStatusLine(complete, other, nameOf)).toBe('Todos respondieron: cierra el turno y el DM narra.')
   })
 
   it('mientras el DM narra no se responde ni se cierra, y el error del engine reabre', () => {

@@ -208,6 +208,9 @@ export const TurnBlock = z.discriminatedUnion('type', [
     tone: z.enum(['info', 'action']).optional(),
     /** Detalle largo para el anfitrion (que linea se ignoro y por que). */
     detail: z.string().optional(),
+    /** Titulo y puntos: la apertura de sesion trae el briefing y "como se juega" del pack. */
+    title: z.string().min(1).optional(),
+    items: z.array(z.string().min(1)).optional(),
   }),
 ])
 export type TurnBlock = z.infer<typeof TurnBlock>

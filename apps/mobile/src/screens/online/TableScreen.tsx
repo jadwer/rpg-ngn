@@ -1,11 +1,12 @@
-import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
+import { CharacterPicker } from '../../components/CharacterPicker'
 import { HostPanel } from '../../components/HostPanel'
 import { TtsBar } from '../../components/TtsBar'
 import { TurnPanel } from '../../components/TurnPanel'
@@ -68,6 +69,31 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
+
+  // Quien entra sin personaje lo elige aqui, entre los que queden libres; el
+  // primero que llega se lo queda. Los de un pack remoto los da la API.
+  const [choosing, setChoosing] = useState<string | null>(null)
+  const [remote, setRemote] = useState<PackCharacter[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackCharacters(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemote(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const freeToPick = useMemo(() => {
+    if (pack) return freeCharacters(pack, table.members)
+    return freeRemoteCharacters(remote, table.members).map((c) => {
+      const path = packPortraitUrl(table.packId, c.portrait)
+      return { id: c.id, name: c.name, race: c.race, class: c.characterClass, roles: c.roles, portraitUri: path ? `${client.baseUrl}${path}` : null }
+    })
+  }, [pack, remote, table.members, table.packId, client.baseUrl])
   const sessionCode = snapshot?.session?.code ?? null
   const headSeq = snapshot?.campaign.headSeq ?? 0
 
@@ -270,6 +296,27 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         ) : null}
       </View>
 
+      {viewer.characterId === null && snapshot !== null ? (
+        <View style={styles.choose}>
+          <Text style={styles.chooseLabel}>Elige tu personaje</Text>
+          <Text style={styles.chooseHint}>Los que ya juega alguien no se pueden elegir: el primero que llega se lo queda. Sin personaje puedes leer, pero no responder.</Text>
+          {pack || remote.length > 0 ? <CharacterPicker characters={freeToPick} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} /> : <Text style={styles.chooseHint}>Cargando los personajes del pack...</Text>}
+          <Button
+            label="Jugar con este personaje"
+            primary
+            busy={busy}
+            disabled={!choosing}
+            onPress={() => {
+              if (!choosing) return
+              void act(async () => {
+                await client.setOwnerCharacter(table.id, user.id, choosing)
+                onTableChanged()
+                refresh()
+              }, 'No se pudo elegir el personaje.')
+            }}
+          />
+        </View>
+      ) : null}
       {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} onFocusInput={scrollToEnd} />
 
@@ -289,6 +336,9 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 }
 
 const styles = StyleSheet.create({
+  choose: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border, padding: 12, gap: 8 },
+  chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.goldDim },
+  chooseHint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright },

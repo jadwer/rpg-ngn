@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { diceModeHint, diceModeLabel, diceModeOf, isDiceMode, withDiceMode } from './dice-mode.js'
+import { DEFAULT_DICE_MODE, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, isDiceMode, withDiceMode } from './dice-mode.js'
 
 describe('dice-mode', () => {
-  it('sin elegir, la mesa tira sus dados, que es como se jugaba antes', () => {
-    expect(diceModeOf(null)).toBe('table')
-    expect(diceModeOf({})).toBe('table')
-    expect(diceModeOf({ dice: 'lo-que-sea' })).toBe('table')
-    expect(diceModeOf({ dice: 'engine' })).toBe('engine')
+  it('sin elegir, tira el servidor: aceptar numeros escritos es una eleccion, no lo que pasa por omision', () => {
+    expect(DEFAULT_DICE_MODE).toBe('engine')
+    expect(diceModeOf(null)).toBe('engine')
+    expect(diceModeOf({})).toBe('engine')
+    expect(diceModeOf({ dice: 'lo-que-sea' })).toBe('engine')
+    expect(diceModeOf({ dice: 'table' })).toBe('table')
+    // Se ofrece primero el seguro.
+    expect(DICE_MODES[0]).toBe('engine')
   })
 
   it('reconoce los modos validos', () => {
@@ -21,9 +24,11 @@ describe('dice-mode', () => {
     expect(diceModeHint('table')).toContain('dados de verdad')
   })
 
-  it('guardar el modo no pisa el resto de ajustes, y `table` no se guarda por ser el de por defecto', () => {
+  it('guardar el modo no pisa el resto de ajustes y se guarda siempre explicito, tambien el de por defecto', () => {
     const settings = { premise: 'Llueve.', provider: { preset: 'anthropic' } }
     expect(withDiceMode(settings, 'engine')).toEqual({ ...settings, dice: 'engine' })
-    expect(withDiceMode({ ...settings, dice: 'engine' }, 'table')).toEqual(settings)
+    expect(withDiceMode({ ...settings, dice: 'engine' }, 'table')).toEqual({ ...settings, dice: 'table' })
+    // Lo que "no hace falta guardar porque es el de por defecto" es lo que se rompe cuando el defecto cambia.
+    expect(withDiceMode(null, 'engine')).toEqual({ dice: 'engine' })
   })
 })

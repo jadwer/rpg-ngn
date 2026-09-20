@@ -51,7 +51,8 @@ describe('ModelDMProvider', () => {
     const transport = new FakeTransport(goodTurn)
     const provider = new ModelDMProvider(transport, KEY)
 
-    const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.'), response('calder', 'La sigo.')]))))
+    // Mesa presencial (`dice: 'table'`): el numero que escribe el jugador vale. Ya no es el defecto.
+    const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.'), response('calder', 'La sigo.')]), { dice: 'table' })))
 
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'dialogue', 'narration', 'dialogue', 'roll', 'narration'])
@@ -94,7 +95,8 @@ describe('ModelDMProvider', () => {
     ].join('\n')
     const provider = new ModelDMProvider(new FakeTransport(text), KEY)
 
-    const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]))))
+    // Mesa presencial: una tirada "fisica" que nadie escribio se descarta (con el servidor tirando, se tiraria).
+    const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]), { dice: 'table' })))
 
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'dialogue', 'system'])

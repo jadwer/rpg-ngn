@@ -31,8 +31,13 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
     }
   }, [client, onUnauthorized])
 
+  // Las solicitudes llegan solas, sin pulsar "Actualizar".
   useEffect(() => {
     void load()
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') void load()
+    }, 10_000)
+    return () => clearInterval(timer)
   }, [load])
 
   const act = async (action: () => Promise<void>) => {

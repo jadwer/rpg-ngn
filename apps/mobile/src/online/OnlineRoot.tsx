@@ -85,8 +85,8 @@ export function OnlineRoot({ pack, onExit }: Props) {
   )
 
   const loadTables = useCallback(
-    async (client: ApiClient) => {
-      setBusy(true)
+    async (client: ApiClient, quiet = false) => {
+      if (!quiet) setBusy(true)
       setTablesError(null)
       try {
         const lista = await client.listTables()
@@ -97,13 +97,21 @@ export function OnlineRoot({ pack, onExit }: Props) {
           unauthorized()
           return
         }
-        setTablesError(caught instanceof Error ? caught.message : String(caught))
+        if (!quiet) setTablesError(caught instanceof Error ? caught.message : String(caught))
       } finally {
-        setBusy(false)
+        if (!quiet) setBusy(false)
       }
     },
     [unauthorized, completarNombres],
   )
+
+  // En la lista de mesas, una invitacion nueva aparece sola: antes habia que
+  // tirar para refrescar y nadie sabia que tenia que hacerlo.
+  useEffect(() => {
+    if (stage.name !== 'tables' || !session) return
+    const timer = setInterval(() => void loadTables(session.client, true), 10_000)
+    return () => clearInterval(timer)
+  }, [stage.name, session, loadTables])
 
   /** Entrar con un token recien emitido (login o registro): se recuerda y se pasa a las mesas. */
   const enter = async (client: ApiClient, url: string, token: string, user: StoredUser) => {

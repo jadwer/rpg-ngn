@@ -237,7 +237,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
               {busy ? <span className="spinner" aria-hidden /> : null}
               Invitar a la mesa
             </button>
-            <span className="hint">{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: podrá mirar pero no responder.'}</span>
+            <span className="hint">{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: lo elige al entrar a la mesa, entre los que queden libres.'}</span>
           </div>
         </div>
       ) : null}

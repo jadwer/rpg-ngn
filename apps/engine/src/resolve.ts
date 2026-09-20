@@ -60,10 +60,29 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let usage = { inputTokens: 0, outputTokens: 0 }
 
   try {
+    // Apertura de sesion (turno 1 sin declaraciones): antes de que el DM
+    // presente la escena, la mesa recibe lo que el pack ya sabia y nadie le
+    // enseñaba: de que va la sesion y como se juega. Es lo que en el piloto
+    // hacia el DM humano antes de que nadie tirara un dado.
+    const packSession = pack.sessions.get(request.turn.sessionId)
+    if (request.turn.number === 1 && request.turn.responses.length === 0 && packSession) {
+      yield {
+        kind: 'block',
+        block: {
+          type: 'system',
+          title: packSession.title,
+          text: packSession.briefing,
+          items: [...packSession.howToPlay],
+          audience: 'table',
+          tone: 'info',
+        },
+      }
+    }
+
     const outputs = provider.narrate({
       pack,
       state,
-      session: pack.sessions.get(request.turn.sessionId),
+      session: packSession,
       turn: request.turn,
       notes: request.context,
       recentEvents,

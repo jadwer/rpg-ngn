@@ -311,7 +311,12 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[]): string {
   const lines: string[] = [`# Turno ${turn.number}`, '']
   if (turn.responses.length === 0) {
     lines.push(turn.number === 1
-      ? 'El turno se cerró sin declaraciones: presenta la escena a la party y dales la palabra.'
+      ? [
+          'APERTURA DE LA SESIÓN. Nadie ha actuado todavía: este turno es tuyo entero y es la primera impresión de la mesa.',
+          'Presenta la escena con fuerza, en 3 a 5 bloques de narración: dónde están, qué acaba de pasar, qué se huele y se oye. Sitúa a CADA personaje presente por su nombre con un detalle propio (algo que ve, siente o lleva encima), sin decidir nada por ellos.',
+          'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay NPCs en escena, que uno hable.',
+          'No pidas tiradas todavía y no propongas eventos salvo un world_event si hace falta. Termina con una situación abierta y una pregunta directa a toda la mesa, y devuelve la palabra a todos ("addressed" con toda la party).',
+        ].join('\n')
       : 'El turno se cerró sin declaraciones: haz avanzar el mundo un poco (un NPC, un sonido, el tiempo) y devuelve la palabra.')
   } else {
     lines.push('Declaraciones de este turno:')

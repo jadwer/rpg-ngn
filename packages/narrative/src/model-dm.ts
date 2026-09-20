@@ -171,7 +171,9 @@ export class ModelDMProvider implements DMProvider {
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
-    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom(), ctx.dice ?? 'table')
+    // Sin modo, tira el servidor: aceptar numeros escritos es una eleccion
+    // explicita para la mesa presencial, nunca lo que pasa por omision.
+    const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', this.options.random ?? webCryptoRandom(), ctx.dice ?? 'engine')
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -350,9 +352,15 @@ class LineInterpreter {
         this.pending = { text, depth: scanned.depth }
         return
       }
-      const parsed = parseLoose(text)
-      if (parsed !== undefined) yield* this.items(parsed)
-      else this.ignored++
+      // Varios objetos en la misma linea ({...} {...}): Haiku lo hace y antes
+      // la linea entera fallaba al parsear y el turno acababa "sin bloques"
+      // con una narracion perfecta dentro (mesa "cinco personas", 19-09).
+      const pieces = splitJsonObjects(text)
+      for (const piece of pieces) {
+        const parsed = parseLoose(piece)
+        if (parsed !== undefined) yield* this.items(parsed)
+        else this.ignored++
+      }
       return
     }
 
@@ -576,4 +584,41 @@ class LineInterpreter {
 function wantsRawLog(): boolean {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
   return env?.['DM_LOG_RAW'] === '1'
+}
+
+/**
+ * Parte una linea con varios valores JSON de primer nivel seguidos
+ * (`{...} {...}` o `{...},{...}`) en cada valor. Una linea con uno solo sale
+ * tal cual. Respeta cadenas y escapes: una llave dentro de un texto no cuenta.
+ */
+export function splitJsonObjects(text: string): string[] {
+  const pieces: string[] = []
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let start = -1
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]!
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === '\\') escaped = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') {
+      inString = true
+      continue
+    }
+    if (ch === '{' || ch === '[') {
+      if (depth === 0) start = i
+      depth++
+    } else if (ch === '}' || ch === ']') {
+      depth--
+      if (depth === 0 && start !== -1) {
+        pieces.push(text.slice(start, i + 1))
+        start = -1
+      }
+    }
+  }
+  return pieces.length > 0 ? pieces : [text]
 }

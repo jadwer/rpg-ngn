@@ -190,7 +190,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         <>
           <Text style={styles.label}>{`Personaje para ${found.name}`}</Text>
           {pack || remote.length > 0 ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone /> : <Text style={styles.hint}>Cargando los personajes del pack...</Text>}
-          <Text style={styles.hint}>{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: podrá mirar pero no responder.'}</Text>
+          <Text style={styles.hint}>{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: lo elige al entrar a la mesa, entre los que queden libres.'}</Text>
           <Button label="Invitar a la mesa" primary busy={busy} onPress={() => void invite()} />
         </>
       ) : null}

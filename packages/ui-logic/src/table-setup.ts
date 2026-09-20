@@ -148,5 +148,5 @@ export function tableTitle(tableName: string, sessionCode: string | null, appNam
 /** Texto cuando la mesa no tiene bloques todavia, segun quien mira. */
 export function emptyTableText(hasSession: boolean, host: boolean): string {
   if (hasSession) return 'El DM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
-  return host ? 'Abre la sesión desde el mando del anfitrión para que el DM presente la escena.' : 'Cuando el anfitrión abra la sesión, el primer turno aparece aquí.'
+  return host ? 'Para empezar, abre la sesión: el botón está abajo, en el mando del anfitrión. El DM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión abra la sesión, el DM presenta la escena aquí y podrás responder.'
 }

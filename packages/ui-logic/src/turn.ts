@@ -45,7 +45,8 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text }
     }
     case 'system':
-      return { kind: 'system', id, title: null, text: block.text, items: [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null }
+      // Titulo y puntos: los usa la apertura de sesion (briefing y "como se juega" del pack).
+      return { kind: 'system', id, title: block.title ?? null, text: block.text, items: block.items ? [...block.items] : [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null }
   }
 }
 
@@ -111,8 +112,8 @@ export function turnStatusLine(turn: TurnSummary | null, progress: TurnProgress,
   if (!turn) return 'No hay turno abierto.'
   if (progress.narrating) return 'El DM está narrando...'
   if (turn.status === 'resolved') return 'Turno resuelto.'
-  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa; cualquiera puede cerrar.' : 'Todos respondieron; cualquiera puede cerrar el turno.'
-  return `Faltan: ${progress.pending.map(nameOf).join(', ')}.`
+  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa: cierra el turno y el DM narra.' : 'Todos respondieron: cierra el turno y el DM narra.'
+  return `Faltan por responder: ${progress.pending.map(nameOf).join(', ')}.`
 }
 
 /** La frase con el numero de turno delante, como la muestran las dos apps. */

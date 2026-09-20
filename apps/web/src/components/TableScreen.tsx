@@ -1,9 +1,9 @@
 'use client'
 
-import { ApiError, memberOf, randomKey, type ApiClient, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
+import { ApiError, memberOf, randomKey, type ApiClient, type PackCharacter, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, suggestedSessionCode, tableSubtitle, tableTitle, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, narratorLabel, narratorsToFlag, packSpeakerResolver, remoteCharacterNames, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
@@ -12,7 +12,9 @@ import { storage, type StoredUser } from '../lib/storage'
 import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
+import { CharacterPicker } from './CharacterPicker'
 import { HostPanel } from './HostPanel'
+import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
 import { TtsBar } from './TtsBar'
 import { TurnPanel } from './TurnPanel'
@@ -50,6 +52,25 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [projections, setProjections] = useState<{ seq: number | null; own: CharacterState | undefined; world: Record<string, CharacterState> | undefined }>({ seq: null, own: undefined, world: undefined })
   const [existingCodes, setExistingCodes] = useState<Array<{ id: string; code: string; status: string; openedSeq: number | null; closedSeq: number | null }>>([])
 
+  // Quien entra sin personaje lo elige aqui, entre los que queden libres; el
+  // primero que llega se lo queda. Los de un pack remoto los da la API.
+  const [choosing, setChoosing] = useState<string | null>(null)
+  const [remote, setRemote] = useState<PackCharacter[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackCharacters(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemote(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const remoteNamesAll = useMemo(() => ({ ...remoteNames, ...remoteCharacterNames(remote) }), [remoteNames, remote])
+
   const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
   const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
@@ -77,7 +98,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   }, [screen])
   const turn = snapshot?.turn ?? null
   const progress = useMemo(() => turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }), [turn, viewer.role, viewer.characterId])
-  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
+  const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNamesAll, id), [pack, remoteNamesAll])
   const headSeq = snapshot?.campaign.headSeq ?? 0
   const sessionCode = snapshot?.session?.code ?? null
 
@@ -365,6 +386,38 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       </footer>
 
       <div className="table-footer hide-on-screen">
+        {viewer.characterId === null && snapshot !== null ? (
+          <section className="card stack" aria-label="Elige tu personaje">
+            <div className="label" style={{ marginTop: 0 }}>
+              Elige tu personaje
+            </div>
+            <p className="hint">Los que ya juega alguien no se pueden elegir: el primero que llega se lo queda. Sin personaje puedes leer, pero no responder.</p>
+            {pack ? (
+              <CharacterPicker characters={freeCharacters(pack, table.members)} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} />
+            ) : remote.length > 0 ? (
+              <RemoteCharacterPicker packId={table.packId} characters={freeRemoteCharacters(remote, table.members)} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} />
+            ) : (
+              <p className="hint">Cargando los personajes del pack...</p>
+            )}
+            <div className="row">
+              <button
+                type="button"
+                className="btn primary"
+                disabled={!choosing || busy}
+                onClick={() => {
+                  if (!choosing) return
+                  void act(async () => {
+                    await client.setOwnerCharacter(table.id, user.id, choosing)
+                    onTableChanged()
+                    refresh()
+                  }, 'No se pudo elegir el personaje.')
+                }}
+              >
+                Jugar con este personaje
+              </button>
+            </div>
+          </section>
+        ) : null}
         {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} />
       </div>
