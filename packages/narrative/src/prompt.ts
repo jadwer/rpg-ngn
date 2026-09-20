@@ -89,8 +89,8 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
   {"type":"world_event","payload":{"note":"Tomás cierra la posada y apaga las velas"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
-- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es cierta, probable o dudosa):
-  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"probable","method":"Tomás se contradice al hablar de la última noche"}}
+- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
+  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
@@ -129,7 +129,7 @@ Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos 
 {"type":"inventory_change","actor":"character:calder","effects":[{"op":"gain","item":"llave-de-hierro","holder":"character:calder"}]}
 {"type":"world_event","payload":{"note":"Tomás cierra la posada"}}
 {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta y se guarda la llave"}}
-{"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"probable","method":"Tomás se contradice"}}
+{"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
 Si dudas de cómo llenar un evento, no lo propongas.`
 
@@ -174,8 +174,8 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"world_event","payload":{"note":"La guardia del pabellón de jade se dobla al anochecer"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
-- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es cierta, probable o dudosa):
-  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"probable","method":"Tomás se contradice al hablar de la última noche"}}
+- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
+  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
@@ -192,7 +192,7 @@ const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "pla
 {"type":"inventory_change","actor":"character:kogen","effects":[{"op":"gain","item":"carta-lacrada","holder":"character:kogen"}]}
 {"type":"world_event","payload":{"note":"Se dobla la guardia del pabellón"}}
 {"type":"npc_action","actor":"npc:jinshi","payload":{"text":"Se retira sin despedirse"}}
-{"type":"discovery","targets":["character:shiho"],"payload":{"fact":"fact:la-tetera-cambio","confidence":"probable","method":"la marca del asa no coincide"}}
+{"type":"discovery","targets":["character:shiho"],"payload":{"fact":"fact:la-tetera-cambio","confidence":"uncertain","method":"la marca del asa no coincide"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:jinshi","with":"character:shiho","delta":1}]}
 Si dudas de cómo llenar un evento, no lo propongas.`
 
@@ -230,8 +230,8 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"world_event","payload":{"note":"Se apagan las lámparas del salón grande; solo quedan las velas del pasillo"}}
 - Lo que hace un NPC delante de la mesa y conviene recordar (solo NPCs del pack; la narración va aparte, en su bloque):
   {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta de la capilla y se guarda la llave"}}
-- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es cierta, probable o dudosa):
-  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"probable","method":"Tomás se contradice al hablar de la última noche"}}
+- Algo que un personaje averigua de verdad en la escena ("fact:" en kebab-case; "confidence" es known cuando lo ha visto o se lo han dicho claro, uncertain cuando lo deduce, conflicting cuando choca con lo que creia):
+  {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
 - Un secreto de la capa del DM que la escena revela de verdad a la party presente (va ANTES del bloque que lo cuenta; "secretId" es el id de la lista):
@@ -249,7 +249,7 @@ const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "p
 {"type":"inventory_change","actor":"character:margot","effects":[{"op":"gain","item":"rosa-blanca","holder":"character:margot"}]}
 {"type":"world_event","payload":{"note":"Se apagan las lámparas del salón"}}
 {"type":"npc_action","actor":"npc:julien","payload":{"text":"Se lleva a la marquesa a bailar"}}
-{"type":"discovery","targets":["character:camille"],"payload":{"fact":"fact:julien-prometio-a-otra","confidence":"cierta","method":"lo oye decir la misma frase dos veces"}}
+{"type":"discovery","targets":["character:camille"],"payload":{"fact":"fact:julien-prometio-a-otra","confidence":"known","method":"lo oye decir la misma frase dos veces"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:julien","with":"character:camille","delta":-1}]}
 Estados de vínculo: interes, atraccion, confianza, quimica, decepcion, desconfianza. Si dudas de cómo llenar un evento, no lo propongas.`
 

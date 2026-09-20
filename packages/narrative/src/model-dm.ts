@@ -130,7 +130,9 @@ const DiscoveryEvent = z.strictObject({
   targets: z.array(CharacterRef).min(1),
   payload: z.strictObject({
     fact: z.string().regex(/^fact:[a-z0-9]+(?:-[a-z0-9]+)*$/),
-    confidence: z.enum(['cierta', 'probable', 'dudosa']),
+    // El vocabulario del dominio (content/event.ts), no uno inventado: el
+    // reductor guarda este valor tal cual en lo que sabe el personaje.
+    confidence: z.enum(['known', 'uncertain', 'conflicting', 'unknown']),
     method: z.string().min(1),
   }),
 })
