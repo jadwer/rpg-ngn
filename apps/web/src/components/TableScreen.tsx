@@ -14,6 +14,7 @@ import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
 import { HostPanel } from './HostPanel'
+import { PersonaPanel } from './PersonaPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
 import { TtsBar } from './TtsBar'
@@ -423,6 +424,19 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               {ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
             </button>
           </div>
+        ) : null}
+        {viewer.characterId !== null && snapshot !== null ? (
+          <PersonaPanel
+            characterName={nameOf(viewer.characterId)}
+            saved={snapshot.viewer?.persona ?? null}
+            busy={busy}
+            onSave={(persona) =>
+              act(async () => {
+                await client.setPersona(table.id, viewer.memberId, persona)
+                refresh()
+              }, 'No se pudo guardar la personalidad.')
+            }
+          />
         ) : null}
         {viewer.characterId === null && snapshot !== null ? (
           <section className="card stack" aria-label="Elige tu personaje">

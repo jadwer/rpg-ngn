@@ -50,6 +50,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   invite(tableId: string | number, userId: string | number, characterId: string | null): Promise<TableMemberRecord>
   /** "Me tengo que ir" / "he vuelto" (el propio miembro) o marcar ausente a otro (solo el anfitrion). */
   setPresence(tableId: string | number, memberId: string | number, present: boolean): Promise<void>
+  /** La personalidad del propio personaje (solo el miembro dueño); null o vacio la borra. */
+  setPersona(tableId: string | number, memberId: string | number, persona: string | null): Promise<void>
   /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
@@ -138,6 +140,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async setPresence(tableId, memberId, present) {
       await request(`/api/v1/tables/${tableId}/members/${memberId}/presence`, { method: 'POST', body: { present } })
+    },
+
+    async setPersona(tableId, memberId, persona) {
+      await request(`/api/v1/tables/${tableId}/members/${memberId}/persona`, { method: 'POST', body: { persona } })
     },
 
     async listFriendships() {

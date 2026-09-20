@@ -755,6 +755,45 @@ h3 {
   font-size: 1.05rem;
 }
 
+/* Tu personaje: la personalidad escrita por el jugador, plegable como el mando del anfitrion. */
+.persona {
+  border-top: 1px solid var(--border);
+}
+
+.persona .head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.persona .head .t {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+}
+
+.persona .head .s {
+  flex: 1;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
+.persona .body {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 16px 12px;
+}
+
 /* Tarjeta de inicio: ocupa la mesa mientras no hay sesion abierta. */
 .start-card {
   max-width: 560px;

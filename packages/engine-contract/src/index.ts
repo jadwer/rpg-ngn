@@ -113,6 +113,8 @@ export const TurnBudget = z.strictObject({
 export const TurnContext = z.strictObject({
   premise: z.string().max(4000).optional(),
   sessionNote: z.string().max(1000).optional(),
+  /** Personalidad escrita por cada jugador presente, por id de personaje. Texto del usuario, delimitado en el contexto. */
+  personas: z.record(KebabId, z.string().max(600)).optional(),
 })
 export type TurnContext = z.infer<typeof TurnContext>
 

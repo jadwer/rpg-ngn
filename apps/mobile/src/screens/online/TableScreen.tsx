@@ -8,6 +8,7 @@ import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
 import { HostPanel } from '../../components/HostPanel'
+import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
 import { TurnPanel } from '../../components/TurnPanel'
 import { useTts } from '../../hooks/useTts'
@@ -324,6 +325,19 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             }}
           />
         </View>
+      ) : null}
+      {viewer.characterId !== null && snapshot !== null ? (
+        <PersonaPanel
+          characterName={nameOf(viewer.characterId)}
+          saved={snapshot.viewer?.persona ?? null}
+          busy={busy}
+          onSave={(persona) =>
+            act(async () => {
+              await client.setPersona(table.id, ownMember.id, persona)
+              refresh()
+            }, 'No se pudo guardar la personalidad.')
+          }
+        />
       ) : null}
       {viewer.characterId === null && snapshot !== null ? (
         <View style={styles.choose}>

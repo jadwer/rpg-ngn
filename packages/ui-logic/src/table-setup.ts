@@ -192,3 +192,17 @@ export function startCard(input: { hasSession: boolean; host: boolean; hostName:
     action: null,
   }
 }
+
+/** Tope de la personalidad escrita por el jugador; el mismo que valida la API. */
+export const PERSONA_MAX = 600
+
+/** Las seis preguntas que la mesa sugiere para escribir la personalidad; sirven de placeholder. */
+export const PERSONA_TEMPLATE = 'Cómo soy: ...\nLo que busco: ...\nLo que no soporto: ...\nCómo coqueteo (o cómo trato a la gente): ...\nMi defecto: ...\nMi secreto: ...'
+
+/** La personalidad lista para enviar: recortada, null si esta vacia, o un aviso si se pasa del tope. */
+export function cleanPersona(text: string): { persona: string | null; error: string | null } {
+  const value = text.replace(/\r\n/g, '\n').trim()
+  if (value === '') return { persona: null, error: null }
+  if (value.length > PERSONA_MAX) return { persona: null, error: `Demasiado largo: ${value.length} caracteres, y caben ${PERSONA_MAX}.` }
+  return { persona: value, error: null }
+}

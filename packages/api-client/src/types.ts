@@ -117,6 +117,8 @@ export interface TableViewer {
   memberId: number
   role: MemberRole
   characterId: string | null
+  /** Personalidad que este jugador escribio para su personaje; solo la ve el y el DM. */
+  persona?: string | null
 }
 
 export interface TableState {

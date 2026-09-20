@@ -6,7 +6,9 @@ import { characterName, packCharacters, sessionList } from './pack.js'
 import {
   acceptedFriends,
   cleanTableName,
+  cleanPersona,
   emptyTableText,
+  PERSONA_MAX,
   startCard,
   freeCharacters,
   friendshipWith,
@@ -180,5 +182,15 @@ describe('startCard', () => {
 
   it('con dados en la mesa física, el paso de dados cambia', () => {
     expect(startCard({ ...base, host: false, dice: 'table' })!.steps[2]).toContain('mesa física')
+  })
+})
+
+describe('cleanPersona', () => {
+  it('recorta, vacio borra, y avisa si se pasa del tope', () => {
+    expect(cleanPersona('  Sarcástica.\r\nFinge que no.  ')).toEqual({ persona: 'Sarcástica.\nFinge que no.', error: null })
+    expect(cleanPersona('   ')).toEqual({ persona: null, error: null })
+    const long = cleanPersona('x'.repeat(PERSONA_MAX + 1))
+    expect(long.persona).toBeNull()
+    expect(long.error).toContain('Demasiado largo')
   })
 })
