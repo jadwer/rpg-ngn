@@ -792,23 +792,85 @@ h3 {
   white-space: nowrap;
 }
 
-.mapa .body {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 16px 12px;
+.mapa .head:hover .muted,
+.mapa .head:focus-visible .muted {
+  color: var(--gold);
+}
+
+/* El mapa se abre a pantalla completa: dentro del pie de la mesa quedaba
+   cortado en escritorio, porque ese pie esta limitado al 55% del alto. */
+.mapa-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(10, 8, 6, 0.86);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.mapa-modal .caja {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: min(1200px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mapa-modal header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mapa-modal header .titulos {
+  flex: 1;
+  min-width: 0;
+}
+
+.mapa-modal header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.mapa-modal header .hint {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapa-modal footer {
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.mapa-modal footer .hint {
+  margin: 0;
 }
 
 .mapa .lienzo {
   position: relative;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   overflow: hidden;
   line-height: 0;
+  /* La imagen manda el tamaño: se centra y cabe entera, sin recortes. */
+  align-self: center;
+  max-width: 100%;
+  max-height: calc(100dvh - 190px);
+  aspect-ratio: 3 / 2;
 }
 
 .mapa .lienzo img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
