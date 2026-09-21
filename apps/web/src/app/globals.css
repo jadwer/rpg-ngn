@@ -861,7 +861,8 @@ h3 {
    se ajusta a lo que ocupa la imagen (inline-block), asi un porcentaje de
    posicion cae donde debe. Con `aspect-ratio` el alto se forzaba y el mapa
    salia ampliado y cortado. */
-.mapa .lienzo {
+.mapa .lienzo,
+.mapa-modal .lienzo {
   position: relative;
   /* `fit-content` hace que la caja mida lo que la imagen ya escalada, para
      que los puntos en porcentaje caigan sobre ella y no sobre el hueco. */
@@ -873,7 +874,8 @@ h3 {
   overflow: hidden;
 }
 
-.mapa .lienzo img {
+.mapa .lienzo img,
+.mapa-modal .lienzo img {
   display: block;
   /* Cabe entera: limitada por el ancho de la caja y por el alto de la
      ventana, descontando cabecera y pie del modal. */
@@ -884,7 +886,8 @@ h3 {
   object-fit: contain;
 }
 
-.mapa .caminos {
+.mapa .caminos,
+.mapa-modal .caminos {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -892,20 +895,23 @@ h3 {
   pointer-events: none;
 }
 
-.mapa .caminos line {
+.mapa .caminos line,
+.mapa-modal .caminos line {
   /* Doble trazo: uno oscuro debajo para que se vea sobre el marmol claro
      del salon, y el dorado encima. Sin esto los caminos desaparecian. */
   stroke: rgba(23, 18, 14, 0.55);
   stroke-width: 0.9;
 }
 
-.mapa .caminos line.oro {
+.mapa .caminos line.oro,
+.mapa-modal .caminos line.oro {
   stroke: rgba(230, 198, 125, 0.9);
   stroke-width: 0.45;
   stroke-dasharray: 1.6 1.4;
 }
 
-.mapa .pin {
+.mapa .pin,
+.mapa-modal .pin {
   position: absolute;
   transform: translate(-50%, -50%);
   display: flex;
@@ -915,7 +921,8 @@ h3 {
   line-height: 1.2;
 }
 
-.mapa .pin .punto {
+.mapa .pin .punto,
+.mapa-modal .pin .punto {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -924,12 +931,14 @@ h3 {
   box-shadow: 0 0 0 1px var(--gold-dim);
 }
 
-.mapa .pin.con-gente .punto {
+.mapa .pin.con-gente .punto,
+.mapa-modal .pin.con-gente .punto {
   background: var(--accent-bright);
   box-shadow: 0 0 0 1px var(--accent-bright);
 }
 
-.mapa .pin .etiqueta {
+.mapa .pin .etiqueta,
+.mapa-modal .pin .etiqueta {
   font-size: 0.72rem;
   color: var(--ink);
   background: rgba(23, 18, 14, 0.82);
@@ -938,13 +947,16 @@ h3 {
   white-space: nowrap;
 }
 
-.mapa .pin .gente {
+.mapa .pin .gente,
+.mapa-modal .pin .gente {
   display: flex;
   gap: 2px;
 }
 
 .mapa .pin .gente img,
-.mapa .pin .gente b {
+.mapa .pin .gente b,
+.mapa-modal .pin .gente img,
+.mapa-modal .pin .gente b {
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -959,12 +971,15 @@ h3 {
 
 /* En pantallas chicas las etiquetas se comen el mapa: quedan los puntos y la gente. */
 @media (max-width: 760px) {
-  .mapa .pin .etiqueta {
+  .mapa .pin .etiqueta,
+.mapa-modal .pin .etiqueta {
     display: none;
   }
 
   .mapa .pin .gente img,
-  .mapa .pin .gente b {
+  .mapa .pin .gente b,
+  .mapa-modal .pin .gente img,
+  .mapa-modal .pin .gente b {
     width: 20px;
     height: 20px;
   }
