@@ -856,22 +856,26 @@ h3 {
   margin: 0;
 }
 
+/* La imagen manda el tamaño y los puntos se posan sobre ella: el contenedor
+   se ajusta a lo que ocupa la imagen (inline-block), asi un porcentaje de
+   posicion cae donde debe. Con `aspect-ratio` el alto se forzaba y el mapa
+   salia ampliado y cortado. */
 .mapa .lienzo {
   position: relative;
-  overflow: hidden;
-  line-height: 0;
-  /* La imagen manda el tamaño: se centra y cabe entera, sin recortes. */
+  display: inline-block;
   align-self: center;
+  line-height: 0;
   max-width: 100%;
-  max-height: calc(100dvh - 190px);
-  aspect-ratio: 3 / 2;
+  overflow: hidden;
 }
 
 .mapa .lienzo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
   display: block;
+  max-width: 100%;
+  /* Cabe entera en la ventana descontando cabecera y pie del modal. */
+  max-height: calc(100dvh - 200px);
+  width: auto;
+  height: auto;
 }
 
 .mapa .caminos {
