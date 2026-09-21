@@ -812,6 +812,7 @@ h3 {
 
 .mapa-modal .caja {
   background: var(--panel);
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -862,20 +863,25 @@ h3 {
    salia ampliado y cortado. */
 .mapa .lienzo {
   position: relative;
-  display: inline-block;
+  /* `fit-content` hace que la caja mida lo que la imagen ya escalada, para
+     que los puntos en porcentaje caigan sobre ella y no sobre el hueco. */
+  width: fit-content;
+  height: fit-content;
+  max-width: 100%;
   align-self: center;
   line-height: 0;
-  max-width: 100%;
   overflow: hidden;
 }
 
 .mapa .lienzo img {
   display: block;
+  /* Cabe entera: limitada por el ancho de la caja y por el alto de la
+     ventana, descontando cabecera y pie del modal. */
   max-width: 100%;
-  /* Cabe entera en la ventana descontando cabecera y pie del modal. */
-  max-height: calc(100dvh - 200px);
+  max-height: calc(100dvh - 210px);
   width: auto;
   height: auto;
+  object-fit: contain;
 }
 
 .mapa .caminos {
