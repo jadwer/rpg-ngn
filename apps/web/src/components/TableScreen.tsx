@@ -1,6 +1,6 @@
 'use client'
 
-import { ApiError, memberOf, randomKey, type ApiClient, type PackCharacter, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
+import { ApiError, memberOf, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, remoteCharacterNames, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
@@ -14,6 +14,7 @@ import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
 import { HostPanel } from './HostPanel'
+import { MapPanel } from './MapPanel'
 import { PersonaPanel } from './PersonaPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
@@ -71,6 +72,21 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     }
   }, [client, pack, table.packId, table.packVersion])
   const remoteNamesAll = useMemo(() => ({ ...remoteNames, ...remoteCharacterNames(remote) }), [remoteNames, remote])
+
+  // El mapa del pack, si trae alguno: la imagen y los lugares posados.
+  const [maps, setMaps] = useState<PackMapView[]>([])
+  useEffect(() => {
+    let alive = true
+    void client.listPackMaps(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setMaps(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.packId, table.packVersion])
 
   // Si el pack de esta mesa pide personalidad escrita por el jugador (La
   // Mascarada). No todos: en el piloto la ficha ya trae bio y meta, y pedir
@@ -441,6 +457,20 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               {ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
             </button>
           </div>
+        ) : null}
+        {maps.length > 0 ? (
+          <MapPanel
+            packId={table.packId}
+            map={maps[0] ?? null}
+            world={projections.world}
+            party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
+            nameOf={nameOf}
+            portraitOf={(id) => {
+              const local = pack?.characters.get(id)?.portrait
+              if (local) return `/packs/pilot/${local}`
+              return packPortraitUrl(table.packId, remote.find((c) => c.id === id)?.portrait)
+            }}
+          />
         ) : null}
         {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
           <PersonaPanel

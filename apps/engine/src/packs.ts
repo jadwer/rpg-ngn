@@ -1,7 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadPack, type FileSource, type LoadedPack } from '@rpg-ngn/content'
-import type { PackCharacter, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
+import type { PackCharacter, PackMapView, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
 
 /**
  * Los packs oficiales viven en disco junto al engine (`content/packs` del
@@ -79,6 +79,26 @@ export class PackStore {
     // `packId` viene de la URL: se limita a un id de pack, sin separadores.
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(packId)) return null
     return readFile(join(this.root, packId, 'portraits', file)).catch(() => null)
+  }
+
+  /** La imagen de un mapa del pack, como los retratos. */
+  async mapImage(packId: string, file: string): Promise<Buffer | null> {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(packId)) return null
+    return readFile(join(this.root, packId, 'maps', file)).catch(() => null)
+  }
+
+  /** Los mapas de un pack con sus lugares ya posados, para pintarlos. */
+  async maps(ref: PackRef): Promise<PackMapView[]> {
+    const pack = await this.get(ref)
+    return [...pack.maps.values()].map((map) => ({
+      id: map.id,
+      name: map.name,
+      image: map.image,
+      description: map.description ?? null,
+      places: [...pack.locations.values()]
+        .filter((l) => l.map === map.id && l.x !== undefined && l.y !== undefined)
+        .map((l) => ({ id: l.id, name: l.name, x: l.x as number, y: l.y as number, connections: [...l.connections] })),
+    }))
   }
 
   get(ref: PackRef): Promise<LoadedPack> {

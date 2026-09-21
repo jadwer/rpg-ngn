@@ -110,6 +110,8 @@ export interface SettingsApi {
   listPacks(): Promise<PackOption[]>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
+  /** Los mapas de un pack, con los lugares ya posados sobre la imagen. */
+  listPackMaps(packId: string, version: string): Promise<PackMapView[]>
   /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
   listCredits(): Promise<{ packs: CreditPack[]; balance: CreditBalance; publishableKey: string }>
   /** Arranca la compra: devuelve el clientSecret para confirmar contra Stripe. Los turnos los suma el webhook. */
@@ -142,6 +144,11 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPackCharacters(packId, version) {
       const { data } = await request<{ data: PackCharacter[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/characters`)
+      return data.data
+    },
+
+    async listPackMaps(packId, version) {
+      const { data } = await request<{ data: PackMapView[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/maps`)
       return data.data
     },
 
@@ -210,6 +217,23 @@ export function withProvider(settings: Record<string, unknown> | null | undefine
 }
 
 /** URL del retrato de un pack servido por la API (los del piloto van empaquetados). */
+/** Un mapa del pack con sus lugares posados, para pintarlo. */
+export interface PackMapView {
+  id: string
+  name: string
+  /** Ruta dentro del pack; se pinta con `packMapUrl`. */
+  image: string
+  description: string | null
+  places: Array<{ id: string; name: string; x: number; y: number; connections: string[] }>
+}
+
+/** La imagen de un mapa del pack, servida por la API como los retratos. */
+export function packMapUrl(packId: string, image: string | null | undefined): string | null {
+  if (!image) return null
+  const file = image.split('/').pop()
+  return file ? `/api/v1/packs/${encodeURIComponent(packId)}/maps/${encodeURIComponent(file)}` : null
+}
+
 export function packPortraitUrl(packId: string, portrait: string | null | undefined): string | null {
   if (!portrait) return null
   // El pack guarda `portraits/shiho.jpg`; la ruta sirve solo el nombre.

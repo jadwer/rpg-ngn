@@ -69,6 +69,24 @@ export function createEngine(options: EngineOptions): Hono {
     return c.body(bytes as unknown as ArrayBuffer)
   })
 
+  app.get('/v1/packs/:id/:version/maps', async (c) => {
+    const maps = await options.packs.maps({ id: c.req.param('id'), version: c.req.param('version') })
+    return c.json({ maps })
+  })
+
+  app.get('/v1/packs/:id/maps/:file', async (c) => {
+    const file = c.req.param('file')
+    if (!/^[a-z0-9][a-z0-9._-]*\.(jpg|jpeg|png|webp)$/i.test(file)) {
+      return c.json({ error: 'nombre de mapa invalido' }, 400)
+    }
+    const bytes = await options.packs.mapImage(c.req.param('id'), file)
+    if (!bytes) return c.json({ error: 'mapa no encontrado' }, 404)
+    const type = file.toLowerCase().endsWith('.png') ? 'image/png' : file.toLowerCase().endsWith('.webp') ? 'image/webp' : 'image/jpeg'
+    c.header('Content-Type', type)
+    c.header('Cache-Control', 'public, max-age=86400')
+    return c.body(bytes as unknown as ArrayBuffer)
+  })
+
   app.post('/v1/turns/resolve', async (c) => {
     const parsed = ResolveTurnRequest.safeParse(await c.req.json())
     if (!parsed.success) {

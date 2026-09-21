@@ -3,4 +3,4 @@ export { ApiError, NetworkError, defaultMessage, describeError, type ValidationE
 export { normalizeBaseUrl, type FetchLike, type HttpResponse, type HttpRequestInit, type TokenProvider } from './http.js'
 export type * from './types.js'
 export { accountApi, type AccountApi, type RegisterInput, type RegisterResult } from './account.js'
-export { packPortraitUrl, providerChoice, settingsApi, withProvider, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, type CreditBalance, type CreditPack, type CreditPurchase, type PackCharacter, type PackOption, type SettingsApi } from './settings.js'
+export { packMapUrl, packPortraitUrl, providerChoice, settingsApi, withProvider, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, type CreditBalance, type CreditPack, type CreditPurchase, type PackCharacter, type PackMapView, type PackOption, type SettingsApi } from './settings.js'

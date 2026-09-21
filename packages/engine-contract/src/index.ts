@@ -221,6 +221,28 @@ export type TurnBlock = z.infer<typeof TurnBlock>
  * Un pack que este servidor puede jugar. La plataforma lo ofrece al crear
  * una mesa; hasta ahora la lista vivia escrita a mano en cada cliente.
  */
+/**
+ * Un mapa del pack listo para pintar: la imagen y los lugares posados sobre
+ * ella, en porcentaje. No es un tablero: las coordenadas dicen donde cae
+ * cada lugar, no donde se coloca un personaje.
+ */
+export const PackMapView = z.strictObject({
+  id: KebabId,
+  name: z.string().min(1),
+  image: z.string().min(1),
+  description: z.string().nullable(),
+  places: z.array(
+    z.strictObject({
+      id: KebabId,
+      name: z.string().min(1),
+      x: z.number(),
+      y: z.number(),
+      connections: z.array(KebabId),
+    }),
+  ),
+})
+export type PackMapView = z.infer<typeof PackMapView>
+
 export const PackSummary = z.strictObject({
   id: KebabId,
   version: z.string().min(1),
