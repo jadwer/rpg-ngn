@@ -60,6 +60,59 @@ Quest Portal; si puede sentarse en rpg-ngn.
    el propio Alchemy presume de no centrarse en mapas. No entrar aqui sin
    una razon mejor que "los demas lo tienen".
 
+## Del segundo mockup (img/idea_web.png e img/ideas_movil.png, 21-09)
+
+Gabino encargo una segunda tanda de pantallas. Lo aprovechable, por orden de
+lo que mas cambia la partida:
+
+6. **La ficha del personaje, siempre visible.** En el mockup vive en una
+   columna derecha fija; hoy esta detras de un boton "Fichas" que abre un
+   panel, y en una partida nadie lo abre porque pierde el hilo de la
+   narracion. **Condicion para construirlo: la ficha la decide el ruleset.**
+   El mockup pinta puntos de golpe, clase de armadura y seis
+   caracteristicas, que es D&D; en La Mascarada hay prestigio, escandalo y
+   vinculos, y en la corte credito, sospecha y pistas. Copiar la ficha tal
+   cual deja el panel vacio o mintiendo en dos de los tres rulesets.
+7. **Jugadores con estado, no una linea de texto.** "3/4 listos" con una
+   fila por persona y su marca (Listo, Escribiendo, Pensando) en vez del
+   actual "Faltan por responder: Zahira, Calder". Hace que la espera del DM
+   se sienta acompañada. **"Escribiendo" no existe hoy**: hace falta que el
+   cliente avise mientras se teclea, parecido a la bandera de narrador que
+   ya existe. Es barato y se nota mucho.
+8. **Historial de la sesion en tarjetas.** Una tira al pie con los turnos
+   anteriores y su titulo ("Turno 2: la discusion en la taberna"). Hoy, para
+   ver que paso hace media hora, hay que subir por el scroll; en una sesion
+   de tres horas eso es un problema real.
+9. **Cabecera que dice donde estas.** "Sesion: La Posada del Cuervo,
+   Capitulo 1, Rumores y puertas cerradas" en vez del subtitulo tecnico de
+   hoy. Barato: el pack ya trae titulo de sesion.
+
+**Lo que NO hay que copiar de ese mockup**, y conviene dejarlo escrito para
+no rediscutirlo:
+
+- **Ficha de D&D** (ver punto 6): contradice el eje agnostico del motor.
+- **"Mensaje al DM (privado)"**: no es un boton, es una decision de diseño.
+  Toda declaracion ya es privada hasta que el DM narra. Un canal secreto con
+  una IA que tiene lint de secretos obliga a decidir que pasa cuando alguien
+  le pide por privado algo que revelaria un secreto a la mesa.
+- **"Abandonar sesion" en rojo y arriba a la derecha**: es el color de
+  destructivo de la propia paleta, en el sitio donde la gente busca cerrar
+  cosas. Ya existe "Me tengo que ir", que hace lo correcto (el DM aparta al
+  personaje sin matarlo). Ese boton invita a salirse por error.
+- **"D&D 5e" y "Faerun (Custom)" en la cabecera**: Faerun es de Wizards of
+  the Coast y docs/07 solo admite contenido original o licenciado. En un
+  mockup da igual; en una captura publica es un problema legal.
+
+**Lo que falta en las dos imagenes y es justo lo que arruino la sesion del
+20-09: los dados.** No aparece ninguna tirada ni sitio donde se vea caer un
+dado. Cualquier rediseño tiene que reservarles un lugar visible.
+
+Juicio de conjunto: el mockup es **buena direccion visual y mala
+especificacion funcional**. Esta dibujado mirando a Alchemy y Quest Portal,
+que son VTT con director humano, y arrastra sus supuestos. Como paleta,
+jerarquia y disposicion, mejora lo que hay. Como lista de funciones, mete
+semanas de trabajo en cosas que contradicen el motor.
+
 ## Antes de elegir de esta lista
 
 Gabino decidio **medir con gente real primero**: poner rpg-ngn delante de
