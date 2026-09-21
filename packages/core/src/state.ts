@@ -25,6 +25,14 @@ export interface CharacterState {
   inventory: InventoryItem[]
   fortune: Fortune | null
   memoriesRecovered: number
+  /**
+   * Donde esta: el id de un lugar del pack, o null si el DM no lo ha
+   * situado o anda de camino. No depende del sistema de juego (un
+   * personaje esta en el comedor tanto en la corte como en la mina), asi
+   * que vive aqui y no en `custom`. Opcional para que los snapshots
+   * anteriores sigan siendo validos.
+   */
+  location?: string | null
   /** Campos que un ruleset concreto necesite y core no modela. */
   custom: Record<string, unknown>
 }

@@ -51,7 +51,7 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
   const party = session?.party ?? []
 
   const sections = [
-    worldLayer(ctx, budget),
+    worldLayer(ctx, budget, party),
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
     dmLayer(ctx, party, budget),
@@ -93,7 +93,7 @@ function describeReveal(secret: Secret): string {
 }
 
 // Capa a: mundo y premisa.
-function worldLayer(ctx: DMTurnContext, budget: ContextBudget): string {
+function worldLayer(ctx: DMTurnContext, budget: ContextBudget, party: string[] = []): string {
   const { manifest } = ctx.pack
   const lines: string[] = ['# Mundo y premisa', '']
   lines.push(`Campaña: ${manifest.name}${manifest.tagline ? ` (${manifest.tagline})` : ''}`)
@@ -123,8 +123,25 @@ function worldLayer(ctx: DMTurnContext, budget: ContextBudget): string {
 
   const locations = [...ctx.pack.locations.values()]
   if (locations.length) {
-    lines.push('', 'Lugares del pack:')
-    for (const location of locations) lines.push(`- ${location.name} (location:${location.id}): ${location.newcomerView}`)
+    // Con `connections` el DM sabe que caminos existen: del comedor no se
+    // pasa a la biblioteca sin cruzar el salon. Y con quien esta en cada
+    // sitio puede narrar quien se cruza con quien.
+    const dondeEsta = new Map<string, string[]>()
+    for (const [id, character] of Object.entries(ctx.state.world.characters)) {
+      if (!character.location) continue
+      const nombre = ctx.pack.characters.get(id)?.name ?? id
+      dondeEsta.set(character.location, [...(dondeEsta.get(character.location) ?? []), nombre])
+    }
+    lines.push('', 'Lugares del pack (con los caminos que salen de cada uno y quien esta alli):')
+    for (const location of locations) {
+      const salidas = location.connections.length ? ` Se llega desde aqui a: ${location.connections.join(', ')}.` : ''
+      const gente = dondeEsta.get(location.id)
+      lines.push(`- ${location.name} (location:${location.id}): ${location.newcomerView}${salidas}${gente ? ` AQUI: ${gente.join(', ')}.` : ''}`)
+    }
+    const sinSitio = Object.entries(ctx.state.world.characters)
+      .filter(([id, c]) => c.location === null && party.includes(id))
+      .map(([id]) => ctx.pack.characters.get(id)?.name ?? id)
+    if (sinSitio.length) lines.push(`De camino o fuera de escena: ${sinSitio.join(', ')}.`)
   }
 
   const npcs = [...ctx.pack.npcs.values()]
@@ -359,6 +376,8 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
       return `escándalo sobre ${target} ${Number(effect['delta']) < 0 ? 'baja' : 'sube'} ${Math.abs(Number(effect['delta']))}`
     case 'bond':
       return `${target} con ${who(String(effect['with']))}: ${String(effect['state'])}`
+    case 'move':
+      return effect['to'] ? `${target} va a ${refId(String(effect['to']))}` : `${target} sale de escena`
     default:
       return `${op} sobre ${target}`
   }

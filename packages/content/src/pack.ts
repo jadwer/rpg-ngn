@@ -35,6 +35,8 @@ export const PackManifest = z.strictObject({
   characters: z.array(KebabId).default([]),
   npcs: z.array(KebabId).default([]),
   locations: z.array(KebabId).default([]),
+  /** Mapas de region sobre los que se posan los lugares (map.ts). */
+  maps: z.array(KebabId).default([]),
   quests: z.array(KebabId).default([]),
   factions: z.array(KebabId).default([]),
   sessions: z.array(z.string().regex(/^\d{3}$/)).default([]),

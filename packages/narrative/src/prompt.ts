@@ -98,6 +98,9 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Cuando un personaje cambia de lugar, dilo con "move" en ese mismo turno: es lo que hace que la mesa sepa quién está dónde y quién se cruza con quién. "to" es el id de un lugar de la lista de arriba, y solo puede ir a uno conectado con el suyo; null si va de camino o sale de escena:
+  {"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
+  {"type":"state_change","effects":[{"op":"move","who":"character:calder","to":null}]}
 - Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
   {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
 - Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
@@ -139,6 +142,7 @@ Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos 
 {"type":"world_event","payload":{"note":"Tomás cierra la posada"}}
 {"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo"}}
 {"type":"quest_update","payload":{"quest":"quest:la-mina","objective":"llegar-al-pueblo"}}
+{"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
 {"type":"npc_action","actor":"npc:tomas","payload":{"text":"Cierra la puerta y se guarda la llave"}}
 {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
@@ -194,6 +198,9 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Cuando un personaje cambia de lugar, dilo con "move" en ese mismo turno: es lo que hace que la mesa sepa quién está dónde y quién se cruza con quién. "to" es el id de un lugar de la lista de arriba, y solo puede ir a uno conectado con el suyo; null si va de camino o sale de escena:
+  {"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
+  {"type":"state_change","effects":[{"op":"move","who":"character:calder","to":null}]}
 - Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
   {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
 - Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
@@ -213,6 +220,7 @@ const INTRIGUE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "pla
 {"type":"world_event","payload":{"note":"Se dobla la guardia del pabellón"}}
 {"type":"scene_started","worldTime":"Valdoria, a la mañana siguiente","payload":{"text":"Amanece sobre el pueblo"}}
 {"type":"quest_update","payload":{"quest":"quest:el-te-envenenado","objective":"reconstruir-la-bandeja"}}
+{"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
 {"type":"npc_action","actor":"npc:jinshi","payload":{"text":"Se retira sin despedirse"}}
 {"type":"discovery","targets":["character:shiho"],"payload":{"fact":"fact:la-tetera-cambio","confidence":"uncertain","method":"la marca del asa no coincide"}}
 {"type":"state_change","effects":[{"op":"relationship","who":"npc:jinshi","with":"character:shiho","delta":1}]}
@@ -261,6 +269,9 @@ Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas
   {"type":"discovery","targets":["character:calder"],"payload":{"fact":"fact:osric-bajo-anoche","confidence":"uncertain","method":"Tomás se contradice al hablar de la última noche"}}
 - Cómo trata un NPC a un personaje tras la escena (de -5 enemigo a 5 aliado; "delta" entre -3 y 3):
   {"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:calder","delta":1}]}
+- Cuando un personaje cambia de lugar, dilo con "move" en ese mismo turno: es lo que hace que la mesa sepa quién está dónde y quién se cruza con quién. "to" es el id de un lugar de la lista de arriba, y solo puede ir a uno conectado con el suyo; null si va de camino o sale de escena:
+  {"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
+  {"type":"state_change","effects":[{"op":"move","who":"character:calder","to":null}]}
 - Un rumor que alguien oye, verdadero o no (a diferencia de discovery, esto NO es un hecho; "false" solo si tú sabes que es mentira):
   {"type":"rumor_heard","targets":["character:calder"],"payload":{"text":"dicen que Osric subió con los bolsillos llenos","from":"npc:tomas","false":true}}
 - Avance de una misión del pack, cuando la mesa cumple un objetivo de los que aparecen arriba (usa el id exacto del objetivo; "status":"done" solo cuando la misión entera termina):
@@ -275,6 +286,7 @@ const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "p
 {"type":"state_change","actor":"character:camille","effects":[{"op":"bond","who":"character:camille","with":"npc:julien","state":"interes"}]}
 {"type":"rumor_heard","targets":["character:etienne"],"payload":{"text":"la dama de rojo llegó acompañada","from":"npc:abbe-gregoire"}}
 {"type":"quest_update","payload":{"quest":"quest:la-cena","objective":"elegir-asiento"}}
+{"type":"state_change","effects":[{"op":"move","who":"character:zahira","to":"comedor"}]}
 {"type":"state_change","actor":"character:armand","effects":[{"op":"prestige","who":"character:armand","delta":1}]}
 {"type":"state_change","actor":"character:lucien","effects":[{"op":"scandal","who":"character:lucien","delta":2}]}
 {"type":"state_change","actor":"character:helene","effects":[{"op":"condition","who":"character:helene","add":"sin máscara"}]}

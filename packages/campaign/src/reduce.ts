@@ -230,9 +230,30 @@ function applyEffects(state: CampaignState, event: CampaignEvent, ruleset: Rules
       world = applyNpcCondition(world, effect)
       continue
     }
+    // Donde esta cada personaje tampoco depende del sistema de juego: el
+    // comedor es el comedor en la corte y en la mina.
+    if (effect['op'] === 'move') {
+      world = applyMove(world, effect)
+      continue
+    }
     world = ruleset.applyEffect(world, effect, event)
   }
   return { ...state, world }
+}
+
+/**
+ * `{"op":"move","who":"character:zahira","to":"comedor"}`. `to` es el id de
+ * un lugar del pack, o null cuando el personaje anda de camino o sale de
+ * escena: entonces se sabe que no esta en ningun nodo, que es justo lo que
+ * Gabino queria ver de quien "salio a explorar".
+ */
+function applyMove(world: WorldState, effect: Record<string, unknown>): WorldState {
+  const who = refId(String(effect['who'] ?? ''))
+  const character = world.characters[who]
+  if (!character) return world
+  const raw = effect['to']
+  const to = typeof raw === 'string' && raw !== '' ? refId(raw) : null
+  return { ...world, characters: { ...world.characters, [who]: { ...character, location: to } } }
 }
 
 /**

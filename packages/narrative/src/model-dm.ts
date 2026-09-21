@@ -142,6 +142,16 @@ const DiscoveryEvent = z.strictObject({
     method: z.string().min(1),
   }),
 })
+/**
+ * Mover a un personaje de lugar. `to` es un id de lugar del pack, o null
+ * cuando va de camino o sale de escena.
+ */
+const MoveEffect = z.strictObject({
+  op: z.literal('move'),
+  who: CharacterRef,
+  to: z.union([KebabId, z.string().regex(/^location:[a-z0-9]+(?:-[a-z0-9]+)*$/), z.null()]),
+})
+
 /** Como trata un NPC a un personaje: -5 enemigo, 5 aliado. */
 const RelationshipEffect = z.strictObject({
   op: z.literal('relationship'),
@@ -192,7 +202,7 @@ const QuestUpdateEvent = z.strictObject({
 
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
@@ -204,7 +214,7 @@ const D20_EVENT = z.discriminatedUnion('type', [
 ])
 const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, StandingEffect, SuspicionEffect, ClueEffect, RelationshipEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, StandingEffect, SuspicionEffect, ClueEffect, RelationshipEffect, MoveEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
@@ -216,7 +226,7 @@ const INTRIGUE_EVENT = z.discriminatedUnion('type', [
 ])
 const MASQUERADE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, BondEffect, RelationshipEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, BondEffect, RelationshipEffect, MoveEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,

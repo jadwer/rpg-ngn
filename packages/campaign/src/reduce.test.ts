@@ -282,3 +282,35 @@ describe('progreso de misiones', () => {
     expect(state.quests?.['la-campana']?.completed).toEqual(['encontrar-la-campana'])
   })
 })
+
+describe('donde esta cada personaje', () => {
+  const mover = (to: string | null, seq: number): CampaignEvent =>
+    ({
+      id: `evt-mv-${seq}`,
+      v: 1,
+      seq,
+      type: 'state_change',
+      sessionId: '002',
+      recordedAt: '2026-09-12T19:00:00Z',
+      effects: [{ op: 'move', who: 'character:zahira', to }],
+    }) as unknown as CampaignEvent
+
+  it('se mueve entre lugares y sale de escena sin tocar el resto de su estado', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events, { pack, ruleset: fantasyD20Lite })
+    const seq = state.meta.headSeq
+    const hpAntes = state.world.characters['zahira']?.hp
+
+    state = applyEvent(state, mover('capilla-de-los-mineros', seq + 1), fantasyD20Lite)
+    expect(state.world.characters['zahira']?.location).toBe('capilla-de-los-mineros')
+
+    // Acepta tambien la referencia con prefijo, como la escribe el DM.
+    state = applyEvent(state, mover('location:segundo-nivel', seq + 2), fantasyD20Lite)
+    expect(state.world.characters['zahira']?.location).toBe('segundo-nivel')
+
+    // null: va de camino o sale de escena.
+    state = applyEvent(state, mover(null, seq + 3), fantasyD20Lite)
+    expect(state.world.characters['zahira']?.location).toBeNull()
+    expect(state.world.characters['zahira']?.hp).toEqual(hpAntes)
+  })
+})

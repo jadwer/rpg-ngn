@@ -3,6 +3,7 @@ import { Character } from './character.js'
 import { refId, refKind } from './common.js'
 import { hasErrors, zodIssues, type Issue } from './issues.js'
 import { Location } from './location.js'
+import { PackMap } from './map.js'
 import { Npc } from './npc.js'
 import { PackManifest } from './pack.js'
 import { Quest } from './quest.js'
@@ -21,6 +22,8 @@ export interface LoadedPack {
   characters: Map<string, Character>
   npcs: Map<string, Npc>
   locations: Map<string, Location>
+  /** Mapas de region del pack; vacio si no trae ninguno. */
+  maps: Map<string, PackMap>
   quests: Map<string, Quest>
   sessions: Map<string, Session>
   /** Capa `dm`: solo la lee el motor y el DM; nunca una proyeccion de jugador. */
@@ -36,6 +39,7 @@ const collections = [
   { key: 'characters', dir: 'characters', schema: Character },
   { key: 'npcs', dir: 'npcs', schema: Npc },
   { key: 'locations', dir: 'locations', schema: Location },
+  { key: 'maps', dir: 'maps', schema: PackMap },
   { key: 'quests', dir: 'quests', schema: Quest },
   { key: 'sessions', dir: 'sessions', schema: Session },
   { key: 'secrets', dir: 'secrets', schema: Secret },
@@ -63,6 +67,7 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
     characters: new Map(),
     npcs: new Map(),
     locations: new Map(),
+    maps: new Map(),
     quests: new Map(),
     sessions: new Map(),
     secrets: new Map(),
@@ -94,6 +99,7 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
   const sessions = loaded.sessions as Map<string, Session>
   const secrets = loaded.secrets as Map<string, Secret>
   const locations = loaded.locations as Map<string, Location>
+  const maps = loaded.maps as Map<string, PackMap>
   const quests = loaded.quests as Map<string, Quest>
 
   for (const [id, character] of characters) {
@@ -105,6 +111,26 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
   for (const [id, npc] of npcs) {
     if (npc.portrait && !(await source.exists(npc.portrait))) {
       issues.push({ level: 'error', path: `npcs/${id}.json`, message: `portrait apunta a ${npc.portrait}, que no existe en el pack` })
+    }
+  }
+
+  for (const [id, map] of maps) {
+    if (!(await source.exists(map.image))) {
+      issues.push({ level: 'error', path: `maps/${id}.json`, message: `image apunta a ${map.image}, que no existe en el pack` })
+    }
+  }
+
+  for (const [id, location] of locations) {
+    // Un lugar puesto en un mapa que el pack no declara no se puede pintar.
+    if (location.map && !maps.has(location.map)) {
+      issues.push({ level: 'error', path: `locations/${id}.json`, message: `map apunta a ${location.map}, que no esta en el pack` })
+    }
+    // Dos lugares en el mismo punto se taparian; aviso, no error.
+    for (const [otherId, other] of locations) {
+      if (otherId <= id || other.map !== location.map || location.map === undefined) continue
+      if (Math.abs((other.x ?? 0) - (location.x ?? 0)) < 2 && Math.abs((other.y ?? 0) - (location.y ?? 0)) < 2) {
+        issues.push({ level: 'warning', path: `locations/${id}.json`, message: `cae casi encima de ${otherId} en el mapa ${location.map}` })
+      }
     }
   }
 
@@ -147,6 +173,7 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
       characters,
       npcs,
       locations,
+      maps,
       quests,
       sessions,
       secrets,

@@ -236,3 +236,31 @@ describe('NPCs improvisados', () => {
     expect(allowed.safeParse({ type: 'npc_action', actor: 'character:zahira', payload: { text: 'Se va' } }).success).toBe(false)
   })
 })
+
+describe('ubicacion de los personajes', () => {
+  const mover = { type: 'state_change', effects: [{ op: 'move', who: 'character:zahira', to: 'comedor' }] }
+
+  it('los tres rulesets aceptan mover a un personaje, con id o con referencia, y sacarlo de escena', () => {
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      const allowed = allowedEventFor(id)
+      expect(allowed.safeParse(mover).success).toBe(true)
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'move', who: 'character:zahira', to: 'location:comedor' }] }).success).toBe(true)
+      // null es "va de camino o sale de escena", que es justo lo que se
+      // queria ver de quien sale a explorar.
+      expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'move', who: 'character:zahira', to: null }] }).success).toBe(true)
+    }
+  })
+
+  it('rechaza mover a un NPC o a ninguna parte sin decirlo', () => {
+    const allowed = allowedEventFor('fantasy-d20-lite')
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'move', who: 'npc:tomas', to: 'comedor' }] }).success).toBe(false)
+    expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'move', who: 'character:zahira' }] }).success).toBe(false)
+  })
+
+  it('el prompt le pide al DM que lo diga en el mismo turno', () => {
+    for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
+      expect(systemPromptFor(id)).toContain('"op":"move"')
+      expect(systemPromptFor(id)).toContain('en ese mismo turno')
+    }
+  })
+})
