@@ -48,7 +48,10 @@ export function MapPanel({ packId, map, world, party, nameOf, portraitOf }: Prop
             {/* Los caminos: de aqui solo se va a donde el pack dice. */}
             <svg className="caminos" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
               {edges.map((e) => (
-                <line key={`${e.from.id}-${e.to.id}`} x1={e.from.x} y1={e.from.y} x2={e.to.x} y2={e.to.y} />
+                <line key={`s-${e.from.id}-${e.to.id}`} x1={e.from.x} y1={e.from.y} x2={e.to.x} y2={e.to.y} />
+              ))}
+              {edges.map((e) => (
+                <line className="oro" key={`o-${e.from.id}-${e.to.id}`} x1={e.from.x} y1={e.from.y} x2={e.to.x} y2={e.to.y} />
               ))}
             </svg>
             {view.pins.map((pin) => (

@@ -821,9 +821,16 @@ h3 {
 }
 
 .mapa .caminos line {
-  stroke: rgba(230, 198, 125, 0.45);
-  stroke-width: 0.4;
-  stroke-dasharray: 1.5 1.5;
+  /* Doble trazo: uno oscuro debajo para que se vea sobre el marmol claro
+     del salon, y el dorado encima. Sin esto los caminos desaparecian. */
+  stroke: rgba(23, 18, 14, 0.55);
+  stroke-width: 0.9;
+}
+
+.mapa .caminos line.oro {
+  stroke: rgba(230, 198, 125, 0.9);
+  stroke-width: 0.45;
+  stroke-dasharray: 1.6 1.4;
 }
 
 .mapa .pin {
