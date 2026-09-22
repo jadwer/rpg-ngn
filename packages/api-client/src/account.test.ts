@@ -36,6 +36,17 @@ describe('cuenta', () => {
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
   })
 
+  it('cambia la contraseña con el token del correo, sin sesion iniciada', async () => {
+    const { api, calls } = client({ 'POST /api/auth/reset-password': { body: { message: 'Contrasena restablecida correctamente.' } } }, null)
+
+    const mensaje = await api.resetPassword({ token: 'tok-del-correo', email: ' lucia@example.com ', password: 'clave-nueva', passwordConfirmation: 'clave-nueva' })
+
+    expect(mensaje).toBe('Contrasena restablecida correctamente.')
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ token: 'tok-del-correo', email: 'lucia@example.com', password: 'clave-nueva', password_confirmation: 'clave-nueva' })
+    // Quien cambia la contraseña no ha entrado todavia: nunca manda token.
+    expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
+  })
+
   it('con verificacion de correo el registro no trae token', async () => {
     const { api } = client({ 'POST /api/auth/register': { status: 201, body: { message: 'Cuenta creada. Verifica tu correo electronico para continuar.', email_verified: false } } }, null)
     const result = await api.register({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', passwordConfirmation: 'clave-larga' }, 'web')

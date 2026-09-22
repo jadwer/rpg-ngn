@@ -32,6 +32,12 @@ export interface AccountApi {
   changePassword(currentPassword: string, password: string, passwordConfirmation: string): Promise<void>
   /** Pide el correo de recuperacion; la API responde igual exista o no la cuenta. Devuelve el mensaje. */
   forgotPassword(email: string): Promise<string>
+  /**
+   * Cambia la contraseña con el token que llego por correo
+   * (`POST /api/auth/reset-password`). El token y el correo vienen en el
+   * enlace; 422 si el token caduco (60 minutos) o la contraseña no coincide.
+   */
+  resetPassword(input: { token: string; email: string; password: string; passwordConfirmation: string }): Promise<string>
   /** Cuenta con ese correo exacto (`GET /api/v1/users/lookup`); null si no existe. Cualquier cuenta puede usarlo. */
   lookupUser(email: string): Promise<AuthUser | null>
 }
@@ -74,6 +80,15 @@ export function accountApi(request: Request): AccountApi {
     async forgotPassword(email) {
       const { data } = await request<{ message?: string }>('/api/auth/forgot-password', { method: 'POST', anonymous: true, body: { email: email.trim() } })
       return data?.message ?? 'Si el correo tiene cuenta, recibirá un enlace para cambiar la contraseña.'
+    },
+
+    async resetPassword(input) {
+      const { data } = await request<{ message?: string }>('/api/auth/reset-password', {
+        method: 'POST',
+        anonymous: true,
+        body: { token: input.token, email: input.email.trim(), password: input.password, password_confirmation: input.passwordConfirmation },
+      })
+      return data?.message ?? 'Contraseña cambiada. Ya puedes entrar.'
     },
 
     async lookupUser(email) {
