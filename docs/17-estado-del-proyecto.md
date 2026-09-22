@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 02:20 CST**. Rama `dev`, commit `9da726f`.
+Fecha de corte: **2026-09-22, 03:40 CST**. Rama `dev`, commit `f8771b9`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -137,6 +137,18 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - Pendiente: los avisos de mesa ("es tu turno", "abrieron sesion"), que se
   diseñan viendo jugar a gente, no antes.
 
+### Retirar una mesa (22-09)
+
+- **Archivar**: la saca de la lista y la deja plegada al final, sin tocar la
+  cronica. Es lo normal: una partida jugada tambien es de los demas jugadores.
+- **Borrar de verdad**: solo si la mesa **nunca llego a jugarse**. Si ya tiene
+  eventos responde 409 con el motivo, no con un error del servidor.
+- **Salir de la mesa**: para el invitado. El anfitrion no puede salirse de lo
+  suyo, porque dejaria la mesa sin quien abra sesiones ni pague los turnos.
+- Antes solo existia `tables:prune` por SSH, y el `DELETE` que JSON:API dejaba
+  expuesto **respondia 500 con la sentencia SQL y el nombre de la base**.
+- `tableRetirement` decide que se ofrece, en `ui-logic` con tests.
+
 ### Legal (22-09)
 
 - **Terminos y aviso de privacidad publicados** como version 1 en `/terminos` y
@@ -217,10 +229,8 @@ director se acuerda de emitir `move` en una partida larga.
    invitar o jugar un turno.
 2. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
    pasar a claves reales.
-3. **Un usuario no puede borrar ni archivar su mesa.** Solo existe
-   `tables:prune`, que es un comando de servidor. Desde que los textos legales
-   estan publicados, esto es una **promesa incumplida**: el aviso reconoce el
-   derecho de cancelacion. Lo señalo Gabino el 22-09.
+3. **No hay borrado de cuenta** con la disociacion que describe el aviso.
+   Retirar una mesa ya se puede (22-09); borrar la cuenta entera, todavia no.
 
 **Ya no bloquean, cerrados el 22-09:** el correo (recuperar contraseña estaba
 roto) y los **textos legales**, publicados como version 1 en `/terminos` y

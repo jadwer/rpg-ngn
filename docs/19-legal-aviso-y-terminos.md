@@ -441,9 +441,9 @@ gaste su tiempo, porque son las que no puedo resolver yo:
 Esto es deuda declarada, no un descuido. Cada linea es una promesa publicada
 que hay que sostener:
 
-- [ ] **Borrar o archivar una mesa desde el producto.** Hoy **no existe**: solo
-  `tables:prune` por linea de comandos. Es lo mas urgente de esta lista, porque
-  es lo que un usuario intentara hacer primero.
+- [x] **Retirar una mesa desde el producto** (22-09): archivar siempre, borrar
+  solo si nunca se jugo, y salir de la mesa para el invitado. Era lo mas
+  urgente de esta lista.
 - [ ] **Borrado de cuenta** con la disociacion que describe el punto 5 del
   aviso. Hoy se cumpliria a mano, y el plazo de 20 dias habiles esta publicado.
 - [ ] **Guardar la aceptacion**: hoy el aviso se muestra pero **no se registra
