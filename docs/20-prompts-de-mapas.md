@@ -30,13 +30,17 @@ habrian quedado asi.
   la aplicacion encima; si la imagen trae letras, se ven dos veces y mal.
 - **Sin personas ni criaturas.** La gente la pinta el mapa con los retratos de
   los personajes.
-- **Apaisada 3:2** (por ejemplo 1536x1024), que es lo que ya funciona: el
-  palacio de La Mascarada es exactamente eso. El lienzo se adapta a la
-  proporcion de la imagen, sea la que sea (`fit-content` mas
-  `object-fit: contain`), asi que no hay recorte; pero el modal de escritorio
-  es apaisado, y una imagen cuadrada deja franjas vacias a los lados.
-  **Excepcion: un mapa que representa profundidad**, como el corte de una mina,
-  se lee mejor vertical (2:3).
+- **1536x1024 pixeles (3:2 apaisada)**, y **1024x1536 si el mapa representa
+  profundidad**, como el corte de una mina. Es lo que ya funciona: el palacio
+  de La Mascarada es 1536x1024 y pesa 418 KB en WebP.
+  - **Por que ese tamaño**: en escritorio el mapa se pinta a unos 1000 px de
+    ancho, asi que 1536 deja margen para pantallas de mucha densidad. Mas
+    grande solo tarda en cargar en el telefono; mas pequeño se ve borroso al
+    abrirlo a pantalla completa.
+  - **Por que apaisada y no cuadrada**: el lienzo se adapta a la proporcion que
+    tenga la imagen (`fit-content` mas `object-fit: contain`), asi que no hay
+    recorte nunca; pero el modal de escritorio es apaisado, y una imagen
+    cuadrada deja franjas vacias a los lados.
 - **Zonas bien separadas y distinguibles**, con espacio vacio entre ellas: ahi
   es donde caen los marcadores.
 - **Separar lo que es lugar de lo que es relleno, y decirlo.** Un mapa con solo
@@ -86,7 +90,7 @@ como texto.
 ## 1. Valdoria, el pueblo (`pilot`, mapa `valdoria`)
 
 ```text
-Mapa cenital ilustrado de Valdoria, un pueblo minero pequeño y pobre en un valle de montaña, de noche cerrada. Estilo mapa de fantasia pintado a mano con tinta y acuarela oscura, muy detallado, con textura de papel. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada, como una maqueta vista desde arriba: se ven los tejados y tambien un poco las fachadas.
+Mapa cenital ilustrado de Valdoria, un pueblo minero pequeño y pobre en un valle de montaña, de noche cerrada. Estilo mapa de fantasia pintado a mano con tinta y acuarela oscura, muy detallado, con textura de papel. Imagen apaisada de 1536x1024 pixeles (proporcion 3:2). Vista cenital ligeramente inclinada, como una maqueta vista desde arriba: se ven los tejados y tambien un poco las fachadas.
 
 El pueblo vive de una mina que lleva nueve dias cerrada, y se nota: no hay carbon apilado, no hay carros cargados, no hay nadie fuera. Es un sitio que espera algo y no lo dice.
 
@@ -118,7 +122,7 @@ arriba a la derecha, camino abajo a la izquierda.
 ## 2. La mina (`pilot`, mapa `mina`)
 
 ```text
-Corte vertical en seccion de una mina de montaña, como un plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca pintada en acuarela y mucho detalle de estratos. Imagen vertical, proporcion 2:3, porque representa profundidad. Vista de perfil: la montaña esta cortada por la mitad y se ven las galerias una debajo de otra, como un hormiguero en seccion.
+Corte vertical en seccion de una mina de montaña, como un plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca pintada en acuarela y mucho detalle de estratos. Imagen vertical de 1024x1536 pixeles (proporcion 2:3), porque representa profundidad. Vista de perfil: la montaña esta cortada por la mitad y se ven las galerias una debajo de otra, como un hormiguero en seccion.
 
 Es la misma mina de Valdoria, cerrada hace nueve dias. Herramienta en su sitio, nada roto, nada revuelto: la gente se fue de golpe y no volvio.
 
@@ -152,7 +156,7 @@ mismo arco de madera con los tablones cruzados que se ve en el pueblo.
 ## 3. El palacio interior (`private-botica`, mapa `palacio`)
 
 ```text
-Mapa cenital de un recinto palaciego imperial chino clasico, el palacio interior donde viven las consortes del emperador, de noche. Ilustrado a tinta y acuarela oscura con mucho detalle arquitectonico. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada: se ven los tejados curvos de teja vidriada y tambien algo de las fachadas y los patios.
+Mapa cenital de un recinto palaciego imperial chino clasico, el palacio interior donde viven las consortes del emperador, de noche. Ilustrado a tinta y acuarela oscura con mucho detalle arquitectonico. Imagen apaisada de 1536x1024 pixeles (proporcion 3:2). Vista cenital ligeramente inclinada: se ven los tejados curvos de teja vidriada y tambien algo de las fachadas y los patios.
 
 Es una ciudad dentro de la ciudad: miles de personas viviendo de puntillas, con rutinas que no se rompen nunca. Hace poco se rompio una.
 
@@ -180,7 +184,7 @@ SIN: texto, letras, numeros, etiquetas, cartelas, rosa de los vientos, escalas, 
 ## 4. La ciudad exterior (`private-botica`, mapa `ciudad`)
 
 ```text
-Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, de noche. Ilustrado con exactamente la misma tinta y acuarela oscura, la misma tecnica y el mismo nivel de detalle que el mapa del palacio del mismo pack. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada.
+Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, de noche. Ilustrado con exactamente la misma tinta y acuarela oscura, la misma tecnica y el mismo nivel de detalle que el mapa del palacio del mismo pack. Imagen apaisada de 1536x1024 pixeles (proporcion 3:2). Vista cenital ligeramente inclinada.
 
 Es un sitio vivo, apretado y ruidoso, lo contrario del palacio: aqui la gente si sale a la calle. Funciona con una economia de favores y rumores que llega mas lejos que la de la corte.
 
