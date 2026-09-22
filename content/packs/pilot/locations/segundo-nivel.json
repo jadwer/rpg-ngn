@@ -1,0 +1,13 @@
+{
+  "id": "segundo-nivel",
+  "name": "El segundo nivel",
+  "connections": [
+    "primer-nivel",
+    "tercer-nivel"
+  ],
+  "description": "Más estrecho y más húmedo. Aquí el eco cambia y las lámparas duran menos de lo que deberían.",
+  "newcomerView": "La galería se estrecha y el agua corre por las paredes. El sonido vuelve tarde.",
+  "tags": [
+    "galeria"
+  ]
+}

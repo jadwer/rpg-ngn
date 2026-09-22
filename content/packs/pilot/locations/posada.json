@@ -1,0 +1,14 @@
+{
+  "id": "posada",
+  "name": "La posada",
+  "connections": [
+    "plaza",
+    "camino-a-la-mina"
+  ],
+  "description": "La única posada de Valdoria. Huele a piedra mojada incluso con el hogar encendido. Tomás atiende las mesas y Bren lleva el libro de huéspedes tras el mostrador.",
+  "newcomerView": "Un salón de techo bajo con seis mesas, el hogar al fondo y un mostrador con un libro grueso. Hay mineros bebiendo sin carbón fresco en la ropa.",
+  "tags": [
+    "refugio",
+    "informacion"
+  ]
+}

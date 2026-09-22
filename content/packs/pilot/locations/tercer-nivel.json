@@ -1,0 +1,14 @@
+{
+  "id": "tercer-nivel",
+  "name": "El tercer nivel",
+  "connections": [
+    "segundo-nivel",
+    "el-pozo"
+  ],
+  "description": "Hasta aquí bajaron los Nueve Viajeros. Las notas del capataz se detienen en este punto.",
+  "newcomerView": "El final de la parte cartografiada. Más allá, la roca está cortada a mano y sin apuntalar.",
+  "tags": [
+    "galeria",
+    "frontera"
+  ]
+}

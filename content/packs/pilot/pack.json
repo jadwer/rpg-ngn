@@ -39,5 +39,21 @@
   "secrets": [
     "osric-esta-abajo",
     "brorg-pago-por-zahira"
+  ],
+  "locations": [
+    "boca-de-la-mina",
+    "camino-a-la-mina",
+    "casa-de-osric",
+    "el-pozo",
+    "plaza",
+    "posada",
+    "primer-nivel",
+    "segundo-nivel",
+    "tercer-nivel"
+  ],
+  "npcs": [
+    "bren",
+    "osric",
+    "tomas"
   ]
 }

@@ -12,14 +12,40 @@
     "Aquí abajo la memoria es un recurso. Lo que recuerdes, dilo en voz alta: puede que mañana ya no lo tengas."
   ],
   "fortune": [
-    { "range": "1-3", "label": "Mala suerte" },
-    { "range": "4-6", "label": "Incómodo" },
-    { "range": "7-14", "label": "Normal" },
-    { "range": "15-17", "label": "Buena estrella" },
-    { "range": "18-19", "label": "Afortunado" },
-    { "range": "20", "label": "Destino" }
+    {
+      "range": "1-3",
+      "label": "Mala suerte"
+    },
+    {
+      "range": "4-6",
+      "label": "Incómodo"
+    },
+    {
+      "range": "7-14",
+      "label": "Normal"
+    },
+    {
+      "range": "15-17",
+      "label": "Buena estrella"
+    },
+    {
+      "range": "18-19",
+      "label": "Afortunado"
+    },
+    {
+      "range": "20",
+      "label": "Destino"
+    }
   ],
-  "availableCharacters": ["brorg", "dayan", "hector", "kael", "talin", "orion"],
+  "availableCharacters": [
+    "brorg",
+    "dayan",
+    "hector",
+    "kael",
+    "talin",
+    "orion"
+  ],
+  "startLocation": "tercer-nivel",
   "party": [],
   "notes": "Sesión para jugadores nuevos. Se elige entre los seis viajeros que siguen en la mina. No hace falta haber jugado las anteriores: tu personaje tampoco recuerda nada. Quien ya jugó conserva su Fortuna; quien entra hoy tira la suya."
 }

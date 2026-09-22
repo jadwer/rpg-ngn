@@ -23,12 +23,17 @@ describe('parseEventLog sobre el log real del piloto', () => {
     expect(events.every((e) => e.v === 1 && e.id.startsWith('evt-'))).toBe(true)
   })
 
-  it('advierte de los NPC que no estan en el pack en vez de fallar', async () => {
+  it('un NPC desconocido es aviso y no error, para que el log siga siendo valido', async () => {
     const { pack, text } = await pilot()
+    // El piloto ya declara a Osric, Tomas y Bren (22-09), asi que el aviso se
+    // provoca con uno que de verdad no existe. La regla que se fija es que un
+    // NPC improvisado **no invalida el log**: el DM los inventa jugando.
+    const conDesconocido = text.replace('"npc:osric"', '"npc:un-tabernero-cualquiera"')
 
-    const { issues } = parseEventLog(text, { pack })
+    const { issues } = parseEventLog(conDesconocido, { pack })
 
-    expect(issues.some((i) => i.level === 'warning' && i.message.includes('npc:osric'))).toBe(true)
+    expect(issues.some((i) => i.level === 'warning' && i.message.includes('npc:un-tabernero-cualquiera'))).toBe(true)
+    expect(issues.filter((i) => i.level === 'error')).toEqual([])
   })
 
   it('es idempotente: el log ya migrado se vuelve a parsear igual', async () => {

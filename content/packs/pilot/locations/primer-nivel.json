@@ -1,0 +1,13 @@
+{
+  "id": "primer-nivel",
+  "name": "El primer nivel",
+  "connections": [
+    "boca-de-la-mina",
+    "segundo-nivel"
+  ],
+  "description": "Galerías anchas de trabajo reciente, con vagonetas paradas y herramienta en su sitio, como si todos se hubieran ido a la vez.",
+  "newcomerView": "Túneles con raíles y lámparas apagadas en los ganchos. Nada roto, nada revuelto.",
+  "tags": [
+    "galeria"
+  ]
+}

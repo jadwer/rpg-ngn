@@ -1,0 +1,12 @@
+{
+  "id": "casa-de-osric",
+  "name": "La casa de Osric",
+  "connections": [
+    "plaza"
+  ],
+  "description": "La casa del capataz de la mina. Lleva ocho días con la luz encendida y la puerta cerrada.",
+  "newcomerView": "Una casa de piedra con las contraventanas cerradas. Por las rendijas se ve luz, de día y de noche.",
+  "tags": [
+    "cerrado"
+  ]
+}

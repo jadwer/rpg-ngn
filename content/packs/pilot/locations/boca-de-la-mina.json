@@ -1,0 +1,13 @@
+{
+  "id": "boca-de-la-mina",
+  "name": "La boca de la mina",
+  "connections": [
+    "camino-a-la-mina",
+    "primer-nivel"
+  ],
+  "description": "La entrada, apuntalada y con una puerta de tablas que alguien clavó por fuera. Cerrada por un derrumbe que nadie vio.",
+  "newcomerView": "Un arco de madera sobre la roca y tablones cruzados. El aire que sale es más frío que el de fuera.",
+  "tags": [
+    "entrada"
+  ]
+}

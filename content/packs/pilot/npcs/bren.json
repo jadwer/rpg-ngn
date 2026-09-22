@@ -1,0 +1,18 @@
+{
+  "id": "bren",
+  "name": "Bren",
+  "portrait": null,
+  "location": "posada",
+  "description": "Lleva la posada y el libro de huéspedes. Anota todo y no enseña nada; con desconocidos es cortés hasta que deja de serlo.",
+  "goals": [
+    "Que el registro no salga del mostrador",
+    "Que el pueblo siga como está"
+  ],
+  "knows": [],
+  "relationships": [
+    {
+      "with": "npc:osric",
+      "kind": "le teme"
+    }
+  ]
+}

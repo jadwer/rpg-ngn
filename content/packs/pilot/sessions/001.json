@@ -11,16 +11,41 @@
     "Al empezar tiras 1d20 de Fortuna. No se te dice para qué sirvió. Ya lo descubrirás."
   ],
   "fortune": [
-    { "range": "1-3", "label": "Mala suerte" },
-    { "range": "4-6", "label": "Incómodo" },
-    { "range": "7-14", "label": "Normal" },
-    { "range": "15-17", "label": "Buena estrella" },
-    { "range": "18-19", "label": "Afortunado" },
-    { "range": "20", "label": "Destino" }
+    {
+      "range": "1-3",
+      "label": "Mala suerte"
+    },
+    {
+      "range": "4-6",
+      "label": "Incómodo"
+    },
+    {
+      "range": "7-14",
+      "label": "Normal"
+    },
+    {
+      "range": "15-17",
+      "label": "Buena estrella"
+    },
+    {
+      "range": "18-19",
+      "label": "Afortunado"
+    },
+    {
+      "range": "20",
+      "label": "Destino"
+    }
   ],
+  "startLocation": "posada",
   "party": [
-    { "player": "Armando", "character": "calder" },
-    { "player": "Gabino", "character": "narivyl" }
+    {
+      "player": "Armando",
+      "character": "calder"
+    },
+    {
+      "player": "Gabino",
+      "character": "narivyl"
+    }
   ],
   "recap": "Calder y Narivyl llegaron a Valdoria bajo la lluvia. El guardia les abrió sin pedirles el nombre. En el libro de huéspedes de El Farol Torcido encontraron su propio registro, escrito de su puño nueve días antes, junto a otros siete nombres y la anotación de un cuarto grande pagado por adelantado. Un minero llamado Tomás fue el único del pueblo que los reconoció: según él, el grupo llegó hace nueve días, investigó las desapariciones de mineros, bajó a la mina y no volvió a subir. Esa noche una figura de niebla gris entró en la posada y se identificó como Orion, uno de los nombres del libro. Antes de deshacerse dijo dónde buscar respuestas y dejó una pregunta abierta sobre cómo salieron ellos dos.",
   "openThreads": [

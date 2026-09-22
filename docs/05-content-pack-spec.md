@@ -141,6 +141,13 @@ generada**, pintando los marcadores encima para comprobar que cada uno cae
 dentro de su sala. En el palacio de La Mascarada, dos de seis estaban mal al
 primer intento.
 
+**Un mapa no se declara hasta que su imagen existe.** Un `maps/x.json` que
+apunta a una imagen que falta **impide cargar el pack entero**, no solo el
+mapa, y con el pack sin cargar no hay partida. Mientras se espera la imagen,
+el mapa y las coordenadas se guardan como `.pendiente` junto al archivo que les
+toca; el empaquetador los ignora y el validador no los ve. Se activan al llegar
+la imagen. Los prompts para generarlas estan en `docs/20`.
+
 **Donde arranca la party: `startLocation` en la sesion.** Un pack con mapa
 deberia declararlo; si no lo hace, nadie tiene ubicacion hasta que el DM mueva
 a alguien y el mapa sale vacio de gente toda la primera escena:
@@ -155,7 +162,7 @@ a alguien y el mapa sale vacio de gente toda la primera escena:
 
 Al abrir la sesion, el engine coloca ahi a todo personaje de la party que no
 tenga ya ubicacion (docs/08). El cargador comprueba que el lugar exista en el
-pack. Es opcional: un pack sin lugares, como el piloto, no lo usa.
+pack. Es opcional: un pack sin lugares no lo usa.
 
 ## Secretos: la capa `dm` del pack
 

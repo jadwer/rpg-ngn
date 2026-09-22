@@ -1,0 +1,14 @@
+{
+  "id": "camino-a-la-mina",
+  "name": "El camino a la mina",
+  "connections": [
+    "posada",
+    "plaza",
+    "boca-de-la-mina"
+  ],
+  "description": "Media hora de subida entre pinos hasta la boca de la mina. De noche se oye el viento en los tocones.",
+  "newcomerView": "Un sendero de carro, con roderas marcadas y ninguna huella fresca.",
+  "tags": [
+    "transito"
+  ]
+}

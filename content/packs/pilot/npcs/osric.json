@@ -1,0 +1,18 @@
+{
+  "id": "osric",
+  "name": "Osric",
+  "portrait": null,
+  "location": "casa-de-osric",
+  "description": "El capataz de la mina. Lleva ocho días encerrado en su casa con la luz encendida y no abre a nadie. Hace treinta años bajó al pozo con una campana de bronce y subió solo.",
+  "goals": [
+    "Que nadie vuelva a bajar al pozo",
+    "No tener que contar lo que hizo"
+  ],
+  "knows": [],
+  "relationships": [
+    {
+      "with": "npc:bren",
+      "kind": "le debe silencio"
+    }
+  ]
+}

@@ -50,14 +50,16 @@ describe('Secret', () => {
 })
 
 describe('loadPack con secretos', () => {
-  it('el pack piloto carga sus dos secretos y avisa de los NPC que solo viven en la cronica', async () => {
+  it('el pack piloto carga sus dos secretos, y ya no avisa de Osric porque el pack lo declara', async () => {
     const { pack, issues } = await loadPack(fsSource(pilotPackDir))
 
     expect(issues.filter((i) => i.level === 'error')).toEqual([])
     expect([...pack!.secrets.keys()].sort()).toEqual(['brorg-pago-por-zahira', 'osric-esta-abajo'])
     expect(pack!.secrets.get('osric-esta-abajo')?.revealWhen).toEqual({ manual: true })
     expect(pack!.secrets.get('brorg-pago-por-zahira')?.revealWhen).toEqual({ event: 'discovery', fact: 'fact:brorg-pago-por-zahira' })
-    expect(issues).toContainEqual(expect.objectContaining({ level: 'warning', path: 'secrets/osric-esta-abajo.json', message: expect.stringContaining('npc:osric') }))
+    // Hasta el 22-09 esto avisaba: el secreto hablaba de un NPC que el pack no
+    // declaraba. Ahora Osric tiene ficha y lugar, asi que el pack carga limpio.
+    expect(issues).toEqual([])
   })
 
   it('carga la coleccion secrets/ de un pack en memoria', async () => {

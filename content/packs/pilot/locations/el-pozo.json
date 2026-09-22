@@ -1,0 +1,13 @@
+{
+  "id": "el-pozo",
+  "name": "El pozo",
+  "connections": [
+    "tercer-nivel"
+  ],
+  "description": "Un tiro vertical que no aparece en ningún plano. Osric bajó por aquí hace treinta años con una campana de bronce, y subió solo.",
+  "newcomerView": "Un agujero redondo en el suelo de la galería, demasiado regular para ser natural. No se ve el fondo.",
+  "tags": [
+    "profundo",
+    "sin cartografiar"
+  ]
+}

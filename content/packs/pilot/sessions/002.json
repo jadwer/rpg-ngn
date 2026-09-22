@@ -36,6 +36,7 @@
       "label": "Destino"
     }
   ],
+  "startLocation": "posada",
   "party": [
     {
       "player": "Armando",

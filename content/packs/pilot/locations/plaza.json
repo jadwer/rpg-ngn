@@ -1,0 +1,14 @@
+{
+  "id": "plaza",
+  "name": "La plaza",
+  "connections": [
+    "posada",
+    "casa-de-osric",
+    "camino-a-la-mina"
+  ],
+  "description": "El centro del pueblo, con el pozo en medio y la campana de la torre que nadie toca desde hace treinta años.",
+  "newcomerView": "Una plaza de tierra apisonada con un pozo de piedra. La gente cruza deprisa y sin mirarse.",
+  "tags": [
+    "publico"
+  ]
+}
