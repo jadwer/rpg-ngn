@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 00:50 CST**. Rama `dev`, commit `77f5bb3`.
+Fecha de corte: **2026-09-22, 01:40 CST**. Rama `dev`, commit `9628d04`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -131,8 +131,11 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
   correo, token, pagina, cambio y login con la clave nueva.
 - **Correo de bienvenida** al registrarse, que habla de la mesa y no del
   producto; va a la cola y no sale si ademas hay que verificar el correo.
-- Pendiente: **verificar el dominio** (ver punto 1 de lo que bloquea) y los
-  avisos de mesa ("es tu turno").
+- **Sale desde `no-responder@gabinoramirez.com`**, con el dominio verificado
+  (DKIM y dos CNAME). El SPF que el dominio ya tenia no se toco: Resend usa
+  CNAME justo para no chocar con el correo existente.
+- Pendiente: los avisos de mesa ("es tu turno", "abrieron sesion"), que se
+  diseñan viendo jugar a gente, no antes.
 
 ### Operacion
 
@@ -194,18 +197,16 @@ director se acuerda de emitir `move` en una partida larga.
    operando la aplicacion toda la partida. Ojo: quien entra **gasta turnos del
    anfitrion**, asi que el enlace necesita tope de plazas y revocacion. Opciones
    en `docs/18`, decision D-UX-1.
-1. **Verificar el dominio en Resend** (lo hace Gabino, son registros DNS). El
-   correo **ya sale** desde el 22-09 y recuperar contraseña funciona de punta a
-   punta, pero mientras el dominio no este verificado el remitente es
-   `onboarding@resend.dev`, que **solo entrega a la cuenta dueña de Resend**.
-   Sirve para probar, no para usuarios.
-2. **No hay documentacion de usuario.** Ninguna. `docs/` es SDD; README y
+1. **No hay documentacion de usuario.** Ninguna: `docs/` es SDD, y README y
    RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa,
    invitar o jugar un turno.
-3. **No hay terminos de servicio ni aviso de privacidad**, y se cobra dinero y
+2. **No hay terminos de servicio ni aviso de privacidad**, y se cobra dinero y
    se guardan datos de terceros.
-4. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
+3. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
    pasar a claves reales.
+
+**Ya no bloquea: el correo.** Recuperar contraseña estaba roto y era el cuarto
+bloqueo; se cerro el 22-09 (ver "Correo" mas arriba).
 
 ### Decidido y no empezado
 
