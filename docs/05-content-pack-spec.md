@@ -10,7 +10,9 @@ content/packs/<id>/
 ├── characters/*.json       personajes jugables pregenerados
 ├── portraits/*.jpg         (opcional) retratos referidos por `portrait`
 ├── npcs/*.json             (opcional)
-├── locations/*.json        (opcional)
+├── locations/*.json        (opcional) con `map`, `x`, `y` si el pack trae mapa
+├── maps/*.json             (opcional) mapas de region
+├── maps/*.webp             (opcional) las imagenes que referencian
 ├── factions/*.json         (opcional)
 ├── rumors.json             (opcional)
 ├── timeline.json           (opcional)
@@ -81,6 +83,63 @@ ruleset concreto es responsabilidad de `packages/rules`, no del content pack.
 - `effect` es prosa dirigida al jugador, no una formula. La resolucion la arbitra el DM.
 - Una capacidad que hace daño (trucos y conjuros de ataque) lleva ademas `damage`,
   `damageType` y `range`, con el mismo vocabulario que `attacks`.
+
+## Mapas de region
+
+Un pack puede traer mapas. **No son tableros tacticos**: no hay casillas ni
+nadie se coloca en una coordenada. Un mapa es una imagen que dibuja el autor
+del pack, y los lugares se posan encima por coordenadas.
+
+Dos piezas que ya existian y ahora se usan juntas:
+
+- **Los nodos son los lugares** (`locations/*.json`), que ya estaban.
+- **Las aristas son sus `connections`**, que tambien estaban: del comedor se
+  llega al salon grande y a los pasillos de servicio, a la biblioteca no. El
+  DM las recibe en su contexto, asi que sabe que caminos existen.
+
+Lo nuevo es donde cae cada nodo sobre la imagen.
+
+```json
+// maps/palacio.json
+{
+  "id": "palacio",
+  "name": "Palacio de Montclair",
+  "image": "maps/palacio.webp",
+  "description": "Planta del palacio la noche del baile."
+}
+```
+
+```json
+// locations/comedor.json (extracto)
+{
+  "id": "comedor",
+  "connections": ["salon-grande", "pasillos-de-servicio"],
+  "map": "palacio",
+  "x": 17.5,
+  "y": 40.0
+}
+```
+
+Reglas:
+
+- **`x` e `y` van en porcentaje** del ancho y el alto de la imagen (0 a 100),
+  no en pixeles: la misma coordenada vale en un telefono y en una pantalla
+  compartida.
+- **Los tres campos van juntos o no va ninguno.** Un lugar sin `map` sigue
+  siendo valido; el pack simplemente no lo pinta.
+- **Varios mapas por pack**, porque una campaña puede querer el pueblo y,
+  aparte, los tres niveles de la mina. Cada lugar dice en cual esta.
+- El cargador comprueba que la imagen exista, que el `map` este declarado en
+  el manifiesto, y **avisa si dos lugares caen casi encima** (se taparian).
+- Un pack sin mapas funciona igual: sus lugares se leen como lista.
+
+**Como se sacan las coordenadas** (lo que costo aprender con el primer
+mapa): un generador de imagenes no obedece numeros, obedece composicion. Se
+le pide la disposicion en rejilla ("el salon en el centro, el comedor a la
+izquierda") y despues **se miden las coordenadas sobre la imagen ya
+generada**, pintando los marcadores encima para comprobar que cada uno cae
+dentro de su sala. En el palacio de La Mascarada, dos de seis estaban mal al
+primer intento.
 
 ## Secretos: la capa `dm` del pack
 

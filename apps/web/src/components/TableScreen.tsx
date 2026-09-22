@@ -204,9 +204,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     }
   }, [client, campaignId, sessionCode, headSeq])
 
-  // Fichas con estado vivo: la propia desde player:<id>, las ajenas desde world. Se piden al abrir y cuando avanza la campaña.
+  // Fichas con estado vivo: la propia desde player:<id>, las ajenas desde
+  // world. Se piden al abrir las fichas y cuando avanza la campaña, y
+  // tambien si la mesa tiene mapa, porque de ahi sale donde esta cada uno:
+  // sin esto el mapa decia "nadie situado" aunque el DM hubiera movido a
+  // alguien (21-09).
   useEffect(() => {
-    if (!sheetsOpen || !campaignId) return
+    if ((!sheetsOpen && maps.length === 0) || !campaignId) return
     let alive = true
     const own = viewer.characterId ? client.playerProjection(campaignId, viewer.characterId).then((p) => p.projection.character, () => undefined) : Promise.resolve(undefined)
     const world = client.worldProjection(campaignId).then((p) => ({ seq: p.seq, characters: p.projection.characters }), () => null)
@@ -216,7 +220,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     return () => {
       alive = false
     }
-  }, [client, campaignId, sheetsOpen, viewer.characterId, headSeq])
+  }, [client, campaignId, sheetsOpen, maps.length, viewer.characterId, headSeq])
 
   // Sesiones previas de la campaña, para sugerir el codigo de la siguiente (solo el anfitrion abre).
   useEffect(() => {

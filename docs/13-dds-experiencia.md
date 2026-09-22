@@ -211,13 +211,38 @@ Panel lateral con las hojas: retrato, características, capacidades, estado
 vivo (vida, condiciones, inventario). Cambia según el sistema de reglas: una
 mesa de intriga muestra crédito, sospecha y pistas en vez de puntos de vida.
 
-### 4.10 Ausencias
+### 4.10 Mapa de la partida
+
+Si el pack trae mapa, el pie de la mesa muestra una linea con **donde esta
+la party** ("Salon grande: Camille, Armand; Comedor: Margot; De camino:
+Sebastien"). Pulsarla abre el mapa **a pantalla completa**: la imagen que
+dibujo el autor del pack, los caminos entre lugares, un punto por lugar
+(encendido si hay alguien) y los retratos de quien esta en cada uno. Se
+cierra con Escape o clicando fuera.
+
+No es un tablero tactico: nadie se coloca en una casilla. Las coordenadas
+del pack dicen donde cae cada lugar sobre la imagen; el estado dice quien
+esta alli, y quien no esta en ningun sitio aparece como "de camino o fuera
+de escena".
+
+Estuvo primero dentro del pie, y ahi se veia cortado en escritorio porque
+ese pie esta limitado al 55% del alto. En el telefono ocupa la pantalla
+entera y las etiquetas de los lugares se ocultan: quedan los puntos y las
+caras, que es lo que cabe.
+
+**Lo que hay que medir con gente**, y es la razon de haberlo construido
+ahora: si alguien lo abre por su cuenta durante la partida, si cambia como
+se declara ("me voy a la biblioteca"), y si el director se acuerda de mover
+a la gente. Sobre esto ultimo la sospecha es que se olvidara, como se
+olvidaba de tirar dados hasta que el motor se los puso delante.
+
+### 4.11 Ausencias
 
 Un jugador que se va pulsa "me tengo que ir". Deja de contar para cerrar el
 turno, sale de la escena y el director recibe el aviso de apartar a su
 personaje **sin matarlo**. Al volver, recupera la palabra.
 
-### 4.11 Ajustes y pagos
+### 4.12 Ajustes y pagos
 
 Pantalla aparte: saldo de turnos, compra de paquetes con tarjeta sin salir del
 sitio, y la clave propia de API. En el teléfono, la compra manda a la web.

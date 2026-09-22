@@ -61,6 +61,35 @@ Campos clave:
 
 `correction` es la respuesta a la regla 16: si un evento registro algo mal (error humano o del DM), no se edita; se agrega una correccion que lo referencia y describe el hecho corregido. Las proyecciones aplican la correccion; el historial conserva ambos.
 
+## Ubicacion: donde esta cada personaje
+
+`CharacterState.location` guarda el id de un lugar del pack, o `null` cuando
+el personaje va de camino o salio de escena. Lo mueve el efecto `move` de un
+`state_change`:
+
+```json
+{"op": "move", "who": "character:zahira", "to": "comedor"}
+{"op": "move", "who": "character:calder", "to": null}
+```
+
+Tres decisiones y su motivo:
+
+- **Vive en `CharacterState`, no en `custom`**: estar en el comedor no
+  depende del sistema de juego. Un personaje esta en un sitio tanto en una
+  intriga de corte como en una mina.
+- **Lo aplica el reductor comun**, no cada ruleset, por lo mismo.
+- **`null` es informacion, no ausencia de dato**: es lo que se ve de quien
+  "salio a explorar" y todavia no ha llegado.
+
+El campo es opcional en el tipo para que los snapshots anteriores sigan
+siendo validos.
+
+Lo mismo se hizo con dos efectos mas que tampoco dependen del ruleset:
+`relationship` (como trata un NPC a un personaje, de -5 a 5, en
+`custom.relationships` del NPC) y `condition` cuando el sujeto es un NPC (en
+`custom.conditions`). Los tres se aplican antes de pasar el efecto al
+ruleset.
+
 ## Proyecciones
 
 ```

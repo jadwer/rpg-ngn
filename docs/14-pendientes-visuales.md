@@ -113,6 +113,24 @@ que son VTT con director humano, y arrastra sus supuestos. Como paleta,
 jerarquia y disposicion, mejora lo que hay. Como lista de funciones, mete
 semanas de trabajo en cosas que contradicen el motor.
 
+## Hecho (salido del congelador)
+
+**El mapa, 21-09.** Gabino levanto el congelamiento solo para esto, porque
+queria medir la reaccion de la gente a su uso narrativo. Esta en produccion:
+lo describe `docs/13` en 4.10, el formato de pack en `docs/05` y la
+ubicacion en `docs/08`. Lo que queda es observarlo jugando, no construir
+mas.
+
+Lo que se aprendio y sirve para el resto de la lista:
+
+- Un mockup bonito no dice donde caen las cosas. La precision la da medir
+  sobre la imagen generada, no pedirsela al generador.
+- Un panel dentro del pie de la mesa se ve cortado en escritorio: el pie
+  esta limitado al 55% del alto. Lo que sea grande va a pantalla completa.
+- Al sacar un modal fuera de su panel, los estilos que colgaban del panel
+  dejan de aplicar. Costo tres intentos verlo, y solo se vio mirando el CSS
+  calculado en el navegador, no el archivo.
+
 ## Antes de elegir de esta lista
 
 Gabino decidio **medir con gente real primero**: poner rpg-ngn delante de
