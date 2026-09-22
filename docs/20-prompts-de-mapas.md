@@ -251,15 +251,26 @@ Dos laminas que faltan, una por pack. Se piden **en rejilla** porque
 `tools/packs/crop-portraits.py` recorta de ahi los retratos sueltos al estandar
 del pack (512x512, WebP, cara y hombros con la cara en el tercio superior).
 
-Reglas comunes, que son las que hacen que el recorte automatico funcione:
+**La receta que funciona, sacada de las laminas que Gabino ya genero**
+(`img/ElTeQueNadieProbo/characters.png`, `img/LeBalMasque/npcs.png`): lo que
+sale bonito **no es "un retrato en una celda", es una carta de personaje**. Esa
+diferencia es la que hace que los retratos actuales tengan vida y los que yo
+pedi al principio salieran planos.
 
-- **Rejilla regular**, con todas las celdas del mismo tamaño y separadas por un
-  marco o un margen visible.
-- **Cada personaje centrado en su celda**, de frente o tres cuartos, **de la
-  cintura para arriba**, con la cara en el tercio superior de la celda.
-- **Fondo muy desenfocado**, que sugiera el sitio sin objetos reconocibles: el
-  retrato se ve a 24 px en el dialogo, y un fondo con detalle se convierte en
-  ruido. Los retratos que ya existen lo hacen asi.
+- **Cada personaje en un panel vertical con marco**, como una carta
+  coleccionable, con su **color propio** (granate, verde, indigo, rosa palo,
+  ocre) que lo distingue de los demas.
+- **Figura de medio cuerpo en pose expresiva**, no un busto quieto de frente:
+  sosteniendo algo, gesticulando, mirando de lado. Cada uno hace algo que
+  cuenta quien es.
+- **Fondo desenfocado que situa la escena** detras de la figura (el salon con
+  luz de araña, la ventana del pabellon, la botica), con profundidad de campo
+  fuerte. No un fondo plano.
+- **Cabeza y torso en la mitad superior del panel**, que es de donde sale el
+  recorte de 512x512.
+- **Rejilla regular**, todas las celdas iguales, con el margen del marco entre
+  ellas.
+- **Iluminacion calida y dramatica**, con la luz entrando desde un lado.
 - **Sin texto, sin nombres, sin marcos decorados, sin numeros.**
 - Mismo estilo, misma luz y mismo encuadre en toda la lamina.
 - **El estilo lo manda el pack, no el gusto de quien escribe el prompt.** Cada
@@ -278,19 +289,21 @@ Reglas comunes, que son las que hacen que el recorte automatico funcione:
 ## 5. Los tres de Valdoria (`pilot`)
 
 ```text
-Lamina de retratos de tres personajes, en una rejilla de 3 columnas por 1 fila, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x1024 pixeles.
+Lamina de cartas de personaje, tres paneles verticales en una fila, como las cartas de un juego de rol ilustrado. Imagen de 3072x1024 pixeles. Cada panel tiene su propio marco fino y un color dominante distinto, separados por un margen oscuro.
 
-Estilo: pintura digital semirrealista de fantasia, con pincelada visible y mucho detalle en la cara, luz fria azulada de noche con algun toque calido de farol, como los retratos de personaje de un manual de rol ilustrado. Nada de fotorrealismo y nada de anime: el punto medio, pintado. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Detras de cada uno, un fondo oscuro y muy desenfocado que solo sugiere el interior de la posada o la noche del pueblo, sin objetos reconocibles: el retrato se ve pequeño y un fondo con detalle se convierte en ruido.
+Estilo: pintura digital semirrealista de fantasia, pincelada visible, mucho detalle en la cara y en las telas, iluminacion calida y dramatica con la luz entrando desde un lado. Como la ilustracion de personaje de un manual de rol de mesa. Nada de fotorrealismo y nada de anime: el punto medio, pintado.
 
-Son gente de un pueblo minero pobre de montaña, ropa de trabajo gastada, lana y cuero, nada de armaduras ni de magia.
+Cada personaje aparece de medio cuerpo, en pose expresiva y haciendo algo que cuenta quien es, con la cabeza y el torso en la mitad superior de su panel. Detras de cada uno, el interior de la posada desenfocado con profundidad de campo fuerte: vigas bajas, el fuego del hogar, luz de farol.
 
-Celda 1, izquierda: un hombre joven de unos veinte años, delgado, pelo oscuro revuelto, ojeras marcadas de no dormir, camisa de lino sucia y delantal de mozo de posada. Mira de reojo hacia un lado, como si vigilara la puerta. Expresion de miedo contenido que intenta disimular.
+Son gente de un pueblo minero pobre de montaña. Ropa de trabajo gastada, lana y cuero, nada de armaduras, nada de armas, nada de magia.
 
-Celda 2, centro: una mujer de unos cuarenta y cinco años, robusta, pelo recogido con mechones grises, delantal sobre vestido de lana marron, un libro grueso de registro bajo el brazo. Mirada directa y evaluadora, boca cerrada. Cortes pero sin calidez.
+Panel 1, color dominante ocre apagado: un hombre joven de unos veinte años, delgado, pelo oscuro revuelto, ojeras marcadas de no dormir, camisa de lino sucia y delantal de mozo de posada. Sostiene una jarra a medio servir y mira de reojo hacia la puerta, como si vigilara. Miedo contenido que intenta disimular.
 
-Celda 3, derecha: un hombre de unos sesenta años, capataz de mina, barba gris descuidada de varios dias, cara curtida, abrigo pesado sobre camisa arrugada. Se le ve agotado y sin dormir, con los ojos de quien lleva ocho dias encerrado. Expresion de culpa, no de enfado.
+Panel 2, color dominante verde oscuro: una mujer de unos cuarenta y cinco años, robusta, pelo recogido con mechones grises, delantal sobre vestido de lana marron. Tiene una mano abierta sobre un libro de registro grueso, como protegiendolo, y mira al frente evaluando. Cortes pero sin calidez.
 
-Sin texto, sin nombres, sin letras, sin numeros, sin marcos decorativos, sin armas a la vista.
+Panel 3, color dominante azul pizarra: un hombre de unos sesenta años, capataz de mina, barba gris descuidada de varios dias, cara curtida, abrigo pesado sobre camisa arrugada. Sostiene un farol bajo, que le ilumina la cara desde abajo. Agotado, sin dormir, con expresion de culpa y no de enfado.
+
+Sin texto, sin nombres, sin letras, sin numeros.
 ```
 
 Recorte: `python3 tools/packs/crop-portraits.py <lamina> content/packs/pilot/portraits tomas bren osric`
@@ -298,23 +311,27 @@ Recorte: `python3 tools/packs/crop-portraits.py <lamina> content/packs/pilot/por
 ## 6. Los seis del palacio (`private-botica`)
 
 ```text
-Lamina de retratos de seis personajes, en una rejilla de 3 columnas por 2 filas, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x2048 pixeles.
+Lamina de cartas de personaje, seis paneles verticales en una rejilla de 3 columnas por 2 filas, como las cartas de un juego de rol ilustrado. Imagen de 3072x2048 pixeles. Cada panel tiene su propio marco fino y un color dominante distinto, separados por un margen claro.
 
-Estilo: ilustracion anime japonesa de alta calidad, linea limpia, ojos grandes y detallados, sombreado suave, al estilo de una novela ligera de ambientacion china imperial clasica. Luz calida de farol de papel, paleta con rojo laca, verde jade y dorado. Tiene que parecerse a los retratos de los personajes jugables de este mismo pack, que son anime, no realistas. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Detras de cada uno, un fondo muy desenfocado en tonos suaves que solo sugiere un interior del palacio, sin objetos reconocibles: el retrato se ve pequeño y un fondo con detalle se convierte en ruido.
+Estilo: ilustracion anime japonesa de alta calidad, linea limpia, ojos grandes y detallados, sombreado suave y colorido rico, al estilo de una novela ligera de ambientacion china imperial clasica. Iluminacion calida de farol de papel. Tiene que parecerse a los retratos de los personajes jugables de este mismo pack, que son anime, no realistas.
 
-Fila de arriba, celda 1: una mujer joven de unos diecinueve años, boticaria, pelo negro recogido con un palillo sencillo, pecas, ropa de sirvienta del palacio sin adornos, manos manchadas de tinte de hierbas. Mirada despierta y analitica, sin sonreir. Una cicatriz pequeña de quemadura en un antebrazo.
+Cada personaje aparece de medio cuerpo, en pose expresiva y haciendo algo que cuenta quien es, con la cabeza y el torso en la mitad superior de su panel. Detras de cada uno, un interior del palacio desenfocado con profundidad de campo fuerte: celosias de madera, ciruelos en flor, faroles de papel.
 
-Fila de arriba, celda 2: un hombre joven de belleza llamativa e incomoda, pelo negro largo y perfecto, tunica de funcionario de alto rango en seda oscura con bordado discreto. Sonrisa amable que no llega a los ojos.
+Todos visten hanfu o tunica china imperial, con la tela y los bordados detallados.
 
-Fila de arriba, celda 3: una mujer de unos veinticinco años, consorte de rango alto, ojos verdes, pelo rojizo recogido con horquillas de jade y oro, tunica de seda ricamente bordada. Porte sereno y frio, muy consciente de que la miran.
+Panel 1, verde jade: una mujer joven de unos diecinueve años, boticaria, pelo negro recogido con un palillo sencillo, pecas, ropa de sirvienta sin adornos. Sostiene un frasco pequeño a contraluz y lo mira entrecerrando los ojos, analitica. Una venda fina en un antebrazo.
 
-Fila de abajo, celda 4: un hombre de unos setenta años, medico de la corte, barba blanca rala, gorro de funcionario, tunica gris sencilla, gafas pequeñas. Manos temblorosas visibles. Expresion cansada y prudente.
+Panel 2, indigo profundo: un hombre joven de belleza llamativa e incomoda, pelo negro largo y perfecto, tunica de funcionario de alto rango en seda oscura con bordado discreto. Sonrie con la cabeza ligeramente ladeada, una sonrisa amable que no llega a los ojos.
 
-Fila de abajo, celda 5: un hombre de unos cuarenta años, estratega de la corte, gafas redondas de montura fina, pelo descuidado recogido a medias, tunica de funcionario puesta sin cuidado. Mirada ausente, como si mirara a traves de quien tiene delante.
+Panel 3, rojo laca: una mujer de unos veinticinco años, consorte de rango alto, ojos verdes, pelo rojizo recogido con horquillas de jade y oro, tunica ricamente bordada. Sostiene una taza de te sin beberla, con porte sereno y frio.
 
-Fila de abajo, celda 6: una mujer de unos veinticinco años, dama de servicio, rostro completamente inexpresivo, pelo negro liso y tirante, tunica de sirvienta lisa y oscura. Manos cuidadas de quien trabaja con hierbas. Quieta, casi sin presencia.
+Panel 4, gris piedra: un hombre de unos setenta años, medico de la corte, barba blanca rala, gorro de funcionario, tunica gris sencilla, gafas pequeñas. Escribe en un cuaderno con mano temblorosa, la mirada baja, cansado y prudente.
 
-Sin texto, sin nombres, sin letras, sin numeros, sin marcos decorativos.
+Panel 5, ocre viejo: un hombre de unos cuarenta años, estratega de la corte, gafas redondas de montura fina, pelo descuidado recogido a medias, tunica puesta sin cuidado. Sostiene una pieza de juego de mesa entre dos dedos, mirando a traves de quien tiene delante, ausente.
+
+Panel 6, morado apagado: una mujer de unos veinticinco años, dama de servicio, rostro completamente inexpresivo, pelo negro liso y tirante, tunica lisa y oscura. Sostiene una bandeja con las dos manos, perfectamente quieta, casi sin presencia.
+
+Sin texto, sin nombres, sin letras, sin numeros.
 ```
 
 Recorte, por filas y de izquierda a derecha:
