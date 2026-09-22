@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 00:20 CST**. Rama `dev`, commit `ef5c4f3`.
+Fecha de corte: **2026-09-22, 00:50 CST**. Rama `dev`, commit `77f5bb3`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -123,6 +123,17 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - **Coste medido**, no estimado: **0.019 USD por turno**. Una sesion de 20
   turnos con cuatro jugadores cuesta 1.26 USD con Sonnet y 0.42 con Haiku.
 
+### Correo (22-09)
+
+- **Sale correo de verdad**: Resend por SMTP estandar, sin paquete ni
+  dependencia nueva, asi que cambiar de proveedor es cambiar variables.
+- **Recuperar contraseña funciona**, probado de punta a punta en produccion:
+  correo, token, pagina, cambio y login con la clave nueva.
+- **Correo de bienvenida** al registrarse, que habla de la mesa y no del
+  producto; va a la cola y no sale si ademas hay que verificar el correo.
+- Pendiente: **verificar el dominio** (ver punto 1 de lo que bloquea) y los
+  avisos de mesa ("es tu turno").
+
 ### Operacion
 
 - Seis servicios de systemd con arranque automatico, comprobado en un reinicio
@@ -183,8 +194,11 @@ director se acuerda de emitir `move` en una partida larga.
    operando la aplicacion toda la partida. Ojo: quien entra **gasta turnos del
    anfitrion**, asi que el enlace necesita tope de plazas y revocacion. Opciones
    en `docs/18`, decision D-UX-1.
-1. **Recuperar contraseña no funciona.** `MAIL_MAILER=log` en el servidor: el
-   enlace se escribe en un archivo que nadie lee. Hace falta un SMTP real.
+1. **Verificar el dominio en Resend** (lo hace Gabino, son registros DNS). El
+   correo **ya sale** desde el 22-09 y recuperar contraseña funciona de punta a
+   punta, pero mientras el dominio no este verificado el remitente es
+   `onboarding@resend.dev`, que **solo entrega a la cuenta dueña de Resend**.
+   Sirve para probar, no para usuarios.
 2. **No hay documentacion de usuario.** Ninguna. `docs/` es SDD; README y
    RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa,
    invitar o jugar un turno.
