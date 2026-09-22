@@ -5,6 +5,7 @@ import { characterNameFrom, memberTag, pendingReceived, seatLabel, tableCardMeta
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FriendsPanel } from '../../components/FriendsPanel'
+import { RetireTable } from '../../components/RetireTable'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
@@ -87,6 +88,9 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
   }, [client, packIds])
 
   const nameOf = (id: string) => characterNameFrom(pack, remoteNames, id)
+  // Las archivadas no estorban arriba: van plegadas al final.
+  const activas = tables?.filter((t) => t.status !== 'archived')
+  const archivadas = tables?.filter((t) => t.status === 'archived')
 
   return (
     <main className="page">
@@ -115,7 +119,7 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
       {tables?.length === 0 ? <p className="hint">No estás en ninguna mesa todavía. Crea una o pide al anfitrión que te invite.</p> : null}
 
       <div className="table-list">
-        {tables?.map((table) => {
+        {activas?.map((table) => {
           const me = memberOf(table, user.id)
           const others = table.members.filter((m) => m.id !== me?.id)
           return (
@@ -139,10 +143,33 @@ function Tables({ client, user, unauthorized, logout }: { client: ApiClient; use
                 </div>
               ) : null}
               {!table.campaignId ? <div className="error" style={{ marginTop: 8 }}>Esta mesa no tiene campaña todavía.</div> : null}
+              <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={() => void load(true)} />
             </Link>
           )
         })}
       </div>
+
+      {archivadas && archivadas.length > 0 ? (
+        <details className="archivadas">
+          <summary>Mesas archivadas ({archivadas.length})</summary>
+          <p className="hint">No salen arriba, pero siguen guardadas con todo lo que jugaron. Puedes recuperarlas cuando quieras.</p>
+          <div className="table-list">
+            {archivadas.map((table) => {
+              const me = memberOf(table, user.id)
+              return (
+                <Link key={table.id} href={`/mesas/${table.id}`} className="table-card quiet">
+                  <div className="top">
+                    <span className="name">{table.name}</span>
+                    <span className="badge quiet">archivada</span>
+                  </div>
+                  <div className="meta">{tableCardMeta(table, packs)}</div>
+                  <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={() => void load(true)} />
+                </Link>
+              )
+            })}
+          </div>
+        </details>
+      ) : null}
 
       <div id="amigos" style={{ marginTop: 24 }}>
         <FriendsPanel client={client} meId={user.id} onUnauthorized={unauthorized} />

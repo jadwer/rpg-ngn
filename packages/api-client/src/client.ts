@@ -52,6 +52,18 @@ export interface ApiClient extends AccountApi, SettingsApi {
   setPresence(tableId: string | number, memberId: string | number, present: boolean): Promise<void>
   /** La personalidad del propio personaje (solo el miembro dueño); null o vacio la borra. */
   setPersona(tableId: string | number, memberId: string | number, persona: string | null): Promise<void>
+  /**
+   * Archiva la mesa o la recupera (solo el anfitrion). Archivar la saca de la
+   * lista sin tocar la cronica: una partida jugada tambien es de los demas.
+   */
+  archiveTable(tableId: string | number, archived: boolean): Promise<void>
+  /**
+   * Borra la mesa de verdad, y **solo si nunca se jugo** (409 con el motivo si
+   * ya tiene eventos). Para lo jugado, `archiveTable`.
+   */
+  deleteTable(tableId: string | number): Promise<void>
+  /** El invitado se va de la mesa; la mesa sigue para los demas. El anfitrion no puede (409). */
+  leaveTable(tableId: string | number): Promise<void>
   /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
@@ -144,6 +156,18 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async setPersona(tableId, memberId, persona) {
       await request(`/api/v1/tables/${tableId}/members/${memberId}/persona`, { method: 'POST', body: { persona } })
+    },
+
+    async archiveTable(tableId, archived) {
+      await request(`/api/v1/tables/${tableId}/archive`, { method: 'POST', body: { archived } })
+    },
+
+    async deleteTable(tableId) {
+      await request(`/api/v1/tables/${tableId}`, { method: 'DELETE' })
+    },
+
+    async leaveTable(tableId) {
+      await request(`/api/v1/tables/${tableId}/me`, { method: 'DELETE' })
     },
 
     async listFriendships() {
@@ -247,6 +271,9 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     }
   })
   const campaign = relationOne(resource, 'campaign')
+  // Cuantos eventos lleva la campaña: con cero, la mesa nunca se jugo y se
+  // puede borrar de verdad (`tableRetirement` en ui-logic).
+  const headSeq = attr<number>(included.get(campaign), 'headSeq', 0)
   const settings = attr<Record<string, unknown> | null>(resource, 'settings', null)
   const premise = settings && typeof settings['premise'] === 'string' && settings['premise'].trim() ? settings['premise'].trim() : null
   return {
@@ -260,6 +287,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     premise,
     settings: settings ?? {},
     campaignId: campaign ? String(campaign.id) : null,
+    headSeq,
     members,
   }
 }

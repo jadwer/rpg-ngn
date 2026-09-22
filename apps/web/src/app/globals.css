@@ -2268,3 +2268,62 @@ a.plain {
   color: var(--gold);
   font-weight: 400;
 }
+
+/* Retirar una mesa. Vive dentro de la tarjeta, que es un enlace, asi que el
+   panel se abre en su sitio y los botones cortan la navegacion. */
+.retirar {
+  align-self: flex-start;
+  margin-top: 8px;
+  opacity: 0.65;
+}
+
+.table-card:hover .retirar {
+  opacity: 1;
+}
+
+.retirar-panel {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.retirar-panel .row {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.retirar-panel .borrar {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 8px;
+  align-items: center;
+}
+
+.btn.danger {
+  border-color: var(--accent-bright);
+  color: var(--accent-bright);
+}
+
+.btn.danger:hover {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.archivadas {
+  margin-top: 20px;
+}
+
+.archivadas summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  color: var(--gold-dim);
+  letter-spacing: 0.03em;
+}
+
+.table-card.quiet {
+  opacity: 0.7;
+}

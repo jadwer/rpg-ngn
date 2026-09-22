@@ -1,6 +1,6 @@
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { characterNameFrom, noCharacterText, packOptionLabel, packSummaryText, premisePlaceholder, tableCardMeta, tableNamePlaceholder } from './table-copy.js'
+import { characterNameFrom, noCharacterText, packOptionLabel, packSummaryText, premisePlaceholder, retirementText, tableCardMeta, tableNamePlaceholder, tableRetirement } from './table-copy.js'
 
 const pack = (over: Partial<PackOption> = {}): PackOption => ({
   id: 'pilot',
@@ -91,5 +91,35 @@ describe('noCharacterText', () => {
     expect(noCharacterText('invite').hint).toContain('al abrir la mesa')
     expect(noCharacterText('create').title).toBe('Sin personaje')
     expect(noCharacterText('create').hint).toContain('diriges la mesa')
+  })
+})
+
+describe('retirar una mesa', () => {
+  it('el anfitrion de una mesa jugada solo puede archivar, y se le dice por que', () => {
+    const r = tableRetirement({ status: 'active' }, { host: true, played: true })
+
+    expect(r).toMatchObject({ canArchive: true, canDelete: false, canLeave: false, archived: false })
+    expect(r.deleteWarning).toBeNull()
+    expect(retirementText(r).hint).toContain('también es de los demás')
+  })
+
+  it('una mesa que nunca se jugo si se puede borrar, con aviso', () => {
+    const r = tableRetirement({ status: 'active' }, { host: true, played: false })
+
+    expect(r.canDelete).toBe(true)
+    expect(r.deleteWarning).toContain('no se puede deshacer')
+    expect(retirementText(r).hint).toContain('no se ha jugado')
+  })
+
+  it('archivada, la accion es recuperarla', () => {
+    const r = tableRetirement({ status: 'archived' }, { host: true, played: true })
+
+    expect(r.archived).toBe(true)
+    expect(retirementText(r).archive).toBe('Recuperar mesa')
+  })
+
+  it('el invitado se va; el anfitrion no puede irse de lo suyo', () => {
+    expect(tableRetirement({ status: 'active' }, { host: false, played: true })).toMatchObject({ canLeave: true, canArchive: false, canDelete: false })
+    expect(tableRetirement({ status: 'active' }, { host: true, played: true }).canLeave).toBe(false)
   })
 })

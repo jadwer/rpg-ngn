@@ -90,3 +90,50 @@ export function noCharacterText(context: 'create' | 'invite'): { title: string; 
   if (context === 'invite') return { title: 'Que elija al entrar', hint: 'Escoge su personaje al abrir la mesa, entre los libres' }
   return { title: 'Sin personaje', hint: 'Solo miras y diriges la mesa' }
 }
+
+/** Lo que se puede hacer para retirar una mesa de la lista. */
+export interface TableRetirement {
+  /** El anfitrion archiva; archivada, la recupera. */
+  canArchive: boolean
+  archived: boolean
+  /** Borrar de verdad, solo si la mesa nunca llego a jugarse. */
+  canDelete: boolean
+  /** El invitado se va; el anfitrion no puede irse de lo suyo. */
+  canLeave: boolean
+  /** Que se le advierte antes de confirmar, o null si la accion no necesita aviso. */
+  deleteWarning: string | null
+}
+
+/**
+ * Que puede hacer este asiento con esta mesa (Gabino, 22-09: "no hay
+ * mecanismos para borrar mesas").
+ *
+ * La regla de fondo: **una partida jugada no se borra, se archiva**, porque lo
+ * que pasó en ella también es de los demás jugadores y el registro es de
+ * solo-anexar. Borrar de verdad queda para las mesas que nunca se jugaron, que
+ * son las de prueba y las que se crean por error.
+ *
+ * `played` sale de que la campaña tenga eventos; sin campaña cargada se asume
+ * que no se jugó, y el servidor lo vuelve a comprobar de todos modos.
+ */
+export function tableRetirement(table: { status: string }, options: { host: boolean; played: boolean }): TableRetirement {
+  const archived = table.status === 'archived'
+  return {
+    canArchive: options.host,
+    archived,
+    canDelete: options.host && !options.played,
+    canLeave: !options.host,
+    deleteWarning: options.host && !options.played ? 'Se borra la mesa y no se puede deshacer.' : null,
+  }
+}
+
+/** El texto del aviso al retirar, segun lo que toque. */
+export function retirementText(retirement: TableRetirement): { archive: string; hint: string } {
+  if (retirement.archived) {
+    return { archive: 'Recuperar mesa', hint: 'Archivada: no sale en tu lista, pero sigue guardada con todo lo que jugaron.' }
+  }
+  if (retirement.canDelete) {
+    return { archive: 'Archivar', hint: 'Esta mesa no se ha jugado todavía, así que también puedes borrarla del todo.' }
+  }
+  return { archive: 'Archivar mesa', hint: 'Lo que jugaron se guarda: una partida también es de los demás, así que se archiva en vez de borrarse.' }
+}

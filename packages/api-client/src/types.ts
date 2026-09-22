@@ -45,6 +45,8 @@ export interface TableSummary {
   settings: Record<string, unknown>
   /** Viene con `include=campaign`; null si la mesa no tiene campaña. */
   campaignId: string | null
+  /** Eventos de la campaña. Cero significa que la mesa nunca se jugo. */
+  headSeq: number
   /** Viene con `include=members.user`. */
   members: TableMember[]
 }
