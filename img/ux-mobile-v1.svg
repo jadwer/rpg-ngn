@@ -5,8 +5,8 @@
  <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="16" flood-opacity=".35"/></filter>
 </defs>
 <rect width="1800" height="1050" fill="#07090f"/>
-<text x="80" y="70" fill="#f4f1ff" font-family="Inter,Arial" font-size="38" font-weight="700">RPG WORLDS — Mobile UX v1</text>
-<text x="80" y="108" fill="#a9a4b8" font-family="Inter,Arial" font-size="18">Narrativa → decisión → acción → espera → resolución. No es un VTT comprimido.</text>
+<text x="80" y="70" fill="#f4f1ff" font-family="Inter,Arial" font-size="38" font-weight="700">RPG WORLDS — Mobile UX v1.1</text>
+<text x="80" y="108" fill="#a9a4b8" font-family="Inter,Arial" font-size="18">La Mascarada · narrativa → decisión → acción → espera → resolución</text>
 
 <!-- phone 1 -->
 <g transform="translate(70 155)" filter="url(#shadow)">
@@ -22,12 +22,12 @@
 <text x="45" y="266" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">cuando las necesitas.</text>
 <rect x="20" y="322" width="330" height="92" rx="22" fill="#171b27"/>
 <circle cx="70" cy="368" r="29" fill="#8b5cf6"/><text x="61" y="375" fill="#fff" font-size="22">✦</text>
-<text x="112" y="357" fill="#fff" font-family="Inter,Arial" font-size="17" font-weight="700">Dayan</text>
-<text x="112" y="380" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">Arquera · Exploración</text>
+<text x="112" y="357" fill="#fff" font-family="Inter,Arial" font-size="17" font-weight="700">Armand</text>
+<text x="112" y="380" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">Corte · Prestigio</text>
 <rect x="20" y="435" width="330" height="92" rx="22" fill="#171b27"/>
 <circle cx="70" cy="481" r="29" fill="#06b6d4"/><text x="61" y="488" fill="#fff" font-size="22">✦</text>
-<text x="112" y="470" fill="#fff" font-family="Inter,Arial" font-size="17" font-weight="700">Zahira</text>
-<text x="112" y="493" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">Intriga · Relaciones</text>
+<text x="112" y="470" fill="#fff" font-family="Inter,Arial" font-size="17" font-weight="700">Camille</text>
+<text x="112" y="493" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">Etiqueta · Rumores</text>
 <rect x="20" y="550" width="330" height="54" rx="18" fill="#7c3aed"/><text x="124" y="584" fill="#fff" font-family="Inter,Arial" font-size="15" font-weight="700">Elegir personaje</text>
 <text x="110" y="664" fill="#817c91" font-family="Inter,Arial" font-size="12">sin reglas que aprender todavía</text>
 <text x="118" y="710" fill="#817c91" font-family="Inter,Arial" font-size="11">390 × 844 referencia</text>
@@ -47,7 +47,7 @@
 <text x="45" y="278" fill="#ddd9e5" font-family="Georgia,serif" font-size="17">de cerrar una puerta.</text>
 <text x="45" y="334" fill="#8d8799" font-family="Inter,Arial" font-size="12">Elige cualquier acción.</text>
 <rect x="20" y="469" width="330" height="112" rx="22" fill="#141823" stroke="#303546"/>
-<text x="40" y="499" fill="#7f7a8d" font-family="Inter,Arial" font-size="12">¿Qué hace Dayan?</text>
+<text x="40" y="499" fill="#7f7a8d" font-family="Inter,Arial" font-size="12">¿Qué hace Camille?</text>
 <text x="40" y="530" fill="#f1eef7" font-family="Inter,Arial" font-size="14">Escribo mi acción en lenguaje natural…</text>
 <text x="40" y="556" fill="#6e697a" font-family="Inter,Arial" font-size="12">Ej. “Me acerco a la puerta sin hacer ruido.”</text>
 <rect x="20" y="601" width="330" height="54" rx="18" fill="#7c3aed"/><text x="145" y="635" fill="#fff" font-family="Inter,Arial" font-size="15" font-weight="700">Declarar</text>
@@ -64,9 +64,9 @@
 <rect x="20" y="84" width="330" height="240" rx="26" fill="#111520"/>
 <text x="45" y="125" fill="#f4f1ff" font-family="Georgia,serif" font-size="21">El grupo guarda silencio.</text>
 <text x="45" y="165" fill="#aaa5b5" font-family="Inter,Arial" font-size="13">Tus compañeros ya decidieron.</text>
-<text x="45" y="215" fill="#fff" font-family="Inter,Arial" font-size="15">Dayan</text><text x="285" y="215" fill="#22c55e" font-family="Inter,Arial" font-size="13">Listo</text>
-<text x="45" y="250" fill="#fff" font-family="Inter,Arial" font-size="15">Zahira</text><text x="285" y="250" fill="#22c55e" font-family="Inter,Arial" font-size="13">Listo</text>
-<text x="45" y="285" fill="#fff" font-family="Inter,Arial" font-size="15">Calder</text><text x="275" y="285" fill="#06b6d4" font-family="Inter,Arial" font-size="13">Escribiendo</text>
+<text x="45" y="215" fill="#fff" font-family="Inter,Arial" font-size="15">Camille</text><text x="285" y="215" fill="#22c55e" font-family="Inter,Arial" font-size="13">Listo</text>
+<text x="45" y="250" fill="#fff" font-family="Inter,Arial" font-size="15">Armand</text><text x="285" y="250" fill="#22c55e" font-family="Inter,Arial" font-size="13">Listo</text>
+<text x="45" y="285" fill="#fff" font-family="Inter,Arial" font-size="15">Margot</text><text x="275" y="285" fill="#06b6d4" font-family="Inter,Arial" font-size="13">Escribiendo</text>
 <rect x="20" y="348" width="330" height="150" rx="24" fill="#181622" stroke="#3a3150"/>
 <text x="105" y="390" fill="#a98ee8" font-family="Inter,Arial" font-size="13">EL DESTINO SE PREPARA</text>
 <circle cx="135" cy="435" r="7" fill="#8b5cf6"/><circle cx="165" cy="435" r="7" fill="#5b3fa8"/><circle cx="195" cy="435" r="7" fill="#3c2a70"/>
@@ -82,18 +82,18 @@
 <text x="40" y="51" fill="#f4f1ff" font-family="Inter,Arial" font-size="14" font-weight="700">Resolución</text>
 <text x="287" y="51" fill="#9b91ae" font-family="Inter,Arial" font-size="12">Turno 04</text>
 <rect x="20" y="84" width="330" height="330" rx="26" fill="url(#scene)"/>
-<text x="111" y="127" fill="#c5b4ff" font-family="Inter,Arial" font-size="12" letter-spacing="2">PERCEPCIÓN</text>
-<text x="132" y="180" fill="#fff" font-family="Georgia,serif" font-size="22">El dado decide</text>
+<text x="117" y="127" fill="#c5b4ff" font-family="Inter,Arial" font-size="12" letter-spacing="2">OBSERVACIÓN</text>
+<text x="117" y="180" fill="#fff" font-family="Georgia,serif" font-size="22">El motor resuelve</text>
 <rect x="115" y="216" width="140" height="110" rx="22" fill="#f2eee5" transform="rotate(-6 185 270)"/>
 <text x="163" y="294" fill="#191622" font-family="Georgia,serif" font-size="58" font-weight="700">18</text>
-<text x="119" y="370" fill="#22c55e" font-family="Inter,Arial" font-size="16" font-weight="700">ÉXITO</text>
+<text x="105" y="370" fill="#c5b4ff" font-family="Inter,Arial" font-size="14" font-weight="700">LA HISTORIA CONTINÚA</text>
 <rect x="20" y="440" width="330" height="170" rx="24" fill="#141823"/>
-<text x="45" y="480" fill="#aaa5b5" font-family="Inter,Arial" font-size="12">RESULTADO</text>
+<text x="45" y="480" fill="#aaa5b5" font-family="Inter,Arial" font-size="12">CONSECUENCIA</text>
 <text x="45" y="515" fill="#f7f3ff" font-family="Georgia,serif" font-size="18">Ves una sombra detrás</text>
 <text x="45" y="542" fill="#f7f3ff" font-family="Georgia,serif" font-size="18">de la puerta antes de</text>
 <text x="45" y="569" fill="#f7f3ff" font-family="Georgia,serif" font-size="18">que desaparezca.</text>
 <text x="45" y="640" fill="#777181" font-family="Inter,Arial" font-size="12">La tirada vuelve a la historia.</text>
 </g>
 
-<text x="80" y="985" fill="#8e88a2" font-family="Inter,Arial" font-size="15">Concept board · no es especificación visual final. El objetivo es validar la arquitectura de experiencia antes de implementar.</text>
+<text x="80" y="985" fill="#8e88a2" font-family="Inter,Arial" font-size="15">Concept board · v1.1 · La Mascarada · valida arquitectura de experiencia, no especificación visual final.</text>
 </svg>
