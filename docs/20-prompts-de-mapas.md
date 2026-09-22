@@ -55,24 +55,24 @@ ven seguidos, asi que:
 
 # Los cuatro prompts
 
+**Copialos del bloque tal cual, entero.** Van en bloque de codigo y con cada
+parrafo en una sola linea a proposito: escritos como cita de markdown, al
+pegarlos se llevaban los `>` de cada linea y los cortes a media frase, y el
+generador los leia como parte del prompt. Tampoco llevan negritas dentro, por
+lo mismo: un generador de imagenes no entiende markdown, se come los asteriscos
+como texto.
+
 ## 1. Valdoria, el pueblo (`pilot`, mapa `valdoria`)
 
-> Mapa cenital ilustrado de un pueblo minero pequeño de montaña, estilo mapa de
-> fantasia dibujado a mano con tinta y acuarela oscura. Imagen cuadrada.
->
-> Composicion, en rejilla de tres por tres: en el centro una plaza de tierra
-> con un pozo de piedra; abajo a la izquierda del centro, una posada de dos
-> pisos con tejado de pizarra y humo en la chimenea; arriba a la derecha, una
-> casa de piedra aislada con las contraventanas cerradas y luz en las rendijas;
-> desde la esquina inferior izquierda, un camino de carro que sube entre pinos
-> y sale por el borde inferior de la imagen.
->
-> Entre los cuatro puntos, espacio vacio: tierra, hierba seca y pinos sueltos.
-> Noche cerrada con niebla baja. Paleta oscura y calida: marron tierra, verde
-> pino apagado, y la luz amarilla de las ventanas como unico color vivo.
->
-> Sin texto, sin etiquetas, sin numeros, sin rosa de los vientos, sin personas
-> ni animales.
+```text
+Mapa cenital ilustrado de un pueblo minero pequeño de montaña, estilo mapa de fantasia dibujado a mano con tinta y acuarela oscura. Imagen cuadrada.
+
+Composicion, en rejilla de tres por tres: en el centro una plaza de tierra con un pozo de piedra; abajo a la izquierda del centro, una posada de dos pisos con tejado de pizarra y humo en la chimenea; arriba a la derecha, una casa de piedra aislada con las contraventanas cerradas y luz en las rendijas; desde la esquina inferior izquierda, un camino de carro que sube entre pinos y sale por el borde inferior de la imagen.
+
+Entre los cuatro puntos, espacio vacio: tierra, hierba seca y pinos sueltos. Noche cerrada con niebla baja. Paleta oscura y calida: marron tierra, verde pino apagado, y la luz amarilla de las ventanas como unico color vivo.
+
+Sin texto, sin etiquetas, sin numeros, sin rosa de los vientos, sin personas ni animales.
+```
 
 **Las cuatro zonas y donde deberian caer** (se miden despues sobre la imagen):
 plaza en el centro, posada abajo a la izquierda del centro, casa de Osric
@@ -80,61 +80,42 @@ arriba a la derecha, camino abajo a la izquierda.
 
 ## 2. La mina (`pilot`, mapa `mina`)
 
-> Corte vertical en seccion de una mina de montaña, estilo plano de ingeniero
-> antiguo dibujado a tinta sobre papel oscuro, con la roca en acuarela. Imagen
-> cuadrada. **Vista de perfil**: se ve la montaña cortada por la mitad y las
-> galerias una debajo de otra.
->
-> Composicion, de arriba abajo por el centro de la imagen: arriba del todo, la
-> boca de la mina, un arco de madera apuntalado en la ladera; debajo, una
-> galeria ancha con railes y vagonetas; mas abajo, una galeria mas estrecha con
-> agua en las paredes; mas abajo aun, una galeria sin apuntalar cortada a mano;
-> y en el fondo, un pozo vertical redondo, demasiado regular, del que no se ve
-> el final.
->
-> Las cuatro galerias unidas por rampas cortas, bien separadas entre si, con
-> roca maciza alrededor. Paleta oscura: negro, gris pizarra, ocre de las
-> lamparas. La misma tecnica y la misma paleta que el mapa del pueblo del mismo
-> pack.
->
-> Sin texto, sin etiquetas, sin numeros, sin personas.
+```text
+Corte vertical en seccion de una mina de montaña, estilo plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca en acuarela. Imagen cuadrada. Vista de perfil: se ve la montaña cortada por la mitad y las galerias una debajo de otra.
+
+Composicion, de arriba abajo por el centro de la imagen: arriba del todo, la boca de la mina, un arco de madera apuntalado en la ladera; debajo, una galeria ancha con railes y vagonetas; mas abajo, una galeria mas estrecha con agua en las paredes; mas abajo aun, una galeria sin apuntalar cortada a mano; y en el fondo, un pozo vertical redondo, demasiado regular, del que no se ve el final.
+
+Las cuatro galerias unidas por rampas cortas, bien separadas entre si, con roca maciza alrededor. Paleta oscura: negro, gris pizarra, ocre de las lamparas. La misma tecnica y la misma paleta que el mapa del pueblo del mismo pack.
+
+Sin texto, sin etiquetas, sin numeros, sin personas.
+```
 
 **Nota de continuidad**: la boca de la mina es el mismo sitio donde muere el
 camino del mapa del pueblo. Conviene que se parezca.
 
 ## 3. El palacio interior (`private-botica`, mapa `palacio`)
 
-> Mapa cenital de un recinto palaciego imperial de estilo chino clasico, dentro
-> de una muralla, ilustrado a tinta y acuarela. Imagen cuadrada.
->
-> Composicion, en rejilla de tres por tres: en el centro, un patio empedrado
-> con un estanque; arriba a la izquierda, un pabellon elegante de tejado curvo
-> verde jade rodeado de un jardin pequeño; arriba a la derecha, un edificio
-> alargado de cocinas con patio de servicio y pozos de agua; abajo en el
-> centro, un almacen bajo y cerrado, con estantes visibles por una puerta
-> abierta y hierbas secandose bajo el alero.
->
-> Todo dentro de una muralla de ladrillo rojo oscuro que rodea la imagen. Entre
-> los edificios, espacio abierto: losas, arboles podados y pasillos cubiertos.
-> Noche. Paleta oscura y calida: rojo laca, verde jade apagado, dorado viejo.
->
-> Sin texto, sin etiquetas, sin numeros, sin personas.
+```text
+Mapa cenital de un recinto palaciego imperial de estilo chino clasico, dentro de una muralla, ilustrado a tinta y acuarela. Imagen cuadrada.
+
+Composicion, en rejilla de tres por tres: en el centro, un patio empedrado con un estanque; arriba a la izquierda, un pabellon elegante de tejado curvo verde jade rodeado de un jardin pequeño; arriba a la derecha, un edificio alargado de cocinas con patio de servicio y pozos de agua; abajo en el centro, un almacen bajo y cerrado, con estantes visibles por una puerta abierta y hierbas secandose bajo el alero.
+
+Todo dentro de una muralla de ladrillo rojo oscuro que rodea la imagen. Entre los edificios, espacio abierto: losas, arboles podados y pasillos cubiertos. Noche. Paleta oscura y calida: rojo laca, verde jade apagado, dorado viejo.
+
+Sin texto, sin etiquetas, sin numeros, sin personas.
+```
 
 ## 4. La ciudad exterior (`private-botica`, mapa `ciudad`)
 
-> Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de
-> las murallas del palacio, ilustrado con la misma tinta y acuarela oscura que
-> el mapa del palacio del mismo pack.
->
-> Composicion: en el centro, una calle ancha de faroles rojos con casas de tres
-> pisos con balcones corridos a ambos lados; alrededor, callejones estrechos y
-> tejados apretados; en el borde superior de la imagen, la muralla del palacio
-> cerrando el barrio por arriba, con una puerta.
->
-> Noche. Paleta oscura y calida, con el rojo de los faroles como unico color
-> vivo. **Mismo estilo y misma paleta que el mapa del palacio.**
->
-> Sin texto, sin etiquetas, sin numeros, sin personas.
+```text
+Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, ilustrado con la misma tinta y acuarela oscura que el mapa del palacio del mismo pack.
+
+Composicion: en el centro, una calle ancha de faroles rojos con casas de tres pisos con balcones corridos a ambos lados; alrededor, callejones estrechos y tejados apretados; en el borde superior de la imagen, la muralla del palacio cerrando el barrio por arriba, con una puerta.
+
+Noche. Paleta oscura y calida, con el rojo de los faroles como unico color vivo. Mismo estilo y misma paleta que el mapa del palacio.
+
+Sin texto, sin etiquetas, sin numeros, sin personas.
+```
 
 **Nota de continuidad**: la muralla del borde superior es la misma que rodea el
 mapa del palacio, vista desde fuera.
