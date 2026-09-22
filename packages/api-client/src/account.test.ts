@@ -47,6 +47,15 @@ describe('cuenta', () => {
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
   })
 
+  it('borra la cuenta mandando la contraseña, y devuelve lo que dice el servidor', async () => {
+    const { api, calls } = client({ 'DELETE /api/v1/profile': { body: { meta: { message: 'Cuenta borrada. Lo que escribiste se conserva sin tu nombre.' } } } })
+
+    const mensaje = await api.deleteAccount('mi-clave')
+
+    expect(mensaje).toContain('sin tu nombre')
+    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ password: 'mi-clave' })
+  })
+
   it('con verificacion de correo el registro no trae token', async () => {
     const { api } = client({ 'POST /api/auth/register': { status: 201, body: { message: 'Cuenta creada. Verifica tu correo electronico para continuar.', email_verified: false } } }, null)
     const result = await api.register({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', passwordConfirmation: 'clave-larga' }, 'web')

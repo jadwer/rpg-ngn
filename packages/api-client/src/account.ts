@@ -40,6 +40,14 @@ export interface AccountApi {
   resetPassword(input: { token: string; email: string; password: string; passwordConfirmation: string }): Promise<string>
   /** Cuenta con ese correo exacto (`GET /api/v1/users/lookup`); null si no existe. Cualquier cuenta puede usarlo. */
   lookupUser(email: string): Promise<AuthUser | null>
+  /** Que pasaria al borrar la cuenta: si se puede y que mesas propias lo impiden. */
+  deletionPreview(): Promise<{ canDelete: boolean; ownedTables: Array<{ id: string; name: string; played: boolean }> }>
+  /**
+   * Borra la propia cuenta, de verdad y sin vuelta atras. Pide la contraseña
+   * (422 si no coincide) y falla con 409 mientras la persona sea anfitriona de
+   * alguna mesa. Lo que escribio en las partidas se conserva sin su nombre.
+   */
+  deleteAccount(password: string): Promise<string>
 }
 
 type Request = <T = unknown>(path: string, init?: RequestOptions) => Promise<HttpResult<T>>
@@ -89,6 +97,16 @@ export function accountApi(request: Request): AccountApi {
         body: { token: input.token, email: input.email.trim(), password: input.password, password_confirmation: input.passwordConfirmation },
       })
       return data?.message ?? 'Contraseña cambiada. Ya puedes entrar.'
+    },
+
+    async deletionPreview() {
+      const { data } = await request<{ data: { canDelete: boolean; ownedTables: Array<{ id: string; name: string; played: boolean }> } }>('/api/v1/profile/deletion')
+      return data.data
+    },
+
+    async deleteAccount(password) {
+      const { data } = await request<{ meta?: { message?: string } }>('/api/v1/profile', { method: 'DELETE', body: { password } })
+      return data?.meta?.message ?? 'Cuenta borrada.'
     },
 
     async lookupUser(email) {

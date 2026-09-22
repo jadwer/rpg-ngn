@@ -2,6 +2,7 @@
 
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState, type FormEvent } from 'react'
+import { DeleteAccount } from '../../components/DeleteAccount'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
 import { useSession } from '../../lib/session'
@@ -122,6 +123,8 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
           <span className="hint">Al menos 8 caracteres.</span>
         </div>
       </form>
+
+      <DeleteAccount client={client} onDeleted={logout} />
     </main>
   )
 }
