@@ -175,6 +175,7 @@ que falta para que entre alguien que no seamos nosotros.
 
 - [ ] **WebP como formato de los retratos.** Hoy son JPEG: los cinco de la boticaria pesan unos 480 KB en total y la lamina original 2.5 MB. En WebP con calidad equivalente son la mitad o menos, y el ahorro se multiplica cuando haya cientos de packs servidos desde el servidor. `tools/packs/crop-portraits.py` ya centraliza el recorte, asi que es cambiar el formato de salida y aceptar `.webp` en la ruta de retratos (el engine ya lo contempla en su validacion)
 
+- **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
 - Takedown y aviso de descarga externa
 - Texto de pack como contenido no confiable en el contexto del DM

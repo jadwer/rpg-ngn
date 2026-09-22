@@ -94,6 +94,19 @@ describe('loadPack sobre packs en memoria', () => {
     expect(issues).toContainEqual(expect.objectContaining({ level: 'error', path: 'sessions/001.json' }))
   })
 
+  it('marca error cuando startLocation apunta a un lugar que no existe', async () => {
+    const source = memorySource({
+      'pack.json': JSON.stringify(manifest),
+      'characters/ana.json': JSON.stringify(ana),
+      'sessions/001.json': JSON.stringify({ ...session, startLocation: 'ninguna-parte' }),
+    })
+
+    const { pack, issues } = await loadPack(source)
+
+    expect(pack).toBeNull()
+    expect(issues).toContainEqual(expect.objectContaining({ level: 'error', message: expect.stringContaining('ninguna-parte') }))
+  })
+
   it('marca error cuando el retrato no existe y advierte de archivos no declarados', async () => {
     const source = memorySource({
       'pack.json': JSON.stringify(manifest),

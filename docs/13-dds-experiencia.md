@@ -230,6 +230,16 @@ ese pie esta limitado al 55% del alto. En el telefono ocupa la pantalla
 entera y las etiquetas de los lugares se ocultan: quedan los puntos y las
 caras, que es lo que cabe.
 
+**La app del telefono lo tiene igual** (linea plegada mas modal a pantalla
+completa, con caminos, puntos y retratos). Se dibuja sin SVG, con vistas
+rotadas: para segmentos rectos el resultado es el mismo y evita añadir un
+modulo nativo a Expo Go solo para esto.
+
+**Al abrir la sesion la party ya esta colocada**, en el lugar que declara el
+pack (`startLocation`, docs/05). Sin eso el mapa decia "de camino o fuera de
+escena" de todo el mundo hasta que el director moviera a alguien, que es
+justo lo que no se puede dar por hecho.
+
 **Lo que hay que medir con gente**, y es la razon de haberlo construido
 ahora: si alguien lo abre por su cuenta durante la partida, si cambia como
 se declara ("me voy a la biblioteca"), y si el director se acuerda de mover

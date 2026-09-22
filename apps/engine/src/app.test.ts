@@ -89,6 +89,43 @@ describe('apps/engine', () => {
     expect((result.projections.narrative as { log: unknown[] }).log).toHaveLength(3)
   })
 
+  it('al abrir sesion coloca a la party donde el pack dice, para que el mapa no salga vacio de gente', async () => {
+    const request: ResolveTurnRequest = {
+      contract: ENGINE_CONTRACT_VERSION,
+      campaignId: '2',
+      pack: { id: 'mascarada', version: '0.1.0' },
+      ruleset: 'masquerade@1.0.0',
+      snapshot: null,
+      events: [
+        {
+          id: 'evt-00001',
+          v: 1,
+          seq: 1,
+          type: 'session_started',
+          sessionId: '001',
+          recordedAt: '2026-09-20T20:00:00Z',
+          payload: { party: ['character:camille', 'character:etienne'] },
+        },
+      ],
+      turn: { id: 't-1', number: 1, sessionId: '001', responses: [] },
+      provider: { kind: 'scripted' },
+    }
+
+    const lines = await readLines(await app.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(request) }))
+    const result = lines.at(-1)
+
+    expect(result?.kind).toBe('result')
+    if (result?.kind !== 'result') return
+    const colocacion = result.events.find((e) => e.type === 'world_event')
+    expect(colocacion?.effects).toEqual([
+      { op: 'move', who: 'character:camille', to: 'salon-grande' },
+      { op: 'move', who: 'character:etienne', to: 'salon-grande' },
+    ])
+    const world = result.projections.world as { characters: Record<string, { location?: string | null }> }
+    expect(world.characters['camille']?.location).toBe('salon-grande')
+    expect(world.characters['etienne']?.location).toBe('salon-grande')
+  })
+
   it('falla limpio si la sesion no esta abierta o el pack no existe', async () => {
     const snapshot = await pilotSnapshot()
     const base = {

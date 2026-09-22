@@ -84,6 +84,23 @@ Tres decisiones y su motivo:
 El campo es opcional en el tipo para que los snapshots anteriores sigan
 siendo validos.
 
+**Donde arranca la party.** Al abrir sesion nadie tiene ubicacion todavia, asi
+que sin mas el mapa de la mesa sale vacio de gente durante toda la primera
+escena y el DM es el unico que puede arreglarlo. Para evitarlo, la sesion del
+pack declara `startLocation` (docs/05) y el engine emite un `world_event` con
+un `move` por cada personaje de la party **que no tenga ya ubicacion**:
+
+```json
+{"type": "world_event", "location": "salon-grande",
+ "payload": {"note": "La sesion arranca en el Salon Grande."},
+ "effects": [{"op": "move", "who": "character:camille", "to": "salon-grande"}]}
+```
+
+Dos consecuencias buscadas: queda **en el log** como cualquier otro hecho del
+mundo (no es estado inventado por el cliente), y al respetar a quien ya tiene
+ubicacion, reabrir una sesion no teletransporta a nadie de vuelta a la entrada.
+Un pack sin `startLocation` se comporta como antes.
+
 Lo mismo se hizo con dos efectos mas que tampoco dependen del ruleset:
 `relationship` (como trata un NPC a un personaje, de -5 a 5, en
 `custom.relationships` del NPC) y `condition` cuando el sujeto es un NPC (en

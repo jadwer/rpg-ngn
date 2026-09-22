@@ -1,4 +1,4 @@
-import { ApiError, randomKey, type ApiClient, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
+import { ApiError, randomKey, type ApiClient, type PackMapView, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
@@ -8,6 +8,7 @@ import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
 import { HostPanel } from '../../components/HostPanel'
+import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
 import { TurnPanel } from '../../components/TurnPanel'
@@ -55,6 +56,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const [worldTime, setWorldTime] = useState<string | null>(null)
   const [projections, setProjections] = useState<{ seq: number | null; own: CharacterState | undefined; world: Record<string, CharacterState> | undefined }>({ seq: null, own: undefined, world: undefined })
   const [existingSessions, setExistingSessions] = useState<SessionSummary[]>([])
+  const [maps, setMaps] = useState<PackMapView[]>([])
 
   const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
@@ -104,6 +106,21 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       alive = false
     }
   }, [client, pack, table.packId, table.packVersion])
+
+  // Los mapas del pack, si trae alguno. Sin mapa no se pinta nada.
+  useEffect(() => {
+    let alive = true
+    void client.listPackMaps(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setMaps(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.packId, table.packVersion])
+
   const freeToPick = useMemo(() => {
     if (pack) return freeCharacters(pack, table.members)
     return freeRemoteCharacters(remote, table.members).map((c) => {
@@ -247,14 +264,26 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     void act(() => client.closeSession(session.id, cliffhanger ?? undefined).then(() => undefined), 'No se pudo cerrar la sesión.')
   }
 
-  /** Fichas con estado vivo: la propia desde player:<id>, las ajenas desde world. Se piden al abrir el modal. */
-  const openSheets = () => {
-    setSheetsOpen(true)
+  /** Estado vivo: la ficha propia desde player:<id>, las ajenas desde world. */
+  const pedirProyecciones = useCallback(() => {
     if (!campaignId) return
     const own = viewer.characterId ? client.playerProjection(campaignId, viewer.characterId).then((p) => p.projection.character, () => undefined) : Promise.resolve(undefined)
     const world = client.worldProjection(campaignId).then((p) => ({ seq: p.seq, characters: p.projection.characters }), () => null)
     void Promise.all([own, world]).then(([mine, w]) => setProjections({ seq: w?.seq ?? null, own: mine, world: w?.characters }))
+  }, [client, campaignId, viewer.characterId])
+
+  const openSheets = () => {
+    setSheetsOpen(true)
+    pedirProyecciones()
   }
+
+  // Si la mesa tiene mapa hay que pedir el estado sin esperar a que nadie abra
+  // las fichas: el mapa necesita saber donde esta cada uno. Pedirlo solo al
+  // abrir el panel fue justo el fallo que dejaba el mapa web sin gente.
+  useEffect(() => {
+    if (maps.length === 0) return
+    pedirProyecciones()
+  }, [maps.length, pedirProyecciones, headSeq])
   const entries = useMemo(
     () => (pack ? onlineSheetEntries({ pack, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
     [pack, sessionCode, table.members, viewer.characterId, projections],
@@ -340,6 +369,21 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             }}
           />
         </View>
+      ) : null}
+      {maps.length > 0 ? (
+        <MapPanel
+          baseUrl={client.baseUrl}
+          packId={table.packId}
+          map={maps[0] ?? null}
+          world={projections.world}
+          party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
+          nameOf={nameOf}
+          portraitOf={(id) => {
+            const portrait = pack?.characters.get(id)?.portrait ?? remote.find((c) => c.id === id)?.portrait
+            const path = packPortraitUrl(table.packId, portrait)
+            return path ? `${client.baseUrl}${path}` : null
+          }}
+        />
       ) : null}
       {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
         <PersonaPanel

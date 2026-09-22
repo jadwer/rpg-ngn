@@ -59,6 +59,20 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let addressed: string[] = session.party
   let usage = { inputTokens: 0, outputTokens: 0 }
 
+  // Cierra un evento nacido en el engine con su id, version y momento. El
+  // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
+  const seal = (event: { type: string } & Record<string, unknown>) => {
+    const seq = state.meta.headSeq + 1
+    return CampaignEvent.safeParse({
+      ...event,
+      id: eventIdFor(seq),
+      v: EVENT_SCHEMA_VERSION,
+      seq,
+      sessionId: request.turn.sessionId,
+      recordedAt: deps.now().toISOString(),
+    })
+  }
+
   try {
     // Apertura de sesion (turno 1 sin declaraciones): antes de que el DM
     // presente la escena, la mesa recibe lo que el pack ya sabia y nadie le
@@ -76,6 +90,24 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
           audience: 'table',
           tone: 'info',
         },
+      }
+
+      // Y se coloca a la party donde el pack dice que arranca la sesion. Sin
+      // esto nadie tiene ubicacion hasta que el DM mueva a alguien, y el mapa
+      // de la mesa sale vacio de gente durante toda la primera escena.
+      const start = packSession.startLocation
+      const sinUbicar = start ? session.party.filter((id) => !state.world.characters[id]?.location) : []
+      if (start && sinUbicar.length > 0) {
+        const parsed = seal({
+          type: 'world_event',
+          location: start,
+          payload: { note: `La sesion arranca en ${pack.locations.get(start)?.name ?? start}.` },
+          effects: sinUbicar.map((id) => ({ op: 'move', who: `character:${id}`, to: start })),
+        })
+        if (parsed.success) {
+          state = applyEvent(state, parsed.data, ruleset, secrets)
+          events.push(parsed.data)
+        }
       }
     }
 
@@ -113,16 +145,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
-      const seq = state.meta.headSeq + 1
-      const candidate = {
-        ...output.event,
-        id: eventIdFor(seq),
-        v: EVENT_SCHEMA_VERSION,
-        seq,
-        sessionId: request.turn.sessionId,
-        recordedAt: deps.now().toISOString(),
-      }
-      const parsed = CampaignEvent.safeParse(candidate)
+      const parsed = seal(output.event)
       if (!parsed.success) {
         throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
       }

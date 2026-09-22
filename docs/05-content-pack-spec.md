@@ -141,6 +141,22 @@ generada**, pintando los marcadores encima para comprobar que cada uno cae
 dentro de su sala. En el palacio de La Mascarada, dos de seis estaban mal al
 primer intento.
 
+**Donde arranca la party: `startLocation` en la sesion.** Un pack con mapa
+deberia declararlo; si no lo hace, nadie tiene ubicacion hasta que el DM mueva
+a alguien y el mapa sale vacio de gente toda la primera escena:
+
+```json
+{
+  "id": "001",
+  "title": "Una noche puede cambiarlo todo",
+  "startLocation": "salon-grande"
+}
+```
+
+Al abrir la sesion, el engine coloca ahi a todo personaje de la party que no
+tenga ya ubicacion (docs/08). El cargador comprueba que el lugar exista en el
+pack. Es opcional: un pack sin lugares, como el piloto, no lo usa.
+
 ## Secretos: la capa `dm` del pack
 
 `secrets/<id>.json`, declarados en `pack.json` bajo `secrets`. Son la capa DM knowledge de

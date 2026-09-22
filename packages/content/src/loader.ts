@@ -146,6 +146,9 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
         issues.push({ level: 'error', path, message: `availableCharacters referencia a ${characterId}, que no esta en el pack` })
       }
     }
+    if (session.startLocation !== undefined && !locations.has(session.startLocation)) {
+      issues.push({ level: 'error', path, message: `startLocation apunta a ${session.startLocation}, que no esta en el pack` })
+    }
   }
 
   for (const [id, secret] of secrets) {
