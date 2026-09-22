@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-21, 22:40 CST**. Rama `dev`, commit `959b213`.
+Fecha de corte: **2026-09-22, 00:00 CST**. Rama `dev`, commit `2cd16d7`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -172,6 +172,17 @@ director se acuerda de emitir `move` en una partida larga.
 
 ### Bloquea abrir a usuarios que no seamos nosotros
 
+0. **No se puede entrar a una mesa sin que el anfitrion te lleve de la mano.**
+   Hoy son **seis pasos**: el invitado se registra, da su correo por fuera,
+   recibe solicitud de amistad, la acepta, el anfitrion lo invita buscandolo
+   por correo y recarga. La regla esta en el codigo: sin amistad aceptada no
+   hay invitacion. **No existe enlace de invitacion ni codigo de mesa.**
+   Descubierto el 21-09 al revisar `docs/16`, y es **el pendiente numero uno**
+   (decision de Gabino): explica por que la sesion con invitados del 20-09
+   empezo mal antes de la primera narracion, y por que el anfitrion acaba
+   operando la aplicacion toda la partida. Ojo: quien entra **gasta turnos del
+   anfitrion**, asi que el enlace necesita tope de plazas y revocacion. Opciones
+   en `docs/18`, decision D-UX-1.
 1. **Recuperar contraseña no funciona.** `MAIL_MAILER=log` en el servidor: el
    enlace se escribe en un archivo que nadie lee. Hace falta un SMTP real.
 2. **No hay documentacion de usuario.** Ninguna. `docs/` es SDD; README y
@@ -260,13 +271,22 @@ detalle esta anotado dentro de ese archivo.
 
 ### Hay que resolver antes de implementar
 
-1. **Mobile-first contra la decision D2.** Lo decide Gabino; si cambia, se
-   corrige en `docs/11` y no solo en `docs/16`.
-2. **Resolucion automatica del turno contra la decision D3.**
-3. **El coste por turno** no aparece en `docs/16`, y es la restriccion mas dura
-   del producto.
-4. **El concept board usa vocabulario de D&D** (PERCEPCION, EXITO, un d20) y
-   personajes del pack equivocado, contradiciendo su propio principio 8.
+**Las cinco decisiones abiertas estan planteadas con opciones y coste en
+`docs/18-decisiones-ux.md`. Las decide Gabino.**
+
+1. **Entrar a una mesa** (D-UX-1): no existe enlace de invitacion. Es el
+   pendiente numero uno y no es UX, es funcionalidad de servidor.
+2. **Mobile-first contra la decision D2** (D-UX-2). Si cambia, se corrige en
+   `docs/11` y no solo en `docs/16`.
+3. **Resolucion automatica del turno contra la decision D3** (D-UX-3).
+4. **El coste por turno** (D-UX-4): no aparece en `docs/16` y es la restriccion
+   mas dura del producto.
+5. **Arquitectura de superficies** (D-UX-5): tres composiciones triplican el
+   mantenimiento con un equipo de una persona.
+
+El concept board ya se corrigio (`b430597`): personajes reales del pack,
+Observacion en vez de Percepcion, y "LA HISTORIA CONTINUA" en vez de un "EXITO"
+verde, que quita el binario exito/fracaso.
 
 ---
 
@@ -284,6 +304,7 @@ detalle esta anotado dentro de ese archivo.
 | Visual congelado y que NO copiar de la competencia | `docs/14` |
 | Packs de la comunidad (diseño, sin construir) | `docs/15` |
 | UX v1 propuesta, con revision anotada | `docs/16` |
+| Decisiones de UX abiertas, con opciones y coste | `docs/18` |
 | Detalle por entrega | `ROADMAP.md` |
 | Operacion del servidor | `RUNBOOK.md` |
 
