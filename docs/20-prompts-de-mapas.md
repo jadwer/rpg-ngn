@@ -242,3 +242,71 @@ mueve, no la imagen.
 
 Relacionado: `docs/05` (formato de mapas en el pack), `docs/08` (como se guarda
 donde esta cada personaje), `docs/13` 4.10 (lo que se ve en la mesa).
+
+---
+
+# Laminas de retratos de NPC
+
+Dos laminas que faltan, una por pack. Se piden **en rejilla** porque
+`tools/packs/crop-portraits.py` recorta de ahi los retratos sueltos al estandar
+del pack (512x512, WebP, cara y hombros con la cara en el tercio superior).
+
+Reglas comunes, que son las que hacen que el recorte automatico funcione:
+
+- **Rejilla regular**, con todas las celdas del mismo tamaño y separadas por un
+  marco o un margen visible.
+- **Cada personaje centrado en su celda**, de frente o tres cuartos, **de la
+  cintura para arriba**, con la cara en el tercio superior de la celda.
+- **Fondo neutro y oscuro** detras de cada uno, sin escenario: el retrato se ve
+  a 24 px en el dialogo, y un fondo con detalle se convierte en ruido.
+- **Sin texto, sin nombres, sin marcos decorados, sin numeros.**
+- Mismo estilo, misma luz y mismo encuadre en toda la lamina.
+
+## 5. Los tres de Valdoria (`pilot`)
+
+```text
+Lamina de retratos de tres personajes, en una rejilla de 3 columnas por 1 fila, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x1024 pixeles.
+
+Estilo: pintura digital realista con luz de fuego y farol, oscura y calida, como una ilustracion de novela de fantasia sobria. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Fondo neutro oscuro detras de cada uno, sin escenario, sin objetos de fondo.
+
+Son gente de un pueblo minero pobre de montaña, ropa de trabajo gastada, lana y cuero, nada de armaduras ni de magia.
+
+Celda 1, izquierda: un hombre joven de unos veinte años, delgado, pelo oscuro revuelto, ojeras marcadas de no dormir, camisa de lino sucia y delantal de mozo de posada. Mira de reojo hacia un lado, como si vigilara la puerta. Expresion de miedo contenido que intenta disimular.
+
+Celda 2, centro: una mujer de unos cuarenta y cinco años, robusta, pelo recogido con mechones grises, delantal sobre vestido de lana marron, un libro grueso de registro bajo el brazo. Mirada directa y evaluadora, boca cerrada. Cortes pero sin calidez.
+
+Celda 3, derecha: un hombre de unos sesenta años, capataz de mina, barba gris descuidada de varios dias, cara curtida, abrigo pesado sobre camisa arrugada. Se le ve agotado y sin dormir, con los ojos de quien lleva ocho dias encerrado. Expresion de culpa, no de enfado.
+
+Sin texto, sin nombres, sin letras, sin numeros, sin marcos decorativos, sin armas a la vista.
+```
+
+Recorte: `python3 tools/packs/crop-portraits.py <lamina> content/packs/pilot/portraits tomas bren osric`
+
+## 6. Los seis del palacio (`private-botica`)
+
+```text
+Lamina de retratos de seis personajes, en una rejilla de 3 columnas por 2 filas, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x2048 pixeles.
+
+Estilo: pintura digital realista de ambientacion china imperial clasica, luz calida de farol de papel, paleta oscura con rojo laca y verde jade. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Fondo neutro oscuro detras de cada uno, sin escenario.
+
+Fila de arriba, celda 1: una mujer joven de unos diecinueve años, boticaria, pelo negro recogido con un palillo sencillo, pecas, ropa de sirvienta del palacio sin adornos, manos manchadas de tinte de hierbas. Mirada despierta y analitica, sin sonreir. Una cicatriz pequeña de quemadura en un antebrazo.
+
+Fila de arriba, celda 2: un hombre joven de belleza llamativa e incomoda, pelo negro largo y perfecto, tunica de funcionario de alto rango en seda oscura con bordado discreto. Sonrisa amable que no llega a los ojos.
+
+Fila de arriba, celda 3: una mujer de unos veinticinco años, consorte de rango alto, ojos verdes, pelo rojizo recogido con horquillas de jade y oro, tunica de seda ricamente bordada. Porte sereno y frio, muy consciente de que la miran.
+
+Fila de abajo, celda 4: un hombre de unos setenta años, medico de la corte, barba blanca rala, gorro de funcionario, tunica gris sencilla, gafas pequeñas. Manos temblorosas visibles. Expresion cansada y prudente.
+
+Fila de abajo, celda 5: un hombre de unos cuarenta años, estratega de la corte, gafas redondas de montura fina, pelo descuidado recogido a medias, tunica de funcionario puesta sin cuidado. Mirada ausente, como si mirara a traves de quien tiene delante.
+
+Fila de abajo, celda 6: una mujer de unos veinticinco años, dama de servicio, rostro completamente inexpresivo, pelo negro liso y tirante, tunica de sirvienta lisa y oscura. Manos cuidadas de quien trabaja con hierbas. Quieta, casi sin presencia.
+
+Sin texto, sin nombres, sin letras, sin numeros, sin marcos decorativos.
+```
+
+Recorte, por filas y de izquierda a derecha:
+`python3 tools/packs/crop-portraits.py <lamina> <destino>/portraits maomao jinshi consorte-gyokuyou medico-anciano lakan suirei --rows 2`
+
+**Ojo con el destino de la boticaria**: su pack vive en
+`~/dev/rpg-packs/boticaria`, no en este repo (docs/07). El de Valdoria si va
+en `content/packs/pilot/portraits`.
