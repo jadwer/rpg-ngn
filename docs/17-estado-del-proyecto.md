@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 01:40 CST**. Rama `dev`, commit `9628d04`.
+Fecha de corte: **2026-09-22, 02:20 CST**. Rama `dev`, commit `9da726f`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -137,6 +137,21 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - Pendiente: los avisos de mesa ("es tu turno", "abrieron sesion"), que se
   diseñan viendo jugar a gente, no antes.
 
+### Legal (22-09)
+
+- **Terminos y aviso de privacidad publicados** como version 1 en `/terminos` y
+  `/privacidad`, enlazados desde el pie de la portada y desde el registro en
+  web y movil. **Pendientes de revision de abogado**: Gabino decidio publicar
+  antes, porque tener algo publicado protege mas que no tener nada.
+- Se escribieron mirando el sistema, no una plantilla: las tablas que guardan
+  datos, los cuatro terceros a los que sale informacion (Anthropic, Stripe,
+  Resend y Hetzner, con el servidor en Alemania) y que el numero de tarjeta
+  nunca toca el servidor. Se declara que el texto de las partidas **no entrena
+  modelos**.
+- Alcance decidido: **solo mayores de 18**, responsable **persona fisica**,
+  ley mexicana (LFPDPPP). Texto completo, hechos verificados y cinco preguntas
+  para el abogado en `docs/19`.
+
 ### Operacion
 
 - Seis servicios de systemd con arranque automatico, comprobado en un reinicio
@@ -200,13 +215,16 @@ director se acuerda de emitir `move` en una partida larga.
 1. **No hay documentacion de usuario.** Ninguna: `docs/` es SDD, y README y
    RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa,
    invitar o jugar un turno.
-2. **No hay terminos de servicio ni aviso de privacidad**, y se cobra dinero y
-   se guardan datos de terceros.
-3. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
+2. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
    pasar a claves reales.
+3. **Un usuario no puede borrar ni archivar su mesa.** Solo existe
+   `tables:prune`, que es un comando de servidor. Desde que los textos legales
+   estan publicados, esto es una **promesa incumplida**: el aviso reconoce el
+   derecho de cancelacion. Lo señalo Gabino el 22-09.
 
-**Ya no bloquea: el correo.** Recuperar contraseña estaba roto y era el cuarto
-bloqueo; se cerro el 22-09 (ver "Correo" mas arriba).
+**Ya no bloquean, cerrados el 22-09:** el correo (recuperar contraseña estaba
+roto) y los **textos legales**, publicados como version 1 en `/terminos` y
+`/privacidad` y pendientes de revision de abogado (`docs/19`).
 
 ### Decidido y no empezado
 
