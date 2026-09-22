@@ -18,7 +18,11 @@ describe('pack empaquetado en la web', () => {
     expect(JSON.stringify(packFiles)).not.toContain('secrets/')
     const manifest = JSON.parse(readFileSync(join(repoRoot, 'content/packs/pilot/pack.json'), 'utf8')) as { version: string }
     expect(manifest.version).toBe(PACK_VERSION)
-    expect(packBinaries).toHaveLength(9)
+    // Cuantos binarios hay lo decide el pack, no este test: fijar el numero a
+    // mano lo rompia cada vez que el pack ganaba un retrato o un mapa. Lo que
+    // se comprueba es que esten **todos** los que el pack declara.
+    expect(packBinaries.filter((p) => p.startsWith('portraits/'))).toHaveLength(9)
+    expect(packBinaries.filter((p) => p.startsWith('maps/')).sort()).toEqual(['maps/mina.webp', 'maps/valdoria.webp'])
     for (const path of packBinaries) {
       expect(() => readFileSync(join(resolve(import.meta.dirname, '../../public/packs/pilot'), path))).not.toThrow()
     }

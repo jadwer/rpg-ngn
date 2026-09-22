@@ -9,5 +9,8 @@
   "newcomerView": "Túneles con raíles y lámparas apagadas en los ganchos. Nada roto, nada revuelto.",
   "tags": [
     "galeria"
-  ]
+  ],
+  "map": "mina",
+  "x": 45.0,
+  "y": 26.0
 }

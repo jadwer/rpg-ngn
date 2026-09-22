@@ -8,5 +8,8 @@
   "newcomerView": "Una casa de piedra con las contraventanas cerradas. Por las rendijas se ve luz, de día y de noche.",
   "tags": [
     "cerrado"
-  ]
+  ],
+  "map": "valdoria",
+  "x": 86.0,
+  "y": 11.0
 }

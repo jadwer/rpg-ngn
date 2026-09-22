@@ -9,5 +9,8 @@
   "newcomerView": "La galería se estrecha y el agua corre por las paredes. El sonido vuelve tarde.",
   "tags": [
     "galeria"
-  ]
+  ],
+  "map": "mina",
+  "x": 40.0,
+  "y": 46.0
 }

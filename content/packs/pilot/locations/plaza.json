@@ -10,5 +10,8 @@
   "newcomerView": "Una plaza de tierra apisonada con un pozo de piedra. La gente cruza deprisa y sin mirarse.",
   "tags": [
     "publico"
-  ]
+  ],
+  "map": "valdoria",
+  "x": 49.0,
+  "y": 45.0
 }

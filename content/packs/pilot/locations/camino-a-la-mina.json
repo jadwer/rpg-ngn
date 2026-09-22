@@ -10,5 +10,8 @@
   "newcomerView": "Un sendero de carro, con roderas marcadas y ninguna huella fresca.",
   "tags": [
     "transito"
-  ]
+  ],
+  "map": "valdoria",
+  "x": 10.0,
+  "y": 84.0
 }

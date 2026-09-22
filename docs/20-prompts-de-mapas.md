@@ -2,8 +2,9 @@
 
 Fecha: 2026-09-22.
 
-Los cuatro prompts que faltan para que los tres packs tengan mapa, y la receta
-para escribir el siguiente. Salen de lo aprendido generando el palacio de La
+Los cuatro prompts con los que se generaron los mapas del piloto y de la
+boticaria (hechos el 22-09, ya en los packs), y la receta para escribir el
+siguiente. Salen de lo aprendido generando el palacio de La
 Mascarada, que fue el primero y costo tres intentos.
 
 ## La regla que manda sobre todo
@@ -59,6 +60,19 @@ habrian quedado asi.
 - **Nombrar los lugares por lo que son en el pack** y describirlos con su
   `newcomerView`, que es justo lo que un recien llegado ve. Ya esta escrito;
   no hay que inventarlo.
+- **Decir la forma del recorrido, no solo por donde pasa.** "El camino pasa
+  junto a la posada, cruza la plaza y sube a la mina" se interpreto como **tres
+  caminos radiales saliendo de la plaza**, no como uno continuo. Si se quiere
+  un solo camino, hay que decir "un unico camino continuo, sin bifurcaciones".
+- **Decir la direccion de las calles y como estan orientados los edificios**,
+  si importa: "calles paralelas de arriba abajo", "las fachadas miran a la
+  calle principal". Sin eso salen en abanico, que puede estar bien o no.
+- **Lo que si se obedecio a la primera** y conviene repetir: la inclinacion
+  ("vista cenital ligeramente inclinada"), la densidad del relleno ("tejados
+  apiñados", "mas pequeño y mas oscuro"), el tamaño en pixeles y la lista de
+  prohibiciones. Las cuatro imagenes salieron al primer intento y **las 14
+  coordenadas cayeron bien a la primera**, frente a dos de seis mal en el
+  palacio de La Mascarada, que se pidio con un prompt corto.
 - **Paleta oscura y calida**, para que pegue con el tema de la mesa (fondo
   `#17120e`, dorado `#c9a35c`) y los puntos dorados se vean encima.
 
