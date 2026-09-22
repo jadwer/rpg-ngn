@@ -1,0 +1,10 @@
+{
+  "id": "patio",
+  "name": "Patio",
+  "description": "El patio.",
+  "newcomerView": "Se ve el patio.",
+  "connections": [
+    "salon"
+  ],
+  "tags": []
+}

@@ -13,6 +13,13 @@ const headers = { 'content-type': 'application/json', 'x-engine-token': TOKEN, '
 
 const app = createEngine({ token: TOKEN, packs: new PackStore(join(repoRoot, 'content/packs')), now: () => new Date('2026-09-06T20:00:00Z') })
 
+/**
+ * Los packs con lugares y mapas viven en repos privados (docs/07), asi que
+ * aqui hay uno propio y versionado: sin el, este test pasaba en la laptop de
+ * quien tuviera el enlace y fallaba en CI.
+ */
+const conPackDePrueba = createEngine({ token: TOKEN, packs: new PackStore(join(import.meta.dirname, '../tests/packs')), now: () => new Date('2026-09-06T20:00:00Z') })
+
 async function pilotEvents(): Promise<unknown[]> {
   const text = await readFile(join(repoRoot, 'campaigns/pilot/events.jsonl'), 'utf8')
   return text.split('\n').filter((l) => l.trim() !== '').map((l) => JSON.parse(l) as unknown)
@@ -93,8 +100,8 @@ describe('apps/engine', () => {
     const request: ResolveTurnRequest = {
       contract: ENGINE_CONTRACT_VERSION,
       campaignId: '2',
-      pack: { id: 'mascarada', version: '0.1.0' },
-      ruleset: 'masquerade@1.0.0',
+      pack: { id: 'salon', version: '0.1.0' },
+      ruleset: 'fantasy-d20-lite@1.0.0',
       snapshot: null,
       events: [
         {
@@ -104,26 +111,26 @@ describe('apps/engine', () => {
           type: 'session_started',
           sessionId: '001',
           recordedAt: '2026-09-20T20:00:00Z',
-          payload: { party: ['character:camille', 'character:etienne'] },
+          payload: { party: ['character:ana', 'character:bruno'] },
         },
       ],
       turn: { id: 't-1', number: 1, sessionId: '001', responses: [] },
       provider: { kind: 'scripted' },
     }
 
-    const lines = await readLines(await app.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(request) }))
+    const lines = await readLines(await conPackDePrueba.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(request) }))
     const result = lines.at(-1)
 
     expect(result?.kind).toBe('result')
     if (result?.kind !== 'result') return
     const colocacion = result.events.find((e) => e.type === 'world_event')
     expect(colocacion?.effects).toEqual([
-      { op: 'move', who: 'character:camille', to: 'salon-grande' },
-      { op: 'move', who: 'character:etienne', to: 'salon-grande' },
+      { op: 'move', who: 'character:ana', to: 'salon' },
+      { op: 'move', who: 'character:bruno', to: 'salon' },
     ])
     const world = result.projections.world as { characters: Record<string, { location?: string | null }> }
-    expect(world.characters['camille']?.location).toBe('salon-grande')
-    expect(world.characters['etienne']?.location).toBe('salon-grande')
+    expect(world.characters['ana']?.location).toBe('salon')
+    expect(world.characters['bruno']?.location).toBe('salon')
   })
 
   it('falla limpio si la sesion no esta abierta o el pack no existe', async () => {

@@ -1,0 +1,29 @@
+{
+  "id": "salon",
+  "type": "campaign",
+  "version": "0.1.0",
+  "name": "El salon",
+  "tagline": "Un pack minimo para probar el motor",
+  "system": "fantasy-d20-lite",
+  "provenance": {
+    "class": "original",
+    "authors": [
+      "rpg-ngn"
+    ],
+    "sources": [],
+    "license": "propietario",
+    "createdAt": "2026-09-22",
+    "updatedAt": "2026-09-22"
+  },
+  "characters": [
+    "ana",
+    "bruno"
+  ],
+  "locations": [
+    "salon",
+    "patio"
+  ],
+  "sessions": [
+    "001"
+  ]
+}

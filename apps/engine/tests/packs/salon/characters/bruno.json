@@ -1,0 +1,27 @@
+{
+  "id": "bruno",
+  "name": "Bruno",
+  "race": "Humana",
+  "class": "Viajera",
+  "age": "30 anios",
+  "quote": "Vamos.",
+  "bio": "Camina.",
+  "stats": {
+    "fue": 10,
+    "des": 12,
+    "con": 12,
+    "int": 10,
+    "sab": 10,
+    "car": 12
+  },
+  "hp": 10,
+  "abilities": [],
+  "skills": [
+    "Observacion"
+  ],
+  "roles": [
+    "Exploracion"
+  ],
+  "goal": "Llegar.",
+  "portrait": null
+}

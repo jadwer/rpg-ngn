@@ -1,0 +1,27 @@
+{
+  "id": "001",
+  "title": "La primera noche",
+  "date": "2026-09-22",
+  "status": "planned",
+  "briefing": "Empieza la partida en el salon.",
+  "howToPlay": [
+    "Di que hace tu personaje."
+  ],
+  "fortune": [
+    {
+      "range": "1-20",
+      "label": "Normal"
+    }
+  ],
+  "startLocation": "salon",
+  "party": [
+    {
+      "player": "P1",
+      "character": "ana"
+    },
+    {
+      "player": "P2",
+      "character": "bruno"
+    }
+  ]
+}
