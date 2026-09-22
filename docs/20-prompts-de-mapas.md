@@ -257,17 +257,30 @@ Reglas comunes, que son las que hacen que el recorte automatico funcione:
   marco o un margen visible.
 - **Cada personaje centrado en su celda**, de frente o tres cuartos, **de la
   cintura para arriba**, con la cara en el tercio superior de la celda.
-- **Fondo neutro y oscuro** detras de cada uno, sin escenario: el retrato se ve
-  a 24 px en el dialogo, y un fondo con detalle se convierte en ruido.
+- **Fondo muy desenfocado**, que sugiera el sitio sin objetos reconocibles: el
+  retrato se ve a 24 px en el dialogo, y un fondo con detalle se convierte en
+  ruido. Los retratos que ya existen lo hacen asi.
 - **Sin texto, sin nombres, sin marcos decorados, sin numeros.**
 - Mismo estilo, misma luz y mismo encuadre en toda la lamina.
+- **El estilo lo manda el pack, no el gusto de quien escribe el prompt.** Cada
+  pack tiene el suyo y un NPC nuevo tiene que parecerse a los jugables con los
+  que va a compartir pantalla. **Hay que abrir un retrato existente del pack
+  antes de escribir el prompt**, no suponerlo: aqui se pidieron los nueve en
+  estilo realista cuando el piloto es pintura semirrealista de fantasia y la
+  boticaria es anime, y no se habria notado hasta tener las laminas.
+
+| Pack | Estilo de sus retratos |
+|---|---|
+| `pilot` (Valdoria) | Pintura digital semirrealista de fantasia, pincelada visible, luz fria azulada, fondo con algo de escenario desenfocado |
+| `private-botica` | Anime / ilustracion japonesa, linea limpia, ojos grandes detallados, colores suaves, fondo desenfocado |
+| `mascarada` | Anime tambien, pero mas oscuro y calido, con dorados y granates |
 
 ## 5. Los tres de Valdoria (`pilot`)
 
 ```text
 Lamina de retratos de tres personajes, en una rejilla de 3 columnas por 1 fila, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x1024 pixeles.
 
-Estilo: pintura digital realista con luz de fuego y farol, oscura y calida, como una ilustracion de novela de fantasia sobria. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Fondo neutro oscuro detras de cada uno, sin escenario, sin objetos de fondo.
+Estilo: pintura digital semirrealista de fantasia, con pincelada visible y mucho detalle en la cara, luz fria azulada de noche con algun toque calido de farol, como los retratos de personaje de un manual de rol ilustrado. Nada de fotorrealismo y nada de anime: el punto medio, pintado. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Detras de cada uno, un fondo oscuro y muy desenfocado que solo sugiere el interior de la posada o la noche del pueblo, sin objetos reconocibles: el retrato se ve pequeño y un fondo con detalle se convierte en ruido.
 
 Son gente de un pueblo minero pobre de montaña, ropa de trabajo gastada, lana y cuero, nada de armaduras ni de magia.
 
@@ -287,7 +300,7 @@ Recorte: `python3 tools/packs/crop-portraits.py <lamina> content/packs/pilot/por
 ```text
 Lamina de retratos de seis personajes, en una rejilla de 3 columnas por 2 filas, celdas iguales separadas por un margen oscuro fino. Imagen de 3072x2048 pixeles.
 
-Estilo: pintura digital realista de ambientacion china imperial clasica, luz calida de farol de papel, paleta oscura con rojo laca y verde jade. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Fondo neutro oscuro detras de cada uno, sin escenario.
+Estilo: ilustracion anime japonesa de alta calidad, linea limpia, ojos grandes y detallados, sombreado suave, al estilo de una novela ligera de ambientacion china imperial clasica. Luz calida de farol de papel, paleta con rojo laca, verde jade y dorado. Tiene que parecerse a los retratos de los personajes jugables de este mismo pack, que son anime, no realistas. Todos con el mismo estilo, la misma luz y el mismo encuadre: de la cintura para arriba, de frente o tres cuartos, centrados en su celda, con la cara en el tercio superior. Detras de cada uno, un fondo muy desenfocado en tonos suaves que solo sugiere un interior del palacio, sin objetos reconocibles: el retrato se ve pequeño y un fondo con detalle se convierte en ruido.
 
 Fila de arriba, celda 1: una mujer joven de unos diecinueve años, boticaria, pelo negro recogido con un palillo sencillo, pecas, ropa de sirvienta del palacio sin adornos, manos manchadas de tinte de hierbas. Mirada despierta y analitica, sin sonreir. Una cicatriz pequeña de quemadura en un antebrazo.
 
