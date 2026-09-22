@@ -2214,3 +2214,57 @@ a.plain {
     font-size: 1.3rem;
   }
 }
+
+/* Paginas legales: texto largo para leer, no para escanear. Medida comoda,
+   interlineado holgado y tabla que no se sale en el telefono. */
+.legal h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--gold);
+  margin: 1.8rem 0 0.6rem;
+  letter-spacing: 0.02em;
+}
+
+.legal p,
+.legal li {
+  line-height: 1.7;
+  margin-bottom: 0.7rem;
+}
+
+.legal ul {
+  margin: 0 0 0.9rem 1.2rem;
+}
+
+.legal b {
+  color: var(--ink);
+}
+
+.legal a {
+  text-decoration: underline;
+}
+
+.tabla-legal {
+  overflow-x: auto;
+  margin: 0.8rem 0 1.2rem;
+}
+
+.tabla-legal table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 34rem;
+  font-size: 0.92rem;
+}
+
+.tabla-legal th,
+.tabla-legal td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-legal th {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-weight: 400;
+}

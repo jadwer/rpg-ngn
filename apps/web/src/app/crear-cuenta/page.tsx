@@ -101,6 +101,10 @@ export default function RegisterPage() {
             <span className="hint">Entras directo a tus mesas.</span>
           </div>
           <p className="hint">
+            Al crear la cuenta declaras que eres mayor de 18 años y aceptas los <Link href="/terminos">términos y condiciones</Link> y el{' '}
+            <Link href="/privacidad">aviso de privacidad</Link>.
+          </p>
+          <p className="hint">
             ¿Ya tienes cuenta? <Link href="/entrar">Entra aquí</Link>.
           </p>
           <ServerField value={server} onChange={setServer} />

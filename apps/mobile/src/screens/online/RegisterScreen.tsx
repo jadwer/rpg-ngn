@@ -1,6 +1,6 @@
 import type { RegisterInput } from '@rpg-ngn/api-client'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
@@ -31,6 +31,8 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
   const mismatch = confirmation.length > 0 && password !== confirmation
   const tooShort = password.length > 0 && password.length < 8
   const canSubmit = !busy && serverUrl.trim().length > 0 && name.trim().length > 0 && email.trim().length > 0 && password.length >= 8 && confirmation.length > 0 && !mismatch
+  /** Los legales son del servidor al que se conecta, no de la app. */
+  const legalBase = (serverUrl.trim() || PUBLIC_SERVER_URL).replace(/\/+$/, '')
 
   const submit = () => {
     if (canSubmit) onRegister(serverUrl, { name, email, password, passwordConfirmation: confirmation })
@@ -55,6 +57,18 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
         {mismatch ? <Text style={styles.error}>Las contraseñas no coinciden.</Text> : null}
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         <Button label="Crear cuenta" primary busy={busy} disabled={!canSubmit} onPress={submit} />
+        {/* Los legales viven en el servidor al que se conecta, no en la app. */}
+        <Text style={styles.foot}>
+          Al crear la cuenta declaras que eres mayor de 18 años y aceptas los{' '}
+          <Text style={styles.legal} onPress={() => void Linking.openURL(`${legalBase}/terminos`)}>
+            términos y condiciones
+          </Text>{' '}
+          y el{' '}
+          <Text style={styles.legal} onPress={() => void Linking.openURL(`${legalBase}/privacidad`)}>
+            aviso de privacidad
+          </Text>
+          .
+        </Text>
         <Text style={styles.foot}>Entras directo a tus mesas. Luego dile tu correo al anfitrión para que te invite.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -71,4 +85,5 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger },
   notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
   foot: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
+  legal: { color: theme.colors.goldBright, textDecorationLine: 'underline' },
 })

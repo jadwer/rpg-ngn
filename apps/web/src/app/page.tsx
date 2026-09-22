@@ -87,6 +87,9 @@ export default function LandingPage() {
         <p className="hint">
           Motor de rol de mesa de código abierto con contenido original. <Link href="/entrar">Entrar</Link> &middot; <Link href="/crear-cuenta">Crear cuenta</Link>
         </p>
+        <p className="hint">
+          <Link href="/terminos">Términos y condiciones</Link> &middot; <Link href="/privacidad">Aviso de privacidad</Link>
+        </p>
       </footer>
     </main>
   )
