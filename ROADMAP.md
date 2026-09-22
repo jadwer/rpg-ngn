@@ -3,6 +3,11 @@
 El orden viene de [docs/11-adr-stack-saas.md](docs/11-adr-stack-saas.md), que
 manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 
+**Para saber como esta el proyecto hoy** (que funciona, que falta, que
+decisiones estan cerradas) sin leer entrega por entrega:
+[docs/17-estado-del-proyecto.md](docs/17-estado-del-proyecto.md). Este archivo
+es el detalle; aquel es el resumen con fecha de corte.
+
 ## Fase 0: Diseño y piloto (cerrada el 2026-09-05)
 
 - [x] Alcance del motor y ejes de agnosticismo
@@ -143,6 +148,23 @@ ellos, de punta a punta en produccion.
 - [ ] Pago dentro de la app movil, cuando existan builds propias con EAS
 - [ ] Definir que incluyen Plata, Oro y Diamante (decision de Gabino)
 
+## Cierre del motor y mapa (2026-09-20 y 21)
+
+Sale de una sesion con invitados que salio mal el 20-09. El diagnostico de
+Gabino fue que la culpa era **del motor, no de la falta de adornos**, y de ahi
+salieron las dos cosas: cerrar los huecos del motor y congelar lo visual
+(`docs/14`).
+
+- [x] **Cuatro causas del fiasco, todas arregladas**: toda mesa nueva del piloto nacia **dentro de la mina** (`suggestedSessionCode` devolvia la primera sesion `planned`, y las jugadas por Gabino estaban marcadas `played`, asi que un grupo nuevo abria en la 003, a mitad de la historia); el `recap` de una sesion llegaba al DM aunque esa campaña no la hubiera jugado, y se sentia como spoiler entre mesas; el panel de personalidad salia en todos los packs cuando es de uno solo (bandera `playerPersona`); y "Sin personaje: solo miras y diriges" tambien al invitar, donde es falso. **El `status` del pack es la bitacora del autor, no el punto de partida de las mesas ajenas**
+- [x] **El motor sin huecos conocidos.** Se midio preguntandole al validador que formas rechazaba de las que un DM propone en una partida normal: eran seis, mas una septima que solo aparecio jugando. Ahora pasan las diez que se prueban. Lo cerrado: escenas y reloj del mundo (`scene_started`/`scene_closed` y `worldTime`, que el DM no podia emitir y por eso una sesion nueva arrastraba el momento de la anterior), condiciones sobre NPC, `rumor_heard` como evento propio (un rumor **no** es conocimiento: se guarda aparte de `facts`, con quien lo conto y si el DM sabe que es falso), progreso de misiones en `CampaignState`, y NPCs improvisados (el interprete exigia que el NPC estuviera declarado, **y el piloto no declara ninguno** mientras su historia esta llena de ellos)
+- [x] **Los fallos de turno ya no rompen la partida**: `resolve` reintenta una vez borrando antes los bloques del intento fallido. Si el segundo sale, solo el anfitrion recibe el motivo. Si fallan los dos, la mesa lee texto de mesa, no jerga del motor
+- [x] **Boton "Iniciar partida"**: tarjeta con los pasos y el boton para el anfitrion mientras no hay sesion. Antes habia que escribir tres digitos a ciegas
+- [x] **Tercer ruleset `masquerade`** (prestigio, escandalo, rumores, vinculos) y el pack **La Mascarada**: 8 jugables con retrato, 13 NPC, 6 lugares, 5 actos como misiones, 7 secretos
+- [x] **Personalidad por jugador** (600 caracteres con plantilla): la escribe el jugador, el DM la recibe en la ficha. Dos jugadores con el mismo arquetipo viven noches distintas
+- [x] **Mapa de la partida** (21-09, unica cosa que salio del congelador de `docs/14`, porque Gabino queria medir la reaccion de la gente a su uso narrativo): imagen del pack con los lugares posados por coordenadas en porcentaje, caminos desde las conexiones que los lugares ya declaraban, y quien esta en cada uno. **No es un tablero tactico.** Modal a pantalla completa en web y en la app. Formato en `docs/05`, ubicacion en `docs/08`, lo que se ve en `docs/13` 4.10
+- [x] **La party empieza en algun sitio** (21-09): la sesion del pack declara `startLocation` y el engine emite un `world_event` con un `move` por personaje que no tenga ya ubicacion. Sin esto el mapa decia "de camino o fuera de escena" de toda la mesa hasta que el DM moviera a alguien
+- [ ] **Observar el mapa jugando**: si los jugadores lo abren por su cuenta, si cambia como se declara ("me voy a la biblioteca") y si el director se acuerda de emitir `move` en una partida larga. Es observacion, no construccion
+
 ## Produccion (desplegada el 2026-09-18)
 
 - [x] **https://rpg-worlds.gabinoramirez.com** en Hetzner CX23 (Nuremberg, 7.09 USD/mes): Ubuntu 24.04, HTTPS con Let's Encrypt y renovacion automatica, ufw con solo 22/80/443, fail2ban. Postgres, engine y API cerrados desde fuera
@@ -151,7 +173,7 @@ ellos, de punta a punta en produccion.
 - [x] **Packs privados en Gitea** (organizacion `rpg-packs`, un repo por pack): el repo publico solo admite contenido original o licenciado (docs/07), asi que lo demas vive versionado y respaldado en privado. `tools/packs/new-pack.sh` crea el repo y lo sube; el pack se enlaza a `content/packs` y **la carpeta debe llamarse como el `id` del pack**, porque el engine busca por id
 - [x] Los personajes y retratos de un pack del servidor los sirve la API: la web solo lleva empaquetado el piloto, asi que sin esto no se podia elegir personaje en otro pack
 - [ ] Despliegue automatico: hoy es `git pull` a mano por SSH
-- [ ] Copias de seguridad de Postgres. **No hay ninguna**, y ya hay pagos registrados
+- [x] **Copias de seguridad de Postgres** (2026-09-19, del bloque HOY del VAM): `rpg-backup.timer` diario a las 04:32 UTC con dumps en `/srv/rpg/backups/`, y `deploy/pg-restore-test.sh` que comprueba la restauracion con las mismas cuentas que produccion y el trigger append-only presente
 - [ ] Vigilancia: nadie avisa si un servicio se cae
 
 ## Antes de abrir a usuarios reales
@@ -193,11 +215,10 @@ abierto.
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
 - [ ] Renombre DM a GM: plan escrito en `docs/12-plan-renombre-gm.md`, sin ejecutar. La capa de visibilidad `dm` de los eventos **no** se renombra (es dato guardado; pediria subir version de esquema con upcast)
 - [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
-- [ ] Migrar la campaña de la mina al servidor (12 eventos; hoy vive solo en la laptop)
+- [x] **Migrar la campaña de la mina al servidor** (hecho el 2026-09-19, rehecho el 20-09 tras el borrado de mesas de prueba): vive como mesa 15 a nombre de Gabino, importada desde `campaigns/pilot/events.jsonl` + `snapshots/002.json`. **La partida piloto es el repo, no el servidor**: ahi solo vive su continuacion web
 - [ ] APKs de Android: falta `eas.json` y el CLI. Con el servidor publico ya tiene sentido, porque la app puede apuntar a un sitio estable
 
 ## v2 (sin fecha)
 
 - DM humano y modo remoto (narracion por microfono, analisis de respuestas). Candidato para el reconocimiento de voz de la mesa: VibeVoice-ASR streaming (quien dijo que, 50+ idiomas). Su TTS queda descartado: Microsoft lo declara solo para investigacion y retiro el codigo en 2025
 - SSE desde el engine si el polling deja de bastar
-- Segundo ruleset real, que es cuando se valida el eje "agnostico de sistema"
