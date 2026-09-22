@@ -39,6 +39,22 @@ habrian quedado asi.
   se lee mejor vertical (2:3).
 - **Zonas bien separadas y distinguibles**, con espacio vacio entre ellas: ahi
   es donde caen los marcadores.
+- **Separar lo que es lugar de lo que es relleno, y decirlo.** Un mapa con solo
+  cuatro edificios parece un diagrama, no un sitio; pero si el relleno tiene el
+  mismo tamaño y detalle que los lugares reales, la gente intenta pulsarlo.
+  Conviene pedir el relleno expresamente y pedir que quede **mas pequeño, mas
+  oscuro y con menos detalle**.
+- **Describir el sitio, no una lista de edificios.** De que vive, que hora es,
+  que ha pasado ahi, que se nota al mirarlo. Un prompt escueto deja que el
+  generador rellene, **y rellena mucho**: en el primer Valdoria puso una
+  bocamina entera que el prompt no pedia. Esa salio bien y se aprovecho, pero
+  pudo haber salido un castillo que contradijera el pack.
+- **Decir que NO se quiere, en una lista al final.** Texto, numeros, personas,
+  criaturas y cualquier cosa del genero que no toque (en una mina de trabajo,
+  ni tesoros ni cristales magicos).
+- **Nombrar los lugares por lo que son en el pack** y describirlos con su
+  `newcomerView`, que es justo lo que un recien llegado ve. Ya esta escrito;
+  no hay que inventarlo.
 - **Paleta oscura y calida**, para que pegue con el tema de la mesa (fondo
   `#17120e`, dorado `#c9a35c`) y los puntos dorados se vean encima.
 
@@ -70,13 +86,29 @@ como texto.
 ## 1. Valdoria, el pueblo (`pilot`, mapa `valdoria`)
 
 ```text
-Mapa cenital ilustrado de un pueblo minero pequeño de montaña, estilo mapa de fantasia dibujado a mano con tinta y acuarela oscura. Imagen apaisada, proporcion 3:2.
+Mapa cenital ilustrado de Valdoria, un pueblo minero pequeño y pobre en un valle de montaña, de noche cerrada. Estilo mapa de fantasia pintado a mano con tinta y acuarela oscura, muy detallado, con textura de papel. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada, como una maqueta vista desde arriba: se ven los tejados y tambien un poco las fachadas.
 
-Composicion, en rejilla de tres por tres: en el centro una plaza de tierra con un pozo de piedra; abajo a la izquierda del centro, una posada de dos pisos con tejado de pizarra y humo en la chimenea; arriba a la derecha, una casa de piedra aislada con las contraventanas cerradas y luz en las rendijas; desde la esquina inferior izquierda, un camino de carro que sube entre pinos y sale por el borde inferior de la imagen.
+El pueblo vive de una mina que lleva nueve dias cerrada, y se nota: no hay carbon apilado, no hay carros cargados, no hay nadie fuera. Es un sitio que espera algo y no lo dice.
 
-Entre los cuatro puntos, espacio vacio: tierra, hierba seca y pinos sueltos. Noche cerrada con niebla baja. Paleta oscura y calida: marron tierra, verde pino apagado, y la luz amarilla de las ventanas como unico color vivo.
+LOS CUATRO LUGARES QUE IMPORTAN, y tienen que verse claros, grandes y bien separados entre si, cada uno con un hueco de terreno vacio alrededor:
 
-Sin texto, sin etiquetas, sin numeros, sin rosa de los vientos, sin personas ni animales.
+1. En el centro exacto de la imagen, una plaza de tierra apisonada, redonda y despejada, con un pozo de piedra circular en medio y un farol encendido junto al brocal. La plaza es la zona mas clara e iluminada del mapa.
+
+2. Abajo a la izquierda del centro, la posada: el edificio mas grande del pueblo, dos pisos, tejado de pizarra en pendiente, chimenea con humo saliendo, ventanas amarillas de luz calida, un porche de madera y un establo pequeño al lado. Es el unico sitio con vida.
+
+3. Arriba a la derecha, aislada sobre un afloramiento rocoso y separada del resto por arboles, una casa de piedra pequeña y maciza con todas las contraventanas cerradas. Por las rendijas de las contraventanas se escapan hilos de luz amarilla. Nada mas la ilumina: no tiene farol, ni porche, ni camino despejado.
+
+4. Arriba a la izquierda, la boca de la mina: una estructura de madera apuntalada contra la ladera rocosa, con un arco de entrada oscuro, una torre de poleas de madera al lado y railes que salen del arco y se pierden. Delante, tablones cruzados clavados sobre la entrada. Vagonetas paradas y vacias.
+
+EL CAMINO: un sendero de carro de tierra clara, con roderas marcadas, que entra por el borde inferior izquierdo de la imagen, pasa junto a la posada, cruza la plaza y sube en curva entre los pinos hasta la boca de la mina. Es el hilo que une los cuatro lugares y tiene que leerse de un vistazo. Faroles apagados de trecho en trecho.
+
+EL RELLENO, que debe existir pero quedar claramente en segundo plano: seis u ocho casitas pequeñas de mineros, oscuras y con las ventanas apagadas, agrupadas en los bordes; cercas de madera rota; un par de cobertizos; huertos pequeños; un arroyo estrecho bajando por la derecha entre rocas. Todo mas pequeño, mas oscuro y con menos detalle que los cuatro lugares principales.
+
+ALREDEDOR: laderas de roca gris y bosque denso de pinos oscuros cerrando el valle por los cuatro lados, con niebla baja entre los troncos.
+
+LUZ Y PALETA: noche sin luna. Paleta oscura y calida: marron tierra, gris pizarra, verde pino muy apagado, y la luz amarilla y naranja de las ventanas y los faroles como unico color vivo. Contraste alto entre las zonas iluminadas y la oscuridad.
+
+SIN: texto, letras, numeros, etiquetas, cartelas, rosa de los vientos, escalas, marcos decorativos, personas, animales, criaturas, carros en movimiento. Nada de humo de mas de una chimenea.
 ```
 
 **Las cuatro zonas y donde deberian caer** (se miden despues sobre la imagen):
@@ -86,40 +118,83 @@ arriba a la derecha, camino abajo a la izquierda.
 ## 2. La mina (`pilot`, mapa `mina`)
 
 ```text
-Corte vertical en seccion de una mina de montaña, estilo plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca en acuarela. Imagen vertical, proporcion 2:3, porque es un corte en profundidad. Vista de perfil: se ve la montaña cortada por la mitad y las galerias una debajo de otra.
+Corte vertical en seccion de una mina de montaña, como un plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca pintada en acuarela y mucho detalle de estratos. Imagen vertical, proporcion 2:3, porque representa profundidad. Vista de perfil: la montaña esta cortada por la mitad y se ven las galerias una debajo de otra, como un hormiguero en seccion.
 
-Composicion, de arriba abajo por el centro de la imagen: arriba del todo, la boca de la mina, un arco de madera apuntalado en la ladera; debajo, una galeria ancha con railes y vagonetas; mas abajo, una galeria mas estrecha con agua en las paredes; mas abajo aun, una galeria sin apuntalar cortada a mano; y en el fondo, un pozo vertical redondo, demasiado regular, del que no se ve el final.
+Es la misma mina de Valdoria, cerrada hace nueve dias. Herramienta en su sitio, nada roto, nada revuelto: la gente se fue de golpe y no volvio.
 
-Las cuatro galerias unidas por rampas cortas, bien separadas entre si, con roca maciza alrededor. Paleta oscura: negro, gris pizarra, ocre de las lamparas. La misma tecnica y la misma paleta que el mapa del pueblo del mismo pack.
+LOS NIVELES, de arriba abajo, centrados en el eje vertical de la imagen y bien separados entre si por roca maciza:
 
-Sin texto, sin etiquetas, sin numeros, sin personas.
+1. Arriba del todo, asomando en la ladera, la entrada vista de perfil: el arco de madera apuntalado, con la torre de poleas fuera y los tablones cruzados clavados encima. Ocupa poco: es solo el punto por donde se entra y se ve un poco del cielo nocturno y de los pinos. El peso de la imagen esta en lo que hay debajo.
+
+2. Debajo, y este es el primer nivel importante: una galeria ancha y bien apuntalada con vigas de madera regulares, railes en el suelo, dos vagonetas paradas y llenas a medias, lamparas de aceite apagadas colgando de ganchos en las vigas, picos y palas apoyados en la pared. Ordenado.
+
+3. Mas abajo, el segundo nivel: la galeria se estrecha, los puntales estan mas juntos y peor puestos, el agua corre por las paredes y hay charcos en el suelo. Una sola lampara colgada. Las vetas de la roca brillan humedas.
+
+4. Mas abajo aun, el tercer nivel: el final de lo cartografiado. Aqui ya no hay railes ni vigas regulares: la roca esta cortada a mano, sin apuntalar, con marcas de pico visibles. Un tablon con papeles clavado en la pared, como un puesto de capataz abandonado.
+
+5. En el fondo de la imagen, el pozo: un agujero vertical redondo abierto en el suelo de la ultima galeria, de bordes demasiado regulares y lisos para ser obra de picos. Oscuridad total dentro, sin fondo visible. Es el elemento mas inquietante del dibujo y debe notarse que no encaja con el resto de la mina.
+
+LO QUE UNE LOS NIVELES: rampas cortas en zigzag y escaleras de madera entre galeria y galeria, dibujadas con lineas finas, de modo que se entienda el recorrido de arriba abajo de un vistazo.
+
+LA ROCA: estratos horizontales de piedra dibujados con detalle alrededor de las galerias, mas claros arriba y mas oscuros y compactos hacia el fondo. Alguna raiz colgando en los niveles altos. Alguna veta mineral brillante.
+
+LUZ Y PALETA: oscura. Negro, gris pizarra, marron de la madera, y el ocre calido de las pocas lamparas. La luz disminuye de arriba abajo: el primer nivel se ve, el pozo del fondo es negro. Misma tecnica, misma paleta y mismo nivel de detalle que el mapa del pueblo del mismo pack.
+
+SIN: texto, letras, numeros, etiquetas, cartelas, flechas, cotas, escalas, personas, criaturas, esqueletos, tesoros, cristales magicos ni nada fantastico. Es una mina de trabajo, no una mazmorra.
 ```
 
-**Nota de continuidad**: la boca de la mina es el mismo sitio donde muere el
-camino del mapa del pueblo. Conviene que se parezca.
+**Nota de continuidad**: el marcador de la boca de la mina vive en el **mapa
+del pueblo** (arriba a la izquierda, donde el generador la dibujo), no aqui.
+Este mapa empieza en el primer nivel. Aun asi la entrada se dibuja arriba, sin
+marcador, para que se entienda que es el mismo sitio visto desde dentro: es el
+mismo arco de madera con los tablones cruzados que se ve en el pueblo.
 
 ## 3. El palacio interior (`private-botica`, mapa `palacio`)
 
 ```text
-Mapa cenital de un recinto palaciego imperial de estilo chino clasico, dentro de una muralla, ilustrado a tinta y acuarela. Imagen apaisada, proporcion 3:2.
+Mapa cenital de un recinto palaciego imperial chino clasico, el palacio interior donde viven las consortes del emperador, de noche. Ilustrado a tinta y acuarela oscura con mucho detalle arquitectonico. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada: se ven los tejados curvos de teja vidriada y tambien algo de las fachadas y los patios.
 
-Composicion, en rejilla de tres por tres: en el centro, un patio empedrado con un estanque; arriba a la izquierda, un pabellon elegante de tejado curvo verde jade rodeado de un jardin pequeño; arriba a la derecha, un edificio alargado de cocinas con patio de servicio y pozos de agua; abajo en el centro, un almacen bajo y cerrado, con estantes visibles por una puerta abierta y hierbas secandose bajo el alero.
+Es una ciudad dentro de la ciudad: miles de personas viviendo de puntillas, con rutinas que no se rompen nunca. Hace poco se rompio una.
 
-Todo dentro de una muralla de ladrillo rojo oscuro que rodea la imagen. Entre los edificios, espacio abierto: losas, arboles podados y pasillos cubiertos. Noche. Paleta oscura y calida: rojo laca, verde jade apagado, dorado viejo.
+LOS CUATRO LUGARES QUE IMPORTAN, claros, grandes y bien separados, cada uno con patio o espacio abierto alrededor:
 
-Sin texto, sin etiquetas, sin numeros, sin personas.
+1. En el centro exacto, un patio ceremonial empedrado con un estanque rectangular de agua quieta, un puente de piedra curvo cruzandolo y faroles de papel encendidos en los bordes. Es el nudo por el que se pasa para ir a todas partes.
+
+2. Arriba a la izquierda, el pabellon de jade: la residencia mas cuidada del recinto. Un pabellon elegante de tejado curvo de teja verde jade, con galeria cubierta de columnas rojas alrededor, escalinata de piedra, un jardin privado pequeño con arboles podados y un muro propio que lo separa del resto. Es el edificio mas bonito y mejor iluminado del mapa.
+
+3. Arriba a la derecha, las cocinas imperiales: un edificio alargado y practico de tejado gris, con chimeneas humeando, un patio de servicio delante lleno de tinajas grandes, cestos apilados y dos pozos de agua, y un cobertizo con leña. Ventanas iluminadas: aqui se trabaja de noche.
+
+4. Abajo en el centro, el almacen de hierbas de la farmacia de la corte: un edificio bajo, cerrado y sin ventanas al exterior, con una sola puerta abierta por la que se ven estanterias con frascos alineados, y un alero largo bajo el que cuelgan manojos de hierbas secandose en filas ordenadas. Apenas iluminado, con una lampara sola.
+
+LO QUE LOS UNE: pasillos cubiertos de columnas rojas y tejadillo, que van del patio central a cada uno de los tres edificios, dibujados con claridad para que se entienda el recorrido. Losas de piedra entre ellos.
+
+EL RELLENO, en segundo plano y mas oscuro: pabellones menores de otras consortes en los bordes, lavanderias con ropa tendida, un patio de servicio pequeño, arboles podados, algun ciruelo en flor, faroles rojos colgados a intervalos.
+
+EL CIERRE: una muralla alta de ladrillo rojo oscuro rodea toda la imagen por los cuatro lados, con una unica puerta monumental de tejado curvo en el borde inferior. Se tiene que entender que aqui dentro no entra ni sale nadie sin pasar por ahi.
+
+LUZ Y PALETA: noche. Paleta oscura y calida: rojo laca, verde jade apagado, gris teja, dorado viejo, y la luz calida de los faroles de papel. Contraste alto entre lo iluminado y las sombras de los patios.
+
+SIN: texto, letras, numeros, etiquetas, cartelas, rosa de los vientos, escalas, personas, animales, dragones ni criaturas.
 ```
 
 ## 4. La ciudad exterior (`private-botica`, mapa `ciudad`)
 
 ```text
-Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, ilustrado con la misma tinta y acuarela oscura que el mapa del palacio del mismo pack. Imagen apaisada, proporcion 3:2.
+Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, de noche. Ilustrado con exactamente la misma tinta y acuarela oscura, la misma tecnica y el mismo nivel de detalle que el mapa del palacio del mismo pack. Imagen apaisada, proporcion 3:2. Vista cenital ligeramente inclinada.
 
-Composicion: en el centro, una calle ancha de faroles rojos con casas de tres pisos con balcones corridos a ambos lados; alrededor, callejones estrechos y tejados apretados; en el borde superior de la imagen, la muralla del palacio cerrando el barrio por arriba, con una puerta.
+Es un sitio vivo, apretado y ruidoso, lo contrario del palacio: aqui la gente si sale a la calle. Funciona con una economia de favores y rumores que llega mas lejos que la de la corte.
 
-Noche. Paleta oscura y calida, con el rojo de los faroles como unico color vivo. Mismo estilo y misma paleta que el mapa del palacio.
+LO QUE IMPORTA, claro y en el centro:
 
-Sin texto, sin etiquetas, sin numeros, sin personas.
+1. En el centro de la imagen, la calle principal: ancha, empedrada, con hileras de farolillos rojos colgados de lado a lado cruzando por encima. A ambos lados, casas de placer de tres pisos con balcones corridos de madera labrada, cortinas, y ventanas iluminadas de rojo y naranja. Es la zona mas luminosa y detallada del mapa.
+
+EL RELLENO, en segundo plano, mas oscuro y mas apretado: callejones estrechos y torcidos saliendo de la calle principal; tejados grises apiñados sin apenas huecos; patios traseros diminutos con ropa tendida y tinajas; un canal de agua estrecho con un puente de madera; puestos de comida cerrados con toldos recogidos; escaleras exteriores de madera. Densidad y desorden, frente al orden del palacio.
+
+EL CIERRE: en el borde superior de la imagen, la muralla alta de ladrillo rojo oscuro del palacio, vista desde fuera, cerrando el barrio por arriba, con una puerta monumental cerrada y guardada. Es la misma muralla que rodea el mapa del palacio del mismo pack, y tiene que reconocerse. El contraste entre la muralla limpia y el amontonamiento del barrio a sus pies es el sentido de la imagen.
+
+LUZ Y PALETA: noche. Paleta oscura y calida, con el rojo de los farolillos como unico color vivo y dominante, reflejado en el empedrado humedo. Mas saturada y mas caotica que el mapa del palacio, pero con la misma gama.
+
+SIN: texto, letras, numeros, etiquetas, cartelas, rosa de los vientos, escalas, personas, animales ni criaturas.
 ```
 
 **Nota de continuidad**: la muralla del borde superior es la misma que rodea el
