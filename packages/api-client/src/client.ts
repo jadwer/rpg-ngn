@@ -17,6 +17,8 @@ import type {
   ResponseReceipt,
   SessionClosed,
   SessionSummary,
+  InvitePreview,
+  TableInvite,
   TableMember,
   TableMemberRecord,
   TableState,
@@ -64,6 +66,19 @@ export interface ApiClient extends AccountApi, SettingsApi {
   deleteTable(tableId: string | number): Promise<void>
   /** El invitado se va de la mesa; la mesa sigue para los demas. El anfitrion no puede (409). */
   leaveTable(tableId: string | number): Promise<void>
+  /**
+   * Crea el enlace de la mesa (solo el anfitrion) y **devuelve el token, que
+   * no se vuelve a enseñar**: se guarda hasheado. Crear uno corta el anterior.
+   */
+  createInvite(tableId: string | number, options?: { maxUses?: number; days?: number }): Promise<TableInvite>
+  /** El enlace vivo de la mesa, sin el token; null si no hay. */
+  currentInvite(tableId: string | number): Promise<TableInvite | null>
+  /** Corta el enlace: deja de funcionar para quien ya lo tenga. */
+  revokeInvite(tableId: string | number): Promise<void>
+  /** A que mesa invita un enlace. **No necesita sesion**: quien lo abre aun no tiene cuenta. */
+  invitePreview(token: string): Promise<InvitePreview>
+  /** Entra a la mesa con el enlace. Devuelve el id de la mesa. */
+  acceptInvite(token: string): Promise<string>
   /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
@@ -168,6 +183,33 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async leaveTable(tableId) {
       await request(`/api/v1/tables/${tableId}/me`, { method: 'DELETE' })
+    },
+
+    async createInvite(tableId, options) {
+      const body: Record<string, number> = {}
+      if (options?.maxUses !== undefined) body['max_uses'] = options.maxUses
+      if (options?.days !== undefined) body['days'] = options.days
+      const { data } = await request<{ data: TableInvite }>(`/api/v1/tables/${tableId}/invites`, { method: 'POST', body })
+      return data.data
+    },
+
+    async currentInvite(tableId) {
+      const { data } = await request<{ data: TableInvite | null }>(`/api/v1/tables/${tableId}/invites`)
+      return data.data
+    },
+
+    async revokeInvite(tableId) {
+      await request(`/api/v1/tables/${tableId}/invites`, { method: 'DELETE' })
+    },
+
+    async invitePreview(token) {
+      const { data } = await request<{ data: InvitePreview }>(`/api/v1/invites/${token}`, { anonymous: true })
+      return data.data
+    },
+
+    async acceptInvite(token) {
+      const { data } = await request<{ data: { tableId: string } }>(`/api/v1/invites/${token}/accept`, { method: 'POST' })
+      return data.data.tableId
     },
 
     async listFriendships() {

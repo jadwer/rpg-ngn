@@ -2327,3 +2327,18 @@ a.plain {
 .table-card.quiet {
   opacity: 0.7;
 }
+
+/* Enlace de invitacion: el campo tiene que dejar seleccionar el enlace entero
+   de un toque, porque copiarlo a mano es donde se pierde la gente. */
+.invitar-enlace .enlace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.invite-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--gold-bright);
+  margin: 0;
+}

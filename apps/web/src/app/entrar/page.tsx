@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState, type FormEvent } from 'react'
+import { destinoSeguro } from '../../lib/volver'
 import { ServerField } from '../../components/ServerField'
 import { useSession } from '../../lib/session'
 import { displayServerUrl } from '../../lib/storage'
@@ -12,9 +13,12 @@ import { displayServerUrl } from '../../lib/storage'
  * token queda en una cookie httpOnly; el campo "Servidor de la API" (plegado)
  * sigue ahi para pegarle a otra API directamente.
  */
-export default function AccessPage() {
+function AccessPageForm() {
   const session = useSession()
   const router = useRouter()
+  // A donde volver: lo pone quien nos mando aqui (por ejemplo un enlace de
+  // mesa). Sin esto, quien llega por invitacion acaba en su lista vacia.
+  const destino = destinoSeguro(useSearchParams().get('volver'))
   const [server, setServer] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,8 +26,8 @@ export default function AccessPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (session.stage.name === 'ready') router.replace('/mesas')
-  }, [session.stage, router])
+    if (session.stage.name === 'ready') router.replace(destino)
+  }, [session.stage, router, destino])
 
   useEffect(() => {
     if (session.stage.name === 'anonymous') setServer((current) => current || displayServerUrl(session.serverUrl))
@@ -37,7 +41,7 @@ export default function AccessPage() {
     const failure = await session.login(sameOrigin ? '' : server, email, password)
     setBusy(false)
     if (failure) setError(failure)
-    else router.replace('/mesas')
+    else router.replace(destino)
   }
 
   const notice = session.stage.name === 'anonymous' ? session.stage.notice : null
@@ -81,7 +85,7 @@ export default function AccessPage() {
             </Link>
           </div>
           <p className="hint">
-            ¿Todavía no tienes cuenta? <Link href="/crear-cuenta">Créala aquí</Link>, toma un minuto.
+            ¿Todavía no tienes cuenta? <Link href={`/crear-cuenta?volver=${encodeURIComponent(destino)}`}>Créala aquí</Link>, toma un minuto.
           </p>
           <ServerField value={server} onChange={setServer} />
         </form>
@@ -90,5 +94,18 @@ export default function AccessPage() {
         El mundo es más grande cuando se comparte
       </footer>
     </main>
+  )
+}
+
+/**
+ * `useSearchParams` obliga a Suspense: sin el, Next no puede prerenderizar
+ * esta pagina y el build falla. El parametro `volver` lo usa el enlace de
+ * invitacion para traer de vuelta a quien tuvo que registrarse.
+ */
+export default function AccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <AccessPageForm />
+    </Suspense>
   )
 }

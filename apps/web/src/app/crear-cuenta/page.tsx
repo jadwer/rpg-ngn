@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState, type FormEvent } from 'react'
+import { destinoSeguro } from '../../lib/volver'
 import { ServerField } from '../../components/ServerField'
 import { useSession } from '../../lib/session'
 import { displayServerUrl } from '../../lib/storage'
@@ -13,9 +14,12 @@ import { displayServerUrl } from '../../lib/storage'
  * entra directo; con ella encendida se muestra el aviso y se espera el
  * enlace del correo.
  */
-export default function RegisterPage() {
+function RegisterPageForm() {
   const session = useSession()
   const router = useRouter()
+  // A donde volver: lo pone quien nos mando aqui (por ejemplo un enlace de
+  // mesa). Sin esto, quien llega por invitacion acaba en su lista vacia.
+  const destino = destinoSeguro(useSearchParams().get('volver'))
   const [server, setServer] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -26,8 +30,8 @@ export default function RegisterPage() {
   const [pending, setPending] = useState<string | null>(null)
 
   useEffect(() => {
-    if (session.stage.name === 'ready') router.replace('/mesas')
-  }, [session.stage, router])
+    if (session.stage.name === 'ready') router.replace(destino)
+  }, [session.stage, router, destino])
 
   useEffect(() => {
     if (session.stage.name === 'anonymous') setServer((current) => current || displayServerUrl(session.serverUrl))
@@ -46,7 +50,7 @@ export default function RegisterPage() {
     setBusy(false)
     if (!outcome.ok) setError(outcome.error)
     else if (outcome.pendingVerification) setPending(outcome.message)
-    else router.replace('/mesas')
+    else router.replace(destino)
   }
 
   return (
@@ -105,11 +109,24 @@ export default function RegisterPage() {
             <Link href="/privacidad">aviso de privacidad</Link>.
           </p>
           <p className="hint">
-            ¿Ya tienes cuenta? <Link href="/entrar">Entra aquí</Link>.
+            ¿Ya tienes cuenta? <Link href={`/entrar?volver=${encodeURIComponent(destino)}`}>Entra aquí</Link>.
           </p>
           <ServerField value={server} onChange={setServer} />
         </form>
       )}
     </main>
+  )
+}
+
+/**
+ * `useSearchParams` obliga a Suspense: sin el, Next no puede prerenderizar
+ * esta pagina y el build falla. El parametro `volver` lo usa el enlace de
+ * invitacion para traer de vuelta a quien tuvo que registrarse.
+ */
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageForm />
+    </Suspense>
   )
 }

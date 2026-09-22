@@ -51,6 +51,27 @@ export interface TableSummary {
   members: TableMember[]
 }
 
+/** El enlace vivo de una mesa. `token` solo viene al crearlo: se guarda hasheado. */
+export interface TableInvite {
+  token?: string
+  maxUses: number
+  uses: number
+  seatsLeft: number
+  expiresAt?: string
+}
+
+/** A que mesa invita un enlace, antes de entrar (y sin tener cuenta). */
+export interface InvitePreview {
+  tableId: string
+  tableName: string
+  packId: string
+  packVersion: string
+  hostName: string | null
+  seatsLeft: number
+  /** Ya es miembro: el enlace no gastara plaza. */
+  alreadyMember: boolean
+}
+
 export interface NewTable {
   name: string
   packId: string

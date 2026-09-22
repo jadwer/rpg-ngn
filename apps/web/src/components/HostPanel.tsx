@@ -5,6 +5,7 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { DmSettingsPanel } from './DmSettingsPanel'
+import { InviteLink } from './InviteLink'
 import { InvitePanel } from './InvitePanel'
 
 interface Props {
@@ -149,7 +150,13 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             </div>
           ) : null}
 
-          {tab === 'invite' ? <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
+          {tab === 'invite' ? (
+            <>
+              {/* El enlace primero: es la via rapida y la que no pide amistad. */}
+              <InviteLink client={client} tableId={table.id} />
+              <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            </>
+          ) : null}
 
           {tab === 'dm' ? <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         </div>
