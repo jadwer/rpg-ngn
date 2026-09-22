@@ -444,16 +444,20 @@ que hay que sostener:
 - [x] **Retirar una mesa desde el producto** (22-09): archivar siempre, borrar
   solo si nunca se jugo, y salir de la mesa para el invitado. Era lo mas
   urgente de esta lista.
-- [ ] **Borrado de cuenta** con la disociacion que describe el punto 5 del
-  aviso. Hoy se cumpliria a mano, y el plazo de 20 dias habiles esta publicado.
-- [ ] **Guardar la aceptacion**: hoy el aviso se muestra pero **no se registra
-  quien acepto, cuando y que version**. Sin eso, la aceptacion es dificil de
-  probar. Es una columna y un dato al registrar.
-- [ ] **Casilla de edad explicita.** Hoy se declara en el texto del boton; una
-  casilla separada es mas defendible.
-- [ ] **Buzon `privacidad@gabinoramirez.com`**, que hoy **no existe** y esta
-  publicado en los dos documentos. Es lo mas rapido de arreglar y lo mas
-  visible si alguien escribe.
+- [x] **Borrado de cuenta** (22-09), con la disociacion que describe el punto 5:
+  se borra de verdad (`forceDelete`, no soft delete: con soft delete el nombre
+  y el correo seguirian en la base) y lo escrito en las partidas queda huerfano
+  de identidad. Bloquea mientras la persona sea anfitriona de alguna mesa y le
+  dice cuales. Pide la contraseña. **Hallazgo del test**: `turn_responses` caia
+  en cascada con el miembro, asi que el relato se destruia en vez de
+  disociarse; corregido a `nullOnDelete`.
+- [x] **Guardar la aceptacion** (22-09): tabla `legal_acceptances` con version,
+  fecha y origen. En tabla aparte porque una persona acepta varias veces y la
+  constancia **sobrevive al borrado de su cuenta**, disociada.
+- [x] **Buzon `privacidad@gabinoramirez.com`** (22-09, lo creo Gabino en
+  JettHost), probado con un envio real desde el servidor.
+- [ ] **Casilla de edad explicita.** Hoy se declara en el texto junto al boton
+  de crear cuenta, y queda registrado; una casilla separada es mas defendible.
 - [ ] **Stripe en modo real.** Sigue en modo prueba, asi que el apartado de
   creditos describe algo que todavia no cobra de verdad.
 

@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 03:40 CST**. Rama `dev`, commit `f8771b9`.
+Fecha de corte: **2026-09-22, 04:45 CST**. Rama `dev`, commit `c91b6d1`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -149,6 +149,22 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
   expuesto **respondia 500 con la sentencia SQL y el nombre de la base**.
 - `tableRetirement` decide que se ofrece, en `ui-logic` con tests.
 
+### Cuenta y datos personales (22-09)
+
+- **Borrar la propia cuenta** desde el perfil. Se borra **de verdad**
+  (`forceDelete`, no el soft delete de la plataforma: con soft delete el nombre
+  y el correo seguirian en la base), y lo escrito en las partidas **queda sin
+  identidad** en vez de destruirse. Es el derecho de cancelacion del aviso.
+- **Bloquea mientras la persona sea anfitriona de alguna mesa** y le dice
+  cuales y si estan jugadas, porque borrarla dejaria la mesa sin anfitrion.
+  Pide la contraseña: un token robado no basta.
+- **Constancia de aceptacion** (`legal_acceptances`) con version, fecha y
+  origen. En tabla aparte porque se acepta varias veces y la constancia
+  **sobrevive al borrado de la cuenta**, disociada.
+- **Fallo de diseño que encontro el test**: `turn_responses` caia en cascada
+  con el miembro, asi que al irse alguien de una mesa su texto se destruia y la
+  cronica quedaba con huecos para los demas. Ahora es `nullOnDelete`.
+
 ### Legal (22-09)
 
 - **Terminos y aviso de privacidad publicados** como version 1 en `/terminos` y
@@ -229,8 +245,9 @@ director se acuerda de emitir `move` en una partida larga.
    invitar o jugar un turno.
 2. **Stripe en modo prueba.** Falta resolver una tarea vencida de la cuenta y
    pasar a claves reales.
-3. **No hay borrado de cuenta** con la disociacion que describe el aviso.
-   Retirar una mesa ya se puede (22-09); borrar la cuenta entera, todavia no.
+3. **Casilla de edad explicita en el registro.** Hoy se declara en el texto
+   junto al boton y queda registrado quien acepto, cuando y que version; una
+   casilla separada seria mas defendible.
 
 **Ya no bloquean, cerrados el 22-09:** el correo (recuperar contraseña estaba
 roto) y los **textos legales**, publicados como version 1 en `/terminos` y
