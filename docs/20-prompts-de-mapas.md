@@ -30,8 +30,13 @@ habrian quedado asi.
   la aplicacion encima; si la imagen trae letras, se ven dos veces y mal.
 - **Sin personas ni criaturas.** La gente la pinta el mapa con los retratos de
   los personajes.
-- **Cuadrada (1:1).** El lienzo de la aplicacion es cuadrado; una imagen
-  apaisada sale recortada o con franjas.
+- **Apaisada 3:2** (por ejemplo 1536x1024), que es lo que ya funciona: el
+  palacio de La Mascarada es exactamente eso. El lienzo se adapta a la
+  proporcion de la imagen, sea la que sea (`fit-content` mas
+  `object-fit: contain`), asi que no hay recorte; pero el modal de escritorio
+  es apaisado, y una imagen cuadrada deja franjas vacias a los lados.
+  **Excepcion: un mapa que representa profundidad**, como el corte de una mina,
+  se lee mejor vertical (2:3).
 - **Zonas bien separadas y distinguibles**, con espacio vacio entre ellas: ahi
   es donde caen los marcadores.
 - **Paleta oscura y calida**, para que pegue con el tema de la mesa (fondo
@@ -65,7 +70,7 @@ como texto.
 ## 1. Valdoria, el pueblo (`pilot`, mapa `valdoria`)
 
 ```text
-Mapa cenital ilustrado de un pueblo minero pequeño de montaña, estilo mapa de fantasia dibujado a mano con tinta y acuarela oscura. Imagen cuadrada.
+Mapa cenital ilustrado de un pueblo minero pequeño de montaña, estilo mapa de fantasia dibujado a mano con tinta y acuarela oscura. Imagen apaisada, proporcion 3:2.
 
 Composicion, en rejilla de tres por tres: en el centro una plaza de tierra con un pozo de piedra; abajo a la izquierda del centro, una posada de dos pisos con tejado de pizarra y humo en la chimenea; arriba a la derecha, una casa de piedra aislada con las contraventanas cerradas y luz en las rendijas; desde la esquina inferior izquierda, un camino de carro que sube entre pinos y sale por el borde inferior de la imagen.
 
@@ -81,7 +86,7 @@ arriba a la derecha, camino abajo a la izquierda.
 ## 2. La mina (`pilot`, mapa `mina`)
 
 ```text
-Corte vertical en seccion de una mina de montaña, estilo plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca en acuarela. Imagen cuadrada. Vista de perfil: se ve la montaña cortada por la mitad y las galerias una debajo de otra.
+Corte vertical en seccion de una mina de montaña, estilo plano de ingeniero antiguo dibujado a tinta sobre papel oscuro, con la roca en acuarela. Imagen vertical, proporcion 2:3, porque es un corte en profundidad. Vista de perfil: se ve la montaña cortada por la mitad y las galerias una debajo de otra.
 
 Composicion, de arriba abajo por el centro de la imagen: arriba del todo, la boca de la mina, un arco de madera apuntalado en la ladera; debajo, una galeria ancha con railes y vagonetas; mas abajo, una galeria mas estrecha con agua en las paredes; mas abajo aun, una galeria sin apuntalar cortada a mano; y en el fondo, un pozo vertical redondo, demasiado regular, del que no se ve el final.
 
@@ -96,7 +101,7 @@ camino del mapa del pueblo. Conviene que se parezca.
 ## 3. El palacio interior (`private-botica`, mapa `palacio`)
 
 ```text
-Mapa cenital de un recinto palaciego imperial de estilo chino clasico, dentro de una muralla, ilustrado a tinta y acuarela. Imagen cuadrada.
+Mapa cenital de un recinto palaciego imperial de estilo chino clasico, dentro de una muralla, ilustrado a tinta y acuarela. Imagen apaisada, proporcion 3:2.
 
 Composicion, en rejilla de tres por tres: en el centro, un patio empedrado con un estanque; arriba a la izquierda, un pabellon elegante de tejado curvo verde jade rodeado de un jardin pequeño; arriba a la derecha, un edificio alargado de cocinas con patio de servicio y pozos de agua; abajo en el centro, un almacen bajo y cerrado, con estantes visibles por una puerta abierta y hierbas secandose bajo el alero.
 
@@ -108,7 +113,7 @@ Sin texto, sin etiquetas, sin numeros, sin personas.
 ## 4. La ciudad exterior (`private-botica`, mapa `ciudad`)
 
 ```text
-Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, ilustrado con la misma tinta y acuarela oscura que el mapa del palacio del mismo pack.
+Mapa cenital de un barrio de placer de una ciudad imperial china, fuera de las murallas del palacio, ilustrado con la misma tinta y acuarela oscura que el mapa del palacio del mismo pack. Imagen apaisada, proporcion 3:2.
 
 Composicion: en el centro, una calle ancha de faroles rojos con casas de tres pisos con balcones corridos a ambos lados; alrededor, callejones estrechos y tejados apretados; en el borde superior de la imagen, la muralla del palacio cerrando el barrio por arriba, con una puerta.
 
@@ -124,8 +129,10 @@ mapa del palacio, vista desde fuera.
 
 ## Que hacer con la imagen cuando la tengas
 
-1. **Cuadrarla y convertirla a WebP.** El formato del pack es `.webp`; una
+1. **Convertirla a WebP** sin recortarla. El formato del pack es `.webp`; una
    captura de 3 MB en PNG se lleva mal con moviles y con el limite de subida.
+   Referencia de lo que ya funciona: el palacio de La Mascarada es 1536x1024
+   y pesa 418 KB.
 2. **Guardarla** como `maps/<id>.webp` dentro del pack, con el nombre que
    declara el `image` del mapa (`valdoria.webp`, `mina.webp`,
    `palacio.webp`, `ciudad.webp`).
