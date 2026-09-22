@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 00:00 CST**. Rama `dev`, commit `2cd16d7`.
+Fecha de corte: **2026-09-22, 00:20 CST**. Rama `dev`, commit `ef5c4f3`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -269,20 +269,20 @@ detalle esta anotado dentro de ese archivo.
 - **Composicion separada por cliente** (`SessionMobile` / `SessionTablet` /
   `SessionDesktop`).
 
-### Hay que resolver antes de implementar
+### Decidido el 22-09 (detalle y motivos en `docs/18-decisiones-ux.md`)
 
-**Las cinco decisiones abiertas estan planteadas con opciones y coste en
-`docs/18-decisiones-ux.md`. Las decide Gabino.**
-
-1. **Entrar a una mesa** (D-UX-1): no existe enlace de invitacion. Es el
-   pendiente numero uno y no es UX, es funcionalidad de servidor.
-2. **Mobile-first contra la decision D2** (D-UX-2). Si cambia, se corrige en
-   `docs/11` y no solo en `docs/16`.
-3. **Resolucion automatica del turno contra la decision D3** (D-UX-3).
-4. **El coste por turno** (D-UX-4): no aparece en `docs/16` y es la restriccion
-   mas dura del producto.
-5. **Arquitectura de superficies** (D-UX-5): tres composiciones triplican el
-   mantenimiento con un equipo de una persona.
+1. **Enlace de invitacion con tope de plazas**, revocable, sin sala de espera
+   (D-UX-1). Lo construye Claude, y es lo siguiente que se hace.
+2. **La jerarquia se diseña a 390px; el acabado va primero a la web** (D-UX-2).
+   **La directriz de `docs/11` no cambia**: la web sigue siendo el producto
+   principal.
+3. **Cuenta atras de 10 segundos cancelable** por cualquiera de la mesa, mas
+   tiempo maximo de turno con "forzar cierre" para el anfitrion (D-UX-3).
+4. **El saldo no se ve durante la partida**, ni siquiera el anfitrion; aviso
+   solo cuando queda poco (D-UX-4). El coste sigue siendo restriccion de diseño
+   aunque no se vea: es la razon de que el cierre sea cancelable.
+5. **Dos composiciones** (movil y escritorio), no tres (D-UX-5, decision de
+   arquitectura). Los tres niveles de configuracion, aceptados.
 
 El concept board ya se corrigio (`b430597`): personajes reales del pack,
 Observacion en vez de Percepcion, y "LA HISTORIA CONTINUA" en vez de un "EXITO"
