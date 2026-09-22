@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 04:45 CST**. Rama `dev`, commit `c91b6d1`.
+Fecha de corte: **2026-09-22, 05:15 CST**. Rama `dev`, commit `7b0d96a`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -137,6 +137,27 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - Pendiente: los avisos de mesa ("es tu turno", "abrieron sesion"), que se
   diseñan viendo jugar a gente, no antes.
 
+### Entrar a una mesa con un enlace (22-09)
+
+Era el pendiente numero uno. **Probado de punta a punta en produccion**: el
+anfitrion crea el enlace, una desconocida lo abre **sin cuenta**, ve la mesa y
+quien invita, se registra **conservando el enlace**, vuelve a el y entra. Cero
+amistades de por medio.
+
+- **El tope de plazas es la proteccion principal**, no la caducidad: quien
+  entra gasta turnos del anfitrion, asi que un enlace reenviado tiene techo.
+  Cinco plazas por omision, siete dias, uno vivo por mesa y revocable.
+- **Se acepta con bloqueo**: dos personas abriendo el ultimo asiento a la vez
+  no pueden pasar las dos.
+- **El token se guarda hasheado** y solo se enseña al crearlo, como una
+  contraseña.
+- **La consulta del enlace es publica a proposito**: quien lo abre todavia no
+  tiene cuenta y tiene que ver a que le invitan. Solo enseña nombre de mesa,
+  pack y anfitrion; nada de la partida.
+- **Entrar y crear cuenta aceptan un destino de vuelta**, validado para que
+  solo pueda ser una ruta interna.
+- **La amistad se queda** para invitar a mano; deja de ser obligatoria.
+
 ### Retirar una mesa (22-09)
 
 - **Archivar**: la saca de la lista y la deja plegada al final, sin tocar la
@@ -229,7 +250,10 @@ director se acuerda de emitir `move` en una partida larga.
 
 ### Bloquea abrir a usuarios que no seamos nosotros
 
-0. **No se puede entrar a una mesa sin que el anfitrion te lleve de la mano.**
+0. ~~No se puede entrar a una mesa sin que el anfitrion te lleve de la mano.~~
+   **RESUELTO el 22-09** con el enlace de invitacion (ver mas arriba). Lo que
+   sigue describe el problema que habia, porque explica decisiones del
+   producto:
    Hoy son **seis pasos**: el invitado se registra, da su correo por fuera,
    recibe solicitud de amistad, la acepta, el anfitrion lo invita buscandolo
    por correo y recarga. La regla esta en el codigo: sin amistad aceptada no
