@@ -1,5 +1,5 @@
 import { characterSheet } from '@rpg-ngn/ui-logic'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Portrait } from '../components/Portrait'
 import { Sheet } from '../components/Sheet'
@@ -21,9 +21,11 @@ interface Props {
   footer?: string | undefined
   /** Retratos de un pack que la app no lleva dentro: URL de la API. */
   portraitUriOf?: ((path: string | null | undefined) => string | null) | undefined
+  /** Quien es tu personaje (la personalidad escrita), debajo de tu propia ficha (docs/18, D-UX-7). */
+  persona?: ReactNode
 }
 
-export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf }: Props) {
+export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, persona }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = selectedId ? entries.find((e) => e.character.id === selectedId) : undefined
   const sheet = selected ? characterSheet(selected.character, { visibility: selected.visibility, state: selected.state, modifier: abilityModifier }) : null
@@ -47,7 +49,10 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf }
         </View>
 
         {sheet ? (
-          <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} />
+          <>
+            <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} />
+            {selected?.mine && persona ? <View style={styles.persona}>{persona}</View> : null}
+          </>
         ) : (
           <ScrollView contentContainerStyle={styles.grid}>
             {entries.map(({ character, slot, visibility, muted, mine }) => (
@@ -69,6 +74,7 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf }
 }
 
 const styles = StyleSheet.create({
+  persona: { paddingHorizontal: 16, paddingBottom: 32 },
   modal: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
   headerLink: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 56 },

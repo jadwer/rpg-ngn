@@ -7,6 +7,12 @@ import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSh
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
+import { ChroniclePanel } from '../../components/ChroniclePanel'
+import { GameBar, type GamePanel } from '../../components/GameBar'
+import { GameSheet } from '../../components/GameSheet'
+import { InviteLink } from '../../components/InviteLink'
+import { InvitePanel } from '../../components/InvitePanel'
+import { PlayersPanel } from '../../components/PlayersPanel'
 import { HostPanel } from '../../components/HostPanel'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
@@ -19,6 +25,7 @@ import { useNarrator } from '../../state/narrator'
 import { onlineSheetEntries } from '../../sheets/entries'
 import { theme } from '../../theme'
 import { SheetsModal } from '../SheetsModal'
+import { webOriginOf } from '../../online/server-url'
 
 interface Props {
   client: ApiClient
@@ -51,6 +58,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [sheetsOpen, setSheetsOpen] = useState(false)
+  // La hoja abierta de la barra del juego (docs/18, D-UX-6); las fichas llevan la suya.
+  const [panel, setPanel] = useState<Exclude<GamePanel, 'sheets'> | null>(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [worldTime, setWorldTime] = useState<string | null>(null)
@@ -165,10 +174,11 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
 
   // Quien esta, quien escribe, quien respondio y quien se tuvo que ir.
-  const seatsLine = useMemo(
-    () => seatsSummary(seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: ownMember.id, nameOf })),
+  const seatList = useMemo(
+    () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: ownMember.id, nameOf }),
     [table.members, turn, snapshot?.typing, snapshot?.narrators, snapshot?.away, ownMember.id, nameOf],
   )
+  const seatsLine = seatsSummary(seatList)
 
   // Quien entra sin personaje lo elige aqui, entre los que queden libres; el
   // primero que llega se lo queda. Los de un pack remoto los da la API.
@@ -394,6 +404,30 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
   const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingSessions.length === 0, dice: diceModeOf(table.settings) }) : null
 
+  // Retratos de la API como URL completa: en el telefono no hay origen al que colgar una ruta.
+  const absolutePortrait = useCallback(
+    (path: string | null | undefined) => {
+      const p = packPortraitUrl(table.packId, path)
+      return p ? `${client.baseUrl}${p}` : null
+    },
+    [client.baseUrl, table.packId],
+  )
+  const portraitOf = useCallback(
+    (id: string) => {
+      const portrait = pack?.characters.get(id)?.portrait ?? remote.find((c) => c.id === id)?.portrait
+      return absolutePortrait(portrait)
+    },
+    [pack, remote, absolutePortrait],
+  )
+  const setPresence = (memberId: string, present: boolean) => {
+    void act(async () => {
+      await client.setPresence(table.id, memberId, present)
+      onTableChanged()
+      refresh()
+    }, 'No se pudo cambiar la presencia.')
+  }
+  const gamePanels: GamePanel[] = ['sheets', ...(maps.length > 0 ? (['map'] as const) : []), 'players', ...(isHost ? (['host'] as const) : []), 'reading']
+
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <View style={styles.header}>
@@ -408,20 +442,10 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             {subtitle}
           </Text>
         </View>
-        <Pressable onPress={openSheets} hitSlop={10} style={styles.sheetsButton}>
-          <Text style={styles.sheetsText}>Fichas</Text>
-        </Pressable>
       </View>
 
       {connectionNotice ? <Text style={styles.connection}>{connectionNotice}</Text> : null}
 
-      <View style={styles.toolbar}>
-        <View style={styles.segmented}>
-          <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
-          <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
-        </View>
-        <TtsBar tts={tts} autoRead />
-      </View>
 
       <View style={styles.body}>
         <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScroll={onScroll} scrollEventThrottle={100}>
@@ -452,51 +476,6 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         ) : null}
       </View>
 
-      {ownMember && ownMember.characterId && snapshot?.session ? (
-        <View style={styles.presence}>
-          <Button
-            label={ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
-            small
-            busy={busy}
-            onPress={() => {
-              void act(async () => {
-                await client.setPresence(table.id, ownMember.id, ownMember.present === false)
-                onTableChanged()
-                refresh()
-              }, 'No se pudo cambiar tu presencia.')
-            }}
-          />
-        </View>
-      ) : null}
-      {maps.length > 0 ? (
-        <MapPanel
-          baseUrl={client.baseUrl}
-          packId={table.packId}
-          maps={maps}
-          world={projections.world}
-          party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
-          viewerCharacterId={viewer.characterId}
-          nameOf={nameOf}
-          portraitOf={(id) => {
-            const portrait = pack?.characters.get(id)?.portrait ?? remote.find((c) => c.id === id)?.portrait
-            const path = packPortraitUrl(table.packId, portrait)
-            return path ? `${client.baseUrl}${path}` : null
-          }}
-        />
-      ) : null}
-      {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
-        <PersonaPanel
-          characterName={nameOf(viewer.characterId)}
-          saved={snapshot.viewer?.persona ?? null}
-          busy={busy}
-          onSave={(persona) =>
-            act(async () => {
-              await client.setPersona(table.id, ownMember.id, persona)
-              refresh()
-            }, 'No se pudo guardar la personalidad.')
-          }
-        />
-      ) : null}
       {viewer.characterId === null && snapshot !== null ? (
         <View style={styles.choose}>
           <Text style={styles.chooseLabel}>Elige tu personaje</Text>
@@ -518,10 +497,80 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
-      {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} />
+      <GameBar panels={gamePanels} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 
-      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : (path) => packPortraitUrl(table.packId, path)} />
+      {maps.length > 0 ? (
+        <MapPanel
+          open={panel === 'map'}
+          onClose={() => setPanel(null)}
+          baseUrl={client.baseUrl}
+          packId={table.packId}
+          maps={maps}
+          world={projections.world}
+          party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
+          viewerCharacterId={viewer.characterId}
+          nameOf={nameOf}
+          portraitOf={(id) => {
+            const portrait = pack?.characters.get(id)?.portrait ?? remote.find((c) => c.id === id)?.portrait
+            const path = packPortraitUrl(table.packId, portrait)
+            return path ? `${client.baseUrl}${path}` : null
+          }}
+        />
+      ) : null}
+      <GameSheet visible={panel === 'players'} title="Jugadores" onClose={() => setPanel(null)}>
+        <PlayersPanel
+          seats={seatList}
+          portraitOf={portraitOf}
+          ownPresent={ownMember.characterId && snapshot?.session ? ownMember.present !== false : null}
+          isHost={isHost}
+          busy={busy}
+          onTogglePresence={() => setPresence(ownMember.id, ownMember.present === false)}
+          onPresence={setPresence}
+          invite={
+            isHost ? (
+              <>
+                <InviteLink client={client} tableId={table.id} tableName={table.name} />
+                <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} hideMembers />
+              </>
+            ) : undefined
+          }
+        />
+      </GameSheet>
+      {isHost ? (
+        <GameSheet visible={panel === 'host'} title="Anfitrión" onClose={() => setPanel(null)}>
+                <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+        </GameSheet>
+      ) : null}
+      <GameSheet visible={panel === 'reading'} title="Lectura" onClose={() => setPanel(null)}>
+        <Text style={styles.sheetLabel}>Vista</Text>
+        <View style={styles.segmented}>
+          <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
+          <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
+        </View>
+        <Text style={styles.sheetLabel}>Voz</Text>
+        <TtsBar tts={tts} autoRead />
+        <Text style={styles.sheetLabel}>Compartir la historia</Text>
+        <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
+      </GameSheet>
+
+      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : absolutePortrait}
+        persona={
+          wantsPersona && viewer.characterId !== null && snapshot !== null ? (
+            <PersonaPanel
+          characterName={nameOf(viewer.characterId)}
+          saved={snapshot.viewer?.persona ?? null}
+          busy={busy}
+          onSave={(persona) =>
+            act(async () => {
+              await client.setPersona(table.id, ownMember.id, persona)
+              refresh()
+            }, 'No se pudo guardar la personalidad.')
+          }
+        />
+          ) : undefined
+        }
+      />
     </KeyboardAvoidingView>
   )
 }
@@ -537,7 +586,6 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 }
 
 const styles = StyleSheet.create({
-  presence: { alignItems: 'flex-end', paddingHorizontal: 12, paddingTop: 6, backgroundColor: theme.colors.panel },
   choose: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border, padding: 12, gap: 8 },
   chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   chooseHint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },
@@ -547,11 +595,9 @@ const styles = StyleSheet.create({
   titles: { flex: 1, alignItems: 'center' },
   title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, textAlign: 'center' },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center' },
-  sheetsButton: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  sheetsText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink },
   connection: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
-  toolbar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden' },
+  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
+  sheetLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim, marginTop: 6 },
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
   segmentActive: { backgroundColor: theme.colors.accent },
   segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.ink },

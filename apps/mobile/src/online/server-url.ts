@@ -42,3 +42,13 @@ export function isWebRootUrl(url: string): boolean {
 export function isUnusableServerUrl(url: string): boolean {
   return isStaleLocalUrl(url) || isWebRootUrl(url)
 }
+
+/**
+ * Donde contesta la web para un servidor dado: los enlaces que se comparten
+ * (invitar, cronica) son paginas de la web, no de la API. En produccion la
+ * API vive en `/movil` y la web en la raiz; en local, API y web son el mismo
+ * origen que el usuario escribio.
+ */
+export function webOriginOf(serverUrl: string): string {
+  return (serverUrl || PUBLIC_SERVER_URL).trim().replace(/\/+$/, '').replace(/\/movil$/, '')
+}

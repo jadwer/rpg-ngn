@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStaleLocalUrl, isUnusableServerUrl, isWebRootUrl, PUBLIC_SERVER_URL } from './server-url'
+import { isStaleLocalUrl, isUnusableServerUrl, isWebRootUrl, PUBLIC_SERVER_URL, webOriginOf } from './server-url'
 
 describe('server-url', () => {
   it('la app entra por /movil, no por la raiz de la web', () => {
@@ -28,5 +28,17 @@ describe('server-url', () => {
     expect(isUnusableServerUrl('https://mesa.ejemplo.com/movil')).toBe(false)
     expect(isUnusableServerUrl('https://rpg-worlds.gabinoramirez.com')).toBe(true)
     expect(isUnusableServerUrl('http://192.168.1.4:8010')).toBe(true)
+  })
+})
+
+describe('origen de la web para los enlaces que se comparten', () => {
+  it('quita /movil: la web contesta en la raiz', () => {
+    expect(webOriginOf('https://rpg-worlds.gabinoramirez.com/movil')).toBe('https://rpg-worlds.gabinoramirez.com')
+    expect(webOriginOf('https://rpg-worlds.gabinoramirez.com/movil/')).toBe('https://rpg-worlds.gabinoramirez.com')
+  })
+
+  it('deja igual un servidor local y usa el publico si no hay', () => {
+    expect(webOriginOf('http://192.168.1.5:3010')).toBe('http://192.168.1.5:3010')
+    expect(webOriginOf('')).toBe('https://rpg-worlds.gabinoramirez.com')
   })
 })

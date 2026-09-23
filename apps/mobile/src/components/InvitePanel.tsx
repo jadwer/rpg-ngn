@@ -16,6 +16,8 @@ interface Props {
   /** La mesa cambio (invitacion nueva): que el padre la recargue. */
   onChanged: () => void
   onUnauthorized: () => void
+  /** En Jugadores la lista de la mesa ya esta arriba: no repetirla (docs/18, D-UX-7). */
+  hideMembers?: boolean | undefined
 }
 
 /**
@@ -25,7 +27,7 @@ interface Props {
  * se invita con personaje cuando ya son amigos. La cuenta se busca por
  * correo exacto con `users/lookup`, abierto a cualquier cuenta.
  */
-export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthorized }: Props) {
+export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthorized, hideMembers = false }: Props) {
   const [friendships, setFriendships] = useState<Friendship[]>([])
   const [email, setEmail] = useState('')
   const [found, setFound] = useState<AuthUser | null>(null)
@@ -129,8 +131,8 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>En la mesa</Text>
-      {table.members.map((member) => (
+      {hideMembers ? null : <Text style={styles.label}>En la mesa</Text>}
+      {(hideMembers ? [] : table.members).map((member) => (
         <View key={member.id} style={styles.member}>
           <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} uri={pack ? null : uriOf(member.characterId)} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} size={32} />
           <Text style={styles.memberText}>{memberLine(member, nameOf)}</Text>

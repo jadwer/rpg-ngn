@@ -1,7 +1,7 @@
 import type { ApiClient, TableInvite } from '@rpg-ngn/api-client'
 import { useCallback, useEffect, useState } from 'react'
 import { Share, StyleSheet, Text, View } from 'react-native'
-import { PUBLIC_SERVER_URL } from '../online/storage'
+import { webOriginOf } from '../online/server-url'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -30,7 +30,8 @@ export function InviteLink({ client, tableId, tableName }: Props) {
   }, [client, tableId])
   useEffect(cargar, [cargar])
 
-  const web = (client.baseUrl || PUBLIC_SERVER_URL).replace(/\/+$/, '')
+  // La pagina /unirse es de la web; con la API en /movil, el enlace iba a un 404.
+  const web = webOriginOf(client.baseUrl)
 
   const crear = async () => {
     setBusy(true)

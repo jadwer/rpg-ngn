@@ -30,6 +30,9 @@ interface Props {
   nameOf: (id: string) => string
   /** Retrato de un personaje, ya como URI absoluta; null si no hay. */
   portraitOf: (id: string) => string | null
+  /** Abierto desde la barra del juego; sin estas dos, el panel pinta su propia fila para abrirse. */
+  open?: boolean | undefined
+  onClose?: (() => void) | undefined
 }
 
 /**
@@ -40,8 +43,11 @@ interface Props {
  */
 const ANCHO = 320
 
-export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf }: Props) {
-  const [open, setOpen] = useState(false)
+export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: openProp, onClose }: Props) {
+  const [openSelf, setOpenSelf] = useState(false)
+  const controlled = openProp !== undefined
+  const open = controlled ? openProp : openSelf
+  const setOpen = (value: boolean) => (controlled ? (value ? undefined : onClose?.()) : setOpenSelf(value))
   // Igual que en la web: el elegido a mano, o el que toque por donde esta la gente.
   const [chosen, setChosen] = useState<number | null>(null)
   // Proporcion ancho/alto de la imagen cargada; 3:2 hasta saberla.
@@ -60,11 +66,13 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
 
   return (
     <>
-      <Pressable style={({ pressed }) => [styles.head, pressed && styles.pressed]} onPress={() => setOpen(true)}>
-        <Text style={styles.headTitle}>{`Mapa: ${view.map.name}`}</Text>
-        <Text style={styles.headSub}>{resumen}</Text>
-        <Text style={styles.headLink}>abrir</Text>
-      </Pressable>
+      {controlled ? null : (
+        <Pressable style={({ pressed }) => [styles.head, pressed && styles.pressed]} onPress={() => setOpen(true)}>
+          <Text style={styles.headTitle}>{`Mapa: ${view.map.name}`}</Text>
+          <Text style={styles.headSub}>{resumen}</Text>
+          <Text style={styles.headLink}>abrir</Text>
+        </Pressable>
+      )}
 
       <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
         <View style={styles.modal}>

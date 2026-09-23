@@ -1,23 +1,18 @@
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
-import { useEffect, useRef, useState } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 import { DiceModePanel } from './DiceModePanel'
 import { DmSettingsPanel } from './DmSettingsPanel'
-import { InviteLink } from './InviteLink'
-import { InvitePanel } from './InvitePanel'
 
 interface Props {
   client: ApiClient
   table: TableSummary
-  meId: string
   pack: LoadedPack | null
   session: { code: string; status: string } | null
-  /** true cuando ya llego el primer estado de la mesa (para abrir el mando solo si no hay sesion). */
-  loaded: boolean
   /** Codigo sugerido: la siguiente sesion de la campaña. */
   suggestedCode: string
   /** Sesiones que ESTA campaña ya jugo, para marcarlas en el selector. */
@@ -30,56 +25,44 @@ interface Props {
 }
 
 /**
- * Mando del anfitrion: abrir la sesion (codigo de tres digitos y una nota
- * que el DM tambien recibe), cerrarla con cliffhanger, invitar y elegir el
- * proveedor del DM (cada uno en un modal, que en el telefono no cabe debajo
- * de la narracion). El DM es la IA; el anfitrion dirige la mesa.
+ * El anfitrion (docs/18, D-UX-7), dentro de su hoja de la barra del juego:
+ * pestaña Sesion (premisa, abrir con codigo y nota, cerrar con cliffhanger),
+ * que es lo de cada noche, y pestaña Ajustes de la mesa (dados, secretos del
+ * pack y director), que casi no se toca. Invitar vive en Jugadores.
  */
-export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
-  const opciones = sessionOptions(pack, playedSessions)
-  const elegida = opciones.find((o) => o.code === code) ?? null
-  const [expanded, setExpanded] = useState(false)
-  const [inviting, setInviting] = useState(false)
-  const [dmOpen, setDmOpen] = useState(false)
+export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+  const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
   const [cliffhanger, setCliffhanger] = useState('')
   const [confirmClose, setConfirmClose] = useState(false)
-  const decidedRef = useRef(false)
+  const opciones = sessionOptions(pack, playedSessions)
+  const elegida = opciones.find((o) => o.code === code) ?? null
 
   useEffect(() => {
     setCode(suggestedCode)
   }, [suggestedCode])
 
-  // Al entrar: abierto si no hay sesion (hay que abrirla), plegado si ya se juega.
-  useEffect(() => {
-    if (!loaded || decidedRef.current) return
-    decidedRef.current = true
-    setExpanded(!session)
-  }, [loaded, session])
-
-  // Al cerrarse la sesion, el mando vuelve a mostrarse para abrir la siguiente.
-  useEffect(() => {
-    if (loaded && !session) setExpanded(true)
-  }, [loaded, session])
-
   return (
-    <View style={styles.panel}>
-      <Pressable onPress={() => setExpanded((v) => !v)} style={styles.headerRow} accessibilityRole="button" accessibilityState={{ expanded }}>
-        <Text style={styles.title}>Mando del anfitrión</Text>
-        <Text style={styles.state} numberOfLines={1}>
-          {session ? `Sesión ${session.code} abierta` : 'Sin sesión abierta'}
-        </Text>
-        <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
-      </Pressable>
+    <View style={styles.form}>
+      <View style={styles.tabs}>
+        {(['session', 'settings'] as const).map((t) => (
+          <Pressable key={t} onPress={() => setTab(t)} style={[styles.tab, tab === t && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === t }}>
+            <Text style={[styles.tabText, tab === t && styles.tabTextOn]}>{t === 'session' ? 'Sesión' : 'Ajustes de la mesa'}</Text>
+          </Pressable>
+        ))}
+      </View>
 
-      {expanded ? (
-        <View style={styles.form}>
-          {table.premise ? (
-            <Text style={styles.premise} numberOfLines={3}>
-              {table.premise}
-            </Text>
-          ) : null}
+      {tab === 'settings' ? (
+        <>
+          <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+          <Text style={styles.title}>Director de juego</Text>
+          <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+        </>
+      ) : (
+        <>
+          <Text style={styles.state}>{session ? `Sesión ${session.code} abierta` : 'Sin sesión abierta'}</Text>
+          {table.premise ? <Text style={styles.premise}>{table.premise}</Text> : null}
           {!session ? (
             <>
               {opciones.length > 0 ? (
@@ -91,27 +74,18 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
                   ))}
                   {elegida ? <Text style={styles.sessionHint}>{elegida.summary}</Text> : null}
                 </View>
-              ) : null}
-              <View style={styles.row}>
-                {opciones.length === 0 ? <TextInput value={code} onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 3))} keyboardType="number-pad" maxLength={3} placeholder="001" placeholderTextColor={theme.colors.inkFaint} style={[styles.input, styles.code]} /> : null}
-                <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el DM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={[styles.input, styles.grow]} />
-              </View>
-              <View style={styles.row}>
-                <Button label="Abrir sesión" primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
-                <Button label="Invitados" onPress={() => setInviting(true)} />
-                <Button label="DM" onPress={() => setDmOpen(true)} />
-              </View>
+              ) : (
+                <TextInput value={code} onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 3))} keyboardType="number-pad" maxLength={3} placeholder="001" placeholderTextColor={theme.colors.inkFaint} style={[styles.input, styles.code]} />
+              )}
+              <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el DM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={styles.input} />
+              <Button label="Abrir sesión" primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
             </>
           ) : (
             <>
               <TextInput value={cliffhanger} onChangeText={setCliffhanger} placeholder="Cliffhanger para la próxima (opcional)" placeholderTextColor={theme.colors.inkFaint} style={styles.input} />
               <View style={styles.row}>
                 {!confirmClose ? (
-                  <>
-                    <Button label="Cerrar sesión" busy={busy} onPress={() => setConfirmClose(true)} />
-                    <Button label="Invitados" onPress={() => setInviting(true)} />
-                    <Button label="DM" onPress={() => setDmOpen(true)} />
-                  </>
+                  <Button label="Cerrar sesión" busy={busy} onPress={() => setConfirmClose(true)} />
                 ) : (
                   <>
                     <Button
@@ -129,42 +103,8 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
               </View>
             </>
           )}
-        </View>
-      ) : null}
-
-      <Modal visible={inviting} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setInviting(false)}>
-        <View style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalSide} />
-            <Text style={styles.modalTitle}>Invitados</Text>
-            <Pressable onPress={() => setInviting(false)} hitSlop={10} style={styles.modalSide}>
-              <Text style={styles.modalLink}>Cerrar</Text>
-            </Pressable>
-          </View>
-          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-            {/* El enlace primero: es la via rapida y la que no pide amistad. */}
-            <InviteLink client={client} tableId={table.id} tableName={table.name} />
-            <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-          </ScrollView>
-        </View>
-      </Modal>
-
-      <Modal visible={dmOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDmOpen(false)}>
-        <View style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalSide} />
-            <Text style={styles.modalTitle}>Director de juego</Text>
-            <Pressable onPress={() => setDmOpen(false)} hitSlop={10} style={styles.modalSide}>
-              <Text style={styles.modalLink}>Cerrar</Text>
-            </Pressable>
-          </View>
-          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-            {/* Primero las reglas de la mesa (guardan al elegir), luego el director; como en la web (docs/18, D-UX-7). */}
-            <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-            <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-          </ScrollView>
-        </View>
-      </Modal>
+        </>
+      )}
     </View>
   )
 }
@@ -180,7 +120,12 @@ const styles = StyleSheet.create({
   title: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   state: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   chevron: { color: theme.colors.gold, fontSize: 14 },
-  form: { gap: 8 },
+  form: { gap: 10 },
+  tabs: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
+  tab: { paddingHorizontal: 14, paddingVertical: 8 },
+  tabOn: { backgroundColor: theme.colors.accent },
+  tabText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.inkDim },
+  tabTextOn: { color: '#ffffff' },
   premise: { fontFamily: theme.fonts.serifItalic, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
   input: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
