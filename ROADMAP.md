@@ -224,9 +224,10 @@ sistema de `img/ideas_movil.png` (Inter para UI, serif para titulos y
 narracion, pildora del turno, cuadro "¿Que hace tu personaje?", Jugadores
 con retrato redondo y check). El velo olivo de los campos era el
 autocompletado de Android: en Expo Go se apaga con `isRunningInExpoGo`, en
-la app instalada lo quita `plugins/withNoAutofillHighlight.js`. **Falta del
-concepto**: la ficha con barras de vida y PE y las pestañas Inventario,
-Habilidades y Rasgos. Lo que se
+la app instalada lo quita `plugins/withNoAutofillHighlight.js`. La ficha del
+concepto (barra de vida, rejilla, pestañas Inventario, Habilidades y Rasgos)
+quedo en `0d3f38f`. **Sigue**: que Gabino la recorra entera en el telefono,
+y el APK para ver splash, icono y el autocompletado sin velo. Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas

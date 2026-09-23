@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 13:50 CST**. Rama `dev`, commit `1dfbf96`; API `1709db0` con platform `08361ea`.
+Fecha de corte: **2026-09-23, 15:55 CST**. Rama `dev`, commit `0d3f38f`; API `d6e8dd9` con platform `0736442`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -182,6 +182,23 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   `apps/web/src/components/Brand.tsx`; icono de app, favicon y apple-icon.
 - **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
   para imprenta, y el nombre en la app (`android.package`).
+
+### La app con el diseño de las laminas de concepto (23-09, tarde)
+
+- Revisada por Gabino en el telefono con Expo Go. La referencia visual son
+  las laminas de concepto, no el board de prueba: portada = version movil de
+  `img/branding/concepto home.png`; el resto = `img/ideas_movil.png`.
+- Inter para la interfaz (brand board), serif para titulos y narracion,
+  Cinzel solo para la marca; enlaces en nebula (`#a78bfa`).
+- Splash con el isotipo; mesa con la pildora del turno; cuadro "¿Que hace
+  tu personaje?"; Jugadores con retrato redondo y check; ficha con barra de
+  vida, rejilla de caracteristicas y pestañas Inventario, Habilidades y
+  Rasgos (sin barra de energia: el sistema no la tiene).
+- El velo olivo de los campos era el autocompletado de Android: se apaga en
+  Expo Go (`isRunningInExpoGo`) y en la app instalada lo quita
+  `apps/mobile/plugins/withNoAutofillHighlight.js`.
+- `react-native-web` instalado para exportar la app a web y revisarla a 390
+  px sin telefono.
 
 ### La app al dia con la web (23-09, tarde)
 
