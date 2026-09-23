@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 05:15 CST**. Rama `dev`, commit `7b0d96a`.
+Fecha de corte: **2026-09-22, 20:05 CST**. Rama `dev`, commit `d7ba867`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -111,7 +111,15 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
   puntos por lugar (encendidos si hay alguien) y los retratos de quien esta
   alli. Quien no tiene ubicacion aparece como "de camino o fuera de escena".
 - **En web y en la app**, con la misma composicion.
-- Formato en `docs/05`, ubicacion en `docs/08`, lo que se ve en `docs/13` 4.10.
+- **Los tres packs tienen mapa** (22-09): La Mascarada uno; el piloto dos
+  (Valdoria y la mina, unidos por la boca de la mina, que vive en el mapa del
+  pueblo); la boticaria dos (el palacio y la ciudad exterior, con la muralla
+  como nexo). Catorce coordenadas medidas sobre la imagen real, comprobadas
+  pintando los marcadores encima.
+- **Con varios mapas, la mesa enseña el que toca**: el del personaje de quien
+  mira, si no el de mas gente, si no el primero; y se cambia desde el modal.
+- Formato en `docs/05`, ubicacion en `docs/08`, lo que se ve en `docs/13`
+  4.10, prompts para generar imagenes y retratos en `docs/20`.
 
 ### Negocio
 

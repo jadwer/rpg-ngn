@@ -245,98 +245,184 @@ donde esta cada personaje), `docs/13` 4.10 (lo que se ve en la mesa).
 
 ---
 
-# Laminas de retratos de NPC
+# Retratos de NPC: un prompt maestro por pack y un bloque por personaje
 
-Dos laminas que faltan, una por pack. Se piden **en rejilla** porque
-`tools/packs/crop-portraits.py` recorta de ahi los retratos sueltos al estandar
-del pack (512x512, WebP, cara y hombros con la cara en el tercio superior).
+Enfoque propuesto por GPT el 22-09, que sustituye a las laminas en rejilla.
+Dos cambios de fondo respecto a lo anterior:
 
-**La receta que funciona, sacada de las laminas que Gabino ya genero**
-(`img/ElTeQueNadieProbo/characters.png`, `img/LeBalMasque/npcs.png`): lo que
-sale bonito **no es "un retrato en una celda", es una carta de personaje**. Esa
-diferencia es la que hace que los retratos actuales tengan vida y los que yo
-pedi al principio salieran planos.
+1. **Un bloque maestro de estilo que no cambia nunca dentro de un pack**, y un
+   bloque variable por personaje. Asi Maomao y Jinshi no parecen de dos series
+   distintas: el estilo es literalmente el mismo texto.
+2. **Un personaje por imagen, sin marco ni tarjeta.** La carta se monta en el
+   cliente si hace falta; la ilustracion queda reutilizable para ficha,
+   dialogo, seleccion y mapa. Lo que da vida (pose, fondo desenfocado, luz
+   lateral) se conserva; lo que sobra es el marco pintado.
 
-- **Cada personaje en un panel vertical con marco**, como una carta
-  coleccionable, con su **color propio** (granate, verde, indigo, rosa palo,
-  ocre) que lo distingue de los demas.
-- **Figura de medio cuerpo en pose expresiva**, no un busto quieto de frente:
-  sosteniendo algo, gesticulando, mirando de lado. Cada uno hace algo que
-  cuenta quien es.
-- **Fondo desenfocado que situa la escena** detras de la figura (el salon con
-  luz de araña, la ventana del pabellon, la botica), con profundidad de campo
-  fuerte. No un fondo plano.
-- **Cabeza y torso en la mitad superior del panel**, que es de donde sale el
-  recorte de 512x512.
-- **Rejilla regular**, todas las celdas iguales, con el margen del marco entre
-  ellas.
-- **Iluminacion calida y dramatica**, con la luz entrando desde un lado.
-- **Sin texto, sin nombres, sin marcos decorados, sin numeros.**
-- Mismo estilo, misma luz y mismo encuadre en toda la lamina.
-- **El estilo lo manda el pack, no el gusto de quien escribe el prompt.** Cada
-  pack tiene el suyo y un NPC nuevo tiene que parecerse a los jugables con los
-  que va a compartir pantalla. **Hay que abrir un retrato existente del pack
-  antes de escribir el prompt**, no suponerlo: aqui se pidieron los nueve en
-  estilo realista cuando el piloto es pintura semirrealista de fantasia y la
-  boticaria es anime, y no se habria notado hasta tener las laminas.
+El coste: nueve generaciones en vez de dos laminas. A cambio, consistencia
+controlada y cero recorte a ciegas. Los bloques maestros van en ingles porque
+es el idioma con el que los generadores obedecen mejor los terminos de estilo;
+las descripciones de personaje pueden ir en cualquiera de los dos.
 
-| Pack | Estilo de sus retratos |
-|---|---|
-| `pilot` (Valdoria) | Pintura digital semirrealista de fantasia, pincelada visible, luz fria azulada, fondo con algo de escenario desenfocado |
-| `private-botica` | Anime / ilustracion japonesa, linea limpia, ojos grandes detallados, colores suaves, fondo desenfocado |
-| `mascarada` | Anime tambien, pero mas oscuro y calido, con dorados y granates |
+**Como se usa**: se pega el bloque maestro del pack, debajo el bloque de
+consistencia, y debajo el bloque del personaje. Una imagen por personaje.
 
-## 5. Los tres de Valdoria (`pilot`)
+**Como se guarda**: cada imagen se lleva al estandar del pack (512x512 WebP,
+cara y hombros con la cara en el tercio superior) con
+`python3 tools/packs/crop-portraits.py <imagen> <destino> <id> --top 0.10`,
+que con un solo id trata la imagen como lamina de una columna.
+
+## Bloque de consistencia (igual para todos los packs)
 
 ```text
-Lamina de cartas de personaje, tres paneles verticales en una fila, como las cartas de un juego de rol ilustrado. Imagen de 3072x1024 pixeles. Cada panel tiene su propio marco fino y un color dominante distinto, separados por un margen oscuro.
-
-Estilo: pintura digital semirrealista de fantasia, pincelada visible, mucho detalle en la cara y en las telas, iluminacion calida y dramatica con la luz entrando desde un lado. Como la ilustracion de personaje de un manual de rol de mesa. Nada de fotorrealismo y nada de anime: el punto medio, pintado.
-
-Cada personaje aparece de medio cuerpo, en pose expresiva y haciendo algo que cuenta quien es, con la cabeza y el torso en la mitad superior de su panel. Detras de cada uno, el interior de la posada desenfocado con profundidad de campo fuerte: vigas bajas, el fuego del hogar, luz de farol.
-
-Son gente de un pueblo minero pobre de montaña. Ropa de trabajo gastada, lana y cuero, nada de armaduras, nada de armas, nada de magia.
-
-Panel 1, color dominante ocre apagado: un hombre joven de unos veinte años, delgado, pelo oscuro revuelto, ojeras marcadas de no dormir, camisa de lino sucia y delantal de mozo de posada. Sostiene una jarra a medio servir y mira de reojo hacia la puerta, como si vigilara. Miedo contenido que intenta disimular.
-
-Panel 2, color dominante verde oscuro: una mujer de unos cuarenta y cinco años, robusta, pelo recogido con mechones grises, delantal sobre vestido de lana marron. Tiene una mano abierta sobre un libro de registro grueso, como protegiendolo, y mira al frente evaluando. Cortes pero sin calidez.
-
-Panel 3, color dominante azul pizarra: un hombre de unos sesenta años, capataz de mina, barba gris descuidada de varios dias, cara curtida, abrigo pesado sobre camisa arrugada. Sostiene un farol bajo, que le ilumina la cara desde abajo. Agotado, sin dormir, con expresion de culpa y no de enfado.
-
-Sin texto, sin nombres, sin letras, sin numeros.
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
 ```
 
-Recorte: `python3 tools/packs/crop-portraits.py <lamina> content/packs/pilot/portraits tomas bren osric`
+## Bloque maestro: `private-botica` (anime de novela ligera)
 
-## 6. Los seis del palacio (`private-botica`)
+Escrito por GPT a partir de la lamina de jugables del pack
+(`img/ElTeQueNadieProbo/characters.png`). Se copia entero y no se toca.
 
 ```text
-Lamina de cartas de personaje, seis paneles verticales en una rejilla de 3 columnas por 2 filas, como las cartas de un juego de rol ilustrado. Imagen de 3072x2048 pixeles. Cada panel tiene su propio marco fino y un color dominante distinto, separados por un margen claro.
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
 
-Estilo: ilustracion anime japonesa de alta calidad, linea limpia, ojos grandes y detallados, sombreado suave y colorido rico, al estilo de una novela ligera de ambientacion china imperial clasica. Iluminacion calida de farol de papel. Tiene que parecerse a los retratos de los personajes jugables de este mismo pack, que son anime, no realistas.
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
 
-Cada personaje aparece de medio cuerpo, en pose expresiva y haciendo algo que cuenta quien es, con la cabeza y el torso en la mitad superior de su panel. Detras de cada uno, un interior del palacio desenfocado con profundidad de campo fuerte: celosias de madera, ciruelos en flor, faroles de papel.
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
 
-Todos visten hanfu o tunica china imperial, con la tela y los bordados detallados.
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
 
-Panel 1, verde jade: una mujer joven de unos diecinueve años, boticaria, pelo negro recogido con un palillo sencillo, pecas, ropa de sirvienta sin adornos. Sostiene un frasco pequeño a contraluz y lo mira entrecerrando los ojos, analitica. Una venda fina en un antebrazo.
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
 
-Panel 2, indigo profundo: un hombre joven de belleza llamativa e incomoda, pelo negro largo y perfecto, tunica de funcionario de alto rango en seda oscura con bordado discreto. Sonrie con la cabeza ligeramente ladeada, una sonrisa amable que no llega a los ojos.
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
 
-Panel 3, rojo laca: una mujer de unos veinticinco años, consorte de rango alto, ojos verdes, pelo rojizo recogido con horquillas de jade y oro, tunica ricamente bordada. Sostiene una taza de te sin beberla, con porte sereno y frio.
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
 
-Panel 4, gris piedra: un hombre de unos setenta años, medico de la corte, barba blanca rala, gorro de funcionario, tunica gris sencilla, gafas pequeñas. Escribe en un cuaderno con mano temblorosa, la mirada baja, cansado y prudente.
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
 
-Panel 5, ocre viejo: un hombre de unos cuarenta años, estratega de la corte, gafas redondas de montura fina, pelo descuidado recogido a medias, tunica puesta sin cuidado. Sostiene una pieza de juego de mesa entre dos dedos, mirando a traves de quien tiene delante, ausente.
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
 
-Panel 6, morado apagado: una mujer de unos veinticinco años, dama de servicio, rostro completamente inexpresivo, pelo negro liso y tirante, tunica lisa y oscura. Sostiene una bandeja con las dos manos, perfectamente quieta, casi sin presencia.
-
-Sin texto, sin nombres, sin letras, sin numeros.
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
 ```
 
-Recorte, por filas y de izquierda a derecha:
-`python3 tools/packs/crop-portraits.py <lamina> <destino>/portraits maomao jinshi consorte-gyokuyou medico-anciano lakan suirei --rows 2`
+### Los seis NPC de la boticaria
 
-**Ojo con el destino de la boticaria**: su pack vive en
-`~/dev/rpg-packs/boticaria`, no en este repo (docs/07). El de Valdoria si va
-en `content/packs/pilot/portraits`.
+Destino: `~/dev/rpg-packs/boticaria/portraits/` (el pack vive en su repo
+privado, docs/07). Ids: `maomao`, `jinshi`, `consorte-gyokuyou`,
+`medico-anciano`, `lakan`, `suirei`.
+
+```text
+CHARACTER: Maomao, a nineteen-year-old apothecary from the pleasure district, brought into the inner palace by paths she did not choose. Black hair tied simply with a plain wooden hairpin, small freckles, sharp observant eyes, hands faintly stained by herb dyes. Plain palace servant's outfit with no ornament.
+PERSONALITY AND EXPRESSION: Analytical and awake, never smiling. She looks like she is examining evidence and noticing what everyone else missed.
+POSE / ACTION: Three-quarter view. She holds a small glass vial up toward the lantern light and studies it with narrowed eyes. A thin bandage is visible on one forearm.
+CLOTHING: Simple layered servant's hanfu in muted jade green and gray, practical fabric, no decoration.
+ACCESSORIES: Wooden hairpin, a small herb pouch at the waist, no jewelry.
+```
+
+```text
+CHARACTER: Jinshi, a high-ranking official of the inner palace, young, of a beauty so striking it makes people uncomfortable to look at him directly. Long perfectly kept black hair, pale refined features, elegant posture.
+PERSONALITY AND EXPRESSION: A gentle, polite smile that never reaches his eyes. He already knows more than he says. Calm, observant, impossible to read.
+POSE / ACTION: Three-quarter view, head slightly tilted toward the viewer. One hand lightly touches the edge of his sleeve, the other rests near his waist. Courtesy with hidden calculation.
+CLOTHING: Dark indigo-black layered court robes of extremely fine silk with subtle gold embroidery. Elegant but restrained.
+ACCESSORIES: A minimal refined hair ornament, a discreet jade detail. No weapons.
+```
+
+```text
+CHARACTER: Consort Gyokuyou, one of the highest-ranking consorts, around twenty-five. Green eyes, reddish hair pinned with jade and gold hairpins, a face that gives nothing away.
+PERSONALITY AND EXPRESSION: Serene, cold and very aware of being watched. A cool head that has just seen its unbreakable routine broken.
+POSE / ACTION: Frontal pose, seated upright. She holds a cup of tea in both hands without drinking, looking straight at the viewer.
+CLOTHING: Richly embroidered silk hanfu in lacquer red and gold, layered, immaculate.
+ACCESSORIES: Jade and gold hairpins, a pair of earrings, a fan folded in her lap.
+```
+
+```text
+CHARACTER: The old court physician, about seventy. Sparse white beard, an official's cap, small round spectacles, a face that has spent forty years learning what really kills in a court.
+PERSONALITY AND EXPRESSION: Tired, prudent, watchful. He counts what goes missing and does not report it.
+POSE / ACTION: Three-quarter view. He writes in a ledger with a visibly trembling hand while his eyes stay steady on the page.
+CLOTHING: Plain gray official's robe, worn but clean.
+ACCESSORIES: Spectacles, a brush, a numbered medicine jar beside him.
+```
+
+```text
+CHARACTER: Lakan, chief strategist of the outer court, about forty. Round thin-rimmed spectacles, hair carelessly half tied, a court robe put on without care.
+PERSONALITY AND EXPRESSION: Absent, looking through whoever stands in front of him. He sees people as pieces on a board.
+POSE / ACTION: Three-quarter view. He holds a single game piece between two fingers, examining it, not the viewer.
+CLOTHING: Official's robe in muted ochre and brown, slightly disheveled, sash loosely tied.
+ACCESSORIES: Spectacles, a xiangqi game piece, no jewelry.
+```
+
+```text
+CHARACTER: Suirei, a lady-in-waiting of about twenty-five with a completely expressionless face, black hair pulled straight and tight, the careful hands of someone who works with herbs.
+PERSONALITY AND EXPRESSION: Still, silent, almost without presence. She knows more about herbs than her position explains.
+POSE / ACTION: Frontal pose. She holds a lacquered tray with both hands, perfectly still, eyes lowered but not submissive.
+CLOTHING: Plain dark servant's hanfu, no ornament, in muted purple-gray.
+ACCESSORIES: None visible. Clean, cared-for hands.
+```
+
+## Bloque maestro: `pilot` (pintura semirrealista de fantasia)
+
+Escrito con la misma estructura, a partir de los retratos de los jugables
+(`content/packs/pilot/portraits/`, por ejemplo `calder.jpg`). Se copia entero
+y no se toca.
+
+```text
+HIGH-QUALITY PAINTED FANTASY CHARACTER ILLUSTRATION, low-fantasy mountain village setting, tabletop roleplaying manual character art.
+
+Semi-realistic digital painting with visible confident brushwork, high detail in the face and in worn fabrics, natural proportions, soft painterly shading with strong value contrast. NOT photorealistic. NOT anime. NOT cartoon. NOT comic book. NOT chibi. The point between realism and illustration, clearly painted, like a character portrait in a premium tabletop roleplaying sourcebook. It should feel like it belongs to the same fictional universe as the reference image.
+
+Cool night illumination in muted blue and slate gray, with a single warm source of lantern or hearth light striking the face from one side. Color palette based on earth brown, slate gray, muted pine green, iron, dirty linen and the amber of firelight. Skin weathered and naturally shaded.
+
+Character portrait from approximately the waist up. Character centered, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Posture and hands that say who this person is.
+
+Background strongly out of focus with shallow depth of field: only the suggestion of a low-beamed inn interior, firelight, rough stone, wet night air. No recognizable objects competing with the character.
+
+Clothing of a poor mining village: worn wool, leather, linen, patched and practical. No armor, no weapons, no magic, no fantasy races.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, painterly illustration, cinematic composition, sober color grading, expressive weathered face, atmospheric depth.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+```
+
+### Los tres NPC de Valdoria
+
+Destino: `content/packs/pilot/portraits/`. Ids: `tomas`, `bren`, `osric`.
+
+```text
+CHARACTER: Tomas, the inn's serving boy, about twenty, thin, with unkempt dark hair and deep shadows under his eyes from not sleeping. He recognizes the Nine Travelers even though the village has forgotten them.
+PERSONALITY AND EXPRESSION: Contained fear he is trying to hide. He watches the door more than the tables.
+POSE / ACTION: Three-quarter view. He holds a half-poured jug and glances sideways toward the door, as if keeping watch.
+CLOTHING: Dirty linen shirt, a serving apron, worn wool trousers.
+ACCESSORIES: The jug, a rag tucked in the apron. No jewelry.
+```
+
+```text
+CHARACTER: Bren, who runs the inn and keeps the guest register, about forty-five, sturdy, hair pinned up with gray strands loose.
+PERSONALITY AND EXPRESSION: Direct, evaluating, mouth closed. Courteous until she stops being courteous. She writes everything down and shows nothing.
+POSE / ACTION: Frontal pose. One open hand rests flat on a thick leather-bound register as if guarding it; she looks straight at the viewer.
+CLOTHING: Brown wool dress with a work apron, sleeves rolled.
+ACCESSORIES: The register, a ring of keys at the waist.
+```
+
+```text
+CHARACTER: Osric, the mine foreman, about sixty, weathered face, several days of unkempt gray beard, a man who has been shut in his house for eight days with the light on. Thirty years ago he went down the shaft with a bronze bell and came up alone.
+PERSONALITY AND EXPRESSION: Exhausted and sleepless, with the eyes of someone who has not opened the door to anyone. Guilt, not anger.
+POSE / ACTION: Three-quarter view. He holds a lantern low, so it lights his face from below, and looks slightly past the viewer.
+CLOTHING: Heavy wool coat over a wrinkled shirt, a foreman's leather belt.
+ACCESSORIES: The lantern. No bell in frame.
+```
+
+## Lo que se aprendio antes de llegar aqui, para no repetirlo
+
+- **Abrir un retrato existente del pack antes de escribir el prompt.** Los
+  nueve se pidieron primero en estilo realista sin mirar ninguno, y el piloto
+  es pintura semirrealista y la boticaria es anime. Un NPC realista al lado de
+  jugables anime canta.
+- **Las laminas originales siguen en `img/`** (`ElTeQueNadieProbo/characters.png`,
+  `LeBalMasque/npcs.png`, `LeBalMasque/characters.png`). Cuando se crea que se
+  perdio una receta, mirar ahi primero.
+- **"Anime" a secas deja demasiado margen.** Lo que lleva al estilo concreto
+  es la combinacion: light-novel illustration, clean linework, refined
+  proportions, soft painterly shading, y el escenario. Lo mismo vale para el
+  piloto con "painted, tabletop sourcebook, not anime, not photo".
