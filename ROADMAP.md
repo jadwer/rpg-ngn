@@ -283,6 +283,13 @@ con capturas, y la lista que salga de B4. La verificacion de correo sigue
 apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
 web, que es el producto principal.
 
+**Y despues de estos bloques, el rumbo que fijo Gabino el 23-09** para llegar
+a produccion: (1) **Entrega 8**, comunidad y repositorio de packs (terminar de
+analizar y completar `docs/15`, con la subida binaria E2, las fichas por API
+E3 y la procedencia como lo que puede doler); (2) **Stripe en real**; (3)
+varias vueltas de analisis y una **beta cerrada con amigos creadores de
+contenido** que den opiniones reales; y ya, produccion.
+
 **Lo que el VAM tumbo del plan original**: "visual primero y cuenta atras
 despues" (era la misma cosa partida en dos y en el orden equivocado); "paleta"
 como tarea abierta (ahora es un experimento de un dia con dos variantes);
