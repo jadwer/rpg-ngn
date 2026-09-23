@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 23:05 CST**. Rama `dev`, commit `b518c0d`.
+Fecha de corte: **2026-09-23, 00:25 CST**. Rama `dev`, commit `ad219a2`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -84,7 +84,9 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 ### Mesa y turnos
 
 - **Turnos**: declaracion privada de cada jugador, cierre del turno, narracion.
-  El cierre lo da el anfitrion (ver decision D3 mas abajo).
+  Cuando todos respondieron, cuenta atras de diez segundos cancelable por
+  cualquiera (D-UX-3, 23-09); el anfitrion puede forzar el cierre si falta
+  alguien.
 - **Dados pre-tirados**: con `dice: engine` (por omision) el motor tira un d20
   por personaje que declaro **antes** de llamar al modelo y se lo enseña. El DM
   narra la consecuencia en el mismo turno. Modo `table` para dados fisicos.
@@ -101,6 +103,37 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - **Personalidad por jugador** (600 caracteres, con plantilla): la escribe el
   jugador y el DM la recibe en la ficha. Activable por pack
   (`playerPersona`), no sale en packs donde no aplica.
+
+### La mesa a 390 px, en la web (23-09; la app va detras)
+
+Bloque B1 del plan (`ROADMAP.md`, "Lo que sigue"), tras levantar Gabino el
+congelamiento visual el 22-09:
+
+- **Dos menus** (D-UX-6): el del sitio como hamburguesa (mesas, perfil y
+  creditos, ajustes, salir) y la **barra del juego** (fichas, mapa, jugadores,
+  anfitrion, mas), al pie en el telefono y en la cabecera en escritorio. El
+  pie de la mesa se queda solo con el cuadro de respuesta.
+- **Jugadores con estado**: listo, escribiendo, pensando, se tuvo que ir,
+  narra en voz alta. "Escribiendo" es nuevo de punta a punta: el cliente avisa
+  mientras se teclea y el aviso caduca solo en la API, como el de narrador.
+- **Cuenta atras cancelable** (D-UX-3): cuando todos respondieron, "El
+  director narra en 10 s. Cancelar". Cualquiera cancela; la espera se guarda
+  en el turno y la ven todos, con quien la pidio; se reanuda desde diez o se
+  cierra a mano. Cada cliente cuenta con su reloj desde que ve el turno
+  completo, asi que un reloj desviado no cierra antes; si dos llegan a cero,
+  el primero cierra y el otro recibe 409 y refresca.
+- **La espera como ficcion**: frases que rotan ("El destino se prepara")
+  en vez de "el DM esta narrando".
+- **Cabecera de escena** arriba de la narracion, con el titulo de la sesion,
+  el momento del mundo y el turno sobre el mapa del pack (hasta que haya
+  imagen por escena, campo pendiente en `docs/05`).
+- **Paleta del borrador de diseño**: negro azulado, superficies frias,
+  violeta como accion, cian para lo interactivo, dorado solo de detalle.
+  Claude habia decidido conservar la paleta calida; Gabino la vio y pidio la
+  del borrador. Es su producto.
+
+Probado en local con tres cuentas a la vez y en produccion con una mesa
+temporal a 1280 y 390. **Pendiente: la misma composicion en la app.**
 
 ### Retratos y NPC
 
@@ -340,7 +373,7 @@ narrativo.
 |---|---|---|---|
 | D1 | El modelo propone, el motor valida, el estado persiste | `docs/02` | El modelo nunca es dueño del estado |
 | D2 | **La web es el producto principal**; el movil es la superficie del jugador | `docs/11`:215 | Mesa propia, independiente, cara para streamers. Ante cualquier disyuntiva gana la web. `docs/16` principio 5 lo contradecia; resuelto en `docs/18` D-UX-2 (la jerarquia se diseña a 390px, la directriz no cambia) |
-| D3 | El cierre del turno es manual, lo da el anfitrion | `docs/13` | Cada turno cuesta dinero; es la unica palanca contra el gasto involuntario. Puesto a critica a proposito |
+| D3 | El cierre del turno es una cuenta atras cancelable, no automatico puro | `docs/18` D-UX-3 | Cada turno cuesta dinero; "cancelar" es la palanca contra el gasto involuntario y da tiempo a corregirse. Sustituye al cierre manual del anfitrion desde el 23-09 |
 | D4 | Los dados los tira el servidor por omision | memoria del proyecto | Se podia escribir "tiro 20". Requisito para packs con roles ocultos |
 | D5 | El pack declara su procedencia; el repo publico solo admite contenido original o licenciado | `docs/07` | Lo demas vive en repos privados |
 | D6 | El motor se cierra antes que lo visual | `docs/14` | Ver "congelado a proposito" |
@@ -367,14 +400,13 @@ detalle esta anotado dentro de ese archivo.
   fisico, no debe animarse nada.
 - **Apertura de sesion** que presenta la escena (estado 2 de sus doce).
 
+### Ya existe desde el 23-09 (en la web; la app va detras)
+
+- **"Escribiendo"** (estado 3), **jugadores con estado individual**, la
+  **espera como ficcion** y la **cuenta atras cancelable** (paso 5).
+
 ### No existe
 
-- **"Escribiendo"** (estado 3). Es lo unico de sus doce estados que no existe:
-  hace falta que el cliente avise mientras se teclea.
-- **Espera como ficcion** ("el destino se prepara"): hoy es un indicador
-  tecnico. Es, en nuestra lectura, la mejor idea de su documento y la mas
-  barata.
-- **Jugadores con estado individual** en vez de una linea de texto.
 - **Historial de la sesion en tarjetas.**
 - **Configuracion en tres niveles.**
 - **Composicion separada por cliente** tal como la propone (`SessionMobile` /

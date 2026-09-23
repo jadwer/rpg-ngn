@@ -198,8 +198,18 @@ que se valide con gente sea la interfaz nueva, no la vieja** (ya jugaron
 varias veces la vieja), asi que B4 desaparece del plan; y que **Stripe espera**
 a que esto termine.
 
-**B1. La mesa a 390 px** (tope: 4 dias web + 2 app; en curso desde el 22-09
-por la noche). Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
+**B1. La mesa a 390 px** (tope: 4 dias web + 2 app). **Web hecha y en
+produccion el 23-09 de madrugada** (`ad219a2`, API `e922fcd`), en una noche:
+dos menus, jugadores con estado, "escribiendo" (API nueva: `typing_until`
+que caduca solo), cuenta atras cancelable con la espera guardada en el turno
+(`held_at`, `held_by`, `completedAt`), espera como ficcion, cabecera de escena
+sobre el mapa del pack y la paleta del borrador (Gabino la pidio al ver la
+primera version "todavia cafe"; anotado en `docs/14`). Probado en local con
+tres cuentas a la vez (escribiendo, cuenta atras, cancelar con nombre,
+reanudar desde diez, cierre solo) y en produccion con una mesa temporal a
+1280 y 390. **Falta la app** (paridad: barra del juego, jugadores con
+estado, cuenta atras, escribiendo, cabecera de escena, paleta). Lo que se
+decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
   (personalidad, mando del anfitrion, fichas) bajo demanda (D-UX-2: jerarquia

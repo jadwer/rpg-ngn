@@ -141,25 +141,27 @@ meta en una mesa. No hay invitación por enlace.
 
 ### 4.5 La mesa
 
-Es la pantalla donde se juega y concentra casi todo. De arriba abajo:
+Es la pantalla donde se juega. Recompuesta el 23-09 (`docs/18`, D-UX-6),
+de arriba abajo:
 
-- **Cabecera**: nombre de la mesa, sesión, momento del mundo, número de turno
-  y quién falta por responder. Botones de fichas y modo pantalla.
-- **Barra de herramientas**: dos vistas (narrativa o diálogo) y controles de
-  lectura en voz alta.
-- **Cuerpo**: los bloques que ha narrado el director, en orden. Es el centro
-  de la experiencia y ocupa la mayor parte de la pantalla.
-- **Pie**: aquí se apilan, según el caso, la tarjeta de inicio, el selector de
-  personaje, el panel de personalidad, el mando del anfitrión y el cuadro de
-  respuesta del turno.
+- **Cabecera**: menú del sitio (hamburguesa: mesas, perfil, ajustes, salir),
+  nombre de la mesa y sesión, y en escritorio la **barra del juego**: fichas,
+  mapa, jugadores, anfitrión, más. En el teléfono esa barra va al pie.
+- **Cuerpo**: una cabecera de escena (título de la sesión, momento del mundo
+  y turno sobre la imagen del pack) y los bloques que ha narrado el director,
+  en orden. Es el centro de la experiencia y ocupa la mayor parte de la
+  pantalla.
+- **Pie**: solo el cuadro de respuesta del turno (y el selector de personaje
+  mientras no se ha elegido). El mando del anfitrión, la personalidad, la voz
+  y el modo pantalla se abren desde la barra del juego.
 
 El estado se consulta por sondeo cada pocos segundos (no hay conexión
 persistente en esta versión).
 
-**Problema conocido**: el pie acumula demasiadas cosas. En un teléfono, el
-mando del anfitrión, el panel de personalidad y el cuadro de respuesta compiten
-por el mismo espacio, y el jugador tiene que desplazarse para encontrar dónde
-escribir.
+**Problema anterior, resuelto el 23-09**: el pie acumulaba el mando del
+anfitrión, la personalidad, el mapa y el cuadro de respuesta, y en un teléfono
+había que desplazarse para encontrar dónde escribir. Fue lo primero que dijo
+la gente que ya jugó ("todo amontonado").
 
 ### 4.6 Tipos de bloque narrativo
 
@@ -179,11 +181,15 @@ servidor a todos los jugadores.
 ### 4.7 El turno
 
 El jugador escribe en un cuadro de texto lo que hace su personaje. Hay atajo
-de teclado para enviar. Mientras tanto, ve quién ha respondido y quién falta.
+de teclado para enviar. Mientras tanto, en "Jugadores" ve a cada persona con
+su estado: listo, escribiendo, pensando, se tuvo que ir.
 
-Cuando todos han respondido, **el anfitrión cierra el turno** y el director
-narra. El cierre es manual a propósito: permite esperar a alguien que fue al
-baño.
+Cuando todos han respondido, arranca una **cuenta atrás de diez segundos** y
+el director narra solo; **cualquiera puede cancelarla** ("un momento"), y
+entonces el turno espera hasta que alguien lo cierre a mano o la reanude. Si
+falta alguien que se fue sin avisar, el anfitrión puede forzar el cierre.
+Antes (hasta el 22-09) el cierre era manual del anfitrión; el cambio y su
+motivo están en `docs/18`, D-UX-3.
 
 Al abrir sesión, el turno 1 se cierra solo, sin declaraciones: el director
 presenta la escena, explica cómo se juega y devuelve la palabra. Sin esto, la
@@ -306,14 +312,15 @@ exactamente lo que le pedimos, y lo que le pedimos estaba mal pensado.
 Ordenado por lo que creo que más duele. Esta priorización también hay que
 cuestionarla.
 
-1. **El anfitrión carga con todo.** Crea, invita, configura, abre, cierra cada
-   turno y además juega. Si se distrae, la mesa se para.
-2. **Invitar es demasiado caro.** Amistad + invitación, sin enlace de
-   invitación, y las dos personas tienen que estar disponibles.
+1. **El anfitrión carga con todo.** Crea, invita, configura, abre y además
+   juega. *Desde el 23-09 ya no cierra cada turno: lo hace la cuenta atrás.*
+2. **Invitar es demasiado caro.** *Resuelto el 22-09 con el enlace de
+   invitación; la amistad ya no es obligatoria.*
 3. **El jugador nuevo no sabe qué escribir.** Le damos un cuadro de texto
    vacío. No hay ejemplos ni sugerencias de lo que su personaje podría hacer.
 4. **La pantalla de crear mesa es un muro.** Cinco decisiones antes de jugar.
-5. **El pie de la mesa se satura** en pantallas pequeñas.
+5. **El pie de la mesa se satura** en pantallas pequeñas. *Resuelto el 23-09:
+   dos menús y el pie solo con el cuadro de respuesta (4.5).*
 6. **No hay documentación de usuario.** Ninguna.
 7. **No se puede recuperar la contraseña** (correo saliente roto).
 8. **No hay términos ni aviso de privacidad**, y se cobra dinero.
