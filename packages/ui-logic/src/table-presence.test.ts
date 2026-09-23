@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTDOWN_SECONDS, countdown, countdownLine, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type SeatMember } from './table-presence.js'
+import { COUNTDOWN_SECONDS, countdown, countdownLine, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
 import { turnProgress, type TurnSummary } from './turn.js'
 
 const nameOf = (id: string) => ({ zahira: 'Zahira', calder: 'Calder', kael: 'Kael' })[id] ?? id
@@ -48,10 +48,10 @@ describe('seats', () => {
 })
 
 describe('countdown', () => {
-  const complete = { status: 'open' as const, required: ['zahira'], responded: ['zahira'], error: null, completedAt: '2026-09-22T23:00:00.000Z' }
+  const complete: CountdownTurn = { status: 'open', required: ['zahira'], responded: ['zahira'], error: null, completedAt: '2026-09-22T23:00:00.000Z' }
   const progress = turnProgress(complete, { role: 'player', characterId: 'zahira' })
   const t0 = 1_000_000
-  const at = (now: number, turn = complete, startedAt: number | null = t0) => countdown({ turn, progress: turnProgress(turn, { role: 'player', characterId: 'zahira' }), startedAt, now, nameOf })
+  const at = (now: number, turn: CountdownTurn = complete, startedAt: number | null = t0) => countdown({ turn, progress: turnProgress(turn, { role: 'player', characterId: 'zahira' }), startedAt, now, nameOf })
 
   it('corre desde que este cliente vio el turno completo', () => {
     expect(at(t0)).toMatchObject({ active: true, remaining: COUNTDOWN_SECONDS, held: false })
