@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
   segmentActive: { backgroundColor: theme.colors.accent },
   segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.ink },
-  segmentTextActive: { color: theme.colors.bg },
+  segmentTextActive: { color: '#ffffff' },
   body: { flex: 1 },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },

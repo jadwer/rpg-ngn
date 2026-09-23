@@ -44,9 +44,8 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
             <View style={styles.who}>
               <Text style={styles.name} numberOfLines={1}>
                 {seat.name}
-                {seat.role === 'host' ? '  · anfitrión' : ''}
-                {seat.mine ? '  · tú' : ''}
               </Text>
+              {seat.role === 'host' || seat.mine ? <Text style={styles.role}>{[seat.role === 'host' ? 'anfitrión' : null, seat.mine ? 'tú' : null].filter(Boolean).join(' · ')}</Text> : null}
               <View style={styles.stateRow}>
                 <View style={[styles.dot, { backgroundColor: DOT[seat.state] }]} />
                 <Text style={[styles.state, seat.state === 'writing' && styles.writing, seat.state === 'ready' && styles.ready, away && styles.away]}>{SEAT_LABELS[seat.state]}</Text>
@@ -73,6 +72,7 @@ const styles = StyleSheet.create({
   mine: { borderColor: theme.colors.accentBright },
   who: { flex: 1 },
   name: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.ink },
+  role: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.accentBright },
   state: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
   writing: { color: theme.colors.cyan },
   ready: { color: theme.colors.success },

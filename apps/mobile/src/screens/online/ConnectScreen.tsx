@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } f
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
+import { Isotipo } from '../../components/Brand'
 import { theme } from '../../theme'
 
 interface Props {
@@ -37,6 +38,9 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
         <View style={styles.spacer} />
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+        <View style={styles.brand}>
+          <Isotipo height={72} color={theme.colors.ink} />
+        </View>
         {showServer ? (
           <Field
             label="Servidor"
@@ -49,7 +53,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
             hint="Déjalo como está salvo que juegues contra otro servidor."
           />
         ) : null}
-        <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" placeholder="jaz@example.com" />
+        <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" placeholder="tu@correo.com" />
         <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={() => canSubmit && onLogin(serverUrl, email, password)} />
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         <Button label="Entrar" primary busy={busy} disabled={!canSubmit} onPress={() => onLogin(serverUrl, email, password)} />
@@ -77,6 +81,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
 }
 
 const styles = StyleSheet.create({
+  brand: { alignItems: 'center', paddingTop: 12, paddingBottom: 8 },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },

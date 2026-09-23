@@ -1,5 +1,5 @@
 import Svg, { Path } from 'react-native-svg'
-import { ISOTIPO, LOGO_VERTICAL, WORDMARK } from '../generated/brand'
+import { ISOTIPO, LOGO_HORIZONTAL, LOGO_VERTICAL, WORDMARK } from '../generated/brand'
 import { theme } from '../theme'
 
 interface Props {
@@ -34,4 +34,9 @@ export function LogoVertical(props: Props) {
 /** Solo el nombre. */
 export function Wordmark(props: Props) {
   return <Mark shape={WORDMARK} {...props} />
+}
+
+/** Isotipo a la izquierda del nombre: la barra superior. */
+export function LogoHorizontal(props: Props) {
+  return <Mark shape={LOGO_HORIZONTAL} {...props} />
 }
