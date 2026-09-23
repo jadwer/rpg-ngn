@@ -182,10 +182,89 @@ salieron las dos cosas: cerrar los huecos del motor y congelar lo visual
 - [x] **Copias de seguridad de Postgres** (2026-09-19, del bloque HOY del VAM): `rpg-backup.timer` diario a las 04:32 UTC con dumps en `/srv/rpg/backups/`, y `deploy/pg-restore-test.sh` que comprueba la restauracion con las mismas cuentas que produccion y el trigger append-only presente
 - [ ] Vigilancia: nadie avisa si un servicio se cae
 
+## Lo que sigue: plan de ejecucion (validado a matar el 2026-09-22)
+
+Sale de la auditoria de `docs/16` a `docs/20` y de la primera señal de gente
+real: los amigos de Gabino, que ya juegan, dicen que la interfaz parece "muy
+junior", amontonada y con colores poco profesionales. El plan original iba en
+ocho puntos sueltos; el VAM (inline, una ronda por seccion) lo dejo en seis
+bloques con tope de tiempo. Regla que manda: **se despliega un bloque antes de
+abrir el siguiente**, y cada cierre pasa por memoria, ancla, este archivo y
+`docs/17`.
+
+**B0. Levantar el congelamiento de `docs/14`.** Decision de Gabino, no de
+Claude. Lo puso el 20-09 con la condicion "medir con gente primero", y esa
+condicion empezo a cumplirse el 22-09 con sus amigos. Cuando lo diga, se anota
+en `docs/14` con fecha y motivo. Nadie lo bloquea.
+
+**B1. La mesa a 390 px** (tope: 4 dias web + 2 app; empieza cuando B0 este
+dicho). Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
+que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
+- Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
+  (personalidad, mando del anfitrion, fichas) bajo demanda (D-UX-2: jerarquia
+  a 390, acabado primero en web; D-UX-5: dos composiciones).
+- **Jugadores con estado** (listo, escribiendo, pensando) en vez de "faltan
+  por responder". "Escribiendo" no existe: hace falta que el cliente avise
+  mientras teclea (marca en `table_members`, la sonda ya existe).
+- **Cuenta atras cancelable** (D-UX-3): cuando todos respondieron, "El
+  director narra en 10 segundos. Cancelar", cancelable por cualquiera (el que
+  quiere corregirse es quien necesita el boton). Mas tiempo maximo de turno con
+  "forzar cierre" para el anfitrion. Cualquier miembro ya puede cerrar si
+  todos respondieron (supuesto 4 del VAM del 19-09), asi que es cliente mas
+  una marca de "espera" compartida.
+- **La espera como ficcion** ("el destino se prepara") en vez del indicador
+  tecnico: 5 a 25 segundos por turno que hoy son tiempo muerto.
+- El saldo no aparece en la mesa (D-UX-4).
+
+**B2. Paleta y jerarquia** (tope: 1 dia, despues de B1). Supuesto escrito en
+el VAM: **la paleta se decide con dos variantes delante de las mismas personas
+que se quejaron**, no en abstracto. Los tokens (`--bg`, `--gold`, `--panel`)
+hacen que una variante sean horas. Advertencia del Fiscal que el Juez acepto:
+el morado sobre negro azulado del mockup de GPT es el aspecto generico de
+dashboard de IA de este año; cambiar de color no es lo mismo que verse pro.
+
+**B3. Guia del anfitrion en texto** (tope: 2 horas, cualquier tarde, antes de
+B4). Crear mesa, enlace, abrir sesion, cerrar turno, retirar mesa. Sin
+capturas, para que el rediseño no la deje vieja. La documentacion completa va
+despues de B1 y B2, como decidio Gabino el 22-09.
+
+**B4. Una sesion con un novato sobre la interfaz actual** (una noche, cosa de
+Gabino, esta semana, **antes de desplegar B1**). El punto medio que ni Opus ni
+el plan original proponian: no bloquea diseñar, pero deja registrado donde se
+traba alguien que nunca jugo antes de que la version 1 desaparezca. Con el
+criterio de aceptacion de `docs/16` como guion, y ahi mismo se observa el mapa
+(si lo abren solos, si el director mueve a la gente).
+
+**B5. Higiene y Stripe** (paralelo, sin orden entre si):
+- Casilla de edad explicita en el registro (2 horas).
+- Cuentas sembradas de produccion: borrar `gabino@example.com`, rotar `god`,
+  cambiar `jaz` y `armando` (Gabino, 30 minutos, pendiente desde el 19-09).
+- Endurecimiento de Stripe P1 a P4 del VAM del 19-09 (unas 12 horas de codigo,
+  no dependen de nada).
+- **La tarea vencida de la cuenta de Stripe la arranca Gabino hoy**: tarda
+  dias y cuesta cero.
+- **El interruptor a claves live es una compuerta, no una fecha**: "el primer
+  desconocido que quiera pagar". Riesgo abierto con dueño Gabino: encenderlo
+  antes deja a un amigo comprando 5 USD de prueba con un reembolso que nadie
+  ha ensayado (`docs/19`, pregunta 5).
+
+**B6. Despues de medir**: avisos de mesa por correo, documentacion completa
+con capturas, y la lista que salga de B4. La verificacion de correo sigue
+apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
+web, que es el producto principal.
+
+**Lo que el VAM tumbo del plan original**: "visual primero y cuenta atras
+despues" (era la misma cosa partida en dos y en el orden equivocado); "paleta"
+como tarea abierta (ahora es un experimento de un dia con dos variantes);
+"documentacion despues de todo" (la guia del anfitrion no puede esperar);
+"Stripe live" como paso del plan (es una compuerta); y "medir al final" (una
+sesion antes de desplegar, no antes de empezar).
+
 ## Antes de abrir a usuarios reales
 
 El servidor ya es publico (https://rpg-worlds.gabinoramirez.com). Esto es lo
-que falta para que entre alguien que no seamos nosotros.
+que falta para que entre alguien que no seamos nosotros. **El orden esta en
+"Lo que sigue"**; aqui queda el inventario.
 
 - [x] **Enlace de invitacion a la mesa** (2026-09-22). **Probado de punta a punta en produccion**: el anfitrion crea el enlace, una desconocida lo abre sin cuenta y ve la mesa y quien invita, se registra conservando el enlace, vuelve a el y entra. Sin amistad de por medio. Tope de plazas (5 por omision) como proteccion principal, porque quien entra gasta turnos del anfitrion; caducidad de 7 dias como segundo cinturon; uno vivo por mesa, revocable. El token se guarda hasheado y solo se enseña al crearlo. La consulta del enlace es publica a proposito. La amistad se queda para invitar a mano, pero deja de ser obligatoria. ~~PENDIENTE NUMERO UNO~~ (Gabino, 21-09). Hoy entrar son **seis pasos**: el invitado se registra, da su correo por fuera, recibe solicitud de amistad, la acepta, el anfitrion lo invita buscandolo por correo y recarga. La regla esta en `TableMemberActionController` ("sin amistad aceptada no hay invitacion") y **no existe enlace ni codigo de mesa**. Explica por que la sesion con invitados del 20-09 empezo mal antes de la primera narracion. **No es UX, es funcionalidad de servidor.** Restriccion que condiciona el diseño: quien entra **gasta turnos del anfitrion** (el cupo se descuenta de `owner_id`), y con `MAIL_MAILER=log` el correo no prueba identidad, asi que hace falta tope de plazas, caducidad y revocacion. Opciones en `docs/18` (D-UX-1)
 - [ ] **Documentacion de usuario.** No existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
@@ -209,7 +288,7 @@ que falta para que entre alguien que no seamos nosotros.
 
 ## Entrega 8: Packs de usuario
 
-- [ ] **WebP como formato de los retratos.** Hoy son JPEG: los cinco de la boticaria pesan unos 480 KB en total y la lamina original 2.5 MB. En WebP con calidad equivalente son la mitad o menos, y el ahorro se multiplica cuando haya cientos de packs servidos desde el servidor. `tools/packs/crop-portraits.py` ya centraliza el recorte, asi que es cambiar el formato de salida y aceptar `.webp` en la ruta de retratos (el engine ya lo contempla en su validacion)
+- [ ] **WebP como formato de los retratos.** Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. **Faltan los nueve jugables del piloto, que siguen en JPG** (`content/packs/pilot/portraits/*.jpg`): recortarlos desde `img/LosNueveViajeros/personajes.png` y cambiar la extension en los nueve JSON. Una hora, y de paso el visor de fichas de `main`
 
 - **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio

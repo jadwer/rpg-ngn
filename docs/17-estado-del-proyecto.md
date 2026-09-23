@@ -266,6 +266,11 @@ director se acuerda de emitir `move` en una partida larga.
 
 ## 5. Que esta pendiente, por orden de urgencia
 
+**El orden de ejecucion vive en `ROADMAP.md`, seccion "Lo que sigue"**
+(validado a matar el 22-09): seis bloques con tope de tiempo, empezando por
+la mesa a 390 px cuando Gabino levante el congelamiento. Lo de abajo es el
+inventario, no el orden.
+
 ### Bloquea abrir a usuarios que no seamos nosotros
 
 0. ~~No se puede entrar a una mesa sin que el anfitrion te lleve de la mano.~~
