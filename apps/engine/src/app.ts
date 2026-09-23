@@ -51,6 +51,15 @@ export function createEngine(options: EngineOptions): Hono {
     }
   })
 
+  /** Fichas completas y sesiones de un pack, para el panel de fichas de un cliente sin el pack (E3). */
+  app.get('/v1/packs/:id/:version/sheets', async (c) => {
+    try {
+      return c.json(await options.packs.sheets({ id: c.req.param('id'), version: c.req.param('version') }))
+    } catch (error) {
+      return c.json({ error: error instanceof Error ? error.message : String(error) }, 404)
+    }
+  })
+
   /**
    * Un retrato del pack. La web lleva los del piloto empaquetados, pero los
    * de un pack instalado en el servidor solo los tiene el engine.

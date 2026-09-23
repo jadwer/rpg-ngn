@@ -1,9 +1,9 @@
 'use client'
 
-import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
+import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -160,6 +160,25 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       alive = false
     }
   }, [client, pack, table.packId, table.packVersion])
+  // Fichas completas y sesiones de un pack que la web no lleva dentro (E3):
+  // con esto el panel de fichas es el mismo para cualquier mundo, subido o
+  // privado del servidor. Antes, en esos packs, el panel salia vacio.
+  const [remoteSheets, setRemoteSheets] = useState<PackSheets | null>(null)
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackSheets(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemoteSheets(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const sheetSource = useMemo(() => (pack ? sheetSourceOf(pack) : remoteSheets ? sheetSourceFrom(remoteSheets) : null), [pack, remoteSheets])
+
   const resolver = useMemo(
     () => speakerResolverFor({ pack, characters: remote, npcs: remoteNpcs, portraitUriOf: (path) => packPortraitUrl(table.packId, path) }),
     [pack, remote, remoteNpcs, table.packId],
@@ -468,8 +487,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   }
 
   const entries = useMemo(
-    () => (pack ? sheetEntries({ pack, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
-    [pack, sessionCode, table.members, viewer.characterId, projections],
+    () => (sheetSource ? sheetEntries({ source: sheetSource, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
+    [sheetSource, sessionCode, table.members, viewer.characterId, projections],
   )
   const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingCodes), [pack, existingCodes])
 
@@ -557,6 +576,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
           <SheetsPanel
             entries={entries}
             footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'}
+            portraitUriOf={pack ? undefined : (path) => packPortraitUrl(table.packId, path)}
             persona={
               wantsPersona && viewer.characterId !== null && snapshot !== null ? (
                 <PersonaPanel

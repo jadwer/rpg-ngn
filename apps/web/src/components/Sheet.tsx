@@ -3,11 +3,11 @@ import { VEIL_NOTE } from '../lib/sheets'
 import { Portrait } from './Portrait'
 
 /** Ficha completa a partir del modelo de vista de ui-logic, ya velado; mismo acabado que apps/sheets. */
-export function Sheet({ sheet }: { sheet: SheetView }) {
+export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: string | null | undefined }) {
   return (
     <article className="sheet">
       <div className="hero-row">
-        <Portrait path={sheet.portrait} name={sheet.name} />
+        <Portrait path={sheet.portrait} uri={portraitUri} name={sheet.name} />
         <div>
           <h2>{sheet.name}</h2>
           <p className="sub">
@@ -21,7 +21,7 @@ export function Sheet({ sheet }: { sheet: SheetView }) {
 
       <div className="vitals">
         <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label="Vida" />
-        <Vital value={String(sheet.ac)} label="Armadura" />
+        <Vital value={sheet.ac === null ? '?' : String(sheet.ac)} label="Armadura" />
         <Vital value={sheet.fortune ? String(sheet.fortune.result) : '?'} label={sheet.fortune ? sheet.fortune.tier : 'Fortuna'} />
       </div>
 

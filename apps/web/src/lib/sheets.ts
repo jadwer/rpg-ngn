@@ -1,61 +1,16 @@
-import type { CharacterState } from '@rpg-ngn/core'
-import type { Character, LoadedPack } from '@rpg-ngn/content'
-import { characterVisibility, everPlayed, packCharacters, VEILABLE_FIELDS, type CharacterSlot, type CharacterVisibility } from '@rpg-ngn/ui-logic'
+import { onlineSheetEntries, type OnlineSheetEntry, type OnlineSheetsInput } from '@rpg-ngn/ui-logic'
 
 /**
- * Lo que el panel de fichas necesita de cada personaje, ya decidido: quien
- * lo juega en la mesa, que se ve (misma regla de velado que apps/sheets y
- * la app movil) y su estado vivo, la propia desde `player:<id>` y las ajenas
- * desde `world`. Sin React para poder probarlo con vitest.
+ * Lo que el panel de fichas necesita de cada personaje, ya decidido. La
+ * logica vive en ui-logic (`sheet-source.ts`) y es la misma para el pack
+ * empaquetado y para uno que llega por la API (E3); aqui queda el nombre
+ * que la web ya usaba y el aviso del velo.
  */
-export interface SheetEntry {
-  character: Character
-  slot: CharacterSlot
-  visibility: CharacterVisibility
-  state: CharacterState | undefined
-  /** Fuera de la mesa: retrato apagado. */
-  muted: boolean
-  /** Es el personaje de quien mira. */
-  mine: boolean
-}
-
-const UNVEILED: CharacterVisibility = { veiled: false, fields: Object.fromEntries(VEILABLE_FIELDS.map((f) => [f, true])) as CharacterVisibility['fields'] }
-
-export interface SheetsInput {
-  pack: LoadedPack
-  /** Codigo de la sesion abierta en la mesa, o null si no hay ninguna. */
-  sessionCode: string | null
-  members: ReadonlyArray<{ characterId: string | null; userName: string | null }>
-  viewerCharacterId: string | null
-  /** `projection.character` de `player:<viewer>`. */
-  own: CharacterState | undefined
-  /** `projection.characters` de `world`. */
-  world: Record<string, CharacterState> | undefined
-}
+export type SheetEntry = OnlineSheetEntry
+export type SheetsInput = OnlineSheetsInput
 
 export function sheetEntries(input: SheetsInput): SheetEntry[] {
-  const { pack, members } = input
-  const session = input.sessionCode ? (pack.sessions.get(input.sessionCode) ?? null) : null
-  const played = everPlayed(pack.sessions.values())
-  for (const member of members) if (member.characterId) played.add(member.characterId)
-
-  return packCharacters(pack).map((character) => {
-    const member = members.find((m) => m.characterId === character.id)
-    const slot: CharacterSlot = member
-      ? { kind: 'taken', player: member.userName ?? 'jugador' }
-      : session?.availableCharacters?.includes(character.id)
-        ? { kind: 'free' }
-        : { kind: 'absent' }
-    const mine = input.viewerCharacterId === character.id
-    return {
-      character,
-      slot,
-      visibility: session ? characterVisibility(session, character, played) : UNVEILED,
-      state: (mine ? input.own : undefined) ?? input.world?.[character.id],
-      muted: slot.kind === 'absent',
-      mine,
-    }
-  })
+  return onlineSheetEntries(input)
 }
 
 /** Aviso que sustituye a la cita cuando la ficha esta velada (misma frase que apps/sheets). */

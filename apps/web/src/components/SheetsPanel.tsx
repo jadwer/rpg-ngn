@@ -13,6 +13,8 @@ interface Props {
   footer: string
   /** La personalidad escrita por el jugador, debajo de su propia ficha (packs que la piden). */
   persona?: ReactNode
+  /** Retratos de un pack que la web no lleva dentro: URL de la API en vez de la carpeta estatica. */
+  portraitUriOf?: ((path: string | null | undefined) => string | null) | undefined
   onClose: () => void
 }
 
@@ -23,7 +25,7 @@ interface Props {
  * y su estado vivo. Quien es tu personaje (la personalidad que escribes) va
  * dentro de tu ficha, que es donde uno la busca (docs/18, D-UX-7).
  */
-export function SheetsPanel({ entries, footer, persona, onClose }: Props) {
+export function SheetsPanel({ entries, footer, persona, portraitUriOf, onClose }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = selectedId ? entries.find((e) => e.character.id === selectedId) : undefined
   const sheet = selected ? characterSheet(selected.character, { visibility: selected.visibility, state: selected.state, modifier: abilityModifier }) : null
@@ -46,13 +48,13 @@ export function SheetsPanel({ entries, footer, persona, onClose }: Props) {
       <div className="content">
         {sheet ? (
           <>
-            <Sheet sheet={sheet} />
+            <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} />
             {selected?.mine && persona ? <div className="persona-en-ficha">{persona}</div> : null}
           </>
         ) : entries.length === 0 ? (
           <>
             {/* Un pack que la web no lleva dentro: las fichas completas por API son la E3 del VAM del 19-09. */}
-            <p className="hint">Las fichas de este mundo todavía no se muestran aquí; en la app sí.</p>
+            <p className="hint">Cargando las fichas del mundo...</p>
             {persona ? <div className="persona-en-ficha">{persona}</div> : null}
           </>
         ) : (
@@ -60,7 +62,7 @@ export function SheetsPanel({ entries, footer, persona, onClose }: Props) {
             <div className="party-grid">
               {entries.map(({ character, slot, visibility, state, muted, mine }) => (
                 <button type="button" key={character.id} className={`pc${slot.kind === 'free' ? ' free' : ''}${mine ? ' mine' : ''}`} onClick={() => setSelectedId(character.id)}>
-                  <Portrait path={character.portrait} name={character.name} muted={muted} />
+                  <Portrait path={character.portrait} uri={portraitUriOf?.(character.portrait)} name={character.name} muted={muted} />
                   <div className="n">{character.name}</div>
                   <div className="r">
                     {character.race}

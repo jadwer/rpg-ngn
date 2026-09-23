@@ -19,9 +19,11 @@ interface Props {
   entries: SheetEntry[]
   /** Pie del modal: de donde sale el estado (sesion offline, seq de la API). */
   footer?: string | undefined
+  /** Retratos de un pack que la app no lleva dentro: URL de la API. */
+  portraitUriOf?: ((path: string | null | undefined) => string | null) | undefined
 }
 
-export function SheetsModal({ visible, onClose, entries, footer }: Props) {
+export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = selectedId ? entries.find((e) => e.character.id === selectedId) : undefined
   const sheet = selected ? characterSheet(selected.character, { visibility: selected.visibility, state: selected.state, modifier: abilityModifier }) : null
@@ -45,12 +47,12 @@ export function SheetsModal({ visible, onClose, entries, footer }: Props) {
         </View>
 
         {sheet ? (
-          <Sheet sheet={sheet} />
+          <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} />
         ) : (
           <ScrollView contentContainerStyle={styles.grid}>
             {entries.map(({ character, slot, visibility, muted, mine }) => (
               <Pressable key={character.id} onPress={() => setSelectedId(character.id)} style={({ pressed }) => [styles.card, slot.kind === 'free' && styles.cardFree, mine && styles.cardMine, pressed && styles.pressed]}>
-                <Portrait path={character.portrait} name={character.name} size={96} muted={muted} />
+                <Portrait path={character.portrait} uri={portraitUriOf?.(character.portrait)} name={character.name} size={96} muted={muted} />
                 <Text style={styles.cardName}>{character.name}</Text>
                 <Text style={styles.cardSub}>{`${character.race}\n${character.class}`}</Text>
                 <Text style={styles.cardRoles}>{character.roles.join(' / ')}</Text>

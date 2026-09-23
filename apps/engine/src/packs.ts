@@ -1,7 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join, resolve, sep } from 'node:path'
 import { loadPack, type FileSource, type Issue, type LoadedPack } from '@rpg-ngn/content'
-import type { PackCharacter, PackMapView, PackNpc, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
+import type { PackCharacter, PackMapView, PackNpc, PackRef, PackSheets, PackSummary } from '@rpg-ngn/engine-contract'
 
 const PACK_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
@@ -100,6 +100,18 @@ export class PackStore {
   /** La imagen de un mapa del pack, como los retratos. */
   async mapImage(packId: string, file: string): Promise<Buffer | null> {
     return this.file(packId, 'maps', file)
+  }
+
+  /**
+   * Las fichas completas y las sesiones de un pack, para el panel de fichas
+   * de un cliente que no lo lleva empaquetado (E3). En el orden del manifiesto.
+   */
+  async sheets(ref: PackRef): Promise<PackSheets> {
+    const pack = await this.get(ref)
+    return {
+      characters: pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is NonNullable<typeof c> => !!c),
+      sessions: pack.manifest.sessions.map((id) => pack.sessions.get(id)).filter((s): s is NonNullable<typeof s> => !!s),
+    }
   }
 
   /** Los mapas de un pack con sus lugares ya posados, para pintarlos. */

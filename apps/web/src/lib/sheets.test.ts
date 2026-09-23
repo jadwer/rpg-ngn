@@ -1,3 +1,4 @@
+import { sheetSourceOf } from '@rpg-ngn/ui-logic'
 import { characterState } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
 import { loadBundledPack } from './pack'
@@ -13,7 +14,7 @@ describe('entradas de fichas de la mesa', () => {
     ]
     const own = characterState('zahira', { current: 9, max: 13 })
     const world = { zahira: characterState('zahira', { current: 13, max: 13 }), kael: characterState('kael', { current: 4, max: 9 }) }
-    const entries = sheetEntries({ pack, sessionCode: '003', members, viewerCharacterId: 'zahira', own, world })
+    const entries = sheetEntries({ source: sheetSourceOf(pack), sessionCode: '003', members, viewerCharacterId: 'zahira', own, world })
     const byId = Object.fromEntries(entries.map((e) => [e.character.id, e]))
 
     expect(entries.map((e) => e.character.id)).toEqual(pack.manifest.characters)
@@ -35,7 +36,7 @@ describe('entradas de fichas de la mesa', () => {
 
   it('sin sesion abierta nada se vela ni se apaga por disponibilidad', async () => {
     const pack = await loadBundledPack()
-    const entries = sheetEntries({ pack, sessionCode: null, members: [], viewerCharacterId: null, own: undefined, world: undefined })
+    const entries = sheetEntries({ source: sheetSourceOf(pack), sessionCode: null, members: [], viewerCharacterId: null, own: undefined, world: undefined })
     expect(entries.every((e) => !e.visibility.veiled && e.slot.kind === 'absent' && e.muted)).toBe(true)
   })
 })

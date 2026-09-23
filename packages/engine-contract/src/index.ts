@@ -1,4 +1,4 @@
-import { CampaignEvent, IsoDateTime, KebabId, SessionId } from '@rpg-ngn/content'
+import { CampaignEvent, Character, IsoDateTime, KebabId, Session, SessionId } from '@rpg-ngn/content'
 import { z } from 'zod'
 
 /**
@@ -408,3 +408,15 @@ export const PackValidateResponse = z.strictObject({
   pack: PackSummary.nullable(),
 })
 export type PackValidateResponse = z.infer<typeof PackValidateResponse>
+
+/**
+ * Las fichas completas de un pack y sus sesiones (entrega 8, E3 del VAM):
+ * lo que un cliente que no lleva el pack necesita para pintar el panel de
+ * fichas con el mismo velo que el pack empaquetado. El velo se aplica en el
+ * cliente: es presentacion, no frontera de seguridad.
+ */
+export const PackSheets = z.strictObject({
+  characters: z.array(Character),
+  sessions: z.array(Session),
+})
+export type PackSheets = z.infer<typeof PackSheets>

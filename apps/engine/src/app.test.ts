@@ -145,6 +145,16 @@ describe('apps/engine', () => {
     expect((await app.request('/v1/packs/nope/1.0.0/npcs', { headers })).status).toBe(404)
   })
 
+  it('da las fichas completas y las sesiones de un pack, con el velo por hacer en el cliente', async () => {
+    const response = await app.request('/v1/packs/pilot/0.4.0/sheets', { headers })
+    expect(response.status).toBe(200)
+    const { characters, sessions } = (await response.json()) as { characters: Array<{ id: string; bio?: string; stats?: unknown }>; sessions: Array<{ id: string; party: unknown[] }> }
+    expect(characters).toHaveLength(9)
+    expect(characters[0]).toMatchObject({ id: expect.any(String), bio: expect.any(String) })
+    expect(sessions.map((s) => s.id)).toEqual(['001', '002', '003'])
+    expect((await app.request('/v1/packs/nope/1.0.0/sheets', { headers })).status).toBe(404)
+  })
+
   it('falla limpio si la sesion no esta abierta o el pack no existe', async () => {
     const snapshot = await pilotSnapshot()
     const base = {

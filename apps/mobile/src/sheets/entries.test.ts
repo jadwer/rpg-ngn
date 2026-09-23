@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CharacterState } from '@rpg-ngn/core'
 import { loadOfflineCampaign } from '../pack/offline'
+import { sheetSourceOf } from '@rpg-ngn/ui-logic'
 import { offlineSheetEntries, onlineSheetEntries } from './entries'
 
 function state(id: string, hp: number): CharacterState {
@@ -29,7 +30,7 @@ describe('fichas', () => {
   it('online: la propia ficha usa la proyeccion del jugador y las ajenas la del mundo', async () => {
     const { pack } = await loadOfflineCampaign()
     const entries = onlineSheetEntries({
-      pack,
+      source: sheetSourceOf(pack),
       sessionCode: '003',
       members: [
         { characterId: null, userName: 'Gabino' },
@@ -61,7 +62,7 @@ describe('fichas', () => {
 
   it('online: un miembro que toma un personaje libre lo desvela aunque el pack no lo haya jugado', async () => {
     const { pack } = await loadOfflineCampaign()
-    const entries = onlineSheetEntries({ pack, sessionCode: '003', members: [{ characterId: 'kael', userName: 'Nuevo' }], viewerCharacterId: 'kael', own: undefined, world: undefined })
+    const entries = onlineSheetEntries({ source: sheetSourceOf(pack), sessionCode: '003', members: [{ characterId: 'kael', userName: 'Nuevo' }], viewerCharacterId: 'kael', own: undefined, world: undefined })
     const kael = entries.find((e) => e.character.id === 'kael')!
     expect(kael.visibility.veiled).toBe(false)
     expect(kael.slot).toEqual({ kind: 'taken', player: 'Nuevo' })
@@ -71,7 +72,7 @@ describe('fichas', () => {
 
   it('online: sin sesion abierta nada se vela', async () => {
     const { pack } = await loadOfflineCampaign()
-    const entries = onlineSheetEntries({ pack, sessionCode: null, members: [], viewerCharacterId: null, own: undefined, world: undefined })
+    const entries = onlineSheetEntries({ source: sheetSourceOf(pack), sessionCode: null, members: [], viewerCharacterId: null, own: undefined, world: undefined })
     expect(entries.every((e) => !e.visibility.veiled)).toBe(true)
     expect(entries.every((e) => e.slot.kind === 'absent')).toBe(true)
   })

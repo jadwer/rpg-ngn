@@ -1,3 +1,6 @@
+import type { PackSheets } from '@rpg-ngn/engine-contract'
+
+export type { PackSheets }
 import type { HttpResult, RequestOptions } from './http.js'
 
 /**
@@ -145,6 +148,8 @@ export interface SettingsApi {
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
   /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
   listPackNpcs(packId: string, version: string): Promise<PackNpc[]>
+  /** Fichas completas y sesiones de un pack del servidor, para el panel de fichas sin llevar el pack (E3). */
+  listPackSheets(packId: string, version: string): Promise<PackSheets>
   /** Mis mundos (entrega 8): los subidos por esta cuenta, con el cupo gratuito. */
   listMyPacks(): Promise<{ packs: PackOption[]; freeLimit: number; used: number }>
   /** Sube un .rpgpack. Si el motor lo rechaza, el ApiError trae `issues` en `body`. */
@@ -186,6 +191,11 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPacks() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
+    },
+
+    async listPackSheets(packId, version) {
+      const { data } = await request<{ data: PackSheets }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/sheets`)
       return data.data
     },
 

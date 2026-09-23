@@ -4,11 +4,11 @@ import { theme, VEIL_NOTE } from '../theme'
 import { Portrait } from './Portrait'
 
 /** Ficha completa a partir del modelo de vista de ui-logic, ya velado. */
-export function Sheet({ sheet }: { sheet: SheetView }) {
+export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: string | null | undefined }) {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <View style={styles.hero}>
-        <Portrait path={sheet.portrait} name={sheet.name} size={92} />
+        <Portrait path={sheet.portrait} uri={portraitUri} name={sheet.name} size={92} />
         <View style={styles.who}>
           <Text style={styles.name}>{sheet.name}</Text>
           <Text style={styles.sub}>{`${sheet.race} · ${sheet.class} · ${sheet.age}`}</Text>
@@ -20,7 +20,7 @@ export function Sheet({ sheet }: { sheet: SheetView }) {
 
       <View style={styles.vitals}>
         <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label="Vida" />
-        <Vital value={String(sheet.ac)} label="Armadura" />
+        <Vital value={sheet.ac === null ? '?' : String(sheet.ac)} label="Armadura" />
         <Vital value={sheet.fortune ? String(sheet.fortune.result) : '?'} label={sheet.fortune ? sheet.fortune.tier : 'Fortuna'} />
       </View>
 

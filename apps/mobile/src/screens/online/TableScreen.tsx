@@ -1,7 +1,7 @@
-import { ApiError, randomKey, type ApiClient, type PackMapView, type PackNpc, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
+import { ApiError, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -308,9 +308,26 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     if (maps.length === 0) return
     pedirProyecciones()
   }, [maps.length, pedirProyecciones, headSeq])
+  // Fichas completas de un pack que la app no lleva dentro (E3): el mismo
+  // panel para cualquier mundo, subido o instalado en el servidor.
+  const [remoteSheets, setRemoteSheets] = useState<PackSheets | null>(null)
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackSheets(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemoteSheets(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const sheetSource = useMemo(() => (pack ? sheetSourceOf(pack) : remoteSheets ? sheetSourceFrom(remoteSheets) : null), [pack, remoteSheets])
   const entries = useMemo(
-    () => (pack ? onlineSheetEntries({ pack, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
-    [pack, sessionCode, table.members, viewer.characterId, projections],
+    () => (sheetSource ? onlineSheetEntries({ source: sheetSource, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
+    [sheetSource, sessionCode, table.members, viewer.characterId, projections],
   )
 
   const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingSessions), [pack, existingSessions])
@@ -447,7 +464,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} onFocusInput={scrollToEnd} />
 
-      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} />
+      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : (path) => packPortraitUrl(table.packId, path)} />
     </KeyboardAvoidingView>
   )
 }
