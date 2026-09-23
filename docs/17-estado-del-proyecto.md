@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 12:45 CST**. Rama `dev`, commit `ce9b365` (la hora del corte anterior, 18:15, estaba en UTC).
+Fecha de corte: **2026-09-23, 13:50 CST**. Rama `dev`, commit `06eb1ea`; API `1709db0` con platform `08361ea`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -164,8 +164,8 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   pack (`GET /v1/packs/:id/:version/sheets`), la API lo releva con cache y
   la web y la app lo piden cuando el pack no viene empaquetado. Verificado en
   produccion con La Mascarada el dia del corte.
-- Pendiente: pantalla de revision, visor del pack antes de activarlo,
-  herramienta para armar el `.rpgpack`.
+- **Revision en la web, visor y `pack.sh`** (23-09). El contenido de un
+  mundo privado ya no se lee por conocer su id (`PackAccess::canRead`).
 
 ### Marca y portada (23-09)
 
@@ -182,6 +182,16 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   `apps/web/src/components/Brand.tsx`; icono de app, favicon y apple-icon.
 - **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
   para imprenta, y el nombre en la app (`android.package`).
+
+### Cronica compartible, embudo y piezas en Atomo (23-09)
+
+- **Cronica compartible**: enlace publico que solo funciona cuando acepta
+  toda la mesa, retirable por cualquiera; `/cronica/<token>` se lee como un
+  libro. En la web; la app va detras.
+- **Embudo**: `php artisan funnel:report` por semana de registro.
+- **Atomo**: borrar cuenta y legales en `atomo-auth`, busqueda por correo en
+  `atomo-user`, creditos de prepago en `atomo-payments`. La API solo conserva
+  lo del juego (mesas que bloquean el borrado, saldo en turnos).
 
 ### Rumbo comercial (23-09, docs 23 y 24)
 

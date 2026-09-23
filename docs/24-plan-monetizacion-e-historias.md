@@ -113,6 +113,8 @@ ROADMAP. Lo reutilizable sale de AtomoPlatform: etiquetas con
 
 ## 4. Historias publicas: la unica pieza del flywheel que se construye pronto
 
+**Hecho el 23-09** en la web (API y `/cronica/<token>`); la app va detras.
+
 Una partida produce narracion. Con consentimiento, una narracion se puede
 publicar. De todo lo que el brief proponia (canal de YouTube, Shorts,
 episodios, ilustraciones), lo unico que necesita codigo es la **cronica
@@ -131,6 +133,9 @@ Producir video a partir de eso es trabajo editorial de Gabino con
 herramientas externas, no una dependencia del producto.
 
 ## 5. Metricas antes de comprar trafico
+
+**Hecho el 23-09**: `php artisan funnel:report` da los numeros 1 a 7 (el 6
+cuenta capitulos sin ledger todavia).
 
 Todo esto ya esta en la base de datos; lo que falta es un reporte semanal en
 SQL (`php artisan` o una vista), sin plataforma de analitica:

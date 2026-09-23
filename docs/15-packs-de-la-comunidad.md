@@ -49,9 +49,14 @@ escasez"). Lo construido ese mismo dia:
   dentro (`GET packs/{pack}/{version}/sheets`), retratos incluidos. Un mundo
   subido se juega con las mismas fichas que el piloto.
 
-**Lo que falta de esta entrega**: una pantalla de revision en vez del
-comando; el visor de ejemplo del pack antes de activarlo; y la herramienta
-que arma el `.rpgpack` desde una carpeta (hoy es `zip -r`).
+- **Revision, visor y herramienta** (23-09): la cola de revision esta en
+  Mis mundos para administracion; cada mundo se puede ver (personajes y
+  sesiones) antes de añadirlo; `tools/packs/pack.sh` valida y arma el
+  `.rpgpack`. El contenido de un mundo privado solo lo leen su autor, quien
+  juega en una mesa con el y administracion.
+
+**Lo que falta**: el catalogo como escaparate, que es la entrega 9
+(`docs/24`).
 
 Lo que sigue es el diseño original, con lo que se descarto y por que.
 

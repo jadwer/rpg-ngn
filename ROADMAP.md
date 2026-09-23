@@ -112,7 +112,7 @@ La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del DM,
 - [x] Movil: crear cuenta (registro en modo token, entra directo), perfil (nombre y contraseña), recuperar contraseña; director de juego al crear la mesa y boton DM del mando con Probar y Guardar; busqueda por correo con `users/lookup` (ya no cae a conocidos por el 403); panel de amigos al pie de "Tus mesas"; idioma de lectura en el selector de voz y en la linea plegada; cabecera con sesion, momento del mundo, turno y faltantes; "Bajar a lo nuevo" cuando se subio a leer. Sin telefono ni emulador: `expo export` en verde, los llamados probados contra la API con `tools/smoke` a mano; los pasos de prueba manual estan en `apps/mobile/README.md`
 - [x] Web: tono por hablante en Web Speech (`utterance.pitch` con `pitchFor`; tono del narrador ajustable en `/ajustes`, la prueba lee narracion, party y NPC) y bandera de narrador local en la barra de voz ("Otro dispositivo narra", aviso de que nadie narra con "Jugamos leyendo")
 - [x] Recuperar contraseña funciona (2026-09-14): el 500 venia de que nadie registraba el enlace de reset y Laravel buscaba la ruta web `password.reset`, que una API sin vistas no tiene. Arreglado en AtomoPlatform (`atomo-auth` registra `ResetPassword::createUrlUsing` hacia `FRONTEND_URL`, commit 05f6c69, con dos tests); en la API basta `FRONTEND_URL=http://localhost:3010`. Verificado de punta a punta: responde 200 y el correo lleva `/auth/reset-password?token=...`. Falta un servidor de correo real para que el enlace llegue a alguien
-- [ ] Cronica publica de la campaña (para streamers y Pages): no es barata hoy. `GET campaigns/{c}/projections/narrative` exige ser miembro y no hay endpoint publico ni token de solo lectura; necesita en la API una ruta `GET /public/campaigns/{c}/chronicle` (o un token de invitado por mesa) antes de que la web pueda pintarla
+- [x] Cronica publica de la campaña (23-09, como "cronica compartible" de la entrega 9, abajo). Lo que decia este punto: `GET campaigns/{c}/projections/narrative` exige ser miembro y no hay endpoint publico ni token de solo lectura; necesita en la API una ruta `GET /public/campaigns/{c}/chronicle` (o un token de invitado por mesa) antes de que la web pueda pintarla
 
 ## Entrega 6: DM IA (primer turno real el 2026-09-12)
 
@@ -284,11 +284,10 @@ apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
 web, que es el producto principal.
 
 **Y despues de estos bloques, el rumbo que fijo Gabino el 23-09** para llegar
-a produccion, corregido esa tarde con los docs 23 y 24: (1) **resto de la
-Entrega 8** (pantalla de revision, visor del pack, `pack.sh`; E2 y E3 ya
-estan); (2) **Stripe en real**, compuerta y tarea de Gabino; (3) **embudo en
-SQL y cronica compartible** (`docs/24`, secciones 4 y 5), que se pueden
-construir mientras Stripe se resuelve; (4) **beta cerrada con amigos creadores
+a produccion, corregido esa tarde con los docs 23 y 24: (1) ~~resto de la
+Entrega 8~~ (hecho el 23-09); (2) **Stripe en real**, compuerta y tarea de
+Gabino; (3) ~~embudo en SQL y cronica compartible~~ (hechos el 23-09; la
+cronica falta en la app); (4) **beta cerrada con amigos creadores
 de contenido**; (5) **Entrega 9, catalogo y pase de historias**, con el
 bosquejo del catalogo que trae Gabino; y ya, produccion. **Steam y Epic:
 diferidos** hasta product-market fit (`docs/23`, con las cuatro condiciones
@@ -333,7 +332,7 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
 
 - [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
 - [x] **Fichas completas por API** (23-09, E3 del VAM): el engine expone `GET /v1/packs/:id/:version/sheets` (fichas y sesiones), la API lo releva con cache y la web y la app lo piden cuando el pack no viene empaquetado; los retratos salen de la API. La logica de que se ve de cada personaje vive en ui-logic (`sheet-source.ts`) con una fuente comun para el pack empaquetado y para la respuesta de la API. Probado en local (boticaria) y en produccion (La Mascarada, mesa temporal borrada). De paso, una Armadura sin valor se pinta con ? en vez de null
-- [ ] Pantalla de revision (hoy `packs:review` por SSH), visor del pack antes de activarlo, y `tools/packs/pack.sh` que valide y arme el `.rpgpack`
+- [x] **Pantalla de revision, visor y pack.sh** (23-09): la cola de revision aparece en Mis mundos para god y admin (publicar, o rechazar con motivo), cada mundo tiene "Ver personajes" (fichas y sesiones, antes de añadirlo), y `tools/packs/pack.sh <carpeta>` valida con las reglas del servidor (`rpg-validate --pack`) y arma el `.rpgpack`. **Hallazgo de paso, cerrado**: las fichas, personajes y NPC de un mundo privado se servian a cualquiera que supiera su id; ahora `PackAccess::canRead` (autor, publicado, quien juega en una mesa con el, administracion)
 - El catalogo que hay hoy (lista con "añadir a mis mundos") es la primera version; **se rediseña como escaparate en la Entrega 9**
 - **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
@@ -353,7 +352,8 @@ como la portada).
 - [ ] **9b. Capitulos y camino de temporada**: ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
 - [ ] **9c. Pase de temporada**: compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
 - [ ] **9d. Compra directa de un mundo**: solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
-- [ ] **Cronica compartible** (adelantada al rumbo, `docs/24` seccion 4): exportacion presentable, enlace publico con consentimiento de todos los miembros, anonimizacion opcional, retirada por cualquiera. Cierra tambien "Cronica publica de la campaña" de la entrega 5b
+- [x] **Cronica compartible** (23-09, en produccion; `docs/24` seccion 4): cualquiera de la mesa pide el enlace desde Lectura, responde 404 hasta que acepta cada miembro actual (y vuelve a pendiente si entra alguien), cualquiera lo retira para siempre, opcion de no enseñar quien jugo. `/cronica/<token>` publica, por sesiones, con lo que hizo cada personaje y lo que paso; nunca bloques `system`. **Falta en la app** (va con B1 app)
+- [x] **Embudo** (23-09): `php artisan funnel:report [--weeks=8] [--exclude-domain=example.com]`, por semana de registro: con mesa, primer turno, segunda sesion, invitados por anfitrion, capitulos por persona y compras
 
 **De donde sale el catalogo.** Regla (Gabino, 23-09): **lo que sirva de base se sube a AtomoPlatform y rpg-ngn lo consume de ahi**; `base/` va mas avanzado y es la fuente de donde se porta, no una dependencia. rpg-ngn solo escribe lo que es del juego. Inventario del 23-09:
 
@@ -370,7 +370,9 @@ como la portada).
 
 ## Deuda tecnica (sin entrega asignada)
 
-- [ ] **Piezas genericas escritas en rpg-ngn-api que deberian vivir en Atomo** (revision del 23-09; los correos de auth si se hicieron bien, en `atomo-auth`, y la bienvenida es texto del juego sobre el evento `UserRegistered` de la plataforma). Candidatas, sin romper tablas de produccion (mismo nombre de tabla, la migracion pasa al package): **borrar la propia cuenta** (`AccountDeletionController`: contraseña, `forceDelete`, con un contrato para que la aplicacion vete el borrado, que en rpg-ngn es "eres anfitrion de estas mesas") a `atomo-user`; **constancia de aceptacion de legales** (`LegalAcceptance`, `RecordLegalAcceptance`) a `atomo-auth` o un package legal; **busqueda exacta por correo** (`UserLookupController`) a `atomo-user`; **creditos de prepago** (`CreditPacks`, `CreditsController`, `CreditPurchasedTurns`) a `atomo/payments` como saldo generico, dejando en rpg-ngn solo la conversion a turnos
+- [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas
+- [ ] Un pack que no existe devuelve 502 en `packs/{pack}/{version}/sheets` (el engine responde 404 y el relevo lo trata como caida); deberia ser 404
+- [ ] `composer analyse` de la API no corre: falta `phpstan.neon` con las rutas
 
 - **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
 
