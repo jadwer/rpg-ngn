@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 13:30 CST**. Rama `dev`, commit `eaca12c`.
+Fecha de corte: **2026-09-23, 18:15 CST**. Rama `dev`, commit `c8a821a`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
