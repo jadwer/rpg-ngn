@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
  */
 export const metadata: Metadata = {
   title: 'Términos y condiciones',
-  description: 'Las condiciones de uso de rpg-worlds: créditos, contenido, responsabilidad y cancelación.',
+  description: 'Las condiciones de uso de Ad Astra Mentis (rpg-worlds): créditos, contenido, responsabilidad y cancelación.',
 }
 
 const ACTUALIZADO = '22 de septiembre de 2026'
@@ -19,7 +19,7 @@ export default function TerminosPage() {
       <header className="hero">
         <h1>
           <Link href="/" className="plain">
-            rpg-ngn
+            Ad Astra Mentis
           </Link>
         </h1>
         <p className="tagline">Términos y condiciones</p>
@@ -30,7 +30,7 @@ export default function TerminosPage() {
 
       <h2>1. Qué es esto y quién lo ofrece</h2>
       <p>
-        rpg-worlds es un servicio en línea para jugar partidas de rol narrativo en las que <b>la dirección del juego la realiza un sistema de inteligencia artificial</b> en lugar de una
+        Ad Astra Mentis, antes rpg-worlds, es un servicio en línea para jugar partidas de rol narrativo en las que <b>la dirección del juego la realiza un sistema de inteligencia artificial</b> en lugar de una
         persona.
       </p>
       <p>Lo ofrece Gabino Ramírez, persona física con actividad empresarial.</p>

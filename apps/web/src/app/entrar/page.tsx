@@ -52,7 +52,7 @@ function AccessPageForm() {
         <p className="motto">&ldquo;Extraños hoy, quizás una leyenda mañana.&rdquo;</p>
         <h1>
           <Link href="/" className="plain">
-            rpg-ngn
+            Ad Astra Mentis
           </Link>
         </h1>
         <p className="tagline">Entrar a la mesa</p>

@@ -12,7 +12,7 @@ import type { Metadata } from 'next'
  */
 export const metadata: Metadata = {
   title: 'Aviso de privacidad',
-  description: 'Que datos recoge rpg-worlds, para que los usa y como ejercer tus derechos.',
+  description: 'Que datos recoge Ad Astra Mentis (rpg-worlds), para que los usa y como ejercer tus derechos.',
 }
 
 const ACTUALIZADO = '22 de septiembre de 2026'
@@ -23,7 +23,7 @@ export default function PrivacidadPage() {
       <header className="hero">
         <h1>
           <Link href="/" className="plain">
-            rpg-ngn
+            Ad Astra Mentis
           </Link>
         </h1>
         <p className="tagline">Aviso de privacidad</p>
@@ -34,7 +34,7 @@ export default function PrivacidadPage() {
 
       <h2>1. Quién es responsable de tus datos</h2>
       <p>
-        Gabino Ramírez, persona física con actividad empresarial, es responsable del tratamiento de los datos personales que nos proporcionas al usar rpg-worlds
+        Gabino Ramírez, persona física con actividad empresarial, es responsable del tratamiento de los datos personales que nos proporcionas al usar Ad Astra Mentis, antes rpg-worlds
         (https://rpg-worlds.gabinoramirez.com), en adelante &quot;el Servicio&quot;.
       </p>
       <p>Este aviso se emite conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y su Reglamento.</p>

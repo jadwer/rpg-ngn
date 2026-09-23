@@ -83,7 +83,7 @@ export default function UnirsePage() {
       <header className="hero">
         <h1>
           <Link href="/" className="plain">
-            rpg-ngn
+            Ad Astra Mentis
           </Link>
         </h1>
         <p className="tagline">Te invitaron a una mesa</p>

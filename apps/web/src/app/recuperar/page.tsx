@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
       <header className="hero">
         <h1>
           <Link href="/" className="plain">
-            rpg-ngn
+            Ad Astra Mentis
           </Link>
         </h1>
         <p className="tagline">Recuperar contraseña</p>
