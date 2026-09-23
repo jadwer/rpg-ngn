@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 18:15 CST**. Rama `dev`, commit `c8a821a`.
+Fecha de corte: **2026-09-23, 12:45 CST**. Rama `dev`, commit `ce9b365` (la hora del corte anterior, 18:15, estaba en UTC).
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -160,7 +160,11 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 - **Crear mesa** solo con packs que la cuenta puede jugar (oficiales, propios,
   activados); el selector dice de quien es cada uno.
 - **Retirar** no rompe mesas: si alguna lo juega, queda retirado y siguen.
-- Pendiente: fichas completas por API en la web (E3), pantalla de revision,
+- **Fichas por API** (E3): el engine sirve fichas y sesiones de cualquier
+  pack (`GET /v1/packs/:id/:version/sheets`), la API lo releva con cache y
+  la web y la app lo piden cuando el pack no viene empaquetado. Verificado en
+  produccion con La Mascarada el dia del corte.
+- Pendiente: pantalla de revision, visor del pack antes de activarlo,
   herramienta para armar el `.rpgpack`.
 
 ### Marca y portada (23-09)

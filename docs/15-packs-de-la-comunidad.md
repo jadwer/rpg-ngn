@@ -44,10 +44,14 @@ escasez"). Lo construido ese mismo dia:
   de mesa nueva dice "tuyo" o "de Fulano". El proxy de Next reenvia bytes
   (E2 del VAM): antes rompia cualquier subida binaria.
 
-**Lo que falta de esta entrega**: las fichas completas por API en la web
-(E3), que hoy solo enseña las del pack empaquetado; una pantalla de revision
-en vez del comando; el visor de ejemplo del pack antes de activarlo; y la
-herramienta que arma el `.rpgpack` desde una carpeta (hoy es `zip -r`).
+- **Fichas por API** (E3, 23-09): el panel de fichas de la web y de la app
+  pide al servidor las fichas y sesiones de cualquier pack que no lleven
+  dentro (`GET packs/{pack}/{version}/sheets`), retratos incluidos. Un mundo
+  subido se juega con las mismas fichas que el piloto.
+
+**Lo que falta de esta entrega**: una pantalla de revision en vez del
+comando; el visor de ejemplo del pack antes de activarlo; y la herramienta
+que arma el `.rpgpack` desde una carpeta (hoy es `zip -r`).
 
 Lo que sigue es el diseño original, con lo que se descarto y por que.
 
