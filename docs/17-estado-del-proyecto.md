@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 13:50 CST**. Rama `dev`, commit `c2fd202`; API `1709db0` con platform `08361ea`.
+Fecha de corte: **2026-09-23, 13:50 CST**. Rama `dev`, commit `1dfbf96`; API `1709db0` con platform `08361ea`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -190,7 +190,7 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   cronica compartible; pantalla Mundos (sin subida, que va por la web).
 - Arreglado: el enlace de invitar de la app daba 404 (`/movil/unirse`) y los
   retratos de mundos remotos no cargaban en el telefono.
-- Sin mirar en un telefono todavia; falta la cabecera de escena.
+- Con la cabecera de escena, todo lo de B1. Sin mirar en un telefono todavia.
 
 ### Cronica compartible, embudo y piezas en Atomo (23-09)
 

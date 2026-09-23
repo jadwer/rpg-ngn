@@ -216,8 +216,8 @@ Ajustes, Lectura con la cronica); pantalla Mundos (los tuyos, catalogo con
 visor, revision; subir sigue en la web). Dos fallos de paso: el enlace de
 invitar de la app apuntaba a `/movil/unirse` (404) y los retratos remotos
 iban con ruta relativa. **Sin verificar en un telefono**: typecheck, tests y
-bundle de Android en verde; falta que Gabino lo mire en Expo Go. **Falta**
-la cabecera de escena de la app. Lo que se
+bundle de Android en verde; falta que Gabino lo mire en Expo Go. Con la
+cabecera de escena (`1dfbf96`) la app tiene todo lo de B1. Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
