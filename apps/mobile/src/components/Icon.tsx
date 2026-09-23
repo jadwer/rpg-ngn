@@ -9,6 +9,9 @@ export const ICON = {
   dice: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 3v18M4 7.5l8 4.5 8-4.5',
   check: 'M5 12.5l4.5 4.5L19 7',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  speak: 'M4 10v4h3l4 4V6L7 10zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11',
+  pause: 'M8 5v14M16 5v14',
+  play: 'M7 5l12 7-12 7z',
 } as const
 
 interface Props {

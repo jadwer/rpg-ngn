@@ -4000,3 +4000,73 @@ a {
   border-top: 1px solid var(--border-soft);
   color: var(--ink-dim);
 }
+
+/* Dado de mantener presionado (23-09) y boton de narracion de la cabecera. */
+.dice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hold-die {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 58px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  font: 600 0.85rem var(--font-sans, system-ui);
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.hold-die.rolling {
+  border-color: var(--accent-bright);
+  background: rgba(124, 58, 237, 0.22);
+}
+.hold-die .face {
+  min-width: 1.4em;
+  text-align: center;
+  color: #fff;
+}
+.hold-die:disabled {
+  opacity: 0.45;
+}
+.narrate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  cursor: pointer;
+}
+.narrate-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--ink-dim);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.narrate-btn.on {
+  border-color: var(--accent-bright);
+}
+.narrate-btn.on svg {
+  stroke: var(--accent-bright);
+}
+.narrate-btn:disabled {
+  opacity: 0.4;
+}
+.dm-now {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.14);
+  color: var(--ink);
+}

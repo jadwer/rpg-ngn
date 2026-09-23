@@ -1,5 +1,5 @@
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
+import { describePreset, savedProviderText, tableDmText, type TableDmInfo } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -23,6 +23,20 @@ interface Props {
  * (la API tambien lo exige).
  */
 export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
+  // Con que narra de verdad la mesa y quien lo paga (23-09: elegir Anthropic no decia si era la clave propia).
+  const [dmInfo, setDmInfo] = useState<TableDmInfo | null>(null)
+  useEffect(() => {
+    let alive = true
+    void client.tableDm(table.id).then(
+      (info) => {
+        if (alive) setDmInfo(info)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.id, table.settings])
   const [presets, setPresets] = useState<DmPreset[] | null>(null)
   const [defaultPreset, setDefaultPreset] = useState<string>('')
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
@@ -95,7 +109,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.hint}>El director de juego de esta mesa. Las claves viven en el servidor; aquí solo eliges cuál usar. Traer tu propia clave llegará más adelante.</Text>
+      {dmInfo ? <Text style={styles.now}>{tableDmText(dmInfo)}</Text> : null}
+      <Text style={styles.hint}>Tu propia clave se guarda en Mi cuenta; si tienes una para este proveedor, la mesa la usa.</Text>
 
       <Text style={styles.label}>Proveedor</Text>
       {presets === null ? <Text style={styles.hint}>Consultando los presets del servidor...</Text> : null}
@@ -125,6 +140,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 }
 
 const styles = StyleSheet.create({
+  now: { fontFamily: theme.fonts.uiMedium, fontSize: 14, lineHeight: 20, color: theme.colors.ink, backgroundColor: 'rgba(124, 58, 237, 0.14)', borderRadius: 10, padding: 10, overflow: 'hidden' },
   wrap: { gap: 8 },
   label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginTop: 10 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },

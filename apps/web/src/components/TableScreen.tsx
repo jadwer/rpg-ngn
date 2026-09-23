@@ -3,7 +3,7 @@
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -523,6 +523,22 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             {sessionTitle ? subtitle.slice(sessionTitle.length) : subtitle}
           </div>
         </div>
+        <button
+          type="button"
+          className={`narrate-btn${tts.state.status === 'speaking' || tts.state.status === 'paused' ? ' on' : ''}`}
+          disabled={tts.count === 0}
+          onClick={() => {
+            if (tts.state.status === 'speaking') tts.pause()
+            else if (tts.state.status === 'paused') tts.resume()
+            else tts.start(latestNarrationStart(blocks) ?? undefined)
+          }}
+          aria-label={tts.state.status === 'speaking' ? 'Pausar la narración' : tts.state.status === 'paused' ? 'Seguir la narración' : 'Escuchar la narración'}
+          title={tts.state.status === 'speaking' ? 'Pausar' : tts.state.status === 'paused' ? 'Seguir' : 'Escuchar la narración'}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden>
+            <path d={tts.state.status === 'speaking' ? 'M8 5v14M16 5v14' : tts.state.status === 'paused' ? 'M7 5l12 7-12 7z' : 'M4 10v4h3l4 4V6L7 10zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11'} />
+          </svg>
+        </button>
         {gameBar('header')}
       </header>
 

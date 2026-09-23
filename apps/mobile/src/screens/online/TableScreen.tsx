@@ -1,7 +1,7 @@
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -456,7 +456,20 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             </Text>
           </View>
         </View>
-        <View style={styles.headerSide} />
+        <Pressable
+          onPress={() => {
+            if (tts.state.status === 'speaking') tts.pause()
+            else if (tts.state.status === 'paused') tts.resume()
+            else tts.start(latestNarrationStart(blocks) ?? undefined)
+          }}
+          disabled={tts.count === 0}
+          hitSlop={12}
+          style={[styles.headerSide, styles.headerRight]}
+          accessibilityRole="button"
+          accessibilityLabel={tts.state.status === 'speaking' ? 'Pausar la narración' : tts.state.status === 'paused' ? 'Seguir la narración' : 'Escuchar la narración'}
+        >
+          <Icon d={tts.state.status === 'speaking' ? ICON.pause : tts.state.status === 'paused' ? ICON.play : ICON.speak} size={22} color={tts.state.status === 'speaking' || tts.state.status === 'paused' ? theme.colors.nebula : theme.colors.inkDim} />
+        </Pressable>
       </View>
 
       {connectionNotice ? <Text style={styles.connection}>{connectionNotice}</Text> : null}
@@ -619,6 +632,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: theme.colors.bg },
   headerSide: { width: 36, alignItems: 'flex-start' },
+  headerRight: { alignItems: 'flex-end' },
   badge: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(124, 58, 237, 0.22)', borderWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   titleText: { alignItems: 'flex-start' },
   link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },

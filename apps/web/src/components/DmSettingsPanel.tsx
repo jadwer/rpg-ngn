@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
+import { describePreset, savedProviderText, tableDmText, type TableDmInfo } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
@@ -24,6 +24,20 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const [presets, setPresets] = useState<DmPreset[] | null>(null)
   const [defaultPreset, setDefaultPreset] = useState<string>('')
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
+  // Con que narra de verdad la mesa y quien lo paga (23-09: elegir Anthropic no decia si era la clave propia).
+  const [dmInfo, setDmInfo] = useState<TableDmInfo | null>(null)
+  useEffect(() => {
+    let alive = true
+    void client.tableDm(table.id).then(
+      (info) => {
+        if (alive) setDmInfo(info)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.id, table.settings])
   const [preset, setPreset] = useState<string>(saved?.preset ?? '')
   const [model, setModel] = useState<string>(saved?.model ?? '')
   const [working, setWorking] = useState(false)
@@ -93,7 +107,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   return (
     <div className="stack dm-settings">
-      <p className="hint">El director de juego de esta mesa. Las claves viven en el servidor; aquí solo eliges cuál usar. Traer tu propia clave llegará más adelante.</p>
+      {dmInfo ? <p className="dm-now">{tableDmText(dmInfo)}</p> : null}
+      <p className="hint">Tu propia clave se guarda en Mi cuenta y créditos; si tienes una para este proveedor, la mesa la usa.</p>
 
       <label className="field">
         <span>Proveedor</span>

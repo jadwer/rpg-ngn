@@ -1,8 +1,9 @@
 'use client'
 
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, quickRoll, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState, type KeyboardEvent } from 'react'
+import { HoldDie } from './HoldDie'
 
 interface Props {
   turn: TurnView | null
@@ -34,7 +35,6 @@ interface Props {
  */
 export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping }: Props) {
   const [text, setText] = useState('')
-  const [die, setDie] = useState<string>(QUICK_DICE[0])
 
   const send = async () => {
     const value = text.trim()
@@ -113,17 +113,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
                 resuelve el motor. En una mesa donde tira el servidor no se
                 ofrece: el numero que escribieras se ignoraria. */}
             {diceMode === 'engine' ? null : (
-              <span className="dice-picker">
-                <select className="select" name="dado" value={die} onChange={(e) => setDie(e.target.value)} disabled={busy} aria-label="Dado">
-                  {QUICK_DICE.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" className="btn" onClick={() => setText((current) => appendRoll(current, quickRoll(die)))} disabled={busy} title="Tira el dado y escribe el resultado en tu respuesta">
-                  Tirar
-                </button>
+              <span className="dice-row" aria-label="Dados: mantén presionado y suelta">
+                {QUICK_DICE.map((d) => (
+                  <HoldDie key={d} die={d} disabled={busy} onRolled={(roll) => setText((current) => appendRoll(current, roll))} />
+                ))}
               </span>
             )}
             <span className="hint">Ctrl+Enter también envía.</span>

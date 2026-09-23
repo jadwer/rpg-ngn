@@ -160,6 +160,8 @@ export interface SettingsApi {
   deletePack(packId: number): Promise<{ retired: boolean; message: string }>
   /** El catalogo publico: lo que otros publicaron y paso revision. */
   listCatalog(): Promise<PackOption[]>
+  /** Con que narra la mesa y quien lo paga (clave propia, cupo o gratis). */
+  tableDm(tableId: string | number): Promise<{ source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null }>
   /** La cola de revision del catalogo; 403 si la cuenta no es de administracion. */
   reviewQueue(): Promise<Array<PackOption & { requestedAt?: string | null; bytes?: number }>>
   /** Aprobar un mundo pendiente, o rechazarlo con el motivo que leera su autor. */
@@ -233,6 +235,11 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listCatalog() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs/catalog')
+      return data.data
+    },
+
+    async tableDm(tableId) {
+      const { data } = await request<{ data: { source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null } }>(`/api/v1/tables/${tableId}/dm`)
       return data.data
     },
 

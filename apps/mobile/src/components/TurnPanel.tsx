@@ -1,9 +1,10 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, quickRoll, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { HoldDie } from './HoldDie'
 import { Icon, ICON } from './Icon'
 
 interface Props {
@@ -108,17 +109,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           ) : (
             <View style={styles.dice}>
               {QUICK_DICE.map((die) => (
-                <Pressable
-                  key={die}
-                  onPress={() => setText((current) => appendRoll(current, quickRoll(die)))}
-                  disabled={busy}
-                  style={({ pressed }) => [styles.dieButton, busy && styles.dieDisabled, pressed && !busy && styles.diePressed]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Tirar ${die}`}
-                >
-                  <Icon d={ICON.dice} size={15} color={theme.colors.inkDim} />
-                  <Text style={styles.dieText}>{die}</Text>
-                </Pressable>
+                <HoldDie key={die} die={die} disabled={busy} onRolled={(roll) => setText((current) => appendRoll(current, roll))} />
               ))}
             </View>
           )}
