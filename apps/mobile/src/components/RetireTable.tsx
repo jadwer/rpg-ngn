@@ -93,11 +93,11 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
 
 const styles = StyleSheet.create({
   abrir: { alignSelf: 'flex-start', marginTop: 6 },
-  abrirTexto: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.cyan, textTransform: 'uppercase', letterSpacing: 1 },
+  abrirTexto: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: theme.colors.cyan, letterSpacing: 0.2 },
   panel: { marginTop: 8, padding: 10, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, backgroundColor: theme.colors.panel2, gap: 8 },
-  hint: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
-  error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   borrar: { borderTopWidth: 1, borderTopColor: theme.colors.borderSoft, paddingTop: 8, gap: 8, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
-  borrarTexto: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.accentBright, textDecorationLine: 'underline' },
+  borrarTexto: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.accentBright, textDecorationLine: 'underline' },
 })

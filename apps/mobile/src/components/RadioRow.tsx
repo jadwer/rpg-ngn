@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   radio: { color: theme.colors.inkDim, fontSize: 16 },
   radioOn: { color: theme.colors.accentBright },
   text: { flex: 1 },
-  label: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
+  label: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   labelOn: { color: '#ffffff' },
-  sub: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim },
+  sub: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim },
 })

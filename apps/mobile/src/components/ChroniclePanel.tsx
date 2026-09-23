@@ -86,7 +86,7 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
 const styles = StyleSheet.create({
   wrap: { gap: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  hint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim, lineHeight: 20 },
-  text: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
-  error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim, lineHeight: 20 },
+  text: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
+  error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
 })

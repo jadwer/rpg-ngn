@@ -351,6 +351,6 @@ export function OnlineRoot({ pack, onExit }: Props) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: theme.colors.bg },
-  loading: { fontFamily: theme.fonts.serifItalic, fontSize: 15, color: theme.colors.inkDim },
-  error: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },
+  loading: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.inkDim },
+  error: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },
 })

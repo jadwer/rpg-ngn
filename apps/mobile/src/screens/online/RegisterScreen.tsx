@@ -78,12 +78,12 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },
+  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
   spacer: { minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 1 },
+  title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
   form: { padding: 20, gap: 16 },
-  error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger },
-  notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
-  foot: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
-  legal: { color: theme.colors.cyan, textDecorationLine: 'underline' },
+  error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
+  notice: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
+  foot: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
+  legal: { color: theme.colors.nebula, textDecorationLine: 'underline' },
 })

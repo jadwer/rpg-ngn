@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { Icon, ICON } from './Icon'
 
 interface Props {
   turn: TurnView | null
@@ -85,6 +86,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {progress.canRespond ? (
         <View style={styles.compose}>
+          {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
           <TextInput
             value={text}
             onChangeText={(value) => {
@@ -92,9 +94,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               onTyping(value.trim().length > 0)
             }}
             multiline
-            placeholder="¿Qué haces? Escribe tu acción o di que no haces nada."
+            maxLength={1000}
+            placeholder="Describe tu acción, o di que no haces nada."
             placeholderTextColor={theme.colors.inkFaint}
-            style={styles.input}
+            style={[styles.input, focused && styles.inputFocused]}
             editable={!busy}
             onFocus={() => {
               setFocused(true)
@@ -102,7 +105,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             }}
             onBlur={() => setFocused(false)}
           />
-          <Button label="Enviar" primary busy={busy} disabled={text.trim().length === 0} onPress={() => void send()} />
+          <Text style={styles.counter}>{`${text.length}/1000`}</Text>
           {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la
               resuelve el motor. En una mesa donde tira el servidor no se
               ofrece: el numero que escribieras se ignoraria. */}
@@ -110,7 +113,6 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             <Text style={styles.diceNotice}>En esta mesa los dados los tira el servidor.</Text>
           ) : (
             <View style={styles.dice}>
-              <Text style={styles.diceLabel}>Tirar</Text>
               {QUICK_DICE.map((die) => (
                 <Pressable
                   key={die}
@@ -120,11 +122,16 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
                   accessibilityRole="button"
                   accessibilityLabel={`Tirar ${die}`}
                 >
+                  <Icon d={ICON.dice} size={15} color={theme.colors.inkDim} />
                   <Text style={styles.dieText}>{die}</Text>
                 </Pressable>
               ))}
             </View>
           )}
+          <Pressable onPress={() => void send()} disabled={busy || text.trim().length === 0} style={({ pressed }) => [styles.sendButton, (busy || text.trim().length === 0) && styles.sendOff, pressed && styles.sendPressed]} accessibilityRole="button">
+            <Icon d={ICON.send} size={18} color="#ffffff" />
+            <Text style={styles.sendText}>Enviar acción</Text>
+          </Pressable>
         </View>
       ) : null}
       {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</Text> : null}
@@ -141,28 +148,35 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 }
 
 const styles = StyleSheet.create({
+  ask: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink },
+  inputFocused: { borderColor: theme.colors.accentBright },
+  counter: { alignSelf: 'flex-end', fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkFaint, marginTop: -4 },
+  sendButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50, borderRadius: 12, backgroundColor: theme.colors.accent },
+  sendOff: { opacity: 0.45 },
+  sendPressed: { opacity: 0.8 },
+  sendText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 16, color: '#ffffff' },
   countdown: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
-  countdownNumber: { fontFamily: theme.fonts.displayBold, fontSize: 22, color: theme.colors.accentBright, minWidth: 28, textAlign: 'center' },
-  countdownText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
-  seats: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
-  panel: { borderTopWidth: 1, borderTopColor: theme.colors.border, backgroundColor: theme.colors.panel, paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
+  countdownNumber: { fontFamily: theme.fonts.uiSemiBold, fontSize: 22, color: theme.colors.accentBright, minWidth: 28, textAlign: 'center' },
+  countdownText: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim },
+  seats: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  panel: { borderTopWidth: 1, borderTopColor: theme.colors.borderSoft, backgroundColor: theme.colors.bg, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10, gap: 8 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  status: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },
-  statusNarrating: { fontFamily: theme.fonts.serifItalic, color: theme.colors.goldBright },
+  status: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
+  statusNarrating: { fontFamily: theme.fonts.ui, color: theme.colors.goldBright },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 2 },
+  chip: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 2 },
   chipDone: { color: theme.colors.success, borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: theme.colors.panel2 },
-  error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 8, padding: 8 },
-  notice: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
+  error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 8, padding: 8 },
+  notice: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
   compose: { gap: 8 },
   dice: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
-  diceNotice: { fontFamily: theme.fonts.serif, fontSize: 12, lineHeight: 16, color: theme.colors.inkDim },
-  diceLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim, marginRight: 2 },
-  dieButton: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: theme.colors.panel },
-  dieText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink },
+  diceNotice: { fontFamily: theme.fonts.ui, fontSize: 12, lineHeight: 16, color: theme.colors.inkDim },
+  diceLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginRight: 2 },
+  dieButton: { flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: theme.colors.panel },
+  dieText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 13, color: theme.colors.ink },
   dieDisabled: { opacity: 0.45 },
   diePressed: { opacity: 0.7 },
-  input: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
-  sent: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.success },
+  input: { fontFamily: theme.fonts.ui, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
+  sent: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.success },
   actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
 })

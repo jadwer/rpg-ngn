@@ -10,11 +10,13 @@ interface Props {
   size?: number
   /** Escala de grises: personaje fuera de la mesa. */
   muted?: boolean
+  /** Circulo en vez de esquinas redondeadas (listas de jugadores del concepto). */
+  round?: boolean
 }
 
-export function Portrait({ path, uri, name, size = 48, muted = false }: Props) {
+export function Portrait({ path, uri, name, size = 48, muted = false, round = false }: Props) {
   const source = uri ? { uri } : portraitSource(path)
-  const box = { width: size, height: size, borderRadius: Math.round(size / 5) }
+  const box = { width: size, height: size, borderRadius: round ? size / 2 : Math.round(size / 5) }
   if (source) {
     return <Image source={source} style={[styles.image, box, muted && styles.muted]} accessibilityLabel={`Retrato de ${name}`} />
   }
@@ -29,5 +31,5 @@ const styles = StyleSheet.create({
   image: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft },
   muted: { opacity: 0.55 },
   placeholder: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, alignItems: 'center', justifyContent: 'center' },
-  initial: { fontFamily: theme.fonts.displayBold, color: theme.colors.accentBright },
+  initial: { fontFamily: theme.fonts.uiSemiBold, color: theme.colors.accentBright },
 })

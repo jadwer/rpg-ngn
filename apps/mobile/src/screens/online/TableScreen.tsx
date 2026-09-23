@@ -9,6 +9,7 @@ import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
 import { ChroniclePanel } from '../../components/ChroniclePanel'
 import { GameBar, type GamePanel } from '../../components/GameBar'
+import { Icon, ICON } from '../../components/Icon'
 import { GameSheet } from '../../components/GameSheet'
 import { InviteLink } from '../../components/InviteLink'
 import { InvitePanel } from '../../components/InvitePanel'
@@ -439,17 +440,23 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <View style={styles.header}>
-        <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Mesas</Text>
+        <Pressable onPress={onBack} hitSlop={12} style={styles.headerSide} accessibilityRole="button" accessibilityLabel="Volver a tus mesas">
+          <Icon d={ICON.back} size={22} color={theme.colors.inkDim} />
         </Pressable>
         <View style={styles.titles}>
-          <Text style={styles.title} numberOfLines={1}>
-            {table.name}
-          </Text>
-          <Text style={styles.subtitle} numberOfLines={1}>
-            {subtitle}
-          </Text>
+          <View style={styles.badge}>
+            <Icon d={ICON.shield} size={18} color={theme.colors.nebula} />
+          </View>
+          <View style={styles.titleText}>
+            <Text style={styles.title} numberOfLines={1}>
+              {turn ? `Turno ${turn.number}` : table.name}
+            </Text>
+            <Text style={styles.subtitle} numberOfLines={1}>
+              {turn ? (progress.narrating ? 'El director narra' : progress.complete ? 'Todos respondieron' : 'Fase de acciones') : subtitle}
+            </Text>
+          </View>
         </View>
+        <View style={styles.headerSide} />
       </View>
 
       {connectionNotice ? <Text style={styles.connection}>{connectionNotice}</Text> : null}
@@ -607,34 +614,37 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 
 const styles = StyleSheet.create({
   choose: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border, padding: 12, gap: 8 },
-  chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
-  chooseHint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },
+  chooseLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 13, letterSpacing: 0.2, color: theme.colors.inkDim },
+  chooseHint: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan },
-  titles: { flex: 1, alignItems: 'center' },
-  title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, textAlign: 'center' },
-  subtitle: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center' },
-  connection: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: theme.colors.bg },
+  headerSide: { width: 36, alignItems: 'flex-start' },
+  badge: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(124, 58, 237, 0.22)', borderWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
+  titleText: { alignItems: 'flex-start' },
+  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
+  titles: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  title: { fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.ink },
+  subtitle: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.nebula },
+  connection: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
   segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
-  sheetLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim, marginTop: 6 },
+  sheetLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginTop: 6 },
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
   segmentActive: { backgroundColor: theme.colors.accent },
-  segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.ink },
+  segmentText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 12, color: theme.colors.ink },
   segmentTextActive: { color: '#ffffff' },
   body: { flex: 1 },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },
   jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
-  empty: { fontFamily: theme.fonts.serifItalic, fontSize: 15, lineHeight: 22, color: theme.colors.inkDim, textAlign: 'center', paddingVertical: 24 },
+  empty: { fontFamily: theme.fonts.ui, fontSize: 15, lineHeight: 22, color: theme.colors.inkDim, textAlign: 'center', paddingVertical: 24 },
   start: { marginVertical: 16, padding: 18, gap: 10, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldBright, borderRadius: theme.radius },
-  startTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.ink, textAlign: 'center' },
-  startText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.ink, textAlign: 'center' },
-  startStep: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
-  startHint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
+  startTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 20, color: theme.colors.ink, textAlign: 'center' },
+  startText: { fontFamily: theme.fonts.ui, fontSize: 16, lineHeight: 23, color: theme.colors.ink, textAlign: 'center' },
+  startStep: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
+  startHint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
   narrating: { alignItems: 'center', gap: 10, paddingVertical: 20, paddingHorizontal: 16, marginVertical: 10, borderRadius: theme.radius, backgroundColor: theme.colors.panel2 },
-  narratingKicker: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 2, color: theme.colors.accentBright },
+  narratingKicker: { fontFamily: theme.fonts.uiSemiBold, fontSize: 12, letterSpacing: 0.2, color: theme.colors.accentBright },
   dots: { flexDirection: 'row', gap: 10 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: theme.colors.accentBright },
-  narratingText: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
+  narratingText: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
 })

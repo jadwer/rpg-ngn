@@ -111,11 +111,11 @@ export function DeleteAccount({ client, onDeleted }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
-  hint: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, lineHeight: 18 },
-  aviso: { fontFamily: theme.fonts.serifSemiBold, fontSize: 13, color: theme.colors.ink, lineHeight: 18 },
-  mesa: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink, paddingLeft: 8 },
-  error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
+  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, lineHeight: 18 },
+  aviso: { fontFamily: theme.fonts.uiSemiBold, fontSize: 13, color: theme.colors.ink, lineHeight: 18 },
+  mesa: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink, paddingLeft: 8 },
+  error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
   actions: { alignItems: 'flex-start' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
 })

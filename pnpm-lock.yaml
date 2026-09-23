@@ -87,6 +87,9 @@ importers:
       '@expo-google-fonts/crimson-pro':
         specifier: ^0.4.2
         version: 0.4.2
+      '@expo-google-fonts/inter':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@rpg-ngn/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
@@ -1183,6 +1186,9 @@ packages:
 
   '@expo-google-fonts/crimson-pro@0.4.2':
     resolution: {integrity: sha512-X5pfxna/aQBhxB6CowczCL2mOsObwlxhI2EJ84fE6OMrxie1bd2ro9xBywCfeVg588eQYvzYBBdkHkPWmFTXug==}
+
+  '@expo-google-fonts/inter@0.4.2':
+    resolution: {integrity: sha512-syfiImMaDmq7cFi0of+waE2M4uSCyd16zgyWxdPOY7fN2VBmSLKEzkfbZgeOjJq61kSqPBNNtXjggiQiSD6gMQ==}
 
   '@expo/cli@57.0.22':
     resolution: {integrity: sha512-MdToR0ZZ1yjfkqbP1jcA7viS9duMPGq/C+qQ/21dtq+en583Ghp+O11BP/wujHa9ZGRtXimzuKPZDpPresVE0g==}
@@ -4953,6 +4959,8 @@ snapshots:
   '@expo-google-fonts/cinzel@0.4.2': {}
 
   '@expo-google-fonts/crimson-pro@0.4.2': {}
+
+  '@expo-google-fonts/inter@0.4.2': {}
 
   '@expo/cli@57.0.22(@expo/dom-webview@57.0.1)(expo-constants@57.0.18(expo@57.0.20)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3)))(expo-font@57.0.4(expo@57.0.20)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(expo@57.0.20)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)':
     dependencies:

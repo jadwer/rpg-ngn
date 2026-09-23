@@ -79,10 +79,10 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
-  hint: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
-  warn: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
-  pack: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.ink },
+  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
+  warn: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
+  pack: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.ink },
   actions: { alignItems: 'flex-start' },
-  error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
+  error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
 })

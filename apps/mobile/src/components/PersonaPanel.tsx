@@ -81,12 +81,12 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
 const styles = StyleSheet.create({
   wrap: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 8 },
-  title: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim },
-  state: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
-  toggle: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
+  title: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  state: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  toggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   body: { paddingHorizontal: 12, paddingBottom: 10, gap: 8 },
-  hint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
-  input: { minHeight: 130, fontFamily: theme.fonts.serif, fontSize: 15, lineHeight: 21, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  input: { minHeight: 130, fontFamily: theme.fonts.ui, fontSize: 15, lineHeight: 21, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   counter: { flex: 1 },
 })

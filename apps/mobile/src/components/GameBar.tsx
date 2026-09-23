@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   bar: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: theme.colors.borderSoft, backgroundColor: theme.colors.bg },
   item: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 9, paddingBottom: 8, gap: 3 },
   pressed: { backgroundColor: theme.colors.highlight },
-  label: { fontFamily: theme.fonts.serif, fontSize: 11, color: theme.colors.inkDim },
+  label: { fontFamily: theme.fonts.ui, fontSize: 11, color: theme.colors.inkDim },
   labelOn: { color: theme.colors.accentBright },
   badge: { position: 'absolute', top: 8, right: '28%', width: 7, height: 7, borderRadius: 4, backgroundColor: theme.colors.accentBright },
 })

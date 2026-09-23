@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   primary: { backgroundColor: theme.colors.accent },
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.7 },
-  text: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.5 },
+  text: { fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.2 },
   smallText: { fontSize: 13 },
   primaryText: { color: theme.colors.onAccent },
 })

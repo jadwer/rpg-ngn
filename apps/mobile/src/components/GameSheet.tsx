@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   modal: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft },
   side: { width: 64, alignItems: 'flex-end' },
-  title: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.display, fontSize: 18, color: theme.colors.ink, letterSpacing: 1 },
-  close: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan },
+  title: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
+  close: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
   body: { padding: 16, gap: 14, paddingBottom: 40 },
 })

@@ -34,7 +34,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#0b0f14"
         }
-      ]
+      ],
+      "./plugins/withNoAutofillHighlight"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",

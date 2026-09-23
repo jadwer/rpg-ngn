@@ -4,6 +4,10 @@ import { CrimsonPro_400Regular } from '@expo-google-fonts/crimson-pro/400Regular
 import { CrimsonPro_400Regular_Italic } from '@expo-google-fonts/crimson-pro/400Regular_Italic'
 import { CrimsonPro_600SemiBold } from '@expo-google-fonts/crimson-pro/600SemiBold'
 import { CrimsonPro_700Bold } from '@expo-google-fonts/crimson-pro/700Bold'
+import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular'
+import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium'
+import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
+import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold'
 import { Platform } from 'react-native'
 
 /**
@@ -27,6 +31,10 @@ export const FONT_ASSETS = {
   CrimsonPro_400Regular_Italic,
   CrimsonPro_600SemiBold,
   CrimsonPro_700Bold,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
 } as const
 
 export const theme = {
@@ -47,6 +55,8 @@ export const theme = {
     accent: '#7c3aed',
     accentBright: '#8b5cf6',
     cyan: '#06b6d4',
+    /** Nebula del brand board: enlaces y acentos suaves ("Ver todo"). */
+    nebula: '#a78bfa',
     success: '#22c55e',
     /** Texto sobre el violeta de los botones principales. */
     onAccent: '#ffffff',
@@ -64,6 +74,12 @@ export const theme = {
     serifItalic: 'CrimsonPro_400Regular_Italic',
     serifSemiBold: 'CrimsonPro_600SemiBold',
     serifBold: 'CrimsonPro_700Bold',
+    // Texto de interfaz (brand board: Inter para texto y UI). La serif queda
+    // para titulos y narracion; Cinzel, solo para la marca.
+    ui: 'Inter_400Regular',
+    uiMedium: 'Inter_500Medium',
+    uiSemiBold: 'Inter_600SemiBold',
+    uiBold: 'Inter_700Bold',
   },
   radius: 16,
   space: 12,

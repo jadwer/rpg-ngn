@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
   image: { opacity: 0.55 },
   plain: { backgroundColor: theme.colors.panel2 },
   shade: { flex: 1, justifyContent: 'flex-end', padding: 16, gap: 4, backgroundColor: 'rgba(11, 15, 20, 0.45)' },
-  pill: { alignSelf: 'flex-start', fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.ink, backgroundColor: theme.colors.highlight, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2, marginBottom: 6 },
-  kicker: { fontFamily: theme.fonts.display, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.accentBright },
-  title: { fontFamily: theme.fonts.display, fontSize: 22, color: theme.colors.ink },
-  when: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },
+  pill: { alignSelf: 'flex-start', fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.ink, backgroundColor: theme.colors.highlight, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2, marginBottom: 6 },
+  kicker: { fontFamily: theme.fonts.uiMedium, fontSize: 11, letterSpacing: 0.2, color: theme.colors.accentBright },
+  title: { fontFamily: theme.fonts.serifSemiBold, fontSize: 22, color: theme.colors.ink },
+  when: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim },
 })
