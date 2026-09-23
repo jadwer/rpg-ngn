@@ -207,8 +207,17 @@ sobre el mapa del pack y la paleta del borrador (Gabino la pidio al ver la
 primera version "todavia cafe"; anotado en `docs/14`). Probado en local con
 tres cuentas a la vez (escribiendo, cuenta atras, cancelar con nombre,
 reanudar desde diez, cierre solo) y en produccion con una mesa temporal a
-1280 y 390; primer feedback de Gabino en el telefono corregido la misma noche (menu del sitio fuera de pantalla en /mesas, estados pulsados aun dorados). El 23-09 por la mañana, con el segundo feedback: los paneles no cerraban (capas) y atras salia de la mesa (ahora los paneles entran en el historial); y **el contenido de los menus reordenado por bloques funcionales** (`docs/18`, D-UX-7: invitar y presencia ajena en Jugadores, personalidad en la propia ficha, "Lectura" en vez de "Mas", Anfitrion en Sesion y Ajustes de la mesa, menu del sitio con nombres que dicen lo que abren). **Fallo real de los dados**: el modo no se guardaba en la web (el Guardar del director solo se encendia al cambiar el proveedor); ahora dados y secretos guardan al elegir, y el estado de la mesa lleva `away` para que la presencia se vea en vivo. **Falta la app** (paridad: barra del juego, jugadores con
-estado, cuenta atras, escribiendo, cabecera de escena, paleta). Lo que se
+1280 y 390; primer feedback de Gabino en el telefono corregido la misma noche (menu del sitio fuera de pantalla en /mesas, estados pulsados aun dorados). El 23-09 por la mañana, con el segundo feedback: los paneles no cerraban (capas) y atras salia de la mesa (ahora los paneles entran en el historial); y **el contenido de los menus reordenado por bloques funcionales** (`docs/18`, D-UX-7: invitar y presencia ajena en Jugadores, personalidad en la propia ficha, "Lectura" en vez de "Mas", Anfitrion en Sesion y Ajustes de la mesa, menu del sitio con nombres que dicen lo que abren). **Fallo real de los dados**: el modo no se guardaba en la web (el Guardar del director solo se encendia al cambiar el proveedor); ahora dados y secretos guardan al elegir, y el estado de la mesa lleva `away` para que la presencia se vea en vivo. **App, 23-09 por la tarde** (`411609a` a `c2fd202`): paleta de
+docs/22 con los mismos roles que la web, iconos de la marca y nombre visible
+Ad Astra Mentis; cuenta atras cancelable, escribiendo, quien se fue y la
+espera como ficcion; barra del juego con una hoja por cosa (Fichas con la
+personalidad propia, Mapa, Jugadores con invitar, Anfitrion en Sesion y
+Ajustes, Lectura con la cronica); pantalla Mundos (los tuyos, catalogo con
+visor, revision; subir sigue en la web). Dos fallos de paso: el enlace de
+invitar de la app apuntaba a `/movil/unirse` (404) y los retratos remotos
+iban con ruta relativa. **Sin verificar en un telefono**: typecheck, tests y
+bundle de Android en verde; falta que Gabino lo mire en Expo Go. **Falta**
+la cabecera de escena de la app. Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
@@ -287,7 +296,7 @@ web, que es el producto principal.
 a produccion, corregido esa tarde con los docs 23 y 24: (1) ~~resto de la
 Entrega 8~~ (hecho el 23-09); (2) **Stripe en real**, compuerta y tarea de
 Gabino; (3) ~~embudo en SQL y cronica compartible~~ (hechos el 23-09; la
-cronica falta en la app); (4) **beta cerrada con amigos creadores
+cronica ya esta tambien en la app); (4) **beta cerrada con amigos creadores
 de contenido**; (5) **Entrega 9, catalogo y pase de historias**, con el
 bosquejo del catalogo que trae Gabino; y ya, produccion. **Steam y Epic:
 diferidos** hasta product-market fit (`docs/23`, con las cuatro condiciones
@@ -352,7 +361,7 @@ como la portada).
 - [ ] **9b. Capitulos y camino de temporada**: ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
 - [ ] **9c. Pase de temporada**: compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
 - [ ] **9d. Compra directa de un mundo**: solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
-- [x] **Cronica compartible** (23-09, en produccion; `docs/24` seccion 4): cualquiera de la mesa pide el enlace desde Lectura, responde 404 hasta que acepta cada miembro actual (y vuelve a pendiente si entra alguien), cualquiera lo retira para siempre, opcion de no enseñar quien jugo. `/cronica/<token>` publica, por sesiones, con lo que hizo cada personaje y lo que paso; nunca bloques `system`. **Falta en la app** (va con B1 app)
+- [x] **Cronica compartible** (23-09, en produccion; `docs/24` seccion 4): cualquiera de la mesa pide el enlace desde Lectura, responde 404 hasta que acepta cada miembro actual (y vuelve a pendiente si entra alguien), cualquiera lo retira para siempre, opcion de no enseñar quien jugo. `/cronica/<token>` publica, por sesiones, con lo que hizo cada personaje y lo que paso; nunca bloques `system`. En la app desde el 23-09 por la tarde (Lectura)
 - [x] **Embudo** (23-09): `php artisan funnel:report [--weeks=8] [--exclude-domain=example.com]`, por semana de registro: con mesa, primer turno, segunda sesion, invitados por anfitrion, capitulos por persona y compras
 
 **De donde sale el catalogo.** Regla (Gabino, 23-09): **lo que sirva de base se sube a AtomoPlatform y rpg-ngn lo consume de ahi**; `base/` va mas avanzado y es la fuente de donde se porta, no una dependencia. rpg-ngn solo escribe lo que es del juego. Inventario del 23-09:
