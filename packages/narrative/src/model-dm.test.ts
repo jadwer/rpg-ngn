@@ -119,8 +119,9 @@ describe('ModelDMProvider', () => {
 
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-    expect(blocks.map((b) => b?.type)).toEqual(['narration', 'system'])
-    expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/llegó a su límite de escritura/)
+    // La apertura de la 003 tira antes la Fortuna de cada personaje presente.
+    expect(blocks.map((b) => b?.type)).toEqual(['roll', 'roll', 'narration', 'system'])
+    expect(blocks[3]?.type === 'system' && blocks[3].text).toMatch(/llegó a su límite de escritura/)
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
   })
 
@@ -233,9 +234,11 @@ describe('ModelDMProvider', () => {
       const outputs = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Entro en la casa de Osric.')]))))
 
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'system', 'system', 'narration'])
+      // Un solo aviso, al final del turno: en medio de la historia parecia que el DM se corregia en vivo.
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system'])
       // El aviso del lint es para el anfitrion: un jugador no puede hacer nada con el.
-      expect(blocks[1]).toMatchObject({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
+      expect(blocks[2]).toMatchObject({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
+      expect(blocks[2]?.type === 'system' && blocks[2].detail).toMatch(/cortó 2 bloques/)
       expect(JSON.stringify(blocks)).not.toContain('Brorg')
       expect(JSON.stringify(blocks)).not.toContain('está abajo')
 
@@ -295,14 +298,43 @@ describe('ModelDMProvider', () => {
     it('en modo report el bloque pasa y el hallazgo se anota; en modo off no se revisa', async () => {
       const base = await openSession003()
       const report = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'report' })))
-      expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['narration', 'dialogue', 'narration'])
+      expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['roll', 'roll', 'narration', 'dialogue', 'narration'])
       expect(report.filter((o) => o.kind === 'lint')).toHaveLength(3)
-      expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['narration', 'narration', 'world_event', 'narration'])
+      expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['roll', 'roll', 'narration', 'narration', 'world_event', 'narration'])
 
       const off = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'off' })))
       expect(off.some((o) => o.kind === 'lint')).toBe(false)
-      expect(off.filter((o) => o.kind === 'block')).toHaveLength(3)
+      expect(off.filter((o) => o.kind === 'block')).toHaveLength(5)
     })
+
+    it('si el lint corta el ultimo bloque, el motor devuelve la palabra (la mesa no queda a la deriva)', async () => {
+      const base = await openSession003()
+      const endsCut = [
+        '{"kind":"block","block":{"type":"narration","text":"La puerta de la casa cede con un crujido."}}',
+        '{"kind":"block","block":{"type":"dialogue","speaker":"Un minero flaco","speakerRef":null,"text":"Osric está abajo, muchacha. ¿Vas a bajar?"}}',
+      ].join('\n')
+      const outputs = await collect(new ModelDMProvider(new FakeTransport(endsCut), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
+      const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system', 'narration'])
+      expect(blocks[3]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
+    })
+  })
+
+  it('la apertura de una sesion con tabla de Fortuna la tira para cada presente y se la dice al DM', async () => {
+    const base = await openSession003()
+    const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Amanece en Valdoria. ¿Qué hacen?"}}')
+    const outputs = await collect(new ModelDMProvider(transport, KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(1, []))))
+
+    const rolls = outputs.filter((o) => o.kind === 'block' && o.block.type === 'roll').map((o) => (o.kind === 'block' && o.block.type === 'roll' ? o.block : null))
+    expect(rolls).toHaveLength(2)
+    expect(rolls[0]?.text).toMatch(/tira 1d20 de Fortuna: \d+ \(.+\)/)
+    const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
+    expect(events.filter((e) => e?.['type'] === 'roll').map((e) => (e?.['resolved'] as { kind: string }).kind)).toEqual(['fortune', 'fortune'])
+    expect(transport.prompts[0]!.user).toContain('Fortuna de esta sesión, ya tirada por el motor')
+
+    // En un turno con declaraciones ya no se tira: solo en la apertura.
+    const later = await collect(new ModelDMProvider(new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Sigue."}}'), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    expect(later.some((o) => o.kind === 'block' && o.block.type === 'roll' && o.block.text.includes('Fortuna'))).toBe(false)
   })
 
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {

@@ -290,6 +290,20 @@ export class ModelDMProvider implements DMProvider {
     const party = built.party
     const witnesses = party.map((id) => `character:${id}`)
 
+    // Fortuna de apertura (Gabino, 23-09: el briefing la anunciaba y nadie
+    // la tiraba). Si la sesion trae su tabla de Fortuna, el motor tira un
+    // d20 por cada personaje presente al abrirla, antes del modelo, que la
+    // recibe ya tirada para dejar que se note sin explicarla.
+    const fortunes = openingFortunes(ctx, party, random)
+    for (const [id, fortune] of Object.entries(fortunes)) {
+      const name = ctx.pack.characters.get(id)?.name ?? id
+      yield { kind: 'block', block: { type: 'roll', text: `${name} tira 1d20 de Fortuna: ${fortune.result} (${fortune.label})`, actor: `character:${id}`, die: '1d20', result: fortune.result, rolls: [fortune.result] } }
+      yield {
+        kind: 'event',
+        event: { type: 'roll', actor: `character:${id}`, resolved: { kind: 'fortune', die: '1d20', result: fortune.result, rolls: [fortune.result], source: fortune.source }, visibility: { layer: 'campaign', witnesses } },
+      }
+    }
+
     // Las declaraciones se registran siempre, sin depender del modelo.
     for (const response of ctx.turn.responses) {
       const name = ctx.pack.characters.get(response.characterId)?.name ?? response.characterId
@@ -300,9 +314,14 @@ export class ModelDMProvider implements DMProvider {
       }
     }
 
+    const fortuneNote = Object.keys(fortunes).length
+      ? `\n\nFortuna de esta sesión, ya tirada por el motor (no la pidas otra vez ni expliques para qué sirve; que se note en la escena): ${Object.entries(fortunes)
+          .map(([id, f]) => `${ctx.pack.characters.get(id)?.name ?? id} ${f.result} (${f.label})`)
+          .join(', ')}.`
+      : ''
     const prompt: ModelPrompt = {
       system: systemPromptFor(ctx.rulesetId, compact),
-      user: built.user,
+      user: built.user + fortuneNote,
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
 
@@ -344,6 +363,18 @@ export class ModelDMProvider implements DMProvider {
     }
     if (interpreter.blocks === 0) {
       throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ningún bloque (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
+    }
+
+    if (interpreter.cuts > 0) {
+      yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: `El lint de conocimiento cortó ${interpreter.cuts === 1 ? 'un bloque' : `${interpreter.cuts} bloques`}. El motivo va en el resultado del turno; el modo se fija con DM_LINT o por mesa.` } }
+    }
+    // Cada turno devuelve la palabra (docs/03), y el modelo suele hacerlo en
+    // su ultimo bloque. Si el lint corto justo ese, la mesa se quedaba sin
+    // pregunta y a la deriva (mesa 33, turno 5): el motor la devuelve.
+    if (reply.finish !== 'length' && interpreter.lastWasCut) {
+      const text = party.length === 1 ? `¿Qué haces, ${ctx.pack.characters.get(party[0]!)?.name ?? party[0]}?` : '¿Qué hacen?'
+      yield { kind: 'block', block: { type: 'narration', text } }
+      yield { kind: 'event', event: { type: 'narration', payload: { text }, visibility: { layer: 'campaign', witnesses } } }
     }
 
     if (reply.finish === 'length') {
@@ -427,6 +458,10 @@ function isChatter(text: string): boolean {
 
 /** Interpreta cada linea del modelo: la valida, la convierte en salidas del DM o la cuenta como ignorada. */
 class LineInterpreter {
+  /** Bloques que el lint corto este turno. */
+  cuts: number
+  /** El ultimo bloque de narracion o dialogo lo corto el lint. */
+  lastWasCut: boolean
   blocks = 0
   ignored = 0
   addressed: string[] | null = null
@@ -445,6 +480,8 @@ class LineInterpreter {
     private readonly preRolled: Readonly<Record<string, number>> = {},
   ) {
     this.knowledge = lintMode === 'off' ? null : buildKnowledgeView(ctx, party)
+    this.cuts = 0
+    this.lastWasCut = false
     this.allowed = allowedEventFor(ctx.rulesetId)
   }
 
@@ -604,10 +641,15 @@ class LineInterpreter {
     if (block.type === 'narration' || block.type === 'dialogue') {
       const cut = yield* this.lint(block.text)
       if (cut) {
-        // El bloque no llega a la mesa ni a la cronica; queda el aviso y el motivo va en result.lint.
-        yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con DM_LINT o por mesa.' } }
+        // El bloque no llega a la mesa ni a la cronica; el motivo va en
+        // result.lint y el aviso al anfitrion sale una vez, al final del
+        // turno: en medio de la historia parecia que el DM se corregia en
+        // vivo (Gabino, 23-09).
+        this.cuts++
+        this.lastWasCut = true
         return
       }
+      this.lastWasCut = false
     }
     if (block.type === 'dialogue') {
       // speakerRef invalido no tumba el bloque: se deja sin referencia.
@@ -817,6 +859,27 @@ export function splitJsonObjects(text: string): string[] {
 }
 
 /** Un d20 por personaje que declaro algo, en orden de llegada y sin repetir. */
+/**
+ * La Fortuna de la apertura: un d20 por personaje presente, solo en el
+ * primer turno de una sesion que trae tabla de Fortuna y sin declaraciones
+ * todavia. La etiqueta sale de la tabla del pack.
+ */
+export function openingFortunes(ctx: DMTurnContext, party: readonly string[], random: RandomSource): Record<string, { result: number; label: string; source: string }> {
+  const table = ctx.session?.fortune
+  if (ctx.turn.number !== 1 || ctx.turn.responses.length > 0 || !table?.length) return {}
+  const rolled: Record<string, { result: number; label: string; source: string }> = {}
+  for (const id of party) {
+    if (id in rolled || !ctx.state.world.characters[id]) continue
+    const roll = rollD20(random, {})
+    const tier = table.find((t) => {
+      const [lo, hi] = t.range.split('-').map(Number)
+      return roll.result >= lo! && roll.result <= (hi ?? lo!)
+    })
+    rolled[id] = { result: roll.result, label: tier?.label ?? 'Fortuna', source: roll.source }
+  }
+  return rolled
+}
+
 export function preRollFor(characterIds: readonly string[], random: RandomSource): Record<string, number> {
   const rolled: Record<string, number> = {}
   for (const id of characterIds) {

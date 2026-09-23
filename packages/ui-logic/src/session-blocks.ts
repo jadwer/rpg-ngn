@@ -61,7 +61,7 @@ export function sessionBlocks(input: SessionBlocksInput): TurnBlock[] {
   }
 
   blocks.push(system(`${session.id}:how-to-play`, { title: LABELS.howToPlay, items: session.howToPlay }))
-  blocks.push(system(`${session.id}:fortune`, { title: LABELS.fortune, items: session.fortune.map((tier) => `${tier.range}: ${tier.label}`) }))
+  if (session.fortune) blocks.push(system(`${session.id}:fortune`, { title: LABELS.fortune, items: session.fortune.map((tier) => `${tier.range}: ${tier.label}`) }))
   if (session.notes) {
     blocks.push(system(`${session.id}:notes`, { title: LABELS.notes, text: session.notes }))
   }
@@ -90,7 +90,7 @@ export function ledgerBlocks(input: SessionBlocksInput): TurnBlock[] {
 }
 
 export function fortuneLabel(session: Pick<Session, 'fortune'>, result: number): string | null {
-  for (const tier of session.fortune) {
+  for (const tier of session.fortune ?? []) {
     const [min, max] = tier.range.split('-').map(Number)
     const hi = max ?? min
     if (min !== undefined && result >= min && result <= (hi as number)) return tier.label

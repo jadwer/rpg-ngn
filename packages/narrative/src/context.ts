@@ -393,6 +393,9 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
           'Presenta la escena con fuerza, en 3 a 5 bloques de narración: dónde están, qué acaba de pasar, qué se huele y se oye. Sitúa a CADA personaje presente por su nombre con un detalle propio (algo que ve, siente o lleva encima), sin decidir nada por ellos.',
           'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay NPCs en escena, que uno hable.',
           'No pidas tiradas todavía y no propongas eventos salvo un world_event si hace falta. Termina con una situación abierta y una pregunta directa a toda la mesa, y devuelve la palabra a todos ("addressed" con toda la party).',
+          ...(party.length === 1
+            ? ['La mesa es de UNA sola persona. Háblale de tú, en singular. Si el briefing o el pack hablan de un grupo ("ustedes", "llevan dos jornadas juntos"), adáptalo a quien llega sola o solo: nunca le hables como a varios ni le atribuyas compañeros que no están en la mesa.']
+            : []),
         ].join('\n')
       : 'El turno se cerró sin declaraciones: haz avanzar el mundo un poco (un NPC, un sonido, el tiempo) y devuelve la palabra.')
   } else {

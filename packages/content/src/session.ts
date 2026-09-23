@@ -28,7 +28,13 @@ export const Session = z.strictObject({
   status: SessionStatus,
   briefing: z.string().min(1),
   howToPlay: z.array(z.string().min(1)).min(1),
-  fortune: z.array(FortuneTier).min(1),
+  /**
+   * Tabla de Fortuna de la sesion: si esta, el motor tira 1d20 por cada
+   * personaje presente al abrirla y el ruleset guarda el resultado. Es una
+   * mecanica que el pack elige, no algo que toda sesion deba tener (antes
+   * era obligatoria por herencia del piloto; opcional desde el 23-09).
+   */
+  fortune: z.array(FortuneTier).min(1).optional(),
   /** Personajes entre los que eligen los jugadores nuevos. */
   availableCharacters: z.array(KebabId).optional(),
   /**
