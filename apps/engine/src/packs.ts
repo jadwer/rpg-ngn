@@ -1,7 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadPack, type FileSource, type LoadedPack } from '@rpg-ngn/content'
-import type { PackCharacter, PackMapView, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
+import type { PackCharacter, PackMapView, PackNpc, PackRef, PackSummary } from '@rpg-ngn/engine-contract'
 
 /**
  * Los packs oficiales viven en disco junto al engine (`content/packs` del
@@ -58,6 +58,12 @@ export class PackStore {
    * empaquetado, pero de los demas no sabe nada: sin esto, quien crea una
    * mesa con otro pack no puede elegir personaje.
    */
+  /** Los NPC con nombre y retrato: lo justo para el dialogo de un cliente que no lleva el pack. */
+  async npcs(ref: PackRef): Promise<PackNpc[]> {
+    const pack = await this.get(ref)
+    return [...pack.npcs.values()].map((n) => ({ id: n.id, name: n.name, portrait: n.portrait ?? null }))
+  }
+
   async characters(ref: PackRef): Promise<PackCharacter[]> {
     const pack = await this.get(ref)
     return [...pack.characters.values()].map((c) => ({

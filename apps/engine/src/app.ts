@@ -69,6 +69,14 @@ export function createEngine(options: EngineOptions): Hono {
     return c.body(bytes as unknown as ArrayBuffer)
   })
 
+  app.get('/v1/packs/:id/:version/npcs', async (c) => {
+    try {
+      return c.json({ npcs: await options.packs.npcs({ id: c.req.param('id'), version: c.req.param('version') }) })
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 404)
+    }
+  })
+
   app.get('/v1/packs/:id/:version/maps', async (c) => {
     const maps = await options.packs.maps({ id: c.req.param('id'), version: c.req.param('version') })
     return c.json({ maps })

@@ -1,7 +1,7 @@
-import { ApiError, randomKey, type ApiClient, type PackMapView, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
+import { ApiError, randomKey, type ApiClient, type PackMapView, type PackNpc, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -58,8 +58,45 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const [existingSessions, setExistingSessions] = useState<SessionSummary[]>([])
   const [maps, setMaps] = useState<PackMapView[]>([])
 
-  const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
   const envelopes = snapshot?.envelopes ?? EMPTY
+  // Los personajes y NPC de un pack que la app no lleva dentro: nombres y caras.
+  const [remote, setRemote] = useState<PackCharacter[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackCharacters(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemote(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const [remoteNpcs, setRemoteNpcs] = useState<PackNpc[]>([])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackNpcs(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemoteNpcs(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  // Con el pack empaquetado, nombres y caras salen de el; si no, de la API.
+  const resolver = useMemo(() => {
+    const uriOf = (path: string) => {
+      const p = packPortraitUrl(table.packId, path)
+      return p ? `${client.baseUrl}${p}` : null
+    }
+    return speakerResolverFor({ pack, characters: remote, npcs: remoteNpcs, portraitUriOf: uriOf })
+  }, [pack, remote, remoteNpcs, table.packId, client.baseUrl])
+
   const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
 
   const turn = snapshot?.turn ?? null
@@ -92,20 +129,6 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   // Quien entra sin personaje lo elige aqui, entre los que queden libres; el
   // primero que llega se lo queda. Los de un pack remoto los da la API.
   const [choosing, setChoosing] = useState<string | null>(null)
-  const [remote, setRemote] = useState<PackCharacter[]>([])
-  useEffect(() => {
-    if (pack) return
-    let alive = true
-    void client.listPackCharacters(table.packId, table.packVersion).then(
-      (result) => {
-        if (alive) setRemote(result)
-      },
-      () => undefined,
-    )
-    return () => {
-      alive = false
-    }
-  }, [client, pack, table.packId, table.packVersion])
 
   // Los mapas del pack, si trae alguno. Sin mapa no se pinta nada.
   useEffect(() => {
@@ -120,6 +143,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       alive = false
     }
   }, [client, table.packId, table.packVersion])
+
 
   const freeToPick = useMemo(() => {
     if (pack) return freeCharacters(pack, table.members)

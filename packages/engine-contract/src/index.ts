@@ -276,6 +276,18 @@ export const PackCharacter = z.strictObject({
 })
 export type PackCharacter = z.infer<typeof PackCharacter>
 
+/**
+ * Lo que un cliente necesita de un NPC de un pack que no lleva empaquetado:
+ * nombre y retrato para el dialogo. Sin esto, los NPC de la boticaria y de La
+ * Mascarada hablaban sin cara en los dos clientes aunque tuvieran retrato.
+ */
+export const PackNpc = z.strictObject({
+  id: KebabId,
+  name: z.string().min(1),
+  portrait: z.string().nullable(),
+})
+export type PackNpc = z.infer<typeof PackNpc>
+
 export const TurnUsage = z.strictObject({
   inputTokens: z.number().int().nonnegative(),
   outputTokens: z.number().int().nonnegative(),

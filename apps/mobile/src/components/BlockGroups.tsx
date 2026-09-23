@@ -73,7 +73,7 @@ function Dialogue({ group, currentBlockId, onPressBlock }: GroupProps<DialogueGr
     <View style={styles.dialogue}>
       {group.blocks.map((block) => (
         <Pressable key={block.id} onPress={() => onPressBlock?.(block.id)} style={[styles.line, block.id === currentBlockId && styles.current]}>
-          <Portrait path={block.speaker.portrait} name={block.speaker.name} size={52} />
+          <Portrait path={block.speaker.portrait} uri={block.speaker.portraitUri} name={block.speaker.name} size={52} />
           <View style={styles.bubble}>
             <Text style={styles.speaker}>{block.speaker.name}</Text>
             <Text style={styles.lineText}>{block.text}</Text>
@@ -88,7 +88,7 @@ function Roll({ group, currentBlockId, onPressBlock }: GroupProps<RollGroup>) {
   const { block } = group
   return (
     <Pressable onPress={() => onPressBlock?.(block.id)} style={[styles.roll, block.id === currentBlockId && styles.current]}>
-      {block.actor ? <Portrait path={block.actor.portrait} name={block.actor.name} size={30} /> : <View style={styles.rollSpacer} />}
+      {block.actor ? <Portrait path={block.actor.portrait} uri={block.actor.portraitUri} name={block.actor.name} size={30} /> : <View style={styles.rollSpacer} />}
       <View style={styles.rollBody}>
         <Text style={styles.rollLabel}>{block.label}</Text>
         <Text style={styles.rollText}>{block.text}</Text>

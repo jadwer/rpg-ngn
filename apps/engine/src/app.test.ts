@@ -133,6 +133,16 @@ describe('apps/engine', () => {
     expect(world.characters['bruno']?.location).toBe('salon')
   })
 
+  it('da los NPC de un pack con nombre y retrato, para que hablen con cara en un cliente sin el pack', async () => {
+    const response = await app.request('/v1/packs/pilot/0.4.0/npcs', { headers })
+    expect(response.status).toBe(200)
+    const { npcs } = (await response.json()) as { npcs: Array<{ id: string; name: string; portrait: string | null }> }
+    expect(npcs.map((n) => n.id).sort()).toEqual(['bren', 'osric', 'tomas'])
+    expect(npcs.find((n) => n.id === 'osric')).toEqual({ id: 'osric', name: 'Osric', portrait: 'portraits/osric.webp' })
+
+    expect((await app.request('/v1/packs/nope/1.0.0/npcs', { headers })).status).toBe(404)
+  })
+
   it('falla limpio si la sesion no esta abierta o el pack no existe', async () => {
     const snapshot = await pilotSnapshot()
     const base = {

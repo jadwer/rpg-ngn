@@ -67,6 +67,14 @@ export interface PackOption {
 
 /** Un paquete de creditos de prepago. `amount` va en la unidad menor (centavos). */
 /** Un personaje jugable de un pack del servidor, para elegirlo al crear mesa. */
+/** Un NPC de un pack remoto: nombre y retrato para el dialogo. */
+export interface PackNpc {
+  id: string
+  name: string
+  /** Ruta dentro del pack; se pinta con `packPortraitUrl`. */
+  portrait: string | null
+}
+
 export interface PackCharacter {
   id: string
   name: string
@@ -110,6 +118,8 @@ export interface SettingsApi {
   listPacks(): Promise<PackOption[]>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
+  /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
+  listPackNpcs(packId: string, version: string): Promise<PackNpc[]>
   /** Los mapas de un pack, con los lugares ya posados sobre la imagen. */
   listPackMaps(packId: string, version: string): Promise<PackMapView[]>
   /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
@@ -139,6 +149,11 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPacks() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
+    },
+
+    async listPackNpcs(packId, version) {
+      const { data } = await request<{ data: PackNpc[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/npcs`)
       return data.data
     },
 

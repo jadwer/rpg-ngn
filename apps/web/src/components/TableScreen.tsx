@@ -1,9 +1,9 @@
 'use client'
 
-import { ApiError, memberOf, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
+import { ApiError, memberOf, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, packSpeakerResolver, remoteCharacterNames, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sheetEntries } from '../lib/sheets'
@@ -58,6 +58,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // primero que llega se lo queda. Los de un pack remoto los da la API.
   const [choosing, setChoosing] = useState<string | null>(null)
   const [remote, setRemote] = useState<PackCharacter[]>([])
+  // Los NPC del pack remoto, para que hablen con cara: la web solo lleva el piloto.
+  const [remoteNpcs, setRemoteNpcs] = useState<PackNpc[]>([])
   useEffect(() => {
     if (pack) return
     let alive = true
@@ -105,7 +107,23 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     }
   }, [client, table.packId])
 
-  const resolver = useMemo(() => packSpeakerResolver(pack), [pack])
+  useEffect(() => {
+    if (pack) return
+    let alive = true
+    void client.listPackNpcs(table.packId, table.packVersion).then(
+      (result) => {
+        if (alive) setRemoteNpcs(result)
+      },
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, pack, table.packId, table.packVersion])
+  const resolver = useMemo(
+    () => speakerResolverFor({ pack, characters: remote, npcs: remoteNpcs, portraitUriOf: (path) => packPortraitUrl(table.packId, path) }),
+    [pack, remote, remoteNpcs, table.packId],
+  )
   const envelopes = snapshot?.envelopes ?? EMPTY
   const allBlocks = useMemo(() => blocksFromApi(envelopes, resolver), [envelopes, resolver])
 

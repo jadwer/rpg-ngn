@@ -2,6 +2,8 @@ import { portraitUrl } from '../lib/pack'
 
 interface Props {
   path: string | null | undefined
+  /** Retrato servido por la API (packs que la web no lleva dentro); manda sobre `path`. */
+  uri?: string | null | undefined
   name: string
   size?: number | undefined
   /** Escala de grises: personaje fuera de la mesa. */
@@ -10,8 +12,8 @@ interface Props {
 }
 
 /** Retrato del pack o la inicial del nombre si no hay imagen. */
-export function Portrait({ path, name, size, muted = false, className }: Props) {
-  const url = portraitUrl(path)
+export function Portrait({ path, uri, name, size, muted = false, className }: Props) {
+  const url = uri ?? portraitUrl(path)
   const style = size ? { width: size, height: size, fontSize: size * 0.45 } : undefined
   const classes = ['portrait', muted ? 'muted' : '', className ?? ''].filter(Boolean).join(' ')
   if (url) {

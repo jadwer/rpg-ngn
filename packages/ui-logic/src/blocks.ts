@@ -9,8 +9,13 @@ export interface Speaker {
   /** `character:zahira`, `npc:osric`. */
   ref: string
   name: string
-  /** Ruta relativa al pack, o null si no hay retrato. */
+  /** Ruta relativa al pack empaquetado, o null si no hay retrato. */
   portrait: string | null
+  /**
+   * Retrato de un pack que el cliente NO lleva empaquetado, ya como URL que
+   * sirve la API. Cuando esta, manda sobre `portrait`.
+   */
+  portraitUri?: string | null
 }
 
 export interface NarrationBlock {

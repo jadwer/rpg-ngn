@@ -75,7 +75,7 @@ function Dialogue({ group, currentBlockId, onPressBlock }: GroupProps<DialogueGr
     <div className="dialogue">
       {group.blocks.map((block) => (
         <div key={block.id} data-block={block.id} className={`block line${block.id === currentBlockId ? ' current' : ''}`} onClick={() => onPressBlock?.(block.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onPressBlock?.(block.id)}>
-          <Portrait path={block.speaker.portrait} name={block.speaker.name} />
+          <Portrait path={block.speaker.portrait} uri={block.speaker.portraitUri} name={block.speaker.name} />
           <div className="bubble">
             <div className="speaker">{block.speaker.name}</div>
             <p className="text">{block.text}</p>
