@@ -3881,3 +3881,63 @@ a {
     left: 57%;
   }
 }
+
+/* Mis mundos (entrega 8). */
+.mundos .mundo-propio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mundos .mundo-propio .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mundos .mundo-propio .top > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mundos .mundo-propio h3 {
+  font-size: 1.05rem;
+}
+
+.mundos .mundo-propio .tagline {
+  margin: 0;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.mundos .chip.st-published {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.mundos .chip.st-pending {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.mundos .chip.st-rejected {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.mundos .issues {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+.mundos .issues code {
+  color: var(--ink);
+}
+
+.mundos input[type='file'] {
+  padding: 8px;
+}

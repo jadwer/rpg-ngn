@@ -73,12 +73,14 @@ export async function forwardToApi(request: NextRequest, path: string): Promise<
   const forwardedFor = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip')
   if (forwardedFor) headers.set('x-forwarded-for', forwardedFor)
 
-  const body = SAFE_METHODS.has(request.method) ? undefined : await request.text()
+  // Bytes, no texto: `text()` reinterpretaba el cuerpo como UTF-8 y rompia
+  // cualquier subida binaria (E2 del VAM del 19-09; la entrega 8 sube zips).
+  const body = SAFE_METHODS.has(request.method) ? null : await request.arrayBuffer()
   const url = `${apiTarget()}${path}${request.nextUrl.search}`
 
   let upstream: Response
   try {
-    upstream = await fetch(url, { method: request.method, headers, body: body && body.length > 0 ? body : null, redirect: 'manual', cache: 'no-store' })
+    upstream = await fetch(url, { method: request.method, headers, body: body && body.byteLength > 0 ? body : null, redirect: 'manual', cache: 'no-store' })
   } catch (error) {
     return NextResponse.json({ error: `No hay conexión con la API (${apiTarget()}): ${(error as Error).message}` }, { status: 502 })
   }

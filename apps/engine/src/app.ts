@@ -1,4 +1,4 @@
-import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, ProjectRequest, ProviderConfig, ResolveTurnRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
+import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, PackValidateRequest, ProjectRequest, ProviderConfig, ResolveTurnRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type ProviderDeps } from '@rpg-ngn/narrative'
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
@@ -93,6 +93,18 @@ export function createEngine(options: EngineOptions): Hono {
     c.header('Content-Type', type)
     c.header('Cache-Control', 'public, max-age=86400')
     return c.body(bytes as unknown as ArrayBuffer)
+  })
+
+  /**
+   * Valida un pack subido, en su carpeta de cuarentena (entrega 8). La
+   * plataforma descomprime y llama aqui antes de dar el pack por bueno; el
+   * engine responde con todos los avisos y, si carga, con su resumen.
+   */
+  app.post('/v1/packs/validate', async (c) => {
+    const parsed = PackValidateRequest.safeParse(await c.req.json().catch(() => null))
+    if (!parsed.success) return c.json({ error: 'hace falta `dir`' }, 400)
+    const result = await options.packs.validate(parsed.data.dir)
+    return c.json(result)
   })
 
   app.post('/v1/turns/resolve', async (c) => {

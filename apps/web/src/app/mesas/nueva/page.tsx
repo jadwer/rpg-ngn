@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { packCharacters, packOptionLabel, packOriginText, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
@@ -154,6 +154,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             {packs.map((p) => (
               <option key={`${p.id}@${p.version}`} value={p.id}>
                 {packOptionLabel(p)}
+                {packOriginText(p) ? `, ${packOriginText(p)}` : ''}
               </option>
             ))}
           </select>

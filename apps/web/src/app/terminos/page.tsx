@@ -91,6 +91,12 @@ export default function TerminosPage() {
         </li>
       </ul>
       <p>Si algo generado por el sistema te parece inaceptable, avísanos.</p>
+      <p>
+        <b>Los mundos que subes</b> (packs con personajes, lugares, historias e imágenes) siguen siendo tuyos. Al subir uno declaras que tienes derecho sobre su contenido, sea propio o con una licencia que lo
+        permita, y respondes de ello; nos concedes la licencia necesaria para guardarlo, validarlo, mostrarlo en tus mesas y, si pides publicarlo y lo aprobamos, en el catálogo con tu nombre. Podemos
+        retirar del catálogo cualquier mundo ante una reclamación de derechos o si incumple estos términos; para reclamar sobre un mundo ajeno escribe a{' '}
+        <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a>.
+      </p>
 
       <h2>6. Lo que no puedes hacer</h2>
       <ul>

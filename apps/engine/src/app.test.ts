@@ -6,6 +6,8 @@ import type { AnthropicClientLike, OpenAIClientLike } from '@rpg-ngn/narrative'
 import { describe, expect, it } from 'vitest'
 import { createEngine } from './app.js'
 import { PackStore } from './packs.js'
+import { cp, mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
 const TOKEN = 'secreto-de-prueba'
@@ -377,5 +379,37 @@ describe('apps/engine', () => {
       expect(invalid.status).toBe(400)
       expect(((await invalid.json()) as ProbeResponse).message).toContain('configuracion invalida')
     })
+  })
+})
+
+describe('packs de usuario (entrega 8)', () => {
+  it('valida un pack en cuarentena y lo sirve por id desde la raiz de usuario', async () => {
+    const userRoot = await mkdtemp(join(tmpdir(), 'packs-usuario-'))
+    try {
+      const salon = join(import.meta.dirname, '../tests/packs/salon')
+      const cuarentena = join(userRoot, 'quarantine', 'x1')
+      await cp(salon, cuarentena, { recursive: true })
+      const engine = createEngine({ token: TOKEN, packs: new PackStore(join(import.meta.dirname, '../tests/packs-vacio'), userRoot), now: () => new Date('2026-09-23T20:00:00Z') })
+
+      const validado = await engine.request('/v1/packs/validate', { method: 'POST', headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify({ dir: cuarentena }) })
+      expect(validado.status).toBe(200)
+      const cuerpo = (await validado.json()) as { ok: boolean; issues: unknown[]; pack: { id: string; characters: number } | null }
+      expect(cuerpo.ok).toBe(true)
+      expect(cuerpo.pack).toMatchObject({ id: 'salon', characters: 2 })
+
+      // Fuera de la raiz de usuario no se lee nada, venga de donde venga.
+      const fuera = await engine.request('/v1/packs/validate', { method: 'POST', headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify({ dir: salon }) })
+      expect(((await fuera.json()) as { ok: boolean }).ok).toBe(false)
+
+      // Aceptado: pasa a la raiz de usuario con su id definitivo, y el engine lo encuentra ahi.
+      await cp(cuarentena, join(userRoot, 'salon-abc123'), { recursive: true })
+      const personajes = await engine.request('/v1/packs/salon-abc123/0.1.0/characters', { headers })
+      expect(personajes.status).toBe(200)
+      expect(((await personajes.json()) as { characters: unknown[] }).characters).toHaveLength(2)
+      // El catalogo publico no lo lista: eso lo sabe la plataforma.
+      expect(((await (await engine.request('/v1/packs', { headers })).json()) as { packs: unknown[] }).packs).toHaveLength(0)
+    } finally {
+      await rm(userRoot, { recursive: true, force: true })
+    }
   })
 })

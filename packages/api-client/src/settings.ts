@@ -63,6 +63,31 @@ export interface PackOption {
   sessions: number
   /** El pack pide que cada jugador escriba la personalidad de su personaje (La Mascarada). */
   playerPersona?: boolean
+  /** De donde sale (entrega 8): oficial del servidor, subido por esta cuenta, o del catalogo y activado. */
+  origin?: 'official' | 'mine' | 'catalog'
+  /** Solo en los subidos: private, pending, published, rejected, retired. */
+  status?: string
+  /** El id que escribio el autor; `id` es el del servidor. */
+  slug?: string
+  author?: string | null
+  provenance?: Record<string, unknown>
+  /** Motivo del ultimo rechazo, para el autor. */
+  reviewNote?: string | null
+  /** Id numerico del pack subido, para publicar, activar o borrar. */
+  packId?: number
+  createdAt?: string | null
+  /** Mesas que lo juegan (solo en "mis mundos"). */
+  tables?: number
+  /** En el catalogo: si esta cuenta ya lo tiene activado o si es suyo. */
+  activated?: boolean
+  mine?: boolean
+}
+
+/** Un aviso del motor al validar un pack subido: archivo y campo. */
+export interface PackIssue {
+  level: 'error' | 'warning'
+  path: string
+  message: string
 }
 
 /** Un paquete de creditos de prepago. `amount` va en la unidad menor (centavos). */
@@ -120,6 +145,18 @@ export interface SettingsApi {
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
   /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
   listPackNpcs(packId: string, version: string): Promise<PackNpc[]>
+  /** Mis mundos (entrega 8): los subidos por esta cuenta, con el cupo gratuito. */
+  listMyPacks(): Promise<{ packs: PackOption[]; freeLimit: number; used: number }>
+  /** Sube un .rpgpack. Si el motor lo rechaza, el ApiError trae `issues` en `body`. */
+  uploadPack(file: Blob, fileName: string): Promise<PackOption>
+  publishPack(packId: number): Promise<PackOption>
+  unpublishPack(packId: number): Promise<PackOption>
+  /** Borra el mundo, o lo retira si alguna mesa lo juega. */
+  deletePack(packId: number): Promise<{ retired: boolean; message: string }>
+  /** El catalogo publico: lo que otros publicaron y paso revision. */
+  listCatalog(): Promise<PackOption[]>
+  activatePack(packId: number): Promise<PackOption>
+  deactivatePack(packId: number): Promise<PackOption>
   /** Los mapas de un pack, con los lugares ya posados sobre la imagen. */
   listPackMaps(packId: string, version: string): Promise<PackMapView[]>
   /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
@@ -149,6 +186,49 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listPacks() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs')
+      return data.data
+    },
+
+    async listMyPacks() {
+      const { data } = await request<{ data: PackOption[]; meta: { freeLimit: number; used: number } }>('/api/v1/packs/mine')
+      return { packs: data.data, freeLimit: data.meta.freeLimit, used: data.meta.used }
+    },
+
+    async uploadPack(file, fileName) {
+      const form = new FormData()
+      form.append('pack', file, fileName)
+      form.append('acceptTerms', '1')
+      const { data } = await request<{ data: PackOption }>('/api/v1/packs/mine', { method: 'POST', form })
+      return data.data
+    },
+
+    async publishPack(packId) {
+      const { data } = await request<{ data: PackOption }>(`/api/v1/packs/mine/${packId}/publish`, { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async unpublishPack(packId) {
+      const { data } = await request<{ data: PackOption }>(`/api/v1/packs/mine/${packId}/unpublish`, { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async deletePack(packId) {
+      const { data } = await request<{ data: { retired: boolean; message: string } }>(`/api/v1/packs/mine/${packId}`, { method: 'DELETE' })
+      return data.data
+    },
+
+    async listCatalog() {
+      const { data } = await request<{ data: PackOption[] }>('/api/v1/packs/catalog')
+      return data.data
+    },
+
+    async activatePack(packId) {
+      const { data } = await request<{ data: PackOption }>(`/api/v1/packs/catalog/${packId}/activate`, { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async deactivatePack(packId) {
+      const { data } = await request<{ data: PackOption }>(`/api/v1/packs/catalog/${packId}/activate`, { method: 'DELETE' })
       return data.data
     },
 

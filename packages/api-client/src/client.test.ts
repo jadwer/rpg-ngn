@@ -59,7 +59,7 @@ describe('login y perfil', () => {
     expect(result).toEqual({ token: '12|abc', expiresAt: '2026-10-06T00:00:00+00:00', user: { id: '4', name: 'Jaz', email: 'jaz@example.com' } })
     expect(calls[0]?.url).toBe('http://api.test/api/auth/login')
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ email: 'jaz@example.com', password: 'password', device_name: 'expo-test' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ email: 'jaz@example.com', password: 'password', device_name: 'expo-test' })
   })
 
   it('un login invalido es un ApiError 422 con mensaje legible', async () => {
@@ -133,24 +133,24 @@ describe('mesas', () => {
     const { api, calls } = client({ 'POST /api/v1/tables?include=campaign%2Cmembers.user': { status: 201, body: created } })
     const table = await api.createTable({ name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: ' La posada al caer la noche. ' })
     expect(calls[0]?.init.headers['Content-Type']).toBe('application/vnd.api+json')
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ data: { type: 'tables', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', settings: { premise: 'La posada al caer la noche.' } } } })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ data: { type: 'tables', attributes: { name: 'Posada', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', settings: { premise: 'La posada al caer la noche.' } } } })
     expect(table).toMatchObject({ id: '9', name: 'Posada', premise: 'La posada al caer la noche.', campaignId: '9' })
     expect(table.members).toEqual([{ id: '20', role: 'host', characterId: null, userId: '2', userName: 'Gabino', present: true }])
 
     await api.createTable({ name: 'Sin premisa', packId: 'pilot', packVersion: '0.4.0', ruleset: 'fantasy-d20-lite@1.0.0', premise: '   ' })
-    expect(JSON.parse(calls[1]?.init.body ?? '{}').data.attributes.settings).toBeUndefined()
+    expect(JSON.parse(calls[1]?.(init.body as string | undefined) ?? '{}').data.attributes.settings).toBeUndefined()
   })
 
   it('el dueño fija su personaje e invita con la misma llamada de miembros', async () => {
     const { api, calls } = client({
       'POST /api/v1/tables/9/members': (init) => {
-        const body = JSON.parse(init.body ?? '{}') as { user_id: number; character_id: string | null }
+        const body = JSON.parse((init.body as string | undefined) ?? '{}') as { user_id: number; character_id: string | null }
         return { status: body.user_id === 2 ? 200 : 201, body: { data: { id: body.user_id === 2 ? 20 : 21, table_id: 9, user_id: body.user_id, role: body.user_id === 2 ? 'host' : 'player', character_id: body.character_id } } }
       },
     })
     expect(await api.setOwnerCharacter('9', '2', 'narivyl')).toEqual({ id: 20, tableId: 9, userId: 2, role: 'host', characterId: 'narivyl' })
     expect(await api.invite(9, 4, 'zahira')).toEqual({ id: 21, tableId: 9, userId: 4, role: 'player', characterId: 'zahira' })
-    expect(calls.map((c) => JSON.parse(c.init.body ?? '{}'))).toEqual([{ user_id: 2, character_id: 'narivyl' }, { user_id: 4, character_id: 'zahira' }])
+    expect(calls.map((c) => JSON.parse(c.(init.body as string | undefined) ?? '{}'))).toEqual([{ user_id: 2, character_id: 'narivyl' }, { user_id: 4, character_id: 'zahira' }])
   })
 
   it('invitar sin amistad es un 422 con el mensaje de la API; repetir es 409', async () => {
@@ -201,7 +201,7 @@ describe('amistades', () => {
     })
     expect(await api.requestFriendship('5')).toEqual({ id: 7, userId: 2, friendId: 5, status: 'pending', created: true })
     expect((await api.requestFriendship(5)).created).toBe(false)
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ friend_id: 5 })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ friend_id: 5 })
     expect(await api.acceptFriendship(7)).toMatchObject({ id: 7, status: 'accepted', created: false })
     expect(calls[2]?.init.body).toBeUndefined()
   })
@@ -233,7 +233,7 @@ describe('turno', () => {
     expect(first).toEqual({ ...receipt, created: true })
     expect(again.created).toBe(false)
     expect(calls[0]?.init.headers['Idempotency-Key']).toBe('key-1')
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ text: 'Miro la campana.' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ text: 'Miro la campana.' })
   })
 
   it('un 409 al responder dos veces llega como conflicto con el mensaje de la API', async () => {
@@ -248,8 +248,8 @@ describe('turno', () => {
     const { api, calls } = client({ 'POST /api/v1/turns/2/close': { status: 202, body: { data: turn } } })
     expect((await api.closeTurn(2)).status).toBe('closing')
     await api.closeTurn(2, true)
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({})
-    expect(JSON.parse(calls[1]?.init.body ?? '{}')).toEqual({ force: true })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({})
+    expect(JSON.parse(calls[1]?.(init.body as string | undefined) ?? '{}')).toEqual({ force: true })
   })
 
   it('cerrar con faltantes es un 422 que nombra a quien falta', async () => {
@@ -269,7 +269,7 @@ describe('turno', () => {
     await api.openSession('2', '003', 'Valdoria, tres dias despues')
     expect(await api.closeSession(1)).toEqual({ session: '003', status: 'closed', snapshotSeq: 23 })
     await api.closeSession('1', 'La campana suena sola.')
-    expect(calls.map((c) => JSON.parse(c.init.body ?? '{}'))).toEqual([{ code: '003' }, { code: '003', worldTime: 'Valdoria, tres dias despues' }, {}, { cliffhanger: 'La campana suena sola.' }])
+    expect(calls.map((c) => JSON.parse(c.(init.body as string | undefined) ?? '{}'))).toEqual([{ code: '003' }, { code: '003', worldTime: 'Valdoria, tres dias despues' }, {}, { cliffhanger: 'La campana suena sola.' }])
   })
 
   it('las proyecciones vuelven con seq y headSeq', async () => {

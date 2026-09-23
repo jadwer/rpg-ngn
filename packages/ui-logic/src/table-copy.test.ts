@@ -1,6 +1,6 @@
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { characterNameFrom, noCharacterText, packOptionLabel, packSummaryText, premisePlaceholder, retirementText, tableCardMeta, tableNamePlaceholder, tableRetirement } from './table-copy.js'
+import { characterNameFrom, noCharacterText, packOptionLabel, packOriginText, packStatusText, packSummaryText, premisePlaceholder, retirementText, tableCardMeta, tableNamePlaceholder, tableRetirement } from './table-copy.js'
 
 const pack = (over: Partial<PackOption> = {}): PackOption => ({
   id: 'pilot',
@@ -121,5 +121,17 @@ describe('retirar una mesa', () => {
   it('el invitado se va; el anfitrion no puede irse de lo suyo', () => {
     expect(tableRetirement({ status: 'active' }, { host: false, played: true })).toMatchObject({ canLeave: true, canArchive: false, canDelete: false })
     expect(tableRetirement({ status: 'active' }, { host: true, played: true }).canLeave).toBe(false)
+  })
+})
+
+describe('packs de la gente (entrega 8)', () => {
+  it('dice de donde sale un pack y en que estado esta', () => {
+    expect(packOriginText({ origin: 'official' })).toBeNull()
+    expect(packOriginText({})).toBeNull()
+    expect(packOriginText({ origin: 'mine' })).toBe('tuyo')
+    expect(packOriginText({ origin: 'catalog', author: 'Ana' })).toBe('de Ana')
+    expect(packOriginText({ origin: 'catalog', author: null })).toBe('del catálogo')
+    expect(packStatusText('pending')).toBe('En revisión')
+    expect(packStatusText(undefined)).toBe('Privado')
   })
 })

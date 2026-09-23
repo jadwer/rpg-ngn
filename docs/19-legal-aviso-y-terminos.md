@@ -474,6 +474,16 @@ que hay que sostener:
   constancia **sobrevive al borrado de su cuenta**, disociada.
 - [x] **Buzon `privacidad@gabinoramirez.com`** (22-09, lo creo Gabino en
   JettHost), probado con un envio real desde el servidor.
+- [x] **Terminos de subida de mundos** (23-09, entrega 8): al subir un
+  `.rpgpack` la persona marca "declaro que tengo derecho a subir este
+  contenido y respondo de ello", y la fecha queda en `user_packs.terms_accepted_at`;
+  el pack lleva ademas su `provenance` declarada. Los terminos publicados
+  ganan un parrafo en el punto 5 (contenido que subes) sin cambiar de version,
+  porque ya decian que no se puede subir contenido sin derechos; la via de
+  retirada es `privacidad@gabinoramirez.com`. **Pregunta 7 para el abogado**:
+  ¿basta esa declaracion para que la responsabilidad por un mundo con
+  contenido ajeno recaiga en quien lo subio, y hace falta un procedimiento
+  formal de notificacion y retirada?
 - [ ] **Casilla de edad explicita.** Hoy se declara en el texto junto al boton
   de crear cuenta, y queda registrado; una casilla separada es mas defendible.
 - [ ] **Stripe en modo real.** Sigue en modo prueba, asi que el apartado de

@@ -145,6 +145,24 @@ encendia al cambiar el proveedor; ahora dados y secretos guardan al elegir.
 De paso, el estado de la mesa lleva `away` (quien tuvo que irse) para que los
 demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 
+### Packs de la gente: subir, catalogo y activar (23-09, entrega 8, primera version)
+
+- **Subir un `.rpgpack` desde `/mundos`**: zip con la estructura de docs/05,
+  inspeccionado antes de extraer (tamaños, rutas, extensiones, sin SVG),
+  imagenes recomprimidas a WebP, validado por el engine con los mismos
+  schemas que los oficiales, con todos los avisos si no carga. Privado al
+  instante, con id unico en el servidor; una version es inmutable.
+- **Dos mundos propios gratis** por cuenta (decision de Gabino); una version
+  nueva de un pack propio no cuenta.
+- **Publicar**: el autor lo pide, Gabino revisa por comando (`packs:review`),
+  el motivo de un rechazo lo lee el autor. Lo publicado aparece en el
+  **catalogo**, y "añadir a mis mundos" es una activacion, no una copia.
+- **Crear mesa** solo con packs que la cuenta puede jugar (oficiales, propios,
+  activados); el selector dice de quien es cada uno.
+- **Retirar** no rompe mesas: si alguna lo juega, queda retirado y siguen.
+- Pendiente: fichas completas por API en la web (E3), pantalla de revision,
+  herramienta para armar el `.rpgpack`.
+
 ### Marca y portada (23-09)
 
 - **El producto se llama Ad Astra Mentis** (docs/21 y docs/22). Adoptado

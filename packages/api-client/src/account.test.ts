@@ -32,7 +32,7 @@ describe('cuenta', () => {
     const { api, calls } = client({ 'POST /api/auth/register': { status: 201, body: { message: 'Cuenta creada.', token: '7|xyz', expires_at: null, user: { id: 9, name: 'Lucía', email: 'lucia@example.com' } } } }, null)
     const result = await api.register({ name: ' Lucía ', email: ' lucia@example.com ', password: 'clave-larga', passwordConfirmation: 'clave-larga' }, 'web-rpg-ngn')
     expect(result).toEqual({ kind: 'token', token: '7|xyz', expiresAt: null, user: { id: '9', name: 'Lucía', email: 'lucia@example.com' } })
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', password_confirmation: 'clave-larga', device_name: 'web-rpg-ngn' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', password_confirmation: 'clave-larga', device_name: 'web-rpg-ngn' })
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
   })
 
@@ -42,7 +42,7 @@ describe('cuenta', () => {
     const mensaje = await api.resetPassword({ token: 'tok-del-correo', email: ' lucia@example.com ', password: 'clave-nueva', passwordConfirmation: 'clave-nueva' })
 
     expect(mensaje).toBe('Contrasena restablecida correctamente.')
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ token: 'tok-del-correo', email: 'lucia@example.com', password: 'clave-nueva', password_confirmation: 'clave-nueva' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ token: 'tok-del-correo', email: 'lucia@example.com', password: 'clave-nueva', password_confirmation: 'clave-nueva' })
     // Quien cambia la contraseña no ha entrado todavia: nunca manda token.
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
   })
@@ -53,7 +53,7 @@ describe('cuenta', () => {
     const mensaje = await api.deleteAccount('mi-clave')
 
     expect(mensaje).toContain('sin tu nombre')
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ password: 'mi-clave' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ password: 'mi-clave' })
   })
 
   it('con verificacion de correo el registro no trae token', async () => {
@@ -69,9 +69,9 @@ describe('cuenta', () => {
     })
     // Una API vieja sin `emailVerified` se lee como verificado: no alarma sin motivo.
     expect(await api.updateProfile({ name: 'Jazmín ' })).toEqual({ id: '4', name: 'Jazmín', email: 'jaz@example.com', emailVerified: true })
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ name: 'Jazmín' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ name: 'Jazmín' })
     await api.changePassword('password', 'nueva-clave', 'nueva-clave')
-    expect(JSON.parse(calls[1]?.init.body ?? '{}')).toEqual({ current_password: 'password', password: 'nueva-clave', password_confirmation: 'nueva-clave' })
+    expect(JSON.parse(calls[1]?.(init.body as string | undefined) ?? '{}')).toEqual({ current_password: 'password', password: 'nueva-clave', password_confirmation: 'nueva-clave' })
   })
 
   it('cambiar el correo lo manda recortado y avisa de que queda sin verificar', async () => {
@@ -80,7 +80,7 @@ describe('cuenta', () => {
     })
 
     expect(await api.updateProfile({ name: 'Jaz', email: ' zahira@example.com ' })).toEqual({ id: '4', name: 'Jaz', email: 'zahira@example.com', emailVerified: false })
-    expect(JSON.parse(calls[0]?.init.body ?? '{}')).toEqual({ name: 'Jaz', email: 'zahira@example.com' })
+    expect(JSON.parse(calls[0]?.(init.body as string | undefined) ?? '{}')).toEqual({ name: 'Jaz', email: 'zahira@example.com' })
   })
 
   it('busca por correo exacto y devuelve null si no existe', async () => {
@@ -109,10 +109,10 @@ describe('ajustes de la mesa', () => {
 
     const probe = await api.probeDm(2, { preset: 'anthropic', model: 'claude-haiku-4-5' })
     expect(probe.ok).toBe(true)
-    expect(JSON.parse(calls[1]?.init.body ?? '{}')).toEqual({ preset: 'anthropic', model: 'claude-haiku-4-5' })
+    expect(JSON.parse(calls[1]?.(init.body as string | undefined) ?? '{}')).toEqual({ preset: 'anthropic', model: 'claude-haiku-4-5' })
 
     const saved = await api.updateTableSettings(2, withProvider({ premise: 'Llueve.' }, { preset: 'anthropic', model: 'claude-haiku-4-5' }))
-    expect(JSON.parse(calls[2]?.init.body ?? '{}')).toEqual({ data: { type: 'tables', id: '2', attributes: { settings: { premise: 'Llueve.', provider: { preset: 'anthropic', model: 'claude-haiku-4-5' } } } } })
+    expect(JSON.parse(calls[2]?.(init.body as string | undefined) ?? '{}')).toEqual({ data: { type: 'tables', id: '2', attributes: { settings: { premise: 'Llueve.', provider: { preset: 'anthropic', model: 'claude-haiku-4-5' } } } } })
     expect(calls[2]?.init.headers['Content-Type']).toBe('application/vnd.api+json')
     expect(providerChoice(saved)).toEqual({ preset: 'anthropic', model: 'claude-haiku-4-5' })
   })

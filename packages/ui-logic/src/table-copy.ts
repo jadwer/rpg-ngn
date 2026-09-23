@@ -137,3 +137,26 @@ export function retirementText(retirement: TableRetirement): { archive: string; 
   }
   return { archive: 'Archivar mesa', hint: 'Lo que jugaron se guarda: una partida también es de los demás, así que se archiva en vez de borrarse.' }
 }
+
+/** De donde sale un pack, para decirlo junto al nombre: nada si es oficial. */
+export function packOriginText(pack: Pick<PackOption, 'origin' | 'author'>): string | null {
+  if (pack.origin === 'mine') return 'tuyo'
+  if (pack.origin === 'catalog') return pack.author ? `de ${pack.author}` : 'del catálogo'
+  return null
+}
+
+/** El estado de un mundo subido, como lo lee su autor. */
+export function packStatusText(status: string | undefined): string {
+  switch (status) {
+    case 'pending':
+      return 'En revisión'
+    case 'published':
+      return 'Publicado'
+    case 'rejected':
+      return 'Rechazado'
+    case 'retired':
+      return 'Retirado'
+    default:
+      return 'Privado'
+  }
+}

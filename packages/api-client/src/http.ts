@@ -16,7 +16,7 @@ export interface HttpResponse {
 export interface HttpRequestInit {
   method: string
   headers: Record<string, string>
-  body?: string
+  body?: string | FormData
 }
 
 export type FetchLike = (url: string, init: HttpRequestInit) => Promise<HttpResponse>
@@ -34,6 +34,8 @@ export interface RequestOptions {
   headers?: Record<string, string>
   /** Sin token aunque haya (login). */
   anonymous?: boolean
+  /** Subida multipart (un .rpgpack): va tal cual, sin Content-Type, que lo pone el navegador con su boundary. */
+  form?: FormData
 }
 
 export interface HttpResult<T> {
@@ -59,7 +61,7 @@ export function createHttp(options: HttpOptions) {
   return async function request<T = unknown>(path: string, init: RequestOptions = {}): Promise<HttpResult<T>> {
     const media = init.media === 'jsonapi' ? JSONAPI_MEDIA : JSON_MEDIA
     const headers: Record<string, string> = { Accept: media, ...init.headers }
-    if (init.body !== undefined) headers['Content-Type'] = media
+    if (init.body !== undefined && !init.form) headers['Content-Type'] = media
     if (!init.anonymous) {
       const token = await options.tokenProvider()
       if (token) headers['Authorization'] = `Bearer ${token}`
@@ -70,7 +72,7 @@ export function createHttp(options: HttpOptions) {
       response = await fetchImpl(`${baseUrl}${path}`, {
         method: init.method ?? 'GET',
         headers,
-        ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
+        ...(init.form ? { body: init.form } : init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
       })
     } catch (cause) {
       throw new NetworkError(`No hay conexion con ${baseUrl}.`, cause)

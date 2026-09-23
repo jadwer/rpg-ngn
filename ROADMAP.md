@@ -327,6 +327,9 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
 
 - [ ] **WebP como formato de los retratos.** Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. **Faltan los nueve jugables del piloto, que siguen en JPG** (`content/packs/pilot/portraits/*.jpg`): recortarlos desde `img/LosNueveViajeros/personajes.png` y cambiar la extension en los nueve JSON. Una hora, y de paso el visor de fichas de `main`
 
+- [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
+- [ ] **Fichas completas por API en la web** (E3 del VAM): sin esto un pack subido se juega sin fichas en la web (la app si las tiene)
+- [ ] Pantalla de revision (hoy `packs:review` por SSH), visor del pack antes de activarlo, y `tools/packs/pack.sh` que valide y arme el `.rpgpack`
 - **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
 - Takedown y aviso de descarga externa

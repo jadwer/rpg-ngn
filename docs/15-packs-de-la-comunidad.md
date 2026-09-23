@@ -1,6 +1,55 @@
 # 15. Packs de la comunidad: subir, revisar y activar
 
-Estado: diseño, sin construir. Fecha: 2026-09-21. Decide Gabino.
+Estado: **construido el 2026-09-23** (primera version, ver "Lo que hay"). Fecha
+del diseño: 2026-09-21. Decide Gabino.
+
+## Decidido el 23-09 y lo que hay
+
+Gabino decidio, preguntado una a una: **subida privada y catalogo publico en
+la primera version**; el pack llega como **archivo `.rpgpack` desde la web**
+(no desde un repo git); y **dos mundos propios gratis** por cuenta ("ya
+tenemos tres oficiales para dar variedad; presionamos sin sensacion de
+escasez"). Lo construido ese mismo dia:
+
+- **Engine**: `PackStore` con dos raices (oficial y `USER_PACKS_DIR`); el
+  catalogo publico solo lista la oficial; un pack se busca por id en las dos.
+  `POST /v1/packs/validate {dir}` carga una carpeta de cuarentena con los
+  mismos schemas y devuelve todos los avisos; solo lee dentro de la raiz de
+  usuario.
+- **API** (`PackIngestService`): se inspecciona el zip antes de extraer
+  (tope de 400 archivos, 8 MB por archivo, 40 MB en total, 20 MB el zip; sin
+  `..`, sin rutas absolutas, solo json, webp, png, jpg, md, txt; **SVG
+  rechazado**); se extrae a `quarantine/<uuid>`; toda imagen de `portraits/`
+  y `maps/` se **recomprime a WebP** (512x512 los retratos, hasta 2048 de
+  ancho los mapas) y las referencias en los JSON se reescriben; el engine
+  valida; si carga, el `id` del manifiesto pasa a ser `<slug>-<6 hex del
+  sha256 del zip>`, unico en el servidor, y la carpeta se mueve a
+  `USER_PACKS_DIR/<id>`. Una version subida es inmutable: la siguiente es
+  otra carpeta. Tablas `user_packs` (estado private, pending, published,
+  rejected, retired; procedencia declarada; aceptacion de terminos de subida)
+  y `pack_activations`.
+- **Cupo**: dos slugs distintos por cuenta sin plan; una version nueva de un
+  pack propio no cuenta; la misma version repetida es 409.
+- **Revision**: `php artisan packs:review` lista la cola; `--approve` o
+  `--reject="motivo"`; el motivo lo lee el autor en su lista. Por SSH mientras
+  la cola sea corta.
+- **Catalogo y activacion**: `GET packs/catalog` (publicados), activar es una
+  fila; `GET packs` devuelve oficiales + propios + activados con `origin`; una
+  mesa solo se crea con un pack que la cuenta pueda jugar (`PackAccess`).
+- **Retirar**: si ninguna mesa lo juega, se borra del disco; si alguna lo
+  juega, queda `retired` y esas mesas siguen, porque el log se reduce contra
+  el pack.
+- **Web**: `/mundos` (subir con la declaracion de derechos, mis mundos con
+  estado y avisos del motor, catalogo con "añadir a mis mundos"); el selector
+  de mesa nueva dice "tuyo" o "de Fulano". El proxy de Next reenvia bytes
+  (E2 del VAM): antes rompia cualquier subida binaria.
+
+**Lo que falta de esta entrega**: las fichas completas por API en la web
+(E3), que hoy solo enseña las del pack empaquetado; una pantalla de revision
+en vez del comando; el visor de ejemplo del pack antes de activarlo; y la
+herramienta que arma el `.rpgpack` desde una carpeta (hoy es `zip -r`).
+
+Lo que sigue es el diseño original, con lo que se descarto y por que.
 
 Idea suya: que cualquiera pueda subir su pack a su cuenta, que haya un
 repositorio publico donde se publiquen, y que tener **coleccion** se pague.

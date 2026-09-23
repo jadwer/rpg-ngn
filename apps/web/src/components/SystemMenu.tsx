@@ -53,6 +53,9 @@ export function SystemMenu({ user, onLogout }: Props) {
           <Link role="menuitem" href="/mesas/nueva" onClick={() => setOpen(false)}>
             Nueva mesa
           </Link>
+          <Link role="menuitem" href="/mundos" onClick={() => setOpen(false)}>
+            Mis mundos
+          </Link>
           <Link role="menuitem" href="/perfil" onClick={() => setOpen(false)}>
             Mi cuenta y créditos
           </Link>

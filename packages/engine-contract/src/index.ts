@@ -383,3 +383,28 @@ export const ENGINE_HEADERS = {
   token: 'x-engine-token',
   contract: 'x-engine-contract',
 } as const
+
+/**
+ * Validar un pack subido (entrega 8): la plataforma lo descomprime en una
+ * carpeta de cuarentena, en la misma maquina que el engine, y le pide que lo
+ * cargue con los mismos schemas que a los oficiales.
+ */
+export const PackValidateRequest = z.strictObject({
+  /** Ruta absoluta de la carpeta, dentro de la zona de packs de usuario. */
+  dir: z.string().min(1),
+})
+export type PackValidateRequest = z.infer<typeof PackValidateRequest>
+
+export const PackIssue = z.strictObject({
+  level: z.enum(['error', 'warning']),
+  path: z.string(),
+  message: z.string(),
+})
+export type PackIssue = z.infer<typeof PackIssue>
+
+export const PackValidateResponse = z.strictObject({
+  ok: z.boolean(),
+  issues: z.array(PackIssue),
+  pack: PackSummary.nullable(),
+})
+export type PackValidateResponse = z.infer<typeof PackValidateResponse>
