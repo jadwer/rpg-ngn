@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 15:55 CST**. Rama `dev`, commit `0d3f38f`; API `d6e8dd9` con platform `0736442`.
+Fecha de corte: **2026-09-23, tarde CST**. Rama `dev`, commit `523bfa6`; API `3f07305` con platform `0736442`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -182,6 +182,17 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   `apps/web/src/components/Brand.tsx`; icono de app, favicon y apple-icon.
 - **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
   para imprenta, y el nombre en la app (`android.package`).
+
+### Lo que salio de jugar la mesa 33 (23-09, tarde)
+
+- Los primeros 20 turnos de cupo de cada cuenta narran con Sonnet; despues,
+  Haiku. La mesa dice con que narra y quien lo paga (`GET tables/{t}/dm`).
+- Fortuna al abrir sesion, tirada por el motor si la sesion trae tabla (la
+  tabla es opcional desde hoy). El aviso del lint va al final del turno y,
+  si corto la pregunta, el motor devuelve la palabra. Mesa de una persona:
+  la apertura le habla en singular.
+- Dado de mantener presionado (inercia de 1 a 5 s) y boton de narracion en
+  la cabecera, en web y app.
 
 ### La app con el diseño de las laminas de concepto (23-09, tarde)
 

@@ -227,7 +227,21 @@ autocompletado de Android: en Expo Go se apaga con `isRunningInExpoGo`, en
 la app instalada lo quita `plugins/withNoAutofillHighlight.js`. La ficha del
 concepto (barra de vida, rejilla, pestañas Inventario, Habilidades y Rasgos)
 quedo en `0d3f38f`. **Sigue**: que Gabino la recorra entera en el telefono,
-y el APK para ver splash, icono y el autocompletado sin velo. Lo que se
+y el APK para ver splash, icono y el autocompletado sin velo.
+
+**Tras la mesa 33 de Gabino (23-09, tarde)**, en produccion (`dfb65ef`,
+`523bfa6`, API `3f07305`): los primeros 20 turnos de cupo de cada cuenta
+narran con Sonnet (`quota.first_turns`, `quota.first_model`), despues Haiku;
+`GET tables/{t}/dm` y Ajustes del director dicen con que narra la mesa y
+quien lo paga (Gabino creyo usar su clave y la tenia en otra cuenta);
+Fortuna tirada por el motor al abrir una sesion que trae su tabla (la tabla
+pasa a ser opcional por sesion); el aviso del lint va una vez al final y,
+si corto el ultimo bloque, el motor devuelve la palabra; la apertura de una
+mesa de una persona le habla en singular; dado de mantener presionado con
+inercia de 1 a 5 s; boton de narracion en la cabecera, en web y app.
+**Pendiente de esa lista**: que el pack adapte el briefing al tamaño de la
+mesa desde el contenido (hoy lo corrige el prompt) y decidir si la Fortuna
+la tira el jugador con el dado de mantener presionado. Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
