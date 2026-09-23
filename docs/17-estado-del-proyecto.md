@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 21:50 CST**. Rama `dev`, commit `0dc2a25`.
+Fecha de corte: **2026-09-22, 22:05 CST**. Rama `dev`, commit `48938ad`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -101,6 +101,18 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - **Personalidad por jugador** (600 caracteres, con plantilla): la escribe el
   jugador y el DM la recibe en la ficha. Activable por pack
   (`playerPersona`), no sale en packs donde no aplica.
+
+### Retratos y NPC
+
+- **Los tres packs tienen todos sus NPC con retrato** (22-09): 3 en el piloto,
+  6 en la boticaria, 13 en La Mascarada. Estandar 512x512 WebP, cara en el
+  tercio superior; el estilo lo manda cada pack (pintura semirrealista en el
+  piloto, anime en los otros dos).
+- **Un NPC de un pack que el cliente no lleva empaquetado habla con su cara**
+  en web y en la app: el engine expone los NPC, la API los reenvia con cache y
+  `speakerResolverFor` resuelve el retrato como URL de la API. Era un hueco
+  desde el principio: solo el piloto va empaquetado y el resolver solo lo
+  conocia a el.
 
 ### Mapa
 
