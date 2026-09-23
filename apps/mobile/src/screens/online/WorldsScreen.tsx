@@ -71,10 +71,12 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Mesas</Text>
+          <Text style={styles.link} numberOfLines={1}>
+            ‹ Mesas
+          </Text>
         </Pressable>
         <Text style={styles.title}>Mundos</Text>
-        <View style={{ width: 56 }} />
+        <View style={{ minWidth: 64 }} />
       </View>
       <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={false} onRefresh={() => void load()} tintColor={theme.colors.accentBright} />}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -207,9 +209,9 @@ function Preview({ client, pack }: { client: ApiClient; pack: PackOption }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 48, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft },
-  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, width: 56 },
-  title: { fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, letterSpacing: 0.2 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
+  title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
   list: { padding: 16, gap: 12, paddingBottom: 48 },
   label: { marginTop: 10, fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },

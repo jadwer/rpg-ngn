@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
   title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
-  who: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.cyan, minWidth: 64, maxWidth: 140, textAlign: 'right', textDecorationLine: 'underline' },
+  who: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula, minWidth: 64, maxWidth: 110, textAlign: 'right' },
   list: { padding: 16, paddingBottom: 40, gap: 10 },
   actions: { gap: 10 },
   center: { alignItems: 'center', padding: 24, gap: 10 },

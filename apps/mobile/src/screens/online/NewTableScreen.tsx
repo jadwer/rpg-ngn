@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
   title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
-  who: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, minWidth: 64, textAlign: 'right' },
+  who: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, minWidth: 64, maxWidth: 110, textAlign: 'right' },
   form: { padding: 16, paddingBottom: 48, gap: 14 },
   block: { gap: 6 },
   label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
