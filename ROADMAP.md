@@ -380,8 +380,9 @@ como la portada).
 ## Deuda tecnica (sin entrega asignada)
 
 - [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas
-- [ ] Un pack que no existe devuelve 502 en `packs/{pack}/{version}/sheets` (el engine responde 404 y el relevo lo trata como caida); deberia ser 404
-- [ ] `composer analyse` de la API no corre: falta `phpstan.neon` con las rutas
+- [x] Un pack que no existe devolvia 502 en `packs/{pack}/{version}/sheets`; ahora 404 con motivo (23-09, API `be11b57`)
+- [x] `composer analyse` de la API vuelve a correr (23-09): Larastan nivel 5 con linea base de 141 hallazgos (tipos de Eloquent; los dos que parecian fallos son falsos positivos) y en el CI de GitHub
+- [ ] **El CI de AtomoPlatform en Gitea nunca ha corrido** (verificado el 23-09 en la base de Gitea, solo lectura): cero runners registrados, cero tokens de registro; todas las corridas quedaron canceladas por espera o en cola. El diseño (`docs/AUDIT_PHASE_9.md`) pone `act_runner` en el MicroServer local (HPE Gen8), no en el VPS de Gitea. Mientras no exista, los tests de los packages se corren a mano (SQLite y Postgres, como el 23-09). Tarea de Gabino: registrar el runner con la etiqueta `ubuntu-latest` y Docker (el workflow usa el servicio `postgres:16`)
 
 - **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
 
