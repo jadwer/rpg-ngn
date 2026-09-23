@@ -1,5 +1,5 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, QUICK_DICE, quickRoll, turnLine, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, countdownLine, QUICK_DICE, quickRoll, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -15,8 +15,15 @@ interface Props {
   hasCharacter: boolean
   /** Quien tira en esta mesa; con `engine` los dados de aqui no pintan nada. */
   diceMode: DiceMode
+  /** Cuenta atras antes de narrar, o en espera si alguien pidio un momento. */
+  countdown: Countdown
+  /** Quien esta, escribe, respondio o se fue (seatsSummary). */
+  seatsLine?: string | null | undefined
   onRespond: (text: string) => Promise<boolean>
   onClose: (force: boolean) => void
+  onHold: (held: boolean) => void
+  /** El cuadro tiene texto: la mesa ve "escribiendo". */
+  onTyping: (typing: boolean) => void
   /** El cuadro tomo el foco: la pantalla baja la narracion al final para que se vea lo ultimo sobre el teclado. */
   onFocusInput?: (() => void) | undefined
 }
@@ -27,7 +34,7 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, onRespond, onClose, onFocusInput }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput }: Props) {
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
@@ -35,6 +42,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   const send = async () => {
     const value = text.trim()
     if (!value || busy) return
+    onTyping(false)
     if (await onRespond(value)) setText('')
   }
 
@@ -46,6 +54,20 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           {line}
         </Text>
       </View>
+
+      {countdown.active ? (
+        <View style={styles.countdown}>
+          <Text style={styles.countdownNumber}>{countdown.remaining}</Text>
+          <Text style={styles.countdownText}>{countdownLine(countdown)}</Text>
+          <Button label="Un momento" small busy={busy} onPress={() => onHold(true)} />
+        </View>
+      ) : countdown.held ? (
+        <View style={styles.countdown}>
+          <Text style={styles.countdownText}>{countdownLine(countdown)}</Text>
+          <Button label="Seguir" small busy={busy} onPress={() => onHold(false)} />
+        </View>
+      ) : null}
+      {seatsLine && !focused ? <Text style={styles.seats}>{seatsLine}</Text> : null}
 
       {turn && !focused && !progress.narrating && (progress.responded.length > 0 || progress.pending.length > 0) ? (
         <View style={styles.chips}>
@@ -65,7 +87,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         <View style={styles.compose}>
           <TextInput
             value={text}
-            onChangeText={setText}
+            onChangeText={(value) => {
+              setText(value)
+              onTyping(value.trim().length > 0)
+            }}
             multiline
             placeholder="¿Qué haces? Escribe tu acción o di que no haces nada."
             placeholderTextColor={theme.colors.inkFaint}
@@ -103,9 +128,9 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         </View>
       ) : null}
       {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</Text> : null}
-      {turn && progress.hasResponded && turn.status === 'open' ? <Text style={styles.sent}>Tu respuesta está enviada.</Text> : null}
+      {turn && progress.hasResponded && turn.status === 'open' && !countdown.active && !countdown.held ? <Text style={styles.sent}>Tu respuesta está enviada.</Text> : null}
 
-      {progress.canClose || progress.canForceClose ? (
+      {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
         <View style={styles.actions}>
           {progress.canClose ? <Button label="Cerrar turno y narrar" onPress={() => onClose(false)} busy={busy} /> : null}
           {progress.canForceClose ? <Button label="Forzar cierre (anfitrión)" onPress={() => onClose(true)} busy={busy} /> : null}
@@ -116,6 +141,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 }
 
 const styles = StyleSheet.create({
+  countdown: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+  countdownNumber: { fontFamily: theme.fonts.displayBold, fontSize: 22, color: theme.colors.accentBright, minWidth: 28, textAlign: 'center' },
+  countdownText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
+  seats: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
   panel: { borderTopWidth: 1, borderTopColor: theme.colors.border, backgroundColor: theme.colors.panel, paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   status: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },

@@ -1,7 +1,7 @@
 import { ApiError, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -125,6 +125,50 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
+
+  // Cuenta atras cancelable antes de narrar (docs/18, D-UX-6), igual que en la
+  // web: cuando todos respondieron, cada cliente cuenta desde que lo vio y al
+  // llegar a cero cierra una sola vez por turno. Cualquiera puede pedir un
+  // momento (hold) y la mesa espera.
+  const completedKey = turn && turn.status === 'open' ? `${turn.id}:${turn.completedAt ?? ''}:${turn.held ? 'espera' : 'corre'}` : null
+  const [startedAt, setStartedAt] = useState<{ key: string; at: number } | null>(null)
+  useEffect(() => {
+    if (!completedKey || !turn?.completedAt) {
+      setStartedAt(null)
+      return
+    }
+    setStartedAt((current) => (current?.key === completedKey ? current : { key: completedKey, at: Date.now() }))
+  }, [completedKey, turn?.completedAt])
+  const [now, setNow] = useState(() => Date.now())
+  const cd = countdown({ turn, progress, startedAt: startedAt?.key === completedKey ? startedAt.at : null, now, nameOf })
+  const ticking = cd.active || progress.narrating
+  useEffect(() => {
+    if (!ticking) return
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 500)
+    return () => clearInterval(timer)
+  }, [ticking])
+  const waiting = progress.narrating && turn ? waitingPhrase(turn.number, now) : null
+
+  // "Escribiendo": se renueva cada 4 s mientras se teclea; la API lo caduca a los 8.
+  const typingRef = useRef<{ on: boolean; last: number }>({ on: false, last: 0 })
+  const notifyTyping = useCallback(
+    (typing: boolean) => {
+      const state = typingRef.current
+      const at = Date.now()
+      if (typing && state.on && at - state.last < 4000) return
+      if (!typing && !state.on) return
+      typingRef.current = { on: typing, last: at }
+      void client.setTyping(table.id, typing).catch(() => undefined)
+    },
+    [client, table.id],
+  )
+
+  // Quien esta, quien escribe, quien respondio y quien se tuvo que ir.
+  const seatsLine = useMemo(
+    () => seatsSummary(seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: ownMember.id, nameOf })),
+    [table.members, turn, snapshot?.typing, snapshot?.narrators, snapshot?.away, ownMember.id, nameOf],
+  )
 
   // Quien entra sin personaje lo elige aqui, entre los que queden libres; el
   // primero que llega se lo queda. Los de un pack remoto los da la API.
@@ -279,6 +323,19 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const closeTurn = (force: boolean) => {
     if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), 'No se pudo cerrar el turno.')
   }
+  const holdTurn = (held: boolean) => {
+    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), 'No se pudo cambiar la espera.')
+  }
+  // Al llegar a cero se cierra una vez; si otro cliente llego antes, el 409 refresca.
+  const autoClosedRef = useRef<number | null>(null)
+  const closeTurnRef = useRef(closeTurn)
+  closeTurnRef.current = closeTurn
+  useEffect(() => {
+    if (!cd.active || cd.remaining > 0 || !turn || busy) return
+    if (autoClosedRef.current === turn.id) return
+    autoClosedRef.current = turn.id
+    closeTurnRef.current(false)
+  }, [cd.active, cd.remaining, turn, busy])
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), 'No se pudo abrir la sesión.')
   }
@@ -384,7 +441,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           {progress.narrating ? (
             <View style={styles.narrating}>
               <ActivityIndicator size="small" color={theme.colors.accentBright} />
-              <Text style={styles.narratingText}>El DM está narrando...</Text>
+              <Text style={styles.narratingText}>{waiting ?? 'El director narra...'}</Text>
             </View>
           ) : null}
         </ScrollView>
@@ -462,7 +519,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </View>
       ) : null}
       {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
-      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} onFocusInput={scrollToEnd} />
+      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} />
 
       <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : (path) => packPortraitUrl(table.packId, path)} />
     </KeyboardAvoidingView>
