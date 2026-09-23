@@ -2366,11 +2366,10 @@ a.plain {
 
 .table-header {
   position: relative;
-  isolation: isolate;
+  z-index: 7;
   gap: 10px;
   padding: 8px 12px;
   background: var(--panel);
-  overflow: hidden;
 }
 
 .table-header .titles {
@@ -3079,4 +3078,75 @@ a {
 
 .table-card .name {
   color: var(--ink);
+}
+
+/* Estados de pulsado y activo que seguian en la paleta vieja (Gabino, 23-09). */
+.btn:active {
+  border-color: var(--accent-bright);
+  background: var(--panel-3);
+}
+
+.btn.primary:active {
+  background: var(--accent);
+  border-color: var(--accent-bright);
+}
+
+.btn.active {
+  border-color: var(--accent-bright);
+  background: var(--highlight);
+  color: #fff;
+}
+
+.btn.ghost:active {
+  border-color: var(--border);
+  background: var(--panel-2);
+}
+
+.table-card:hover,
+.table-card:focus-visible,
+.table-card:active {
+  border-color: var(--accent-bright);
+}
+
+.party-grid .pc:hover,
+.party-grid .pc:focus-visible {
+  border-color: var(--accent-bright);
+}
+
+.party-grid .pc.free {
+  border-color: var(--border);
+}
+
+.segmented button:active {
+  background: var(--panel-3);
+}
+
+.gamebar button:active {
+  background: var(--highlight);
+}
+
+.mapa-modal .segmented button[aria-pressed='true'],
+.mapa-modal .segmented button[aria-selected='true'] {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* El menu del sitio se despliega por encima de todo, tambien del pie y de la barra del juego. */
+.sysmenu-panel {
+  z-index: 12;
+}
+
+.topbar {
+  position: relative;
+  z-index: 7;
+}
+
+/* En la barra superior el menu esta a la derecha: se despliega hacia la izquierda, no fuera de la pantalla. */
+.topbar .sysmenu-panel {
+  left: auto;
+  right: 0;
+}
+
+.sysmenu-panel .who {
+  text-align: left;
 }
