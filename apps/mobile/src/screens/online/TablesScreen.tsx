@@ -27,6 +27,8 @@ interface Props {
   onRefresh: () => void
   /** Tocar el nombre abre el perfil (nombre y contraseña). */
   onProfile: () => void
+  /** Mis mundos y el catalogo (entrega 8). */
+  onWorlds: () => void
   onLogout: () => void
   onUnauthorized: () => void
 }
@@ -36,7 +38,7 @@ interface Props {
  * `host` se muestra como anfitrion. Al pie, los amigos fuera de la mesa
  * (solicitudes recibidas, busqueda por correo y lista), como en la web.
  */
-export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, onOpen, onCreate, onRefresh, onProfile, onLogout, onUnauthorized }: Props) {
+export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, onOpen, onCreate, onRefresh, onProfile, onWorlds, onLogout, onUnauthorized }: Props) {
   const nameOf = (id: string) => characterNameFrom(pack, remoteNames, id)
   const sorted = tables ? [...tables].sort((a, b) => Number(b.id) - Number(a.id)) : null
   const activas = sorted?.filter((t) => t.status !== 'archived') ?? null
@@ -59,6 +61,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
       <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.gold} colors={[theme.colors.gold]} progressBackgroundColor={theme.colors.panel} />}>
         <View style={styles.actions}>
           <Button label="Crear mesa" primary onPress={onCreate} />
+          <Button label="Mundos" onPress={onWorlds} />
           <JoinByLink client={client} onOpen={onOpen} onRefresh={onRefresh} />
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}

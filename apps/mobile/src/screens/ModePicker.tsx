@@ -20,7 +20,7 @@ export function ModePicker({ packName, motto, onOnline, onOffline }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       {motto ? <Text style={styles.motto}>{`"${motto}"`}</Text> : null}
-      <Text style={styles.title}>rpg-ngn</Text>
+      <Text style={styles.title}>Ad Astra Mentis</Text>
       <Text style={styles.tagline}>La mesa de rol con DM de inteligencia artificial</Text>
       <View style={styles.rule} />
 

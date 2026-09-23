@@ -50,7 +50,7 @@ export function InviteLink({ client, tableId, tableName }: Props) {
   const compartir = async () => {
     if (!enlace) return
     try {
-      await Share.share({ message: `Te invito a mi mesa "${tableName}" en rpg-worlds. Entra con este enlace: ${enlace}` })
+      await Share.share({ message: `Te invito a mi mesa "${tableName}" en Ad Astra Mentis. Entra con este enlace: ${enlace}` })
     } catch {
       // La hoja de compartir cancelada no es un error.
     }

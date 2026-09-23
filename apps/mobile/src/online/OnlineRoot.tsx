@@ -8,6 +8,7 @@ import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { ProfileScreen } from '../screens/online/ProfileScreen'
 import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { TableScreen } from '../screens/online/TableScreen'
+import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
 import { theme } from '../theme'
 import { storage, type StoredUser } from './storage'
@@ -25,6 +26,7 @@ type Stage =
   | { name: 'forgot' }
   | { name: 'tables' }
   | { name: 'profile' }
+  | { name: 'worlds' }
   | { name: 'new-table' }
   | { name: 'table'; table: TableSummary }
 
@@ -267,7 +269,21 @@ export function OnlineRoot({ pack, onExit }: Props) {
         onCreate={() => setStage({ name: 'new-table' })}
         onRefresh={() => void loadTables(session.client)}
         onProfile={() => setStage({ name: 'profile' })}
+        onWorlds={() => setStage({ name: 'worlds' })}
         onLogout={() => void logout()}
+        onUnauthorized={() => unauthorized()}
+      />
+    )
+  }
+
+  if (stage.name === 'worlds') {
+    return (
+      <WorldsScreen
+        client={session.client}
+        onBack={() => {
+          setStage({ name: 'tables' })
+          void loadTables(session.client)
+        }}
         onUnauthorized={() => unauthorized()}
       />
     )
