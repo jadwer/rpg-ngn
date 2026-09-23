@@ -245,43 +245,41 @@ donde esta cada personaje), `docs/13` 4.10 (lo que se ve en la mesa).
 
 ---
 
-# Retratos de NPC: un prompt maestro por pack y un bloque por personaje
+# Retratos de NPC
 
-Enfoque propuesto por GPT el 22-09, que sustituye a las laminas en rejilla.
-Dos cambios de fondo respecto a lo anterior:
+Faltan nueve retratos: tres de **Los Nueve Viajeros** (el piloto, carpeta
+`content/packs/pilot`) y seis de **El te que nadie probo** (la boticaria,
+carpeta `content/packs/private-botica`; el prefijo `private-` es solo porque
+el pack no se versiona en este repo, docs/07).
 
-1. **Un bloque maestro de estilo que no cambia nunca dentro de un pack**, y un
-   bloque variable por personaje. Asi Maomao y Jinshi no parecen de dos series
-   distintas: el estilo es literalmente el mismo texto.
-2. **Un personaje por imagen, sin marco ni tarjeta.** La carta se monta en el
-   cliente si hace falta; la ilustracion queda reutilizable para ficha,
-   dialogo, seleccion y mapa. Lo que da vida (pose, fondo desenfocado, luz
-   lateral) se conserva; lo que sobra es el marco pintado.
+## Como se usa, en cuatro pasos
 
-El coste: nueve generaciones en vez de dos laminas. A cambio, consistencia
-controlada y cero recorte a ciegas. Los bloques maestros van en ingles porque
-es el idioma con el que los generadores obedecen mejor los terminos de estilo;
-las descripciones de personaje pueden ir en cualquiera de los dos.
+1. **Copia el bloque entero del personaje** que quieras, del primer renglon al
+   ultimo. Cada bloque ya lleva dentro el estilo del pack, la regla de
+   consistencia y la descripcion del personaje: **no hay que juntar nada**.
+2. Pegalo en el generador y pide **una imagen vertical, 1024x1536**.
+3. Guarda la imagen como `<id>.png` en `img/` (por ejemplo `img/LosNueveViajeros/tomas.png`).
+4. Avisame y la recorto al estandar del pack (512x512 WebP) con
+   `crop-portraits.py` y la activo en la ficha.
 
-**Como se usa**: se pega el bloque maestro del pack, debajo el bloque de
-consistencia, y debajo el bloque del personaje. Una imagen por personaje.
+**Por que los nueve bloques empiezan igual**: el estilo esta escrito una sola
+vez por pack y se repite palabra por palabra en cada personaje, a proposito
+(idea de GPT, 22-09). Es lo que hace que Maomao y Jinshi parezcan de la misma
+serie. Si algun dia hay que cambiar el estilo, se cambia en los seis a la vez.
 
-**Como se guarda**: cada imagen se lleva al estandar del pack (512x512 WebP,
-cara y hombros con la cara en el tercio superior) con
-`python3 tools/packs/crop-portraits.py <imagen> <destino> <id> --top 0.10`,
-que con un solo id trata la imagen como lamina de una columna.
+**Por que van sin marco ni tarjeta**: la ilustracion sola sirve para la ficha,
+el dialogo, el selector y el mapa; el marco lo pone el cliente. Lo que da vida
+(la pose, el fondo desenfocado, la luz lateral) esta dentro del prompt.
 
-## Bloque de consistencia (igual para todos los packs)
+**Por que en ingles**: los generadores obedecen mejor los terminos de estilo en
+ingles. Las descripciones de personaje podrian ir en español, pero mezclar
+idiomas en un mismo prompt suele salir peor.
 
-```text
-CHARACTER DESIGN CONSISTENCY:
-All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
-```
+## El te que nadie probo (`private-botica`)
 
-## Bloque maestro: `private-botica` (anime de novela ligera)
+Destino de los recortes: `~/dev/rpg-packs/boticaria/portraits/`.
 
-Escrito por GPT a partir de la lamina de jugables del pack
-(`img/ElTeQueNadieProbo/characters.png`). Se copia entero y no se toca.
+### Maomao (`maomao`)
 
 ```text
 HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
@@ -303,15 +301,10 @@ The character must communicate their personality through facial expression, post
 Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
 
 NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
-```
 
-### Los seis NPC de la boticaria
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
 
-Destino: `~/dev/rpg-packs/boticaria/portraits/` (el pack vive en su repo
-privado, docs/07). Ids: `maomao`, `jinshi`, `consorte-gyokuyou`,
-`medico-anciano`, `lakan`, `suirei`.
-
-```text
 CHARACTER: Maomao, a nineteen-year-old apothecary from the pleasure district, brought into the inner palace by paths she did not choose. Black hair tied simply with a plain wooden hairpin, small freckles, sharp observant eyes, hands faintly stained by herb dyes. Plain palace servant's outfit with no ornament.
 PERSONALITY AND EXPRESSION: Analytical and awake, never smiling. She looks like she is examining evidence and noticing what everyone else missed.
 POSE / ACTION: Three-quarter view. She holds a small glass vial up toward the lantern light and studies it with narrowed eyes. A thin bandage is visible on one forearm.
@@ -319,7 +312,32 @@ CLOTHING: Simple layered servant's hanfu in muted jade green and gray, practical
 ACCESSORIES: Wooden hairpin, a small herb pouch at the waist, no jewelry.
 ```
 
+### Jinshi (`jinshi`)
+
 ```text
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
+
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
+
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
+
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
+
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
+
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
+
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Jinshi, a high-ranking official of the inner palace, young, of a beauty so striking it makes people uncomfortable to look at him directly. Long perfectly kept black hair, pale refined features, elegant posture.
 PERSONALITY AND EXPRESSION: A gentle, polite smile that never reaches his eyes. He already knows more than he says. Calm, observant, impossible to read.
 POSE / ACTION: Three-quarter view, head slightly tilted toward the viewer. One hand lightly touches the edge of his sleeve, the other rests near his waist. Courtesy with hidden calculation.
@@ -327,7 +345,32 @@ CLOTHING: Dark indigo-black layered court robes of extremely fine silk with subt
 ACCESSORIES: A minimal refined hair ornament, a discreet jade detail. No weapons.
 ```
 
+### Consorte Gyokuyou (`consorte-gyokuyou`)
+
 ```text
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
+
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
+
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
+
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
+
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
+
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
+
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Consort Gyokuyou, one of the highest-ranking consorts, around twenty-five. Green eyes, reddish hair pinned with jade and gold hairpins, a face that gives nothing away.
 PERSONALITY AND EXPRESSION: Serene, cold and very aware of being watched. A cool head that has just seen its unbreakable routine broken.
 POSE / ACTION: Frontal pose, seated upright. She holds a cup of tea in both hands without drinking, looking straight at the viewer.
@@ -335,7 +378,32 @@ CLOTHING: Richly embroidered silk hanfu in lacquer red and gold, layered, immacu
 ACCESSORIES: Jade and gold hairpins, a pair of earrings, a fan folded in her lap.
 ```
 
+### El medico anciano (`medico-anciano`)
+
 ```text
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
+
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
+
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
+
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
+
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
+
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
+
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: The old court physician, about seventy. Sparse white beard, an official's cap, small round spectacles, a face that has spent forty years learning what really kills in a court.
 PERSONALITY AND EXPRESSION: Tired, prudent, watchful. He counts what goes missing and does not report it.
 POSE / ACTION: Three-quarter view. He writes in a ledger with a visibly trembling hand while his eyes stay steady on the page.
@@ -343,7 +411,32 @@ CLOTHING: Plain gray official's robe, worn but clean.
 ACCESSORIES: Spectacles, a brush, a numbered medicine jar beside him.
 ```
 
+### Lakan (`lakan`)
+
 ```text
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
+
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
+
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
+
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
+
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
+
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
+
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Lakan, chief strategist of the outer court, about forty. Round thin-rimmed spectacles, hair carelessly half tied, a court robe put on without care.
 PERSONALITY AND EXPRESSION: Absent, looking through whoever stands in front of him. He sees people as pieces on a board.
 POSE / ACTION: Three-quarter view. He holds a single game piece between two fingers, examining it, not the viewer.
@@ -351,7 +444,32 @@ CLOTHING: Official's robe in muted ochre and brown, slightly disheveled, sash lo
 ACCESSORIES: Spectacles, a xiangqi game piece, no jewelry.
 ```
 
+### Suirei (`suirei`)
+
 ```text
+HIGH-QUALITY JAPANESE ANIME CHARACTER ILLUSTRATION, imperial Chinese court setting, light-novel character art.
+
+Elegant Japanese anime illustration with clean and confident linework, highly detailed expressive eyes, refined facial features, delicate anime proportions, polished cel shading combined with soft painterly gradients, rich but controlled colors, subtle highlights on hair and silk, detailed traditional Chinese imperial clothing and embroidery.
+
+The visual language must feel like a premium Japanese light novel illustration set in a classical imperial Chinese court: sophisticated, elegant, mysterious and slightly dramatic. NOT photorealistic. NOT western comic art. NOT realistic concept art. NOT chibi. NOT generic fantasy anime. It should feel like a professionally illustrated Japanese light novel character from the same fictional universe as the reference image.
+
+Warm illumination from traditional Chinese paper lanterns, with soft amber highlights and gentle shadows. Color palette based on lacquer red, jade green, muted indigo, warm gold, ivory, dark brown and charcoal. Skin tones natural and softly shaded.
+
+Character portrait from approximately the waist up. Character centered in the composition, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Elegant posture and expressive body language.
+
+Background strongly out of focus with shallow depth of field. It should only suggest the interior of an imperial Chinese palace: blurred wooden lattice screens, red architectural columns, distant paper lanterns, soft flowering plum branches and warm architectural shapes. No recognizable objects competing with the character. The background exists only to establish atmosphere and depth.
+
+Highly detailed hair with individual strands, traditional Chinese hairstyle appropriate to social status, subtle jewelry when appropriate, historically inspired hanfu or imperial Chinese robes, layered silk fabrics, embroidered patterns, realistic folds and delicate ornamental details.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, polished anime illustration, cinematic composition, sophisticated color grading, beautiful face, expressive eyes, intricate costume design, soft atmospheric depth, elegant imperial Chinese aesthetic.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Suirei, a lady-in-waiting of about twenty-five with a completely expressionless face, black hair pulled straight and tight, the careful hands of someone who works with herbs.
 PERSONALITY AND EXPRESSION: Still, silent, almost without presence. She knows more about herbs than her position explains.
 POSE / ACTION: Frontal pose. She holds a lacquered tray with both hands, perfectly still, eyes lowered but not submissive.
@@ -359,11 +477,11 @@ CLOTHING: Plain dark servant's hanfu, no ornament, in muted purple-gray.
 ACCESSORIES: None visible. Clean, cared-for hands.
 ```
 
-## Bloque maestro: `pilot` (pintura semirrealista de fantasia)
+## Los Nueve Viajeros (`pilot`)
 
-Escrito con la misma estructura, a partir de los retratos de los jugables
-(`content/packs/pilot/portraits/`, por ejemplo `calder.jpg`). Se copia entero
-y no se toca.
+Destino de los recortes: `content/packs/pilot/portraits/`.
+
+### Tomas (`tomas`)
 
 ```text
 HIGH-QUALITY PAINTED FANTASY CHARACTER ILLUSTRATION, low-fantasy mountain village setting, tabletop roleplaying manual character art.
@@ -383,13 +501,10 @@ The character must communicate their personality through facial expression, post
 Premium character artwork, painterly illustration, cinematic composition, sober color grading, expressive weathered face, atmospheric depth.
 
 NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
-```
 
-### Los tres NPC de Valdoria
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
 
-Destino: `content/packs/pilot/portraits/`. Ids: `tomas`, `bren`, `osric`.
-
-```text
 CHARACTER: Tomas, the inn's serving boy, about twenty, thin, with unkempt dark hair and deep shadows under his eyes from not sleeping. He recognizes the Nine Travelers even though the village has forgotten them.
 PERSONALITY AND EXPRESSION: Contained fear he is trying to hide. He watches the door more than the tables.
 POSE / ACTION: Three-quarter view. He holds a half-poured jug and glances sideways toward the door, as if keeping watch.
@@ -397,7 +512,30 @@ CLOTHING: Dirty linen shirt, a serving apron, worn wool trousers.
 ACCESSORIES: The jug, a rag tucked in the apron. No jewelry.
 ```
 
+### Bren (`bren`)
+
 ```text
+HIGH-QUALITY PAINTED FANTASY CHARACTER ILLUSTRATION, low-fantasy mountain village setting, tabletop roleplaying manual character art.
+
+Semi-realistic digital painting with visible confident brushwork, high detail in the face and in worn fabrics, natural proportions, soft painterly shading with strong value contrast. NOT photorealistic. NOT anime. NOT cartoon. NOT comic book. NOT chibi. The point between realism and illustration, clearly painted, like a character portrait in a premium tabletop roleplaying sourcebook. It should feel like it belongs to the same fictional universe as the reference image.
+
+Cool night illumination in muted blue and slate gray, with a single warm source of lantern or hearth light striking the face from one side. Color palette based on earth brown, slate gray, muted pine green, iron, dirty linen and the amber of firelight. Skin weathered and naturally shaded.
+
+Character portrait from approximately the waist up. Character centered, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Posture and hands that say who this person is.
+
+Background strongly out of focus with shallow depth of field: only the suggestion of a low-beamed inn interior, firelight, rough stone, wet night air. No recognizable objects competing with the character.
+
+Clothing of a poor mining village: worn wool, leather, linen, patched and practical. No armor, no weapons, no magic, no fantasy races.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, painterly illustration, cinematic composition, sober color grading, expressive weathered face, atmospheric depth.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Bren, who runs the inn and keeps the guest register, about forty-five, sturdy, hair pinned up with gray strands loose.
 PERSONALITY AND EXPRESSION: Direct, evaluating, mouth closed. Courteous until she stops being courteous. She writes everything down and shows nothing.
 POSE / ACTION: Frontal pose. One open hand rests flat on a thick leather-bound register as if guarding it; she looks straight at the viewer.
@@ -405,7 +543,30 @@ CLOTHING: Brown wool dress with a work apron, sleeves rolled.
 ACCESSORIES: The register, a ring of keys at the waist.
 ```
 
+### Osric (`osric`)
+
 ```text
+HIGH-QUALITY PAINTED FANTASY CHARACTER ILLUSTRATION, low-fantasy mountain village setting, tabletop roleplaying manual character art.
+
+Semi-realistic digital painting with visible confident brushwork, high detail in the face and in worn fabrics, natural proportions, soft painterly shading with strong value contrast. NOT photorealistic. NOT anime. NOT cartoon. NOT comic book. NOT chibi. The point between realism and illustration, clearly painted, like a character portrait in a premium tabletop roleplaying sourcebook. It should feel like it belongs to the same fictional universe as the reference image.
+
+Cool night illumination in muted blue and slate gray, with a single warm source of lantern or hearth light striking the face from one side. Color palette based on earth brown, slate gray, muted pine green, iron, dirty linen and the amber of firelight. Skin weathered and naturally shaded.
+
+Character portrait from approximately the waist up. Character centered, occupying most of the vertical frame. Face positioned around the upper third. Three-quarter view or frontal pose. Clear silhouette. Posture and hands that say who this person is.
+
+Background strongly out of focus with shallow depth of field: only the suggestion of a low-beamed inn interior, firelight, rough stone, wet night air. No recognizable objects competing with the character.
+
+Clothing of a poor mining village: worn wool, leather, linen, patched and practical. No armor, no weapons, no magic, no fantasy races.
+
+The character must communicate their personality through facial expression, posture, hands and small gestures rather than through exaggerated action.
+
+Premium character artwork, painterly illustration, cinematic composition, sober color grading, expressive weathered face, atmospheric depth.
+
+NO TEXT, NO NAME, NO LETTERS, NO NUMBERS, NO LABELS, NO UI, NO LOGOS, NO WATERMARK, NO CHARACTER CARD, NO DECORATIVE FRAME.
+
+CHARACTER DESIGN CONSISTENCY:
+All characters belong to the same fictional universe. Maintain the same facial rendering, eye design, line quality, color grading, lighting model, anatomy, costume detailing and overall illustration quality across every character. Characters must look like they were illustrated by the same artist for the same series.
+
 CHARACTER: Osric, the mine foreman, about sixty, weathered face, several days of unkempt gray beard, a man who has been shut in his house for eight days with the light on. Thirty years ago he went down the shaft with a bronze bell and came up alone.
 PERSONALITY AND EXPRESSION: Exhausted and sleepless, with the eyes of someone who has not opened the door to anyone. Guilt, not anger.
 POSE / ACTION: Three-quarter view. He holds a lantern low, so it lights his face from below, and looks slightly past the viewer.
