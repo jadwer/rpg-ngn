@@ -284,11 +284,15 @@ apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
 web, que es el producto principal.
 
 **Y despues de estos bloques, el rumbo que fijo Gabino el 23-09** para llegar
-a produccion: (1) **Entrega 8**, comunidad y repositorio de packs (terminar de
-analizar y completar `docs/15`, con la subida binaria E2, las fichas por API
-E3 y la procedencia como lo que puede doler); (2) **Stripe en real**; (3)
-varias vueltas de analisis y una **beta cerrada con amigos creadores de
-contenido** que den opiniones reales; y ya, produccion.
+a produccion, corregido esa tarde con los docs 23 y 24: (1) **resto de la
+Entrega 8** (pantalla de revision, visor del pack, `pack.sh`; E2 y E3 ya
+estan); (2) **Stripe en real**, compuerta y tarea de Gabino; (3) **embudo en
+SQL y cronica compartible** (`docs/24`, secciones 4 y 5), que se pueden
+construir mientras Stripe se resuelve; (4) **beta cerrada con amigos creadores
+de contenido**; (5) **Entrega 9, catalogo y pase de historias**, con el
+bosquejo del catalogo que trae Gabino; y ya, produccion. **Steam y Epic:
+diferidos** hasta product-market fit (`docs/23`, con las cuatro condiciones
+para reabrirlo).
 
 **Lo que el VAM tumbo del plan original**: "visual primero y cuenta atras
 despues" (era la misma cosa partida en dos y en el orden equivocado); "paleta"
@@ -330,12 +334,33 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
 - [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
 - [x] **Fichas completas por API** (23-09, E3 del VAM): el engine expone `GET /v1/packs/:id/:version/sheets` (fichas y sesiones), la API lo releva con cache y la web y la app lo piden cuando el pack no viene empaquetado; los retratos salen de la API. La logica de que se ve de cada personaje vive en ui-logic (`sheet-source.ts`) con una fuente comun para el pack empaquetado y para la respuesta de la API. Probado en local (boticaria) y en produccion (La Mascarada, mesa temporal borrada). De paso, una Armadura sin valor se pinta con ? en vez de null
 - [ ] Pantalla de revision (hoy `packs:review` por SSH), visor del pack antes de activarlo, y `tools/packs/pack.sh` que valide y arme el `.rpgpack`
+- El catalogo que hay hoy (lista con "añadir a mis mundos") es la primera version; **se rediseña como escaparate en la Entrega 9**
 - **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
 - Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
 - Takedown y aviso de descarga externa
 - Texto de pack como contenido no confiable en el contexto del DM
 - Informacion asimetrica para packs de deduccion social (issue #2, analisis de GPT del 2026-09-18). Verificado contra el codigo el 2026-09-19 (VAM, reproducido con el reductor): `visibility.layer` existe, `visibleTo()` la respeta y el feed de eventos la filtra en la API (`CampaignEvent::scopeVisibleToPlayers`). Lo que NO la respeta es el reductor: `appendLog` no consulta `visibility`, asi que un evento de capa `dm` entra en `narrative.log` y la proyeccion `narrative` lo sirve a toda la mesa; y `worldProjection` devuelve el estado vivo completo de todos los personajes (`inventory`, `custom`) a cualquier miembro. Hoy nadie emite eventos `dm` y ningun cliente lee esas proyecciones, asi que es trampa armada, no fuga activa. Antes de cualquier pack con roles ocultos hay que cerrar las dos cosas (rpg-ngn-api/docs/vam-2026-09-19.md, S14 y E1). Lo que ademas falta es el modelo de audiencias mas alla de `table`/`host` (por personaje, por rol, por faccion), y se diseña con un pack concreto delante, no antes. Reuniones, votos y condiciones de victoria quedan para v2 si algun pack los pide
 - Principio de coste que manda sobre el diseño (del mismo issue): las llamadas al proveedor escalan con eventos del mundo, no con el numero de jugadores. Cinco jugadores que ven la misma explosion son una generacion narrativa y cinco proyecciones deterministas. A 0.019 USD por turno medidos, la version ingenua multiplica el coste por jugador y ahi no hay negocio
+
+## Entrega 9: Catalogo y pase de historias (decidida el 2026-09-23)
+
+Diseño y numeros en `docs/24`. Va despues de Stripe en real y de la beta
+cerrada: sin cobro vivo el pase no cobra, y sin embudo no se fijan precios
+ni umbrales. El diseño visual del catalogo lo trae Gabino (bosquejo de GPT,
+como la portada).
+
+- [ ] **9a. Catalogo como escaparate**: tabla `catalog_worlds` (portada, titulo, genero, etiquetas de tono, jugadores y duracion, autor, sinopsis sin spoilers, precio nulo o en centavos, origen oficial o comunidad) apuntando a una version de pack inmutable; `pack_activations.source` (gratis, desbloqueo, pase, compra, creador); `GET /api/v1/catalog/worlds` **publico** con filtros y paginacion (sin cuenta se ve; jugar pide cuenta); `/mundos` rediseñado con los estados de tarjeta de `docs/24` seccion 3 y "Jugar" que crea la mesa
+- [ ] **9b. Capitulos y camino de temporada**: ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
+- [ ] **9c. Pase de temporada**: compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
+- [ ] **9d. Compra directa de un mundo**: solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
+- [ ] **Cronica compartible** (adelantada al rumbo, `docs/24` seccion 4): exportacion presentable, enlace publico con consentimiento de todos los miembros, anonimizacion opcional, retirada por cualquiera. Cierra tambien "Cronica publica de la campaña" de la entrega 5b
+
+**Que se copia para el catalogo** (inventario del 23-09, nada de esto esta instalado en rpg-ngn):
+
+- `~/dev/AtomoSoluciones/base/webapp-base/packages/ecommerce/src/public-catalog/`: mismo stack (Next 15, SWR, CSS Modules). Grid, tarjeta, filtros, paginacion, detalle y buscador; hooks con SWR inmutable; capa `services/transform` que separa JSON:API del modelo de UI; tests reales, incluido el fallback de SSR. De `components/`, `WishlistButton.tsx` como patron del boton "añadir a mis mundos". Se adapta: mundo en vez de producto, sin carrito ni multimoneda
+- `~/dev/AtomoSoluciones/base/api-base/Modules/Product/routes/public.php` y `PublicProductSchema.php`: servidor JSON:API publico aparte, filtro de visibilidad, busqueda, filtros multiples por coma, slug y paginacion con tope
+- AtomoPlatform (`atomo-product`, `atomo-ecommerce`, `atomo-editorial`): modelos de wishlist, reseñas y colecciones, pero todo autenticado, UI de back-office y solo smoke tests. **No se instala ninguno**: sirve el patron; de Atomo solo se usa `atomo/payments`
+- No existe en ningun lado y se escribe nuevo: etiquetas libres, estado de mundo por usuario, ledger de capitulos, temporadas
 
 ## Deuda tecnica (sin entrega asignada)
 

@@ -183,6 +183,18 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 - **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
   para imprenta, y el nombre en la app (`android.package`).
 
+### Rumbo comercial (23-09, docs 23 y 24)
+
+- **Steam y Epic, diferidos** hasta product-market fit, con cuatro
+  condiciones medibles para reabrirlo (`docs/23`, ADR).
+- **Pase de historias** (`docs/24`): los mundos oficiales se desbloquean
+  jugando (capitulos, tambien como invitado), con un pase de temporada de
+  compra unica que acelera y compra directa de mundos originales. Los turnos
+  siguen siendo el combustible y el pase nunca los regala. Es la Entrega 9,
+  despues de Stripe en real y de la beta.
+- **Posicionamiento**: "historias", con llamados a la accion para quien lee
+  novela ligera y para quien juega rol.
+
 ### Retratos y NPC
 
 - **Los tres packs tienen todos sus NPC con retrato** (22-09): 3 en el piloto,
