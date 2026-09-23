@@ -217,7 +217,16 @@ visor, revision; subir sigue en la web). Dos fallos de paso: el enlace de
 invitar de la app apuntaba a `/movil/unirse` (404) y los retratos remotos
 iban con ruta relativa. **Sin verificar en un telefono**: typecheck, tests y
 bundle de Android en verde; falta que Gabino lo mire en Expo Go. Con la
-cabecera de escena (`1dfbf96`) la app tiene todo lo de B1. Lo que se
+cabecera de escena (`1dfbf96`) la app tiene todo lo de B1. **Tarde del
+23-09, con Gabino en el telefono** (`cbebdf5` a `ac034f4`): portada segun
+`img/branding/concepto home.png`, splash con el isotipo, e interfaz con el
+sistema de `img/ideas_movil.png` (Inter para UI, serif para titulos y
+narracion, pildora del turno, cuadro "¿Que hace tu personaje?", Jugadores
+con retrato redondo y check). El velo olivo de los campos era el
+autocompletado de Android: en Expo Go se apaga con `isRunningInExpoGo`, en
+la app instalada lo quita `plugins/withNoAutofillHighlight.js`. **Falta del
+concepto**: la ficha con barras de vida y PE y las pestañas Inventario,
+Habilidades y Rasgos. Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
