@@ -4,6 +4,7 @@ import { characterNameFrom, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { FriendsPanel } from '../../components/FriendsPanel'
+import { JoinByLink } from '../../components/JoinByLink'
 import { Portrait } from '../../components/Portrait'
 import type { StoredUser } from '../../online/storage'
 import { theme } from '../../theme'
@@ -53,6 +54,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
       <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.gold} colors={[theme.colors.gold]} progressBackgroundColor={theme.colors.panel} />}>
         <View style={styles.actions}>
           <Button label="Crear mesa" primary onPress={onCreate} />
+          <JoinByLink client={client} onOpen={onOpen} onRefresh={onRefresh} />
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {tables === null && loading ? (
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
   title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
   who: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, minWidth: 64, maxWidth: 140, textAlign: 'right', textDecorationLine: 'underline' },
   list: { padding: 16, paddingBottom: 40, gap: 10 },
-  actions: { flexDirection: 'row', justifyContent: 'flex-start' },
+  actions: { gap: 10 },
   center: { alignItems: 'center', padding: 24, gap: 10 },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
   error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger, textAlign: 'center' },

@@ -7,6 +7,7 @@ import { theme } from '../theme'
 import { Button } from './Button'
 import { DiceModePanel } from './DiceModePanel'
 import { DmSettingsPanel } from './DmSettingsPanel'
+import { InviteLink } from './InviteLink'
 import { InvitePanel } from './InvitePanel'
 
 interface Props {
@@ -141,6 +142,8 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+            {/* El enlace primero: es la via rapida y la que no pide amistad. */}
+            <InviteLink client={client} tableId={table.id} tableName={table.name} />
             <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </ScrollView>
         </View>

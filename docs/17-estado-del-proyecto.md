@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 20:05 CST**. Rama `dev`, commit `d7ba867`.
+Fecha de corte: **2026-09-22, 21:10 CST**. Rama `dev`, commit `8b2ef93`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -165,8 +165,12 @@ amistades de por medio.
 - **Entrar y crear cuenta aceptan un destino de vuelta**, validado para que
   solo pueda ser una ruta interna.
 - **La amistad se queda** para invitar a mano; deja de ser obligatoria.
+- **En la app tambien**: el anfitrion comparte el enlace con la hoja nativa y
+  el invitado lo pega en "Tengo un enlace" (vale la URL o solo el codigo).
 
 ### Retirar una mesa (22-09)
+
+**Solo en la web por ahora**; en la app falta (pendiente de paridad).
 
 - **Archivar**: la saca de la lista y la deja plegada al final, sin tocar la
   cronica. Es lo normal: una partida jugada tambien es de los demas jugadores.
