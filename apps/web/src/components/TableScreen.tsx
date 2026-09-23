@@ -58,6 +58,28 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [panel, setPanel] = useState<GamePanel | null>(null)
   const sheetsOpen = panel === 'sheets'
   const togglePanel = (next: GamePanel) => setPanel((current) => (current === next ? null : next))
+
+  // Los paneles entran en el historial del navegador: en el telefono "atras"
+  // cierra el panel en vez de sacar de la mesa, y "adelante" lo reabre. Abrir
+  // apila una entrada; cambiar de panel la sustituye; cerrar desde el boton la
+  // retira con back(), y el popstate que provoca deja el estado como esta.
+  const panelRef = useRef<GamePanel | null>(null)
+  useEffect(() => {
+    const previous = panelRef.current
+    panelRef.current = panel
+    const state = window.history.state as { rpgPanel?: GamePanel } | null
+    if (panel && !previous) window.history.pushState({ ...(state ?? {}), rpgPanel: panel }, '')
+    else if (panel && previous && panel !== previous) window.history.replaceState({ ...(state ?? {}), rpgPanel: panel }, '')
+    else if (!panel && previous && state?.rpgPanel) window.history.back()
+  }, [panel])
+  useEffect(() => {
+    const onPop = (event: PopStateEvent) => {
+      const state = event.state as { rpgPanel?: GamePanel } | null
+      setPanel(state?.rpgPanel ?? null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [worldTime, setWorldTime] = useState<string | null>(null)

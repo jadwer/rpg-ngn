@@ -3150,3 +3150,10 @@ a {
 .sysmenu-panel .who {
   text-align: left;
 }
+
+/* Los paneles del juego van por encima de la cabecera de la mesa: la cabecera
+   tapaba su fila de "Cerrar" en el telefono (Gabino, 23-09). El menu del sitio
+   (12) y el mapa (50) siguen encima de ellos. */
+.aside {
+  z-index: 9;
+}
