@@ -15,6 +15,8 @@ import { CharacterPicker } from './CharacterPicker'
 import { Drawer } from './Drawer'
 import { GameBar, type GamePanel } from './GameBar'
 import { HostPanel } from './HostPanel'
+import { InviteLink } from './InviteLink'
+import { InvitePanel } from './InvitePanel'
 import { MapPanel } from './MapPanel'
 import { PersonaPanel } from './PersonaPanel'
 import { PlayersPanel } from './PlayersPanel'
@@ -242,8 +244,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   )
 
   const seatList = useMemo(
-    () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, viewerMemberId: viewer.memberId, nameOf }),
-    [table.members, turn, snapshot?.typing, snapshot?.narrators, viewer.memberId, nameOf],
+    () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: viewer.memberId, nameOf }),
+    [table.members, turn, snapshot?.typing, snapshot?.narrators, snapshot?.away, viewer.memberId, nameOf],
   )
   const seatsLine = seatsSummary(seatList)
 
@@ -448,6 +450,14 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       refresh()
     }, 'No se pudo cambiar tu presencia.')
   }
+  /** El anfitrion marca ausente (o presente) a quien se fue sin avisar. */
+  const setMemberPresence = (memberId: string, present: boolean) => {
+    void act(async () => {
+      await client.setPresence(table.id, memberId, present)
+      onTableChanged()
+      refresh()
+    }, 'No se pudo cambiar la presencia.')
+  }
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), 'No se pudo abrir la sesión.')
   }
@@ -543,15 +553,56 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             Bajar a lo nuevo
           </button>
         ) : null}
-        {sheetsOpen && !screen ? <SheetsPanel entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} onClose={() => setPanel(null)} /> : null}
-        {panel === 'players' && !screen ? <PlayersPanel seats={seatList} portraitOf={portraitOf} ownPresent={ownMember && ownMember.characterId && snapshot?.session ? ownMember.present !== false : null} busy={busy} onTogglePresence={togglePresence} onClose={() => setPanel(null)} /> : null}
+        {sheetsOpen && !screen ? (
+          <SheetsPanel
+            entries={entries}
+            footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'}
+            persona={
+              wantsPersona && viewer.characterId !== null && snapshot !== null ? (
+                <PersonaPanel
+                  characterName={nameOf(viewer.characterId)}
+                  saved={snapshot.viewer?.persona ?? null}
+                  busy={busy}
+                  onSave={(persona) =>
+                    act(async () => {
+                      await client.setPersona(table.id, viewer.memberId, persona)
+                      refresh()
+                    }, 'No se pudo guardar la personalidad.')
+                  }
+                />
+              ) : undefined
+            }
+            onClose={() => setPanel(null)}
+          />
+        ) : null}
+        {panel === 'players' && !screen ? (
+          <PlayersPanel
+            seats={seatList}
+            portraitOf={portraitOf}
+            ownPresent={ownMember && ownMember.characterId && snapshot?.session ? ownMember.present !== false : null}
+            isHost={isHost}
+            busy={busy}
+            onTogglePresence={togglePresence}
+            onPresence={setMemberPresence}
+            invite={
+              isHost ? (
+                <>
+                  {/* El enlace primero: es la via rapida y la que no pide amistad. */}
+                  <InviteLink client={client} tableId={table.id} />
+                  <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                </>
+              ) : undefined
+            }
+            onClose={() => setPanel(null)}
+          />
+        ) : null}
         {panel === 'host' && isHost && !screen ? (
           <Drawer title="Anfitrión" onClose={() => setPanel(null)} className="host-drawer">
-            <HostPanel embedded client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Drawer>
         ) : null}
         {panel === 'more' && !screen ? (
-          <Drawer title="Más" onClose={() => setPanel(null)} className="more-drawer">
+          <Drawer title="Lectura" onClose={() => setPanel(null)} className="more-drawer">
             <div className="stack">
               <div className="label" style={{ marginTop: 0 }}>
                 Vista
@@ -595,22 +646,6 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 </button>
                 <span className="hint">Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).</span>
               </div>
-              {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
-                <>
-                  <div className="label">Tu personaje</div>
-                  <PersonaPanel
-                    characterName={nameOf(viewer.characterId)}
-                    saved={snapshot.viewer?.persona ?? null}
-                    busy={busy}
-                    onSave={(persona) =>
-                      act(async () => {
-                        await client.setPersona(table.id, viewer.memberId, persona)
-                        refresh()
-                      }, 'No se pudo guardar la personalidad.')
-                    }
-                  />
-                </>
-              ) : null}
             </div>
           </Drawer>
         ) : null}

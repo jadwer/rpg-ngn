@@ -19,6 +19,8 @@ export interface TableSnapshot {
   narrators: TableState['narrators']
   /** Quien esta tecleando su respuesta ahora mismo. */
   typing: TableState['typing']
+  /** Quien tuvo que irse, en vivo. */
+  away: TableState['away']
   /** Todos los bloques recibidos hasta ahora, en orden. Misma referencia mientras no lleguen nuevos. */
   envelopes: BlockEnvelope[]
   lastBlockId: number
@@ -66,7 +68,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

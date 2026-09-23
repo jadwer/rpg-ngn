@@ -135,6 +135,16 @@ congelamiento visual el 22-09:
 Probado en local con tres cuentas a la vez y en produccion con una mesa
 temporal a 1280 y 390. **Pendiente: la misma composicion en la app.**
 
+**Bloques de cada menu, reordenados (23-09, D-UX-7)** tras la primera prueba
+de Gabino en el telefono: invitar y la presencia de los demas en Jugadores;
+la personalidad dentro de la propia ficha; "Mas" pasa a "Lectura"; Anfitrion
+en dos pestañas (Sesion y Ajustes de la mesa); el menu del sitio dice lo que
+abre (Mi cuenta y creditos, Voz). **Fallo real corregido**: el modo de dados
+no se podia guardar en la web porque el "Guardar" del director solo se
+encendia al cambiar el proveedor; ahora dados y secretos guardan al elegir.
+De paso, el estado de la mesa lleva `away` (quien tuvo que irse) para que los
+demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
+
 ### Retratos y NPC
 
 - **Los tres packs tienen todos sus NPC con retrato** (22-09): 3 en el piloto,

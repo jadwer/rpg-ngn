@@ -2,7 +2,9 @@
 
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState, type FormEvent } from 'react'
+import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
+import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
 import { useSession } from '../../lib/session'
@@ -12,7 +14,12 @@ export default function ProfilePage() {
   return <RequireSession>{({ client, user, unauthorized, logout }) => <Profile client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
 }
 
-/** Perfil: nombre visible, correo y contraseña. Cambiar el correo lo deja sin verificar. */
+/**
+ * Mi cuenta: quien soy (nombre, correo, contraseña), mi dinero (creditos y
+ * clave propia) y borrar la cuenta. La voz de lectura va en /ajustes, que es
+ * del navegador y no de la cuenta (docs/18, D-UX-7). Cambiar el correo lo
+ * deja sin verificar.
+ */
 function Profile({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
   const session = useSession()
   const [name, setName] = useState(user.name)
@@ -71,7 +78,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
 
   return (
     <main className="page narrow">
-      <UserBar title="Tu perfil" user={user} onLogout={logout} />
+      <UserBar title="Mi cuenta" user={user} onLogout={logout} />
 
       <form className="card stack" onSubmit={(e) => void saveName(e)}>
         <div className="label" style={{ marginTop: 0 }}>
@@ -123,6 +130,10 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
           <span className="hint">Al menos 8 caracteres.</span>
         </div>
       </form>
+
+      <CreditsPanel client={client} unauthorized={unauthorized} />
+
+      <OwnKeys client={client} unauthorized={unauthorized} />
 
       <DeleteAccount client={client} onDeleted={logout} />
     </main>

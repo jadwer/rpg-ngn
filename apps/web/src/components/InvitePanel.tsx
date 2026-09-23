@@ -2,10 +2,9 @@
 
 import { ApiError, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
+import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CharacterPicker } from './CharacterPicker'
-import { Portrait } from './Portrait'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 
 interface Props {
@@ -22,7 +21,8 @@ interface Props {
  * Invitar amigos por correo. La API exige amistad aceptada antes de invitar
  * (docs/09, "Auth: la mesa es un contrato"), asi que aqui se ve en que punto
  * esta cada amistad, se aceptan las pendientes propias y se invita con
- * personaje cuando ya son amigos.
+ * personaje cuando ya son amigos. Quien ya esta en la mesa y su presencia se
+ * ven en Jugadores, no aqui (docs/18, D-UX-7).
  */
 export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthorized }: Props) {
   const [friendships, setFriendships] = useState<Friendship[]>([])
@@ -130,31 +130,6 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
   return (
     <div className="invite stack">
-      <div>
-        <div className="label" style={{ marginTop: 0 }}>
-          En la mesa
-        </div>
-        <div className="members">
-          {table.members.map((member) => (
-            <div key={member.id} className="member">
-              <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} />
-              <span>{memberLine(member, nameOf)}</span>
-              {member.characterId ? (
-                <button
-                  type="button"
-                  className="btn ghost small"
-                  disabled={busy}
-                  title={member.present === false ? 'Vuelve a contar para el turno' : 'Si tuvo que irse: la mesa no lo espera y el DM lo aparta sin matarlo'}
-                  onClick={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))}
-                >
-                  {member.present === false ? 'Marcar presente' : 'Marcar ausente'}
-                </button>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {pending.length > 0 ? (
         <div>
           <div className="label">Solicitudes de amistad pendientes</div>
@@ -174,7 +149,9 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       ) : null}
 
       <div>
-        <div className="label">Invitar por correo</div>
+        <div className="label" style={{ marginTop: pending.length > 0 ? undefined : 0 }}>
+          Invitar por correo
+        </div>
         <form
           className="row"
           onSubmit={(e) => {

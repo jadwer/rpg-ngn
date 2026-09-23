@@ -1,17 +1,14 @@
 'use client'
 
-import type { ApiClient } from '@rpg-ngn/api-client'
 import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
-import { CreditsPanel } from '../../components/CreditsPanel'
-import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
 import type { StoredUser } from '../../lib/storage'
 import { useTts } from '../../lib/useTts'
 
 export default function SettingsPage() {
-  return <RequireSession>{({ client, user, unauthorized, logout }) => <Settings client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
+  return <RequireSession>{({ user, logout }) => <Settings user={user} logout={logout} />}</RequireSession>
 }
 
 /** La prueba lee narracion, un dialogo de la party y uno de un NPC, para oir los tres tonos. */
@@ -22,19 +19,19 @@ const SAMPLE = [
 ]
 
 /**
- * Ajustes del usuario: voz por defecto, idioma de lectura, velocidad, tono
- * del narrador y lectura automatica. Viven en localStorage (son del
- * navegador, no de la cuenta); la barra de voz de la mesa es el acceso
- * rapido a los mismos.
+ * Voz: voz por defecto, idioma de lectura, velocidad, tono del narrador y
+ * lectura automatica. Viven en localStorage (son del navegador, no de la
+ * cuenta); la barra de voz de la mesa es el acceso rapido a los mismos. Los
+ * creditos y la clave propia estan en /perfil (docs/18, D-UX-7).
  */
-function Settings({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
+function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
   const blocks = useMemo(() => SAMPLE, [])
   const tts = useTts(blocks)
   const speaking = tts.state.status === 'speaking'
 
   return (
     <main className="page narrow">
-      <UserBar title="Ajustes" user={user} onLogout={logout} />
+      <UserBar title="Voz" user={user} onLogout={logout} />
 
       <section className="card stack">
         <div className="label" style={{ marginTop: 0 }}>
@@ -108,10 +105,6 @@ function Settings({ client, user, unauthorized, logout }: { client: ApiClient; u
           {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">Se guarda en este navegador.</span>}
         </div>
       </section>
-
-      <CreditsPanel client={client} unauthorized={unauthorized} />
-
-      <OwnKeys client={client} unauthorized={unauthorized} />
     </main>
   )
 }

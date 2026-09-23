@@ -54,10 +54,10 @@ export function SystemMenu({ user, onLogout }: Props) {
             Nueva mesa
           </Link>
           <Link role="menuitem" href="/perfil" onClick={() => setOpen(false)}>
-            Perfil y créditos
+            Mi cuenta y créditos
           </Link>
           <Link role="menuitem" href="/ajustes" onClick={() => setOpen(false)}>
-            Ajustes de voz
+            Voz
           </Link>
           {onLogout ? (
             <button

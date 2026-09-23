@@ -144,16 +144,20 @@ meta en una mesa. No hay invitación por enlace.
 Es la pantalla donde se juega. Recompuesta el 23-09 (`docs/18`, D-UX-6),
 de arriba abajo:
 
-- **Cabecera**: menú del sitio (hamburguesa: mesas, perfil, ajustes, salir),
-  nombre de la mesa y sesión, y en escritorio la **barra del juego**: fichas,
-  mapa, jugadores, anfitrión, más. En el teléfono esa barra va al pie.
+- **Cabecera**: menú del sitio (hamburguesa: mesas, nueva mesa, mi cuenta y
+  créditos, voz, salir), nombre de la mesa y sesión, y en escritorio la
+  **barra del juego**: fichas, mapa, jugadores, anfitrión, lectura. En el
+  teléfono esa barra va al pie. Qué hay dentro de cada panel está decidido en
+  `docs/18`, D-UX-7: la party y tu personalidad en Fichas; quién está, su
+  estado, tu presencia y (para el anfitrión) invitar en Jugadores; dirigir la
+  sesión y los ajustes de la mesa (dados, secretos, director) en Anfitrión;
+  vista, voz y modo pantalla en Lectura.
 - **Cuerpo**: una cabecera de escena (título de la sesión, momento del mundo
   y turno sobre la imagen del pack) y los bloques que ha narrado el director,
   en orden. Es el centro de la experiencia y ocupa la mayor parte de la
   pantalla.
 - **Pie**: solo el cuadro de respuesta del turno (y el selector de personaje
-  mientras no se ha elegido). El mando del anfitrión, la personalidad, la voz
-  y el modo pantalla se abren desde la barra del juego.
+  mientras no se ha elegido).
 
 El estado se consulta por sondeo cada pocos segundos (no hay conexión
 persistente en esta versión).

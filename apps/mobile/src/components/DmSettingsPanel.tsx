@@ -1,5 +1,5 @@
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { DICE_MODES, describePreset, diceModeHint, diceModeLabel, diceModeOf, savedProviderText, withDiceMode, type DiceMode } from '@rpg-ngn/ui-logic'
+import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -28,10 +28,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
   const [preset, setPreset] = useState<string>(saved?.preset ?? '')
   const [model, setModel] = useState<string>(saved?.model ?? '')
-  // Quien tira los dados. Faltaba en la app: desde el telefono no se podia
-  // cambiar y la mesa quedaba con el defecto viejo (tira la mesa).
-  const [dice, setDice] = useState<DiceMode>(diceModeOf(table.settings))
-  const diceDirty = dice !== diceModeOf(table.settings)
+  // Los dados van aparte, en DiceModePanel, que guarda al elegir: aqui
+  // estaban repetidos y el modal los enseñaba dos veces.
   const [working, setWorking] = useState(false)
   const [probe, setProbe] = useState<DmProbeResult | null>(null)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
@@ -88,8 +86,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   const save = () =>
     run(async () => {
-      await client.updateTableSettings(table.id, withDiceMode(withProvider(table.settings, chosen), dice))
-      setNotice({ ok: true, text: `${savedProviderText(chosen)} Dados: ${diceModeLabel(dice).toLowerCase()}.` })
+      await client.updateTableSettings(table.id, withProvider(table.settings, chosen))
+      setNotice({ ok: true, text: savedProviderText(chosen) })
       onChanged()
     })
 
@@ -114,18 +112,12 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
         </>
       ) : null}
 
-      <Text style={styles.label}>Dados</Text>
-      {DICE_MODES.map((m) => (
-        <RadioRow key={m} label={diceModeLabel(m)} selected={dice === m} disabled={disabled} onSelect={() => setDice(m)} />
-      ))}
-      <Text style={styles.hint}>{diceModeHint(dice)}</Text>
-
       {probe ? <Text style={[styles.result, probe.ok ? styles.ok : styles.error]}>{`${probe.ok ? 'Listo: ' : 'No responde: '}${probe.message}${probe.model ? ` (${probe.model})` : ''}`}</Text> : null}
       {notice ? <Text style={[styles.result, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
 
       <View style={styles.row}>
         <Button label="Probar" busy={working} disabled={disabled || presets === null} onPress={() => void test()} />
-        <Button label="Guardar" primary busy={working} disabled={disabled || !(dirty || diceDirty)} onPress={() => void save()} />
+        <Button label="Guardar" primary busy={working} disabled={disabled || !dirty} onPress={() => void save()} />
       </View>
       <Text style={styles.hint}>Probar no gasta un turno; solo comprueba clave y modelo.</Text>
     </View>

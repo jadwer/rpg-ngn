@@ -159,8 +159,9 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-            <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            {/* Primero las reglas de la mesa (guardan al elegir), luego el director; como en la web (docs/18, D-UX-7). */}
             <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </ScrollView>
         </View>
       </Modal>

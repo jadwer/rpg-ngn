@@ -5,13 +5,11 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { DmSettingsPanel } from './DmSettingsPanel'
-import { InviteLink } from './InviteLink'
-import { InvitePanel } from './InvitePanel'
+import { TableRulesPanel } from './TableRulesPanel'
 
 interface Props {
   client: ApiClient
   table: TableSummary
-  meId: string
   pack: LoadedPack | null
   session: { code: string; status: string } | null
   /** true cuando ya llego el primer estado de la mesa (para abrir el mando solo si no hay sesion). */
@@ -30,14 +28,15 @@ interface Props {
 }
 
 /**
- * Mando del anfitrion: abrir la sesion (codigo de tres digitos y una nota
- * que el DM tambien recibe), cerrarla con cliffhanger, la premisa de la
- * mesa, invitaciones y el proveedor del DM. El DM es la IA; el anfitrion
+ * Mando del anfitrion, en dos pestañas (docs/18, D-UX-7): **Sesion**, lo de
+ * cada noche (abrir con codigo y nota, cerrar con cliffhanger, la premisa), y
+ * **Ajustes de la mesa**, lo que casi nunca cambia (dados, secretos del pack,
+ * director de juego). Invitar vive en Jugadores. El DM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
+export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
   const [expanded, setExpanded] = useState(false)
-  const [tab, setTab] = useState<'session' | 'invite' | 'dm'>('session')
+  const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
   const [cliffhanger, setCliffhanger] = useState('')
@@ -79,11 +78,8 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             <button type="button" aria-pressed={tab === 'session'} onClick={() => setTab('session')}>
               Sesión
             </button>
-            <button type="button" aria-pressed={tab === 'invite'} onClick={() => setTab('invite')}>
-              Invitados
-            </button>
-            <button type="button" aria-pressed={tab === 'dm'} onClick={() => setTab('dm')}>
-              DM
+            <button type="button" aria-pressed={tab === 'settings'} onClick={() => setTab('settings')}>
+              Ajustes de la mesa
             </button>
           </div>
 
@@ -156,15 +152,13 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
             </div>
           ) : null}
 
-          {tab === 'invite' ? (
-            <>
-              {/* El enlace primero: es la via rapida y la que no pide amistad. */}
-              <InviteLink client={client} tableId={table.id} />
-              <InvitePanel client={client} table={table} meId={meId} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-            </>
+          {tab === 'settings' ? (
+            <div className="stack">
+              <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+              <div className="label">Director de juego</div>
+              <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            </div>
           ) : null}
-
-          {tab === 'dm' ? <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
         </div>
       ) : null}
     </section>

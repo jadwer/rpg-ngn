@@ -18,10 +18,11 @@ const ICONS: Record<GamePanel, string> = {
   map: 'M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   players: 'M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21v-1a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v1',
   host: 'M3 18h18M4 17l1.5-9 4.5 4 2-6 2 6 4.5-4L20 17',
-  more: 'M5 12h.01M12 12h.01M19 12h.01',
+  more: 'M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z',
 }
 
-const LABELS: Record<GamePanel, string> = { sheets: 'Fichas', map: 'Mapa', players: 'Jugadores', host: 'Anfitrión', more: 'Más' }
+/** `more` se llama Lectura (vista, voz, pantalla); el id se queda para no tocar CSS ni historial. */
+const LABELS: Record<GamePanel, string> = { sheets: 'Fichas', map: 'Mapa', players: 'Jugadores', host: 'Anfitrión', more: 'Lectura' }
 
 /**
  * La barra del juego (docs/18, D-UX-6): lo que se abre durante la partida,

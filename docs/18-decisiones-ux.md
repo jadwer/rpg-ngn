@@ -36,6 +36,8 @@ experiencia, que es donde el resto va mas flojo.
 5. **Dos composiciones** (movil y escritorio), no tres. Tres niveles de
    configuracion, aceptados.
 6. **Dos menus**: uno de sistema y sitio, otro del juego (22-09).
+7. **Que va dentro de cada menu** (23-09): una persona en un solo panel,
+   dirigir aparte de configurar, lo que se lee aparte de lo que se juega.
 
 ---
 
@@ -328,6 +330,34 @@ decision):
 - **Escritorio**: el de sistema como barra superior, el del juego como
   columna o barra lateral; la narracion sigue siendo la columna ancha.
 - El saldo vive en el menu de sistema, nunca en el del juego (D-UX-4).
+
+## D-UX-7: Que va dentro de cada menu (decidida el 23-09)
+
+Gabino, probando el diseño nuevo en el telefono: "los menus me parecen
+correctos, pero su contenido se puede separar y presentar mejor". El
+inventario de los paneles dio cinco cosas mal puestas: la misma persona en
+dos paneles (Jugadores y Anfitrion → Invitados), "Mas" mezclando como se lee
+la mesa con la personalidad del personaje, el menu del sitio diciendo
+"Perfil y creditos" para una pagina sin creditos, el anfitrion mezclando
+dirigir la sesion con configurar la mesa, y el fallo real de los dados: el
+control existia pero su "Guardar" solo se encendia al cambiar el proveedor.
+
+> **DECIDIDO (Gabino, 2026-09-23)**, con tres reglas de agrupacion: **una
+> persona vive en un solo panel; dirigir aparte de configurar; lo que se lee
+> aparte de lo que se juega.**
+
+| Menu o panel | Bloques, en este orden | Quien |
+|---|---|---|
+| Menu del sitio | Mesas · Nueva mesa · Mi cuenta y creditos (`/perfil`: cuenta, contraseña, creditos, clave propia, borrar cuenta) · Voz (`/ajustes`: solo la lectura en voz) · Salir | todos |
+| Fichas | la party; al abrir la propia, debajo "Tu personaje" (la personalidad escrita) si el pack la pide | todos |
+| Mapa | sin cambios | todos |
+| Jugadores | asientos con estado; en tu fila "me tengo que ir"; en las ajenas el anfitrion marca ausente o presente; abajo, solo anfitrion, **Invitar** (enlace y por correo) | todos; invitar solo anfitrion |
+| Anfitrion | pestaña **Sesion** (premisa, abrir con codigo y nota, cerrar con cliffhanger) y pestaña **Ajustes de la mesa**: dados y secretos del pack **guardan al elegir**, sin boton; el director de juego (proveedor, modelo) con Probar y Guardar | anfitrion |
+| Lectura (antes "Mas") | vista narrativa o dialogo · voz · modo pantalla | todos |
+
+El pie no cambia: respuesta, cuenta atras, forzar cierre, elegir personaje.
+La app sigue la misma tabla cuando le toque su B1; de momento se le quito el
+bloque de dados duplicado.
 
 ## Lo que NO se decide aqui
 

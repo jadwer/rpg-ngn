@@ -207,7 +207,7 @@ sobre el mapa del pack y la paleta del borrador (Gabino la pidio al ver la
 primera version "todavia cafe"; anotado en `docs/14`). Probado en local con
 tres cuentas a la vez (escribiendo, cuenta atras, cancelar con nombre,
 reanudar desde diez, cierre solo) y en produccion con una mesa temporal a
-1280 y 390; primer feedback de Gabino en el telefono corregido la misma noche (menu del sitio fuera de pantalla en /mesas, estados pulsados aun dorados). **Falta la app** (paridad: barra del juego, jugadores con
+1280 y 390; primer feedback de Gabino en el telefono corregido la misma noche (menu del sitio fuera de pantalla en /mesas, estados pulsados aun dorados). El 23-09 por la mañana, con el segundo feedback: los paneles no cerraban (capas) y atras salia de la mesa (ahora los paneles entran en el historial); y **el contenido de los menus reordenado por bloques funcionales** (`docs/18`, D-UX-7: invitar y presencia ajena en Jugadores, personalidad en la propia ficha, "Lectura" en vez de "Mas", Anfitrion en Sesion y Ajustes de la mesa, menu del sitio con nombres que dicen lo que abren). **Fallo real de los dados**: el modo no se guardaba en la web (el Guardar del director solo se encendia al cambiar el proveedor); ahora dados y secretos guardan al elegir, y el estado de la mesa lleva `away` para que la presencia se vea en vivo. **Falta la app** (paridad: barra del juego, jugadores con
 estado, cuenta atras, escribiendo, cabecera de escena, paleta). Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):

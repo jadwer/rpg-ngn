@@ -3157,3 +3157,67 @@ a {
 .aside {
   z-index: 9;
 }
+
+/* Jugadores con lo que se hace con cada persona (D-UX-7): estado y boton en
+   columna a la derecha; el bloque de invitar del anfitrion al final. */
+.seat .right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: none;
+}
+
+.seat .right .btn.small {
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+}
+
+.seats-panel .invitar {
+  margin-top: 22px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.seats-panel .invitar > .label {
+  margin-top: 8px;
+}
+
+/* La personalidad debajo de la propia ficha. */
+.persona-en-ficha {
+  margin-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 6px;
+}
+
+.persona-en-ficha .persona {
+  border: 0;
+}
+
+.persona-en-ficha .persona .head,
+.persona-en-ficha .persona .body {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+}
+
+/* Reglas de la mesa: el segmented de los dados cabe en 390 con las dos opciones. */
+.table-rules .segmented {
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Las dos opciones de dados a lo ancho, mitad y mitad: en 390 no caben en fila y partirlas se veia torcido. */
+.table-rules .segmented {
+  display: flex;
+  width: 100%;
+  align-self: stretch;
+  flex-wrap: nowrap;
+}
+
+.table-rules .segmented button {
+  flex: 1;
+  padding-left: 8px;
+  padding-right: 8px;
+}

@@ -31,6 +31,12 @@ describe('seats', () => {
     expect(sin[1]?.state).toBe('thinking')
   })
 
+  it('el estado en vivo marca ausente aunque la mesa cargada diga que esta', () => {
+    const list = seats({ members, turn: open, typing: [], narrators: [], away: [{ memberId: 2, characterId: 'calder' }], viewerMemberId: 1, nameOf })
+    expect(list[1]?.state).toBe('away')
+    expect(list[0]?.state).toBe('ready')
+  })
+
   it('sin turno abierto nadie piensa ni escribe', () => {
     const list = seats({ members, turn: null, typing: [{ memberId: 2, characterId: 'calder' }], narrators: [], viewerMemberId: 1, nameOf })
     expect(list.map((s) => s.state)).toEqual(['ready', 'ready', 'away', 'watching'])

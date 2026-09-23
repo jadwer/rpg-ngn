@@ -181,7 +181,7 @@ export function startCard(input: { hasSession: boolean; host: boolean; hostName:
   const steps = [
     'El DM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el DM narra.',
     'Cuando todos hayan respondido, el anfitrión cierra el turno y el DM narra las consecuencias.',
-    input.dice === 'engine' ? 'Los dados los tira la mesa: si tu acción tiene riesgo, el resultado sale en la narración.' : 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
+    input.dice === 'engine' ? 'Los dados los tira el servidor: si tu acción tiene riesgo, el resultado sale en la narración.' : 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
     'Si te tienes que ir, pulsa "Me tengo que ir": el DM aparta a tu personaje sin matarlo y la mesa no te espera.',
   ]
   if (input.host) {

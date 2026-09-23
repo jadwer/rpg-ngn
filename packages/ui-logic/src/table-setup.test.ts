@@ -167,7 +167,7 @@ describe('startCard', () => {
     expect(card.action).toBe('Iniciar partida')
     expect(card.title).toBe('La mesa está lista')
     expect(card.steps).toHaveLength(4)
-    expect(card.steps[2]).toContain('los tira la mesa')
+    expect(card.steps[2]).toContain('los tira el servidor')
   })
 
   it('tras una sesión cerrada, el botón nombra la siguiente', () => {

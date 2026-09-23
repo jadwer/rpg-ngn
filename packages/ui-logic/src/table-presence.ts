@@ -48,6 +48,8 @@ interface SeatsInput {
   turn: TurnSummary | null
   typing: readonly SeatPresence[]
   narrators: readonly SeatPresence[]
+  /** Quien tuvo que irse segun el estado en vivo; `members[].present` solo se refresca con las propias acciones. */
+  away?: readonly SeatPresence[] | undefined
   viewerMemberId: string | number
   nameOf: (characterId: string) => string
 }
@@ -57,17 +59,18 @@ interface SeatsInput {
  * turno abierto nadie "piensa": los que tienen personaje quedan en `ready`
  * (estan sentados) y los que no, en `watching`.
  */
-export function seats({ members, turn, typing, narrators, viewerMemberId, nameOf }: SeatsInput): Seat[] {
+export function seats({ members, turn, typing, narrators, away = [], viewerMemberId, nameOf }: SeatsInput): Seat[] {
   const responded = new Set(turn?.responded ?? [])
   const required = new Set(turn?.required ?? [])
   const typingIds = new Set(typing.map((t) => String(t.memberId)))
   const narratingIds = new Set(narrators.map((n) => String(n.memberId)))
+  const awayIds = new Set(away.map((a) => String(a.memberId)))
   const open = turn?.status === 'open'
 
   return members.map((m) => {
     const memberId = String(m.id)
     let state: SeatState
-    if (m.present === false) state = 'away'
+    if (m.present === false || awayIds.has(memberId)) state = 'away'
     else if (narratingIds.has(memberId)) state = 'narrating'
     else if (!m.characterId) state = 'watching'
     else if (open && responded.has(m.characterId)) state = 'ready'

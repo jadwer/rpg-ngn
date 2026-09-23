@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { DICE_MODES, describePreset, diceModeHint, diceModeLabel, diceModeOf, savedProviderText, withDiceMode, type DiceMode } from '@rpg-ngn/ui-logic'
+import { describePreset, savedProviderText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
  * jugar). Se elige entre los presets del servidor, sin credenciales; el
  * modelo es opcional; "Probar" llama al engine con el preset antes de
  * guardarlo. Solo el anfitrion ve este panel (la API tambien lo exige).
+ * Los dados y los secretos del pack viven aparte, en `TableRulesPanel`.
  */
 export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
   const [presets, setPresets] = useState<DmPreset[] | null>(null)
@@ -28,18 +29,11 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const [working, setWorking] = useState(false)
   const [probe, setProbe] = useState<DmProbeResult | null>(null)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
-  const savedLint = typeof table.settings?.['lint'] === 'string' ? (table.settings['lint'] as string) : ''
-  const [lint, setLint] = useState<string>(savedLint)
-  const [dice, setDice] = useState<DiceMode>(diceModeOf(table.settings))
 
   useEffect(() => {
     setPreset(saved?.preset ?? '')
     setModel(saved?.model ?? '')
   }, [saved])
-
-  useEffect(() => {
-    setLint(savedLint)
-  }, [savedLint])
 
   useEffect(() => {
     let alive = true
@@ -89,11 +83,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   const save = () =>
     run(async () => {
-      const base = withProvider(table.settings, chosen)
-      // Sin modo elegido se quita la clave: manda el del engine.
-      const { lint: _previous, ...rest } = base
-      const conLint = lint === '' ? rest : { ...rest, lint }
-      await client.updateTableSettings(table.id, withDiceMode(conLint, dice))
+      // `withProvider` conserva lo demas de los ajustes (dados, secretos, premisa).
+      await client.updateTableSettings(table.id, withProvider(table.settings, chosen))
       setNotice({ ok: true, text: savedProviderText(chosen) })
       onChanged()
     })
@@ -126,33 +117,6 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
           </span>
         </label>
       ) : null}
-
-      <label className="field">
-        <span>Dados</span>
-        <select className="select" name="dice" value={dice} onChange={(e) => setDice(e.target.value as DiceMode)} disabled={disabled}>
-          {DICE_MODES.map((m) => (
-            <option key={m} value={m}>
-              {diceModeLabel(m)}
-            </option>
-          ))}
-        </select>
-        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          {diceModeHint(dice)}
-        </span>
-      </label>
-
-      <label className="field">
-        <span>Secretos del pack</span>
-        <select className="select" name="lint" value={lint} onChange={(e) => setLint(e.target.value)} disabled={disabled}>
-          <option value="">El del servidor</option>
-          <option value="enforce">Cortar lo que revele un secreto</option>
-          <option value="report">Dejar pasar y avisarme</option>
-          <option value="off">No revisar</option>
-        </select>
-        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          El motor compara cada bloque del DM con lo que la mesa ha descubierto. Los avisos solo los ves tú.
-        </span>
-      </label>
 
       {probe ? (
         <div className={probe.ok ? 'ok' : 'error'}>

@@ -160,6 +160,8 @@ export interface TableState {
   narrators: Narrator[]
   /** Quien esta tecleando su respuesta (anuncio que caduca solo). */
   typing: Presence[]
+  /** Quien tuvo que irse (`present = false`), para que lo vean todos sin recargar la mesa. */
+  away: Presence[]
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }
