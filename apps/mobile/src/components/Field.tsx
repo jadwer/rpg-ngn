@@ -1,4 +1,4 @@
-import Constants, { ExecutionEnvironment } from 'expo-constants'
+import { isRunningInExpoGo } from 'expo'
 import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 import { theme } from '../theme'
@@ -8,16 +8,16 @@ interface Props extends TextInputProps {
   hint?: string | undefined
 }
 
-/** Campo de texto como el concepto (img/ideas_movil.png): etiqueta en Inter, caja rellena y redondeada, borde violeta con el foco. */
 /**
- * Dentro de Expo Go el autocompletado de Android pinta un velo amarillo (que
+ * Dentro de Expo Go, el autocompletado de Android pinta un velo amarillo (que
  * sobre el fondo oscuro sale verde olivo, con esquinas rectas) encima del
- * campo, y el tema que lo quitaria es el de Expo Go, no el nuestro. Ahi se
- * apaga el autocompletado; en la app instalada se queda (el velo lo quita
- * plugins/withNoAutofillHighlight.js).
+ * campo que rellena; el tema que lo quitaria es el de Expo Go, no el nuestro.
+ * Ahi se apaga el autocompletado. En la app instalada se queda, y el velo lo
+ * quita plugins/withNoAutofillHighlight.js.
  */
-const IN_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient
-const NO_AUTOFILL = IN_EXPO_GO ? ({ importantForAutofill: 'no', autoComplete: 'off' } as const) : {}
+const NO_AUTOFILL = isRunningInExpoGo() ? ({ importantForAutofill: 'no', autoComplete: 'off' } as const) : {}
+
+/** Campo de texto como el concepto (img/ideas_movil.png): etiqueta en Inter, caja rellena y redondeada, borde violeta con el foco. */
 
 export function Field({ label, hint, style, onFocus, onBlur, ...input }: Props) {
   const [focused, setFocused] = useState(false)
