@@ -12,7 +12,7 @@ arranca la cabeza, y se escala a 512.
 
 Uso, desde la raiz del repo:
 
-    python3 tools/packs/crop-portraits.py <lamina> <destino> <id1> <id2> ... [--top 0.245] [--side 0.03] [--rows 1] [--header 0]
+    python3 tools/packs/crop-portraits.py <lamina> <destino> <id1> <id2> ... [--top=0.245] [--side=0.03] [--rows=1] [--header=0]
 
 Ejemplo:
 
@@ -27,7 +27,7 @@ arrastrar el marco del panel. Con `--rows 2` la lamina es una rejilla (los ids
 van por filas, de izquierda a derecha): `--header` es la fraccion de la altura
 que ocupa el titulo de la lamina antes de la primera fila, y `--top` se mide
 dentro de cada celda. La lamina de La Mascarada (img/jugables.png del pack,
-4x2 con tarjetas) sale con `--rows 2 --header 0.05 --top 0.02 --side 0.06`. Si la lamina es mas pequeña que 512 por
+4x2 con tarjetas) sale con `--rows=2 --header=0.05 --top=0.02 --side=0.06`. **Las opciones van con `=`**: con espacio, el valor se toma como un id mas y la lamina se parte en columnas de sobra. Si la lamina es mas pequeña que 512 por
 personaje, el retrato sale escalado hacia arriba: mejor pedir al generador
 retratos sueltos de 1024 cuando se quiera mas nitidez.
 """

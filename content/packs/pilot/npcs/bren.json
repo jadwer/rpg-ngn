@@ -1,7 +1,7 @@
 {
   "id": "bren",
   "name": "Bren",
-  "portrait": null,
+  "portrait": "portraits/bren.webp",
   "location": "posada",
   "description": "Lleva la posada y el libro de huéspedes. Anota todo y no enseña nada; con desconocidos es cortés hasta que deja de serlo.",
   "goals": [

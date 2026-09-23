@@ -19,10 +19,17 @@ describe('pack empaquetado en la web', () => {
     const manifest = JSON.parse(readFileSync(join(repoRoot, 'content/packs/pilot/pack.json'), 'utf8')) as { version: string }
     expect(manifest.version).toBe(PACK_VERSION)
     // Cuantos binarios hay lo decide el pack, no este test: fijar el numero a
-    // mano lo rompia cada vez que el pack ganaba un retrato o un mapa. Lo que
-    // se comprueba es que esten **todos** los que el pack declara.
-    expect(packBinaries.filter((p) => p.startsWith('portraits/'))).toHaveLength(9)
-    expect(packBinaries.filter((p) => p.startsWith('maps/')).sort()).toEqual(['maps/mina.webp', 'maps/valdoria.webp'])
+    // mano lo rompia cada vez que el pack ganaba un retrato o un mapa (paso
+    // dos veces el 22-09). Se comprueba que esten **exactamente** los que el
+    // pack declara: los `portrait` de personajes y NPC, y las imagenes de los
+    // mapas.
+    const declarados = Object.entries(packFiles)
+      .filter(([path]) => /^(characters|npcs|maps)\/.*\.json$/.test(path))
+      .map(([, text]) => JSON.parse(text) as { portrait?: string | null; image?: string })
+      .map((entity) => entity.portrait ?? entity.image)
+      .filter((p): p is string => typeof p === 'string')
+      .sort()
+    expect([...packBinaries].sort()).toEqual(declarados)
     for (const path of packBinaries) {
       expect(() => readFileSync(join(resolve(import.meta.dirname, '../../public/packs/pilot'), path))).not.toThrow()
     }

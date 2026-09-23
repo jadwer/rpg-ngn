@@ -4,6 +4,7 @@
 export const portraits: Readonly<Record<string, number>> = {
   "maps/mina.webp": require("../../assets/pack/pilot/maps/mina.webp"),
   "maps/valdoria.webp": require("../../assets/pack/pilot/maps/valdoria.webp"),
+  "portraits/bren.webp": require("../../assets/pack/pilot/portraits/bren.webp"),
   "portraits/brorg.jpg": require("../../assets/pack/pilot/portraits/brorg.jpg"),
   "portraits/calder.jpg": require("../../assets/pack/pilot/portraits/calder.jpg"),
   "portraits/dayan.jpg": require("../../assets/pack/pilot/portraits/dayan.jpg"),
@@ -11,6 +12,8 @@ export const portraits: Readonly<Record<string, number>> = {
   "portraits/kael.jpg": require("../../assets/pack/pilot/portraits/kael.jpg"),
   "portraits/narivyl.jpg": require("../../assets/pack/pilot/portraits/narivyl.jpg"),
   "portraits/orion.jpg": require("../../assets/pack/pilot/portraits/orion.jpg"),
+  "portraits/osric.webp": require("../../assets/pack/pilot/portraits/osric.webp"),
   "portraits/talin.jpg": require("../../assets/pack/pilot/portraits/talin.jpg"),
+  "portraits/tomas.webp": require("../../assets/pack/pilot/portraits/tomas.webp"),
   "portraits/zahira.jpg": require("../../assets/pack/pilot/portraits/zahira.jpg"),
 }

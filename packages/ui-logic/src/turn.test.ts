@@ -29,8 +29,12 @@ describe('blocksFromApi', () => {
   })
 
   it('un hablante que no esta en el pack conserva el nombre que escribio el engine', () => {
-    const blocks = blocksFromApi([{ id: 5, block: { type: 'dialogue', speaker: 'Osric', speakerRef: 'npc:osric', text: 'Vete.' } }], packSpeakerResolver(pack))
-    expect(blocks[0]?.kind === 'dialogue' && blocks[0].speaker).toEqual({ ref: 'npc:osric', name: 'Osric', portrait: null })
+    // Osric fue el ejemplo de desconocido hasta el 22-09; ahora tiene ficha y
+    // retrato en el pack, asi que el desconocido es otro.
+    const blocks = blocksFromApi([{ id: 5, block: { type: 'dialogue', speaker: 'Un tabernero', speakerRef: 'npc:un-tabernero-cualquiera', text: 'Vete.' } }], packSpeakerResolver(pack))
+    expect(blocks[0]?.kind === 'dialogue' && blocks[0].speaker).toEqual({ ref: 'npc:un-tabernero-cualquiera', name: 'Un tabernero', portrait: null })
+    const osric = blocksFromApi([{ id: 7, block: { type: 'dialogue', speaker: 'Osric', speakerRef: 'npc:osric', text: 'Vete.' } }], packSpeakerResolver(pack))
+    expect(osric[0]?.kind === 'dialogue' && osric[0].speaker).toEqual({ ref: 'npc:osric', name: 'Osric', portrait: 'portraits/osric.webp' })
     const noPack = blocksFromApi([{ id: 6, block: { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Hola.' } }], packSpeakerResolver(null))
     expect(noPack[0]?.kind === 'dialogue' && noPack[0].speaker.name).toBe('Zahira')
   })

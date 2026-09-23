@@ -1,7 +1,7 @@
 {
   "id": "tomas",
   "name": "Tomás",
-  "portrait": null,
+  "portrait": "portraits/tomas.webp",
   "location": "posada",
   "description": "El mozo de la posada, joven y con ojeras de no dormir. Vigila la puerta más de lo que atiende las mesas, y reconoce a los Nueve aunque el pueblo los haya olvidado.",
   "goals": [

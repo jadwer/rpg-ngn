@@ -21,8 +21,13 @@ describe('pack empaquetado', () => {
     const manifest = JSON.parse(readFileSync(join(repoRoot, 'content/packs/pilot/pack.json'), 'utf8')) as { version: string }
     expect(manifest.version).toBe(PACK_VERSION)
     // El numero lo decide el pack, no este test (ver el equivalente en la web).
-    expect(packBinaries.filter((p) => p.startsWith('portraits/'))).toHaveLength(9)
-    expect(packBinaries.filter((p) => p.startsWith('maps/')).sort()).toEqual(['maps/mina.webp', 'maps/valdoria.webp'])
+    const declarados = Object.entries(packFiles)
+      .filter(([path]) => /^(characters|npcs|maps)\/.*\.json$/.test(path))
+      .map(([, text]) => JSON.parse(text) as { portrait?: string | null; image?: string })
+      .map((entity) => entity.portrait ?? entity.image)
+      .filter((p): p is string => typeof p === 'string')
+      .sort()
+    expect([...packBinaries].sort()).toEqual(declarados)
     expect(PACK_OPTION).toEqual({ id: 'pilot', version: PACK_VERSION, ruleset: 'fantasy-d20-lite@1.0.0' })
   })
 
