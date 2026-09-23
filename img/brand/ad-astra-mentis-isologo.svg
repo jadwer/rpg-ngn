@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">Ad Astra Mentis isologo</title>
+<desc id="desc">Abstract open book transforming into a four-point star.</desc>
+<defs>
+<linearGradient id="violet" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#1F1F2E"/><stop offset=".58" stop-color="#7C3AED"/><stop offset="1" stop-color="#A78BFA"/></linearGradient>
+<radialGradient id="star" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#F8F7F4"/><stop offset=".22" stop-color="#E5E7FF"/><stop offset=".55" stop-color="#A78BFA"/><stop offset="1" stop-color="#7C3AED"/></radialGradient>
+</defs>
+<path d="M104 211C118 105 199 54 256 54C313 54 394 105 408 211" fill="none" stroke="#7C3AED" stroke-width="10" stroke-linecap="round"/>
+<path d="M256 406C220 363 174 335 103 322C116 354 142 382 184 399C210 410 235 414 256 420C277 414 302 410 328 399C370 382 396 354 409 322C338 335 292 363 256 406Z" fill="url(#violet)"/>
+<path d="M256 409C222 371 184 351 131 341C157 369 191 390 230 401C241 404 249 407 256 414C263 407 271 404 282 401C321 390 355 369 381 341C328 351 290 371 256 409Z" fill="#F8F7F4" opacity=".95"/>
+<path d="M256 407C250 350 251 287 256 220C261 287 262 350 256 407Z" fill="#E5E7FF"/>
+<path d="M256 96L276 181L361 201L276 221L256 306L236 221L151 201L236 181Z" fill="url(#star)"/>
+<circle cx="256" cy="201" r="8" fill="#F8F7F4"/>
+</svg>
