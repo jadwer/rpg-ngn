@@ -1,11 +1,13 @@
 import { memberOf, type ApiClient, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, memberTag, seatLabel, tableCardMeta } from '@rpg-ngn/ui-logic'
+import { useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { FriendsPanel } from '../../components/FriendsPanel'
 import { JoinByLink } from '../../components/JoinByLink'
 import { Portrait } from '../../components/Portrait'
+import { RetireTable } from '../../components/RetireTable'
 import type { StoredUser } from '../../online/storage'
 import { theme } from '../../theme'
 
@@ -37,6 +39,9 @@ interface Props {
 export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, onOpen, onCreate, onRefresh, onProfile, onLogout, onUnauthorized }: Props) {
   const nameOf = (id: string) => characterNameFrom(pack, remoteNames, id)
   const sorted = tables ? [...tables].sort((a, b) => Number(b.id) - Number(a.id)) : null
+  const activas = sorted?.filter((t) => t.status !== 'archived') ?? null
+  const archivadas = sorted?.filter((t) => t.status === 'archived') ?? []
+  const [verArchivadas, setVerArchivadas] = useState(false)
 
   return (
     <View style={styles.screen}>
@@ -64,7 +69,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
           </View>
         ) : null}
         {tables?.length === 0 ? <Text style={styles.hint}>No estás en ninguna mesa todavía. Crea una o pide al anfitrión que te invite.</Text> : null}
-        {sorted?.map((table) => {
+        {activas?.map((table) => {
           const me = memberOf(table, user.id)
           const others = table.members.filter((m) => m.id !== me?.id)
           return (
@@ -86,9 +91,38 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                 </View>
               ) : null}
               {!table.campaignId ? <Text style={styles.warn}>Esta mesa no tiene campaña todavía.</Text> : null}
+              <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={onRefresh} />
             </Pressable>
           )
         })}
+
+        {archivadas.length > 0 ? (
+          <View style={styles.archivadas}>
+            <Pressable onPress={() => setVerArchivadas((v) => !v)} hitSlop={8}>
+              <Text style={styles.archivadasTitulo}>
+                {verArchivadas ? '▾' : '▸'} Mesas archivadas ({archivadas.length})
+              </Text>
+            </Pressable>
+            {verArchivadas ? (
+              <>
+                <Text style={styles.hint}>No salen arriba, pero siguen guardadas con todo lo que jugaron. Puedes recuperarlas cuando quieras.</Text>
+                {archivadas.map((table) => {
+                  const me = memberOf(table, user.id)
+                  return (
+                    <Pressable key={table.id} onPress={() => onOpen(table)} style={({ pressed }) => [styles.card, styles.cardQuiet, pressed && styles.pressed]} accessibilityRole="button">
+                      <View style={styles.cardTop}>
+                        <Text style={styles.cardTitle}>{table.name}</Text>
+                        <Text style={styles.badge}>archivada</Text>
+                      </View>
+                      <Text style={styles.meta}>{tableCardMeta(table, packs)}</Text>
+                      <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={onRefresh} />
+                    </Pressable>
+                  )
+                })}
+              </>
+            ) : null}
+          </View>
+        ) : null}
 
         <View style={styles.friends}>
           <FriendsPanel client={client} meId={user.id} onUnauthorized={onUnauthorized} />
@@ -121,4 +155,7 @@ const styles = StyleSheet.create({
   memberText: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   friends: { marginTop: 14 },
+  archivadas: { marginTop: 10, gap: 10 },
+  archivadasTitulo: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.goldDim, letterSpacing: 0.5 },
+  cardQuiet: { opacity: 0.7 },
 })

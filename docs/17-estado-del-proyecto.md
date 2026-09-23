@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 21:10 CST**. Rama `dev`, commit `8b2ef93`.
+Fecha de corte: **2026-09-22, 21:50 CST**. Rama `dev`, commit `0dc2a25`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -170,7 +170,7 @@ amistades de por medio.
 
 ### Retirar una mesa (22-09)
 
-**Solo en la web por ahora**; en la app falta (pendiente de paridad).
+**En web y en la app**, con las mismas reglas.
 
 - **Archivar**: la saca de la lista y la deja plegada al final, sin tocar la
   cronica. Es lo normal: una partida jugada tambien es de los demas jugadores.
@@ -194,6 +194,7 @@ amistades de por medio.
 - **Constancia de aceptacion** (`legal_acceptances`) con version, fecha y
   origen. En tabla aparte porque se acepta varias veces y la constancia
   **sobrevive al borrado de la cuenta**, disociada.
+- **Borrar la cuenta esta en web y en la app** (22-09 noche).
 - **Fallo de diseño que encontro el test**: `turn_responses` caia en cascada
   con el miembro, asi que al irse alguien de una mesa su texto se destruia y la
   cronica quedaba con huecos para los demas. Ahora es `nullOnDelete`.

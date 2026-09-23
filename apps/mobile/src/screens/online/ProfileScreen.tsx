@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { CreditsPanel } from '../../components/CreditsPanel'
+import { DeleteAccount } from '../../components/DeleteAccount'
 import { Field } from '../../components/Field'
 import { OwnKeysPanel } from '../../components/OwnKeysPanel'
 import type { StoredUser } from '../../online/storage'
@@ -17,6 +18,8 @@ interface Props {
   onUserChanged: (user: StoredUser) => void
   onBack: () => void
   onUnauthorized: () => void
+  /** La cuenta se borro: limpiar la sesion local, sin llamar a la API. */
+  onDeleted: () => void
 }
 
 /**
@@ -25,7 +28,7 @@ interface Props {
  * pide la actual). El correo se muestra pero no se edita (cambiarlo exige
  * verificarlo).
  */
-export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized }: Props) {
+export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted }: Props) {
   const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
@@ -124,6 +127,8 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         <CreditsPanel client={client} serverUrl={serverUrl} onUnauthorized={onUnauthorized} />
 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
+
+        <DeleteAccount client={client} onDeleted={onDeleted} />
       </ScrollView>
     </KeyboardAvoidingView>
   )

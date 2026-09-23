@@ -274,7 +274,19 @@ export function OnlineRoot({ pack, onExit }: Props) {
   }
 
   if (stage.name === 'profile') {
-    return <ProfileScreen client={session.client} user={session.user} serverUrl={serverUrl} onUserChanged={setUser} onBack={() => setStage({ name: 'tables' })} onUnauthorized={() => unauthorized()} />
+    return (
+      <ProfileScreen
+        client={session.client}
+        user={session.user}
+        serverUrl={serverUrl}
+        onUserChanged={setUser}
+        onBack={() => setStage({ name: 'tables' })}
+        onUnauthorized={() => unauthorized()}
+        // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,
+        // que respondera 401 a partir de ahora.
+        onDeleted={() => unauthorized('Tu cuenta se borró. Lo que escribiste en las partidas se conserva sin tu nombre.')}
+      />
+    )
   }
 
   if (stage.name === 'new-table') {
