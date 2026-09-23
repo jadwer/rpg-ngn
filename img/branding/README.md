@@ -25,3 +25,16 @@ limpio (menos nodos, curvas simetricas). Para pantalla, tal como esta, vale.
 Paleta (docs/22): Cosmic Black #0B0B12, Graphite #1F1F2E, Violet #7C3AED,
 Nebula #A78BFA, Starlight #E5E7FF, Ivory #F8F7F4. El trazado original venia en
 #362E66; en producto se usa Starlight sobre oscuro y Cosmic Black sobre claro.
+
+## Propuesta de Home (`hero.png`, 23-09)
+
+Lamina generada por GPT con la estructura del Home (hero, propuesta de valor,
+mundos destacados, como funciona, comunidad, CTA final) y su version movil.
+**Es direccion de arte y wireframe, no material de produccion**: los iconos se
+hacen como SVG propios con el sistema geometrico de docs/22 (lo pidio el propio
+GPT), el texto tiene erratas de generador ("AASTRA", "ASTRIA"), y hay contenido
+que no puede ir en el Home publico: la tarjeta "Teyvat" es el mundo de Genshin
+Impact (docs/07 y docs/22 lo prohiben), los personajes del hero recuerdan a esa
+franquicia, y "La Boticaria" y "La Mascarada" son packs privados con contenido
+de terceros que no se enseñan con su arte. Lo que se conserva: el orden de
+secciones, la frase, los CTA y la idea de tarjetas de mundos.
