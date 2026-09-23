@@ -83,3 +83,37 @@ export function whereEveryoneIs(view: MapView | null, nameOf: (id: string) => st
   if (view.offMap.length) partes.push(`De camino: ${view.offMap.map(nameOf).join(', ')}`)
   return partes.length ? partes.join(' · ') : 'Nadie situado en el mapa todavía'
 }
+
+/**
+ * Con varios mapas por pack, cual enseñar primero. Antes los clientes hacian
+ * `maps[0]` a secas, y en el piloto eso era la mina (por orden alfabetico) y
+ * no el pueblo donde empieza la partida. Lo vio la primera mesa de Valdoria
+ * con dos mapas.
+ *
+ * Orden: el mapa donde esta el personaje de quien mira; si no tiene sitio, el
+ * que reune a mas gente de la party; si nadie esta en ninguno, el primero.
+ */
+export function currentMapIndex(
+  maps: readonly PackMapView[],
+  world: Record<string, CharacterState> | undefined,
+  party: readonly string[],
+  viewerCharacterId: string | null,
+): number {
+  if (maps.length <= 1) return 0
+  const mapOf = (characterId: string): number => {
+    const donde = world?.[characterId]?.location
+    if (!donde) return -1
+    return maps.findIndex((m) => m.places.some((p) => p.id === donde))
+  }
+  if (viewerCharacterId) {
+    const propio = mapOf(viewerCharacterId)
+    if (propio >= 0) return propio
+  }
+  const cuenta = maps.map(() => 0)
+  for (const id of party) {
+    const i = mapOf(id)
+    if (i >= 0) cuenta[i] = (cuenta[i] ?? 0) + 1
+  }
+  const max = Math.max(...cuenta)
+  return max > 0 ? cuenta.indexOf(max) : 0
+}

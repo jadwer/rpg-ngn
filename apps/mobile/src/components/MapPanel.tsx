@@ -1,6 +1,6 @@
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
-import { mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
+import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -21,20 +21,33 @@ import { theme } from '../theme'
 interface Props {
   baseUrl: string
   packId: string
-  map: PackMapView | null
+  /** Todos los mapas del pack; el que se enseña lo decide `currentMapIndex`. */
+  maps: readonly PackMapView[]
   /** Fichas vivas por id, de la proyeccion de mundo que la mesa ya pide. */
   world: Record<string, CharacterState> | undefined
   party: readonly string[]
+  viewerCharacterId: string | null
   nameOf: (id: string) => string
   /** Retrato de un personaje, ya como URI absoluta; null si no hay. */
   portraitOf: (id: string) => string | null
 }
 
-/** Lado del lienzo cuadrado sobre el que se posan las coordenadas. */
-const LADO = 320
+/**
+ * Ancho del lienzo. El alto sale de la proporcion real de la imagen: los mapas
+ * son 3:2 (o 2:3 la mina) y un lienzo cuadrado con `cover` los recortaba, con
+ * lo que los porcentajes caian fuera de sitio. La web hace lo mismo con
+ * `fit-content` mas `object-fit: contain`.
+ */
+const ANCHO = 320
 
-export function MapPanel({ baseUrl, packId, map, world, party, nameOf, portraitOf }: Props) {
+export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf }: Props) {
   const [open, setOpen] = useState(false)
+  // Igual que en la web: el elegido a mano, o el que toque por donde esta la gente.
+  const [chosen, setChosen] = useState<number | null>(null)
+  // Proporcion ancho/alto de la imagen cargada; 3:2 hasta saberla.
+  const [aspect, setAspect] = useState(1.5)
+  const index = chosen ?? currentMapIndex(maps, world, party, viewerCharacterId)
+  const map = maps[index] ?? null
   const view = useMemo(() => mapView(map, world, party), [map, world, party])
   const edges = useMemo(() => (view ? mapEdges(view.pins) : []), [view])
 
@@ -43,6 +56,7 @@ export function MapPanel({ baseUrl, packId, map, world, party, nameOf, portraitO
   const path = packMapUrl(packId, view.map.image)
   const src = path ? `${baseUrl}${path}` : null
   const resumen = whereEveryoneIs(view, nameOf)
+  const ALTO = ANCHO / aspect
 
   return (
     <>
@@ -63,16 +77,35 @@ export function MapPanel({ baseUrl, packId, map, world, party, nameOf, portraitO
           </View>
 
           <ScrollView contentContainerStyle={styles.body}>
+            {maps.length > 1 ? (
+              <View style={styles.selector}>
+                {maps.map((m, i) => (
+                  <Pressable key={m.id} onPress={() => setChosen(i)} style={[styles.pestana, i === index && styles.pestanaActiva]}>
+                    <Text style={[styles.pestanaTexto, i === index && styles.pestanaTextoActivo]}>{m.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
             <Text style={styles.resumen}>{resumen}</Text>
 
-            <View style={styles.lienzo}>
-              {src ? <Image source={{ uri: src }} style={styles.imagen} resizeMode="cover" /> : null}
+            <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]}>
+              {src ? (
+                <Image
+                  source={{ uri: src }}
+                  style={{ width: ANCHO, height: ALTO }}
+                  resizeMode="contain"
+                  onLoad={(e) => {
+                    const { width, height } = e.nativeEvent.source
+                    if (width && height) setAspect(width / height)
+                  }}
+                />
+              ) : null}
 
               {edges.map((e) => {
-                const x1 = (e.from.x / 100) * LADO
-                const y1 = (e.from.y / 100) * LADO
-                const x2 = (e.to.x / 100) * LADO
-                const y2 = (e.to.y / 100) * LADO
+                const x1 = (e.from.x / 100) * ANCHO
+                const y1 = (e.from.y / 100) * ALTO
+                const x2 = (e.to.x / 100) * ANCHO
+                const y2 = (e.to.y / 100) * ALTO
                 const largo = Math.hypot(x2 - x1, y2 - y1)
                 const angulo = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI
                 // El trazo se ancla en su punto medio, que es donde React
@@ -87,7 +120,7 @@ export function MapPanel({ baseUrl, packId, map, world, party, nameOf, portraitO
               })}
 
               {view.pins.map((pin) => (
-                <View key={pin.id} style={[styles.pin, { left: (pin.x / 100) * LADO, top: (pin.y / 100) * LADO }]} pointerEvents="none">
+                <View key={pin.id} style={[styles.pin, { left: (pin.x / 100) * ANCHO, top: (pin.y / 100) * ALTO }]} pointerEvents="none">
                   <View style={[styles.punto, pin.who.length > 0 && styles.puntoConGente]} />
                   {pin.who.length > 0 ? (
                     <View style={styles.gente}>
@@ -132,9 +165,13 @@ const styles = StyleSheet.create({
   headerTitle: { fontFamily: theme.fonts.display, fontSize: 18, color: theme.colors.gold, letterSpacing: 1 },
   body: { padding: 16, paddingBottom: 40, gap: 12, alignItems: 'center' },
   resumen: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink, alignSelf: 'stretch' },
+  selector: { flexDirection: 'row', gap: 6, alignSelf: 'stretch', flexWrap: 'wrap' },
+  pestana: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
+  pestanaActiva: { borderColor: theme.colors.gold, backgroundColor: theme.colors.panel3 },
+  pestanaTexto: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
+  pestanaTextoActivo: { color: theme.colors.goldBright },
 
-  lienzo: { width: LADO, height: LADO, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
-  imagen: { width: LADO, height: LADO },
+  lienzo: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
 
   // Dos trazos: uno oscuro debajo, o las lineas claras se pierden sobre el
   // marmol de la imagen (misma razon que en la web).

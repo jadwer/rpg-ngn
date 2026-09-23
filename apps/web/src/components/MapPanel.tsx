@@ -2,15 +2,18 @@
 
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
-import { mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
+import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
   packId: string
-  map: PackMapView | null
+  /** Todos los mapas del pack; el que se enseña lo decide `currentMapIndex`. */
+  maps: readonly PackMapView[]
   /** Fichas vivas por id, de la proyeccion de mundo que la mesa ya pide. */
   world: Record<string, CharacterState> | undefined
   party: readonly string[]
+  /** Para abrir por omision el mapa donde esta el personaje de quien mira. */
+  viewerCharacterId: string | null
   nameOf: (id: string) => string
   /** Retrato de un personaje, para el punto; null si no hay. */
   portraitOf: (id: string) => string | null
@@ -26,8 +29,15 @@ interface Props {
  * mapa se abre a pantalla completa. Dentro del pie se veia cortado en
  * escritorio, porque ese pie esta limitado al 55% del alto (Gabino, 21-09).
  */
-export function MapPanel({ packId, map, world, party, nameOf, portraitOf }: Props) {
+export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf, portraitOf }: Props) {
   const [open, setOpen] = useState(false)
+  // El mapa elegido a mano en el modal; sin eleccion, el que toque por donde
+  // esta la gente. Con un pack de dos mapas (pueblo y mina) enseñar siempre el
+  // primero de la lista era enseñar la mina en una partida que empieza en la
+  // posada.
+  const [chosen, setChosen] = useState<number | null>(null)
+  const index = chosen ?? currentMapIndex(maps, world, party, viewerCharacterId)
+  const map = maps[index] ?? null
   const view = useMemo(() => mapView(map, world, party), [map, world, party])
   const edges = useMemo(() => (view ? mapEdges(view.pins) : []), [view])
 
@@ -68,6 +78,15 @@ export function MapPanel({ packId, map, world, party, nameOf, portraitOf }: Prop
               <div className="titulos">
                 <h2>{view.map.name}</h2>
                 <p className="hint">{resumen}</p>
+                {maps.length > 1 ? (
+                  <div className="segmented mapas" role="tablist" aria-label="Mapas del pack">
+                    {maps.map((m, i) => (
+                      <button key={m.id} type="button" role="tab" aria-selected={i === index} aria-pressed={i === index} onClick={() => setChosen(i)}>
+                        {m.name}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <button type="button" className="btn ghost small" onClick={() => setOpen(false)}>
                 Cerrar <span className="k">Esc</span>

@@ -465,9 +465,10 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         {maps.length > 0 ? (
           <MapPanel
             packId={table.packId}
-            map={maps[0] ?? null}
+            maps={maps}
             world={projections.world}
             party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
+            viewerCharacterId={viewer.characterId}
             nameOf={nameOf}
             portraitOf={(id) => {
               const local = pack?.characters.get(id)?.portrait

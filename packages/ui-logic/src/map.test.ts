@@ -1,7 +1,7 @@
 import type { PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
-import { mapEdges, mapView, whereEveryoneIs } from './map.js'
+import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from './map.js'
 
 /**
  * El mapa que pidio Gabino: saber donde esta cada uno, quien anda junto y
@@ -79,5 +79,27 @@ describe('whereEveryoneIs', () => {
   it('sin nadie situado lo dice, en vez de quedarse en blanco', () => {
     const view = mapView(palacio, {}, [])
     expect(whereEveryoneIs(view, (id) => id)).toBe('Nadie situado en el mapa todavía')
+  })
+})
+
+describe('currentMapIndex', () => {
+  const pueblo: PackMapView = { id: 'valdoria', name: 'Valdoria', image: 'maps/valdoria.webp', description: null, places: [{ id: 'posada', name: 'La posada', x: 22, y: 62, connections: ['plaza'] }, { id: 'plaza', name: 'La plaza', x: 49, y: 45, connections: ['posada'] }] }
+  const mina: PackMapView = { id: 'mina', name: 'La mina', image: 'maps/mina.webp', description: null, places: [{ id: 'primer-nivel', name: 'Primer nivel', x: 45, y: 26, connections: [] }] }
+  // Por orden alfabetico la mina va primero: es justo el caso que fallaba.
+  const maps = [mina, pueblo]
+  const en = (location: string | null): CharacterState => ({ ...mundo['camille']!, location })
+
+  it('enseña el mapa donde esta el personaje de quien mira, no el primero de la lista', () => {
+    expect(currentMapIndex(maps, { zahira: en('posada'), calder: en('primer-nivel') }, ['zahira', 'calder'], 'zahira')).toBe(1)
+    expect(currentMapIndex(maps, { zahira: en('posada'), calder: en('primer-nivel') }, ['zahira', 'calder'], 'calder')).toBe(0)
+  })
+
+  it('sin personaje propio situado, el mapa con mas gente de la party', () => {
+    expect(currentMapIndex(maps, { zahira: en('posada'), calder: en('plaza'), brorg: en('primer-nivel') }, ['zahira', 'calder', 'brorg'], null)).toBe(1)
+  })
+
+  it('sin nadie situado, el primero; con un solo mapa, siempre ese', () => {
+    expect(currentMapIndex(maps, { zahira: en(null) }, ['zahira'], 'zahira')).toBe(0)
+    expect(currentMapIndex([pueblo], undefined, [], null)).toBe(0)
   })
 })
