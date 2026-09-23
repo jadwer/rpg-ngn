@@ -16,12 +16,15 @@ que se afirma abajo se comprobo el dia del corte.
 
 ## Como usar este documento
 
-1. **Los marcadores `<ASI>` los rellena Gabino** antes de la revision legal.
-   Son cinco y estan listados en la seccion siguiente.
-2. **El abogado revisa y da el visto bueno.** Al final hay una lista de
+**El texto que manda es el publicado**, en
+`apps/web/src/app/privacidad/page.tsx` y `apps/web/src/app/terminos/page.tsx`
+(version `2026-09-22`, la que registra `legal_acceptances`). El borrador de
+abajo conserva los marcadores `<ASI>` porque es la version que va al abogado;
+lo que el cambie se publica como version 2 y se sube `LEGAL_VERSION`.
+
+1. **El abogado revisa y da el visto bueno.** Al final hay una lista de
    preguntas concretas para el, que es donde conviene que gaste su tiempo.
-3. Despues se publican como `/privacidad` y `/terminos` en la web, con enlace
-   en el pie y en el registro.
+2. Lo que cambie se aplica en las dos paginas y se anota aqui.
 
 **Lo que este documento NO es**: asesoria legal. Es un borrador tecnico escrito
 por quien conoce el sistema, para que el abogado no tenga que averiguar que
@@ -36,14 +39,18 @@ hace el software.
 | **Mexico y LATAM** | Se escribe sobre la LFPDPPP mexicana; no se promete cumplimiento RGPD |
 | **Se declara que no se entrena con el texto de los jugadores** | Clausula expresa sobre el proveedor de IA |
 
-## Lo que falta rellenar
+## Los marcadores, y como quedaron en lo publicado
 
-- `<RFC>`: RFC de Gabino como persona fisica con actividad empresarial.
-- `<DOMICILIO>`: domicilio fiscal completo, que la LFPDPPP exige en el aviso.
-- `<CORREO_PRIVACIDAD>`: buzon para ejercer derechos ARCO. Recomendacion:
-  `privacidad@gabinoramirez.com`, que hoy **no existe** y hay que crear.
-- `<FECHA_PUBLICACION>`: la fecha en que se publiquen.
-- `<ESTADO>`: entidad federativa para la clausula de jurisdiccion.
+- `<RFC>` y `<DOMICILIO>`: **no estan en las paginas publicadas.** El aviso
+  dice "Gabino Ramirez, persona fisica con actividad empresarial" y nada mas.
+  La LFPDPPP (art. 16) pide la identidad **y el domicilio** del responsable en
+  el aviso; publicar el domicilio de una persona fisica en una web publica es
+  una decision de Gabino, y por eso se dejo fuera. Es la pregunta 6 para el
+  abogado.
+- `<CORREO_PRIVACIDAD>`: `privacidad@gabinoramirez.com`, creado el 22-09 y
+  publicado en las dos paginas.
+- `<FECHA_PUBLICACION>`: 22 de septiembre de 2026.
+- `<ESTADO>`: Ciudad de Mexico.
 
 ---
 
@@ -102,15 +109,14 @@ prometer:
    como se cumple el derecho de cancelacion. Propuesta en el texto: se borra la
    cuenta y se disocia al usuario de lo escrito, conservando el registro de la
    partida sin datos que identifiquen a la persona.
-2. **Hoy no existe borrado de cuenta ni borrado de mesas** en el producto.
-   Gabino lo señalo el 22-09 y tiene razon: un usuario **no puede borrar ni
-   archivar una mesa suya**. Solo existe `php artisan tables:prune`, que es un
-   comando de servidor que ejecuta el administrador. Con los textos publicados,
-   esto pasa de incomodidad a **promesa incumplida**: el aviso reconoce el
-   derecho de cancelacion y los terminos dicen que se puede dejar de usar el
-   Servicio. Hay que construirlo, y **archivar no es borrar**: la mesa
-   archivada deja de verse pero el registro sigue, que es justo la disociacion
-   que describe el punto 5 del aviso.
+2. ~~Hoy no existe borrado de cuenta ni borrado de mesas.~~ **Resuelto el
+   22-09**, el mismo dia: retirar mesas (archivar, borrar si nunca se jugo,
+   salir) y borrar la cuenta desde el perfil, en web y app. Se deja el punto
+   porque explica el diseño: **archivar no es borrar**, la mesa archivada deja
+   de verse pero el registro sigue, que es la disociacion del punto 5 del
+   aviso. Queda un detalle de texto: los terminos publicados (punto 9) dicen
+   que la cancelacion se pide por correo, y ahora ademas se puede hacer desde
+   el perfil; conviene decirlo en la version 2.
 3. **El correo no prueba identidad**: cualquiera puede registrarse con una
    direccion ajena porque la verificacion esta apagada. Afecta a que se puede
    afirmar sobre la titularidad de una cuenta.
@@ -120,8 +126,14 @@ prometer:
 - **Creditos de prepago medidos en turnos**, no suscripcion ni tiempo.
 - Cuatro paquetes (2, 5, 10 y 15 USD). Tres planes anunciados pero **apagados**.
 - **Lo paga el dueño de la mesa**, no cada jugador.
-- **Stripe esta en modo prueba al dia del corte**: no se puede publicar el texto
-  de cobro hasta pasar a modo real.
+- **Stripe esta en modo prueba al dia del corte.** El apartado de creditos se
+  publico igualmente (decision de Gabino: mejor tener el texto antes que
+  esperar); describe el cobro tal como sera cuando pase a modo real.
+- **"Si un turno falla por un error del sistema, no se te cobra"**: verificado
+  en el codigo el 22-09. El cupo se descuenta dentro de la transaccion que
+  resuelve el turno (`TurnService`); un turno que falla se reabre y no llega
+  ahi. El reintento interno del motor cuesta tokens al proveedor, no creditos
+  al usuario.
 
 ---
 
@@ -427,6 +439,12 @@ gaste su tiempo, porque son las que no puedo resolver yo:
 5. **Devoluciones y PROFECO** (terminos, punto 4). Se venden creditos digitales
    de consumo inmediato. ¿La politica propuesta cumple con lo que exige la
    normativa de proteccion al consumidor en Mexico?
+
+6. **Domicilio del responsable** (aviso, punto 1). El art. 16 de la LFPDPPP
+   pide identidad y domicilio; lo publicado solo lleva el nombre. ¿Basta con
+   el correo de contacto, o hay que publicar el domicilio fiscal de una
+   persona fisica? Si hay que publicarlo, ¿vale un apartado postal o un
+   domicilio para oir notificaciones?
 
 ## Lo que ya esta publicado
 

@@ -86,6 +86,16 @@ RPG Worlds no debe comportarse como un VTT simplificado. El producto es una mesa
 > D&D, que es exactamente lo que este principio prohibe. Las tiradas de La
 > Mascarada, para redibujarlo: Etiqueta, Baile, Seduccion, Observacion,
 > Ingenio.
+>
+> **Corregido en `b430597` (mismo dia)**: el board ya lleva a Armand y Camille,
+> "Observacion" en vez de "Percepcion" y "La historia continua" en vez de un
+> "Exito" verde. Quedaban dos cosas, revisadas el 22-09: los subtitulos "Corte
+> · Prestigio" y "Etiqueta · Rumores" siguen siendo inventados (las
+> habilidades de Armand en el pack son Etiqueta, Ingenio, Baile y
+> Conversacion; Prestigio es un marcador de estado, no una habilidad), y el
+> pie del telefono 3 decia "El anfitrion puede resolver cuando quiera", que
+> contradice lo decidido en `docs/18` D-UX-3 (cuenta atras cancelable por
+> cualquiera). Ese pie se cambio; los subtitulos se dejan, son atrezo.
 9. **El mapa es contexto narrativo.** No convertirlo en tablero táctico.
 10. **No competir con la historia.** Ningún panel secundario debe ocupar permanentemente la atención durante un turno.
 

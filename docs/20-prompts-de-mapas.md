@@ -235,10 +235,10 @@ mapa del palacio, vista desde fuera.
    bueno. Es el paso que nadie quiere hacer y el que evita los dos errores de
    cada seis.
 
-**Las coordenadas que ya estan puestas en los packs son una propuesta**, hechas
-sobre la composicion pedida aqui. Al llegar la imagen real hay que medirlas de
-verdad: si el generador puso la posada mas a la derecha, la coordenada se
-mueve, no la imagen.
+**Las coordenadas de los cuatro mapas ya estan medidas sobre la imagen real**
+(22-09, comprobadas pintando los marcadores encima). Para el proximo mapa
+vale la misma regla: si el generador puso la posada mas a la derecha, la
+coordenada se mueve, no la imagen.
 
 Relacionado: `docs/05` (formato de mapas en el pack), `docs/08` (como se guarda
 donde esta cada personaje), `docs/13` 4.10 (lo que se ve en la mesa).
@@ -247,10 +247,12 @@ donde esta cada personaje), `docs/13` 4.10 (lo que se ve en la mesa).
 
 # Retratos de NPC
 
-Faltan nueve retratos: tres de **Los Nueve Viajeros** (el piloto, carpeta
-`content/packs/pilot`) y seis de **El te que nadie probo** (la boticaria,
-carpeta `content/packs/private-botica`; el prefijo `private-` es solo porque
-el pack no se versiona en este repo, docs/07).
+Los nueve retratos que faltaban **ya estan hechos y en los packs** (22-09):
+tres de **Los Nueve Viajeros** (el piloto, carpeta `content/packs/pilot`) y
+seis de **El te que nadie probo** (la boticaria, carpeta
+`content/packs/private-botica`; el prefijo `private-` es solo porque el pack
+no se versiona en este repo, docs/07). Los bloques se conservan como receta
+para el siguiente NPC de cada pack.
 
 ## Como se usa, en cuatro pasos
 
@@ -580,9 +582,13 @@ ACCESSORIES: The lantern. No bell in frame.
   nueve se pidieron primero en estilo realista sin mirar ninguno, y el piloto
   es pintura semirrealista y la boticaria es anime. Un NPC realista al lado de
   jugables anime canta.
-- **Las laminas originales siguen en `img/`** (`ElTeQueNadieProbo/characters.png`,
-  `LeBalMasque/npcs.png`, `LeBalMasque/characters.png`). Cuando se crea que se
-  perdio una receta, mirar ahi primero.
+- **Las laminas originales se conservan**: las de La Mascarada y el piloto en
+  `img/` de este repo (`LeBalMasque/npcs.png`, `LeBalMasque/characters.png`,
+  `LosNueveViajeros/nineTravelers-NPCs.png`); la de la boticaria en su propio
+  repo (`~/dev/rpg-packs/boticaria/img/lamina-personajes.png`), porque es
+  contenido de terceros y no va en el repo publico. La carpeta
+  `img/ElTeQueNadieProbo/` de aqui esta vacia a proposito. Cuando se crea que
+  se perdio una receta, mirar ahi primero.
 - **"Anime" a secas deja demasiado margen.** Lo que lleva al estilo concreto
   es la combinacion: light-novel illustration, clean linework, refined
   proportions, soft painterly shading, y el escenario. Lo mismo vale para el

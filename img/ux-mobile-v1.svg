@@ -72,7 +72,7 @@
 <circle cx="135" cy="435" r="7" fill="#8b5cf6"/><circle cx="165" cy="435" r="7" fill="#5b3fa8"/><circle cx="195" cy="435" r="7" fill="#3c2a70"/>
 <text x="91" y="475" fill="#777181" font-family="Inter,Arial" font-size="12">No es “loading”. La mesa está jugando.</text>
 <rect x="20" y="530" width="330" height="54" rx="18" fill="#252938"/><text x="128" y="564" fill="#ddd9e5" font-family="Inter,Arial" font-size="14">Ver jugadores</text>
-<text x="86" y="642" fill="#817c8c" font-family="Inter,Arial" font-size="12">El anfitrión puede resolver cuando quiera.</text>
+<text x="52" y="642" fill="#817c8c" font-family="Inter,Arial" font-size="12">Cuando todos respondan: “El director narra en 10 s. Cancelar.”</text>
 </g>
 
 <!-- phone 4 -->

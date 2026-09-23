@@ -40,9 +40,11 @@ experiencia, que es donde el resto va mas flojo.
 
 ## D-UX-1: Entrar a una mesa
 
-**Estado: es el pendiente numero uno** (decidido por Gabino el 21-09). Va por
-delante de las otras cuatro porque no es una mejora de pantalla: es una
-funcionalidad que **no existe**, y es de servidor.
+**Estado: era el pendiente numero uno** (decidido por Gabino el 21-09) y
+**esta construido y en produccion desde el 22-09**, en web y en la app
+(`docs/17`, "Entrar a una mesa con un enlace"). Lo que sigue es el analisis
+con el que se decidio; se conserva porque explica el tope de plazas y la
+ausencia de sala de espera.
 
 ### Lo que pasa hoy, verificado en el codigo
 
@@ -72,8 +74,9 @@ siempre de `owner_id`, no de quien juega (verificado en `QuotaService`). Un
 enlace filtrado no es solo alguien colandose en una ficcion: es **dinero de
 Gabino o de un cliente**. Eso descarta el enlace eterno y publico.
 
-Agravante de hoy: `MAIL_MAILER=log` y `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`
-en produccion. **El correo no prueba nada**: cualquiera se registra con una
+Agravante: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false` en produccion (el correo
+saliente ya funciona desde el 22-09, pero la verificacion sigue apagada a
+proposito). **El correo no prueba nada**: cualquiera se registra con una
 direccion ajena y nadie lo verifica. Asi que la identidad del que entra no la
 da el correo; la da el enlace.
 
@@ -312,13 +315,16 @@ sugerida sin preguntar nada) y funciono.
 
 ## Orden acordado
 
-1. **D-UX-1: enlace de invitacion.** Lo construye Claude. Es lo unico que hoy
-   impide que alguien entre sin que el anfitrion lo lleve de la mano, y no es
-   UX: es servidor.
+1. ~~**D-UX-1: enlace de invitacion.**~~ **Hecho el 22-09**, web y app.
 2. **Medir con gente real** los tres flujos que `docs/16` llama fricciones:
    entrar, crear, primer turno. Con el criterio de aceptacion de `docs/16` como
-   guion.
-3. Lo que salga de esa medicion, con estas cinco decisiones como marco.
+   guion. **Primera señal, 22-09, sin guion**: amigos de Gabino que ya juegan
+   dicen que la interfaz parece "muy junior", amontonada y con colores poco
+   profesionales. No sustituye la medicion con gente que nunca jugo, pero ya
+   es feedback real y apunta al pie saturado (`docs/13` 7.5) y a la paleta.
+3. Lo que salga de esa medicion, con estas cinco decisiones como marco. Si
+   Gabino decide levantar el congelamiento de `docs/14` con lo que ya se oyo,
+   es su decision y se anota alli; nadie lo bloquea.
 
 ## Para el V2 de `docs/16`
 

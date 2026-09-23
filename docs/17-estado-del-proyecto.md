@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-22, 22:05 CST**. Rama `dev`, commit `48938ad`.
+Fecha de corte: **2026-09-22, 23:05 CST**. Rama `dev`, commit `b518c0d`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -236,21 +236,14 @@ amistades de por medio.
 
 | Donde | Tests |
 |---|---|
-| `packages/ui-logic` | 140 |
-| `packages/narrative` | 76 |
-| `packages/api-client` | 31 (+1 saltado) |
-| `packages/core` | 28 |
-| `packages/content` | 27 |
-| `packages/rules` | 23 |
-| `packages/campaign` | 22 |
-| `apps/mobile` | 13 |
-| `apps/web` | 10 |
-| `apps/engine` | 10 |
-| `packages/engine-contract` | 4 |
-| **Monorepo** | **384** |
-| **API (Laravel)** | **99** (551 aserciones) |
+| **Monorepo** (`pnpm -r test`) | **403** |
+| **API (Laravel)** | **123** (646 aserciones) |
 
-Todo en verde el dia del corte. CI en GitHub Actions en ambos repos.
+Contados corriendo las suites el 22-09 a las 23:00 (la version anterior de
+esta tabla decia 384 y 99: se quedo vieja el mismo dia, porque el enlace de
+invitacion, retirar mesas, borrar cuenta y los NPC remotos trajeron tests).
+El detalle por package lo da CI, no este archivo. Todo en verde el dia del
+corte. CI en GitHub Actions en ambos repos.
 
 **Advertencia de metodo, pagada cuatro veces esta semana: los tests verdes no
 ven el circuito completo.** Cuatro fallos reales de este mes pasaron los tests
@@ -304,19 +297,23 @@ roto) y los **textos legales**, publicados como version 1 en `/terminos` y
 
 ### Decidido y no empezado
 
-5. **Medir con gente real** que no haya jugado rol nunca, y ver donde
+4. **Medir con gente real** que no haya jugado rol nunca, y ver donde
    abandonan. Es la decision que ordena todo lo visual: **la lista de trabajo
    de UX sale de esa medicion, no de la impresion que deja el producto de
-   otro.** Ver `docs/14`.
-6. **Auditoria de UX externa** sobre `docs/13`.
+   otro.** Ver `docs/14`. **Primera medicion informal, 22-09**: los amigos de
+   Gabino que ya juegan dicen que la interfaz parece "muy junior", todo
+   amontonado y con colores poco profesionales. Coincide con el problema 7.5
+   de `docs/13` (el pie saturado) y añade la paleta, que hasta ahora nadie
+   habia cuestionado.
+5. **Auditoria de UX externa** sobre `docs/13`.
 
 ### Deuda tecnica conocida
 
-7. `campaign:import` solo trae eventos, no turnos ni bloques: una campaña
+6. `campaign:import` solo trae eventos, no turnos ni bloques: una campaña
    importada se ve vacia.
-8. `composer analyse` declarado sin `phpstan.neon`.
-9. Un solo comando que levante los cuatro servicios locales.
-10. Renombre de DM a GM: plan escrito en `docs/12`, sin ejecutar.
+7. `composer analyse` declarado sin `phpstan.neon`.
+8. Un solo comando que levante los cuatro servicios locales.
+9. Renombre de DM a GM: plan escrito en `docs/12`, sin ejecutar.
 
 ### Congelado a proposito
 
@@ -337,7 +334,7 @@ narrativo.
 | # | Decision | Donde | Por que |
 |---|---|---|---|
 | D1 | El modelo propone, el motor valida, el estado persiste | `docs/02` | El modelo nunca es dueño del estado |
-| D2 | **La web es el producto principal**; el movil es la superficie del jugador | `docs/11`:215 | Mesa propia, independiente, cara para streamers. Ante cualquier disyuntiva gana la web. **`docs/16` principio 5 contradice esto** |
+| D2 | **La web es el producto principal**; el movil es la superficie del jugador | `docs/11`:215 | Mesa propia, independiente, cara para streamers. Ante cualquier disyuntiva gana la web. `docs/16` principio 5 lo contradecia; resuelto en `docs/18` D-UX-2 (la jerarquia se diseña a 390px, la directriz no cambia) |
 | D3 | El cierre del turno es manual, lo da el anfitrion | `docs/13` | Cada turno cuesta dinero; es la unica palanca contra el gasto involuntario. Puesto a critica a proposito |
 | D4 | Los dados los tira el servidor por omision | memoria del proyecto | Se podia escribir "tiro 20". Requisito para packs con roles ocultos |
 | D5 | El pack declara su procedencia; el repo publico solo admite contenido original o licenciado | `docs/07` | Lo demas vive en repos privados |
@@ -375,8 +372,10 @@ detalle esta anotado dentro de ese archivo.
 - **Jugadores con estado individual** en vez de una linea de texto.
 - **Historial de la sesion en tarjetas.**
 - **Configuracion en tres niveles.**
-- **Composicion separada por cliente** (`SessionMobile` / `SessionTablet` /
-  `SessionDesktop`).
+- **Composicion separada por cliente** tal como la propone (`SessionMobile` /
+  `SessionTablet` / `SessionDesktop`). Lo decidido (D-UX-5) son dos
+  composiciones, movil y escritorio, que es lo que de hecho ya hay con la app
+  y la web.
 
 ### Decidido el 22-09 (detalle y motivos en `docs/18-decisiones-ux.md`)
 
