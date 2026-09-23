@@ -51,7 +51,7 @@ export function Root() {
   } else if (!fontsReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
     body = (
       <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.gold} />
+        <ActivityIndicator color={theme.colors.accentBright} />
         <Text style={styles.loading}>Consultando los archivos del gremio...</Text>
       </View>
     )

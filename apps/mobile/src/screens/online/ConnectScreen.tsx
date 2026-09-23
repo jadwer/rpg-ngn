@@ -79,12 +79,12 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright, minWidth: 64 },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },
   spacer: { minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
+  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 1 },
   form: { padding: 20, gap: 16 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
   links: { gap: 8, alignItems: 'center' },
-  linkText: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.goldBright, textDecorationLine: 'underline' },
+  linkText: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.cyan, textDecorationLine: 'underline' },
   foot: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
 })

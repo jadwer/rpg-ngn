@@ -26,13 +26,13 @@ export function RadioRow({ label, sub, selected, disabled = false, onSelect }: P
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
-  rowSelected: { borderColor: theme.colors.gold, backgroundColor: theme.colors.panel2 },
+  rowSelected: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
   rowDisabled: { opacity: 0.5 },
   pressed: { opacity: 0.8 },
   radio: { color: theme.colors.inkDim, fontSize: 16 },
-  radioOn: { color: theme.colors.gold },
+  radioOn: { color: theme.colors.accentBright },
   text: { flex: 1 },
   label: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
-  labelOn: { color: theme.colors.goldBright },
+  labelOn: { color: '#ffffff' },
   sub: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim },
 })

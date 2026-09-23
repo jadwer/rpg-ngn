@@ -383,7 +383,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           ) : null}
           {progress.narrating ? (
             <View style={styles.narrating}>
-              <ActivityIndicator size="small" color={theme.colors.goldBright} />
+              <ActivityIndicator size="small" color={theme.colors.accentBright} />
               <Text style={styles.narratingText}>El DM está narrando...</Text>
             </View>
           ) : null}
@@ -482,22 +482,22 @@ function Segment({ label, active, onPress }: { label: string; active: boolean; o
 const styles = StyleSheet.create({
   presence: { alignItems: 'flex-end', paddingHorizontal: 12, paddingTop: 6, backgroundColor: theme.colors.panel },
   choose: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border, padding: 12, gap: 8 },
-  chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.goldDim },
+  chooseLabel: { fontFamily: theme.fonts.display, fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   chooseHint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan },
   titles: { flex: 1, alignItems: 'center' },
-  title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.gold, textAlign: 'center' },
+  title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, textAlign: 'center' },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center' },
-  sheetsButton: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  sheetsText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold },
+  sheetsButton: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  sheetsText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink },
   connection: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
   toolbar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, overflow: 'hidden' },
+  segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden' },
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
-  segmentActive: { backgroundColor: theme.colors.gold },
-  segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.gold },
+  segmentActive: { backgroundColor: theme.colors.accent },
+  segmentText: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.ink },
   segmentTextActive: { color: theme.colors.bg },
   body: { flex: 1 },
   scroll: { flex: 1 },
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
   empty: { fontFamily: theme.fonts.serifItalic, fontSize: 15, lineHeight: 22, color: theme.colors.inkDim, textAlign: 'center', paddingVertical: 24 },
   start: { marginVertical: 16, padding: 18, gap: 10, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldBright, borderRadius: theme.radius },
-  startTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.goldBright, textAlign: 'center' },
+  startTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.ink, textAlign: 'center' },
   startText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.ink, textAlign: 'center' },
   startStep: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
   startHint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },

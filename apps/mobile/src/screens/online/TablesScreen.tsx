@@ -64,7 +64,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {tables === null && loading ? (
           <View style={styles.center}>
-            <ActivityIndicator color={theme.colors.gold} />
+            <ActivityIndicator color={theme.colors.accentBright} />
             <Text style={styles.hint}>Buscando tus mesas...</Text>
           </View>
         ) : null}
@@ -135,8 +135,8 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright, minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },
+  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 1 },
   who: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, minWidth: 64, maxWidth: 140, textAlign: 'right', textDecorationLine: 'underline' },
   list: { padding: 16, paddingBottom: 40, gap: 10 },
   actions: { gap: 10 },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldDim, borderRadius: theme.radius, padding: 14, gap: 4 },
   pressed: { opacity: 0.8 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  cardTitle: { flex: 1, fontFamily: theme.fonts.display, fontSize: 17, color: theme.colors.gold },
+  cardTitle: { flex: 1, fontFamily: theme.fonts.display, fontSize: 17, color: theme.colors.ink },
   badge: { fontFamily: theme.fonts.serif, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, color: theme.colors.inkDim, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1 },
   role: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
   meta: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
@@ -156,6 +156,6 @@ const styles = StyleSheet.create({
   warn: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   friends: { marginTop: 14 },
   archivadas: { marginTop: 10, gap: 10 },
-  archivadasTitulo: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.goldDim, letterSpacing: 0.5 },
+  archivadasTitulo: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink, letterSpacing: 0.5 },
   cardQuiet: { opacity: 0.7 },
 })

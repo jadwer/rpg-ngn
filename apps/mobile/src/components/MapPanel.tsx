@@ -155,21 +155,21 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
 const styles = StyleSheet.create({
   head: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 10, gap: 2 },
   pressed: { opacity: 0.8 },
-  headTitle: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.gold, letterSpacing: 0.5 },
+  headTitle: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.5 },
   headSub: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
-  headLink: { fontFamily: theme.fonts.serif, fontSize: 11, color: theme.colors.goldDim, textTransform: 'uppercase', letterSpacing: 1 },
+  headLink: { fontFamily: theme.fonts.serif, fontSize: 11, color: theme.colors.cyan, textTransform: 'uppercase', letterSpacing: 1 },
 
   modal: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  headerLink: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright, minWidth: 56 },
-  headerTitle: { fontFamily: theme.fonts.display, fontSize: 18, color: theme.colors.gold, letterSpacing: 1 },
+  headerLink: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 56 },
+  headerTitle: { fontFamily: theme.fonts.display, fontSize: 18, color: theme.colors.ink, letterSpacing: 1 },
   body: { padding: 16, paddingBottom: 40, gap: 12, alignItems: 'center' },
   resumen: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink, alignSelf: 'stretch' },
   selector: { flexDirection: 'row', gap: 6, alignSelf: 'stretch', flexWrap: 'wrap' },
   pestana: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  pestanaActiva: { borderColor: theme.colors.gold, backgroundColor: theme.colors.panel3 },
+  pestanaActiva: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel3 },
   pestanaTexto: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
-  pestanaTextoActivo: { color: theme.colors.goldBright },
+  pestanaTextoActivo: { color: '#ffffff' },
 
   lienzo: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
 

@@ -81,7 +81,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
 const styles = StyleSheet.create({
   wrap: { backgroundColor: theme.colors.panel, borderTopWidth: 1, borderColor: theme.colors.border },
   head: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 8 },
-  title: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.goldBright },
+  title: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim },
   state: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   toggle: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   body: { paddingHorizontal: 12, paddingBottom: 10, gap: 8 },

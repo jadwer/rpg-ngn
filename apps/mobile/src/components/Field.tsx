@@ -19,7 +19,7 @@ export function Field({ label, hint, style, ...input }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 4 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
+  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   input: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 },
   hint: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim },
 })

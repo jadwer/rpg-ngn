@@ -72,9 +72,9 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.goldBright, minWidth: 64 },
+  link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },
   spacer: { minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold, textAlign: 'center', letterSpacing: 1 },
+  title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 1 },
   form: { padding: 20, gap: 16 },
   body: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },

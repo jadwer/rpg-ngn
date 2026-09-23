@@ -31,28 +31,31 @@ export const FONT_ASSETS = {
 
 export const theme = {
   colors: {
-    bg: '#17120e',
-    panel: '#221a13',
-    panel2: '#2b2118',
-    panel3: '#352a1f',
-    border: '#4a392a',
-    borderSoft: '#3a2c20',
-    ink: '#e8dcc8',
-    inkDim: '#a89778',
-    inkFaint: '#7c6d55',
-    gold: '#c9a35c',
-    goldDim: '#8a713f',
-    goldBright: '#e6c67d',
-    accent: '#7d2f28',
-    accentBright: '#b5473d',
-    /** Texto sobre el granate de los botones principales. */
-    onAccent: '#fff5e1',
+    // Paleta de docs/22 (la misma que la web, apps/web/src/app/globals.css).
+    bg: '#0b0f14',
+    panel: '#121826',
+    panel2: '#161d2e',
+    panel3: '#1b2336',
+    border: '#283149',
+    borderSoft: '#1e2639',
+    ink: '#e5e7eb',
+    inkDim: '#9ca3af',
+    inkFaint: '#6b7280',
+    gold: '#d4af37',
+    goldDim: '#8d7628',
+    goldBright: '#e9c95a',
+    accent: '#7c3aed',
+    accentBright: '#8b5cf6',
+    cyan: '#06b6d4',
+    success: '#22c55e',
+    /** Texto sobre el violeta de los botones principales. */
+    onAccent: '#ffffff',
     /** Bloque que se esta leyendo en voz alta. */
-    highlight: 'rgba(201, 163, 92, 0.12)',
+    highlight: 'rgba(124, 58, 237, 0.12)',
     /** Fondo de avisos (error del engine, sin conexion). */
-    warning: '#3a2419',
+    warning: '#2a1d0b',
     /** Texto de error sobre fondo oscuro. */
-    danger: '#e08a80',
+    danger: '#ef4444',
   },
   fonts: {
     display: 'Cinzel_400Regular',

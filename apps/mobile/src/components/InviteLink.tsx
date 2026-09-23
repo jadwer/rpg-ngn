@@ -111,7 +111,7 @@ export function InviteLink({ client, tableId, tableName }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 10, marginBottom: 14 },
-  title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.gold, letterSpacing: 0.5 },
+  title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.5 },
   hint: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, flexShrink: 1 },
   enlace: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
   row: { flexDirection: 'row', gap: 10, alignItems: 'center', flexWrap: 'wrap' },

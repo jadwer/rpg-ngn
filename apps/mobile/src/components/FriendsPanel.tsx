@@ -124,13 +124,13 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 8 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
+  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },
   input: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   found: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 12, gap: 6 },
-  foundName: { fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold },
+  foundName: { fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink },
   foundEmail: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   state: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.ink },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, borderWidth: 1, borderRadius: 8, padding: 8 },

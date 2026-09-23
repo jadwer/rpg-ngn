@@ -137,7 +137,7 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 12 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
+  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   row: { gap: 8, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: 12 },
   provider: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.ink },

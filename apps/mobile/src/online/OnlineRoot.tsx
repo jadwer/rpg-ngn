@@ -217,7 +217,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
   if (stage.name === 'booting') {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.gold} />
+        <ActivityIndicator color={theme.colors.accentBright} />
         <Text style={styles.loading}>Buscando la mesa...</Text>
       </View>
     )

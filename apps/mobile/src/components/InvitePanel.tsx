@@ -201,19 +201,19 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
 const styles = StyleSheet.create({
   wrap: { gap: 8 },
-  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold, marginTop: 10 },
+  label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim, marginTop: 10 },
   member: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   memberText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowText: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },
   input: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 },
-  chip: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
-  chipText: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.gold },
+  chip: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  chipText: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.ink },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   found: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 12, gap: 6 },
-  foundName: { fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.gold },
+  foundName: { fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink },
   foundEmail: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   state: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.ink },
 })

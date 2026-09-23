@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "rpg-ngn",
+    "name": "Ad Astra Mentis",
     "slug": "rpg-ngn",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#17120e",
+    "backgroundColor": "#0b0f14",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#efe3c9",
+        "backgroundColor": "#0b0f14",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

@@ -41,7 +41,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   return (
     <View style={styles.panel}>
       <View style={styles.statusRow}>
-        {progress.narrating ? <ActivityIndicator size="small" color={theme.colors.goldBright} /> : null}
+        {progress.narrating ? <ActivityIndicator size="small" color={theme.colors.accentBright} /> : null}
         <Text style={[styles.status, progress.narrating && styles.statusNarrating]} numberOfLines={focused ? 1 : 3}>
           {line}
         </Text>
@@ -129,8 +129,8 @@ const styles = StyleSheet.create({
   dice: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   diceNotice: { fontFamily: theme.fonts.serif, fontSize: 12, lineHeight: 16, color: theme.colors.inkDim },
   diceLabel: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: theme.colors.inkDim, marginRight: 2 },
-  dieButton: { borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: theme.colors.panel },
-  dieText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.gold },
+  dieButton: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: theme.colors.panel },
+  dieText: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink },
   dieDisabled: { opacity: 0.45 },
   diePressed: { opacity: 0.7 },
   input: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
