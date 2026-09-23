@@ -35,6 +35,7 @@ experiencia, que es donde el resto va mas flojo.
    solo cuando queda poco.
 5. **Dos composiciones** (movil y escritorio), no tres. Tres niveles de
    configuracion, aceptados.
+6. **Dos menus**: uno de sistema y sitio, otro del juego (22-09).
 
 ---
 
@@ -305,6 +306,28 @@ sugerida sin preguntar nada) y funciono.
 > y se note, no antes. Los tres niveles de configuracion se aceptan tal cual.
 
 ---
+
+## D-UX-6: Dos menus, sistema y juego (decidida el 22-09)
+
+Lo que hay hoy: todo apilado en el pie de la mesa y en la cabecera
+(`docs/13` 4.5 y 7.5). Gabino lo confirmo el 22-09 ("el pie esta muy
+saturado") y fijo la forma:
+
+> **DECIDIDO (Gabino, 2026-09-22): dos menus, no uno.** Uno de **sistema y
+> sitio** (navegacion general: mesas, perfil, saldo, salir) y otro **del
+> juego** (fichas, mapa, jugadores, historial y lo demas de la partida).
+> Cada uno como hamburguesa o como barra.
+
+Como se aplica en cada composicion (propuesta de Claude, dentro de la
+decision):
+- **390 px**: el de sistema es una hamburguesa arriba, porque durante la
+  partida casi no se toca; el del juego es una barra al pie, que es lo que
+  `docs/16` llama superficies ("Sesion / Personaje / Jugadores / Mas") y lo
+  que ya dibujaba el mockup movil. Dos barras fijas a la vez no: entre las dos
+  y el teclado no quedaria sitio para la narracion.
+- **Escritorio**: el de sistema como barra superior, el del juego como
+  columna o barra lateral; la narracion sigue siendo la columna ancha.
+- El saldo vive en el menu de sistema, nunca en el del juego (D-UX-4).
 
 ## Lo que NO se decide aqui
 

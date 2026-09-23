@@ -203,6 +203,14 @@ que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
   (personalidad, mando del anfitrion, fichas) bajo demanda (D-UX-2: jerarquia
   a 390, acabado primero en web; D-UX-5: dos composiciones).
+- **Dos menus, no uno** (Gabino, 22-09, D-UX-6 en `docs/18`): uno de
+  **sistema y sitio** (mesas, perfil, saldo, salir) y otro **del juego**
+  (fichas, mapa, jugadores, historial). En 390 px el del sistema es una
+  hamburguesa, porque durante la partida casi no se toca, y el del juego una
+  barra al pie (es el "Sesion / Personaje / Jugadores / Mas" de `docs/16` y
+  del mockup movil); dos barras fijas a la vez se comerian el alto que
+  necesita la narracion. En escritorio el del sistema puede ser barra
+  superior.
 - **Jugadores con estado** (listo, escribiendo, pensando) en vez de "faltan
   por responder". "Escribiendo" no existe: hace falta que el cliente avise
   mientras teclea (marca en `table_members`, la sonda ya existe).
