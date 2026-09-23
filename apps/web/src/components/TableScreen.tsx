@@ -12,6 +12,7 @@ import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
+import { ChroniclePanel } from './ChroniclePanel'
 import { Drawer } from './Drawer'
 import { GameBar, type GamePanel } from './GameBar'
 import { HostPanel } from './HostPanel'
@@ -652,6 +653,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                   </button>
                 </p>
               ) : null}
+              <div className="label">Compartir la historia</div>
+              <ChroniclePanel client={client} tableId={table.id} />
               <div className="label">Pantalla</div>
               <div className="row">
                 <button

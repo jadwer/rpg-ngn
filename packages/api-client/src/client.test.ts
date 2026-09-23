@@ -301,3 +301,31 @@ describe('red y errores', () => {
     expect(randomKey()).not.toBe(randomKey())
   })
 })
+
+describe('cronica compartible', () => {
+  const share = { token: 'abcdefghijklmnopqrstuvwx', anonymize: true, public: false, mine: true, members: [{ memberId: '4', name: 'Gabino', consented: true }] }
+
+  it('pide el enlace con anonimizar, acepta y retira sobre la mesa', async () => {
+    const { api, calls } = client({
+      'POST /api/v1/tables/2/chronicle': { status: 201, body: { data: share } },
+      'POST /api/v1/tables/2/chronicle/consent': { body: { data: { ...share, public: true } } },
+      'DELETE /api/v1/tables/2/chronicle': { body: { data: null } },
+      'GET /api/v1/tables/2/chronicle': { body: { data: null } },
+    })
+
+    expect(await api.shareChronicle(2, { anonymize: true })).toEqual(share)
+    expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ anonymize: true })
+    expect((await api.consentChronicle(2)).public).toBe(true)
+    await api.withdrawChronicle(2)
+    expect(await api.chronicleShare(2)).toBeNull()
+  })
+
+  it('lee la cronica publica sin mandar el token de la cuenta', async () => {
+    const { api, calls } = client({
+      'GET /api/v1/chronicles/abcdefghijklmnopqrstuvwx': { body: { data: { title: 'Valdoria', pack: { id: 'pilot', version: '0.4.0', name: null }, players: null, sessions: [] } } },
+    })
+
+    expect((await api.chronicle('abcdefghijklmnopqrstuvwx')).title).toBe('Valdoria')
+    expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
+  })
+})

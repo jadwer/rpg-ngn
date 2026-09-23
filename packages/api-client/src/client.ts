@@ -18,6 +18,8 @@ import type {
   ResponseReceipt,
   SessionClosed,
   SessionSummary,
+  Chronicle,
+  ChronicleShare,
   InvitePreview,
   TableInvite,
   TableMember,
@@ -80,6 +82,16 @@ export interface ApiClient extends AccountApi, SettingsApi {
   invitePreview(token: string): Promise<InvitePreview>
   /** Entra a la mesa con el enlace. Devuelve el id de la mesa. */
   acceptInvite(token: string): Promise<string>
+  /** El enlace a la cronica de la mesa, o null si nadie lo pidio (o se retiro). */
+  chronicleShare(tableId: string | number): Promise<ChronicleShare | null>
+  /** Pedir el enlace; quien lo pide ya acepta. Devuelve el vigente si ya habia uno. */
+  shareChronicle(tableId: string | number, options?: { anonymize?: boolean }): Promise<ChronicleShare>
+  /** Aceptar que la cronica se vea con el enlace. */
+  consentChronicle(tableId: string | number): Promise<ChronicleShare>
+  /** Retirar el enlace; cualquiera de la mesa puede, y es definitivo. */
+  withdrawChronicle(tableId: string | number): Promise<void>
+  /** La cronica publica; sin cuenta. Falla con 404 si no todos aceptaron. */
+  chronicle(token: string): Promise<Chronicle>
   /** Amistades donde participa el usuario, pedidas o recibidas, en cualquier estado. */
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
@@ -215,6 +227,31 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async acceptInvite(token) {
       const { data } = await request<{ data: { tableId: string } }>(`/api/v1/invites/${token}/accept`, { method: 'POST' })
       return data.data.tableId
+    },
+
+    async chronicleShare(tableId) {
+      const { data } = await request<{ data: ChronicleShare | null }>(`/api/v1/tables/${tableId}/chronicle`)
+      return data.data
+    },
+
+    async shareChronicle(tableId, options) {
+      const body = options?.anonymize !== undefined ? { anonymize: options.anonymize } : {}
+      const { data } = await request<{ data: ChronicleShare }>(`/api/v1/tables/${tableId}/chronicle`, { method: 'POST', body })
+      return data.data
+    },
+
+    async consentChronicle(tableId) {
+      const { data } = await request<{ data: ChronicleShare }>(`/api/v1/tables/${tableId}/chronicle/consent`, { method: 'POST' })
+      return data.data
+    },
+
+    async withdrawChronicle(tableId) {
+      await request(`/api/v1/tables/${tableId}/chronicle`, { method: 'DELETE' })
+    },
+
+    async chronicle(token) {
+      const { data } = await request<{ data: Chronicle }>(`/api/v1/chronicles/${encodeURIComponent(token)}`, { anonymous: true })
+      return data.data
     },
 
     async listFriendships() {

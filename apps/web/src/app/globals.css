@@ -3941,3 +3941,62 @@ a {
 .mundos input[type='file'] {
   padding: 8px;
 }
+
+/* Cronica compartida (docs/24, seccion 4): se lee como un libro. */
+.cronica {
+  font-family: var(--font-serif);
+  line-height: 1.65;
+}
+.cronica-head {
+  margin: 24px 0 12px;
+}
+.cronica-head .kicker {
+  color: var(--accent-bright);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.cronica-head h1 {
+  font-family: var(--font-display);
+  margin: 4px 0 8px;
+}
+.cronica-session h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 6px;
+  margin-top: 32px;
+}
+.cronica-turn {
+  margin: 18px 0;
+}
+.cronica-actions {
+  list-style: none;
+  padding: 10px 14px;
+  margin: 0 0 10px;
+  border-left: 3px solid var(--accent);
+  background: var(--highlight);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--ink-dim);
+}
+.cronica-narration,
+.cronica-dialogue {
+  margin: 0 0 10px;
+  font-size: 1.08rem;
+}
+.cronica-dialogue b {
+  color: var(--cyan);
+}
+.cronica-roll {
+  margin: 0 0 10px;
+  color: var(--ink-faint);
+  font-size: 0.92rem;
+}
+.cronica-foot {
+  margin: 40px 0 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-soft);
+  color: var(--ink-dim);
+}

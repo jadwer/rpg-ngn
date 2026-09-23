@@ -60,6 +60,35 @@ export interface TableInvite {
   expiresAt?: string
 }
 
+/** El enlace a la cronica de una mesa y quien falta por aceptar (docs/24, seccion 4). */
+export interface ChronicleShare {
+  token: string
+  anonymize: boolean
+  /** Todos los miembros actuales aceptaron y no se retiro: el enlace se ve. */
+  public: boolean
+  /** Quien mira ya acepto. */
+  mine: boolean
+  members: Array<{ memberId: string; name: string | null; consented: boolean }>
+}
+
+/** Un bloque de la cronica publica: solo lo que se lee, nunca avisos internos. */
+export type ChronicleBlock =
+  | { type: 'narration'; text: string }
+  | { type: 'dialogue'; speaker: string; text: string }
+  | { type: 'roll'; text: string; actor: string; die: string; result: number }
+
+/** La cronica publica de una mesa, tal como la ve quien abre el enlace. */
+export interface Chronicle {
+  title: string
+  pack: { id: string; version: string; name: string | null }
+  /** Null si la mesa pidio no enseñar quien jugo. */
+  players: Array<{ name: string | null; character: string | null }> | null
+  sessions: Array<{
+    code: string
+    turns: Array<{ number: number; actions: Array<{ character: string; text: string }>; blocks: ChronicleBlock[] }>
+  }>
+}
+
 /** A que mesa invita un enlace, antes de entrar (y sin tener cuenta). */
 export interface InvitePreview {
   tableId: string
