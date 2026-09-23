@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { Isotipo } from './components/Brand'
 import { OnlineRoot } from './online/OnlineRoot'
 import { loadBundledPack, loadOfflineCampaign, type OfflineCampaign } from './pack/offline'
 import { ModePicker } from './screens/ModePicker'
@@ -51,8 +52,8 @@ export function Root() {
   } else if (!fontsReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
     body = (
       <View style={styles.center}>
-        <ActivityIndicator color={theme.colors.accentBright} />
-        <Text style={styles.loading}>Consultando los archivos del gremio...</Text>
+        <Isotipo height={96} color={theme.colors.ink} />
+        <ActivityIndicator color={theme.colors.accentBright} style={{ marginTop: 18 }} />
       </View>
     )
   } else if (screen.name === 'mode') {

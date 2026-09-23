@@ -21,9 +21,9 @@ export function Button({ label, onPress, primary = false, disabled = false, busy
 }
 
 const styles = StyleSheet.create({
-  button: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: theme.colors.panel, alignItems: 'center', justifyContent: 'center', minHeight: 40 },
-  small: { paddingHorizontal: 12, paddingVertical: 6, minHeight: 32 },
-  primary: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
+  button: { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel3, alignItems: 'center', justifyContent: 'center', minHeight: 44 },
+  small: { paddingHorizontal: 12, paddingVertical: 6, minHeight: 34, borderRadius: 10 },
+  primary: { backgroundColor: theme.colors.accent },
   disabled: { opacity: 0.45 },
   pressed: { opacity: 0.7 },
   text: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.5 },

@@ -60,11 +60,11 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
 
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  card: { width: '31%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 8, alignItems: 'center', gap: 2 },
+  card: { width: '31%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 8, alignItems: 'center', gap: 2 },
   selected: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
   taken: { opacity: 0.6 },
   pressed: { opacity: 0.8 },
-  none: { width: 72, height: 72, borderRadius: 14, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center', justifyContent: 'center' },
+  none: { width: 72, height: 72, borderRadius: 14, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, alignItems: 'center', justifyContent: 'center' },
   noneMark: { fontFamily: theme.fonts.display, fontSize: 30, color: theme.colors.inkDim },
   name: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.ink, marginTop: 4, textAlign: 'center' },
   nameSelected: { color: '#ffffff' },

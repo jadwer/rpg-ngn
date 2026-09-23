@@ -36,8 +36,8 @@ export const theme = {
     panel: '#121826',
     panel2: '#161d2e',
     panel3: '#1b2336',
-    border: '#283149',
-    borderSoft: '#1e2639',
+    border: '#252d42',
+    borderSoft: '#1b2234',
     ink: '#e5e7eb',
     inkDim: '#9ca3af',
     inkFaint: '#6b7280',
@@ -65,7 +65,7 @@ export const theme = {
     serifSemiBold: 'CrimsonPro_600SemiBold',
     serifBold: 'CrimsonPro_700Bold',
   },
-  radius: 10,
+  radius: 16,
   space: 12,
 } as const
 

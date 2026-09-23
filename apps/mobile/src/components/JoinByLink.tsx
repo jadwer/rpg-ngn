@@ -125,7 +125,7 @@ export function JoinByLink({ client, onOpen, onRefresh }: Props) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10, alignItems: 'center', flexWrap: 'wrap' },
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 10 },
+  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10 },
   title: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.5 },
   hint: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },

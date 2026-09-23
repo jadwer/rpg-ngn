@@ -59,7 +59,7 @@ export function TtsBar({ tts, autoRead = false }: Props) {
           {autoRead ? (
             <View style={styles.switchRow}>
               <Text style={styles.switchLabel}>Leer lo nuevo desde este teléfono</Text>
-              <Switch value={tts.autoRead} onValueChange={tts.setAutoRead} trackColor={{ true: theme.colors.gold, false: theme.colors.border }} thumbColor={theme.colors.ink} />
+              <Switch value={tts.autoRead} onValueChange={tts.setAutoRead} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} thumbColor={theme.colors.ink} />
             </View>
           ) : null}
 
@@ -119,13 +119,13 @@ const styles = StyleSheet.create({
   summary: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, minHeight: 30 },
   summaryText: { flexShrink: 1, fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'right' },
   summaryWarn: { color: theme.colors.goldBright },
-  chevron: { color: theme.colors.gold, fontSize: 13 },
+  chevron: { color: theme.colors.inkDim, fontSize: 13 },
   panel: { gap: 8, paddingTop: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   rate: { fontFamily: theme.fonts.display, fontSize: 12, color: theme.colors.inkDim },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   switchLabel: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
-  narrating: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.gold },
+  narrating: { flex: 1, fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.accentBright },
   noticeRow: { gap: 4 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   link: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.cyan, textDecorationLine: 'underline' },

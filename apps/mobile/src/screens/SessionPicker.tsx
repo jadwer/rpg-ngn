@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   title: { fontFamily: theme.fonts.display, fontSize: 30, color: theme.colors.ink, textAlign: 'center', letterSpacing: 2, textTransform: 'uppercase' },
   tagline: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, textAlign: 'center', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase', fontSize: 12 },
   hint: { fontFamily: theme.fonts.serif, color: theme.colors.inkDim, fontSize: 14, marginTop: 6 },
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 4 },
+  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 4 },
   cardNext: { borderColor: theme.colors.accentBright },
   pressed: { opacity: 0.8 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },

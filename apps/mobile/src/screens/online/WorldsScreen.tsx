@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   name: { fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink },
   tagline: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.ink },
   chip: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.accentBright, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
-  input: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10, minHeight: 60 },
+  input: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, padding: 10, minHeight: 60 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   preview: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   pc: { width: 96, alignItems: 'center', gap: 4 },

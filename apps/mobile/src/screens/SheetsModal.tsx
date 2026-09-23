@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   headerLink: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 56 },
   headerTitle: { fontFamily: theme.fonts.display, fontSize: 18, color: theme.colors.ink, letterSpacing: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 16, paddingBottom: 40 },
-  card: { width: '47%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 10, alignItems: 'center', gap: 3 },
+  card: { width: '47%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 10, alignItems: 'center', gap: 3 },
   cardFree: { borderColor: theme.colors.accentBright },
   cardMine: { borderColor: theme.colors.accentBright },
   pressed: { opacity: 0.8 },

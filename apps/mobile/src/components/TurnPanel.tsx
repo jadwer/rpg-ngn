@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   statusNarrating: { fontFamily: theme.fonts.serifItalic, color: theme.colors.goldBright },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.inkDim, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 2 },
-  chipDone: { color: theme.colors.gold, borderColor: theme.colors.goldDim, backgroundColor: theme.colors.panel2 },
+  chipDone: { color: theme.colors.success, borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: theme.colors.panel2 },
   error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 8, padding: 8 },
   notice: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   compose: { gap: 8 },
@@ -163,6 +163,6 @@ const styles = StyleSheet.create({
   dieDisabled: { opacity: 0.45 },
   diePressed: { opacity: 0.7 },
   input: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
-  sent: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.gold },
+  sent: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.success },
   actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
 })

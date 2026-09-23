@@ -58,7 +58,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
           </Text>
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.gold} colors={[theme.colors.gold]} progressBackgroundColor={theme.colors.panel} />}>
+      <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.accentBright} colors={[theme.colors.accentBright]} progressBackgroundColor={theme.colors.panel} />}>
         <View style={styles.actions}>
           <Button label="Crear mesa" primary onPress={onCreate} />
           <Button label="Mundos" onPress={onWorlds} />
@@ -140,13 +140,13 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.serif, fontSize: 16, color: theme.colors.cyan, minWidth: 64 },
   title: { flex: 1, fontFamily: theme.fonts.display, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 1 },
-  who: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.goldBright, minWidth: 64, maxWidth: 140, textAlign: 'right', textDecorationLine: 'underline' },
+  who: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.cyan, minWidth: 64, maxWidth: 140, textAlign: 'right', textDecorationLine: 'underline' },
   list: { padding: 16, paddingBottom: 40, gap: 10 },
   actions: { gap: 10 },
   center: { alignItems: 'center', padding: 24, gap: 10 },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
   error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger, textAlign: 'center' },
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldDim, borderRadius: theme.radius, padding: 14, gap: 4 },
+  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 4 },
   pressed: { opacity: 0.8 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   cardTitle: { flex: 1, fontFamily: theme.fonts.display, fontSize: 17, color: theme.colors.ink },

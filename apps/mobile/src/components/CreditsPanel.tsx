@@ -78,7 +78,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, padding: 14, gap: 10 },
+  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10 },
   label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.serif, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },

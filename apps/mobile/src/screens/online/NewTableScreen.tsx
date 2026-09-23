@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   block: { gap: 6 },
   label: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.inkDim },
   value: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
-  premise: { fontFamily: theme.fonts.serif, fontSize: 15, lineHeight: 21, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 110, textAlignVertical: 'top' },
+  premise: { fontFamily: theme.fonts.serif, fontSize: 15, lineHeight: 21, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 110, textAlignVertical: 'top' },
   hint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.danger },
   actions: { gap: 8, alignItems: 'flex-start', marginTop: 4 },

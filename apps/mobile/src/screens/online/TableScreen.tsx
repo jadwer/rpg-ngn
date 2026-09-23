@@ -3,7 +3,7 @@ import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
@@ -479,8 +479,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           ) : null}
           {progress.narrating ? (
             <View style={styles.narrating}>
-              <ActivityIndicator size="small" color={theme.colors.accentBright} />
-              <Text style={styles.narratingText}>{waiting ?? 'El director narra...'}</Text>
+              <Text style={styles.narratingKicker}>EL DESTINO SE PREPARA</Text>
+              <View style={styles.dots}>
+                {[0, 1, 2].map((i) => (
+                  <View key={i} style={[styles.dot, { opacity: (Math.floor(now / 400) % 3) === i ? 1 : 0.35 }]} />
+                ))}
+              </View>
+              <Text style={styles.narratingText}>{waiting ?? 'La mesa está jugando.'}</Text>
             </View>
           ) : null}
         </ScrollView>
@@ -513,7 +518,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </View>
       ) : null}
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} />
-      <GameBar panels={gamePanels} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
+      <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 
       {maps.length > 0 ? (
         <MapPanel
@@ -627,6 +632,9 @@ const styles = StyleSheet.create({
   startText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.ink, textAlign: 'center' },
   startStep: { fontFamily: theme.fonts.serif, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
   startHint: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
-  narrating: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
-  narratingText: { fontFamily: theme.fonts.serifItalic, fontSize: 15, color: theme.colors.goldBright },
+  narrating: { alignItems: 'center', gap: 10, paddingVertical: 20, paddingHorizontal: 16, marginVertical: 10, borderRadius: theme.radius, backgroundColor: theme.colors.panel2 },
+  narratingKicker: { fontFamily: theme.fonts.display, fontSize: 12, letterSpacing: 2, color: theme.colors.accentBright },
+  dots: { flexDirection: 'row', gap: 10 },
+  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: theme.colors.accentBright },
+  narratingText: { fontFamily: theme.fonts.serifItalic, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
 })

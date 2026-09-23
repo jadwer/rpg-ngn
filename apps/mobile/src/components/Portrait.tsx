@@ -26,8 +26,8 @@ export function Portrait({ path, uri, name, size = 48, muted = false }: Props) {
 }
 
 const styles = StyleSheet.create({
-  image: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border },
+  image: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft },
   muted: { opacity: 0.55 },
-  placeholder: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center', justifyContent: 'center' },
-  initial: { fontFamily: theme.fonts.displayBold, color: theme.colors.gold },
+  placeholder: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, alignItems: 'center', justifyContent: 'center' },
+  initial: { fontFamily: theme.fonts.displayBold, color: theme.colors.accentBright },
 })

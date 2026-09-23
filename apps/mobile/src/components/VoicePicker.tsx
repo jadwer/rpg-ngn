@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   chipOn: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
   chipText: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.inkDim },
   chipTextOn: { color: '#ffffff' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   rowSelected: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowText: { flex: 1 },

@@ -94,7 +94,7 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
 const styles = StyleSheet.create({
   abrir: { alignSelf: 'flex-start', marginTop: 6 },
   abrirTexto: { fontFamily: theme.fonts.serif, fontSize: 12, color: theme.colors.cyan, textTransform: 'uppercase', letterSpacing: 1 },
-  panel: { marginTop: 8, padding: 10, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius, backgroundColor: theme.colors.panel2, gap: 8 },
+  panel: { marginTop: 8, padding: 10, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, backgroundColor: theme.colors.panel2, gap: 8 },
   hint: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.danger },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
