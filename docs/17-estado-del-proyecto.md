@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, 00:50 CST**. Rama `dev`, commit `bfe89b3`.
+Fecha de corte: **2026-09-23, 13:30 CST**. Rama `dev`, commit `eaca12c`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -144,6 +144,22 @@ no se podia guardar en la web porque el "Guardar" del director solo se
 encendia al cambiar el proveedor; ahora dados y secretos guardan al elegir.
 De paso, el estado de la mesa lleva `away` (quien tuvo que irse) para que los
 demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
+
+### Marca y portada (23-09)
+
+- **El producto se llama Ad Astra Mentis** (docs/21 y docs/22). Adoptado
+  antes de registrar la marca, por decision de Gabino: que se vea y se pruebe
+  antes de pagar. La direccion sigue siendo rpg-worlds.gabinoramirez.com y los
+  legales dicen "Ad Astra Mentis, antes rpg-worlds".
+- **Portada nueva** con el orden de docs/22: hero con la lamina y el logo en
+  vector, pilares, motor y mundos, como funciona, cierre y pie. Tarjetas de
+  mundos por escenario (fantasia medieval, China antigua, baile de mascaras),
+  sin nombres ni arte identificable de terceros. Redes en el pie: GitHub
+  real; Discord, YouTube y X en gris hasta que existan.
+- **Marca en vector**: `img/branding/` (isotipo, mini, wordmark, logos) y
+  `apps/web/src/components/Brand.tsx`; icono de app, favicon y apple-icon.
+- **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
+  para imprenta, y el nombre en la app (`android.package`).
 
 ### Retratos y NPC
 

@@ -235,6 +235,21 @@ que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
   tecnico: 5 a 25 segundos por turno que hoy son tiempo muerto.
 - El saldo no aparece en la mesa (D-UX-4).
 
+**B1b. Marca y portada (23-09, decidido por Gabino sobre la marcha).** La
+identidad **Ad Astra Mentis** (docs/21 y docs/22, propuesta con GPT; lamina
+y trazado en `img/branding/`) se adopta **antes de registrarla**: es barato
+cambiar de nombre ahora y caro pedirle al cliente que se imagine que esta
+bonito. Hecho y en produccion (`eaca12c`): portada nueva con el orden de
+docs/22 (hero con la lamina y el logo en vector, pilares, "Un motor.
+Infinitos mundos.", tarjetas de mundos por escenario sin nombres de terceros,
+como funciona, cierre, pie con redes), marca en vector (`components/Brand.tsx`
+sobre `generated/brand.ts`), icono, favicon, metadatos y cabeceras con el
+nombre nuevo, legales con "antes rpg-worlds" en la misma version. **Pendiente
+antes de registrar**: busqueda de marca (IMPI, USPTO), dominio, acento de
+"Mentis" (docs/21 juega con "de a mentis"), URLs de Discord, YouTube y X
+(hoy en gris), un redibujo limpio del logo para imprenta, y el
+`android.package` (H14), que fija este nombre para siempre.
+
 **B2. Paleta y jerarquia.** Decidido por Claude el 22-09 (Gabino se lo dejo):
 **la paleta se queda**; lo "junior" es composicion (todo tarjeta con borde y
 etiqueta en mayusculas, apilado), asi que la jerarquia entra en B1 como
