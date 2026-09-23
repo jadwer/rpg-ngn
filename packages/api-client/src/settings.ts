@@ -160,6 +160,10 @@ export interface SettingsApi {
   deletePack(packId: number): Promise<{ retired: boolean; message: string }>
   /** El catalogo publico: lo que otros publicaron y paso revision. */
   listCatalog(): Promise<PackOption[]>
+  /** La cola de revision del catalogo; 403 si la cuenta no es de administracion. */
+  reviewQueue(): Promise<Array<PackOption & { requestedAt?: string | null; bytes?: number }>>
+  /** Aprobar un mundo pendiente, o rechazarlo con el motivo que leera su autor. */
+  reviewPack(packId: number, decision: 'approve' | 'reject', note?: string): Promise<PackOption>
   activatePack(packId: number): Promise<PackOption>
   deactivatePack(packId: number): Promise<PackOption>
   /** Los mapas de un pack, con los lugares ya posados sobre la imagen. */
@@ -229,6 +233,17 @@ export function settingsApi(request: Request): SettingsApi {
 
     async listCatalog() {
       const { data } = await request<{ data: PackOption[] }>('/api/v1/packs/catalog')
+      return data.data
+    },
+
+    async reviewQueue() {
+      const { data } = await request<{ data: Array<PackOption & { requestedAt?: string | null; bytes?: number }> }>('/api/v1/packs/review')
+      return data.data
+    },
+
+    async reviewPack(packId, decision, note) {
+      const body = note !== undefined ? { decision, note } : { decision }
+      const { data } = await request<{ data: PackOption }>(`/api/v1/packs/review/${packId}`, { method: 'POST', body })
       return data.data
     },
 

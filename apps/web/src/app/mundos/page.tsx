@@ -3,6 +3,7 @@
 import { ApiError, type ApiClient, type PackIssue, type PackOption } from '@rpg-ngn/api-client'
 import { packOriginText, packStatusText } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { PackPreview } from '../../components/PackPreview'
 import { RequireSession } from '../../components/RequireSession'
 import { UserBar } from '../../components/UserBar'
 import type { StoredUser } from '../../lib/storage'
@@ -21,6 +22,10 @@ export default function WorldsPage() {
 function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
   const [mine, setMine] = useState<{ packs: PackOption[]; freeLimit: number; used: number } | null>(null)
   const [catalog, setCatalog] = useState<PackOption[] | null>(null)
+  // La cola de revision: null si la cuenta no es de administracion (403).
+  const [review, setReview] = useState<PackOption[] | null>(null)
+  // El mundo cuyo visor esta abierto (id del engine).
+  const [previewing, setPreviewing] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -43,6 +48,7 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
       setMine(m)
       setCatalog(c)
       setError(null)
+      setReview(await client.reviewQueue().catch(() => null))
     } catch (caught) {
       fail(caught)
     }
@@ -88,6 +94,14 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
   }
 
   const remaining = mine ? Math.max(0, mine.freeLimit - mine.used) : null
+
+  // Cada lista abre su propio visor: el mismo mundo puede estar en revision,
+  // en los tuyos y en el catalogo a la vez.
+  const previewToggle = (key: string) => (
+    <button type="button" className="btn ghost small" onClick={() => setPreviewing((cur) => (cur === key ? null : key))}>
+      {previewing === key ? 'Ocultar personajes' : 'Ver personajes'}
+    </button>
+  )
 
   return (
     <main className="page narrow mundos">
@@ -141,6 +155,47 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
 
       {error ? <div className="error">{error}</div> : null}
 
+      {review ? (
+        <section className="stack" style={{ marginTop: 20 }}>
+          <div className="label">Revisión del catálogo</div>
+          <p className="hint">Se mira en este orden: procedencia, contenido sexual o de odio, menores y datos personales de terceros. Un rechazo lleva motivo: el autor lo lee para corregir.</p>
+          {review.length === 0 ? <p className="hint">Nada en la cola.</p> : null}
+          {review.map((p) => (
+            <article key={p.packId} className="card mundo-propio">
+              <div className="top">
+                <div>
+                  <h3>{p.name}</h3>
+                  <span className="hint">
+                    {packOriginText({ origin: 'catalog', author: p.author ?? null })} · versión {p.version} · {p.system}
+                  </span>
+                </div>
+              </div>
+              <p className="hint">
+                Procedencia: {String(p.provenance?.['class'] ?? '?')} · licencia {String(p.provenance?.['license'] ?? '?')}
+              </p>
+              {previewing === `review:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
+              <div className="row">
+                {previewToggle(`review:${p.id}`)}
+                <button type="button" className="btn primary small" disabled={busy} onClick={() => void act(() => client.reviewPack(p.packId!, 'approve'))}>
+                  Publicar
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost small danger"
+                  disabled={busy}
+                  onClick={() => {
+                    const note = window.prompt('Motivo del rechazo (lo lee el autor):')
+                    if (note && note.trim()) void act(() => client.reviewPack(p.packId!, 'reject', note.trim()))
+                  }}
+                >
+                  Rechazar
+                </button>
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : null}
+
       <section className="stack" style={{ marginTop: 20 }}>
         <div className="label">Mis mundos</div>
         {mine === null ? <p className="hint">Cargando...</p> : mine.packs.length === 0 ? <p className="hint">Todavía no has subido ninguno.</p> : null}
@@ -161,7 +216,9 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
             </p>
             {p.status === 'rejected' && p.reviewNote ? <div className="error">No se publicó: {p.reviewNote}</div> : null}
             {p.status === 'pending' ? <p className="hint">En la cola de revisión: cuando pase, aparece en el catálogo con tu nombre.</p> : null}
+            {previewing === `mine:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
             <div className="row">
+              {previewToggle(`mine:${p.id}`)}
               {p.status === 'private' || p.status === 'rejected' ? (
                 <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.publishPack(p.packId!))}>
                   Pedir publicación
@@ -206,8 +263,10 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
             <p className="hint">
               {p.characters} personajes, {p.sessions} sesiones.
             </p>
+            {previewing === `catalog:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
             {!p.mine ? (
               <div className="row">
+                {previewToggle(`catalog:${p.id}`)}
                 {p.activated ? (
                   <button type="button" className="btn ghost small" disabled={busy} onClick={() => void act(() => client.deactivatePack(p.packId!))}>
                     Quitar de mis mundos

@@ -55,6 +55,16 @@ export async function validateRepo(root: string): Promise<ValidationReport> {
   return { packs: packNames, campaigns: campaignNames, issues, ok: !hasErrors(issues) }
 }
 
+/**
+ * Valida una sola carpeta de pack, fuera de `content/packs` (la de un autor
+ * que va a subir su .rpgpack). Mismas reglas que el engine al recibirlo.
+ */
+export async function validatePackDir(dir: string): Promise<ValidationReport> {
+  const result = await loadPack(fsSource(dir))
+  const id = result.pack?.manifest.id ?? dir.split('/').at(-1) ?? dir
+  return { packs: [id], campaigns: [], issues: result.issues, ok: !hasErrors(result.issues) }
+}
+
 async function subdirectories(dir: string): Promise<string[]> {
   try {
     // Sin `withFileTypes`: `isDirectory()` da false para un enlace simbolico

@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, writeFile, cp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { validateRepo } from './validate.js'
+import { validatePackDir, validateRepo } from './validate.js'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
 
@@ -44,5 +44,19 @@ describe('validateRepo', () => {
 
     expect(report.ok).toBe(false)
     expect(report.issues[0]?.message).toContain('content/packs/huerfana')
+  })
+})
+
+describe('validatePackDir', () => {
+  it('valida una carpeta de pack suelta, como la de un autor', async () => {
+    const report = await validatePackDir(join(repoRoot, 'content/packs/pilot'))
+    expect(report.ok).toBe(true)
+    expect(report.packs).toEqual(['pilot'])
+  })
+
+  it('una carpeta sin pack.json es error', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'rpg-pack-'))
+    const report = await validatePackDir(root)
+    expect(report.ok).toBe(false)
   })
 })
