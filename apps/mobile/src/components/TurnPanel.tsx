@@ -49,12 +49,16 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
   return (
     <View style={styles.panel}>
-      <View style={styles.statusRow}>
-        {progress.narrating ? <ActivityIndicator size="small" color={theme.colors.accentBright} /> : null}
-        <Text style={[styles.status, progress.narrating && styles.statusNarrating]} numberOfLines={focused ? 1 : 3}>
-          {line}
-        </Text>
-      </View>
+      {/* Con el cuadro de respuesta delante, el turno ya lo dice la cabecera y
+          quien falta, Jugadores: aqui solo cuando no toca responder. */}
+      {!progress.canRespond ? (
+        <View style={styles.statusRow}>
+          {progress.narrating ? <ActivityIndicator size="small" color={theme.colors.accentBright} /> : null}
+          <Text style={[styles.status, progress.narrating && styles.statusNarrating]} numberOfLines={focused ? 1 : 3}>
+            {line}
+          </Text>
+        </View>
+      ) : null}
 
       {countdown.active ? (
         <View style={styles.countdown}>
@@ -70,16 +74,6 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       ) : null}
       {seatsLine && !focused ? <Text style={styles.seats}>{seatsLine}</Text> : null}
 
-      {turn && !focused && !progress.narrating && (progress.responded.length > 0 || progress.pending.length > 0) ? (
-        <View style={styles.chips}>
-          {progress.responded.map((id) => (
-            <Text key={id} style={[styles.chip, styles.chipDone]}>{`${nameOf(id)} ya respondió`}</Text>
-          ))}
-          {progress.pending.map((id) => (
-            <Text key={id} style={styles.chip}>{`falta ${nameOf(id)}`}</Text>
-          ))}
-        </View>
-      ) : null}
 
       {turn?.error ? <Text style={styles.error}>{`El DM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
@@ -163,9 +157,6 @@ const styles = StyleSheet.create({
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   status: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
   statusNarrating: { fontFamily: theme.fonts.ui, color: theme.colors.goldBright },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 2 },
-  chipDone: { color: theme.colors.success, borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: theme.colors.panel2 },
   error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 8, padding: 8 },
   notice: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
   compose: { gap: 8 },

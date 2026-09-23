@@ -39,20 +39,19 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={selected ? () => setSelectedId(null) : close}>
       <View style={styles.modal}>
         <View style={styles.header}>
-          <Pressable onPress={selected ? () => setSelectedId(null) : close} hitSlop={10}>
+          <Pressable onPress={selected ? () => setSelectedId(null) : close} hitSlop={10} style={styles.headerSide}>
             <Text style={styles.headerLink}>{selected ? '‹ Fichas' : 'Cerrar'}</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>{selected ? selected.character.name : 'La party'}</Text>
-          <Pressable onPress={close} hitSlop={10}>
-            <Text style={styles.headerLink}>{selected ? 'Cerrar' : ''}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {selected ? selected.character.name : 'La party'}
+          </Text>
+          <Pressable onPress={close} hitSlop={10} style={styles.headerSide}>
+            <Text style={[styles.headerLink, styles.right]}>{selected ? 'Cerrar' : ''}</Text>
           </Pressable>
         </View>
 
         {sheet ? (
-          <>
-            <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} />
-            {selected?.mine && persona ? <View style={styles.persona}>{persona}</View> : null}
-          </>
+          <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} footer={selected?.mine && persona ? persona : undefined} />
         ) : (
           <ScrollView contentContainerStyle={styles.grid}>
             {entries.map(({ character, slot, visibility, muted, mine }) => (
@@ -61,8 +60,8 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
                 <Text style={styles.cardName}>{character.name}</Text>
                 <Text style={styles.cardSub}>{`${character.race}\n${character.class}`}</Text>
                 <Text style={styles.cardRoles}>{character.roles.join(' / ')}</Text>
-                {slot.kind === 'taken' ? <Text style={[styles.tag, mine && styles.tagMine]}>{mine ? 'tu personaje' : slot.player}</Text> : null}
-                {slot.kind === 'free' ? <Text style={[styles.tag, styles.tagFree]}>{visibility.veiled ? 'disponible, sin memoria' : 'disponible'}</Text> : null}
+                {slot.kind === 'taken' ? <Text style={[styles.tag, mine && styles.tagMine]}>{mine ? 'Tú' : slot.player}</Text> : null}
+                {slot.kind === 'free' ? <Text style={[styles.tag, styles.tagFree]}>{visibility.veiled ? 'Libre, sin memoria' : 'Libre'}</Text> : null}
               </Pressable>
             ))}
             {footer ? <Text style={styles.footer}>{footer}</Text> : null}
@@ -74,21 +73,22 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
 }
 
 const styles = StyleSheet.create({
-  persona: { paddingHorizontal: 16, paddingBottom: 32 },
   modal: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 56 },
-  headerTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
+  headerSide: { minWidth: 72 },
+  headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
+  right: { textAlign: 'right' },
+  headerTitle: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 16, paddingBottom: 40 },
   card: { width: '47%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 10, alignItems: 'center', gap: 3 },
-  cardFree: { borderColor: theme.colors.accentBright },
+  cardFree: { borderColor: theme.colors.borderSoft },
   cardMine: { borderColor: theme.colors.accentBright },
   pressed: { opacity: 0.8 },
   cardName: { fontFamily: theme.fonts.serifSemiBold, fontSize: 17, color: theme.colors.ink, marginTop: 6 },
   cardSub: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
   cardRoles: { fontFamily: theme.fonts.uiMedium, fontSize: 11, color: theme.colors.inkDim, textAlign: 'center', letterSpacing: 0.2 },
-  tag: { fontFamily: theme.fonts.uiMedium, fontSize: 11, color: theme.colors.inkDim, letterSpacing: 0.2, marginTop: 4 },
-  tagFree: { color: '#ffffff' },
-  tagMine: { color: theme.colors.danger },
+  tag: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: theme.colors.inkDim, backgroundColor: theme.colors.panel3, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, marginTop: 6, overflow: 'hidden' },
+  tagFree: { color: '#bbf7d0', backgroundColor: 'rgba(34, 197, 94, 0.14)' },
+  tagMine: { color: '#ffffff', backgroundColor: 'rgba(124, 58, 237, 0.45)' },
   footer: { width: '100%', fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center', marginTop: 12, letterSpacing: 0.2 },
 })
