@@ -106,7 +106,10 @@ etiquetas (tono, jugadores, duracion), autor y **un estado por usuario**:
 
 "Jugar" crea la mesa con ese mundo. El diseño visual lo trae Gabino
 (bosquejo de GPT, como la portada); la construccion es la entrega 9 del
-ROADMAP, con lo que se copia de `webapp-base` y `api-base` listado alli.
+ROADMAP. Lo reutilizable sale de AtomoPlatform: etiquetas con
+`atomo-taxonomy`, el pase como plan de `atomo-subscriptions`, portadas con
+`atomo-media` y cobro con `atomo/payments`; lo que `base/` tiene mas maduro
+(catalogo publico) se porta a Atomo antes de usarse.
 
 ## 4. Historias publicas: la unica pieza del flywheel que se construye pronto
 

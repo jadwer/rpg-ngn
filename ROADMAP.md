@@ -355,14 +355,22 @@ como la portada).
 - [ ] **9d. Compra directa de un mundo**: solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
 - [ ] **Cronica compartible** (adelantada al rumbo, `docs/24` seccion 4): exportacion presentable, enlace publico con consentimiento de todos los miembros, anonimizacion opcional, retirada por cualquiera. Cierra tambien "Cronica publica de la campaña" de la entrega 5b
 
-**Que se copia para el catalogo** (inventario del 23-09, nada de esto esta instalado en rpg-ngn):
+**De donde sale el catalogo.** Regla (Gabino, 23-09): **lo que sirva de base se sube a AtomoPlatform y rpg-ngn lo consume de ahi**; `base/` va mas avanzado y es la fuente de donde se porta, no una dependencia. rpg-ngn solo escribe lo que es del juego. Inventario del 23-09:
 
-- `~/dev/AtomoSoluciones/base/webapp-base/packages/ecommerce/src/public-catalog/`: mismo stack (Next 15, SWR, CSS Modules). Grid, tarjeta, filtros, paginacion, detalle y buscador; hooks con SWR inmutable; capa `services/transform` que separa JSON:API del modelo de UI; tests reales, incluido el fallback de SSR. De `components/`, `WishlistButton.tsx` como patron del boton "añadir a mis mundos". Se adapta: mundo en vez de producto, sin carrito ni multimoneda
-- `~/dev/AtomoSoluciones/base/api-base/Modules/Product/routes/public.php` y `PublicProductSchema.php`: servidor JSON:API publico aparte, filtro de visibilidad, busqueda, filtros multiples por coma, slug y paginacion con tope
-- AtomoPlatform (`atomo-product`, `atomo-ecommerce`, `atomo-editorial`): modelos de wishlist, reseñas y colecciones, pero todo autenticado, UI de back-office y solo smoke tests. **No se instala ninguno**: sirve el patron; de Atomo solo se usa `atomo/payments`
-- No existe en ningun lado y se escribe nuevo: etiquetas libres, estado de mundo por usuario, ledger de capitulos, temporadas
+- **Ya esta en Atomo y se usa** (hoy solo con smoke tests: cada uno gana tests reales en Atomo antes de que rpg-ngn dependa de el):
+  - `atomo-taxonomy`: vocabularios, terminos y etiquetado polimorfico. Genero, tono, jugadores y duracion de un mundo son terminos, no columnas nuevas
+  - `atomo-subscriptions`: planes con entitlements, suscripciones con inicio y caducidad, reglas de paywall. **El pase de temporada es un plan** con caducidad al cierre de la temporada y entitlements (`capitulos-x2`, `mundos-de-temporada`, `mundos-privados-extra`, `revision-prioritaria`), pagado una vez con `atomo/payments`
+  - `atomo-media`: portadas y capturas del mundo, con redimensionado
+  - `atomo/payments` (ya instalado): pase y compra directa por el mismo webhook que acredita creditos
+- **Se porta de `base/` a Atomo** (no a rpg-ngn):
+  - Del API: el servidor JSON:API publico de `base/api-base/Modules/Product/routes/public.php` y `PublicProductSchema.php` (filtro de visibilidad, busqueda, filtros multiples por coma, slug, paginacion con tope) como capacidad de `atomo/json-api-base`: registrar un servidor publico de solo lectura sin copiar el patron en cada proyecto
+  - Del frontend: la logica de `base/webapp-base/packages/ecommerce/src/public-catalog/` (hooks con SWR inmutable, capa `services/transform` que separa JSON:API del modelo de UI, query inicial para SSR, y sus tests) a un package `@atomo/*` sin dependencia de framework. Los componentes visuales (grid, tarjeta, filtros, detalle) se hacen en rpg-ngn con el bosquejo de Gabino, porque la web es Next y los `*-ui` de Atomo son Vite y de back-office
+- **Se queda en rpg-ngn** porque es del juego: la fila de mundo que apunta a una version de pack, `pack_activations.source`, el ledger de capitulos y las temporadas del camino
+- **No se usa**: `atomo-product`, `atomo-ecommerce`, `atomo-editorial` (productos, variantes, carrito, wishlist y reseñas que el plan descarta en `docs/24` seccion 8)
 
 ## Deuda tecnica (sin entrega asignada)
+
+- [ ] **Piezas genericas escritas en rpg-ngn-api que deberian vivir en Atomo** (revision del 23-09; los correos de auth si se hicieron bien, en `atomo-auth`, y la bienvenida es texto del juego sobre el evento `UserRegistered` de la plataforma). Candidatas, sin romper tablas de produccion (mismo nombre de tabla, la migracion pasa al package): **borrar la propia cuenta** (`AccountDeletionController`: contraseña, `forceDelete`, con un contrato para que la aplicacion vete el borrado, que en rpg-ngn es "eres anfitrion de estas mesas") a `atomo-user`; **constancia de aceptacion de legales** (`LegalAcceptance`, `RecordLegalAcceptance`) a `atomo-auth` o un package legal; **busqueda exacta por correo** (`UserLookupController`) a `atomo-user`; **creditos de prepago** (`CreditPacks`, `CreditsController`, `CreditPurchasedTurns`) a `atomo/payments` como saldo generico, dejando en rpg-ngn solo la conversion a turnos
 
 - **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
 
