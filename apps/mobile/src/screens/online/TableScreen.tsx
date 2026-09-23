@@ -1,4 +1,4 @@
-import { ApiError, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
+import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
@@ -13,6 +13,7 @@ import { GameSheet } from '../../components/GameSheet'
 import { InviteLink } from '../../components/InviteLink'
 import { InvitePanel } from '../../components/InvitePanel'
 import { PlayersPanel } from '../../components/PlayersPanel'
+import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
@@ -115,11 +116,16 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   // Personalidad escrita por el jugador: solo si el pack la pide (La Mascarada).
   const [wantsPersona, setWantsPersona] = useState(false)
+  // El nombre del mundo, para la cabecera de escena (la app solo lleva el piloto).
+  const [packName, setPackName] = useState<string | null>(pack?.manifest.name ?? null)
   useEffect(() => {
     let alive = true
     void client.listPacks().then(
       (packs) => {
-        if (alive) setWantsPersona(packs.find((p) => p.id === table.packId)?.playerPersona === true)
+        if (!alive) return
+        const mine = packs.find((p) => p.id === table.packId)
+        setWantsPersona(mine?.playerPersona === true)
+        if (mine?.name) setPackName(mine.name)
       },
       () => undefined,
     )
@@ -426,6 +432,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       refresh()
     }, 'No se pudo cambiar la presencia.')
   }
+  const heroPath = maps[0] ? packMapUrl(table.packId, maps[0].image) : null
+  const heroImage = heroPath ? `${client.baseUrl}${heroPath}` : null
   const gamePanels: GamePanel[] = ['sheets', ...(maps.length > 0 ? (['map'] as const) : []), 'players', ...(isHost ? (['host'] as const) : []), 'reading']
 
   return (
@@ -449,6 +457,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
       <View style={styles.body}>
         <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScroll={onScroll} scrollEventThrottle={100}>
+          <SceneHero
+            image={heroImage}
+            kicker={packName ?? table.name}
+            title={sessionTitle ?? (snapshot?.session ? table.name : 'Sin sesión abierta')}
+            when={worldTime}
+            pill={turn ? `Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}` : null}
+          />
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
           {start ? (
