@@ -17,6 +17,11 @@ interface Props {
   nameOf: (id: string) => string
   /** Retrato de un personaje, para el punto; null si no hay. */
   portraitOf: (id: string) => string | null
+  /** Abierto desde fuera (la barra del juego); sin esto lo abre su propia linea. */
+  open?: boolean | undefined
+  onOpenChange?: ((open: boolean) => void) | undefined
+  /** false: sin la linea plegada, solo el modal. */
+  showLine?: boolean | undefined
 }
 
 /**
@@ -29,8 +34,13 @@ interface Props {
  * mapa se abre a pantalla completa. Dentro del pie se veia cortado en
  * escritorio, porque ese pie esta limitado al 55% del alto (Gabino, 21-09).
  */
-export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf, portraitOf }: Props) {
-  const [open, setOpen] = useState(false)
+export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: controlled, onOpenChange, showLine = true }: Props) {
+  const [own, setOwn] = useState(false)
+  const open = controlled ?? own
+  const setOpen = (value: boolean) => {
+    if (onOpenChange) onOpenChange(value)
+    else setOwn(value)
+  }
   // El mapa elegido a mano en el modal; sin eleccion, el que toque por donde
   // esta la gente. Con un pack de dos mapas (pueblo y mina) enseñar siempre el
   // primero de la lista era enseñar la mina en una partida que empieza en la
@@ -63,13 +73,15 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
 
   return (
     <>
-      <section className="mapa" aria-label="Mapa de la partida">
-        <button type="button" className="head" onClick={() => setOpen(true)}>
-          <span className="t">Mapa: {view.map.name}</span>
-          <span className="s">{resumen}</span>
-          <span className="muted">abrir</span>
-        </button>
-      </section>
+      {showLine ? (
+        <section className="mapa" aria-label="Mapa de la partida">
+          <button type="button" className="head" onClick={() => setOpen(true)}>
+            <span className="t">Mapa: {view.map.name}</span>
+            <span className="s">{resumen}</span>
+            <span className="muted">abrir</span>
+          </button>
+        </section>
+      ) : null}
 
       {open ? (
         <div className="mapa-modal" role="dialog" aria-modal="true" aria-label={`Mapa: ${view.map.name}`} onClick={() => setOpen(false)}>

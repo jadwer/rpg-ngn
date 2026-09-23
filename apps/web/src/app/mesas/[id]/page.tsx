@@ -11,11 +11,11 @@ import type { StoredUser } from '../../../lib/storage'
 
 export default function TablePage() {
   const params = useParams<{ id: string }>()
-  return <RequireSession>{({ client, user, unauthorized }) => <TableLoader client={client} user={user} tableId={params.id} unauthorized={unauthorized} />}</RequireSession>
+  return <RequireSession>{({ client, user, unauthorized, logout }) => <TableLoader client={client} user={user} tableId={params.id} unauthorized={unauthorized} logout={logout} />}</RequireSession>
 }
 
 /** Carga la mesa (miembros, premisa, campaña) y entra; el estado vivo lo lleva TableScreen por polling. */
-function TableLoader({ client, user, tableId, unauthorized }: { client: ApiClient; user: StoredUser; tableId: string; unauthorized: (notice?: string) => void }) {
+function TableLoader({ client, user, tableId, unauthorized, logout }: { client: ApiClient; user: StoredUser; tableId: string; unauthorized: (notice?: string) => void; logout: () => void }) {
   const { pack } = usePack()
   const [table, setTable] = useState<TableSummary | null>(null)
   // Nombres de personaje de un pack que esta web no lleva dentro, para que la
@@ -88,6 +88,7 @@ function TableLoader({ client, user, tableId, unauthorized }: { client: ApiClien
       remoteNames={remoteNames}
       onTableChanged={() => void load()}
       onUnauthorized={unauthorized}
+      onLogout={logout}
     />
   )
 }

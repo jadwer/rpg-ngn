@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { StoredUser } from '../lib/storage'
+import { SystemMenu } from './SystemMenu'
 
 interface Props {
   title: string
@@ -11,7 +12,7 @@ interface Props {
   onLogout?: (() => void) | undefined
 }
 
-/** Barra superior de las pantallas con sesion: volver, titulo, y el menu de la cuenta (perfil, ajustes, salir). */
+/** Barra superior de las pantallas con sesion: volver, titulo, y el menu del sitio (D-UX-6). */
 export function UserBar({ title, user, back = { href: '/mesas', label: 'Mesas' }, onLogout }: Props) {
   return (
     <div className="topbar">
@@ -19,21 +20,11 @@ export function UserBar({ title, user, back = { href: '/mesas', label: 'Mesas' }
         <Link href={back.href} className="btn ghost small">
           {back.label}
         </Link>
-      ) : null}
+      ) : (
+        <span style={{ width: 44 }} />
+      )}
       <h1>{title}</h1>
-      <nav className="account" aria-label="Cuenta">
-        <Link href="/perfil" className="who" title="Tu perfil">
-          {user.name}
-        </Link>
-        <Link href="/ajustes" className="btn ghost small" title="Voz e idioma de lectura">
-          Ajustes
-        </Link>
-        {onLogout ? (
-          <button type="button" className="btn ghost small" onClick={onLogout}>
-            Salir
-          </button>
-        ) : null}
-      </nav>
+      <SystemMenu user={user} onLogout={onLogout} />
     </div>
   )
 }

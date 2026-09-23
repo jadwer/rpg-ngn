@@ -1,11 +1,10 @@
 'use client'
 
-import { ApiError, memberOf, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
+import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, type ViewMode } from '@rpg-ngn/ui-logic'
-import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
 import { storage, type StoredUser } from '../lib/storage'
@@ -13,11 +12,15 @@ import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
+import { Drawer } from './Drawer'
+import { GameBar, type GamePanel } from './GameBar'
 import { HostPanel } from './HostPanel'
 import { MapPanel } from './MapPanel'
 import { PersonaPanel } from './PersonaPanel'
+import { PlayersPanel } from './PlayersPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
+import { SystemMenu } from './SystemMenu'
 import { TtsBar } from './TtsBar'
 import { TurnPanel } from './TurnPanel'
 
@@ -30,23 +33,31 @@ interface Props {
   remoteNames?: Readonly<Record<string, string>>
   onTableChanged: () => void
   onUnauthorized: () => void
+  onLogout?: (() => void) | undefined
 }
 
 const EMPTY: never[] = []
 
+/** Cada cuanto se renueva "escribiendo" mientras se teclea; la API lo caduca a los 8 s. */
+const TYPING_EVERY_MS = 4000
+
 /**
- * La mesa: polling del estado, las dos vistas sobre los bloques del DM,
- * cuadro de respuesta, cierre de turno, mando del anfitrion, fichas con el
- * estado vivo, voz y modo pantalla para compartir.
+ * La mesa (docs/18, D-UX-6): el menu del sitio arriba a la izquierda, la
+ * barra del juego (fichas, mapa, jugadores, anfitrion, mas) al pie en el
+ * telefono y en la cabecera en escritorio, la narracion en medio y el cuadro
+ * de respuesta abajo. Todo lo demas se abre bajo demanda. Polling del estado,
+ * cuenta atras cancelable del cierre, "escribiendo", voz y modo pantalla.
  */
-export function TableScreen({ client, table, user, pack, remoteNames = {}, onTableChanged, onUnauthorized }: Props) {
+export function TableScreen({ client, table, user, pack, remoteNames = {}, onTableChanged, onUnauthorized, onLogout }: Props) {
   const campaignId = table.campaignId
   const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
   const narrator = useNarrator()
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [screen, setScreen] = useState(false)
-  const [sheetsOpen, setSheetsOpen] = useState(false)
+  const [panel, setPanel] = useState<GamePanel | null>(null)
+  const sheetsOpen = panel === 'sheets'
+  const togglePanel = (next: GamePanel) => setPanel((current) => (current === next ? null : next))
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [worldTime, setWorldTime] = useState<string | null>(null)
@@ -94,11 +105,16 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // Mascarada). No todos: en el piloto la ficha ya trae bio y meta, y pedir
   // un texto mas antes de jugar estorba (mesas del 20-09).
   const [wantsPersona, setWantsPersona] = useState(false)
+  // El nombre del pack, para la cabecera de escena (la web solo lleva el piloto).
+  const [packName, setPackName] = useState<string | null>(pack?.manifest.name ?? null)
   useEffect(() => {
     let alive = true
     void client.listPacks().then(
       (packs) => {
-        if (alive) setWantsPersona(packs.find((p) => p.id === table.packId)?.playerPersona === true)
+        if (!alive) return
+        const mine = packs.find((p) => p.id === table.packId)
+        setWantsPersona(mine?.playerPersona === true)
+        if (mine?.name) setPackName(mine.name)
       },
       () => undefined,
     )
@@ -154,6 +170,60 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNamesAll, id), [pack, remoteNamesAll])
   const headSeq = snapshot?.campaign.headSeq ?? 0
   const sessionCode = snapshot?.session?.code ?? null
+
+  // Cuenta atras del cierre (D-UX-3). Arranca cuando ESTE cliente ve el turno
+  // completo (`completedAt` cambia) o cuando se reanuda tras una espera, con
+  // su propio reloj: un reloj desviado no cierra antes de tiempo. Al llegar a
+  // cero cierra una sola vez por turno; si otro cliente llego antes, el 409
+  // refresca y ya esta.
+  const completedKey = turn && turn.status === 'open' ? `${turn.id}:${turn.completedAt ?? ''}:${turn.held ? 'espera' : 'corre'}` : null
+  const [startedAt, setStartedAt] = useState<{ key: string; at: number } | null>(null)
+  useEffect(() => {
+    if (!completedKey || !turn?.completedAt) {
+      setStartedAt(null)
+      return
+    }
+    setStartedAt((current) => (current?.key === completedKey ? current : { key: completedKey, at: Date.now() }))
+  }, [completedKey, turn?.completedAt])
+  const [now, setNow] = useState(() => Date.now())
+  const cd = countdown({ turn, progress, startedAt: startedAt?.key === completedKey ? startedAt.at : null, now, nameOf })
+  const ticking = cd.active || progress.narrating
+  useEffect(() => {
+    if (!ticking) return
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 500)
+    return () => clearInterval(timer)
+  }, [ticking])
+  const autoClosedRef = useRef<number | null>(null)
+  const closeTurnRef = useRef<(force: boolean) => void>(() => undefined)
+  useEffect(() => {
+    if (!cd.active || cd.remaining > 0 || !turn || busy) return
+    if (autoClosedRef.current === turn.id) return
+    autoClosedRef.current = turn.id
+    closeTurnRef.current(false)
+  }, [cd.active, cd.remaining, turn, busy])
+
+  // "Escribiendo": se renueva cada 4 s mientras se teclea y se suelta al
+  // enviar o vaciar el cuadro. Si el navegador se cierra a media frase, la
+  // API lo caduca sola.
+  const typingRef = useRef<{ on: boolean; last: number }>({ on: false, last: 0 })
+  const notifyTyping = useCallback(
+    (typing: boolean) => {
+      const state = typingRef.current
+      const at = Date.now()
+      if (typing && state.on && at - state.last < TYPING_EVERY_MS) return
+      if (!typing && !state.on) return
+      typingRef.current = { on: typing, last: at }
+      void client.setTyping(table.id, typing).catch(() => undefined)
+    },
+    [client, table.id],
+  )
+
+  const seatList = useMemo(
+    () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, viewerMemberId: viewer.memberId, nameOf }),
+    [table.members, turn, snapshot?.typing, snapshot?.narrators, viewer.memberId, nameOf],
+  )
+  const seatsLine = seatsSummary(seatList)
 
   /** Clave de idempotencia estable por turno: reintentar el mismo envio no duplica. */
   const keyRef = useRef<{ turnId: number; key: string } | null>(null)
@@ -255,14 +325,17 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     }
   }, [client, campaignId, isHost, sessionCode])
 
-  // Tecla F alterna el modo pantalla; Esc lo cierra. No mientras se escribe.
+  // Tecla F alterna el modo pantalla; Esc cierra pantalla y paneles. No mientras se escribe.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
       const typing = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)
       if (typing) return
       if (event.key === 'f' || event.key === 'F') setScreen((v) => !v)
-      if (event.key === 'Escape') setScreen(false)
+      if (event.key === 'Escape') {
+        setScreen(false)
+        setPanel(null)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -341,6 +414,18 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const closeTurn = (force: boolean) => {
     if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), 'No se pudo cerrar el turno.')
   }
+  closeTurnRef.current = closeTurn
+  const holdTurn = (held: boolean) => {
+    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), 'No se pudo cambiar la espera.')
+  }
+  const togglePresence = () => {
+    if (!ownMember) return
+    void act(async () => {
+      await client.setPresence(table.id, ownMember.id, ownMember.present === false)
+      onTableChanged()
+      refresh()
+    }, 'No se pudo cambiar tu presencia.')
+  }
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), 'No se pudo abrir la sesión.')
   }
@@ -363,13 +448,22 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
   const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingCodes.length === 0, dice: diceModeOf(table.settings) }) : null
   const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
+  const waiting = progress.narrating && turn ? waitingPhrase(turn.number, now) : null
+  const portraitOf = (id: string) => {
+    const local = pack?.characters.get(id)?.portrait
+    if (local) return `/packs/pilot/${local}`
+    return packPortraitUrl(table.packId, remote.find((c) => c.id === id)?.portrait)
+  }
+  // La imagen de escena arriba de la narracion, como en el borrador de diseño
+  // (docs/14): mientras el pack no traiga imagen por escena, su mapa.
+  const heroImage = maps[0] ? packMapUrl(table.packId, maps[0].image) : null
+  const heroStyle = heroImage ? ({ '--hero': `url("${heroImage}")` } as CSSProperties) : undefined
+  const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={togglePanel} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
 
   return (
     <div className={`table${screen ? ' screen' : ''}`}>
       <header className="table-header hide-on-screen">
-        <Link href="/mesas" className="btn ghost small">
-          Mesas
-        </Link>
+        <SystemMenu user={user} onLogout={onLogout} />
         <div className="titles">
           <div className="title">{table.name}</div>
           <div className="subtitle" title={subtitle}>
@@ -377,48 +471,24 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             {sessionTitle ? subtitle.slice(sessionTitle.length) : subtitle}
           </div>
         </div>
-        <div className="actions">
-          <button type="button" className={`btn small${sheetsOpen ? ' active' : ''}`} onClick={() => setSheetsOpen((v) => !v)}>
-            Fichas
-          </button>
-          <button type="button" className="btn small" onClick={() => setScreen(true)} title="Solo narrativa y diálogos, en grande, como los ve un jugador (tecla F). Corta la lectura en voz alta en curso.">
-            Pantalla
-          </button>
-        </div>
+        {gameBar('header')}
       </header>
 
-      <div className="toolbar hide-on-screen">
-        <div className="segmented" role="group" aria-label="Vista">
-          <button type="button" aria-pressed={mode === 'narrative'} onClick={() => setMode('narrative')}>
-            Narrativa
-          </button>
-          <button type="button" aria-pressed={mode === 'dialogue'} onClick={() => setMode('dialogue')}>
-            Diálogo
-          </button>
-        </div>
-        <TtsBar tts={tts} />
-      </div>
-
       {connectionNotice ? <div className="notice-bar hide-on-screen">{connectionNotice}</div> : null}
-      {showVoiceNotice ? (
-        <div className="notice-bar soft hide-on-screen">
-          Este navegador no tiene voces en español instaladas; la lectura sonará en otro idioma o no sonará.{' '}
-          <button
-            type="button"
-            className="btn ghost small"
-            onClick={() => {
-              storage.setVoiceNoticeSeen()
-              setVoiceNoticeDismissed(true)
-            }}
-          >
-            Entendido
-          </button>
-        </div>
-      ) : null}
 
       <div className="table-body">
         <div className="scroll" ref={scrollRef} onScroll={onScroll}>
           <div className="blocks">
+            <section className="scene-hero hide-on-screen" style={heroStyle} aria-label="Escena">
+              {turn ? (
+                <span className="pill">
+                  <b>Turno {turn.number}</b> {progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}
+                </span>
+              ) : null}
+              <div className="kicker">{packName ?? table.name}</div>
+              <h2>{sessionTitle ?? (snapshot?.session ? table.name : 'Sin sesión abierta')}</h2>
+              {worldTime ? <p className="when">{worldTime}</p> : null}
+            </section>
             {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
             <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
             {start ? (
@@ -435,12 +505,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     {start.action}
                   </button>
                 ) : null}
-                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al DM, usa el mando del anfitrión de abajo.</p> : null}
+                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al DM, abre Anfitrión en la barra del juego.</p> : null}
               </section>
             ) : null}
-            {progress.narrating ? (
+            {/* La espera se ve en el pie, que siempre esta a la vista; aqui solo el modo pantalla, que no tiene pie. */}
+            {progress.narrating && screen ? (
               <div className="narrating">
-                <span className="spinner" aria-hidden /> El DM está narrando...
+                <span className="spinner" aria-hidden /> {waiting ?? 'El director narra...'}
               </div>
             ) : null}
           </div>
@@ -450,7 +521,78 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             Bajar a lo nuevo
           </button>
         ) : null}
-        {sheetsOpen && !screen ? <SheetsPanel entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} onClose={() => setSheetsOpen(false)} /> : null}
+        {sheetsOpen && !screen ? <SheetsPanel entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} onClose={() => setPanel(null)} /> : null}
+        {panel === 'players' && !screen ? <PlayersPanel seats={seatList} portraitOf={portraitOf} ownPresent={ownMember && ownMember.characterId && snapshot?.session ? ownMember.present !== false : null} busy={busy} onTogglePresence={togglePresence} onClose={() => setPanel(null)} /> : null}
+        {panel === 'host' && isHost && !screen ? (
+          <Drawer title="Anfitrión" onClose={() => setPanel(null)} className="host-drawer">
+            <HostPanel embedded client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+          </Drawer>
+        ) : null}
+        {panel === 'more' && !screen ? (
+          <Drawer title="Más" onClose={() => setPanel(null)} className="more-drawer">
+            <div className="stack">
+              <div className="label" style={{ marginTop: 0 }}>
+                Vista
+              </div>
+              <div className="segmented" role="group" aria-label="Vista" style={{ alignSelf: 'flex-start' }}>
+                <button type="button" aria-pressed={mode === 'narrative'} onClick={() => setMode('narrative')}>
+                  Narrativa
+                </button>
+                <button type="button" aria-pressed={mode === 'dialogue'} onClick={() => setMode('dialogue')}>
+                  Diálogo
+                </button>
+              </div>
+              <div className="label">Voz</div>
+              <TtsBar tts={tts} />
+              {showVoiceNotice ? (
+                <p className="hint">
+                  Este navegador no tiene voces en español instaladas; la lectura sonará en otro idioma o no sonará.{' '}
+                  <button
+                    type="button"
+                    className="btn ghost small"
+                    onClick={() => {
+                      storage.setVoiceNoticeSeen()
+                      setVoiceNoticeDismissed(true)
+                    }}
+                  >
+                    Entendido
+                  </button>
+                </p>
+              ) : null}
+              <div className="label">Pantalla</div>
+              <div className="row">
+                <button
+                  type="button"
+                  className="btn small"
+                  onClick={() => {
+                    setPanel(null)
+                    setScreen(true)
+                  }}
+                >
+                  Modo pantalla
+                </button>
+                <span className="hint">Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).</span>
+              </div>
+              {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
+                <>
+                  <div className="label">Tu personaje</div>
+                  <PersonaPanel
+                    characterName={nameOf(viewer.characterId)}
+                    saved={snapshot.viewer?.persona ?? null}
+                    busy={busy}
+                    onSave={(persona) =>
+                      act(async () => {
+                        await client.setPersona(table.id, viewer.memberId, persona)
+                        refresh()
+                      }, 'No se pudo guardar la personalidad.')
+                    }
+                  />
+                </>
+              ) : null}
+            </div>
+          </Drawer>
+        ) : null}
+        {maps.length > 0 ? <MapPanel packId={table.packId} maps={maps} world={projections.world} party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)} viewerCharacterId={viewer.characterId} nameOf={nameOf} portraitOf={portraitOf} open={panel === 'map' && !screen} onOpenChange={(v) => setPanel(v ? 'map' : null)} showLine={false} /> : null}
       </div>
 
       <footer className="screen-foot">
@@ -461,53 +603,6 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       </footer>
 
       <div className="table-footer hide-on-screen">
-        {ownMember && ownMember.characterId && snapshot?.session ? (
-          <div className="row" style={{ justifyContent: 'flex-end', padding: '4px 12px 0' }}>
-            <button
-              type="button"
-              className="btn ghost small"
-              disabled={busy}
-              title={ownMember.present === false ? 'Vuelves a contar para el turno y el DM te devuelve la palabra' : 'El DM aparta a tu personaje sin matarlo y la mesa no te espera para cerrar el turno'}
-              onClick={() => {
-                void act(async () => {
-                  await client.setPresence(table.id, ownMember.id, ownMember.present === false)
-                  onTableChanged()
-                  refresh()
-                }, 'No se pudo cambiar tu presencia.')
-              }}
-            >
-              {ownMember.present === false ? 'He vuelto' : 'Me tengo que ir'}
-            </button>
-          </div>
-        ) : null}
-        {maps.length > 0 ? (
-          <MapPanel
-            packId={table.packId}
-            maps={maps}
-            world={projections.world}
-            party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)}
-            viewerCharacterId={viewer.characterId}
-            nameOf={nameOf}
-            portraitOf={(id) => {
-              const local = pack?.characters.get(id)?.portrait
-              if (local) return `/packs/pilot/${local}`
-              return packPortraitUrl(table.packId, remote.find((c) => c.id === id)?.portrait)
-            }}
-          />
-        ) : null}
-        {wantsPersona && viewer.characterId !== null && snapshot !== null ? (
-          <PersonaPanel
-            characterName={nameOf(viewer.characterId)}
-            saved={snapshot.viewer?.persona ?? null}
-            busy={busy}
-            onSave={(persona) =>
-              act(async () => {
-                await client.setPersona(table.id, viewer.memberId, persona)
-                refresh()
-              }, 'No se pudo guardar la personalidad.')
-            }
-          />
-        ) : null}
         {viewer.characterId === null && snapshot !== null ? (
           <section className="card stack" aria-label="Elige tu personaje">
             <div className="label" style={{ marginTop: 0 }}>
@@ -540,9 +635,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        {isHost ? <HostPanel client={client} table={table} meId={user.id} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} /> : null}
-        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} onRespond={respond} onClose={closeTurn} />
+        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} />
       </div>
+      {gameBar('bottom')}
     </div>
   )
 }

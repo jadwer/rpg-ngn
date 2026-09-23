@@ -1,6 +1,34 @@
 # 14. Pendientes de mejora visual y de experiencia
 
-Estado: congelado a proposito. Fecha: 2026-09-20.
+Estado: **descongelado el 2026-09-22** (decision de Gabino). Fecha original:
+2026-09-20.
+
+**Por que se levanta**: la condicion del congelamiento era medir con gente
+antes de construir. Los amigos de Gabino, que ya jugaron varias veces, dieron
+el veredicto el 22-09: la interfaz parece "muy junior", amontonada y con
+colores poco profesionales. Con eso, y con el motor ya cerrado, Gabino decidio
+trabajar lo visual y **validar la interfaz nueva**, no la vieja. El orden y
+los topes estan en `ROADMAP.md`, "Lo que sigue"; las decisiones de forma en
+`docs/18` (D-UX-1 a D-UX-6). Lo de abajo se conserva como inventario y como
+lista de lo que NO hay que copiar.
+
+**Decision de Claude sobre paleta e imagenes (22-09, B2 del plan)**: la
+paleta calida (fondo `#17120e`, dorado, Cinzel y Crimson) **se queda**. Es
+distintiva, y los mapas y retratos de los tres packs ya estan generados en esa
+gama; el morado sobre negro azulado del mockup de GPT es el aspecto generico
+de dashboard de IA de este año y no resuelve nada. Lo que se ve "junior" no
+es el tono: es que todo es una tarjeta con borde y etiqueta dorada en
+mayusculas, apilada sobre otra igual, con el mismo peso visual para la
+narracion y para un boton de ajustes. Eso es composicion y CSS, no paleta:
+menos contenedores, escala tipografica de verdad para la narracion, un solo
+acento, aire. Para las imagenes de fondo: **el mapa del pack, desenfocado y
+oscurecido, como fondo de la cabecera de la mesa**, que ya existe en los tres
+packs y no toca el formato; una `cover` por pack y una imagen por lugar
+quedan como campo opcional de `docs/05` para despues. Si tras el rediseño los
+mismos amigos siguen diciendo "poco profesional", entonces si se prueba una
+segunda paleta con dos variantes delante de ellos, un dia y no mas.
+
+Lo que sigue es el texto original del congelamiento.
 
 Esto no se toca hasta que el motor este cerrado. La decision es de Gabino y
 tiene su razon: la sesion del 20-09 salio aburrida **por el motor** (turnos

@@ -192,13 +192,14 @@ bloques con tope de tiempo. Regla que manda: **se despliega un bloque antes de
 abrir el siguiente**, y cada cierre pasa por memoria, ancla, este archivo y
 `docs/17`.
 
-**B0. Levantar el congelamiento de `docs/14`.** Decision de Gabino, no de
-Claude. Lo puso el 20-09 con la condicion "medir con gente primero", y esa
-condicion empezo a cumplirse el 22-09 con sus amigos. Cuando lo diga, se anota
-en `docs/14` con fecha y motivo. Nadie lo bloquea.
+**B0. ~~Levantar el congelamiento de `docs/14`.~~ Hecho: Gabino lo levanto
+el 22-09** y esta anotado en `docs/14` con el motivo. Decidio ademas que **lo
+que se valide con gente sea la interfaz nueva, no la vieja** (ya jugaron
+varias veces la vieja), asi que B4 desaparece del plan; y que **Stripe espera**
+a que esto termine.
 
-**B1. La mesa a 390 px** (tope: 4 dias web + 2 app; empieza cuando B0 este
-dicho). Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
+**B1. La mesa a 390 px** (tope: 4 dias web + 2 app; en curso desde el 22-09
+por la noche). Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
   (personalidad, mando del anfitrion, fichas) bajo demanda (D-UX-2: jerarquia
@@ -224,37 +225,33 @@ que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
   tecnico: 5 a 25 segundos por turno que hoy son tiempo muerto.
 - El saldo no aparece en la mesa (D-UX-4).
 
-**B2. Paleta y jerarquia** (tope: 1 dia, despues de B1). Supuesto escrito en
-el VAM: **la paleta se decide con dos variantes delante de las mismas personas
-que se quejaron**, no en abstracto. Los tokens (`--bg`, `--gold`, `--panel`)
-hacen que una variante sean horas. Advertencia del Fiscal que el Juez acepto:
-el morado sobre negro azulado del mockup de GPT es el aspecto generico de
-dashboard de IA de este año; cambiar de color no es lo mismo que verse pro.
+**B2. Paleta y jerarquia.** Decidido por Claude el 22-09 (Gabino se lo dejo):
+**la paleta se queda**; lo "junior" es composicion (todo tarjeta con borde y
+etiqueta en mayusculas, apilado), asi que la jerarquia entra en B1 como
+reescritura del CSS de la mesa, y la ambientacion se hace con **el mapa del
+pack desenfocado como fondo de la cabecera**, sin tocar el formato de pack.
+Motivos en `docs/14`. Solo si tras B1 los mismos amigos siguen diciendo "poco
+profesional" se prueba una segunda paleta con dos variantes delante de ellos,
+con tope de un dia.
 
 **B3. Guia del anfitrion en texto** (tope: 2 horas, cualquier tarde, antes de
 B4). Crear mesa, enlace, abrir sesion, cerrar turno, retirar mesa. Sin
 capturas, para que el rediseño no la deje vieja. La documentacion completa va
 despues de B1 y B2, como decidio Gabino el 22-09.
 
-**B4. Una sesion con un novato sobre la interfaz actual** (una noche, cosa de
-Gabino, esta semana, **antes de desplegar B1**). El punto medio que ni Opus ni
-el plan original proponian: no bloquea diseñar, pero deja registrado donde se
-traba alguien que nunca jugo antes de que la version 1 desaparezca. Con el
-criterio de aceptacion de `docs/16` como guion, y ahi mismo se observa el mapa
-(si lo abren solos, si el director mueve a la gente).
+**B4. ~~Una sesion con un novato sobre la interfaz actual.~~ Descartado por
+Gabino el 22-09**: ya se jugo varias veces con la interfaz vieja; lo que se
+valida con gente es la nueva, con el criterio de aceptacion de `docs/16` como
+guion y observando ahi el mapa. El Fiscal del VAM lo pedia para no perder la
+version 1; Gabino, que decide, prefiere no gastar una noche en ella.
 
-**B5. Higiene y Stripe** (paralelo, sin orden entre si):
-- Casilla de edad explicita en el registro (2 horas).
-- Cuentas sembradas de produccion: borrar `gabino@example.com`, rotar `god`,
-  cambiar `jaz` y `armando` (Gabino, 30 minutos, pendiente desde el 19-09).
-- Endurecimiento de Stripe P1 a P4 del VAM del 19-09 (unas 12 horas de codigo,
-  no dependen de nada).
-- **La tarea vencida de la cuenta de Stripe la arranca Gabino hoy**: tarda
-  dias y cuesta cero.
-- **El interruptor a claves live es una compuerta, no una fecha**: "el primer
-  desconocido que quiera pagar". Riesgo abierto con dueño Gabino: encenderlo
-  antes deja a un amigo comprando 5 USD de prueba con un reembolso que nadie
-  ha ensayado (`docs/19`, pregunta 5).
+**B5. Higiene** (cualquier tarde): casilla de edad explicita en el registro
+(2 horas) y cuentas sembradas de produccion (borrar `gabino@example.com`,
+rotar `god`, cambiar `jaz` y `armando`; Gabino, 30 minutos, pendiente desde el
+19-09). **Stripe espera** (Gabino, 22-09): ni el endurecimiento P1 a P4 ni la
+tarea de la cuenta se tocan hasta terminar B1; se retoma "mañana o terminando
+esto". El interruptor a live sigue siendo una compuerta ("el primer
+desconocido que quiera pagar"), no una fecha.
 
 **B6. Despues de medir**: avisos de mesa por correo, documentacion completa
 con capturas, y la lista que salga de B4. La verificacion de correo sigue

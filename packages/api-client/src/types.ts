@@ -127,6 +127,11 @@ export interface TurnView {
   /** Mensaje del engine si el turno se reabrio por error. */
   error: string | null
   openedAt: string | null
+  /** Desde cuando no falta nadie (arranque de la cuenta atras); null mientras falte alguien o el turno no este abierto. */
+  completedAt?: string | null
+  /** Alguien cancelo la cuenta atras: el turno se cierra a mano. */
+  held?: boolean
+  heldBy?: Presence | null
 }
 
 export interface BlockEnvelope {
@@ -153,15 +158,20 @@ export interface TableState {
   blocks: BlockEnvelope[]
   /** Quien lee en voz alta ahora mismo (anuncio que caduca solo). */
   narrators: Narrator[]
+  /** Quien esta tecleando su respuesta (anuncio que caduca solo). */
+  typing: Presence[]
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }
 
-export interface Narrator {
+/** Un miembro señalado por la API en un aviso (narra, escribe, puso el turno en espera). */
+export interface Presence {
   memberId: number
   name: string | null
   characterId: string | null
 }
+
+export type Narrator = Presence
 
 export interface ResponseReceipt {
   id: number

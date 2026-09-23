@@ -25,6 +25,8 @@ interface Props {
   onCloseSession: (cliffhanger: string | null) => void
   onTableChanged: () => void
   onUnauthorized: () => void
+  /** Dentro de un panel de la barra del juego: sin cabecera plegable, siempre abierto. */
+  embedded?: boolean | undefined
 }
 
 /**
@@ -33,7 +35,7 @@ interface Props {
  * mesa, invitaciones y el proveedor del DM. El DM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, meId, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'invite' | 'dm'>('session')
   const [code, setCode] = useState(suggestedCode)
@@ -61,13 +63,17 @@ export function HostPanel({ client, table, meId, pack, session, loaded, suggeste
   }, [loaded, session])
 
   return (
-    <section className="host" aria-label="Mando del anfitrión">
-      <button type="button" className="head" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
-        <span className="t">Anfitrión</span>
-        <span className="s">{session ? `Sesión ${session.code} abierta` : 'Sin sesión abierta'}</span>
-        <span className="muted">{expanded ? 'ocultar' : 'mostrar'}</span>
-      </button>
-      {expanded ? (
+    <section className={`host${embedded ? ' embedded' : ''}`} aria-label="Mando del anfitrión">
+      {embedded ? (
+        <p className="hint">{session ? `Sesión ${session.code} abierta.` : 'Sin sesión abierta.'}</p>
+      ) : (
+        <button type="button" className="head" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
+          <span className="t">Anfitrión</span>
+          <span className="s">{session ? `Sesión ${session.code} abierta` : 'Sin sesión abierta'}</span>
+          <span className="muted">{expanded ? 'ocultar' : 'mostrar'}</span>
+        </button>
+      )}
+      {embedded || expanded ? (
         <div className="body">
           <div className="segmented" style={{ alignSelf: 'flex-start' }}>
             <button type="button" aria-pressed={tab === 'session'} onClick={() => setTab('session')}>

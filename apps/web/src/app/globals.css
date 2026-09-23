@@ -1,26 +1,32 @@
-/* Tema de la mesa: el mismo de apps/sheets (fondo oscuro calido, dorados,
-   Cinzel para titulos y Crimson Pro para texto), pensado para leerse de
-   lejos en una pantalla compartida. */
+/* Tema de la mesa (docs/14, 22-09): la paleta del borrador de diseño de
+   Gabino, negro azulado con superficies frias, violeta como acento de accion,
+   cian para lo interactivo y dorado solo como detalle de ambientacion.
+   Cinzel para titulos y Crimson Pro para texto, pensado para leerse de lejos
+   en una pantalla compartida. */
 
 :root {
-  --bg: #17120e;
-  --bg-glow: #2c2115;
-  --panel: #221a13;
-  --panel-2: #2b2118;
-  --panel-3: #352a1f;
-  --border: #4a392a;
-  --border-soft: #3a2c20;
-  --gold: #c9a35c;
-  --gold-dim: #8a713f;
-  --gold-bright: #e6c67d;
-  --ink: #e8dcc8;
-  --ink-dim: #a89778;
-  --ink-faint: #7c6d55;
-  --accent: #7d2f28;
-  --accent-bright: #b5473d;
-  --highlight: rgba(201, 163, 92, 0.1);
+  --bg: #0b0f14;
+  --bg-glow: #17132a;
+  --panel: #121826;
+  --panel-2: #161d2e;
+  --panel-3: #1b2336;
+  --border: #283149;
+  --border-soft: #1e2639;
+  --gold: #d4af37;
+  --gold-dim: #8d7628;
+  --gold-bright: #e9c95a;
+  --ink: #e5e7eb;
+  --ink-dim: #9ca3af;
+  --ink-faint: #6b7280;
+  --accent: #7c3aed;
+  --accent-bright: #8b5cf6;
+  --cyan: #06b6d4;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --highlight: rgba(124, 58, 237, 0.12);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  --radius: 10px;
+  --radius: 12px;
   --font-display: var(--font-cinzel), Georgia, 'Times New Roman', serif;
   --font-serif: var(--font-crimson), Georgia, 'Times New Roman', serif;
   color-scheme: dark;
@@ -2341,4 +2347,736 @@ a.plain {
   font-size: 1.4rem;
   color: var(--gold-bright);
   margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* La mesa a 390 px (docs/18, D-UX-6): dos menus, uno de sistema y otro */
+/* del juego; la narracion en medio y el cuadro de respuesta al pie.    */
+/* ------------------------------------------------------------------ */
+
+.table {
+  display: flex;
+  flex-direction: column;
+  grid-template-rows: none;
+}
+
+.table-body {
+  flex: 1;
+}
+
+.table-header {
+  position: relative;
+  isolation: isolate;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.table-header .titles {
+  text-align: left;
+}
+
+.table-header .title {
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.table-header .subtitle {
+  font-size: 0.88rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Menu de sistema: la hamburguesa. */
+.sysmenu {
+  position: relative;
+  flex: none;
+}
+
+.sysmenu-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.sysmenu-btn:hover,
+.sysmenu-btn:focus-visible,
+.sysmenu-btn[aria-expanded='true'] {
+  background: rgba(201, 163, 92, 0.12);
+  border-color: var(--gold-dim);
+  outline: none;
+}
+
+.sysmenu-btn .bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sysmenu-btn .bars i {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.sysmenu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  z-index: 8;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sysmenu-panel .who {
+  padding: 8px 12px 10px;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sysmenu-panel a,
+.sysmenu-panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.sysmenu-panel a:hover,
+.sysmenu-panel a:focus-visible,
+.sysmenu-panel button:hover,
+.sysmenu-panel button:focus-visible {
+  background: rgba(201, 163, 92, 0.12);
+  color: var(--gold-bright);
+  outline: none;
+}
+
+.topbar .sysmenu {
+  margin-left: auto;
+}
+
+/* Barra del juego: en la cabecera en escritorio, al pie en el telefono. */
+.gamebar {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+.gamebar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.gamebar button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gamebar button .s {
+  display: none;
+}
+
+.gamebar button:hover,
+.gamebar button:focus-visible {
+  color: var(--gold);
+  outline: none;
+}
+
+.gamebar button[aria-pressed='true'] {
+  color: var(--gold-bright);
+  background: rgba(201, 163, 92, 0.14);
+  border-color: var(--gold-dim);
+}
+
+.gamebar.at-bottom {
+  display: none;
+}
+
+/* Cuadro de respuesta: es lo primero del pie, sin nada encima. */
+.table-footer {
+  border-top: 1px solid var(--border-soft);
+  background: var(--panel);
+  max-height: 55dvh;
+}
+
+.turn .status {
+  color: var(--ink-dim);
+  font-size: 0.98rem;
+}
+
+/* La espera como ficcion: no es "cargando", la mesa esta jugando. */
+.waiting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gold);
+  font-style: italic;
+  font-size: 1.05rem;
+}
+
+.waiting .phrase {
+  animation: waiting-fade 6s ease-in-out infinite;
+}
+
+@keyframes waiting-fade {
+  0%,
+  10% {
+    opacity: 0.35;
+  }
+  25%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+
+/* Cuenta atras cancelable: un numero grande, la frase y el boton. */
+.countdown {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 6px 0 2px;
+}
+
+.countdown .ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  color: var(--gold-bright);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 4px rgba(201, 163, 92, 0.12);
+  animation: ring-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(201, 163, 92, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(201, 163, 92, 0.2);
+  }
+}
+
+.countdown .text {
+  flex: 1;
+  min-width: 160px;
+  color: var(--ink);
+  font-size: 1.02rem;
+}
+
+.countdown.held .text {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+/* Paneles de la barra del juego (fichas, jugadores, anfitrion, mas). */
+.aside.drawer .content {
+  padding: 16px;
+}
+
+.host.embedded {
+  border: 0;
+  background: transparent;
+}
+
+.host.embedded .body {
+  padding: 0;
+  max-width: none;
+}
+
+.more-drawer .tts {
+  flex-wrap: wrap;
+}
+
+.more-drawer .tts-fino {
+  display: inline-flex;
+}
+
+.more-drawer .persona {
+  border: 0;
+}
+
+.more-drawer .persona .head {
+  padding: 0 0 8px;
+}
+
+.more-drawer .persona .body {
+  padding: 0;
+  max-width: none;
+}
+
+/* Jugadores con estado: una fila por asiento. */
+.seats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.seat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.seat .n {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.seat .name {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seat .tag {
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+
+.seat .state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.seat .state i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+}
+
+.seat.st-ready .state {
+  color: #cfe3b8;
+}
+
+.seat.st-ready .state i {
+  background: #7fb069;
+}
+
+.seat.st-writing .state {
+  color: var(--gold-bright);
+}
+
+.seat.st-writing .state i {
+  background: var(--gold);
+  animation: ring-pulse 1.2s ease-in-out infinite;
+}
+
+.seat.st-narrating .state i {
+  background: var(--gold);
+}
+
+.seat.st-away .state,
+.seat.st-away .name {
+  color: var(--ink-faint);
+}
+
+.seat.st-away .state i {
+  background: var(--accent);
+}
+
+/* En el telefono: la barra del juego al pie, el menu del sitio arriba. */
+@media (max-width: 760px) {
+  .table-header {
+    padding: 6px 8px;
+  }
+
+  .gamebar.in-header {
+    display: none;
+  }
+
+  .gamebar.at-bottom {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+  }
+
+  .gamebar.at-bottom button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 2px;
+  }
+
+  .table.screen .gamebar.at-bottom {
+    display: none;
+  }
+
+  .table-footer {
+    max-height: 50dvh;
+  }
+
+  .turn {
+    padding: 8px 12px 10px;
+  }
+
+  .turn textarea {
+    min-height: 52px;
+  }
+
+  .turn .actions .hint {
+    display: none;
+  }
+
+  .countdown .text {
+    min-width: 0;
+  }
+
+  .aside.drawer {
+    width: 100%;
+    border-left: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Roles de color de la paleta del borrador (22-09): el dorado deja de  */
+/* ser el color de todo y queda para detalle; el violeta es la accion.  */
+/* ------------------------------------------------------------------ */
+
+h1,
+h2,
+h3 {
+  color: var(--ink);
+}
+
+a {
+  color: var(--cyan);
+}
+
+.label {
+  color: var(--ink-dim);
+}
+
+.btn {
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--accent-bright);
+  color: #fff;
+}
+
+.btn.primary {
+  color: #fff;
+}
+
+.btn.ghost {
+  color: var(--ink-dim);
+}
+
+.btn.ghost:hover,
+.btn.ghost:focus-visible {
+  color: var(--ink);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18);
+}
+
+.segmented {
+  border-color: var(--border);
+}
+
+.segmented button {
+  color: var(--ink-dim);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: #fff;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+.table-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.table-header .title {
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.table-header .subtitle {
+  text-shadow: none;
+}
+
+.sysmenu-btn .bars i {
+  background: var(--ink);
+}
+
+.sysmenu-btn:hover,
+.sysmenu-btn:focus-visible,
+.sysmenu-btn[aria-expanded='true'] {
+  background: var(--highlight);
+  border-color: var(--accent-bright);
+}
+
+.sysmenu-panel a:hover,
+.sysmenu-panel a:focus-visible,
+.sysmenu-panel button:hover,
+.sysmenu-panel button:focus-visible {
+  background: var(--highlight);
+  color: #fff;
+}
+
+.gamebar button:hover,
+.gamebar button:focus-visible {
+  color: var(--ink);
+}
+
+.gamebar button[aria-pressed='true'] {
+  color: var(--accent-bright);
+  background: var(--highlight);
+  border-color: transparent;
+}
+
+.gamebar.at-bottom {
+  background: var(--panel);
+}
+
+.seat .name,
+.party-grid .pc .n {
+  color: var(--ink);
+}
+
+.seat.st-ready .state {
+  color: var(--success);
+}
+
+.seat.st-ready .state i {
+  background: var(--success);
+}
+
+.seat.st-writing .state {
+  color: var(--cyan);
+}
+
+.seat.st-writing .state i {
+  background: var(--cyan);
+}
+
+.seat.st-thinking .state i {
+  background: var(--warning);
+}
+
+.seat.st-narrating .state i {
+  background: var(--accent-bright);
+}
+
+.seat.st-away .state i {
+  background: var(--danger);
+}
+
+.countdown .ring {
+  border-color: var(--accent-bright);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--highlight);
+}
+
+.waiting {
+  color: var(--accent-bright);
+}
+
+.notice-bar {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.start-card {
+  border-color: var(--accent-bright);
+}
+
+.start-card h2 {
+  color: var(--ink);
+}
+
+/* Cabecera de escena: la imagen arriba de la narracion, como en el borrador
+   (docs/14). Mientras no haya imagen por escena, el mapa del pack. */
+.scene-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 210px;
+  margin: 0 0 18px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 20px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+}
+
+.scene-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--hero);
+  background-size: cover;
+  background-position: center 40%;
+}
+
+.scene-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(11, 15, 20, 0.05) 0%, rgba(11, 15, 20, 0.55) 55%, rgba(11, 15, 20, 0.92) 100%);
+}
+
+.scene-hero .pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(11, 15, 20, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.6);
+  color: var(--ink);
+  font-size: 0.85rem;
+  backdrop-filter: blur(6px);
+}
+
+.scene-hero .pill b {
+  color: var(--accent-bright);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.scene-hero .kicker {
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.scene-hero h2 {
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  margin: 4px 0 2px;
+}
+
+.scene-hero .when {
+  color: var(--ink-dim);
+  font-style: italic;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .scene-hero {
+    min-height: 160px;
+    margin: 0 0 12px;
+    padding: 14px 14px;
+    border-radius: 0 0 var(--radius) var(--radius);
+    border-top: 0;
+  }
+
+  .blocks {
+    padding-top: 0;
+  }
+}
+
+/* En el telefono la pastilla del turno va arriba en el flujo, no encima del titulo. */
+@media (max-width: 760px) {
+  .scene-hero .pill {
+    position: static;
+    align-self: flex-start;
+    margin-bottom: auto;
+  }
+
+  .scene-hero h2 {
+    font-size: 1.35rem;
+  }
+}
+
+.table-card .name {
+  color: var(--ink);
 }
