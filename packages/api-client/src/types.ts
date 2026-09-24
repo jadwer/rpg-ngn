@@ -76,6 +76,7 @@ export type ChronicleBlock =
   | { type: 'narration'; text: string }
   | { type: 'dialogue'; speaker: string; text: string }
   | { type: 'roll'; text: string; actor: string; die: string; result: number }
+  | { type: 'image'; url: string; alt: string }
 
 /** La cronica publica de una mesa, tal como la ve quien abre el enlace. */
 export interface Chronicle {

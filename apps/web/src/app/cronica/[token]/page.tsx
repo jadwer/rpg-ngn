@@ -103,6 +103,10 @@ export default function CronicaPage() {
                   <p key={i} className="cronica-dialogue">
                     <b>{b.speaker}</b>: «{b.text}»
                   </p>
+                ) : b.type === 'image' ? (
+                  <figure key={i} className="scene-image loaded">
+                    <img src={b.url} alt={b.alt} loading="lazy" />
+                  </figure>
                 ) : (
                   <p key={i} className="cronica-roll">
                     {b.actor} tira {b.die}: {b.result}. {b.text}

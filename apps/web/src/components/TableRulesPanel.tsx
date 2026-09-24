@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, withDiceMode, type DiceMode } from '@rpg-ngn/ui-logic'
+import { DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 
 interface Props {
@@ -55,6 +55,12 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
     void save(withDiceMode(table.settings, mode), `Guardado: ${diceModeLabel(mode).toLowerCase()}.`)
   }
 
+  const images = sceneImagesOn(table.settings)
+  const chooseImages = (on: boolean) => {
+    if (on === images || disabled) return
+    void save(withSceneImages(table.settings, on), on ? 'Guardado: la mesa se ilustra.' : 'Guardado: solo texto.')
+  }
+
   const chooseLint = (value: string) => {
     if (value === lint || disabled) return
     // Sin modo elegido se quita la clave: manda el del engine.
@@ -76,6 +82,21 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
         </div>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
           {diceModeHint(dice)}
+        </span>
+      </div>
+
+      <div className="field">
+        <span>Ilustraciones</span>
+        <div className="segmented" role="group" aria-label="Ilustraciones">
+          <button type="button" aria-pressed={images} disabled={disabled} onClick={() => chooseImages(true)}>
+            Ilustrar escenas
+          </button>
+          <button type="button" aria-pressed={!images} disabled={disabled} onClick={() => chooseImages(false)}>
+            Solo texto
+          </button>
+        </div>
+        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+          {sceneImagesHint(images)}
         </span>
       </div>
 
