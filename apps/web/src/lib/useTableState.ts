@@ -24,6 +24,8 @@ export interface TableSnapshot {
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion. */
   fortune: TableState['fortune']
   suggestions: TableState['suggestions']
+  /** El historial ya llego entero (la API pagina de 200 en 200). */
+  caughtUp: boolean
   quota: TableState['quota']
   /** Todos los bloques recibidos hasta ahora, en orden. Misma referencia mientras no lleguen nuevos. */
   envelopes: BlockEnvelope[]
@@ -72,7 +74,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, suggestions: state.suggestions, quota: state.quota ?? null, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, suggestions: state.suggestions, caughtUp: state.blocks.length < 200, quota: state.quota ?? null, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

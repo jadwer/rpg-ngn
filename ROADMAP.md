@@ -433,8 +433,12 @@ premium, imagenes fuera del tope) espera a Stripe.
   orientan cuando no se sabe que espera el narrador, pero no cierran
   romances internos ni lineas paralelas. "Otras" pide dos nuevas (tope 2 por
   turno). Se apagan por jugador
-- [ ] **10c. "Anteriormente..."** al abrir o retomar una sesion: el recap y
-  el cliffhanger en una pantalla con Continuar
+- [x] **10c. "Anteriormente..."** (24-09, desplegada): en la apertura de una
+  sesion con otra antes, el DM escribe el resumen en la misma llamada (linea
+  `recap`, pasa el lint) y sale como bloque `system` con `recap: true`. Quien
+  entra a la mesa con la sesion abierta lo ve en una pantalla con Continuar,
+  una vez por resumen (web: por navegador; app: mientras esta abierta); si
+  llega en vivo durante la apertura, se lee en la narracion y no tapa nada
 - [ ] **10d. Video de la sesion**: cronica, imagenes de 10a y voz del
   narrador a un video por sesion (ffmpeg en la cola), descargable desde
   Lectura. Depende de 10a

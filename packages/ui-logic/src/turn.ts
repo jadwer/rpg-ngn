@@ -46,7 +46,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
     }
     case 'system':
       // Titulo y puntos: los usa la apertura de sesion (briefing y "como se juega" del pack).
-      return { kind: 'system', id, title: block.title ?? null, text: block.text, items: block.items ? [...block.items] : [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null }
+      return { kind: 'system', id, title: block.title ?? null, text: block.text, items: block.items ? [...block.items] : [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null, ...(block.recap ? { recap: true } : {}) }
     case 'image':
       return { kind: 'image', id, url: block.url, alt: block.alt, caption: block.caption ?? null }
   }

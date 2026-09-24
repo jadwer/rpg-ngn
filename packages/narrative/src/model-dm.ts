@@ -2,7 +2,7 @@ import { CharacterRef, DiceSpec, EntityRef, KebabId, refId, refKind } from '@rpg
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import { TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
-import { budgetFor, buildTurnContext, type ContextBudget, type ContextProfile } from './context.js'
+import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
 import type { DMOutput, DMProbe, DMProvider, DMTurnContext, ProposedEvent } from './provider.js'
@@ -253,6 +253,7 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('event'), event: z.unknown() }),
   z.object({ kind: z.literal('addressed'), characterIds: z.array(z.string()) }),
   z.object({ kind: z.literal('scene'), text: z.string() }),
+  z.object({ kind: z.literal('recap'), text: z.string() }),
   z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
 ])
 
@@ -317,6 +318,7 @@ export class ModelDMProvider implements DMProvider {
     }
 
     const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', random, diceMode, preRolled)
+    interpreter.recapAllowed = ctx.turn.number === 1 && ctx.turn.responses.length === 0 && hasPreviousSession(ctx)
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -460,6 +462,9 @@ class LineInterpreter {
   addressed: string[] | null = null
   /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
   scene: string | null = null
+  /** "Anteriormente..." (E10c): permitido solo en la apertura con sesion previa, y uno. */
+  recapAllowed = false
+  recapped = false
   /** Ideas de accion por personaje (E10b). */
   suggestions: Record<string, string[]> = {}
   private pending: { text: string; depth: number } | null = null
@@ -643,6 +648,17 @@ class LineInterpreter {
           if (options.length === 2) break
         }
         if (options.length) this.suggestions[id] = options
+        return
+      }
+      case 'recap': {
+        // Solo en la apertura de una sesion que tiene otra antes, y uno.
+        const text = line.data.text.trim().slice(0, 1200)
+        if (!text || this.recapped || !this.recapAllowed) return
+        this.recapped = true
+        const cut = yield* this.lint(text)
+        if (cut) return
+        this.blocks++
+        yield { kind: 'block', block: { type: 'system', title: 'Anteriormente...', text, audience: 'table', tone: 'info', recap: true } }
         return
       }
       case 'scene': {

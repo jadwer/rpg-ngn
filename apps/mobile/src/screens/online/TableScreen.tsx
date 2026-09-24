@@ -1,7 +1,7 @@
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -16,6 +16,7 @@ import { InvitePanel } from '../../components/InvitePanel'
 import { PlayersPanel } from '../../components/PlayersPanel'
 import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
+import { RecapModal } from '../../components/RecapModal'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
@@ -137,6 +138,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
   const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
+  // "Anteriormente..." (E10c): solo si ya estaba al entrar, no si llega en vivo.
+  const recap = useMemo(() => latestRecap(blocks), [blocks])
+  const [recapAtEntry, setRecapAtEntry] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    if (recapAtEntry === undefined && snapshot?.caughtUp) setRecapAtEntry(recap?.id ?? null)
+  }, [snapshot, recap, recapAtEntry])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
@@ -539,6 +546,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
+      <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} />
       <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 

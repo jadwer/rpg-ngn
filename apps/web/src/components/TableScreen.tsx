@@ -3,7 +3,7 @@
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -23,6 +23,7 @@ import { PersonaPanel } from './PersonaPanel'
 import { PlayersPanel } from './PlayersPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
+import { RecapOverlay } from './RecapOverlay'
 import { SystemMenu } from './SystemMenu'
 import { TtsBar } from './TtsBar'
 import { TurnPanel } from './TurnPanel'
@@ -198,6 +199,12 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // comparte por OBS es lo que veria un jugador, y eso vale tambien para la
   // voz. Antes se escondian con CSS y el TTS los leia igual en directo.
   const blocks = useMemo(() => blocksForSeat(allBlocks, isHost && !screen), [allBlocks, isHost, screen])
+  // "Anteriormente..." (E10c): solo si ya estaba al entrar, no si llega en vivo.
+  const recap = useMemo(() => latestRecap(blocks), [blocks])
+  const [recapAtEntry, setRecapAtEntry] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    if (recapAtEntry === undefined && snapshot?.caughtUp) setRecapAtEntry(recap?.id ?? null)
+  }, [snapshot, recap, recapAtEntry])
   const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
   const tts = useTts(blocks)
 
@@ -517,6 +524,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
 
   return (
     <div className={`table${screen ? ' screen' : ''}`}>
+      <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
       <header className="table-header hide-on-screen">
         <SystemMenu user={user} onLogout={onLogout} />
         <div className="titles">

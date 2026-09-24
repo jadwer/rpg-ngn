@@ -61,6 +61,8 @@ export interface SystemBlock {
   tone: 'info' | 'action'
   /** Explicacion larga, para el anfitrion. */
   detail: string | null
+  /** Es el "Anteriormente..." de la apertura (E10c). */
+  recap?: boolean
 }
 
 /** Ilustracion de la escena (E10a). `url` como la manda la API: relativa a su servidor. */
@@ -118,4 +120,17 @@ export function speechTextOf(block: TurnBlock): string {
       // Una imagen no se lee en voz alta: la narracion ya conto la escena.
       return ''
   }
+}
+
+/**
+ * El "Anteriormente..." mas reciente (E10c): lo que se enseña al entrar a
+ * una mesa con la sesion abierta. Null si la sesion no trae (la primera de
+ * la campaña no tiene nada que resumir).
+ */
+export function latestRecap(blocks: readonly TurnBlock[]): SystemBlock | null {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i]
+    if (block?.kind === 'system' && block.recap) return block
+  }
+  return null
 }

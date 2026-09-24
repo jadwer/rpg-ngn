@@ -362,6 +362,22 @@ describe('ModelDMProvider', () => {
     })
   })
 
+  it('la apertura con sesion previa trae el "Anteriormente...", y solo la apertura', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"recap","text":"Descolgaron la campana en la capilla y algo respondió desde el tercer nivel."}',
+      '{"kind":"block","block":{"type":"narration","text":"Amanece gris sobre Valdoria."}}',
+    ].join('\n')
+    const transport = new FakeTransport(lines)
+    const opening = await collect(new ModelDMProvider(transport, KEY).narrate(contextFor(base, turn(1, []))))
+    const recap = opening.find((o) => o.kind === 'block' && o.block.type === 'system' && o.block.recap)
+    expect(recap).toMatchObject({ block: { title: 'Anteriormente...', text: 'Descolgaron la campana en la capilla y algo respondió desde el tercer nivel.' } })
+    expect(transport.prompts[0]!.user).toContain('"kind":"recap"')
+
+    const later = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    expect(later.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.recap)).toBe(false)
+  })
+
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)

@@ -55,7 +55,7 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
     dmLayer(ctx, party, budget),
-    turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}),
+    turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx)),
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
@@ -384,7 +384,12 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
 }
 
 // Capa d: el turno.
-function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled: Readonly<Record<string, number>> = {}): string {
+/** Si la campaña ya jugo otra sesion antes de esta: entonces la apertura trae "Anteriormente...". */
+export function hasPreviousSession(ctx: Pick<DMTurnContext, 'state' | 'turn'>): boolean {
+  return Object.values(ctx.state.meta.sessions).some((s) => s.id !== ctx.turn.sessionId && s.status === 'closed')
+}
+
+function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled: Readonly<Record<string, number>> = {}, previous = false): string {
   const lines: string[] = [`# Turno ${turn.number}`, '']
   if (turn.responses.length === 0) {
     lines.push(turn.number === 1
@@ -392,6 +397,9 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
           'APERTURA DE LA SESIÓN. Nadie ha actuado todavía: este turno es tuyo entero y es la primera impresión de la mesa.',
           'Presenta la escena con fuerza, en 3 a 5 bloques de narración: dónde están, qué acaba de pasar, qué se huele y se oye. Sitúa a CADA personaje presente por su nombre con un detalle propio (algo que ve, siente o lleva encima), sin decidir nada por ellos.',
           'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay NPCs en escena, que uno hable.',
+          ...(previous
+            ? ['Antes de todo, en la PRIMERA línea, el resumen de lo que la mesa vivió en la sesión anterior: {"kind":"recap","text":"..."} con 3 a 5 frases en pasado, en orden, desde la Crónica y el cliffhanger. Solo lo que la mesa sabe, sin secretos ni lo que no vieron. Es el "Anteriormente..." que leen al volver; no lo repitas en la narración.']
+            : []),
           'No pidas tiradas todavía y no propongas eventos salvo un world_event si hace falta. Termina con una situación abierta y una pregunta directa a toda la mesa, y devuelve la palabra a todos ("addressed" con toda la party).',
           ...(party.length === 1
             ? ['La mesa es de UNA sola persona. Háblale de tú, en singular. Si el briefing o el pack hablan de un grupo ("ustedes", "llevan dos jornadas juntos"), adáptalo a quien llega sola o solo: nunca le hables como a varios ni le atribuyas compañeros que no están en la mesa.']

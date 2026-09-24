@@ -213,6 +213,8 @@ export const TurnBlock = z.discriminatedUnion('type', [
     /** Titulo y puntos: la apertura de sesion trae el briefing y "como se juega" del pack. */
     title: z.string().min(1).optional(),
     items: z.array(z.string().min(1)).optional(),
+    /** Es el "Anteriormente..." de la apertura (E10c): los clientes lo enseñan al entrar. */
+    recap: z.literal(true).optional(),
   }),
   /**
    * Ilustracion de la escena (E10a). No la escribe el engine: la API la
