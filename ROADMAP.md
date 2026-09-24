@@ -416,7 +416,7 @@ Gabino decidio el orden: **imagenes primero**, antes de Stripe en real,
 gratis durante la beta y con tope por sesion. Lo que cobra (narrador
 premium, imagenes fuera del tope) espera a Stripe.
 
-- [ ] **10a. Imagen por escena.** Contrato: el motor decide *cuando* (cambio
+- [x] **10a. Imagen por escena** (24-09, desplegada; en produccion `IMAGES_ENABLED=false` hasta tener las claves de Gemini y OpenAI). Con interruptor por mesa, cronica ilustrada y `artStyle` en piloto y La Mascarada. Contrato: el motor decide *cuando* (cambio
   de lugar, apertura de sesion y momentos clave que el DM marca, con tope
   por sesion) y *que* (prompt armado desde el estilo del pack, el lugar y los
   personajes presentes, nunca desde el texto libre del jugador); la API
@@ -426,7 +426,7 @@ premium, imagenes fuera del tope) espera a Stripe.
   para que las caras se mantengan. Solo en packs originales o con licencia
   (`docs/07`). Ajuste por mesa para apagarlas. Tabla de costes por imagen
   para `turns:usage`. Web, app y cronica pintan el bloque
-- [ ] **10b. Sugerencias de respuesta por jugador.** Dos acciones por
+- [x] **10b. Sugerencias de respuesta por jugador** (24-09, desplegada, sin "Otras" todavia: esa necesita una llamada aparte al modelo). Dos acciones por
   personaje interpelado, en la misma llamada del DM, filtradas por lo que el
   personaje sabe; tocarla la copia al cuadro. **El cuadro de texto siempre
   sigue abierto** para "otra respuesta" (Gabino, 24-09): las sugerencias

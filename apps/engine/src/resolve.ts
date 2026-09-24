@@ -63,6 +63,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   const initial = state
   const opening = request.turn.number === 1 && request.turn.responses.length === 0
   let moment: string | null = null
+  let suggestions: Record<string, string[]> = {}
 
   // Cierra un evento nacido en el engine con su id, version y momento. El
   // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
@@ -155,6 +156,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'suggestions') {
+        suggestions = output.byCharacter
+        continue
+      }
+
       const parsed = seal(output.event)
       if (!parsed.success) {
         throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
@@ -178,5 +184,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     usage,
     ...(lint.length ? { lint } : {}),
     ...(illustration ? { illustrations: [illustration] } : {}),
+    // Solo para quien tiene la palabra el turno que viene.
+    ...(Object.keys(suggestions).length ? { suggestions: Object.fromEntries(Object.entries(suggestions).filter(([id]) => addressed.includes(id))) } : {}),
   }
 }

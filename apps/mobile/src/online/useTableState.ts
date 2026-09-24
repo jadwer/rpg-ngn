@@ -23,6 +23,7 @@ export interface TableSnapshot {
   away: TableState['away']
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion. */
   fortune: TableState['fortune']
+  suggestions: TableState['suggestions']
   envelopes: BlockEnvelope[]
   lastBlockId: number
 }
@@ -69,7 +70,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, suggestions: state.suggestions, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

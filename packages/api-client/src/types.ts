@@ -196,6 +196,8 @@ export interface TableState {
   fortune: { pending: boolean }
   /** Turnos de cupo o creditos que le quedan a la mesa; null si no consume (clave propia). */
   quota?: { remainingTurns: number } | null
+  /** Ideas de accion para el personaje de quien consulta (E10b); vacio si no hay. */
+  suggestions: string[]
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }

@@ -346,6 +346,22 @@ describe('ModelDMProvider', () => {
     expect(illustrate).toEqual([{ kind: 'illustrate', moment: 'Una campana de bronce vibra sola en una capilla minera a la luz de un farol.' }])
   })
 
+  it('sugerencias: dos por personaje de la party, cortas y sin repetir; las de fuera de la party se ignoran', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"block","block":{"type":"narration","text":"Tomás espera en la puerta de la capilla."}}',
+      '{"kind":"suggest","characterId":"zahira","options":["Le pregunto a Tomás por su hermano","Le pregunto a Tomás por su hermano","Bajo sola al segundo nivel","Una tercera que sobra"]}',
+      '{"kind":"suggest","characterId":"character:calder","options":["Reviso la cuerda antes de bajar"]}',
+      '{"kind":"suggest","characterId":"osric","options":["No es de la party"]}',
+      '{"kind":"addressed","characterIds":["zahira","calder"]}',
+    ].join('\n')
+    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
+    expect(outputs.find((o) => o.kind === 'suggestions')).toEqual({
+      kind: 'suggestions',
+      byCharacter: { zahira: ['Le pregunto a Tomás por su hermano', 'Bajo sola al segundo nivel'], calder: ['Reviso la cuerda antes de bajar'] },
+    })
+  })
+
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)

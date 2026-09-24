@@ -539,7 +539,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
-      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} />
+      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} />
       <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 
       {maps.length > 0 ? (
@@ -617,6 +617,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
 }
 
+const EMPTY_IDEAS: string[] = []
 const EMPTY: never[] = []
 
 function Segment({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {

@@ -2647,6 +2647,42 @@ a.plain {
   font-size: 0.9rem;
 }
 
+/* Ideas de accion del DM (E10b): sobre el cuadro, que sigue libre. */
+.turn .ideas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 8px;
+}
+.turn .ideas .label {
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+}
+.turn .idea {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-bright);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+}
+.turn .idea:hover {
+  background: rgba(124, 58, 237, 0.24);
+}
+.turn .ideas-toggle {
+  border: 0;
+  background: none;
+  color: var(--nebula, #a78bfa);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
 /* La Fortuna de la sesion: un dado grande que tira el jugador. */
 .turn .fortune {
   display: flex;

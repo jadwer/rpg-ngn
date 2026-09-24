@@ -32,6 +32,8 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
+  /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
+  suggestions: string[]
 }
 
 /**
@@ -40,7 +42,8 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, suggestions }: Props) {
+  const [showIdeas, setShowIdeas] = useState(true)
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
@@ -115,6 +118,25 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {progress.canRespond ? (
         <View style={styles.compose}>
           {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
+          {/* Ideas del DM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
+          {suggestions.length > 0 && !focused ? (
+            showIdeas ? (
+              <View style={styles.ideas}>
+                {suggestions.map((idea) => (
+                  <Pressable key={idea} style={({ pressed }) => [styles.idea, pressed && styles.ideaPressed]} disabled={busy} onPress={() => setText(idea)} accessibilityRole="button">
+                    <Text style={styles.ideaText}>{idea}</Text>
+                  </Pressable>
+                ))}
+                <Pressable onPress={() => setShowIdeas(false)} hitSlop={8}>
+                  <Text style={styles.ideasToggle}>Ocultar ideas</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <Pressable onPress={() => setShowIdeas(true)} hitSlop={8}>
+                <Text style={styles.ideasToggle}>Ver ideas</Text>
+              </Pressable>
+            )
+          ) : null}
           <TextInput
             value={text}
             onChangeText={(value) => {
@@ -166,6 +188,11 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 }
 
 const styles = StyleSheet.create({
+  ideas: { gap: 8 },
+  idea: { borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
+  ideaPressed: { backgroundColor: 'rgba(124, 58, 237, 0.26)' },
+  ideaText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
+  ideasToggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula },
   fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
   fortuneText: { flex: 1, gap: 2 },
   fortuneTitle: { fontFamily: theme.fonts.uiBold, fontSize: 15, color: theme.colors.ink },

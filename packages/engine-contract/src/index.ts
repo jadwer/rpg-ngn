@@ -347,6 +347,12 @@ export const ResolveLine = z.discriminatedUnion('kind', [
     lint: z.array(LintFinding).optional(),
     /** Escenas que el engine propone ilustrar (E10a); ausente si ninguna. Opcional: no sube la version. */
     illustrations: z.array(Illustration).optional(),
+    /**
+     * Ideas de accion por personaje interpelado (E10b): dos frases cortas que
+     * el cliente ofrece sobre el cuadro de texto, que sigue libre. Opcional:
+     * no sube la version.
+     */
+    suggestions: z.record(KebabId, z.array(z.string().min(1).max(120)).max(2)).optional(),
   }),
   z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
 ])

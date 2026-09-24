@@ -31,6 +31,8 @@ interface Props {
   onFortune: () => Promise<number>
   /** El anfitrion se quedo sin turnos: el aviso lleva a recargar antes de chocar con el cierre. */
   outOfTurns: boolean
+  /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
+  suggestions: string[]
 }
 
 /**
@@ -40,7 +42,8 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns, suggestions }: Props) {
+  const [showIdeas, setShowIdeas] = useState(() => readShowIdeas())
   const [fortuneError, setFortuneError] = useState<string | null>(null)
   // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
   // es el que confirma que ya no toca; si vuelve a tocar (sesion nueva), vuelve.
@@ -49,6 +52,15 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     if (!fortunePending) setFortuneLanded(false)
   }, [fortunePending])
   const [text, setText] = useState('')
+
+  const toggleIdeas = (on: boolean) => {
+    setShowIdeas(on)
+    try {
+      localStorage.setItem(IDEAS_KEY, on ? '1' : '0')
+    } catch {
+      // Sin almacenamiento el ajuste dura lo que la pagina.
+    }
+  }
 
   const send = async () => {
     const value = text.trim()
@@ -129,6 +141,27 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {progress.canRespond ? (
         <>
+          {/* Ideas del DM para quien no sabe que espera el narrador. Tocar una la
+              copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
+          {suggestions.length > 0 ? (
+            showIdeas ? (
+              <div className="ideas" role="group" aria-label="Ideas para tu personaje">
+                <span className="label">Ideas</span>
+                {suggestions.map((idea) => (
+                  <button key={idea} type="button" className="idea" disabled={busy} onClick={() => setText(idea)}>
+                    {idea}
+                  </button>
+                ))}
+                <button type="button" className="ideas-toggle" onClick={() => toggleIdeas(false)}>
+                  Ocultar ideas
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="ideas-toggle" onClick={() => toggleIdeas(true)}>
+                Ver ideas
+              </button>
+            )
+          ) : null}
           <textarea
             className="textarea"
             name="respuesta"
@@ -184,4 +217,15 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       ) : null}
     </div>
   )
+}
+
+const IDEAS_KEY = 'rpg:ideas'
+
+/** Las ideas se ven salvo que este jugador las haya ocultado en este navegador. */
+function readShowIdeas(): boolean {
+  try {
+    return typeof localStorage === 'undefined' || localStorage.getItem(IDEAS_KEY) !== '0'
+  } catch {
+    return true
+  }
 }

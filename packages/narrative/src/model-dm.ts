@@ -253,6 +253,7 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('event'), event: z.unknown() }),
   z.object({ kind: z.literal('addressed'), characterIds: z.array(z.string()) }),
   z.object({ kind: z.literal('scene'), text: z.string() }),
+  z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
 ])
 
 /**
@@ -384,6 +385,7 @@ export class ModelDMProvider implements DMProvider {
     }
 
     if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
+    if (Object.keys(interpreter.suggestions).length) yield { kind: 'suggestions', byCharacter: interpreter.suggestions }
     yield { kind: 'addressed', characterIds: interpreter.addressed ?? party }
     yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
   }
@@ -458,6 +460,8 @@ class LineInterpreter {
   addressed: string[] | null = null
   /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
   scene: string | null = null
+  /** Ideas de accion por personaje (E10b). */
+  suggestions: Record<string, string[]> = {}
   private pending: { text: string; depth: number } | null = null
   private readonly knowledge: KnowledgeView | null
   private readonly allowed: ReturnType<typeof allowedEventFor>
@@ -623,6 +627,22 @@ class LineInterpreter {
       case 'addressed': {
         const ids = line.data.characterIds.map((id) => refId(id)).filter((id) => this.party.includes(id))
         if (ids.length) this.addressed = ids
+        return
+      }
+      case 'suggest': {
+        // Dos por personaje de la party, cortas, y cada una pasa el lint: una
+        // sugerencia tambien puede filtrar un secreto a quien no lo sabe.
+        const id = refId(line.data.characterId)
+        if (!this.party.includes(id) || this.suggestions[id]) return
+        const options: string[] = []
+        for (const raw of line.data.options) {
+          const option = raw.trim().replace(/\s+/g, ' ').slice(0, 120)
+          if (!option || options.includes(option)) continue
+          const cut = yield* this.lint(option)
+          if (!cut) options.push(option)
+          if (options.length === 2) break
+        }
+        if (options.length) this.suggestions[id] = options
         return
       }
       case 'scene': {

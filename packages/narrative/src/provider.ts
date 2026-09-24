@@ -53,6 +53,8 @@ export type DMOutput =
   | { kind: 'lint'; finding: LintFinding }
   /** El DM marco un momento para ilustrar: una frase de lo que se ve (docs/ROADMAP, E10a). */
   | { kind: 'illustrate'; moment: string }
+  /** Ideas de accion por personaje interpelado (E10b); el cuadro de texto sigue libre. */
+  | { kind: 'suggestions'; byCharacter: Record<string, string[]> }
 
 export interface DMProbe {
   ok: boolean
