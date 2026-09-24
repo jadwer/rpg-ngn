@@ -47,7 +47,7 @@ hace el software.
   el aviso; publicar el domicilio de una persona fisica en una web publica es
   una decision de Gabino, y por eso se dejo fuera. Es la pregunta 6 para el
   abogado.
-- `<CORREO_PRIVACIDAD>`: `privacidad@gabinoramirez.com`, creado el 22-09 y
+- `<CORREO_PRIVACIDAD>`: `privacidad@adastramentis.com`, creado el 22-09 y
   publicado en las dos paginas.
 - `<FECHA_PUBLICACION>`: 22 de septiembre de 2026.
 - `<ESTADO>`: Ciudad de Mexico.
@@ -472,7 +472,7 @@ que hay que sostener:
 - [x] **Guardar la aceptacion** (22-09): tabla `legal_acceptances` con version,
   fecha y origen. En tabla aparte porque una persona acepta varias veces y la
   constancia **sobrevive al borrado de su cuenta**, disociada.
-- [x] **Buzon `privacidad@gabinoramirez.com`** (22-09, lo creo Gabino en
+- [x] **Buzon `privacidad@adastramentis.com`** (22-09, lo creo Gabino en
   JettHost), probado con un envio real desde el servidor.
 - [x] **Terminos de subida de mundos** (23-09, entrega 8): al subir un
   `.rpgpack` la persona marca "declaro que tengo derecho a subir este
@@ -480,7 +480,7 @@ que hay que sostener:
   el pack lleva ademas su `provenance` declarada. Los terminos publicados
   ganan un parrafo en el punto 5 (contenido que subes) sin cambiar de version,
   porque ya decian que no se puede subir contenido sin derechos; la via de
-  retirada es `privacidad@gabinoramirez.com`. **Pregunta 7 para el abogado**:
+  retirada es `privacidad@adastramentis.com`. **Pregunta 7 para el abogado**:
   ¿basta esa declaracion para que la responsabilidad por un mundo con
   contenido ajeno recaiga en quien lo subio, y hace falta un procedimiento
   formal de notificacion y retirada?

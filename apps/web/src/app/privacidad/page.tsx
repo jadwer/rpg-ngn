@@ -39,7 +39,7 @@ export default function PrivacidadPage() {
       </p>
       <p>Este aviso se emite conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y su Reglamento.</p>
       <p>
-        Para cualquier asunto relacionado con tus datos, escríbenos a <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a>.
+        Para cualquier asunto relacionado con tus datos, escríbenos a <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>.
       </p>
 
       <h2>2. Qué datos recogemos</h2>
@@ -73,7 +73,7 @@ export default function PrivacidadPage() {
       </ul>
       <p>
         <b>Finalidad adicional, que puedes rechazar</b> sin que afecte a tu uso del Servicio: enviarte avisos sobre tus mesas (por ejemplo, que es tu turno). Puedes oponerte escribiendo a{' '}
-        <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a>.
+        <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>.
       </p>
       <p>
         <b>No vendemos tus datos, no los cedemos con fines publicitarios y no hacemos perfiles comerciales contigo.</b>
@@ -136,7 +136,7 @@ export default function PrivacidadPage() {
         También puedes revocar tu consentimiento en cualquier momento.
       </p>
       <p>
-        Para ejercerlos, escribe a <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a> desde el correo de tu cuenta, indicando qué solicitas y aportando un documento
+        Para ejercerlos, escribe a <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a> desde el correo de tu cuenta, indicando qué solicitas y aportando un documento
         que acredite tu identidad. <b>Te responderemos en un plazo máximo de 20 días hábiles</b>, y si procede, se hará efectivo dentro de los 15 días hábiles siguientes.
       </p>
       <p>

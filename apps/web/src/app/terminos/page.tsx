@@ -63,7 +63,7 @@ export default function TerminosPage() {
 
       <h2>4. Devoluciones</h2>
       <p>
-        Si los créditos no funcionaron por un fallo atribuible al Servicio, escríbenos a <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a> y te devolvemos el importe
+        Si los créditos no funcionaron por un fallo atribuible al Servicio, escríbenos a <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a> y te devolvemos el importe
         correspondiente.
       </p>
       <p>
@@ -95,7 +95,7 @@ export default function TerminosPage() {
         <b>Los mundos que subes</b> (packs con personajes, lugares, historias e imágenes) siguen siendo tuyos. Al subir uno declaras que tienes derecho sobre su contenido, sea propio o con una licencia que lo
         permita, y respondes de ello; nos concedes la licencia necesaria para guardarlo, validarlo, mostrarlo en tus mesas y, si pides publicarlo y lo aprobamos, en el catálogo con tu nombre. Podemos
         retirar del catálogo cualquier mundo ante una reclamación de derechos o si incumple estos términos; para reclamar sobre un mundo ajeno escribe a{' '}
-        <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a>.
+        <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>.
       </p>
 
       <h2>6. Lo que no puedes hacer</h2>
@@ -129,7 +129,7 @@ export default function TerminosPage() {
       <h2>9. Cancelación</h2>
       <p>
         <b>Puedes dejar de usar el Servicio cuando quieras</b> y solicitar la cancelación de tu cuenta escribiendo a{' '}
-        <a href="mailto:privacidad@gabinoramirez.com">privacidad@gabinoramirez.com</a>. La cancelación implica la pérdida de los créditos no consumidos.
+        <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>. La cancelación implica la pérdida de los créditos no consumidos.
       </p>
       <p>Podemos suspender o cancelar tu cuenta si incumples estos términos, avisándote del motivo salvo que la ley lo impida.</p>
       <p>
