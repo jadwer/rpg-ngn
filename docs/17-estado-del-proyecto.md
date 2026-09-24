@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-24, mañana CST**. Rama `dev`, commit `a75aec1`; API `d120576` con platform `0736442`.
+Fecha de corte: **2026-09-24, tarde CST**. Rama `dev`, commit `acf4988`; API `5e22720` con platform `d95a210`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -191,13 +191,29 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   y el webhook de Stripe. Correo saliente por Resend desde
   no-responder@adastramentis.com (dominio verificado). La app apunta al
   dominio nuevo y migra sola la direccion vieja.
+- El primer correo real cayo en no deseado de Outlook sin blacklist ni fallo
+  de DKIM/SPF/DMARC: dominio de horas, firma "rpg-ngn" y plantilla en ingles.
+  Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
+  llego bien.
+
+### Higiene y Fortuna del jugador (24-09)
+
+- La Fortuna la tira cada jugador con el dado de mantener presionado; el
+  numero lo saca la API (`POST tables/{t}/fortune`), queda en el log y en la
+  mesa, una vez por personaje y sesion. El motor ya no la tira.
+- Registro con casilla "Tengo 18 años o más" (`atomo-auth.legal.min_age`,
+  guardado en la constancia) y errores de validacion en español.
+- Cuentas sembradas borradas en produccion; `jadwer@msn.com` es admin.
+  `DatabaseSeeder` no corre en produccion.
+- Guia del anfitrion en `/guia`; aviso con enlace al quedarse sin turnos;
+  retratos del piloto en WebP.
 
 ### Lo que salio de jugar la mesa 33 (23-09, tarde)
 
 - Los primeros 20 turnos de cupo de cada cuenta narran con Sonnet; despues,
   Haiku. La mesa dice con que narra y quien lo paga (`GET tables/{t}/dm`).
-- Fortuna al abrir sesion, tirada por el motor si la sesion trae tabla (la
-  tabla es opcional desde hoy). El aviso del lint va al final del turno y,
+- Fortuna al abrir sesion si la sesion trae tabla (la tabla es opcional
+  desde hoy); desde el 24-09 la tira el jugador, no el motor. El aviso del lint va al final del turno y,
   si corto la pregunta, el motor devuelve la palabra. Mesa de una persona:
   la apertura le habla en singular.
 - Dado de mantener presionado (inercia de 1 a 5 s) y boton de narracion en

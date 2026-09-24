@@ -240,8 +240,11 @@ si corto el ultimo bloque, el motor devuelve la palabra; la apertura de una
 mesa de una persona le habla en singular; dado de mantener presionado con
 inercia de 1 a 5 s; boton de narracion en la cabecera, en web y app.
 **Pendiente de esa lista**: que el pack adapte el briefing al tamaño de la
-mesa desde el contenido (hoy lo corrige el prompt) y decidir si la Fortuna
-la tira el jugador con el dado de mantener presionado. Lo que se
+mesa desde el contenido (hoy lo corrige el prompt). La Fortuna **la tira
+cada jugador** (Gabino, 24-09): el dado de mantener presionado llama a
+`POST tables/{t}/fortune`, el numero lo saca el servidor y queda en el log y
+en la mesa; el motor ya no la tira al abrir y un d20 del modelo marcado como
+Fortuna cuenta como tirada cualquiera (monorepo `fef8e45`, API `97c6928`). Lo que se
 decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
 que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
 - Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
@@ -292,7 +295,7 @@ Motivos en `docs/14`. Solo si tras B1 los mismos amigos siguen diciendo "poco
 profesional" se prueba una segunda paleta con dos variantes delante de ellos,
 con tope de un dia.
 
-**B3. Guia del anfitrion en texto** (tope: 2 horas, cualquier tarde, antes de
+**B3. ~~Guia del anfitrion en texto~~ Hecha el 24-09** en `/guia`, enlazada desde el pie y el menu del sitio (tope: 2 horas, cualquier tarde, antes de
 B4). Crear mesa, enlace, abrir sesion, cerrar turno, retirar mesa. Sin
 capturas, para que el rediseño no la deje vieja. La documentacion completa va
 despues de B1 y B2, como decidio Gabino el 22-09.
@@ -303,7 +306,7 @@ valida con gente es la nueva, con el criterio de aceptacion de `docs/16` como
 guion y observando ahi el mapa. El Fiscal del VAM lo pedia para no perder la
 version 1; Gabino, que decide, prefiere no gastar una noche en ella.
 
-**B5. Higiene** (cualquier tarde): casilla de edad explicita en el registro
+**B5. Higiene, hecha el 24-09** salvo Stripe: casilla de edad y cuentas sembradas borradas (ver "Antes de abrir"). Lo original: casilla de edad explicita en el registro
 (2 horas) y cuentas sembradas de produccion (borrar `gabino@example.com`,
 rotar `god`, cambiar `jaz` y `armando`; Gabino, 30 minutos, pendiente desde el
 19-09). **Stripe espera** (Gabino, 22-09): ni el endurecimiento P1 a P4 ni la
@@ -340,13 +343,13 @@ sesion antes de desplegar, no antes de empezar).
 
 ## Antes de abrir a usuarios reales
 
-El servidor ya es publico (https://rpg-worlds.gabinoramirez.com). Esto es lo
+El servidor ya es publico (https://adastramentis.com). Esto es lo
 que falta para que entre alguien que no seamos nosotros. **El orden esta en
 "Lo que sigue"**; aqui queda el inventario.
 
 - [x] **Enlace de invitacion a la mesa** (2026-09-22). **Probado de punta a punta en produccion**: el anfitrion crea el enlace, una desconocida lo abre sin cuenta y ve la mesa y quien invita, se registra conservando el enlace, vuelve a el y entra. Sin amistad de por medio. Tope de plazas (5 por omision) como proteccion principal, porque quien entra gasta turnos del anfitrion; caducidad de 7 dias como segundo cinturon; uno vivo por mesa, revocable. El token se guarda hasheado y solo se enseña al crearlo. La consulta del enlace es publica a proposito. La amistad se queda para invitar a mano, pero deja de ser obligatoria. ~~PENDIENTE NUMERO UNO~~ (Gabino, 21-09). Hoy entrar son **seis pasos**: el invitado se registra, da su correo por fuera, recibe solicitud de amistad, la acepta, el anfitrion lo invita buscandolo por correo y recarga. La regla esta en `TableMemberActionController` ("sin amistad aceptada no hay invitacion") y **no existe enlace ni codigo de mesa**. Explica por que la sesion con invitados del 20-09 empezo mal antes de la primera narracion. **No es UX, es funcionalidad de servidor.** Restriccion que condiciona el diseño: quien entra **gasta turnos del anfitrion** (el cupo se descuenta de `owner_id`), y con `MAIL_MAILER=log` el correo no prueba identidad, asi que hace falta tope de plazas, caducidad y revocacion. Opciones en `docs/18` (D-UX-1)
-- [ ] **Documentacion de usuario.** No existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
-- [ ] **Cuentas sembradas en produccion.** `gabino@example.com` es `admin` con `password`, y `admin` recibe de los seeders de Atomo `users.*` y `payments.refund` (VAM del 19-09): se borra, no se le cambia la clave. `god@example.com` tiene todos los permisos con la clave de `SEED_GOD_PASSWORD`: rotarla. `jaz` y `armando` tienen `password`: cambiarlas. La cuenta real de Gabino es `jadwer@msn.com`, `customer`
+- [x] **Guia del anfitrion** (24-09, `/guia`): crear mesa, invitar, abrir sesion, turnos, quien paga, cerrar, cronica y retirar, con los nombres de la interfaz. Falta la del jugador y la completa con capturas (B6). Lo que decia antes: no existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
+- [x] **Cuentas sembradas borradas** (24-09, con dump previo): `god`, `gabino@example.com`, `armando`, `jaz` y `ux@example.com`. `jadwer@msn.com` pasa a `admin` para la cola de revision de mundos. `DatabaseSeeder` se niega a correr en produccion. Lo que decia: `gabino@example.com` es `admin` con `password`, y `admin` recibe de los seeders de Atomo `users.*` y `payments.refund` (VAM del 19-09): se borra, no se le cambia la clave. `god@example.com` tiene todos los permisos con la clave de `SEED_GOD_PASSWORD`: rotarla. `jaz` y `armando` tienen `password`: cambiarlas. La cuenta real de Gabino es `jadwer@msn.com`, `customer`
 - [ ] **El correo todavia no prueba quien eres.** Ya sale correo (ver "Correo saliente"), pero `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`: cualquiera puede registrarse con una direccion ajena. Recuperar contraseña **si funciona** desde el 22-09, asi que la via de rescate ya no es el anfitrion. Encender la verificacion es una decision aparte, porque añade un paso al registro justo donde la gente abandona (`docs/18`, D-UX-1)
 - [ ] **Stripe en modo real**: resolver la tarea vencida de la cuenta (transferencias suspendidas) y pasar a claves `live`. Hoy todo esta en sandbox
 - [x] **Terminos de servicio y aviso de privacidad** (2026-09-22): publicados como **version 1** en `/terminos` y `/privacidad`, enlazados desde el pie de la portada y desde el registro en web y movil. **Pendiente la revision del abogado**; Gabino decidio publicar antes porque tener algo publicado protege mas que esperar sin nada. Escritos mirando el sistema y no una plantilla: los datos que se guardan, los cuatro terceros (Anthropic, Stripe, Resend, Hetzner con el servidor en Alemania) y que el numero de tarjeta nunca toca el servidor. Alcance: solo mayores de 18, responsable persona fisica, ley mexicana. Texto y cinco preguntas para el abogado en `docs/19-legal-aviso-y-terminos.md`
@@ -354,19 +357,19 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
 - [x] **Guardar la aceptacion de los legales** (2026-09-22): tabla `legal_acceptances` con version, fecha y origen, en tabla aparte porque una persona acepta varias veces y la constancia **sobrevive al borrado de su cuenta**, disociada. El origen sale de `device_name` y no de una cabecera: el registro web lo hace el servidor de Next, asi que ninguna cabecera del navegador llega a la API
 - [x] **Buzon `privacidad@gabinoramirez.com`** (2026-09-22, creado por Gabino en JettHost y probado con un envio real desde el servidor)
 - [x] **Borrar la propia cuenta** (2026-09-22): el derecho de cancelacion del aviso llevado al producto. Se borra **de verdad** (`forceDelete`, no el soft delete de la plataforma, que dejaria el nombre y el correo en la base) y lo escrito en las partidas queda huerfano de identidad. Bloquea mientras la persona sea anfitriona de alguna mesa y le dice cuales. Pide la contraseña. **Fallo de diseño que encontro el test: `turn_responses` caia en cascada con el miembro**, asi que al irse alguien de una mesa su texto se destruia y la cronica quedaba con huecos para los demas; ahora es `nullOnDelete`
-- [ ] **Casilla de edad explicita en el registro.** Hoy se declara en el texto junto al boton y la aceptacion queda registrada; una casilla separada es mas defendible
+- [x] **Casilla de edad explicita en el registro** (24-09): "Tengo 18 años o más" en web y app; la API la exige (`atomo-auth.legal.min_age`, en Atomo) y `legal_acceptances.min_age` guarda lo declarado. De paso, los errores de validacion salen en español. Antes se declaraba en el texto junto al boton y la aceptacion queda registrada; una casilla separada es mas defendible
 - [x] **Correo saliente** (2026-09-22): **Resend por SMTP estandar**, sin paquete ni dependencia nueva, asi que cambiar de proveedor es cambiar variables. La clave vive en `/root/.rpg/resendkey` y se copia al `.env`, nunca en el repo. Trampas pagadas: `MAIL_SCHEME` en Laravel 12 acepta `smtp` o `smtps`, **no `tls`** (para el 587 con STARTTLS es `smtp`), y tras tocar el `.env` hay que reiniciar **`rpg-worker` y `php8.3-fpm`**, no solo limpiar la cache
   - [x] **Recuperar contraseña**, probado de punta a punta en produccion: correo enviado, token valido, pagina, cambio y login con la clave nueva. Hizo falta arreglar tres cosas: las notifications de `atomo-auth` estaban escritas pero **no las mandaba nadie** (Laravel enviaba las suyas en ingles), una barra final en `FRONTEND_URL` dejaba doble barra en el enlace, y **la pagina `/auth/reset-password` no existia**, asi que el correo acababa en un 404
   - [x] **Correo de bienvenida** (pedido por Gabino el 19-09): `UserRegistered` en la plataforma y `WelcomeNotification` propia de rpg-ngn, que habla de la mesa y no del producto. No se manda si ademas hay que verificar el correo. Va a la cola. De paso: el registro mandaba el correo de verificacion **siempre**, tambien con la verificacion apagada
   - [x] **Dominio `gabinoramirez.com` verificado en Resend** (2026-09-22): DKIM en `resend._domainkey` mas dos CNAME (`rsend` y `send` a `forge.rmta.net`). El remitente es `no-responder@gabinoramirez.com`, probado con un envio real
   - [x] **SPF con `include:_spf.resend.com`** (2026-09-22, lo puso Gabino en JettHost editando el registro existente, nunca añadiendo un segundo). Sin el, DMARC pasaba solo por DKIM y Outlook mandaba el correo a no deseado. Propagado y comprobado desde dos resolvedores
   - [ ] **Avisos de mesa**: "es tu turno", "abrieron sesion". Es lo que trae a la gente de vuelta sin que tenga que acordarse sola. Se decide cuando avisar sin volverse pesado viendo jugar a gente, no antes
-- [ ] Revisar que pasa cuando un usuario sin creditos entra: hoy choca con un 409 al cerrar turno, que es correcto pero seco
+- [x] Sin creditos (24-09): el 409 dice donde recargar y la web avisa al anfitrion con enlace a Mi cuenta y créditos antes de que choque
 - [ ] **Lo que salio del VAM de arquitectura del 19-09** (rpg-ngn-api/docs/vam-2026-09-19.md, con orden de ejecucion y horas): copias de seguridad, roles de Postgres, reserva de cupo, redaccion de credenciales en logs, modo pantalla que lee bloques de anfitrion, el segundo ruleset jugable de verdad, `world` y la capa `dm` antes de roles ocultos, la app antes del primer APK. Los supuestos nuevos estan escritos en docs/11, docs/06 y los READMEs que cada fallo indica
 
 ## Entrega 8: Packs de usuario
 
-- [ ] **WebP como formato de los retratos.** Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. **Faltan los nueve jugables del piloto, que siguen en JPG** (`content/packs/pilot/portraits/*.jpg`): recortarlos desde `img/LosNueveViajeros/personajes.png` y cambiar la extension en los nueve JSON. Una hora, y de paso el visor de fichas de `main`
+- [x] **WebP como formato de los retratos** (24-09, los nueve jugables del piloto convertidos de sus recortes de 512; el visor de `main` sigue con JPG hasta el siguiente merge). Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. **Faltan los nueve jugables del piloto, que siguen en JPG** (`content/packs/pilot/portraits/*.jpg`): recortarlos desde `img/LosNueveViajeros/personajes.png` y cambiar la extension en los nueve JSON. Una hora, y de paso el visor de fichas de `main`
 
 - [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
 - [x] **Fichas completas por API** (23-09, E3 del VAM): el engine expone `GET /v1/packs/:id/:version/sheets` (fichas y sesiones), la API lo releva con cache y la web y la app lo piden cuando el pack no viene empaquetado; los retratos salen de la API. La logica de que se ve de cada personaje vive en ui-logic (`sheet-source.ts`) con una fuente comun para el pack empaquetado y para la respuesta de la API. Probado en local (boticaria) y en produccion (La Mascarada, mesa temporal borrada). De paso, una Armadura sin valor se pinta con ? en vez de null
