@@ -5,7 +5,7 @@ import { apiTarget, csrfOk, DEVICE_NAME, setSessionCookie } from '../../../serve
 import { failure } from '../session/route'
 
 /**
- * POST /auth/register {name, email, password, passwordConfirmation}: crea
+ * POST /auth/register {name, email, password, passwordConfirmation, ageConfirmed}: crea
  * la cuenta por la API en modo token. Si la API devuelve token (verificacion
  * de correo apagada) queda en la cookie y se entra directo; si exige
  * verificar, devuelve el mensaje y no hay sesion todavia.
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const api = createApiClient({ baseUrl: apiTarget(), tokenProvider: () => null })
   try {
-    const result = await api.register({ name: text('name'), email: text('email'), password: text('password'), passwordConfirmation: text('passwordConfirmation') }, DEVICE_NAME)
+    const result = await api.register({ name: text('name'), email: text('email'), password: text('password'), passwordConfirmation: text('passwordConfirmation'), ageConfirmed: payload['ageConfirmed'] === true }, DEVICE_NAME)
     if (result.kind === 'verify') return NextResponse.json({ pendingVerification: true, message: result.message }, { status: 201 })
     const response = NextResponse.json({ user: result.user, expiresAt: result.expiresAt }, { status: 201 })
     setSessionCookie(response, request, result.token, result.expiresAt)

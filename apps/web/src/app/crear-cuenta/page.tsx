@@ -25,6 +25,7 @@ function RegisterPageForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
+  const [adult, setAdult] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState<string | null>(null)
@@ -46,7 +47,7 @@ function RegisterPageForm() {
     setBusy(true)
     setError(null)
     const sameOrigin = typeof window !== 'undefined' && server.trim().replace(/\/+$/, '') === window.location.origin
-    const outcome = await session.register(sameOrigin ? '' : server, { name, email, password, passwordConfirmation: confirmation })
+    const outcome = await session.register(sameOrigin ? '' : server, { name, email, password, passwordConfirmation: confirmation, ageConfirmed: adult })
     setBusy(false)
     if (!outcome.ok) setError(outcome.error)
     else if (outcome.pendingVerification) setPending(outcome.message)
@@ -96,16 +97,20 @@ function RegisterPageForm() {
           </label>
           {tooShort ? <div className="error">La contraseña necesita al menos 8 caracteres.</div> : null}
           {mismatch ? <div className="error">Las contraseñas no coinciden.</div> : null}
+          <label className="check">
+            <input type="checkbox" name="age_confirmed" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
+            Tengo 18 años o más.
+          </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
-            <button type="submit" className="btn primary" disabled={busy || !name.trim() || !email || !password || !confirmation || mismatch || tooShort}>
+            <button type="submit" className="btn primary" disabled={busy || !name.trim() || !email || !password || !confirmation || mismatch || tooShort || !adult}>
               {busy ? <span className="spinner" aria-hidden /> : null}
               Crear cuenta
             </button>
             <span className="hint">Entras directo a tus mesas.</span>
           </div>
           <p className="hint">
-            Al crear la cuenta declaras que eres mayor de 18 años y aceptas los <Link href="/terminos">términos y condiciones</Link> y el{' '}
+            Al crear la cuenta aceptas los <Link href="/terminos">términos y condiciones</Link> y el{' '}
             <Link href="/privacidad">aviso de privacidad</Link>.
           </p>
           <p className="hint">

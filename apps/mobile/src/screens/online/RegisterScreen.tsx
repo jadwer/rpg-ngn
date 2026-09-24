@@ -1,6 +1,6 @@
 import type { RegisterInput } from '@rpg-ngn/api-client'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
@@ -27,15 +27,16 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
+  const [adult, setAdult] = useState(false)
 
   const mismatch = confirmation.length > 0 && password !== confirmation
   const tooShort = password.length > 0 && password.length < 8
-  const canSubmit = !busy && serverUrl.trim().length > 0 && name.trim().length > 0 && email.trim().length > 0 && password.length >= 8 && confirmation.length > 0 && !mismatch
+  const canSubmit = !busy && serverUrl.trim().length > 0 && name.trim().length > 0 && email.trim().length > 0 && password.length >= 8 && confirmation.length > 0 && !mismatch && adult
   /** Los legales son del servidor al que se conecta, no de la app. */
   const legalBase = (serverUrl.trim() || PUBLIC_SERVER_URL).replace(/\/+$/, '')
 
   const submit = () => {
-    if (canSubmit) onRegister(serverUrl, { name, email, password, passwordConfirmation: confirmation })
+    if (canSubmit) onRegister(serverUrl, { name, email, password, passwordConfirmation: confirmation, ageConfirmed: adult })
   }
 
   return (
@@ -55,11 +56,15 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
         <Field label="Repite la contraseña" value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={submit} />
         {tooShort ? <Text style={styles.error}>La contraseña necesita al menos 8 caracteres.</Text> : null}
         {mismatch ? <Text style={styles.error}>Las contraseñas no coinciden.</Text> : null}
+        <Pressable style={styles.check} onPress={() => setAdult((v) => !v)} accessibilityRole="checkbox" accessibilityState={{ checked: adult }}>
+          <Switch value={adult} onValueChange={setAdult} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} thumbColor={theme.colors.ink} />
+          <Text style={styles.checkText}>Tengo 18 años o más.</Text>
+        </Pressable>
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         <Button label="Crear cuenta" primary busy={busy} disabled={!canSubmit} onPress={submit} />
         {/* Los legales viven en el servidor al que se conecta, no en la app. */}
         <Text style={styles.foot}>
-          Al crear la cuenta declaras que eres mayor de 18 años y aceptas los{' '}
+          Al crear la cuenta aceptas los{' '}
           <Text style={styles.legal} onPress={() => void Linking.openURL(`${legalBase}/terminos`)}>
             términos y condiciones
           </Text>{' '}
@@ -85,5 +90,7 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
   notice: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, padding: 10 },
   foot: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center', marginTop: 4 },
+  check: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  checkText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   legal: { color: theme.colors.nebula, textDecorationLine: 'underline' },
 })

@@ -14,6 +14,8 @@ export interface RegisterInput {
   email: string
   password: string
   passwordConfirmation: string
+  /** La casilla "tengo 18 años o más"; la API la exige (`atomo-auth.legal.min_age`). */
+  ageConfirmed: boolean
 }
 
 /**
@@ -64,7 +66,7 @@ export function accountApi(request: Request): AccountApi {
       const { data } = await request<{ message?: string; token?: string; expires_at?: string | null; email_verified?: boolean; user?: RawUser }>('/api/auth/register', {
         method: 'POST',
         anonymous: true,
-        body: { name: input.name.trim(), email: input.email.trim(), password: input.password, password_confirmation: input.passwordConfirmation, device_name: deviceName },
+        body: { name: input.name.trim(), email: input.email.trim(), password: input.password, password_confirmation: input.passwordConfirmation, age_confirmed: input.ageConfirmed, device_name: deviceName },
       })
       if (data.token && data.user) {
         return { kind: 'token', token: data.token, expiresAt: data.expires_at ?? null, user: userFrom(data.user) }

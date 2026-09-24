@@ -30,9 +30,9 @@ function client(routes: Parameters<typeof fakeFetch>[0], token: string | null = 
 describe('cuenta', () => {
   it('registra en modo token y devuelve token y usuario', async () => {
     const { api, calls } = client({ 'POST /api/auth/register': { status: 201, body: { message: 'Cuenta creada.', token: '7|xyz', expires_at: null, user: { id: 9, name: 'Lucía', email: 'lucia@example.com' } } } }, null)
-    const result = await api.register({ name: ' Lucía ', email: ' lucia@example.com ', password: 'clave-larga', passwordConfirmation: 'clave-larga' }, 'web-rpg-ngn')
+    const result = await api.register({ name: ' Lucía ', email: ' lucia@example.com ', password: 'clave-larga', passwordConfirmation: 'clave-larga', ageConfirmed: true }, 'web-rpg-ngn')
     expect(result).toEqual({ kind: 'token', token: '7|xyz', expiresAt: null, user: { id: '9', name: 'Lucía', email: 'lucia@example.com' } })
-    expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', password_confirmation: 'clave-larga', device_name: 'web-rpg-ngn' })
+    expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', password_confirmation: 'clave-larga', age_confirmed: true, device_name: 'web-rpg-ngn' })
     expect(calls[0]?.init.headers['Authorization']).toBeUndefined()
   })
 
@@ -58,7 +58,7 @@ describe('cuenta', () => {
 
   it('con verificacion de correo el registro no trae token', async () => {
     const { api } = client({ 'POST /api/auth/register': { status: 201, body: { message: 'Cuenta creada. Verifica tu correo electronico para continuar.', email_verified: false } } }, null)
-    const result = await api.register({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', passwordConfirmation: 'clave-larga' }, 'web')
+    const result = await api.register({ name: 'Lucía', email: 'lucia@example.com', password: 'clave-larga', passwordConfirmation: 'clave-larga', ageConfirmed: true }, 'web')
     expect(result).toEqual({ kind: 'verify', message: 'Cuenta creada. Verifica tu correo electronico para continuar.' })
   })
 
