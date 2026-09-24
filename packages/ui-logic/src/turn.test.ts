@@ -24,7 +24,7 @@ describe('blocksFromApi', () => {
     expect(blocks.map((b) => b.kind)).toEqual(['system', 'dialogue', 'dialogue', 'narration'])
     expect(blocks.map((b) => b.id)).toEqual(['api:1', 'api:2', 'api:3', 'api:4'])
     const calder = blocks[1]
-    expect(calder?.kind === 'dialogue' && calder.speaker).toEqual({ ref: 'character:calder', name: 'Calder', portrait: 'portraits/calder.jpg' })
+    expect(calder?.kind === 'dialogue' && calder.speaker).toEqual({ ref: 'character:calder', name: 'Calder', portrait: 'portraits/calder.webp' })
     expect(apiBlockId(9)).toBe('api:9')
   })
 

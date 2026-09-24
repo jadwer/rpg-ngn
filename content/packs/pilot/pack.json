@@ -13,7 +13,7 @@
     ],
     "sources": [
       "img/personajes.png (lámina generada por IA para la sesión piloto)",
-      "portraits/*.jpg (recortes de la lámina anterior, mismo origen y licencia)"
+      "portraits/*.webp (recortes de la lámina anterior en 512x512 WebP, mismo origen y licencia)"
     ],
     "license": "propietario",
     "createdAt": "2026-09-04",

@@ -38,7 +38,7 @@ describe('pack empaquetado en la web', () => {
   it('carga y valida en memoria y resuelve retratos', async () => {
     const pack = await loadBundledPack()
     expect(pack.characters.size).toBe(9)
-    expect(portraitUrl(pack.characters.get('zahira')?.portrait)).toBe('/packs/pilot/portraits/zahira.jpg')
+    expect(portraitUrl(pack.characters.get('zahira')?.portrait)).toBe('/packs/pilot/portraits/zahira.webp')
     expect(portraitUrl(null)).toBeNull()
     expect(RULESET_ID).toBe('fantasy-d20-lite@1.0.0')
   })

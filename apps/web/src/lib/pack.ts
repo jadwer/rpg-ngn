@@ -22,7 +22,7 @@ export function loadBundledPack(): Promise<LoadedPack> {
   return cached
 }
 
-/** URL publica de un retrato del pack (`portraits/zahira.jpg`), o null si no hay. */
+/** URL publica de un retrato del pack (`portraits/zahira.webp`), o null si no hay. */
 export function portraitUrl(path: string | null | undefined): string | null {
   if (!path) return null
   return `/packs/${PACK_ID}/${path}`
