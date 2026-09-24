@@ -234,6 +234,7 @@ export default function LandingPage() {
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub
           </a>
+          <Link href="/guia">Guía</Link>
           <Link href="/terminos">Términos</Link>
           <Link href="/privacidad">Privacidad</Link>
         </nav>

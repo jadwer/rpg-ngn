@@ -2,6 +2,7 @@
 
 import type { TurnView } from '@rpg-ngn/api-client'
 import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import Link from 'next/link'
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import { HoldDie } from './HoldDie'
 
@@ -28,6 +29,8 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
+  /** El anfitrion se quedo sin turnos: el aviso lleva a recargar antes de chocar con el cierre. */
+  outOfTurns: boolean
 }
 
 /**
@@ -37,7 +40,7 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns }: Props) {
   const [fortuneError, setFortuneError] = useState<string | null>(null)
   // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
   // es el que confirma que ya no toca; si vuelve a tocar (sesion nueva), vuelve.
@@ -94,6 +97,11 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         <div className="status">{turnLine(turn, progress, nameOf)}</div>
       )}
 
+      {outOfTurns ? (
+        <div className="error">
+          La mesa se quedó sin turnos. <Link href="/perfil">Recarga en Mi cuenta y créditos</Link> o usa tu propia clave en los ajustes del director.
+        </div>
+      ) : null}
       {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 

@@ -193,6 +193,8 @@ export interface TableState {
   away: Presence[]
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion (la tira el jugador, el numero lo saca la API). */
   fortune: { pending: boolean }
+  /** Turnos de cupo o creditos que le quedan a la mesa; null si no consume (clave propia). */
+  quota?: { remainingTurns: number } | null
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }

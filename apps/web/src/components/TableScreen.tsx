@@ -733,7 +733,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} />
+        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} outOfTurns={viewer.role === 'host' && snapshot?.quota?.remainingTurns === 0} />
       </div>
       {gameBar('bottom')}
     </div>

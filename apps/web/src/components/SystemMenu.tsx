@@ -62,6 +62,9 @@ export function SystemMenu({ user, onLogout }: Props) {
           <Link role="menuitem" href="/ajustes" onClick={() => setOpen(false)}>
             Voz
           </Link>
+          <Link role="menuitem" href="/guia" onClick={() => setOpen(false)}>
+            Guía del anfitrión
+          </Link>
           {onLogout ? (
             <button
               type="button"
