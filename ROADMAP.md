@@ -409,6 +409,15 @@ como la portada).
 - **Se queda en rpg-ngn** porque es del juego: la fila de mundo que apunta a una version de pack, `pack_activations.source`, el ledger de capitulos y las temporadas del camino
 - **No se usa**: `atomo-product`, `atomo-ecommerce`, `atomo-editorial` (productos, variantes, carrito, wishlist y reseñas que el plan descarta en `docs/24` seccion 8)
 
+## Despues de Stripe, sin fecha: lo que marca la competencia (24-09)
+
+Analisis de Tipsy Chat en `docs/analisis-competencia-tipsy.md`. Candidatos,
+en orden: imagen por escena como bloque del turno (0.03 a 0.20 USD por
+sesion segun modelo; base del video de la campaña), sugerencias de
+respuesta, "Anteriormente..." al abrir la mesa, narrador estandar o premium
+con su precio a la vista, etiquetas de descubrimiento (E9), invitacion con
+recompensa y editor web de mundos para creadores.
+
 ## Deuda tecnica (sin entrega asignada)
 
 - [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas

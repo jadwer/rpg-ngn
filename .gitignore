@@ -37,3 +37,6 @@ apps/web/next-env.d.ts
 # Borrador de La Mascarada: vive en Gitea (rpg-packs/mascarada) hasta que se juegue; despues se versiona aqui
 content/packs/mascarada
 .packs-user/
+
+# Capturas de apps de la competencia: traen datos de cuentas personales
+img/competencia/
