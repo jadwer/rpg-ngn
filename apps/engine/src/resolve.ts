@@ -3,6 +3,7 @@ import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from
 import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
+import { illustrationFor } from './illustrate.js'
 import { projectionsOf, rebuildState } from './state.js'
 
 export interface ResolveDeps {
@@ -58,6 +59,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   const secrets = [...pack.secrets.values()]
   let addressed: string[] = session.party
   let usage = { inputTokens: 0, outputTokens: 0 }
+  // Para ver al final si la party cambio de lugar, y lo que el DM pidio ilustrar.
+  const initial = state
+  const opening = request.turn.number === 1 && request.turn.responses.length === 0
+  let moment: string | null = null
 
   // Cierra un evento nacido en el engine con su id, version y momento. El
   // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
@@ -145,6 +150,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'illustrate') {
+        moment = output.moment
+        continue
+      }
+
       const parsed = seal(output.event)
       if (!parsed.success) {
         throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
@@ -157,6 +167,8 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     return
   }
 
+  const illustration = illustrationFor({ pack, before: initial, after: state, party: session.party, opening, moment })
+
   yield {
     kind: 'result',
     events,
@@ -165,5 +177,6 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     projections: projectionsOf(state),
     usage,
     ...(lint.length ? { lint } : {}),
+    ...(illustration ? { illustrations: [illustration] } : {}),
   }
 }

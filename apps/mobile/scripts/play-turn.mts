@@ -84,7 +84,7 @@ async function main(): Promise<void> {
     if (last.blocks.length > 0) {
       blocks += last.blocks.length
       after = last.lastBlockId
-      for (const b of last.blocks) log(`  bloque ${b.id}`, `${b.block.type}: ${b.block.text.slice(0, 70)}`)
+      for (const b of last.blocks) log(`  bloque ${b.id}`, `${b.block.type}: ${("text" in b.block ? b.block.text : b.block.alt).slice(0, 70)}`)
     }
     if (last.turn && last.turn.number === 2 && last.turn.status === 'open') break
   }

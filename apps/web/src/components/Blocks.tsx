@@ -1,6 +1,6 @@
 'use client'
 
-import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ImageGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
 
@@ -28,6 +28,8 @@ export function Blocks({ groups, currentBlockId, onPressBlock }: Props) {
             return <Roll key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
           case 'system':
             return <System key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
+          case 'image':
+            return <Scene key={group.id} group={group} />
         }
       })}
     </>
@@ -138,5 +140,20 @@ function System({ group, currentBlockId, onPressBlock }: GroupProps<SystemGroup>
         </ul>
       ) : null}
     </div>
+  )
+}
+
+/**
+ * Ilustracion de la escena (E10a). Llega despues del texto que la motiva,
+ * cuando termina de generarse; aparece con un fundido para no saltar.
+ */
+function Scene({ group }: { group: ImageGroup }) {
+  const [loaded, setLoaded] = useState(false)
+  const { block } = group
+  return (
+    <figure className={`scene-image${loaded ? ' loaded' : ''}`} data-block={block.id}>
+      <img src={block.url} alt={block.alt} loading="lazy" onLoad={() => setLoaded(true)} />
+      {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+    </figure>
   )
 }

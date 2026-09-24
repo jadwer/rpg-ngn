@@ -214,8 +214,40 @@ export const TurnBlock = z.discriminatedUnion('type', [
     title: z.string().min(1).optional(),
     items: z.array(z.string().min(1)).optional(),
   }),
+  /**
+   * Ilustracion de la escena (E10a). No la escribe el engine: la API la
+   * genera aparte y la añade al turno cuando esta lista, asi que el texto
+   * nunca la espera. `url` es relativa al servidor de la API.
+   */
+  z.strictObject({
+    type: z.literal('image'),
+    url: z.string().min(1),
+    alt: z.string().min(1),
+    caption: z.string().optional(),
+  }),
 ])
 export type TurnBlock = z.infer<typeof TurnBlock>
+
+/**
+ * Lo que el engine propone ilustrar al terminar un turno. Decide cuando
+ * (apertura, cambio de lugar, momento que marco el DM) y arma el prompt
+ * desde el pack y el estado, nunca desde el texto libre de un jugador. La
+ * API decide si se genera (tope por sesion, procedencia del pack, ajuste de
+ * la mesa) y con que proveedor.
+ */
+export const Illustration = z.strictObject({
+  reason: z.enum(['opening', 'location', 'moment']),
+  /** Descripcion lista para el generador: momento, lugar, personajes y estilo. */
+  prompt: z.string().min(1),
+  /** Texto alternativo corto para quien no ve la imagen. */
+  alt: z.string().min(1),
+  /** Rutas del pack (`portraits/zahira.webp`) que el generador usa de referencia. */
+  references: z.array(z.string().min(1)),
+  /** Hay personajes en cuadro: pide un proveedor que respete referencias. */
+  withCharacters: z.boolean(),
+  location: KebabId.nullable(),
+})
+export type Illustration = z.infer<typeof Illustration>
 
 /**
  * Un pack que este servidor puede jugar. La plataforma lo ofrece al crear
@@ -313,6 +345,8 @@ export const ResolveLine = z.discriminatedUnion('kind', [
     usage: TurnUsage,
     /** Hallazgos del lint de conocimiento; ausente si no hubo ninguno. Opcional: no sube la version. */
     lint: z.array(LintFinding).optional(),
+    /** Escenas que el engine propone ilustrar (E10a); ausente si ninguna. Opcional: no sube la version. */
+    illustrations: z.array(Illustration).optional(),
   }),
   z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
 ])

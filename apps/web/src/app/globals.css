@@ -2621,6 +2621,32 @@ a.plain {
   font-style: italic;
 }
 
+/* Ilustracion de la escena (E10a): ancho completo, fundido al cargar. */
+.scene-image {
+  margin: 14px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  aspect-ratio: 16 / 9;
+}
+.scene-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.scene-image.loaded img {
+  opacity: 1;
+}
+.scene-image figcaption {
+  padding: 8px 12px;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
 /* La Fortuna de la sesion: un dado grande que tira el jugador. */
 .turn .fortune {
   display: flex;

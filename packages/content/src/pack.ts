@@ -50,6 +50,12 @@ export const PackManifest = z.strictObject({
    * mas antes de jugar estorba (mesas del 20-09).
    */
   playerPersona: z.boolean().default(false),
+  /**
+   * Estilo de las ilustraciones de escena (E10a), en una frase: tecnica,
+   * paleta y ambiente ("oleo oscuro de fantasia minera, luz de farol").
+   * Sin el, se usa un estilo pictorico neutro.
+   */
+  artStyle: z.string().min(1).optional(),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

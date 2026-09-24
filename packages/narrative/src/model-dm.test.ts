@@ -334,6 +334,18 @@ describe('ModelDMProvider', () => {
     expect(kinds).not.toContain('fortune')
   })
 
+  it('el DM puede marcar un momento para ilustrar: uno por turno y pasa por el lint', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"block","block":{"type":"narration","text":"La campana tiembla sola en la capilla."}}',
+      '{"kind":"scene","text":"Una campana de bronce vibra sola en una capilla minera a la luz de un farol."}',
+      '{"kind":"scene","text":"Otra escena que sobra."}',
+    ].join('\n')
+    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
+    const illustrate = outputs.filter((o) => o.kind === 'illustrate')
+    expect(illustrate).toEqual([{ kind: 'illustrate', moment: 'Una campana de bronce vibra sola en una capilla minera a la luz de un farol.' }])
+  })
+
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)

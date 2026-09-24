@@ -252,6 +252,7 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('block'), block: z.unknown() }),
   z.object({ kind: z.literal('event'), event: z.unknown() }),
   z.object({ kind: z.literal('addressed'), characterIds: z.array(z.string()) }),
+  z.object({ kind: z.literal('scene'), text: z.string() }),
 ])
 
 /**
@@ -382,6 +383,7 @@ export class ModelDMProvider implements DMProvider {
       }
     }
 
+    if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
     yield { kind: 'addressed', characterIds: interpreter.addressed ?? party }
     yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
   }
@@ -454,6 +456,8 @@ class LineInterpreter {
   blocks = 0
   ignored = 0
   addressed: string[] | null = null
+  /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
+  scene: string | null = null
   private pending: { text: string; depth: number } | null = null
   private readonly knowledge: KnowledgeView | null
   private readonly allowed: ReturnType<typeof allowedEventFor>
@@ -619,6 +623,15 @@ class LineInterpreter {
       case 'addressed': {
         const ids = line.data.characterIds.map((id) => refId(id)).filter((id) => this.party.includes(id))
         if (ids.length) this.addressed = ids
+        return
+      }
+      case 'scene': {
+        // Una por turno: la primera manda. La frase pasa el lint como
+        // cualquier narracion, porque de ella sale el prompt de la imagen.
+        const text = line.data.text.trim().slice(0, 400)
+        if (!text || this.scene !== null) return
+        const cut = yield* this.lint(text)
+        if (!cut) this.scene = text
         return
       }
     }

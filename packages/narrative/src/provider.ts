@@ -51,6 +51,8 @@ export type DMOutput =
   | { kind: 'usage'; inputTokens: number; outputTokens: number }
   /** Hallazgo del lint de conocimiento; el engine lo acumula en `result.lint`. */
   | { kind: 'lint'; finding: LintFinding }
+  /** El DM marco un momento para ilustrar: una frase de lo que se ve (docs/ROADMAP, E10a). */
+  | { kind: 'illustrate'; moment: string }
 
 export interface DMProbe {
   ok: boolean

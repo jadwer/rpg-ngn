@@ -409,14 +409,44 @@ como la portada).
 - **Se queda en rpg-ngn** porque es del juego: la fila de mundo que apunta a una version de pack, `pack_activations.source`, el ledger de capitulos y las temporadas del camino
 - **No se usa**: `atomo-product`, `atomo-ecommerce`, `atomo-editorial` (productos, variantes, carrito, wishlist y reseñas que el plan descarta en `docs/24` seccion 8)
 
-## Despues de Stripe, sin fecha: lo que marca la competencia (24-09)
+## Entrega 10: Historia ilustrada (decidida el 2026-09-24)
 
-Analisis de Tipsy Chat en `docs/analisis-competencia-tipsy.md`. Candidatos,
-en orden: imagen por escena como bloque del turno (0.03 a 0.20 USD por
-sesion segun modelo; base del video de la campaña), sugerencias de
-respuesta, "Anteriormente..." al abrir la mesa, narrador estandar o premium
-con su precio a la vista, etiquetas de descubrimiento (E9), invitacion con
-recompensa y editor web de mundos para creadores.
+Sale del analisis de Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
+Gabino decidio el orden: **imagenes primero**, antes de Stripe en real,
+gratis durante la beta y con tope por sesion. Lo que cobra (narrador
+premium, imagenes fuera del tope) espera a Stripe.
+
+- [ ] **10a. Imagen por escena.** Contrato: el motor decide *cuando* (cambio
+  de lugar, apertura de sesion y momentos clave que el DM marca, con tope
+  por sesion) y *que* (prompt armado desde el estilo del pack, el lugar y los
+  personajes presentes, nunca desde el texto libre del jugador); la API
+  genera en la cola, convierte a WebP, guarda y añade un bloque `image` al
+  turno, asi que el texto nunca espera. Proveedor detras de una interfaz
+  (`ImageProvider`, como `DMProvider`) con retratos del pack como referencia
+  para que las caras se mantengan. Solo en packs originales o con licencia
+  (`docs/07`). Ajuste por mesa para apagarlas. Tabla de costes por imagen
+  para `turns:usage`. Web, app y cronica pintan el bloque
+- [ ] **10b. Sugerencias de respuesta por jugador.** Dos acciones por
+  personaje interpelado, en la misma llamada del DM, filtradas por lo que el
+  personaje sabe; tocarla la copia al cuadro. **El cuadro de texto siempre
+  sigue abierto** para "otra respuesta" (Gabino, 24-09): las sugerencias
+  orientan cuando no se sabe que espera el narrador, pero no cierran
+  romances internos ni lineas paralelas. "Otras" pide dos nuevas (tope 2 por
+  turno). Se apagan por jugador
+- [ ] **10c. "Anteriormente..."** al abrir o retomar una sesion: el recap y
+  el cliffhanger en una pantalla con Continuar
+- [ ] **10d. Video de la sesion**: cronica, imagenes de 10a y voz del
+  narrador a un video por sesion (ffmpeg en la cola), descargable desde
+  Lectura. Depende de 10a
+- [ ] **10e. Narrador estandar o premium** con su coste en turnos a la
+  vista (Haiku y Sonnet). Despues de Stripe en real
+- [ ] **10f. Afinidad con los NPC**: evento `relation_changed` validado por
+  el motor (una etapa por turno, con motivo), desbloqueos que declara el
+  pack, "Relaciones" en Fichas. Despues de Stripe, con un mundo original
+
+Van a otras entregas: invitacion con recompensa y etiquetas de
+descubrimiento (E9), editor web de mundos (beta con creadores), ayuda en la
+app, idiomas y pulido (sin fecha).
 
 ## Deuda tecnica (sin entrega asignada)
 

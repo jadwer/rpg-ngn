@@ -1,4 +1,4 @@
-import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ImageGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { DICE_FACES } from '../generated/dice'
@@ -13,9 +13,11 @@ interface Props {
   groups: ViewGroup[]
   currentBlockId: string | null
   onPressBlock?: (blockId: string) => void
+  /** Servidor de la API: las ilustraciones llegan con ruta relativa. */
+  assetBase?: string
 }
 
-export function BlockGroups({ groups, currentBlockId, onPressBlock }: Props) {
+export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = '' }: Props) {
   return (
     <View style={styles.list}>
       {groups.map((group) => {
@@ -28,6 +30,8 @@ export function BlockGroups({ groups, currentBlockId, onPressBlock }: Props) {
             return <Roll key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
           case 'system':
             return <System key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
+          case 'image':
+            return <Scene key={group.id} group={group} assetBase={assetBase} />
         }
       })}
     </View>
@@ -138,7 +142,22 @@ function System({ group, currentBlockId, onPressBlock }: GroupProps<SystemGroup>
   )
 }
 
+/** Ilustracion de la escena (E10a): ancho completo, 16:9. */
+function Scene({ group, assetBase }: { group: ImageGroup; assetBase: string }) {
+  const { block } = group
+  const uri = /^https?:/.test(block.url) ? block.url : `${assetBase}${block.url}`
+  return (
+    <View style={styles.scene}>
+      <Image source={{ uri }} style={styles.sceneImage} resizeMode="cover" accessibilityLabel={block.alt} />
+      {block.caption ? <Text style={styles.sceneCaption}>{block.caption}</Text> : null}
+    </View>
+  )
+}
+
 const styles = StyleSheet.create({
+  scene: { marginVertical: 10, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
+  sceneImage: { width: '100%', aspectRatio: 16 / 9 },
+  sceneCaption: { paddingHorizontal: 12, paddingVertical: 8, fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   list: { gap: 10 },
   current: { backgroundColor: theme.colors.highlight, borderColor: theme.colors.accentBright },
   prose: { gap: 4 },

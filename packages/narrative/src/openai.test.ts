@@ -128,7 +128,7 @@ describe('OpenAITransport (OpenAI y compatibles como DeepSeek)', () => {
     const { client } = fakeClient(['{"kind":"block","block":{"type":"narration","text":"Empieza a llover y"}}\n{"kind":"block","block":{"type":"narr'], { finish: 'length' })
     const outputs = await collect(createOpenAIProvider({ model: 'deepseek-chat', credential: KEY, client }).narrate(contextFor(base, turn(1, []))))
     // Sin las tiradas de Fortuna de la apertura, que van antes que la narracion.
-    const texts = outputs.filter((o) => o.kind === 'block' && o.block.type !== 'roll').map((o) => (o.kind === 'block' ? o.block.text : ''))
+    const texts = outputs.filter((o) => o.kind === 'block' && o.block.type !== 'roll').map((o) => (o.kind === 'block' && 'text' in o.block ? o.block.text : ''))
     expect(texts[0]).toBe('Empieza a llover y')
     expect(texts.some((t) => t.includes('llegó a su límite de escritura'))).toBe(true)
   })

@@ -63,7 +63,16 @@ export interface SystemBlock {
   detail: string | null
 }
 
-export type TurnBlock = NarrationBlock | DialogueBlock | RollBlock | SystemBlock
+/** Ilustracion de la escena (E10a). `url` como la manda la API: relativa a su servidor. */
+export interface ImageBlock {
+  kind: 'image'
+  id: string
+  url: string
+  alt: string
+  caption: string | null
+}
+
+export type TurnBlock = NarrationBlock | DialogueBlock | RollBlock | SystemBlock | ImageBlock
 export type BlockKind = TurnBlock['kind']
 
 export function narration(id: string, text: string): NarrationBlock {
@@ -105,5 +114,8 @@ export function speechTextOf(block: TurnBlock): string {
       return block.text
     case 'system':
       return [block.title, block.text, ...block.items].filter((part): part is string => !!part).join('. ')
+    case 'image':
+      // Una imagen no se lee en voz alta: la narracion ya conto la escena.
+      return ''
   }
 }

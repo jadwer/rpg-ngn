@@ -1,4 +1,4 @@
-import type { DialogueBlock, NarrationBlock, RollBlock, SystemBlock, TurnBlock } from './blocks.js'
+import type { DialogueBlock, ImageBlock, NarrationBlock, RollBlock, SystemBlock, TurnBlock } from './blocks.js'
 import { splitSentences } from './narration.js'
 
 /**
@@ -37,7 +37,13 @@ export interface SystemGroup {
   block: SystemBlock
 }
 
-export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup
+export interface ImageGroup {
+  kind: 'image'
+  id: string
+  block: ImageBlock
+}
+
+export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup | ImageGroup
 
 /**
  * Quita los avisos tecnicos que solo el anfitrion puede accionar (una linea
@@ -74,6 +80,9 @@ export function groupBlocks(blocks: readonly TurnBlock[], mode: ViewMode): ViewG
       case 'system':
         groups.push({ kind: 'system', id: `system:${block.id}`, block })
         break
+      case 'image':
+        groups.push({ kind: 'image', id: `image:${block.id}`, block })
+        break
     }
   }
   return groups
@@ -95,6 +104,7 @@ export function groupBlockIds(group: ViewGroup): string[] {
       return group.blocks.map((b) => b.id)
     case 'roll':
     case 'system':
+    case 'image':
       return [group.block.id]
   }
 }

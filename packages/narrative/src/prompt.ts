@@ -65,6 +65,8 @@ Responde SOLO con líneas NDJSON: un objeto JSON por línea, sin texto fuera de 
 
 La línea "addressed" va al final y lista los ids de los personajes a los que devuelves la palabra (los que deben responder el próximo turno). Si la escena está abierta para todos, lista a toda la party.
 
+Opcional, como mucho una vez por turno y no en todos: cuando pase algo que se vería bien ilustrado (una llegada, una revelación, un encuentro, un peligro), añade antes de "addressed" una línea {"kind":"scene","text":"..."} con una frase de lo que se ve: lugar, quién está y qué hace, luz y ambiente. Sin nombres de obras reales, sin texto escrito en la imagen y sin revelar nada que la mesa no sepa.
+
 # Eventos que puedes proponer
 
 Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Lo normal es proponer entre 0 y 2 por turno. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". Usa solo estas formas, exactamente con estas claves:
@@ -132,7 +134,7 @@ Formato: responde SOLO con líneas JSON, una por línea, sin texto fuera ni bloq
 {"kind":"block","block":{"type":"dialogue","speaker":"Tomás","speakerRef":"npc:tomas","text":"..."}}
 {"kind":"event","event":{...}}
 {"kind":"addressed","characterIds":["zahira","calder"]}
-La última línea es "addressed" con los ids de quienes deben responder ahora.
+La última línea es "addressed" con los ids de quienes deben responder ahora. Opcional, como mucho una por turno: {"kind":"scene","text":"..."} antes de "addressed", con una frase de lo que se ve cuando la escena merece ilustración (sin texto escrito ni secretos).
 
 Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos ya se registran solos):
 {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}
