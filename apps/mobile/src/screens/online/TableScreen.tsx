@@ -180,6 +180,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     [client, table.id],
   )
 
+  const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
+
   // Quien esta, quien escribe, quien respondio y quien se tuvo que ir.
   const seatList = useMemo(
     () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: ownMember.id, nameOf }),
@@ -537,7 +539,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
         </View>
       ) : null}
-      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} />
+      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} />
       <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 
       {maps.length > 0 ? (

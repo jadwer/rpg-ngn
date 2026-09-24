@@ -103,6 +103,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   setNarrating(tableId: string | number, narrating: boolean): Promise<Narrator[]>
   /** Anuncia (o retira) que este jugador esta tecleando; caduca solo si no se renueva. */
   setTyping(tableId: string | number, typing: boolean): Promise<Presence[]>
+  /** Tira la Fortuna de la sesion del propio personaje; el numero lo saca el servidor. 409 si ya se tiro o no toca. */
+  rollFortune(tableId: string | number): Promise<{ result: number; label: string }>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
   closeTurn(turnId: number, force?: boolean): Promise<TurnView>
   /** Cancela (true) o reanuda (false) la cuenta atras del cierre; cualquiera de la mesa puede. */
@@ -285,11 +287,16 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async tableState(tableId, after = 0) {
       const { data } = await request<{ data: Omit<TableState, 'lastBlockId'>; meta: { lastBlockId: number } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
       // `narrators` y `typing` no existian antes de los avisos compartidos: una API vieja no rompe al cliente.
-      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], lastBlockId: data.meta.lastBlockId }
+      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, lastBlockId: data.meta.lastBlockId }
     },
 
     async setNarrating(tableId, narrating) {
       const { data } = await request<{ data: Narrator[] }>(`/api/v1/tables/${tableId}/narrator`, { method: 'POST', body: { narrating } })
+      return data.data
+    },
+
+    async rollFortune(tableId) {
+      const { data } = await request<{ data: { result: number; label: string } }>(`/api/v1/tables/${tableId}/fortune`, { method: 'POST' })
       return data.data
     },
 

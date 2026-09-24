@@ -290,19 +290,13 @@ export class ModelDMProvider implements DMProvider {
     const party = built.party
     const witnesses = party.map((id) => `character:${id}`)
 
-    // Fortuna de apertura (Gabino, 23-09: el briefing la anunciaba y nadie
-    // la tiraba). Si la sesion trae su tabla de Fortuna, el motor tira un
-    // d20 por cada personaje presente al abrirla, antes del modelo, que la
-    // recibe ya tirada para dejar que se note sin explicarla.
-    const fortunes = openingFortunes(ctx, party, random)
-    for (const [id, fortune] of Object.entries(fortunes)) {
-      const name = ctx.pack.characters.get(id)?.name ?? id
-      yield { kind: 'block', block: { type: 'roll', text: `${name} tira 1d20 de Fortuna: ${fortune.result} (${fortune.label})`, actor: `character:${id}`, die: '1d20', result: fortune.result, rolls: [fortune.result] } }
-      yield {
-        kind: 'event',
-        event: { type: 'roll', actor: `character:${id}`, resolved: { kind: 'fortune', die: '1d20', result: fortune.result, rolls: [fortune.result], source: fortune.source }, visibility: { layer: 'campaign', witnesses } },
-      }
-    }
+    // La Fortuna de la sesion la tira cada jugador con su dado, y el numero
+    // lo saca la API (Gabino, 24-09: tirada por el motor nadie la sentia
+    // suya). Al DM solo se le dice que no la pida ni la invente; la que ya
+    // se tiro llega en la ficha de cada personaje.
+    const fortuneNote = ctx.session?.fortune?.length
+      ? '\n\nFortuna de esta sesión: la tira cada jugador con su dado desde la mesa. No la pidas, no la tires tú ni inventes su número; la que ya se tiró está en la ficha de cada personaje y se nota en la escena sin explicarla.'
+      : ''
 
     // Las declaraciones se registran siempre, sin depender del modelo.
     for (const response of ctx.turn.responses) {
@@ -314,11 +308,6 @@ export class ModelDMProvider implements DMProvider {
       }
     }
 
-    const fortuneNote = Object.keys(fortunes).length
-      ? `\n\nFortuna de esta sesión, ya tirada por el motor (no la pidas otra vez ni expliques para qué sirve; que se note en la escena): ${Object.entries(fortunes)
-          .map(([id, f]) => `${ctx.pack.characters.get(id)?.name ?? id} ${f.result} (${f.label})`)
-          .join(', ')}.`
-      : ''
     const prompt: ModelPrompt = {
       system: systemPromptFor(ctx.rulesetId, compact),
       user: built.user + fortuneNote,
@@ -687,6 +676,11 @@ class LineInterpreter {
     if (event['type'] === 'secret_revealed' && this.knowledge) {
       markRevealed(this.knowledge, (event['payload'] as { secretId: string }).secretId)
     }
+    if (event['type'] === 'roll' && (event['resolved'] as { kind?: string }).kind === 'fortune') {
+      // La Fortuna la tira el jugador por la API; el d20 que el modelo
+      // quiera usar como Fortuna cuenta como tirada cualquiera y no la pisa.
+      event = { ...event, resolved: { ...(event['resolved'] as object), kind: 'other' } }
+    }
     if (event['type'] === 'roll') {
       // La mesa ve el dado caer: un bloque roll con el resultado, tirado por el engine o escrito por el jugador.
       const resolved = event['resolved'] as { die: string; result: number; skill?: string; source: string; rolls?: number[] }
@@ -859,27 +853,6 @@ export function splitJsonObjects(text: string): string[] {
 }
 
 /** Un d20 por personaje que declaro algo, en orden de llegada y sin repetir. */
-/**
- * La Fortuna de la apertura: un d20 por personaje presente, solo en el
- * primer turno de una sesion que trae tabla de Fortuna y sin declaraciones
- * todavia. La etiqueta sale de la tabla del pack.
- */
-export function openingFortunes(ctx: DMTurnContext, party: readonly string[], random: RandomSource): Record<string, { result: number; label: string; source: string }> {
-  const table = ctx.session?.fortune
-  if (ctx.turn.number !== 1 || ctx.turn.responses.length > 0 || !table?.length) return {}
-  const rolled: Record<string, { result: number; label: string; source: string }> = {}
-  for (const id of party) {
-    if (id in rolled || !ctx.state.world.characters[id]) continue
-    const roll = rollD20(random, {})
-    const tier = table.find((t) => {
-      const [lo, hi] = t.range.split('-').map(Number)
-      return roll.result >= lo! && roll.result <= (hi ?? lo!)
-    })
-    rolled[id] = { result: roll.result, label: tier?.label ?? 'Fortuna', source: roll.source }
-  }
-  return rolled
-}
-
 export function preRollFor(characterIds: readonly string[], random: RandomSource): Record<string, number> {
   const rolled: Record<string, number> = {}
   for (const id of characterIds) {

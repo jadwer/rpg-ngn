@@ -119,9 +119,8 @@ describe('ModelDMProvider', () => {
 
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-    // La apertura de la 003 tira antes la Fortuna de cada personaje presente.
-    expect(blocks.map((b) => b?.type)).toEqual(['roll', 'roll', 'narration', 'system'])
-    expect(blocks[3]?.type === 'system' && blocks[3].text).toMatch(/llegó a su límite de escritura/)
+    expect(blocks.map((b) => b?.type)).toEqual(['narration', 'system'])
+    expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/llegó a su límite de escritura/)
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
   })
 
@@ -298,13 +297,13 @@ describe('ModelDMProvider', () => {
     it('en modo report el bloque pasa y el hallazgo se anota; en modo off no se revisa', async () => {
       const base = await openSession003()
       const report = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'report' })))
-      expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['roll', 'roll', 'narration', 'dialogue', 'narration'])
+      expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['narration', 'dialogue', 'narration'])
       expect(report.filter((o) => o.kind === 'lint')).toHaveLength(3)
-      expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['roll', 'roll', 'narration', 'narration', 'world_event', 'narration'])
+      expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['narration', 'narration', 'world_event', 'narration'])
 
       const off = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'off' })))
       expect(off.some((o) => o.kind === 'lint')).toBe(false)
-      expect(off.filter((o) => o.kind === 'block')).toHaveLength(5)
+      expect(off.filter((o) => o.kind === 'block')).toHaveLength(3)
     })
 
     it('si el lint corta el ultimo bloque, el motor devuelve la palabra (la mesa no queda a la deriva)', async () => {
@@ -320,21 +319,19 @@ describe('ModelDMProvider', () => {
     })
   })
 
-  it('la apertura de una sesion con tabla de Fortuna la tira para cada presente y se la dice al DM', async () => {
+  it('la Fortuna la tira el jugador: el motor no la tira al abrir y el d20 del modelo no la pisa', async () => {
     const base = await openSession003()
     const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Amanece en Valdoria. ¿Qué hacen?"}}')
     const outputs = await collect(new ModelDMProvider(transport, KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(1, []))))
 
-    const rolls = outputs.filter((o) => o.kind === 'block' && o.block.type === 'roll').map((o) => (o.kind === 'block' && o.block.type === 'roll' ? o.block : null))
-    expect(rolls).toHaveLength(2)
-    expect(rolls[0]?.text).toMatch(/tira 1d20 de Fortuna: \d+ \(.+\)/)
-    const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
-    expect(events.filter((e) => e?.['type'] === 'roll').map((e) => (e?.['resolved'] as { kind: string }).kind)).toEqual(['fortune', 'fortune'])
-    expect(transport.prompts[0]!.user).toContain('Fortuna de esta sesión, ya tirada por el motor')
+    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'roll')).toBe(false)
+    expect(transport.prompts[0]!.user).toContain('la tira cada jugador con su dado')
 
-    // En un turno con declaraciones ya no se tira: solo en la apertura.
-    const later = await collect(new ModelDMProvider(new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Sigue."}}'), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
-    expect(later.some((o) => o.kind === 'block' && o.block.type === 'roll' && o.block.text.includes('Fortuna'))).toBe(false)
+    // Una tirada que el modelo marque como Fortuna sale como tirada cualquiera.
+    const sneaky = ['{"kind":"event","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"fortune","die":"1d20","result":20,"source":"model"}}}', '{"kind":"block","block":{"type":"narration","text":"Sigue."}}'].join('\n')
+    const later = await collect(new ModelDMProvider(new FakeTransport(sneaky), KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]), { dice: 'engine' })))
+    const kinds = later.filter((o) => o.kind === 'event' && o.event['type'] === 'roll').map((o) => (o.kind === 'event' ? (o.event['resolved'] as { kind: string }).kind : null))
+    expect(kinds).not.toContain('fortune')
   })
 
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {

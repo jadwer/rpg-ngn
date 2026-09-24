@@ -263,6 +263,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     [client, table.id],
   )
 
+  const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
+
   const seatList = useMemo(
     () => seats({ members: table.members, turn, typing: snapshot?.typing ?? EMPTY, narrators: snapshot?.narrators ?? EMPTY, away: snapshot?.away ?? EMPTY, viewerMemberId: viewer.memberId, nameOf }),
     [table.members, turn, snapshot?.typing, snapshot?.narrators, snapshot?.away, viewer.memberId, nameOf],
@@ -731,7 +733,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} />
+        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} />
       </div>
       {gameBar('bottom')}
     </div>

@@ -2,7 +2,7 @@
 
 import type { TurnView } from '@rpg-ngn/api-client'
 import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useState, type KeyboardEvent } from 'react'
 import { HoldDie } from './HoldDie'
 
 interface Props {
@@ -24,6 +24,10 @@ interface Props {
   onHold: (held: boolean) => void
   /** Se teclea (true) o se dejo de teclear (false); el aviso lo ven los demas. */
   onTyping: (typing: boolean) => void
+  /** Si a este jugador le falta tirar la Fortuna de la sesion. */
+  fortunePending: boolean
+  /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
+  onFortune: () => Promise<number>
 }
 
 /**
@@ -33,7 +37,14 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune }: Props) {
+  const [fortuneError, setFortuneError] = useState<string | null>(null)
+  // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
+  // es el que confirma que ya no toca; si vuelve a tocar (sesion nueva), vuelve.
+  const [fortuneLanded, setFortuneLanded] = useState(false)
+  useEffect(() => {
+    if (!fortunePending) setFortuneLanded(false)
+  }, [fortunePending])
   const [text, setText] = useState('')
 
   const send = async () => {
@@ -85,6 +96,28 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
+
+      {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el
+          servidor, asi que no hay texto que editar ni dado fisico que creer. */}
+      {open && hasCharacter && fortunePending && !fortuneLanded ? (
+        <div className="fortune" role="group" aria-label="Tu Fortuna de esta sesión">
+          <HoldDie
+            die="1d20"
+            label="Fortuna"
+            disabled={busy}
+            serverRoll={onFortune}
+            onRolled={() => {
+              setFortuneError(null)
+              setTimeout(() => setFortuneLanded(true), 1500)
+            }}
+            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+          />
+          <span className="text">
+            <b>Tira tu Fortuna.</b> Mantén presionado el dado y suéltalo. No se te dice para qué sirve.
+          </span>
+          {fortuneError ? <span className="error">{fortuneError}</span> : null}
+        </div>
+      ) : null}
 
       {progress.canRespond ? (
         <>

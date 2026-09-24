@@ -2621,6 +2621,33 @@ a.plain {
   font-style: italic;
 }
 
+/* La Fortuna de la sesion: un dado grande que tira el jugador. */
+.turn .fortune {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 8px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-bright);
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.12);
+}
+.turn .fortune .hold-die {
+  min-width: 96px;
+  min-height: 56px;
+  justify-content: center;
+  font-size: 1rem;
+}
+.turn .fortune .text {
+  flex: 1;
+  min-width: 180px;
+  color: var(--ink);
+}
+.turn .fortune .error {
+  flex-basis: 100%;
+}
+
 /* Paneles de la barra del juego (fichas, jugadores, anfitrion, mas). */
 .aside.drawer .content {
   padding: 16px;

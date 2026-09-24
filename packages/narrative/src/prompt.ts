@@ -69,7 +69,7 @@ La línea "addressed" va al final y lista los ids de los personajes a los que de
 
 Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo aplica. Lo normal es proponer entre 0 y 2 por turno. Las acciones declaradas por los jugadores y tu narración ya quedan registradas automáticamente: NO propongas eventos "player_action" ni "narration". Usa solo estas formas, exactamente con estas claves:
 
-- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es fortune, skill, social, attack, save, rest u other):
+- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es skill, social, attack, save, rest u other; la Fortuna nunca, la tira el jugador):
   {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","result":14,"source":"engine","skill":"Percepción"}}
 - Tirada extra que pides y el motor resuelve (sin "result"; "advantage" o "disadvantage" opcionales para 1d20). Solo si hace falta un segundo dado; la consecuencia se narra el turno siguiente:
   {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}
@@ -167,7 +167,7 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
 - Si se gana o pierde el favor de la corte (un aliado nuevo, una puerta que se cierra), mueve "standing".
 Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas formas, exactamente con estas claves:
 
-- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es fortune, skill, social, save u other):
+- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es skill, social, save u other; la Fortuna nunca, la tira el jugador):
   {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","result":14,"source":"engine","skill":"Etiqueta"}}
 - Tirada extra que pides y el motor resuelve (sin "result"). Solo si hace falta un segundo dado; la consecuencia se narra el turno siguiente:
   {"type":"roll","actor":"character:shiho","resolved":{"kind":"social","die":"1d20","skill":"Etiqueta"}}
@@ -236,7 +236,7 @@ Un evento registra un hecho mecánico en la crónica; el motor lo valida y lo ap
 - Coquetear, mentir sobre quién eres, sonsacar a un sirviente o pedir un baile a quien no te conoce tiene riesgo: usa el dado de ese personaje con "kind":"social".
 Lo normal en esta mesa es proponer entre 1 y 3 eventos por turno. Usa solo estas formas, exactamente con estas claves:
 
-- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es social, skill, fortune, save u other):
+- Tirada con el d20 que el motor YA tiró este turno para ese personaje (el número está en "Dados de este turno"; va ANTES del bloque que narra su consecuencia; "kind" es social, skill, save u other; la Fortuna nunca, la tira el jugador):
   {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","result":14,"source":"engine","skill":"Seducción"}}
 - Tirada extra que pides y el motor resuelve (sin "result"). Solo si hace falta un segundo dado; la consecuencia se narra el turno siguiente:
   {"type":"roll","actor":"character:camille","resolved":{"kind":"social","die":"1d20","skill":"Baile"}}

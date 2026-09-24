@@ -8,6 +8,14 @@ interface Props {
   die: string
   disabled?: boolean
   onRolled: (roll: QuickRoll) => void
+  /**
+   * Si esta, el numero lo saca el servidor (la Fortuna): se pide al soltar y
+   * se enseña cuando el dado termina de frenar. Si falla, `onFailed`.
+   */
+  serverRoll?: () => Promise<number>
+  onFailed?: (error: unknown) => void
+  label?: string
+  large?: boolean
 }
 
 /** Rango de caras de una expresion simple ("1d20", "2d6"): lo que se ve girar. */
@@ -25,7 +33,7 @@ function faces(die: string): { min: number; max: number } {
  * resultado. El numero lo tira el generador al terminar: la duracion da la
  * sensacion de haberlo tirado uno, no cambia las probabilidades.
  */
-export function HoldDie({ die, disabled = false, onRolled }: Props) {
+export function HoldDie({ die, disabled = false, onRolled, serverRoll, onFailed, label, large = false }: Props) {
   const [face, setFace] = useState<number | null>(null)
   const [rolling, setRolling] = useState(false)
   const pressedAt = useRef(0)
@@ -54,21 +62,32 @@ export function HoldDie({ die, disabled = false, onRolled }: Props) {
     if (!spin.current) return
     clearInterval(spin.current)
     spin.current = null
+    const fromServer = serverRoll?.()
     let at = 0
     for (const step of settleSchedule(holdReleaseMs(Date.now() - pressedAt.current))) {
       at += step
       timers.current.push(setTimeout(() => setFace(randomFace()), at))
     }
+    const land = (roll: QuickRoll) => {
+      setFace(roll.result)
+      onRolled(roll)
+      timers.current.push(
+        setTimeout(() => {
+          setRolling(false)
+          setFace(null)
+        }, 900),
+      )
+    }
     timers.current.push(
       setTimeout(() => {
-        const roll = quickRoll(die)
-        setFace(roll.result)
-        onRolled(roll)
-        timers.current.push(
-          setTimeout(() => {
+        if (!fromServer) return land(quickRoll(die))
+        fromServer.then(
+          (result) => land({ die, result, rolls: [result], text: `Tiro ${die}: ${result}` }),
+          (error: unknown) => {
             setRolling(false)
             setFace(null)
-          }, 900),
+            onFailed?.(error)
+          },
         )
       }, at),
     )
@@ -79,18 +98,19 @@ export function HoldDie({ die, disabled = false, onRolled }: Props) {
       onPressIn={pressIn}
       onPressOut={pressOut}
       disabled={disabled}
-      style={({ pressed }) => [styles.die, rolling && styles.rolling, disabled && styles.off, pressed && !rolling && styles.pressed]}
+      style={({ pressed }) => [styles.die, large && styles.large, rolling && styles.rolling, disabled && styles.off, pressed && !rolling && styles.pressed]}
       accessibilityRole="button"
       accessibilityLabel={`Tirar ${die}: mantén presionado y suelta`}
     >
       {rolling ? <Text style={styles.face}>{face ?? ''}</Text> : <Icon d={ICON.dice} size={15} color={theme.colors.inkDim} />}
-      <Text style={styles.label}>{die}</Text>
+      <Text style={styles.label}>{label ?? die}</Text>
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   die: { flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: theme.colors.panel, minWidth: 64 },
+  large: { minWidth: 104, minHeight: 52, justifyContent: 'center' },
   rolling: { borderColor: theme.colors.accentBright, backgroundColor: 'rgba(124, 58, 237, 0.22)' },
   off: { opacity: 0.45 },
   pressed: { opacity: 0.8 },

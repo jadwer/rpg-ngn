@@ -1,6 +1,6 @@
 import type { TurnView } from '@rpg-ngn/api-client'
 import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
@@ -28,6 +28,10 @@ interface Props {
   onTyping: (typing: boolean) => void
   /** El cuadro tomo el foco: la pantalla baja la narracion al final para que se vea lo ultimo sobre el teclado. */
   onFocusInput?: (() => void) | undefined
+  /** Si a este jugador le falta tirar la Fortuna de la sesion. */
+  fortunePending: boolean
+  /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
+  onFortune: () => Promise<number>
 }
 
 /**
@@ -36,10 +40,16 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune }: Props) {
   const [text, setText] = useState('')
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
+  const [fortuneError, setFortuneError] = useState<string | null>(null)
+  // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo.
+  const [fortuneLanded, setFortuneLanded] = useState(false)
+  useEffect(() => {
+    if (!fortunePending) setFortuneLanded(false)
+  }, [fortunePending])
 
   const send = async () => {
     const value = text.trim()
@@ -78,6 +88,29 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {turn?.error ? <Text style={styles.error}>{`El DM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
+
+      {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el servidor. */}
+      {turn?.status === 'open' && hasCharacter && fortunePending && !fortuneLanded ? (
+        <View style={styles.fortune}>
+          <HoldDie
+            die="1d20"
+            label="Fortuna"
+            large
+            disabled={busy}
+            serverRoll={onFortune}
+            onRolled={() => {
+              setFortuneError(null)
+              setTimeout(() => setFortuneLanded(true), 1500)
+            }}
+            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+          />
+          <View style={styles.fortuneText}>
+            <Text style={styles.fortuneTitle}>Tira tu Fortuna.</Text>
+            <Text style={styles.fortuneHint}>Mantén presionado el dado y suéltalo. No se te dice para qué sirve.</Text>
+            {fortuneError ? <Text style={styles.error}>{fortuneError}</Text> : null}
+          </View>
+        </View>
+      ) : null}
 
       {progress.canRespond ? (
         <View style={styles.compose}>
@@ -133,6 +166,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 }
 
 const styles = StyleSheet.create({
+  fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
+  fortuneText: { flex: 1, gap: 2 },
+  fortuneTitle: { fontFamily: theme.fonts.uiBold, fontSize: 15, color: theme.colors.ink },
+  fortuneHint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   ask: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink },
   inputFocused: { borderColor: theme.colors.accentBright },
   counter: { alignSelf: 'flex-end', fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkFaint, marginTop: -4 },
