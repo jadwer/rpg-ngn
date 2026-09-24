@@ -35,7 +35,7 @@ export default function PrivacidadPage() {
       <h2>1. Quién es responsable de tus datos</h2>
       <p>
         Gabino Ramírez, persona física con actividad empresarial, es responsable del tratamiento de los datos personales que nos proporcionas al usar Ad Astra Mentis, antes rpg-worlds
-        (https://rpg-worlds.gabinoramirez.com), en adelante &quot;el Servicio&quot;.
+        (https://adastramentis.com), en adelante &quot;el Servicio&quot;.
       </p>
       <p>Este aviso se emite conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares y su Reglamento.</p>
       <p>

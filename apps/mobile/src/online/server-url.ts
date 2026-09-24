@@ -16,7 +16,15 @@
  * sino token Bearer, asi que por la raiz se llevaba un 403: "Peticion
  * rechazada: falta la cabecera de la web". `/movil` entra directo a Laravel.
  */
-export const PUBLIC_SERVER_URL = 'https://rpg-worlds.gabinoramirez.com/movil'
+export const PUBLIC_SERVER_URL = 'https://adastramentis.com/movil'
+
+/**
+ * El servidor publico de antes del dominio propio (24-09). Sigue contestando
+ * en /movil para las apps ya instaladas, pero una direccion guardada con el
+ * se cambia a la nueva, para poder retirarlo algun dia sin dejar a nadie
+ * fuera.
+ */
+const LEGACY_SERVER_URLS = ['https://rpg-worlds.gabinoramirez.com/movil', 'https://rpg-worlds.gabinoramirez.com']
 
 /** La raiz del mismo dominio, donde contesta la web y no la API. */
 const WEB_ROOT = PUBLIC_SERVER_URL.replace(/\/movil$/, '')
@@ -38,9 +46,14 @@ export function isWebRootUrl(url: string): boolean {
   return url.trim().replace(/\/+$/, '') === WEB_ROOT
 }
 
+/** Una direccion del servidor publico de antes del dominio propio. */
+export function isLegacyPublicUrl(url: string): boolean {
+  return LEGACY_SERVER_URLS.includes(url.trim().replace(/\/+$/, ''))
+}
+
 /** Si una direccion guardada ya no sirve y hay que volver a la de por defecto. */
 export function isUnusableServerUrl(url: string): boolean {
-  return isStaleLocalUrl(url) || isWebRootUrl(url)
+  return isStaleLocalUrl(url) || isWebRootUrl(url) || isLegacyPublicUrl(url)
 }
 
 /**
