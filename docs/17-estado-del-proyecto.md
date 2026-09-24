@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-23, tarde CST**. Rama `dev`, commit `523bfa6`; API `3f07305` con platform `0736442`.
+Fecha de corte: **2026-09-24, mañana CST**. Rama `dev`, commit `a75aec1`; API `d120576` con platform `0736442`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -182,6 +182,15 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   `apps/web/src/components/Brand.tsx`; icono de app, favicon y apple-icon.
 - **Pendiente**: registro de marca y dominio, redes, redibujo limpio del logo
   para imprenta, y el nombre en la app (`android.package`).
+
+### Dominio propio (24-09)
+
+- **adastramentis.com** en linea: DNS y buzones en JettHost (contacto@,
+  privacidad@, soporte@), web y API en Hetzner con un certificado para los
+  tres nombres. rpg-worlds.gabinoramirez.com redirige al nuevo salvo /movil
+  y el webhook de Stripe. Correo saliente por Resend desde
+  no-responder@adastramentis.com (dominio verificado). La app apunta al
+  dominio nuevo y migra sola la direccion vieja.
 
 ### Lo que salio de jugar la mesa 33 (23-09, tarde)
 

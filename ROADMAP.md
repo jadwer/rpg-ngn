@@ -333,6 +333,11 @@ como tarea abierta (ahora es un experimento de un dia con dos variantes);
 "Stripe live" como paso del plan (es una compuerta); y "medir al final" (una
 sesion antes de desplegar, no antes de empezar).
 
+## Dominio propio (24-09, hecho)
+
+- [x] adastramentis.com con HTTPS, correo de entrada en JettHost y de salida por Resend; el dominio viejo redirige salvo /movil y el webhook de Stripe
+- [ ] Cambiar el webhook de Stripe al dominio nuevo cuando se pase a modo real
+
 ## Antes de abrir a usuarios reales
 
 El servidor ya es publico (https://rpg-worlds.gabinoramirez.com). Esto es lo
