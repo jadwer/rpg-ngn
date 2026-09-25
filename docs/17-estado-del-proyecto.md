@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-24, tarde CST**. Rama `dev`, commit `acf4988`; API `5e22720` con platform `d95a210`.
+Fecha de corte: **2026-09-24, noche CST**. Rama `dev`, commit `ade5205`; API `777a7ee` con platform `d95a210`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -195,6 +195,28 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   de DKIM/SPF/DMARC: dominio de horas, firma "rpg-ngn" y plantilla en ingles.
   Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
   llego bien.
+
+### Historia ilustrada, Entrega 10 (24-09, noche)
+
+Sale de analizar Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
+
+- **Imagenes de escena (10a)**: el motor propone ilustrar la apertura, un
+  cambio de lugar o un momento que el DM marca (linea `scene`); la API
+  decide (tope 6 por sesion, minimo 3 turnos entre imagenes, solo packs
+  originales o con licencia, ajuste por mesa) y genera en la cola `images`
+  con su propio worker. Gemini 3.1 Flash Lite Image con los retratos como
+  referencia (0.034 USD, unos 4 s); GPT Image Mini solo de respaldo porque
+  en calidad baja salio turbia. Prepago de MXN 100 en Google como techo.
+  `artStyle` en el manifiesto del pack.
+- **La mesa con la escena de fondo**, en web y app: la ultima imagen es el
+  fondo, el texto en la mitad de abajo sobre velo negro con alfa (sin
+  desenfoque ni sombra en las letras, lo pidio Gabino) y el cuadro de
+  respuesta plegado en una barra que se abre al tocarla o al bajar leyendo.
+- **Ideas de accion (10b)**: dos por personaje interpelado, filtradas por lo
+  que sabe, sobre el cuadro, que siempre sigue libre.
+- **"Anteriormente..." (10c)**: el DM resume la sesion previa en la apertura
+  y quien entra lo ve en una pantalla con Continuar.
+- La cronica publica incluye las imagenes.
 
 ### Higiene y Fortuna del jugador (24-09)
 

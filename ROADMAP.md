@@ -319,6 +319,11 @@ con capturas, y la lista que salga de B4. La verificacion de correo sigue
 apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
 web, que es el producto principal.
 
+**Rumbo al 24-09 por la noche** (Gabino): la Entrega 10 (10a a 10c) quedo en
+produccion; **lo que sigue es lo pendiente de Stripe en real** y lo demas de
+esta lista. 10d (video de la sesion) espera a que haya sesiones ilustradas
+jugadas; 10e y 10f, a Stripe.
+
 **Y despues de estos bloques, el rumbo que fijo Gabino el 23-09** para llegar
 a produccion, corregido esa tarde con los docs 23 y 24: (1) ~~resto de la
 Entrega 8~~ (hecho el 23-09); (2) **Stripe en real**, compuerta y tarea de
