@@ -2738,18 +2738,23 @@ a.plain {
   margin-top: max(38dvh, 180px);
   border-top: 1px solid rgba(167, 139, 250, 0.35);
   border-radius: 18px 18px 0 0;
-  background: rgba(11, 11, 18, 0.62);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+  /* Velo negro con alfa y casi sin desenfoque (Gabino, 24-09): la imagen se
+     sigue viendo detras y la sombra de las letras cuida la lectura. */
+  background: linear-gradient(to bottom, rgba(5, 5, 10, 0.5), rgba(5, 5, 10, 0.68));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.3);
+}
+.table.has-scene .blocks {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.6);
 }
 .table.has-scene .scene-hero {
   display: none;
 }
 .table.has-scene .table-footer {
-  background: rgba(11, 11, 18, 0.78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(5, 5, 10, 0.82);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 .table.has-scene.screen .scroll {
   margin-top: 45dvh;
