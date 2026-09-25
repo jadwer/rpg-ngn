@@ -196,6 +196,29 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
   llego bien.
 
+### Tirada pedida por el director (25-09, tarde)
+
+- **Lo que fallo:** en la mesa 39, con los dados en manos de la mesa, el DM
+  invento un 13 y un 9 "del motor", narro la consecuencia y el motor descarto
+  la linea en silencio. El prompt decia "el motor ya tiro" en todos los
+  modos, y en ese modo no habia dado. Nadie le pidio tirar a Gabino.
+- **Tres capas que no se conocen:** el DM **pide** (`ask_roll`, guardado en
+  `turns.roll_requests`), la API **resuelve** (`DiceService`: `random_int`,
+  evento y bloque `roll`, y la tirada queda como la respuesta del personaje
+  en `turn_responses.roll`) y el cliente **presenta** (`DiceRoller`, hoy
+  `SpriteDie` con la lamina de dados). El resultado llega antes que la
+  animacion, asi que un dado 3D con fisicas entra cambiando una linea.
+- **Si el turno solo exige tirada, no hay cuadro de texto:** sale el dado,
+  se mantiene presionado y se suelta; el numero lo pone el servidor y el
+  turno queda respondido. El DM narra la consecuencia al turno siguiente.
+- **Tres modos de dados** (`settings.dice`): `dice` por omision (dado en
+  pantalla, lo escrito no cuenta), `engine` (el motor tira en silencio y
+  narra al momento) y `table` (presencial, el numero escrito vale). El
+  prompt de sistema cambia por modo; un numero inventado se vuelve peticion
+  y el anfitrion lo ve en el aviso.
+- **Fortuna** pasa por la misma pieza de registro. La Fortuna y las tiradas
+  pedidas usan el mismo dado de la lamina.
+
 ### Primera sesion de prueba y primer APK (25-09)
 
 - **Mesa 39 (piloto, 10 turnos):** el DM narraba los movimientos sin emitir
@@ -203,7 +226,8 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   de cambio de lugar y con el lint marcando cada lugar como no presenciado.
   Ahora cada turno termina con `where` (el motor mueve a la party) y `scene`
   (la API ilustra una cada 3 turnos); el aviso de lineas ignoradas dice
-  cuales, y una tirada con `"kind":"roll"` se entiende igual.
+  cuales, y una tirada con `"kind":"roll"` se entiende igual. Las tiradas
+  seguian mal (arriba).
 - **Mesa:** la narracion nueva se lee desde su inicio, el cuadro de respuesta
   solo se abre al bajar leyendo, la Fortuna se pliega con el, el panel de
   texto se arrastra (web y app) y la app tiene pantalla de lectura. Crear

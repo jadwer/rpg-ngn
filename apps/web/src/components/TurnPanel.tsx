@@ -1,9 +1,10 @@
 'use client'
 
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, countdownLine, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useState, type KeyboardEvent } from 'react'
+import { DiceRoller, type RollOutcome } from './dice'
 import { HoldDie } from './HoldDie'
 
 interface Props {
@@ -29,6 +30,10 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
+  /** Suelta el dado de la tirada que el DM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
+  onRoll: () => Promise<RollOutcome>
+  /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
+  onRolled: () => void
   /** El anfitrion se quedo sin turnos: el aviso lleva a recargar antes de chocar con el cierre. */
   outOfTurns: boolean
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
@@ -48,7 +53,7 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns, suggestions, autoOpen }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, onRoll, onRolled, outOfTurns, suggestions, autoOpen }: Props) {
   const [opened, setOpened] = useState(false)
   // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
   const [folded, setFolded] = useState(false)
@@ -67,6 +72,30 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   }, [fortunePending])
   const [text, setText] = useState('')
   const composing = !folded && (opened || autoOpen || text.length > 0)
+  // La tirada pedida: el numero se queda en pantalla hasta que el sondeo
+  // trae el bloque y la peticion deja de estar pendiente.
+  const [rollError, setRollError] = useState<string | null>(null)
+  const [landed, setLanded] = useState<{ die: string; outcome: RollOutcome } | null>(null)
+  // La peticion se recuerda hasta que cambia el turno: el sondeo la quita en
+  // cuanto el servidor registra la tirada, y eso pasa a media animacion; si
+  // la tarjeta se fuera con ella, el dado se desmontaria antes de aterrizar.
+  const [activeRoll, setActiveRoll] = useState<TurnProgress['mustRoll']>(null)
+  // Este dado ya se solto: aunque el sondeo diga "respondio" antes de que
+  // aterrice, la tarjeta se queda para enseñar el numero.
+  const [started, setStarted] = useState(false)
+  useEffect(() => {
+    setLanded(null)
+    setRollError(null)
+    setActiveRoll(null)
+    setStarted(false)
+  }, [turn?.id])
+  useEffect(() => {
+    if (progress.mustRoll) setActiveRoll(progress.mustRoll)
+  }, [progress.mustRoll])
+  // Respondio por otro lado (otro dispositivo) sin soltar este dado: no hay nada que enseñar.
+  useEffect(() => {
+    if (progress.hasResponded && !started && !progress.mustRoll) setActiveRoll(null)
+  }, [progress.hasResponded, progress.mustRoll, started])
 
   const toggleIdeas = (on: boolean) => {
     setShowIdeas(on)
@@ -132,16 +161,52 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 
+      {/* El DM pidio una tirada: el turno de este personaje es soltar el dado,
+          no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
+      {open && hasCharacter && activeRoll ? (
+        <div className="roll-card" role="group" aria-label="Te toca tirar">
+          <DiceRoller
+            die={activeRoll.die}
+            label={rollLabel(activeRoll)}
+            large
+            disabled={busy || landed !== null}
+            resolve={() => {
+              setStarted(true)
+              return onRoll()
+            }}
+            onLanded={(outcome) => {
+              setRollError(null)
+              setLanded({ die: activeRoll.die, outcome })
+              onRolled()
+            }}
+            onFailed={(error) => setRollError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+          />
+          <span className="text">
+            {landed ? (
+              <>
+                <b>Sacaste {landed.outcome.result}.</b> El director narra lo que pasa cuando cierre el turno.
+              </>
+            ) : (
+              <>
+                <b>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : 'El director te pide una tirada.'}</b> Tira {rollLabel(activeRoll)}: mantén presionado el dado y suéltalo.
+              </>
+            )}
+          </span>
+          {rollError ? <span className="error">{rollError}</span> : null}
+        </div>
+      ) : null}
+
       {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el
           servidor, asi que no hay texto que editar ni dado fisico que creer. */}
       {open && hasCharacter && fortunePending && !fortuneLanded && composing ? (
         <div className="fortune" role="group" aria-label="Tu Fortuna de esta sesión">
-          <HoldDie
+          <DiceRoller
             die="1d20"
             label="Fortuna"
+            large
             disabled={busy}
-            serverRoll={onFortune}
-            onRolled={() => {
+            resolve={() => onFortune().then((result) => ({ result }))}
+            onLanded={() => {
               setFortuneError(null)
               setTimeout(() => setFortuneLanded(true), 1500)
             }}
@@ -221,10 +286,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               {busy ? <span className="spinner" aria-hidden /> : null}
               Enviar
             </button>
-            {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la
-                resuelve el motor. En una mesa donde tira el servidor no se
-                ofrece: el numero que escribieras se ignoraria. */}
-            {diceMode === 'engine' ? null : (
+            {/* Dados rapidos solo en la mesa presencial: el numero va en el
+                texto y cuenta. Con el servidor tirando (engine, dice) se
+                ignoraria. */}
+            {diceMode !== 'table' ? null : (
               <span className="dice-row" aria-label="Dados: mantén presionado y suelta">
                 {QUICK_DICE.map((d) => (
                   <HoldDie key={d} die={d} disabled={busy} onRolled={(roll) => setText((current) => appendRoll(current, roll))} />

@@ -46,6 +46,8 @@ export interface RollBlock {
   advantage: 'advantage' | 'disadvantage' | null
   /** Frase completa, lista para pintar y para leer en voz alta. */
   text: string
+  /** La pidio el DM y la resolvio el servidor cuando el jugador solto el dado (modo `dice`). */
+  requested?: true
 }
 
 export interface SystemBlock {

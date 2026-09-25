@@ -1,9 +1,10 @@
 import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import { appendRoll, countdownLine, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { DiceRoller, type RollOutcome } from './dice'
 import { HoldDie } from './HoldDie'
 import { Icon, ICON } from './Icon'
 
@@ -32,6 +33,10 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
+  /** Suelta el dado de la tirada que el DM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
+  onRoll: () => Promise<RollOutcome>
+  /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
+  onRolled: () => void
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
   /** Se abre solo cuando quien lee bajo hasta el final y el director ya no narra (como la web). */
@@ -46,7 +51,7 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, suggestions, autoOpen, onComposingChange }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, autoOpen, onComposingChange }: Props) {
   const [showIdeas, setShowIdeas] = useState(true)
   const [opened, setOpened] = useState(false)
   // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
@@ -58,6 +63,30 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   const [text, setText] = useState('')
   const composing = !folded && (opened || autoOpen || text.length > 0)
   useEffect(() => onComposingChange?.(composing && progress.canRespond), [composing, progress.canRespond, onComposingChange])
+  // La tirada pedida: el numero se queda en pantalla hasta que el sondeo
+  // trae el bloque y la peticion deja de estar pendiente.
+  const [rollError, setRollError] = useState<string | null>(null)
+  const [landed, setLanded] = useState<{ die: string; outcome: RollOutcome } | null>(null)
+  // La peticion se recuerda hasta que cambia el turno: el sondeo la quita en
+  // cuanto el servidor registra la tirada, y eso pasa a media animacion; si
+  // la tarjeta se fuera con ella, el dado se desmontaria antes de aterrizar.
+  const [activeRoll, setActiveRoll] = useState<TurnProgress['mustRoll']>(null)
+  // Este dado ya se solto: aunque el sondeo diga "respondio" antes de que
+  // aterrice, la tarjeta se queda para enseñar el numero.
+  const [started, setStarted] = useState(false)
+  useEffect(() => {
+    setLanded(null)
+    setRollError(null)
+    setActiveRoll(null)
+    setStarted(false)
+  }, [turn?.id])
+  useEffect(() => {
+    if (progress.mustRoll) setActiveRoll(progress.mustRoll)
+  }, [progress.mustRoll])
+  // Respondio por otro lado (otro dispositivo) sin soltar este dado: no hay nada que enseñar.
+  useEffect(() => {
+    if (progress.hasResponded && !started && !progress.mustRoll) setActiveRoll(null)
+  }, [progress.hasResponded, progress.mustRoll, started])
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
   const [fortuneError, setFortuneError] = useState<string | null>(null)
@@ -105,16 +134,53 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {turn?.error ? <Text style={styles.error}>{`El DM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
 
+      {/* El DM pidio una tirada: el turno de este personaje es soltar el dado,
+          no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
+      {turn?.status === 'open' && hasCharacter && activeRoll ? (
+        <View style={styles.rollCard}>
+          <DiceRoller
+            die={activeRoll.die}
+            label={rollLabel(activeRoll)}
+            large
+            disabled={busy || landed !== null}
+            resolve={() => {
+              setStarted(true)
+              return onRoll()
+            }}
+            onLanded={(outcome) => {
+              setRollError(null)
+              setLanded({ die: activeRoll.die, outcome })
+              onRolled()
+            }}
+            onFailed={(error) => setRollError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+          />
+          <View style={styles.fortuneText}>
+            {landed ? (
+              <>
+                <Text style={styles.fortuneTitle}>{`Sacaste ${landed.outcome.result}.`}</Text>
+                <Text style={styles.fortuneHint}>El director narra lo que pasa cuando cierre el turno.</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.fortuneTitle}>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : 'El director te pide una tirada.'}</Text>
+                <Text style={styles.fortuneHint}>{`Tira ${rollLabel(activeRoll)}: mantén presionado el dado y suéltalo.`}</Text>
+              </>
+            )}
+            {rollError ? <Text style={styles.error}>{rollError}</Text> : null}
+          </View>
+        </View>
+      ) : null}
+
       {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el servidor. */}
       {turn?.status === 'open' && hasCharacter && fortunePending && !fortuneLanded && composing ? (
         <View style={styles.fortune}>
-          <HoldDie
+          <DiceRoller
             die="1d20"
             label="Fortuna"
             large
             disabled={busy}
-            serverRoll={onFortune}
-            onRolled={() => {
+            resolve={() => onFortune().then((result) => ({ result }))}
+            onLanded={() => {
               setFortuneError(null)
               setTimeout(() => setFortuneLanded(true), 1500)
             }}
@@ -192,11 +258,11 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             onBlur={() => setFocused(false)}
           />
           <Text style={styles.counter}>{`${text.length}/1000`}</Text>
-          {/* Tirar por tu cuenta al declarar; cuando el DM pide una tirada, la
-              resuelve el motor. En una mesa donde tira el servidor no se
-              ofrece: el numero que escribieras se ignoraria. */}
-          {diceMode === 'engine' ? (
-            <Text style={styles.diceNotice}>En esta mesa los dados los tira el servidor.</Text>
+          {/* Dados rapidos solo en la mesa presencial: el numero va en el
+              texto y cuenta. Con el servidor tirando (engine, dice) se
+              ignoraria. */}
+          {diceMode !== 'table' ? (
+            diceMode === 'engine' ? <Text style={styles.diceNotice}>En esta mesa los dados los tira el servidor.</Text> : null
           ) : (
             <View style={styles.dice}>
               {QUICK_DICE.map((die) => (
@@ -233,6 +299,7 @@ const styles = StyleSheet.create({
   ideaText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   ideasToggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula },
   fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
+  rollCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 12, backgroundColor: 'rgba(0, 0, 0, 0.35)' },
   fortuneText: { flex: 1, gap: 2 },
   fortuneTitle: { fontFamily: theme.fonts.uiBold, fontSize: 15, color: theme.colors.ink },
   fortuneHint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },

@@ -1,3 +1,5 @@
+import type { DiceMode } from '@rpg-ngn/engine-contract'
+
 /**
  * Prompt de sistema del DM con modelo. Condensa docs/03 (el DM narra, las
  * herramientas deciden) y docs/06 (contrato de realidad). Es estable entre
@@ -312,13 +314,59 @@ const OWN_EVENTS: Record<string, { full: string; compact: string }> = {
   masquerade: { full: MASQUERADE_EVENTS, compact: MASQUERADE_EVENTS_COMPACT },
 }
 
-/** El prompt de sistema para un ruleset; sin ruleset o con uno desconocido, el del d20 tal cual. */
-export function systemPromptFor(rulesetId: string | undefined, compact = false): string {
+/** El prompt de sistema para un ruleset y un modo de dados; sin ruleset o con uno desconocido, el del d20. */
+export function systemPromptFor(rulesetId: string | undefined, compact = false, dice: DiceMode = 'engine'): string {
   const base = compact ? DM_SYSTEM_PROMPT_COMPACT : DM_SYSTEM_PROMPT
   const own = rulesetId ? OWN_EVENTS[rulesetId] : undefined
-  if (!own) return base
   const mark = compact ? COMPACT_EVENTS_MARK : EVENTS_MARK
   const at = base.indexOf(mark)
-  if (at === -1) return base
-  return base.slice(0, at) + (compact ? own.compact : own.full)
+  const prompt = !own || at === -1 ? base : base.slice(0, at) + (compact ? own.compact : own.full)
+  return withDiceMode(prompt, dice, compact)
+}
+
+/** La linea con la que el DM pide una tirada en los modos `dice` y `table`. */
+export const ASK_ROLL_EXAMPLE = '{"kind":"ask_roll","characterId":"zahira","die":"1d20","rollKind":"skill","skill":"Percepción","reason":"la cornisa cede bajo tus pies"}'
+
+const ASK_ROLL_RULE_FULL = {
+  dice: `4. Los dados son imparciales y tú jamás inventas un resultado. Los dados los tira cada jugador desde la mesa cuando tú se lo pides, y el número lo pone el servidor: no existe "Dados de este turno" y tú no tienes ningún número. Cuando una acción declarada tiene riesgo real, NO narras su consecuencia: describes el momento de tensión, pides la tirada con la línea ${ASK_ROLL_EXAMPLE} (una por personaje; "rollKind" es skill, social, attack, save u other; "reason" es lo que está en juego, en palabras de la escena) y terminas el turno devolviéndole la palabra a ese personaje. Nunca emitas un evento "roll" con "result": ese número no es tuyo. Una acción sin riesgo (hablar, mirar alrededor, caminar) no pide dado. Cuando la tirada llegue registrada en el turno siguiente ("tiró 1d20: 14"), narras su consecuencia en ese turno, sea la que sea: un 1 falla feo y un 20 brilla. Nunca reveles el número que hacía falta.`,
+  table: `4. Los dados son imparciales y tú jamás inventas un resultado. La mesa juega con dados de verdad: cada jugador tira el suyo y escribe el número en su respuesta. No existe "Dados de este turno". Si un jugador escribió su número, regístralo con el evento "roll", "result" igual a ese número y "source":"physical", ANTES del bloque que narra su consecuencia, y nárrala en este turno, sea la que sea: un 1 falla feo y un 20 brilla. Si su acción tiene riesgo real y no escribió ningún número, NO narras la consecuencia: describes el momento de tensión, pides la tirada con la línea ${ASK_ROLL_EXAMPLE} ("rollKind" es skill, social, attack, save u other) y terminas el turno devolviéndole la palabra. Nunca emitas un "roll" con un número que el jugador no escribió. Una acción sin riesgo no pide dado. Nunca reveles el número que hacía falta.`,
+}
+
+const ASK_ROLL_RULE_COMPACT = {
+  dice: `2. No inventas tiradas ni tienes dados: los tira cada jugador desde la mesa y el número lo pone el servidor. Si una acción tiene riesgo, NO narres la consecuencia: describe la tensión, pide la tirada con ${ASK_ROLL_EXAMPLE} y devuélvele la palabra. Nunca emitas "roll" con "result". Cuando llegue registrada ("tiró 1d20: 14"), narra su consecuencia ese turno, sea la que sea.`,
+  table: `2. No inventas tiradas: la mesa juega con dados de verdad. Si el jugador escribió su número, regístralo con el evento roll, "result" y "source":"physical" ANTES de narrar la consecuencia. Si su acción tiene riesgo y no escribió número, NO narres la consecuencia: pide la tirada con ${ASK_ROLL_EXAMPLE} y devuélvele la palabra.`,
+}
+
+const ASK_ROLL_EVENTS_FULL = {
+  dice: `- Tirada: NO es un evento tuyo. Se pide con la línea "ask_roll" (regla 4) y la resuelve el jugador desde la mesa; la consecuencia se narra el turno siguiente. Nunca propongas "roll".\n`,
+  table: (actor: string) =>
+    `- Tirada que un jugador reportó con su propio dado (solo si escribió el número; nunca inventes uno):\n  {"type":"roll","actor":"character:${actor}","resolved":{"kind":"skill","die":"1d20","result":14,"source":"physical","skill":"Percepción"}}\n- Si no escribió el número y la acción tiene riesgo, pídela con la línea "ask_roll" (regla 4); la consecuencia se narra el turno siguiente.\n`,
+}
+
+/** El párrafo de formato que presenta la línea `ask_roll`, con la excepción a `suggest`. */
+const ASK_ROLL_FORMAT_FULL = `Cuando pides una tirada (regla 4), la línea ${ASK_ROLL_EXAMPLE} va antes de "addressed", ese personaje va en "addressed", y para él NO escribes "suggest": su turno es soltar el dado, no elegir una acción.\n\n`
+const ASK_ROLL_FORMAT_COMPACT = ` Cuando pides una tirada (regla 2), la línea "ask_roll" va antes de "addressed", ese personaje va en "addressed" y para él no hay "suggest".`
+
+/**
+ * El mismo prompt con la regla de dados del modo de la mesa. Con `engine`
+ * queda tal cual (el motor tira antes de llamar al modelo). Con `dice` y
+ * `table` no hay "Dados de este turno": el DM pide la tirada y no narra su
+ * consecuencia. Es una sustitucion sobre los textos existentes, para no
+ * mantener seis prompts a mano; el resultado sigue siendo estable por mesa,
+ * asi que los proveedores lo cachean igual. Sin esto el modelo obedecia "el
+ * motor YA tiro" sin numero y se lo inventaba (mesa 39, 25-09).
+ */
+export function withDiceMode(prompt: string, dice: DiceMode, compact: boolean): string {
+  if (dice === 'engine') return prompt
+  if (compact) {
+    return prompt
+      .replace(/^2\. No inventas tiradas\..*$/m, ASK_ROLL_RULE_COMPACT[dice])
+      .replace(/^\{"type":"roll","actor":"character:[a-z-]+","resolved":\{[^\n]*\}\}\n/m, '')
+      .replace(/(según lo que ese personaje sabe\.)/, `$1${ASK_ROLL_FORMAT_COMPACT}`)
+  }
+  const actor = /- Tirada con el d20[^\n]*\n\s*\{"type":"roll","actor":"character:([a-z-]+)"/.exec(prompt)?.[1] ?? 'zahira'
+  return prompt
+    .replace(/^4\. Los dados son imparciales.*$/m, ASK_ROLL_RULE_FULL[dice])
+    .replace(/^- Tirada con el d20[^\n]*\n[^\n]*\n- Tirada extra[^\n]*\n[^\n]*\n- Tirada que un jugador[^\n]*\n[^\n]*\n/m, dice === 'dice' ? ASK_ROLL_EVENTS_FULL.dice : ASK_ROLL_EVENTS_FULL.table(actor))
+    .replace(/^# Eventos que puedes proponer/m, `${ASK_ROLL_FORMAT_FULL}# Eventos que puedes proponer`)
 }

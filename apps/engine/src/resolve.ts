@@ -1,6 +1,6 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
-import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
+import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
@@ -64,6 +64,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   const opening = request.turn.number === 1 && request.turn.responses.length === 0
   let moment: string | null = null
   let suggestions: Record<string, string[]> = {}
+  let rollRequests: RollRequest[] = []
 
   // Cierra un evento nacido en el engine con su id, version y momento. El
   // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
@@ -161,6 +162,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'rollRequests') {
+        rollRequests = output.requests
+        continue
+      }
+
       const parsed = seal(output.event)
       if (!parsed.success) {
         throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
@@ -186,5 +192,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     ...(illustration ? { illustrations: [illustration] } : {}),
     // Solo para quien tiene la palabra el turno que viene.
     ...(Object.keys(suggestions).length ? { suggestions: Object.fromEntries(Object.entries(suggestions).filter(([id]) => addressed.includes(id))) } : {}),
+    // Tiradas pedidas: esos personajes tiran en vez de escribir el turno que viene.
+    ...(rollRequests.length ? { rollRequests: rollRequests.filter((r) => addressed.includes(r.characterId)) } : {}),
   }
 }

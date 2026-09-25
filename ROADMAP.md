@@ -462,9 +462,10 @@ app, idiomas y pulido (sin fecha).
 
 - [ ] **Claves de imagen rotadas**: Gabino creo claves nuevas de Gemini y OpenAI pero el servidor sigue con las viejas (que siguen activas). Subirlas con `read -rs` a `/root/.rpg/`, pasarlas al `.env` y revocar las viejas
 - [ ] **Stripe en real**: la cuenta espera la validacion de telefono, constancia fiscal y biometria; al quedar "Completo", seguir la lista de `rpg-ngn-api/deploy/README.md` y decidir USD o MXN
-- [ ] **Verificar en el telefono** (APK v3): dado sin cierre, arrastre del panel, pantalla de lectura, y que las imagenes salgan cada 3 turnos con `where`/`scene`
+- [x] **Verificar en el telefono** (APK v3, 25-09): el dado ya no cierra la app y las imagenes salen; en tablet el hero se ve bien. Lo que salio mal fueron las tiradas (abajo)
+- [x] **Tirada pedida por el director** (25-09, tras la mesa 39: con los dados en manos de la mesa, el DM inventaba un 13 y un 9 "del motor", narraba la consecuencia y el motor descartaba la linea en silencio; nadie le pedia tirar a Gabino). Tres capas que no se conocen: el DM **pide** (`ask_roll`, `turns.roll_requests`), la API **resuelve** (`DiceService`: `random_int`, evento y bloque `roll`, y la tirada es la respuesta del personaje, `turn_responses.roll`) y el cliente **presenta** (`DiceRoller`, hoy `SpriteDie` con la lamina; un dado 3D con fisicas entra cambiando una linea porque el resultado llega antes que la animacion). Si el turno solo exige tirada, no hay cuadro de texto: se tira directo. **Tres modos de dados**: `dice` (por omision desde hoy: el jugador suelta el dado en pantalla, el numero lo pone el servidor, lo escrito no cuenta), `engine` (el motor tira en silencio y narra al momento) y `table` (presencial, el numero escrito vale). El prompt cambia por modo (`withDiceMode`); red de seguridad: un numero inventado se vuelve peticion y el anfitrion lo ve. Pendiente: lamina para d4, d10 y d12 (hoy numero sobre silueta), ventaja con dos dados girando, y que Gabino pase la mesa 39 a `dice`
 
-- [ ] **Hero vertical para moviles** (Gabino, 25-09, visto en el APK): en el telefono la altura del hero es correcta pero no se ve nada de los mundos; hace falta una segunda version de la ilustracion en vertical y servirla por tamaño de pantalla (web y app)
+- [ ] **Dos heros, uno por orientacion** (Gabino, 25-09, visto en el APK y en tablet): en tablet y escritorio (landscape) el actual se ve bien; en el telefono (portrait) no se ve nada de los mundos. Hace falta una segunda ilustracion vertical y elegirla por orientacion de la pantalla, no solo por ancho (web y app). La vertical la genera Gabino
 - [x] **Primer APK** (25-09): `com.adastramentis.app` 0.1.0, compilado en la WSL (ver memoria `apk-local`), firmado con la llave de subida respaldada en el disco E:; instalado y corriendo en el telefono de Gabino
 
 ## Packs de prueba (plan del 25-09)
@@ -495,19 +496,18 @@ Los retratos se pueden generar con Gemini desde la ficha de cada personaje.
 - [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas
 - [x] Un pack que no existe devolvia 502 en `packs/{pack}/{version}/sheets`; ahora 404 con motivo (23-09, API `be11b57`)
 - [x] `composer analyse` de la API vuelve a correr (23-09): Larastan nivel 5 con linea base de 141 hallazgos (tipos de Eloquent; los dos que parecian fallos son falsos positivos) y en el CI de GitHub
-- [ ] **El CI de AtomoPlatform en Gitea nunca ha corrido** (verificado el 23-09 en la base de Gitea, solo lectura): cero runners registrados, cero tokens de registro; todas las corridas quedaron canceladas por espera o en cola. El diseño (`docs/AUDIT_PHASE_9.md`) pone `act_runner` en el MicroServer local (HPE Gen8), no en el VPS de Gitea. Mientras no exista, los tests de los packages se corren a mano (SQLite y Postgres, como el 23-09). Tarea de Gabino: registrar el runner con la etiqueta `ubuntu-latest` y Docker (el workflow usa el servicio `postgres:16`)
+- [x] **El CI de AtomoPlatform** (25-09): nunca corrio en Gitea (cero runners, y no hay MicroServer). Se resolvio con el job `atomo` del CI de GitHub de rpg-ngn-api, que corre los tests de `atomo-auth`, `atomo-user` y `atomo-payments` en SQLite y Postgres
 
 - **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
 
 Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
 abierto.
 
-- [ ] `composer analyse` esta declarado en el composer.json de la API pero no existe `phpstan.neon`, asi que falla con "At least one path must be specified". O se configura Larastan o se quita el script
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
 - [ ] Renombre DM a GM: plan escrito en `docs/12-plan-renombre-gm.md`, sin ejecutar. La capa de visibilidad `dm` de los eventos **no** se renombra (es dato guardado; pediria subir version de esquema con upcast)
 - [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
 - [x] **Migrar la campaña de la mina al servidor** (hecho el 2026-09-19, rehecho el 20-09 tras el borrado de mesas de prueba): vive como mesa 15 a nombre de Gabino, importada desde `campaigns/pilot/events.jsonl` + `snapshots/002.json`. **La partida piloto es el repo, no el servidor**: ahi solo vive su continuacion web
-- [ ] APKs de Android: falta `eas.json` y el CLI. Con el servidor publico ya tiene sentido, porque la app puede apuntar a un sitio estable
+- [x] APKs de Android (25-09): se compilan en local con el SDK y JDK 17, sin EAS (memoria `apk-local`); v3 instalado en el telefono de Gabino
 
 ## v2 (sin fecha)
 

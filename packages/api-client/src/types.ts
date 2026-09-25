@@ -145,6 +145,23 @@ export interface FriendshipRecord {
 
 export type TurnStatus = 'open' | 'closing' | 'resolving' | 'resolved'
 
+/** Lo que el DM pidio tirar: el dado, para que y por que. No dice como se pinta. */
+export interface PendingRollRequest {
+  die: string
+  kind: 'skill' | 'social' | 'attack' | 'save' | 'other'
+  skill?: string
+  reason?: string
+  advantage?: boolean
+  disadvantage?: boolean
+}
+
+/** Lo que devuelve el servidor al soltar el dado de una tirada pedida. */
+export interface RollReceipt {
+  result: number
+  rolls: number[]
+  die: string
+}
+
 export interface TurnView {
   id: number
   session: string
@@ -194,6 +211,8 @@ export interface TableState {
   away: Presence[]
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion (la tira el jugador, el numero lo saca la API). */
   fortune: { pending: boolean }
+  /** La tirada que el DM pidio al personaje de quien consulta en este turno, si la hay y aun no la tiro (modos `dice` y `table`). */
+  rolls: { pending: PendingRollRequest | null }
   /** Turnos de cupo o creditos que le quedan a la mesa; null si no consume (clave propia). */
   quota?: { remainingTurns: number } | null
   /** Ideas de accion para el personaje de quien consulta (E10b); vacio si no hay. */

@@ -1,6 +1,6 @@
 import type { CampaignState } from '@rpg-ngn/campaign'
 import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
-import type { DiceMode, LintFinding, LintMode, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
+import type { DiceMode, LintFinding, LintMode, RollRequest, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
  * Lo que el DM recibe para narrar un turno. El estado completo llega tal
@@ -20,7 +20,7 @@ export interface DMTurnContext {
   maxOutputTokens?: number | undefined
   /** Lint de conocimiento (lint.ts); por defecto `enforce`. */
   lint?: LintMode | undefined
-  /** Quien tira los dados; por defecto `table` (se aceptan numeros del jugador). */
+  /** Quien tira los dados (contrato `DiceMode`); por defecto `engine`. */
   dice?: DiceMode | undefined
   /**
    * Id del ruleset de la campaña (`court-intrigue`, `fantasy-d20-lite`). El
@@ -55,6 +55,8 @@ export type DMOutput =
   | { kind: 'illustrate'; moment: string }
   /** Ideas de accion por personaje interpelado (E10b); el cuadro de texto sigue libre. */
   | { kind: 'suggestions'; byCharacter: Record<string, string[]> }
+  /** Tiradas que el DM pidio para el turno que viene (modos `dice` y `table`): esos personajes tiran en vez de escribir. */
+  | { kind: 'rollRequests'; requests: RollRequest[] }
 
 export interface DMProbe {
   ok: boolean

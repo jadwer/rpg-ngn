@@ -16,6 +16,40 @@ export const PackRef = z.strictObject({
 })
 export type PackRef = z.infer<typeof PackRef>
 
+/** Un dado con forma NdM, NdM+K o NdM-K (la misma regla que `DiceSpec` de content). */
+const DieSpec = z.string().regex(/^\d{1,2}d\d{1,3}(?:[+-]\d{1,3})?$/, 'dado con forma NdM, NdM+K o NdM-K')
+
+export const RollKind = z.enum(['skill', 'social', 'attack', 'save', 'other'])
+export type RollKind = z.infer<typeof RollKind>
+
+/**
+ * Tirada que el DM pide a un personaje y que se resuelve fuera del motor: el
+ * jugador la dispara desde la mesa y el numero lo pone la API (modo `dice`),
+ * o la tira con su dado fisico y escribe el numero (modo `table`). Es solo
+ * el dato: no dice como se pinta el dado.
+ */
+export const RollRequest = z.strictObject({
+  characterId: KebabId,
+  die: DieSpec,
+  kind: RollKind,
+  skill: z.string().min(1).max(60).optional(),
+  /** Por que se pide, en palabras de la escena ("la cornisa cede bajo tus pies"). */
+  reason: z.string().min(1).max(160).optional(),
+  advantage: z.boolean().optional(),
+  disadvantage: z.boolean().optional(),
+})
+export type RollRequest = z.infer<typeof RollRequest>
+
+/** La tirada que ES la respuesta de un personaje (la registro la API al resolver una `RollRequest`). */
+export const ResponseRoll = z.strictObject({
+  die: DieSpec,
+  result: z.number().int(),
+  rolls: z.array(z.number().int()),
+  kind: RollKind,
+  skill: z.string().optional(),
+})
+export type ResponseRoll = z.infer<typeof ResponseRoll>
+
 /** Lo que un jugador respondio en el turno. `late` llego tras el cierre. */
 export const TurnResponse = z.strictObject({
   characterId: KebabId,
@@ -23,6 +57,8 @@ export const TurnResponse = z.strictObject({
   text: z.string().min(1).max(4000),
   submittedAt: IsoDateTime,
   late: z.boolean().default(false),
+  /** Si la respuesta es una tirada pedida y ya registrada por la API. Opcional: no sube la version. */
+  roll: ResponseRoll.optional(),
 })
 export type TurnResponse = z.infer<typeof TurnResponse>
 
@@ -128,18 +164,20 @@ export const LintMode = z.enum(['enforce', 'report', 'off'])
 export type LintMode = z.infer<typeof LintMode>
 
 /**
- * Quien tira los dados de la mesa.
+ * Quien tira los dados de la mesa (Gabino, 25-09: tres modos).
  *
- * `table` (por defecto): la mesa juega con dados reales, asi que un numero
- * escrito por el jugador vale como tirada fisica. Es lo que pide el contrato
- * de realidad para una partida presencial.
+ * `engine`: el motor tira un d20 por personaje antes de llamar al modelo y
+ * el DM narra la consecuencia en el mismo turno. El numero que escriba un
+ * jugador se ignora. Rapido y sin dado a la vista.
  *
- * `engine`: solo tira el servidor. El numero que escriba un jugador se
- * ignora y la tirada se resuelve igual con el generador del motor. Es lo que
- * corresponde cuando la mesa no se ve las caras, y lo unico honesto en
- * cuanto haya roles ocultos: si no, cualquiera escribe "tiro 20".
+ * `dice`: el DM pide la tirada (`RollRequest`) y no narra la consecuencia;
+ * el jugador suelta el dado en la mesa y el numero lo pone la API. Un numero
+ * escrito por el jugador no cuenta. Es el dado en pantalla.
+ *
+ * `table`: partida presencial con dados reales. El DM pide la tirada y el
+ * jugador escribe el numero que saco; ese vale como tirada fisica.
  */
-export const DiceMode = z.enum(['table', 'engine'])
+export const DiceMode = z.enum(['engine', 'dice', 'table'])
 export type DiceMode = z.infer<typeof DiceMode>
 
 export const ResolveTurnRequest = z.strictObject({
@@ -193,6 +231,8 @@ export const TurnBlock = z.discriminatedUnion('type', [
     result: z.number().int(),
     /** Cada dado por separado (dos con ventaja o desventaja, varios en 2d6): para pintar las caras. */
     rolls: z.array(z.number().int()).optional(),
+    /** La pidio el DM y la resolvio la API (no una tirada rapida ni el motor). Opcional: no sube la version. */
+    requested: z.literal(true).optional(),
   }),
   z.strictObject({
     type: z.literal('system'),
@@ -355,6 +395,12 @@ export const ResolveLine = z.discriminatedUnion('kind', [
      * no sube la version.
      */
     suggestions: z.record(KebabId, z.array(z.string().min(1).max(120)).max(2)).optional(),
+    /**
+     * Tiradas que el DM pidio para el turno que viene (modos `dice` y
+     * `table`): esos personajes tiran en vez de escribir. Opcional: no sube
+     * la version.
+     */
+    rollRequests: z.array(RollRequest).optional(),
   }),
   z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
 ])

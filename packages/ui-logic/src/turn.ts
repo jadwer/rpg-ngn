@@ -48,7 +48,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text }
     case 'roll': {
       const actor = block.actor ? (block.actor.includes(':') ? resolve(block.actor, null) : resolve(null, block.actor)) : null
-      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text }
+      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text, ...(block.requested ? { requested: true } : {}) }
     }
     case 'system':
       // Titulo y puntos: los usa la apertura de sesion (briefing y "como se juega" del pack).
@@ -77,6 +77,14 @@ export interface Viewer {
   characterId: string | null
 }
 
+/** La tirada que el DM pidio a quien mira, tal como la manda `state.rolls.pending`. */
+export interface PendingRoll {
+  die: string
+  kind: string
+  skill?: string | undefined
+  reason?: string | undefined
+}
+
 export interface TurnProgress {
   /** Interpelados que faltan (`required` menos `responded`). */
   pending: string[]
@@ -86,8 +94,14 @@ export interface TurnProgress {
   complete: boolean
   /** `closing` o `resolving`: el DM esta narrando. */
   narrating: boolean
-  /** El que mira puede escribir: turno abierto, tiene personaje y no ha respondido. */
+  /** El que mira puede escribir: turno abierto, tiene personaje, no ha respondido y no le toca tirar. */
   canRespond: boolean
+  /**
+   * Le toca tirar, no escribir: el DM pidio una tirada a su personaje y ese
+   * es su turno entero (Gabino, 25-09: "si el turno solo exige tirada, no
+   * habilites el input"). Null si no hay tirada pendiente o ya respondio.
+   */
+  mustRoll: PendingRoll | null
   /** Ya respondio en este turno. */
   hasResponded: boolean
   /** Cualquiera cierra cuando estan todas las obligatorias (docs/09). */
@@ -96,21 +110,23 @@ export interface TurnProgress {
   canForceClose: boolean
 }
 
-export function turnProgress(turn: TurnSummary | null, viewer: Viewer): TurnProgress {
+export function turnProgress(turn: TurnSummary | null, viewer: Viewer, pendingRoll: PendingRoll | null = null): TurnProgress {
   if (!turn) {
-    return { pending: [], responded: [], complete: false, narrating: false, canRespond: false, hasResponded: false, canClose: false, canForceClose: false }
+    return { pending: [], responded: [], complete: false, narrating: false, canRespond: false, mustRoll: null, hasResponded: false, canClose: false, canForceClose: false }
   }
   const responded = new Set(turn.responded)
   const pending = turn.required.filter((id) => !responded.has(id))
   const open = turn.status === 'open'
   const complete = pending.length === 0
   const hasResponded = viewer.characterId !== null && responded.has(viewer.characterId)
+  const mustRoll = open && viewer.characterId !== null && !hasResponded ? pendingRoll : null
   return {
     pending,
     responded: [...turn.responded],
     complete,
     narrating: turn.status === 'closing' || turn.status === 'resolving',
-    canRespond: open && viewer.characterId !== null && !hasResponded,
+    canRespond: open && viewer.characterId !== null && !hasResponded && mustRoll === null,
+    mustRoll,
     hasResponded,
     canClose: open && complete,
     canForceClose: open && !complete && viewer.role === 'host',
@@ -122,8 +138,14 @@ export function turnStatusLine(turn: TurnSummary | null, progress: TurnProgress,
   if (!turn) return 'No hay turno abierto.'
   if (progress.narrating) return 'El DM está narrando...'
   if (turn.status === 'resolved') return 'Turno resuelto.'
+  if (progress.mustRoll) return `Te toca tirar ${rollLabel(progress.mustRoll)}.`
   if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa: cierra el turno y el DM narra.' : 'Todos respondieron: cierra el turno y el DM narra.'
   return `Faltan por responder: ${progress.pending.map(nameOf).join(', ')}.`
+}
+
+/** "1d20 de Percepción", o solo el dado si la tirada no lleva habilidad. */
+export function rollLabel(roll: PendingRoll): string {
+  return roll.skill ? `${roll.die} de ${roll.skill}` : roll.die
 }
 
 /** La frase con el numero de turno delante, como la muestran las dos apps. */

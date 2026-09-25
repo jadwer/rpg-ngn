@@ -69,6 +69,18 @@ describe('turnProgress', () => {
     expect(calder).toMatchObject({ canRespond: false, hasResponded: true, canClose: false })
   })
 
+  it('con tirada pedida le toca tirar, no escribir; en cuanto responde (tiro), ya no', () => {
+    const roll = { die: '1d20', kind: 'skill', skill: 'Percepción' }
+    const zahira = turnProgress(open, { role: 'player', characterId: 'zahira' }, roll)
+    expect(zahira).toMatchObject({ canRespond: false, mustRoll: roll, hasResponded: false })
+    expect(turnStatusLine(open, zahira, nameOf)).toBe('Te toca tirar 1d20 de Percepción.')
+    // Ya respondio (la API registro la tirada como su respuesta): no hay nada pendiente.
+    const calder = turnProgress(open, { role: 'player', characterId: 'calder' }, roll)
+    expect(calder).toMatchObject({ canRespond: false, mustRoll: null, hasResponded: true })
+    // Sin peticion, como siempre.
+    expect(turnProgress(open, { role: 'player', characterId: 'zahira' }).mustRoll).toBeNull()
+  })
+
   it('el DM sin personaje no responde pero puede forzar el cierre con faltantes', () => {
     const dm = turnProgress(open, { role: 'host', characterId: null })
     expect(dm).toMatchObject({ canRespond: false, canClose: false, canForceClose: true })

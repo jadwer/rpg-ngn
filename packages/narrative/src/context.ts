@@ -410,7 +410,18 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
     lines.push('Declaraciones de este turno:')
     for (const response of turn.responses) {
       const name = pack.characters.get(response.characterId)?.name ?? response.characterId
-      lines.push(`- ${name} (character:${response.characterId})${response.late ? ' [llegó tarde, del turno anterior]' : ''}: ${clip(response.text, 4000)}`)
+      const late = response.late ? ' [llegó tarde, del turno anterior]' : ''
+      if (response.roll) {
+        // La tirada que el DM pidio, ya registrada por la API cuando el
+        // jugador solto el dado: ahora toca narrar su consecuencia, no
+        // volver a tirarla.
+        const r = response.roll
+        const skill = r.skill ? ` (${r.skill})` : ''
+        const edge = r.die.startsWith('1d20') && r.result === 20 ? ' Es un 20: brilla.' : r.die.startsWith('1d20') && r.result === 1 ? ' Es un 1: falla feo.' : ''
+        lines.push(`- ${name} (character:${response.characterId})${late} tiró ${r.die}${skill} cuando se lo pediste: ${r.result}.${edge} Ya está registrada: narra ahora su consecuencia y no emitas "roll" para esta acción.`)
+        continue
+      }
+      lines.push(`- ${name} (character:${response.characterId})${late}: ${clip(response.text, 4000)}`)
     }
   }
   const silent = party.filter((id) => !turn.responses.some((r) => r.characterId === id))

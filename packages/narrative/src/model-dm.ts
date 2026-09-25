@@ -1,6 +1,6 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId, refKind } from '@rpg-ngn/content'
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
-import { TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
+import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
@@ -256,6 +256,17 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('recap'), text: z.string() }),
   z.object({ kind: z.literal('where'), location: z.string(), characterIds: z.array(z.string()).optional() }),
   z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
+  // `rollKind` y no `kind`: la clave `kind` ya es la de la linea.
+  z.object({
+    kind: z.literal('ask_roll'),
+    characterId: z.string(),
+    die: z.string().optional(),
+    rollKind: z.string().optional(),
+    skill: z.string().optional(),
+    reason: z.string().optional(),
+    advantage: z.boolean().optional(),
+    disadvantage: z.boolean().optional(),
+  }),
 ])
 
 /**
@@ -313,7 +324,7 @@ export class ModelDMProvider implements DMProvider {
     }
 
     const prompt: ModelPrompt = {
-      system: systemPromptFor(ctx.rulesetId, compact),
+      system: systemPromptFor(ctx.rulesetId, compact, diceMode),
       user: built.user + fortuneNote,
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
@@ -390,8 +401,14 @@ export class ModelDMProvider implements DMProvider {
     }
 
     if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
-    if (Object.keys(interpreter.suggestions).length) yield { kind: 'suggestions', byCharacter: interpreter.suggestions }
-    yield { kind: 'addressed', characterIds: interpreter.addressed ?? party }
+    // Quien tiene tirada pedida tira en vez de escribir: sin ideas para el, y
+    // siempre con la palabra (aunque el modelo lo olvidara en "addressed").
+    const requests = Object.values(interpreter.rollRequests)
+    const suggestions = Object.fromEntries(Object.entries(interpreter.suggestions).filter(([id]) => !interpreter.rollRequests[id]))
+    if (Object.keys(suggestions).length) yield { kind: 'suggestions', byCharacter: suggestions }
+    if (requests.length) yield { kind: 'rollRequests', requests }
+    const addressed = interpreter.addressed ?? party
+    yield { kind: 'addressed', characterIds: [...addressed, ...requests.map((r) => r.characterId).filter((id) => !addressed.includes(id))] }
     yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
   }
 
@@ -469,9 +486,43 @@ class LineInterpreter {
   /** Quien se movio este turno por un evento `move`, para que `where` no lo repita. */
   private moved = new Set<string>()
 
+  /** Un `roll` de los modos donde tira el jugador, pendiente de que `playerRoll` decida (ver `event()`). */
+  private pendingPlayerRoll: { event: ProposedEvent & { actor: string; resolved: Record<string, unknown> }; witnesses: string[] } | null = null
+
   private ignore(): void {
     this.ignored++
     if (this.current && this.ignoredLines.length < 5) this.ignoredLines.push(this.current.slice(0, 240))
+  }
+
+  /** Tiradas pedidas este turno, una por personaje (modos `dice` y `table`). */
+  rollRequests: Record<string, RollRequest> = {}
+
+  /**
+   * Pide una tirada a un personaje de la party. Devuelve false si no se
+   * puede (personaje ausente, dado mal formado). La primera peticion por
+   * personaje manda; un `reason` o `skill` que cuente un secreto se corta.
+   */
+  private *requestRoll(raw: { characterId: string; die?: string | undefined; rollKind?: string | undefined; skill?: string | undefined; reason?: string | undefined; advantage?: boolean | undefined; disadvantage?: boolean | undefined }): Generator<DMOutput, boolean> {
+    const id = refId(raw.characterId)
+    if (!this.party.includes(id)) return false
+    if (this.rollRequests[id]) return true
+    const kind = RollKind.safeParse(raw.rollKind)
+    const skill = raw.skill?.trim().slice(0, 60)
+    const reason = raw.reason?.trim().replace(/\s+/g, ' ').slice(0, 160)
+    const parsed = RollRequest.safeParse({
+      characterId: id,
+      die: raw.die?.trim() || '1d20',
+      kind: kind.success ? kind.data : 'other',
+      ...(skill ? { skill } : {}),
+      ...(reason ? { reason } : {}),
+      ...(raw.advantage && !raw.disadvantage ? { advantage: true } : {}),
+      ...(raw.disadvantage && !raw.advantage ? { disadvantage: true } : {}),
+    })
+    if (!parsed.success) return false
+    const cut = yield* this.lint([skill, reason].filter(Boolean).join('. '))
+    const request = cut ? { characterId: parsed.data.characterId, die: parsed.data.die, kind: parsed.data.kind } : parsed.data
+    this.rollRequests[id] = request
+    return true
   }
   addressed: string[] | null = null
   /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
@@ -601,11 +652,7 @@ class LineInterpreter {
         yield* this.block(block.data)
         return
       }
-      const event = this.event(parsed)
-      if (event) {
-        yield* this.emitEvent(event)
-        return
-      }
+      if (yield* this.emitProposed(parsed)) return
       // `{"kind":"dialogue","speaker":...}` en vez de
       // `{"kind":"block","block":{"type":"dialogue",...}}`: el modelo usa el
       // tipo de bloque como `kind`, que es la abreviacion natural. Se
@@ -617,11 +664,7 @@ class LineInterpreter {
       // tirada que pedia el movimiento se perdio por esto).
       const withEvent = parsed as { event?: unknown }
       if (withEvent && typeof withEvent === 'object' && withEvent.event && typeof withEvent.event === 'object') {
-        const wrapped = this.event(withEvent.event)
-        if (wrapped) {
-          yield* this.emitEvent(wrapped)
-          return
-        }
+        if (yield* this.emitProposed(withEvent.event)) return
       }
       const asKind = parsed as { kind?: unknown }
       if (asKind && typeof asKind === 'object' && typeof asKind.kind === 'string') {
@@ -647,12 +690,7 @@ class LineInterpreter {
         return
       }
       case 'event': {
-        const event = this.event(line.data.event)
-        if (!event) {
-          this.ignore()
-          return
-        }
-        yield* this.emitEvent(event)
+        if (!(yield* this.emitProposed(line.data.event))) this.ignore()
         return
       }
       case 'addressed': {
@@ -703,6 +741,17 @@ class LineInterpreter {
         if (cut) return
         this.blocks++
         yield { kind: 'block', block: { type: 'system', title: 'Anteriormente...', text, audience: 'table', tone: 'info', recap: true } }
+        return
+      }
+      case 'ask_roll': {
+        // El DM pide la tirada y no narra su consecuencia: el jugador la
+        // suelta desde la mesa (modo `dice`) o escribe su numero (`table`).
+        // Con el motor tirando no tiene sentido: ya tiro antes de llamar.
+        if (this.diceMode === 'engine') {
+          this.ignore()
+          return
+        }
+        if (!(yield* this.requestRoll(line.data))) this.ignore()
         return
       }
       case 'scene': {
@@ -802,6 +851,58 @@ class LineInterpreter {
     yield { kind: 'event', event }
   }
 
+  /**
+   * Un evento `roll` en los modos donde el jugador tira (`dice`, `table`).
+   * Devuelve el evento si vale, o null tras decidir que hacer con el: la
+   * tirada que la API ya registro como respuesta se calla sin contar; la que
+   * el DM pide sin numero se vuelve peticion; y el numero que el DM invento
+   * (mesa 39, 25-09) tambien se vuelve peticion, pero se le cuenta al
+   * anfitrion, porque la narracion que la mesa leyo ya lo dio por bueno.
+   */
+  private *playerRoll(event: ProposedEvent & { actor: string; resolved: Record<string, unknown> }, witnesses: string[]): Generator<DMOutput, ProposedEvent | true | null> {
+    const actorId = refId(event.actor)
+    const resolved = event.resolved as { result?: number; source?: string; die: string; kind: string; skill?: string; advantage?: boolean; disadvantage?: boolean; modifier?: number }
+    const response = this.ctx.turn.responses.find((r) => r.characterId === actorId)
+    const ask = { characterId: actorId, die: resolved.die, rollKind: resolved.kind, skill: resolved.skill, advantage: resolved.advantage, disadvantage: resolved.disadvantage }
+    if (response?.roll) {
+      // Ya esta en la cronica: la registro la API cuando el jugador solto el dado.
+      return true
+    }
+    if (resolved.result === undefined) {
+      return (yield* this.requestRoll(ask)) ? true : null
+    }
+    if (this.diceMode === 'table' && response && new RegExp(`(?<![\\d])${resolved.result}(?![\\d])`).test(response.text)) {
+      const { result, source: _source, advantage: _a, disadvantage: _d, ...rest } = resolved
+      return { ...event, resolved: { ...rest, result, source: 'physical' }, visibility: { layer: 'campaign', witnesses } }
+    }
+    // Un numero que nadie tiro. Se pide la tirada de verdad y se avisa.
+    if (!(yield* this.requestRoll(ask))) return null
+    if (this.ignoredLines.length < 5) this.ignoredLines.push(`El DM inventó un ${resolved.result} y se le pidió la tirada al jugador: ${this.current.slice(0, 200)}`)
+    this.ignored++
+    return true
+  }
+
+  /**
+   * Valida y emite un evento propuesto. Devuelve true si la linea quedo
+   * atendida (emitida, o convertida en peticion de tirada) y false si hay
+   * que ignorarla. Es el unico camino para los `roll` de los modos `dice` y
+   * `table`, porque decidirlos puede emitir (el lint de la peticion).
+   */
+  private *emitProposed(raw: unknown): Generator<DMOutput, boolean> {
+    const event = this.event(raw)
+    if (event) {
+      yield* this.emitEvent(event)
+      return true
+    }
+    const pending = this.pendingPlayerRoll
+    if (!pending) return false
+    this.pendingPlayerRoll = null
+    const decided = yield* this.playerRoll(pending.event, pending.witnesses)
+    if (decided === true || decided === null) return decided === true
+    yield* this.emitEvent(decided)
+    return true
+  }
+
   /** Valida forma y sentido del evento contra el estado; null si no se puede aplicar. */
   private event(raw: unknown): ProposedEvent | null {
     const parsed = this.allowed.safeParse(raw)
@@ -816,6 +917,12 @@ class LineInterpreter {
       case 'roll': {
         const actorId = refId(event.actor)
         if (!present(event.actor)) return null
+        if (this.diceMode !== 'engine') {
+          // Lo decide `playerRoll`, que necesita emitir (lint de la peticion):
+          // `event()` es sincrono, asi que se deja marcado y `emitProposed` lo recoge.
+          this.pendingPlayerRoll = { event: event as ProposedEvent & { actor: string; resolved: Record<string, unknown> }, witnesses }
+          return null
+        }
         const { result, source: _source, advantage, disadvantage, ...rest } = event.resolved
         // El d20 que el motor ya tiro para ese personaje este turno: el DM lo
         // devuelve tal cual y narra su consecuencia ahora. Solo vale una vez y

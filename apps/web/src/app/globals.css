@@ -2887,6 +2887,115 @@ a.plain {
   padding: 4px 0;
 }
 
+/* La tirada que pide el DM: en vez del cuadro, el dado de la lamina (25-09). */
+.turn .roll-card {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 8px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+}
+.turn .roll-card .text {
+  flex: 1;
+  min-width: 180px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+.turn .roll-card .error {
+  flex-basis: 100%;
+}
+
+/* El dado con caras de la lamina: se mantiene presionado y frena sobre el numero. */
+.sprite-die {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  font: 600 0.8rem var(--font-sans, system-ui);
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.sprite-die .faces {
+  display: flex;
+  gap: 6px;
+}
+.sprite-die .sprite {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.12s ease;
+}
+.sprite-die.large .sprite {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+}
+.sprite-die .generic {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(160deg, #2a2338, #120f1c);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--gold-bright);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+.sprite-die.large .generic {
+  width: 96px;
+  height: 96px;
+  font-size: 2.4rem;
+}
+.sprite-die.rolling .sprite,
+.sprite-die.rolling .generic {
+  animation: die-shake 0.14s linear infinite;
+}
+.sprite-die.landed .sprite,
+.sprite-die.landed .generic {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px var(--gold-bright), 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+.sprite-die .total {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--gold-bright);
+}
+.sprite-die .label {
+  color: var(--ink-dim);
+}
+.sprite-die:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+@keyframes die-shake {
+  0% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-2px);
+  }
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+}
+
 /* La Fortuna de la sesion: un dado grande que tira el jugador. */
 .turn .fortune {
   display: flex;

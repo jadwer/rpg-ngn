@@ -1,5 +1,6 @@
 import type { Friendship, MemberRole, SessionSummary, TableMember, TableSummary } from '@rpg-ngn/api-client'
 import type { Character, LoadedPack } from '@rpg-ngn/content'
+import type { DiceMode } from './dice-mode.js'
 import { packCharacters } from './pack.js'
 
 /**
@@ -175,13 +176,19 @@ export interface StartCard {
  * decia "turno, esperando a todos"; nadie sabia por donde empezar. Con
  * sesion abierta no hay tarjeta: la narracion manda.
  */
-export function startCard(input: { hasSession: boolean; host: boolean; hostName: string | null; nextCode: string; firstSession: boolean; dice: 'engine' | 'table' }): StartCard | null {
+const DICE_STEP: Record<DiceMode, string> = {
+  engine: 'Los dados los tira el servidor: si tu acción tiene riesgo, el resultado sale en la narración.',
+  dice: 'Si tu acción tiene riesgo, el director te pide tirar: sueltas el dado en la mesa y el número lo pone el servidor.',
+  table: 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
+}
+
+export function startCard(input: { hasSession: boolean; host: boolean; hostName: string | null; nextCode: string; firstSession: boolean; dice: DiceMode }): StartCard | null {
   if (input.hasSession) return null
   const host = input.hostName ?? 'el anfitrión'
   const steps = [
     'El DM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el DM narra.',
     'Cuando todos hayan respondido, el anfitrión cierra el turno y el DM narra las consecuencias.',
-    input.dice === 'engine' ? 'Los dados los tira el servidor: si tu acción tiene riesgo, el resultado sale en la narración.' : 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
+    DICE_STEP[input.dice],
     'Si te tienes que ir, pulsa "Me tengo que ir": el DM aparta a tu personaje sin matarlo y la mesa no te espera.',
   ]
   if (input.host) {

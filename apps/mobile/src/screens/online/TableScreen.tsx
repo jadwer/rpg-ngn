@@ -186,7 +186,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
   const veilTop = Math.round(windowHeight * (composing ? Math.min(veilRatio, 0.12) : veilRatio))
   const tts = useTts(blocks, { autoRead: true })
-  const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
+  const pendingRoll = snapshot?.rolls?.pending ?? null
+  const progress = useMemo(() => turnProgress(turn, viewer, pendingRoll), [turn, viewer, pendingRoll])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
 
   // Cuenta atras cancelable antes de narrar (docs/18, D-UX-6), igual que en la
@@ -228,6 +229,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
 
   const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
+  // La tirada que pidio el DM: el numero lo pone el servidor y queda como la respuesta del turno.
+  const rollTurnId = turn?.id ?? null
+  const rollRequested = useCallback(async () => {
+    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    const receipt = await client.rollRequested(rollTurnId)
+    return { result: receipt.result, rolls: receipt.rolls }
+  }, [client, rollTurnId])
 
   // Quien esta, quien escribe, quien respondio y quien se tuvo que ir.
   const seatList = useMemo(
@@ -667,7 +675,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           <Text style={styles.screenExitText}>Salir de pantalla</Text>
         </Pressable>
       ) : null}
-      {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
+      {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
       {screen ? null : <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />}
 
       {maps.length > 0 ? (
