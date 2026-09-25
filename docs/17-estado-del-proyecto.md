@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-24, noche CST**. Rama `dev`, commit `ade5205`; API `777a7ee` con platform `d95a210`.
+Fecha de corte: **2026-09-25, tarde CST**. Rama `dev`, commit `610b9a3`; API `1ec50ce` con platform `12d82aa`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -195,6 +195,29 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   de DKIM/SPF/DMARC: dominio de horas, firma "rpg-ngn" y plantilla en ingles.
   Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
   llego bien.
+
+### Primera sesion de prueba y primer APK (25-09)
+
+- **Mesa 39 (piloto, 10 turnos):** el DM narraba los movimientos sin emitir
+  `move`, asi que para el motor la party nunca salio de la posada: sin imagen
+  de cambio de lugar y con el lint marcando cada lugar como no presenciado.
+  Ahora cada turno termina con `where` (el motor mueve a la party) y `scene`
+  (la API ilustra una cada 3 turnos); el aviso de lineas ignoradas dice
+  cuales, y una tirada con `"kind":"roll"` se entiende igual.
+- **Mesa:** la narracion nueva se lee desde su inicio, el cuadro de respuesta
+  solo se abre al bajar leyendo, la Fortuna se pliega con el, el panel de
+  texto se arrastra (web y app) y la app tiene pantalla de lectura. Crear
+  mesa ofrece y preselecciona la clave propia.
+- **APK local** (`com.adastramentis.app`, v3): SDK de Android y JDK 17 en la
+  WSL, llave de subida respaldada. El v2 se cerraba al tirar un dado: Hermes
+  release no trae `crypto.getRandomValues`; ya no depende de el.
+- **Stripe antes de live:** se acredita lo pagado aunque el paquete cambie,
+  saldo bloqueado al acreditar, claves fuera de los logs, BYOK que no se
+  descifra vuelve a la del servidor, firma invalida registrada, checklist en
+  `deploy/README.md`. La cuenta espera su validacion (telefono, constancia
+  fiscal, biometria).
+- **CI de Atomo:** auth, user y payments se prueban en el CI de GitHub de la
+  API (no hay MicroServer para el runner de Gitea).
 
 ### Historia ilustrada, Entrega 10 (24-09, noche)
 

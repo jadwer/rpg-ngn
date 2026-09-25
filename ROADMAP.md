@@ -460,6 +460,10 @@ app, idiomas y pulido (sin fecha).
 
 ## Pendientes del 25-09
 
+- [ ] **Claves de imagen rotadas**: Gabino creo claves nuevas de Gemini y OpenAI pero el servidor sigue con las viejas (que siguen activas). Subirlas con `read -rs` a `/root/.rpg/`, pasarlas al `.env` y revocar las viejas
+- [ ] **Stripe en real**: la cuenta espera la validacion de telefono, constancia fiscal y biometria; al quedar "Completo", seguir la lista de `rpg-ngn-api/deploy/README.md` y decidir USD o MXN
+- [ ] **Verificar en el telefono** (APK v3): dado sin cierre, arrastre del panel, pantalla de lectura, y que las imagenes salgan cada 3 turnos con `where`/`scene`
+
 - [ ] **Hero vertical para moviles** (Gabino, 25-09, visto en el APK): en el telefono la altura del hero es correcta pero no se ve nada de los mundos; hace falta una segunda version de la ilustracion en vertical y servirla por tamaño de pantalla (web y app)
 - [x] **Primer APK** (25-09): `com.adastramentis.app` 0.1.0, compilado en la WSL (ver memoria `apk-local`), firmado con la llave de subida respaldada en el disco E:; instalado y corriendo en el telefono de Gabino
 
