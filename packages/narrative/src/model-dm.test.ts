@@ -378,6 +378,25 @@ describe('ModelDMProvider', () => {
     expect(later.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.recap)).toBe(false)
   })
 
+  it('where mueve a la party aunque el DM no emita el move, sin repetirlo ni inventar lugares', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"block","block":{"type":"narration","text":"Bajan juntos por el camino embarrado."}}',
+      '{"kind":"event","event":{"type":"state_change","effects":[{"op":"move","who":"character:calder","to":"camino-a-la-mina"}]}}',
+      '{"kind":"where","location":"location:camino-a-la-mina"}',
+      '{"kind":"where","location":"el-castillo-que-no-existe"}',
+    ].join('\n')
+    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Vamos a la mina.')]))))
+    const moves = outputs
+      .filter((o) => o.kind === 'event' && o.event['type'] === 'state_change')
+      .flatMap((o) => (o.kind === 'event' ? (o.event['effects'] as Array<{ who: string; to: string }>) : []))
+    // Calder ya se movio con su evento; zahira la mueve `where`; nadie dos veces.
+    expect(moves.map((m) => `${m.who}>${m.to}`).sort()).toEqual(['character:calder>camino-a-la-mina', 'character:zahira>camino-a-la-mina'])
+    // El lugar inventado se ignora, y el anfitrion ve cual fue.
+    const notice = outputs.find((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('se ignoró'))
+    expect(notice?.kind === 'block' && notice.block.type === 'system' && notice.block.detail).toContain('el-castillo-que-no-existe')
+  })
+
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)

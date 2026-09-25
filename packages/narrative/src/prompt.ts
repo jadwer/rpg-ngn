@@ -65,7 +65,9 @@ Responde SOLO con líneas NDJSON: un objeto JSON por línea, sin texto fuera de 
 
 La línea "addressed" va al final y lista los ids de los personajes a los que devuelves la palabra (los que deben responder el próximo turno). Si la escena está abierta para todos, lista a toda la party.
 
-Opcional, como mucho una vez por turno y no en todos: cuando pase algo que se vería bien ilustrado (una llegada, una revelación, un encuentro, un peligro), añade antes de "addressed" una línea {"kind":"scene","text":"..."} con una frase de lo que se ve: lugar, quién está y qué hace, luz y ambiente. Sin nombres de obras reales, sin texto escrito en la imagen y sin revelar nada que la mesa no sepa.
+Siempre, antes de "addressed", estas dos líneas:
+- {"kind":"where","location":"<id>"}: el id del lugar (de la lista de lugares) donde termina la escena. Si la party se movió, el motor la mueve; si no, repite donde está. Si el grupo se separa, una línea por subgrupo con "characterIds".
+- {"kind":"scene","text":"..."}: una frase con la imagen más representativa de este turno: lugar, quién está y qué hace, luz y ambiente. Sin nombres de obras reales, sin texto escrito en la imagen y sin revelar nada que la mesa no sepa. El motor decide cuándo se dibuja.
 
 Justo antes de "addressed", una línea {"kind":"suggest","characterId":"zahira","options":["...","..."]} por cada personaje al que devuelves la palabra: dos cosas que ese personaje podría intentar ahora, en primera persona y en menos de 12 palabras cada una, distintas entre sí (una prudente, una atrevida) y basadas solo en lo que ese personaje sabe. Son ideas para quien no sabe qué hacer, no un menú: el jugador puede escribir cualquier otra cosa.
 
@@ -136,7 +138,7 @@ Formato: responde SOLO con líneas JSON, una por línea, sin texto fuera ni bloq
 {"kind":"block","block":{"type":"dialogue","speaker":"Tomás","speakerRef":"npc:tomas","text":"..."}}
 {"kind":"event","event":{...}}
 {"kind":"addressed","characterIds":["zahira","calder"]}
-La última línea es "addressed" con los ids de quienes deben responder ahora. Opcional, como mucho una por turno: {"kind":"scene","text":"..."} antes de "addressed", con una frase de lo que se ve cuando la escena merece ilustración (sin texto escrito ni secretos). Y antes de "addressed", por cada personaje al que devuelves la palabra: {"kind":"suggest","characterId":"<id>","options":["...","..."]}, dos acciones cortas en primera persona (una prudente, una atrevida) según lo que ese personaje sabe.
+La última línea es "addressed" con los ids de quienes deben responder ahora. Siempre, antes de "addressed": {"kind":"where","location":"<id del lugar donde termina la escena>"} y {"kind":"scene","text":"..."} con una frase de la imagen más representativa del turno (sin texto escrito ni secretos). Y antes de "addressed", por cada personaje al que devuelves la palabra: {"kind":"suggest","characterId":"<id>","options":["...","..."]}, dos acciones cortas en primera persona (una prudente, una atrevida) según lo que ese personaje sabe.
 
 Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos ya se registran solos):
 {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}

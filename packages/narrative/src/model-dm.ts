@@ -254,6 +254,7 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('addressed'), characterIds: z.array(z.string()) }),
   z.object({ kind: z.literal('scene'), text: z.string() }),
   z.object({ kind: z.literal('recap'), text: z.string() }),
+  z.object({ kind: z.literal('where'), location: z.string(), characterIds: z.array(z.string()).optional() }),
   z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
 ])
 
@@ -381,7 +382,9 @@ export class ModelDMProvider implements DMProvider {
           type: 'system',
           text: `El DM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.`,
           ...HOST_NOTICE,
-          detail: 'Suele ser un evento con un personaje que no está en la sesión, un objeto que nadie tiene o una tirada mal formada. La narración que leyó la mesa no cambia y no hay nada que hacer.',
+          // Cuales fueron, recortadas: sin esto no habia forma de saber que se
+          // rechazaba (mesa 39, 25-09). Solo lo ve el anfitrion.
+          detail: `Suele ser un evento con un personaje que no está en la sesión, un objeto que nadie tiene o una tirada mal formada. La narración que leyó la mesa no cambia y no hay nada que hacer.${interpreter.ignoredLines.length ? `\n\n${interpreter.ignoredLines.join('\n')}` : ''}`,
         },
       }
     }
@@ -459,6 +462,17 @@ class LineInterpreter {
   lastWasCut: boolean
   blocks = 0
   ignored = 0
+  /** Las lineas ignoradas, recortadas, para que el anfitrion vea cuales fueron. */
+  ignoredLines: string[] = []
+  /** La linea que se esta interpretando. */
+  private current = ''
+  /** Quien se movio este turno por un evento `move`, para que `where` no lo repita. */
+  private moved = new Set<string>()
+
+  private ignore(): void {
+    this.ignored++
+    if (this.current && this.ignoredLines.length < 5) this.ignoredLines.push(this.current.slice(0, 240))
+  }
   addressed: string[] | null = null
   /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
   scene: string | null = null
@@ -500,6 +514,7 @@ class LineInterpreter {
 
   *line(rawLine: string): Generator<DMOutput> {
     const text = rawLine.trim()
+    this.current = text
     // Fences de markdown y etiquetas sueltas (`<json>`, `</output>`) con las
     // que algunos modelos envuelven la salida: no son ni bloque ni evento.
     if (text === '' || text.startsWith('```') || /^<\/?[a-z][\w-]*>$/i.test(text)) return
@@ -520,7 +535,7 @@ class LineInterpreter {
     if (/^[{[]/.test(text)) {
       const scanned = scanJson(text, 0)
       if (scanned.inString) {
-        this.ignored++
+        this.ignore()
         return
       }
       if (scanned.depth > 0) {
@@ -534,7 +549,7 @@ class LineInterpreter {
       for (const piece of pieces) {
         const parsed = parseLoose(piece)
         if (parsed !== undefined) yield* this.items(parsed)
-        else this.ignored++
+        else this.ignore()
       }
       return
     }
@@ -558,12 +573,12 @@ class LineInterpreter {
     const parsed = parseLoose(this.pending?.text ?? '')
     this.pending = null
     if (parsed !== undefined) yield* this.items(parsed)
-    else this.ignored++
+    else this.ignore()
   }
 
   private dropPending(): void {
     this.pending = null
-    this.ignored++
+    this.ignore()
   }
 
   private *items(parsed: unknown): Generator<DMOutput> {
@@ -606,7 +621,7 @@ class LineInterpreter {
           return
         }
       }
-      this.ignored++
+      this.ignore()
       return
     }
 
@@ -614,7 +629,7 @@ class LineInterpreter {
       case 'block': {
         const block = TurnBlock.safeParse(line.data.block)
         if (!block.success) {
-          this.ignored++
+          this.ignore()
           return
         }
         yield* this.block(block.data)
@@ -623,7 +638,7 @@ class LineInterpreter {
       case 'event': {
         const event = this.event(line.data.event)
         if (!event) {
-          this.ignored++
+          this.ignore()
           return
         }
         yield* this.emitEvent(event)
@@ -648,6 +663,24 @@ class LineInterpreter {
           if (options.length === 2) break
         }
         if (options.length) this.suggestions[id] = options
+        return
+      }
+      case 'where': {
+        // Donde termina la escena (obligatorio cada turno). El modelo narra
+        // que la party camina a la mina y casi nunca emite el `move` (mesa 39,
+        // 25-09: nueve turnos sin moverse de la posada para el motor). Esta
+        // linea es tan simple como `addressed` y el motor la vuelve `move`.
+        const location = line.data.location.replace(/^location:/, '')
+        if (!this.ctx.pack.locations.has(location)) {
+          this.ignore()
+          return
+        }
+        const ids = (line.data.characterIds?.map((id) => refId(id)) ?? this.party).filter((id) => this.party.includes(id))
+        for (const id of ids) {
+          if (this.moved.has(id) || this.ctx.state.world.characters[id]?.location === location) continue
+          const event = this.event({ type: 'state_change', effects: [{ op: 'move', who: `character:${id}`, to: location }] })
+          if (event) yield* this.emitEvent(event)
+        }
         return
       }
       case 'recap': {
@@ -717,6 +750,11 @@ class LineInterpreter {
    * como conocido para el resto del turno: el DM lo revelo a proposito.
    */
   private *emitEvent(event: ProposedEvent): Generator<DMOutput> {
+    if (event['type'] === 'state_change' || event['type'] === 'world_event') {
+      for (const effect of (event['effects'] as Array<Record<string, unknown>> | undefined) ?? []) {
+        if (effect['op'] === 'move' && typeof effect['who'] === 'string') this.moved.add(refId(effect['who']))
+      }
+    }
     if (event['type'] === 'world_event') {
       const note = (event['payload'] as { note: string }).note
       const cut = yield* this.lint(note)
