@@ -32,7 +32,13 @@ export function packSpeakerResolver(pack: LoadedPack | null): SpeakerResolver {
   }
 }
 
-export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolver): TurnBlock {
+/**
+ * Un bloque de la API en bloque de ui-logic, o null si es de un tipo que este
+ * cliente no conoce. Una API mas nueva que la app (un APK viejo, o Metro con
+ * cache vieja) manda tipos nuevos, como `image` el 24-09: se ignoran en vez de
+ * tumbar la mesa.
+ */
+export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolver): TurnBlock | null {
   const id = apiBlockId(envelope.id)
   const block = envelope.block
   switch (block.type) {
@@ -49,11 +55,13 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'system', id, title: block.title ?? null, text: block.text, items: block.items ? [...block.items] : [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null, ...(block.recap ? { recap: true } : {}) }
     case 'image':
       return { kind: 'image', id, url: block.url, alt: block.alt, caption: block.caption ?? null }
+    default:
+      return null
   }
 }
 
 export function blocksFromApi(envelopes: readonly ApiBlockEnvelope[], resolve: SpeakerResolver): TurnBlock[] {
-  return envelopes.map((envelope) => blockFromApi(envelope, resolve))
+  return envelopes.map((envelope) => blockFromApi(envelope, resolve)).filter((block): block is TurnBlock => block !== null)
 }
 
 /** Lo que el cuadro de respuesta necesita saber del turno; coincide con `TurnView` de api-client. */
