@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-25, tarde CST**. Rama `dev`, commit `610b9a3`; API `1ec50ce` con platform `12d82aa`.
+Fecha de corte: **2026-09-25, 18:00 CST**. Rama `dev`, commit `3c0301d`; API `23fde12` con platform `12d82aa`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
