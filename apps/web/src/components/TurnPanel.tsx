@@ -247,7 +247,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             </button>
           ) : null}
           {progress.canForceClose ? (
-            <button type="button" className="btn ghost" onClick={() => onClose(true)} disabled={busy} title="Solo el anfitrión: cierra aunque falte alguien">
+            <button type="button" className="btn ghost small force-close" onClick={() => onClose(true)} disabled={busy} title="Solo el anfitrión: cierra aunque falte alguien">
               Forzar cierre
             </button>
           ) : null}

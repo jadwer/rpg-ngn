@@ -2780,6 +2780,15 @@ a.plain {
   font-size: 0.88rem;
 }
 
+/* Forzar cierre: accion rara del anfitrion, pequeña (Gabino, 24-09). */
+.turn .force-close {
+  padding: 4px 10px;
+  font-family: var(--font-sans, system-ui);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* Volver a plegar el cuadro abierto por error. */
 .turn .compose-hide {
   display: block;

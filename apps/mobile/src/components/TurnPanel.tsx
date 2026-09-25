@@ -216,7 +216,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
         <View style={styles.actions}>
           {progress.canClose ? <Button label="Cerrar turno y narrar" onPress={() => onClose(false)} busy={busy} /> : null}
-          {progress.canForceClose ? <Button label="Forzar cierre (anfitrión)" onPress={() => onClose(true)} busy={busy} /> : null}
+          {progress.canForceClose ? <Button label="Forzar cierre (anfitrión)" small onPress={() => onClose(true)} busy={busy} /> : null}
         </View>
       ) : null}
     </View>
