@@ -699,7 +699,8 @@ const styles = StyleSheet.create({
   sceneBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
   scenePill: { position: 'absolute', top: 10, left: 12, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(5, 5, 10, 0.6)' },
   scenePillText: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.ink },
-  sceneVeil: { backgroundColor: 'rgba(5, 5, 10, 0.62)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
+  // Negro puro con alfa clarito (Gabino, 24-09): el texto va transparente encima.
+  sceneVeil: { backgroundColor: 'rgba(0, 0, 0, 0.3)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },
   jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
