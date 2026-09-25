@@ -458,6 +458,34 @@ Van a otras entregas: invitacion con recompensa y etiquetas de
 descubrimiento (E9), editor web de mundos (beta con creadores), ayuda en la
 app, idiomas y pulido (sin fecha).
 
+## Pendientes del 25-09
+
+- [ ] **Hero vertical para moviles** (Gabino, 25-09, visto en el APK): en el telefono la altura del hero es correcta pero no se ve nada de los mundos; hace falta una segunda version de la ilustracion en vertical y servirla por tamaño de pantalla (web y app)
+- [x] **Primer APK** (25-09): `com.adastramentis.app` 0.1.0, compilado en la WSL (ver memoria `apk-local`), firmado con la llave de subida respaldada en el disco E:; instalado y corriendo en el telefono de Gabino
+
+## Packs de prueba (plan del 25-09)
+
+Para probar el juego con las correcciones y medir las censuras de narracion
+e imagen. Reglas que aplican (`docs/07`):
+
+1. **Genshin Impact** y 2. **GTA San Andreas**: obra ajena, solo como packs
+   **privados de prueba** (clase `user-provided`), nunca publicados ni
+   vendidos, y sin ilustraciones salvo un permiso de administrador que las
+   encienda en mesas privadas para probar la censura de imagen. GTA prueba
+   violencia y crimen: donde se detiene el modelo.
+3. **Coqueteo muy sugerente**: sugerente, nunca explicito. Stripe prohibe el
+   contenido sexual explicito (cerraria la cuenta) y Google Play tambien.
+   Sirve para fijar la frontera y escribirla como politica de contenido.
+4. **Terror de pasillo en bucle con anomalias** (inspirado en la idea de Exit 8,
+   sin su nombre ni su arte): original, puede pedir un ruleset de "notar
+   anomalias".
+5. **Niveles liminales** (inspirado en la idea de Backrooms, sin copiar el wiki
+   CC BY-SA, que obligaria a publicar con esa licencia): original.
+6. **Terror psicologico propio**: 100% original, ilustrable, publicable y
+   vendible. El que mas hay que cuidar.
+
+Los retratos se pueden generar con Gemini desde la ficha de cada personaje.
+
 ## Deuda tecnica (sin entrega asignada)
 
 - [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas
