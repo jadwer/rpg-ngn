@@ -50,8 +50,13 @@ interface Props {
  */
 export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns, suggestions, autoOpen }: Props) {
   const [opened, setOpened] = useState(false)
+  // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
+  const [folded, setFolded] = useState(false)
   // Cada turno nuevo empieza plegado: primero se lee lo que paso.
-  useEffect(() => setOpened(false), [turn?.id])
+  useEffect(() => {
+    setOpened(false)
+    setFolded(false)
+  }, [turn?.id])
   const [showIdeas, setShowIdeas] = useState(() => readShowIdeas())
   const [fortuneError, setFortuneError] = useState<string | null>(null)
   // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
@@ -61,6 +66,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     if (!fortunePending) setFortuneLanded(false)
   }, [fortunePending])
   const [text, setText] = useState('')
+  const composing = !folded && (opened || autoOpen || text.length > 0)
 
   const toggleIdeas = (on: boolean) => {
     setShowIdeas(on)
@@ -148,14 +154,31 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         </div>
       ) : null}
 
-      {progress.canRespond && !(opened || autoOpen || text.length > 0) ? (
-        <button type="button" className="compose-bar" onClick={() => setOpened(true)}>
+      {progress.canRespond && !composing ? (
+        <button
+          type="button"
+          className="compose-bar"
+          onClick={() => {
+            setFolded(false)
+            setOpened(true)
+          }}
+        >
           <span>¿Qué hace tu personaje?</span>
           {suggestions.length > 0 ? <span className="count">{suggestions.length} ideas</span> : null}
         </button>
       ) : null}
-      {progress.canRespond && (opened || autoOpen || text.length > 0) ? (
+      {progress.canRespond && composing ? (
         <>
+          <button
+            type="button"
+            className="compose-hide"
+            onClick={() => {
+              setOpened(false)
+              setFolded(true)
+            }}
+          >
+            Ocultar
+          </button>
           {/* Ideas del DM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {suggestions.length > 0 ? (
