@@ -34,6 +34,10 @@ interface Props {
   onFortune: () => Promise<number>
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
+  /** Se abre solo cuando quien lee bajo hasta el final y el director ya no narra (como la web). */
+  autoOpen: boolean
+  /** Avisa si el cuadro esta abierto: la escena de fondo cede alto mientras se escribe. */
+  onComposingChange?: (open: boolean) => void
 }
 
 /**
@@ -42,9 +46,18 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, suggestions }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, suggestions, autoOpen, onComposingChange }: Props) {
   const [showIdeas, setShowIdeas] = useState(true)
+  const [opened, setOpened] = useState(false)
+  // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
+  const [folded, setFolded] = useState(false)
+  useEffect(() => {
+    setOpened(false)
+    setFolded(false)
+  }, [turn?.id])
   const [text, setText] = useState('')
+  const composing = !folded && (opened || autoOpen || text.length > 0)
+  useEffect(() => onComposingChange?.(composing && progress.canRespond), [composing, progress.canRespond, onComposingChange])
   const [focused, setFocused] = useState(false)
   const line = turnLine(turn, progress, nameOf)
   const [fortuneError, setFortuneError] = useState<string | null>(null)
@@ -115,8 +128,31 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         </View>
       ) : null}
 
-      {progress.canRespond ? (
+      {progress.canRespond && !composing ? (
+        <Pressable
+          style={({ pressed }) => [styles.composeBar, pressed && styles.ideaPressed]}
+          onPress={() => {
+            setFolded(false)
+            setOpened(true)
+          }}
+          accessibilityRole="button"
+        >
+          <Text style={styles.composeBarText}>¿Qué hace tu personaje?</Text>
+          {suggestions.length > 0 ? <Text style={styles.ideasToggle}>{`${suggestions.length} ideas`}</Text> : null}
+        </Pressable>
+      ) : null}
+      {progress.canRespond && composing ? (
         <View style={styles.compose}>
+          <Pressable
+            style={styles.hide}
+            hitSlop={8}
+            onPress={() => {
+              setOpened(false)
+              setFolded(true)
+            }}
+          >
+            <Text style={styles.ideasToggle}>Ocultar</Text>
+          </Pressable>
           {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
           {/* Ideas del DM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {suggestions.length > 0 && !focused ? (
@@ -189,6 +225,9 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
 const styles = StyleSheet.create({
   ideas: { gap: 8 },
+  composeBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 13, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.14)' },
+  composeBarText: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink },
+  hide: { alignSelf: 'flex-end' },
   idea: { borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
   ideaPressed: { backgroundColor: 'rgba(124, 58, 237, 0.26)' },
   ideaText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },

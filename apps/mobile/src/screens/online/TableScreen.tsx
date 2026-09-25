@@ -1,9 +1,9 @@
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
+import { Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
@@ -144,7 +144,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   useEffect(() => {
     if (recapAtEntry === undefined && snapshot?.caughtUp) setRecapAtEntry(recap?.id ?? null)
   }, [snapshot, recap, recapAtEntry])
-  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
+  // La ultima ilustracion es el fondo de la escena y no un bloque entre el texto (como la web).
+  const groups = useMemo(() => groupBlocks(withoutImages(blocks), mode), [blocks, mode])
+  const sceneImage = useMemo(() => latestSceneImage(blocks), [blocks])
+  const sceneUri = sceneImage ? (/^https?:/.test(sceneImage.url) ? sceneImage.url : `${client.baseUrl}${sceneImage.url}`) : null
+  const [composing, setComposing] = useState(false)
+  const { height: windowHeight } = useWindowDimensions()
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
@@ -239,12 +244,22 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     setBehind(false)
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80)
   }, [])
+  // El cuadro de respuesta se abre solo cuando quien lee bajo con el dedo
+  // hasta el final; la carga y el autoscroll no cuentan (como la web).
+  const userScrollRef = useRef(false)
+  const [readToEnd, setReadToEnd] = useState(false)
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
     const distance = contentSize.height - contentOffset.y - layoutMeasurement.height
     atBottomRef.current = distance < NEAR_BOTTOM
+    if (userScrollRef.current && distance < 40) setReadToEnd(true)
     if (atBottomRef.current) setBehind(false)
   }
+  const turnId = turn?.id ?? null
+  useEffect(() => {
+    userScrollRef.current = false
+    setReadToEnd(false)
+  }, [turnId])
   useEffect(() => {
     if (blocks.length === 0 && !progress.narrating) return
     if (atBottomRef.current) scrollToEnd()
@@ -485,14 +500,35 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
 
       <View style={styles.body}>
-        <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScroll={onScroll} scrollEventThrottle={100}>
-          <SceneHero
+        {sceneUri ? (
+          <>
+            <Image source={{ uri: sceneUri }} style={styles.sceneBackdrop} resizeMode="cover" accessibilityLabel={sceneImage?.alt ?? 'Escena'} />
+            {turn ? (
+              <View style={styles.scenePill}>
+                <Text style={styles.scenePillText}>{`Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}`}</Text>
+              </View>
+            ) : null}
+          </>
+        ) : null}
+        <ScrollView
+          ref={scrollRef}
+          style={[styles.scroll, sceneUri ? [styles.sceneVeil, { marginTop: Math.round(windowHeight * (composing ? 0.1 : 0.3)) }] : null]}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onScroll={onScroll}
+          onScrollBeginDrag={() => {
+            userScrollRef.current = true
+          }}
+          scrollEventThrottle={100}
+        >
+          {sceneUri ? null : <SceneHero
             image={heroImage}
             kicker={packName ?? table.name}
             title={sessionTitle ?? (snapshot?.session ? table.name : 'Sin sesión abierta')}
             when={worldTime}
             pill={turn ? `Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}` : null}
-          />
+          />}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} />
           {start ? (
@@ -547,7 +583,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </View>
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
-      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} />
+      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />
       <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
 
       {maps.length > 0 ? (
@@ -658,6 +694,12 @@ const styles = StyleSheet.create({
   segmentText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 12, color: theme.colors.ink },
   segmentTextActive: { color: '#ffffff' },
   body: { flex: 1 },
+  // Escena de fondo (E10a, Gabino 24-09): la imagen arriba y el texto en la
+  // mitad de abajo sobre un velo negro con alfa, sin desenfoque ni sombras.
+  sceneBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
+  scenePill: { position: 'absolute', top: 10, left: 12, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(5, 5, 10, 0.6)' },
+  scenePillText: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.ink },
+  sceneVeil: { backgroundColor: 'rgba(5, 5, 10, 0.62)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },
   jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
