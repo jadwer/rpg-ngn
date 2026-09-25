@@ -2738,11 +2738,9 @@ a.plain {
   margin-top: max(38dvh, 180px);
   border-top: 1px solid rgba(167, 139, 250, 0.35);
   border-radius: 18px 18px 0 0;
-  /* Velo negro con alfa y casi sin desenfoque (Gabino, 24-09): la imagen se
-     sigue viendo detras. Sin sombra en las letras: se veia como textura. */
-  background: linear-gradient(to bottom, rgba(5, 5, 10, 0.5), rgba(5, 5, 10, 0.68));
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  /* Negro puro con alfa clarito y sin desenfoque, igual que la app (Gabino,
+     24-09: "se ve increible"): la escena se ve entera detras del texto. */
+  background: rgba(0, 0, 0, 0.3);
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.3);
 }
 .table.has-scene .scene-hero {
