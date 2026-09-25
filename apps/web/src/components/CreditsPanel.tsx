@@ -4,7 +4,7 @@ import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@
 import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packPrice, packValue } from '@rpg-ngn/ui-logic'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 
 /**
  * Creditos de prepago: saldo, paquetes y pago con Stripe.
@@ -44,7 +44,12 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
     void load()
   }, [load])
 
+  // Un doble clic no puede iniciar dos pagos: el estado de React llega tarde
+  // para el segundo clic, la referencia no.
+  const startingRef = useRef(false)
   const start = async (pack: CreditPack) => {
+    if (startingRef.current) return
+    startingRef.current = true
     setBusy(true)
     setError(null)
     setNotice(null)
@@ -55,6 +60,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       if (e instanceof ApiError && e.isUnauthorized) return unauthorized()
       setError(e instanceof ApiError ? e.message : 'No se pudo iniciar el pago.')
     } finally {
+      startingRef.current = false
       setBusy(false)
     }
   }
@@ -63,6 +69,12 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
     setBuying(null)
     setNotice(message)
     await load()
+    // El saldo lo sube el webhook de Stripe, que llega uno o varios segundos
+    // despues: se vuelve a mirar un par de veces para que se vea sin recargar.
+    for (const wait of [2500, 6000]) {
+      await new Promise((resolve) => setTimeout(resolve, wait))
+      await load()
+    }
   }
 
   const venta = useMemo(() => buyablePacks(packs), [packs])
@@ -145,7 +157,7 @@ function PayForm({
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (!stripe || !elements) return
+    if (!stripe || !elements || busy) return
 
     setBusy(true)
     const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' })
