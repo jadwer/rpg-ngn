@@ -34,6 +34,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
   const [presets, setPresets] = useState<DmPreset[]>([])
+  const [ownKeys, setOwnKeys] = useState<string[]>([])
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
   const [packs, setPacks] = useState<PackOption[]>([])
@@ -89,12 +90,16 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
     let alive = true
-    void client.listDmPresets().then(
-      (result) => {
+    // Con las claves propias: una clave guardada se ofrece al crear la mesa y
+    // se preselecciona, aunque el servidor no tenga ese proveedor.
+    void Promise.all([client.listDmPresets(), client.listOwnKeys().catch(() => [])]).then(
+      ([result, keys]) => {
         if (!alive) return
-        setPresets(selectablePresets(result.presets))
+        const own = keys.filter((k) => k.configured).map((k) => k.preset)
+        setOwnKeys(own)
+        setPresets(selectablePresets(result.presets, own))
         setDefaultPreset(result.defaultPreset)
-        setPreset(result.defaultPreset)
+        setPreset(own[0] ?? result.defaultPreset)
       },
       () => undefined,
     )
@@ -181,7 +186,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
             <View style={styles.block}>
               <Text style={styles.label}>Director de juego</Text>
               {presets.map((p) => (
-                <RadioRow key={p.name} label={presetOptionLabel(p)} selected={preset === p.name} onSelect={() => setPreset(p.name)} />
+                <RadioRow key={p.name} label={presetOptionLabel(p, ownKeys.includes(p.name))} selected={preset === p.name} onSelect={() => setPreset(p.name)} />
               ))}
               <Text style={styles.hint}>Se puede cambiar y probar después desde el mando del anfitrión, botón DM.</Text>
             </View>

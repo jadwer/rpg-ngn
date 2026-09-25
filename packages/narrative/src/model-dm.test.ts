@@ -397,6 +397,17 @@ describe('ModelDMProvider', () => {
     expect(notice?.kind === 'block' && notice.block.type === 'system' && notice.block.detail).toContain('el-castillo-que-no-existe')
   })
 
+  it('una tirada con el tipo del evento como kind se entiende igual', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"roll","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}}',
+      '{"kind":"block","block":{"type":"narration","text":"Zahira escucha."}}',
+    ].join('\n')
+    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY, { random: seededRandom(5) }).narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]))))
+    expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'roll')).toBe(true)
+    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('se ignoró'))).toBe(false)
+  })
+
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)

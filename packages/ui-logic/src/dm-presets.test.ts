@@ -16,6 +16,11 @@ describe('presets del DM', () => {
     expect(presetOptionLabel(presets[0]!)).toBe('DM con guion (sin modelo)')
   })
 
+  it('con clave propia el preset se ofrece aunque el servidor no lo tenga, va primero y lo dice', () => {
+    expect(selectablePresets(presets, ['openai']).map((p) => p.name)).toEqual(['openai', 'anthropic', 'scripted'])
+    expect(presetOptionLabel(presets[1]!, true)).toBe('Anthropic (Claude) (con tu clave, no gasta cupo), claude-sonnet-5')
+  })
+
   it('al crear la mesa ofrece solo los configurados, con el del servidor primero, y manda siempre el elegido', () => {
     expect(selectablePresets(presets).map((p) => p.name)).toEqual(['anthropic', 'scripted'])
     // Desde la entrega 7 el proveedor es obligatorio al crear: elegir el del

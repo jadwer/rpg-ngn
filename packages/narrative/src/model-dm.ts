@@ -612,6 +612,17 @@ class LineInterpreter {
       // entiende igual. Sin esto, un turno entero podia quedarse sin ningun
       // bloque y morir con "el modelo no devolvio ningun bloque" (mesa de
       // prueba con Sonnet, 20-09).
+      // `{"kind":"roll","event":{...}}`: el modelo pone el tipo del evento
+      // como `kind`. Si trae `event`, es un evento (mesa 39, turno 15: la
+      // tirada que pedia el movimiento se perdio por esto).
+      const withEvent = parsed as { event?: unknown }
+      if (withEvent && typeof withEvent === 'object' && withEvent.event && typeof withEvent.event === 'object') {
+        const wrapped = this.event(withEvent.event)
+        if (wrapped) {
+          yield* this.emitEvent(wrapped)
+          return
+        }
+      }
       const asKind = parsed as { kind?: unknown }
       if (asKind && typeof asKind === 'object' && typeof asKind.kind === 'string') {
         const { kind, ...rest } = asKind as Record<string, unknown>

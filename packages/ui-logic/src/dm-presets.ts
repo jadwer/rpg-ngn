@@ -18,9 +18,17 @@ export function describePreset(name: string): string {
   return NAMES[name] ?? name
 }
 
-/** Presets que se pueden elegir al crear la mesa: los configurados, con el del servidor primero. */
-export function selectablePresets(presets: readonly DmPreset[]): DmPreset[] {
-  return [...presets].filter((p) => p.configured).sort((a, b) => Number(b.default) - Number(a.default))
+/**
+ * Presets que se pueden elegir al crear la mesa: los configurados en el
+ * servidor y los que tienen clave propia de quien crea (Gabino, 25-09: con su
+ * clave guardada, la pantalla de crear mesa no la ofrecia). El del servidor
+ * primero; si hay clave propia, esos antes.
+ */
+export function selectablePresets(presets: readonly DmPreset[], ownKeys: readonly string[] = []): DmPreset[] {
+  const own = new Set(ownKeys)
+  return [...presets]
+    .filter((p) => p.configured || own.has(p.name))
+    .sort((a, b) => Number(own.has(b.name)) - Number(own.has(a.name)) || Number(b.default) - Number(a.default))
 }
 
 /**
@@ -39,9 +47,13 @@ export function providerForNewTable(preset: string, defaultPreset: string): DmPr
   return { preset: chosen, model: null }
 }
 
-/** Etiqueta de un preset en un selector: nombre, si es el del servidor y su modelo. */
-export function presetOptionLabel(preset: DmPreset): string {
-  return `${describePreset(preset.name)}${preset.default ? ' (el del servidor)' : ''}${preset.model ? `, ${preset.model}` : ''}`
+/**
+ * Etiqueta de un preset en un selector: nombre, con que clave narra y su
+ * modelo. Con clave propia manda eso: la mesa no usa la del servidor.
+ */
+export function presetOptionLabel(preset: DmPreset, ownKey = false): string {
+  const whose = ownKey ? ' (con tu clave, no gasta cupo)' : preset.default ? ' (el del servidor)' : ''
+  return `${describePreset(preset.name)}${whose}${preset.model ? `, ${preset.model}` : ''}`
 }
 
 /** Mensaje tras guardar el proveedor de la mesa. */

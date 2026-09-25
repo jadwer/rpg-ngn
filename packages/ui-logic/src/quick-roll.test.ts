@@ -41,3 +41,19 @@ describe('appendRoll', () => {
     expect(appendRoll('¿Puedo?', roll)).toBe('¿Puedo? Tiro 1d20: 14')
   })
 })
+
+describe('safeRandom', () => {
+  it('sin crypto en el entorno no lanza: cae a Math.random', async () => {
+    const { safeRandom, quickRoll } = await import('./quick-roll.js')
+    const original = Object.getOwnPropertyDescriptor(globalThis, 'crypto')
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true })
+    try {
+      expect(safeRandom().describe()).toBe('math-random')
+      const roll = quickRoll('1d20')
+      expect(roll.result).toBeGreaterThanOrEqual(1)
+      expect(roll.result).toBeLessThanOrEqual(20)
+    } finally {
+      if (original) Object.defineProperty(globalThis, 'crypto', original)
+    }
+  })
+})

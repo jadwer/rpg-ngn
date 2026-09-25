@@ -22,7 +22,22 @@ export interface QuickRoll {
   text: string
 }
 
-export function quickRoll(die: string, rng: RandomSource = webCryptoRandom()): QuickRoll {
+/**
+ * Azar para la tirada rapida: el del sistema si existe y, si no, Math.random.
+ * La app compilada (Hermes) no trae `crypto.getRandomValues` y la tirada
+ * lanzaba al soltar el dado, lo que cerraba la app entera (APK v2, 25-09).
+ * Es la tirada que el jugador pega en su texto, no la que decide el servidor:
+ * no necesita azar criptografico, necesita no romperse.
+ */
+export function safeRandom(): RandomSource {
+  try {
+    return webCryptoRandom()
+  } catch {
+    return { nextInt: (max) => Math.floor(Math.random() * max), describe: () => 'math-random' }
+  }
+}
+
+export function quickRoll(die: string, rng: RandomSource = safeRandom()): QuickRoll {
   const rolled = rollDice(die, rng)
   const detail = rolled.rolls.length > 1 ? ` [${rolled.rolls.join(' + ')}${rolled.modifier !== 0 ? ` ${rolled.modifier > 0 ? '+' : '-'} ${Math.abs(rolled.modifier)}` : ''}]` : ''
   return { die, result: rolled.total, rolls: rolled.rolls, text: `Tiro ${die}: ${rolled.total}${detail}` }

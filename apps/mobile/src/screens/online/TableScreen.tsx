@@ -157,20 +157,32 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   // del panel (Gabino, 25-09, "asi pueden ver la imagen o el texto que
   // quieran"). Fraccion del alto, entre 8% y 70%.
   const [veilRatio, setVeilRatio] = useState(0.4)
+  // El gesto se crea una sola vez y lee el valor vivo por referencia: si se
+  // recreaba en cada movimiento (dependia de veilRatio), el arrastre temblaba
+  // y volvia a su sitio (APK v2, 25-09).
+  const veilRatioRef = useRef(0.4)
+  veilRatioRef.current = veilRatio
+  const windowHeightRef = useRef(windowHeight)
+  windowHeightRef.current = windowHeight
   const dragStartRef = useRef(0.4)
   const veilDrag = useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 2,
+        onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponderCapture: () => true,
+        onMoveShouldSetPanResponderCapture: () => true,
+        // Que el ScrollView no se quede con el gesto a medio arrastre.
+        onPanResponderTerminationRequest: () => false,
+        onShouldBlockNativeResponder: () => true,
         onPanResponderGrant: () => {
-          dragStartRef.current = veilRatio
+          dragStartRef.current = veilRatioRef.current
         },
         onPanResponderMove: (_e, g) => {
-          setVeilRatio(Math.min(0.7, Math.max(0.08, dragStartRef.current + g.dy / windowHeight)))
+          setVeilRatio(Math.min(0.7, Math.max(0.08, dragStartRef.current + g.dy / windowHeightRef.current)))
         },
       }),
-    [veilRatio, windowHeight],
+    [],
   )
   const veilTop = Math.round(windowHeight * (composing ? Math.min(veilRatio, 0.12) : veilRatio))
   const tts = useTts(blocks, { autoRead: true })
@@ -572,7 +584,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           </>
         ) : null}
         {sceneUri ? (
-          <View {...veilDrag.panHandlers} style={[styles.veilHandle, { top: veilTop - 14 }]} accessibilityLabel="Arrastra para ver más escena o más texto" accessibilityRole="adjustable">
+          <View {...veilDrag.panHandlers} style={[styles.veilHandle, { top: veilTop - 20 }]} accessibilityLabel="Arrastra para ver más escena o más texto" accessibilityRole="adjustable">
             <View style={styles.veilGrip} />
           </View>
         ) : null}
@@ -786,7 +798,7 @@ const styles = StyleSheet.create({
   screenExit: { position: 'absolute', right: 14, bottom: 24, zIndex: 5, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(0, 0, 0, 0.6)', borderWidth: 1, borderColor: 'rgba(167, 139, 250, 0.5)' },
   screenExitText: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.ink },
   screenHint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
-  veilHandle: { position: 'absolute', left: 0, right: 0, height: 28, zIndex: 3, alignItems: 'center', justifyContent: 'center' },
+  veilHandle: { position: 'absolute', left: 0, right: 0, height: 40, zIndex: 3, elevation: 3, alignItems: 'center', justifyContent: 'center' },
   veilGrip: { width: 44, height: 5, borderRadius: 3, backgroundColor: 'rgba(229, 231, 255, 0.55)' },
   sceneVeil: { backgroundColor: 'rgba(0, 0, 0, 0.3)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   scroll: { flex: 1 },

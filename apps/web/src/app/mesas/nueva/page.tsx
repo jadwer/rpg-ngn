@@ -30,6 +30,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
   const [presets, setPresets] = useState<DmPreset[]>([])
+  const [ownKeys, setOwnKeys] = useState<string[]>([])
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
   const [busy, setBusy] = useState(false)
@@ -80,12 +81,16 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
     let alive = true
-    void client.listDmPresets().then(
-      (result) => {
+    // Con las claves propias: una clave guardada se ofrece al crear la mesa y
+    // se preselecciona, aunque el servidor no tenga ese proveedor.
+    void Promise.all([client.listDmPresets(), client.listOwnKeys().catch(() => [])]).then(
+      ([result, keys]) => {
         if (!alive) return
-        setPresets(selectablePresets(result.presets))
+        const own = keys.filter((k) => k.configured).map((k) => k.preset)
+        setOwnKeys(own)
+        setPresets(selectablePresets(result.presets, own))
         setDefaultPreset(result.defaultPreset)
-        setPreset(result.defaultPreset)
+        setPreset(own[0] ?? result.defaultPreset)
       },
       () => undefined,
     )
@@ -183,7 +188,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             <select className="select" name="dm" value={preset} onChange={(e) => setPreset(e.target.value)}>
               {presets.map((p) => (
                 <option key={p.name} value={p.name}>
-                  {presetOptionLabel(p)}
+                  {presetOptionLabel(p, ownKeys.includes(p.name))}
                 </option>
               ))}
             </select>
