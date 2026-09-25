@@ -33,6 +33,12 @@ interface Props {
   outOfTurns: boolean
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
+  /**
+   * El cuadro se abre solo cuando quien lee llego al final y el director ya
+   * no narra ni habla; mientras tanto queda una barra que lo abre al tocarla
+   * (Gabino, 24-09: las respuestas se comian el espacio de la escena).
+   */
+  autoOpen: boolean
 }
 
 /**
@@ -42,7 +48,10 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns, suggestions }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, outOfTurns, suggestions, autoOpen }: Props) {
+  const [opened, setOpened] = useState(false)
+  // Cada turno nuevo empieza plegado: primero se lee lo que paso.
+  useEffect(() => setOpened(false), [turn?.id])
   const [showIdeas, setShowIdeas] = useState(() => readShowIdeas())
   const [fortuneError, setFortuneError] = useState<string | null>(null)
   // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
@@ -139,7 +148,13 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         </div>
       ) : null}
 
-      {progress.canRespond ? (
+      {progress.canRespond && !(opened || autoOpen || text.length > 0) ? (
+        <button type="button" className="compose-bar" onClick={() => setOpened(true)}>
+          <span>¿Qué hace tu personaje?</span>
+          {suggestions.length > 0 ? <span className="count">{suggestions.length} ideas</span> : null}
+        </button>
+      ) : null}
+      {progress.canRespond && (opened || autoOpen || text.length > 0) ? (
         <>
           {/* Ideas del DM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}

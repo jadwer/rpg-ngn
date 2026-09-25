@@ -3,7 +3,7 @@
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -205,7 +205,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   useEffect(() => {
     if (recapAtEntry === undefined && snapshot?.caughtUp) setRecapAtEntry(recap?.id ?? null)
   }, [snapshot, recap, recapAtEntry])
-  const groups = useMemo(() => groupBlocks(blocks, mode), [blocks, mode])
+  // La ultima ilustracion es el fondo de la escena y no un bloque entre el texto.
+  const groups = useMemo(() => groupBlocks(withoutImages(blocks), mode), [blocks, mode])
+  const sceneImage = useMemo(() => latestSceneImage(blocks), [blocks])
   const tts = useTts(blocks)
 
   // Entrar en pantalla corta la lectura en curso: la cola que ya sonaba puede
@@ -399,13 +401,28 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const scrollRef = useRef<HTMLDivElement>(null)
   const atBottomRef = useRef(true)
   const [behind, setBehind] = useState(false)
+  // El cuadro de respuesta se abre solo cuando quien lee bajo con el dedo o
+  // la rueda hasta el final. La carga y el autoscroll no cuentan: llegan al
+  // final sin que nadie haya leido nada.
+  const userScrollRef = useRef(false)
+  const [readToEnd, setReadToEnd] = useState(false)
   const onScroll = () => {
     const el = scrollRef.current
     if (!el) return
     const distance = el.scrollHeight - el.scrollTop - el.clientHeight
     atBottomRef.current = distance < 160
+    if (userScrollRef.current && distance < 40) setReadToEnd(true)
     if (atBottomRef.current) setBehind(false)
   }
+  const markUserScroll = () => {
+    userScrollRef.current = true
+  }
+  // Turno nuevo, lectura nueva: el cuadro vuelve a plegarse hasta leer lo que paso.
+  const turnId = turn?.id ?? null
+  useEffect(() => {
+    userScrollRef.current = false
+    setReadToEnd(false)
+  }, [turnId])
   const scrollToEnd = useCallback((smooth = true) => {
     const el = scrollRef.current
     if (!el) return
@@ -520,10 +537,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // (docs/14): mientras el pack no traiga imagen por escena, su mapa.
   const heroImage = maps[0] ? packMapUrl(table.packId, maps[0].image) : null
   const heroStyle = heroImage ? ({ '--hero': `url("${heroImage}")` } as CSSProperties) : undefined
+  // Con una ilustracion, la escena ocupa la mesa de fondo y el texto se lee
+  // encima, en la mitad de abajo, sobre vidrio ahumado (Gabino, 24-09).
+  const sceneUrl = sceneImage?.url ?? null
   const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={togglePanel} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
 
   return (
-    <div className={`table${screen ? ' screen' : ''}`}>
+    <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
       <header className="table-header hide-on-screen">
         <SystemMenu user={user} onLogout={onLogout} />
@@ -556,7 +576,19 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       {connectionNotice ? <div className="notice-bar hide-on-screen">{connectionNotice}</div> : null}
 
       <div className="table-body">
-        <div className="scroll" ref={scrollRef} onScroll={onScroll}>
+        {sceneUrl ? (
+          <>
+            <div key={sceneUrl} className="scene-backdrop" style={{ backgroundImage: `url("${sceneUrl}")` }} role="img" aria-label={sceneImage?.alt ?? 'Escena'} />
+            <div className="scene-caption hide-on-screen">
+              {turn ? (
+                <span className="pill">
+                  <b>Turno {turn.number}</b> {progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}
+                </span>
+              ) : null}
+            </div>
+          </>
+        ) : null}
+        <div className="scroll" ref={scrollRef} onScroll={onScroll} onWheel={markUserScroll} onTouchMove={markUserScroll}>
           <div className="blocks">
             <section className="scene-hero hide-on-screen" style={heroStyle} aria-label="Escena">
               {turn ? (
@@ -742,7 +774,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} outOfTurns={viewer.role === 'host' && snapshot?.quota?.remainingTurns === 0} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} />
+        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} outOfTurns={viewer.role === 'host' && snapshot?.quota?.remainingTurns === 0} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} />
       </div>
       {gameBar('bottom')}
     </div>

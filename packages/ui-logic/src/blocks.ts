@@ -134,3 +134,20 @@ export function latestRecap(blocks: readonly TurnBlock[]): SystemBlock | null {
   }
   return null
 }
+
+/**
+ * La ilustracion mas reciente (E10a): en la mesa es el fondo de la escena y
+ * no un bloque mas entre el texto (Gabino, 24-09). Null si no hay ninguna.
+ */
+export function latestSceneImage(blocks: readonly TurnBlock[]): ImageBlock | null {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i]
+    if (block?.kind === 'image') return block
+  }
+  return null
+}
+
+/** Los bloques sin ilustraciones: la mesa las pinta de fondo. */
+export function withoutImages(blocks: readonly TurnBlock[]): TurnBlock[] {
+  return blocks.filter((block) => block.kind !== 'image')
+}

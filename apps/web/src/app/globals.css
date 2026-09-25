@@ -2687,6 +2687,120 @@ a.plain {
   margin-top: 8px;
 }
 
+/* La escena de fondo (E10a, Gabino 24-09): la ultima ilustracion ocupa la */
+/* mesa y el texto se lee en la mitad de abajo sobre vidrio ahumado.       */
+.table.has-scene .table-body {
+  overflow: hidden;
+}
+.scene-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center 30%;
+  animation: scene-in 1.2s ease;
+}
+@keyframes scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.scene-caption {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  right: 14px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+}
+.scene-caption h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+.scene-caption .pill {
+  background: rgba(11, 11, 18, 0.6);
+  backdrop-filter: blur(6px);
+}
+.table.has-scene .scroll {
+  position: relative;
+  z-index: 1;
+  margin-top: 42%;
+  margin-top: max(38dvh, 180px);
+  border-top: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 18px 18px 0 0;
+  background: rgba(11, 11, 18, 0.62);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+}
+.table.has-scene .scene-hero {
+  display: none;
+}
+.table.has-scene .table-footer {
+  background: rgba(11, 11, 18, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.table.has-scene.screen .scroll {
+  margin-top: 45dvh;
+}
+@media (min-width: 900px) {
+  .table.has-scene .scroll {
+    margin-top: max(46dvh, 260px);
+  }
+}
+
+/* Con escena de fondo, el cuadro abierto ocupa lo menos posible. */
+.table.has-scene .turn .textarea {
+  height: 68px;
+  min-height: 68px;
+}
+/* Mientras se escribe, la escena cede alto: lo que importa es el texto. */
+.table.has-scene:has(.turn textarea) .scroll {
+  margin-top: 16dvh;
+  transition: margin-top 0.35s ease;
+}
+.table.has-scene .turn .ideas {
+  margin: 4px 0 6px;
+}
+.table.has-scene .turn .idea {
+  padding: 5px 10px;
+  font-size: 0.88rem;
+}
+
+/* Barra plegada del cuadro de respuesta: se abre al tocarla o al llegar al final. */
+.compose-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 6px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-bright);
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.14);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  text-align: left;
+  cursor: pointer;
+}
+.compose-bar .count {
+  color: var(--nebula, #a78bfa);
+  font-size: 0.85rem;
+}
+
 /* Ideas de accion del DM (E10b): sobre el cuadro, que sigue libre. */
 .turn .ideas {
   display: flex;
