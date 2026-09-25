@@ -512,7 +512,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         ) : null}
         <ScrollView
           ref={scrollRef}
-          style={[styles.scroll, sceneUri ? [styles.sceneVeil, { marginTop: Math.round(windowHeight * (composing ? 0.1 : 0.3)) }] : null]}
+          style={[styles.scroll, sceneUri ? [styles.sceneVeil, { marginTop: Math.round(windowHeight * (composing ? 0.12 : 0.4)) }] : null]}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
