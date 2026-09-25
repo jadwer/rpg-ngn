@@ -4,7 +4,7 @@ import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiCli
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
 import { storage, type StoredUser } from '../lib/storage'
@@ -431,16 +431,37 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     setBehind(false)
   }, [])
   const firstScrollRef = useRef(true)
+  // Al llegar la narracion de un turno la vista se queda al inicio de ella,
+  // no al final (Gabino, 25-09): el primer bloque nuevo arriba del panel.
+  const prevCountRef = useRef(0)
+  const anchoredRef = useRef(false)
   useEffect(() => {
+    const before = prevCountRef.current
+    prevCountRef.current = blocks.length
     if (blocks.length === 0) return
     if (firstScrollRef.current) {
       firstScrollRef.current = false
       setTimeout(() => scrollToEnd(false), 30)
       return
     }
-    if (atBottomRef.current) setTimeout(() => scrollToEnd(true), 30)
-    else setBehind(true)
-  }, [blocks.length, scrollToEnd])
+    if (blocks.length <= before) return
+    if (!atBottomRef.current) {
+      setBehind(true)
+      return
+    }
+    if (anchoredRef.current) return
+    anchoredRef.current = true
+    const firstNew = blocks[before]?.id
+    setTimeout(() => {
+      const el = firstNew ? scrollRef.current?.querySelector(`[data-block="${firstNew}"]`) : null
+      if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' })
+      else scrollToEnd(true)
+    }, 30)
+  }, [blocks, scrollToEnd])
+  // Cuando el director empieza a narrar, lo siguiente que llegue es lo nuevo.
+  useEffect(() => {
+    if (progress.narrating) anchoredRef.current = false
+  }, [progress.narrating])
   // Al entrar o salir del modo pantalla cambia la altura: se vuelve al final.
   useEffect(() => {
     const timer = setTimeout(() => scrollToEnd(false), 50)
@@ -540,6 +561,24 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // Con una ilustracion, la escena ocupa la mesa de fondo y el texto se lee
   // encima, en la mitad de abajo, sobre vidrio ahumado (Gabino, 24-09).
   const sceneUrl = sceneImage?.url ?? null
+  // El borde del panel de texto se arrastra (Gabino, 25-09): quien juega
+  // decide cuanto ve de escena y cuanto de texto. En pixeles desde arriba del
+  // cuerpo de la mesa, entre el 8% y el 75% de su alto.
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [veilTop, setVeilTop] = useState<number | null>(null)
+  const startVeilDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const body = bodyRef.current
+    if (!body) return
+    event.preventDefault()
+    const rect = body.getBoundingClientRect()
+    const move = (e: PointerEvent) => setVeilTop(Math.round(Math.min(rect.height * 0.75, Math.max(rect.height * 0.08, e.clientY - rect.top))))
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
   const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={togglePanel} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
 
   return (
@@ -575,7 +614,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
 
       {connectionNotice ? <div className="notice-bar hide-on-screen">{connectionNotice}</div> : null}
 
-      <div className="table-body">
+      <div className="table-body" ref={bodyRef} style={veilTop !== null ? ({ '--veil-top': `${veilTop}px` } as CSSProperties) : undefined}>
         {sceneUrl ? (
           <>
             <div key={sceneUrl} className="scene-backdrop" style={{ backgroundImage: `url("${sceneUrl}")` }} role="img" aria-label={sceneImage?.alt ?? 'Escena'} />
@@ -587,6 +626,17 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               ) : null}
             </div>
           </>
+        ) : null}
+        {sceneUrl ? (
+          <div
+            className="veil-grip hide-on-screen"
+            role="separator"
+            aria-orientation="horizontal"
+            aria-label="Arrastra para ver más escena o más texto"
+            onPointerDown={startVeilDrag}
+          >
+            <span />
+          </div>
         ) : null}
         <div className="scroll" ref={scrollRef} onScroll={onScroll} onWheel={markUserScroll} onTouchMove={markUserScroll}>
           <div className="blocks">

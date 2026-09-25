@@ -15,17 +15,19 @@ interface Props {
   onPressBlock?: (blockId: string) => void
   /** Servidor de la API: las ilustraciones llegan con ruta relativa. */
   assetBase?: string
+  /** Pantalla de lectura: letra grande para leer de lejos o proyectar. */
+  large?: boolean
 }
 
-export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = '' }: Props) {
+export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = '', large = false }: Props) {
   return (
     <View style={styles.list}>
       {groups.map((group) => {
         switch (group.kind) {
           case 'prose':
-            return <Prose key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
+            return <Prose key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} large={large} />
           case 'dialogue':
-            return <Dialogue key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
+            return <Dialogue key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} large={large} />
           case 'roll':
             return <Roll key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
           case 'system':
@@ -38,9 +40,9 @@ export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = 
   )
 }
 
-type GroupProps<G> = { group: G; currentBlockId: string | null; onPressBlock?: ((blockId: string) => void) | undefined }
+type GroupProps<G> = { group: G; currentBlockId: string | null; onPressBlock?: ((blockId: string) => void) | undefined; large?: boolean }
 
-function Prose({ group, currentBlockId, onPressBlock }: GroupProps<ProseGroup>) {
+function Prose({ group, currentBlockId, onPressBlock, large = false }: GroupProps<ProseGroup>) {
   const [expanded, setExpanded] = useState(false)
   const speakingHere = group.blocks.some((b) => b.id === currentBlockId)
 
@@ -60,7 +62,7 @@ function Prose({ group, currentBlockId, onPressBlock }: GroupProps<ProseGroup>) 
     <View style={styles.prose}>
       {group.blocks.map((block) => (
         <Pressable key={block.id} onPress={() => onPressBlock?.(block.id)} style={[styles.paragraphBox, block.id === currentBlockId && styles.current]}>
-          <Text style={styles.paragraph}>{block.text}</Text>
+          <Text style={[styles.paragraph, large && styles.paragraphLarge]}>{block.text}</Text>
         </Pressable>
       ))}
       {group.compressed ? (
@@ -72,7 +74,7 @@ function Prose({ group, currentBlockId, onPressBlock }: GroupProps<ProseGroup>) 
   )
 }
 
-function Dialogue({ group, currentBlockId, onPressBlock }: GroupProps<DialogueGroup>) {
+function Dialogue({ group, currentBlockId, onPressBlock, large = false }: GroupProps<DialogueGroup>) {
   return (
     <View style={styles.dialogue}>
       {group.blocks.map((block) => (
@@ -80,7 +82,7 @@ function Dialogue({ group, currentBlockId, onPressBlock }: GroupProps<DialogueGr
           <Portrait path={block.speaker.portrait} uri={block.speaker.portraitUri} name={block.speaker.name} size={52} />
           <View style={styles.bubble}>
             <Text style={styles.speaker}>{block.speaker.name}</Text>
-            <Text style={styles.lineText}>{block.text}</Text>
+            <Text style={[styles.lineText, large && styles.lineTextLarge]}>{block.text}</Text>
           </View>
         </Pressable>
       ))}
@@ -155,6 +157,8 @@ function Scene({ group, assetBase }: { group: ImageGroup; assetBase: string }) {
 }
 
 const styles = StyleSheet.create({
+  paragraphLarge: { fontSize: 24, lineHeight: 35 },
+  lineTextLarge: { fontSize: 22, lineHeight: 31 },
   scene: { marginVertical: 10, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
   sceneImage: { width: '100%', aspectRatio: 16 / 9 },
   sceneCaption: { paddingHorizontal: 12, paddingVertical: 8, fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },

@@ -3,7 +3,7 @@ import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { blocksForSeat, countdown, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
+import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
@@ -149,7 +149,30 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const sceneImage = useMemo(() => latestSceneImage(blocks), [blocks])
   const sceneUri = sceneImage ? (/^https?:/.test(sceneImage.url) ? sceneImage.url : `${client.baseUrl}${sceneImage.url}`) : null
   const [composing, setComposing] = useState(false)
+  // Pantalla de lectura (como el modo pantalla de la web): solo la historia,
+  // en grande, sin cabecera ni pie.
+  const [screen, setScreen] = useState(false)
   const { height: windowHeight } = useWindowDimensions()
+  // Cuanto de la pantalla es escena y cuanto texto: se arrastra la agarradera
+  // del panel (Gabino, 25-09, "asi pueden ver la imagen o el texto que
+  // quieran"). Fraccion del alto, entre 8% y 70%.
+  const [veilRatio, setVeilRatio] = useState(0.4)
+  const dragStartRef = useRef(0.4)
+  const veilDrag = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 2,
+        onPanResponderGrant: () => {
+          dragStartRef.current = veilRatio
+        },
+        onPanResponderMove: (_e, g) => {
+          setVeilRatio(Math.min(0.7, Math.max(0.08, dragStartRef.current + g.dy / windowHeight)))
+        },
+      }),
+    [veilRatio, windowHeight],
+  )
+  const veilTop = Math.round(windowHeight * (composing ? Math.min(veilRatio, 0.12) : veilRatio))
   const tts = useTts(blocks, { autoRead: true })
   const progress = useMemo(() => turnProgress(turn, viewer), [turn, viewer])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
@@ -248,23 +271,61 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   // hasta el final; la carga y el autoscroll no cuentan (como la web).
   const userScrollRef = useRef(false)
   const [readToEnd, setReadToEnd] = useState(false)
+  const lastYRef = useRef(0)
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
     const distance = contentSize.height - contentOffset.y - layoutMeasurement.height
     atBottomRef.current = distance < NEAR_BOTTOM
-    if (userScrollRef.current && distance < 40) setReadToEnd(true)
+    // Solo al bajar leyendo: subir a buscar el inicio del turno no abre nada.
+    const goingDown = contentOffset.y > lastYRef.current
+    lastYRef.current = contentOffset.y
+    if (userScrollRef.current && goingDown && distance < 40) setReadToEnd(true)
     if (atBottomRef.current) setBehind(false)
+  }
+  // Donde empieza lo nuevo: al llegar la narracion de un turno la vista se
+  // queda al inicio de ella, no al final (Gabino, 25-09: se iba hasta abajo
+  // y habia que subir a buscar donde empezaba la respuesta).
+  const contentHeightRef = useRef(0)
+  const anchoredRef = useRef(false)
+  const onContentSizeChange = (_w: number, h: number) => {
+    contentHeightRef.current = h
   }
   const turnId = turn?.id ?? null
   useEffect(() => {
     userScrollRef.current = false
     setReadToEnd(false)
   }, [turnId])
+  // Mientras el director narra se prepara el ancla: el primer lote que llegue
+  // despues se lee desde su inicio.
   useEffect(() => {
-    if (blocks.length === 0 && !progress.narrating) return
-    if (atBottomRef.current) scrollToEnd()
-    else setBehind(true)
-  }, [blocks.length, progress.narrating, scrollToEnd])
+    if (progress.narrating) anchoredRef.current = false
+  }, [progress.narrating])
+  const firstLoadRef = useRef(true)
+  const prevCountRef = useRef(0)
+  useEffect(() => {
+    if (blocks.length === 0) return
+    // El efecto corre antes de que el ScrollView mida lo nuevo: la altura
+    // guardada todavia es la de antes, que es justo donde empieza lo nuevo.
+    const before = contentHeightRef.current
+    if (blocks.length <= prevCountRef.current) {
+      prevCountRef.current = blocks.length
+      return
+    }
+    prevCountRef.current = blocks.length
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false
+      scrollToEnd()
+      return
+    }
+    if (!atBottomRef.current) {
+      setBehind(true)
+      return
+    }
+    if (anchoredRef.current) return
+    anchoredRef.current = true
+    // Al inicio de lo nuevo, con un poco de lo anterior como contexto.
+    setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(0, before - 48), animated: true }), 120)
+  }, [blocks.length, scrollToEnd])
 
   // Bandera de narrador compartida: este telefono anuncia mientras lee (y
   // refresca el anuncio, que caduca solo), y refleja a quien lea en otro.
@@ -463,7 +524,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
-      <View style={styles.header}>
+      <View style={[styles.header, screen && styles.hidden]}>
         <Pressable onPress={onBack} hitSlop={12} style={styles.headerSide} accessibilityRole="button" accessibilityLabel="Volver a tus mesas">
           <Icon d={ICON.back} size={22} color={theme.colors.inkDim} />
         </Pressable>
@@ -510,13 +571,19 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             ) : null}
           </>
         ) : null}
+        {sceneUri ? (
+          <View {...veilDrag.panHandlers} style={[styles.veilHandle, { top: veilTop - 14 }]} accessibilityLabel="Arrastra para ver más escena o más texto" accessibilityRole="adjustable">
+            <View style={styles.veilGrip} />
+          </View>
+        ) : null}
         <ScrollView
           ref={scrollRef}
-          style={[styles.scroll, sceneUri ? [styles.sceneVeil, { marginTop: Math.round(windowHeight * (composing ? 0.12 : 0.4)) }] : null]}
+          style={[styles.scroll, sceneUri ? [styles.sceneVeil, { marginTop: veilTop }] : null]}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           onScroll={onScroll}
+          onContentSizeChange={onContentSizeChange}
           onScrollBeginDrag={() => {
             userScrollRef.current = true
           }}
@@ -530,7 +597,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             pill={turn ? `Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}` : null}
           />}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
-          <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} />
+          <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} />
           {start ? (
             <View style={styles.start}>
               <Text style={styles.startTitle}>{start.title}</Text>
@@ -583,8 +650,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </View>
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
-      <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />
-      <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />
+      {screen ? (
+        <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel="Salir de la pantalla de lectura">
+          <Text style={styles.screenExitText}>Salir de pantalla</Text>
+        </Pressable>
+      ) : null}
+      {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
+      {screen ? null : <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />}
 
       {maps.length > 0 ? (
         <MapPanel
@@ -638,6 +710,16 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         <TtsBar tts={tts} autoRead />
         <Text style={styles.sheetLabel}>Compartir la historia</Text>
         <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
+        <Text style={styles.sheetLabel}>Pantalla</Text>
+        <Button
+          label="Pantalla de lectura"
+          small
+          onPress={() => {
+            setPanel(null)
+            setScreen(true)
+          }}
+        />
+        <Text style={styles.screenHint}>Solo la historia, en grande, sin controles: para leer de lejos o proyectar.</Text>
       </GameSheet>
 
       <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : absolutePortrait}
@@ -700,6 +782,12 @@ const styles = StyleSheet.create({
   scenePill: { position: 'absolute', top: 10, left: 12, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(5, 5, 10, 0.6)' },
   scenePillText: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.ink },
   // Negro puro con alfa clarito (Gabino, 24-09): el texto va transparente encima.
+  hidden: { display: 'none' },
+  screenExit: { position: 'absolute', right: 14, bottom: 24, zIndex: 5, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(0, 0, 0, 0.6)', borderWidth: 1, borderColor: 'rgba(167, 139, 250, 0.5)' },
+  screenExitText: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.ink },
+  screenHint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  veilHandle: { position: 'absolute', left: 0, right: 0, height: 28, zIndex: 3, alignItems: 'center', justifyContent: 'center' },
+  veilGrip: { width: 44, height: 5, borderRadius: 3, backgroundColor: 'rgba(229, 231, 255, 0.55)' },
   sceneVeil: { backgroundColor: 'rgba(0, 0, 0, 0.3)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },

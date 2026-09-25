@@ -2735,7 +2735,7 @@ a.plain {
   position: relative;
   z-index: 1;
   margin-top: 42%;
-  margin-top: max(38dvh, 180px);
+  margin-top: var(--veil-top, max(38dvh, 180px));
   border-top: 1px solid rgba(167, 139, 250, 0.35);
   border-radius: 18px 18px 0 0;
   /* Negro puro con alfa clarito y sin desenfoque, igual que la app (Gabino,
@@ -2756,8 +2756,35 @@ a.plain {
 }
 @media (min-width: 900px) {
   .table.has-scene .scroll {
-    margin-top: max(46dvh, 260px);
+    margin-top: var(--veil-top, max(46dvh, 260px));
   }
+}
+/* Agarradera del panel de texto: se arrastra para repartir escena y texto. */
+.veil-grip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--veil-top, max(38dvh, 180px)) - 14px);
+  z-index: 2;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: ns-resize;
+  touch-action: none;
+}
+@media (min-width: 900px) {
+  .veil-grip {
+    top: calc(var(--veil-top, max(46dvh, 260px)) - 14px);
+  }
+}
+.veil-grip span {
+  width: 48px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(229, 231, 255, 0.55);
+}
+.table.has-scene:has(.turn textarea) .veil-grip {
+  display: none;
 }
 
 /* Con escena de fondo, el cuadro abierto ocupa lo menos posible. */

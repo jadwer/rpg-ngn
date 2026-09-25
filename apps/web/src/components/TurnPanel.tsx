@@ -134,7 +134,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el
           servidor, asi que no hay texto que editar ni dado fisico que creer. */}
-      {open && hasCharacter && fortunePending && !fortuneLanded ? (
+      {open && hasCharacter && fortunePending && !fortuneLanded && composing ? (
         <div className="fortune" role="group" aria-label="Tu Fortuna de esta sesión">
           <HoldDie
             die="1d20"
@@ -164,7 +164,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           }}
         >
           <span>¿Qué hace tu personaje?</span>
-          {suggestions.length > 0 ? <span className="count">{suggestions.length} ideas</span> : null}
+          {fortunePending && !fortuneLanded ? <span className="count">Tira tu Fortuna</span> : suggestions.length > 0 ? <span className="count">{suggestions.length} ideas</span> : null}
         </button>
       ) : null}
       {progress.canRespond && composing ? (
