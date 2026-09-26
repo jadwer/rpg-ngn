@@ -1,10 +1,12 @@
 import { ApiError, packPortraitUrl, type ApiClient, type PackOption, type PackSheets } from '@rpg-ngn/api-client'
 import { packOriginText, packStatusText } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Linking, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Portrait } from '../../components/Portrait'
 import { webOriginOf } from '../../online/server-url'
+import { Backdrop } from '../../components/Backdrop'
+import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
 
 interface Props {
@@ -69,16 +71,12 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link} numberOfLines={1}>
-            ‹ Explorar
-          </Text>
-        </Pressable>
-        <Text style={styles.title}>Mis mundos</Text>
-        <View style={{ minWidth: 64 }} />
-      </View>
-      <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={false} onRefresh={() => void load()} tintColor={theme.colors.accentBright} />}>
+      <PageHeader back="Explorar" onBack={onBack} />
+      <ScrollView contentContainerStyle={styles.scroll} refreshControl={<RefreshControl refreshing={false} onRefresh={() => void load()} tintColor={theme.colors.accentBright} />}>
+        <Backdrop />
+        <View style={styles.list}>
+        <Text style={styles.pageTitle}>Mis mundos</Text>
+        <Text style={styles.subtitle}>Los que subes, los que revisas y los de la comunidad que añadiste</Text>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         {review ? (
@@ -145,7 +143,15 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
 
         <Text style={styles.label}>Catálogo</Text>
         <Text style={styles.hint}>Mundos que otros publicaron y pasaron revisión. Añadirlos no copia nada: al crear una mesa los ves como opción.</Text>
-        {catalog?.length === 0 ? <Text style={styles.hint}>Todavía no hay mundos publicados.</Text> : null}
+        {catalog?.length === 0 ? (
+          <Text style={styles.hint}>
+            Todavía no hay mundos de la comunidad. Los oficiales están en{' '}
+            <Text style={styles.linkInline} onPress={onBack}>
+              Explorar
+            </Text>
+            .
+          </Text>
+        ) : null}
         {catalog?.map((p) => (
           <View key={`c${p.packId}`} style={styles.card}>
             <Text style={styles.name}>{p.name}</Text>
@@ -162,6 +168,7 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
             </View>
           </View>
         ))}
+        </View>
       </ScrollView>
     </View>
   )
@@ -209,14 +216,15 @@ function Preview({ client, pack }: { client: ApiClient; pack: PackOption }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
-  list: { padding: 16, gap: 12, paddingBottom: 48 },
+  scroll: { paddingBottom: 48 },
+  list: { width: '100%', maxWidth: 760, alignSelf: 'center', padding: 16, gap: 12 },
+  pageTitle: { fontFamily: theme.fonts.display, fontSize: 34, color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 8 },
+  subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -6, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6 },
+  linkInline: { color: theme.colors.nebula, textDecorationLine: 'underline' },
   label: { marginTop: 10, fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
-  card: { gap: 8, padding: 14, borderRadius: theme.radius, borderWidth: 1, borderColor: theme.colors.borderSoft, backgroundColor: theme.colors.panel },
+  card: { gap: 8, padding: 14, borderRadius: theme.radius, borderWidth: 1, borderColor: theme.colors.borderSoft, backgroundColor: 'rgba(17, 22, 34, 0.9)' },
   name: { fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink },
   tagline: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
   chip: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.accentBright, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },

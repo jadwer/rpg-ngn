@@ -3,7 +3,7 @@
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 
 interface Props {
   packId: string
@@ -24,6 +24,74 @@ interface Props {
   showLine?: boolean | undefined
 }
 
+const ZOOM_MAX = 4
+
+/**
+ * Zoom del mapa (Gabino, 26-09): rueda o pellizco para acercar, arrastrar
+ * para moverse, botones y doble clic para volver. Transformacion CSS sobre
+ * una capa interior: la caja sigue midiendo lo que la imagen, asi los puntos
+ * en porcentaje no se mueven de su sitio.
+ */
+function useMapZoom() {
+  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
+  const box = useRef<HTMLDivElement | null>(null)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const gesture = useRef<{ s: number; x: number; y: number; dist: number; px: number; py: number } | null>(null)
+
+  const clamp = (s: number, x: number, y: number) => {
+    const scale = Math.min(ZOOM_MAX, Math.max(1, s))
+    const w = box.current?.clientWidth ?? 0
+    const h = box.current?.clientHeight ?? 0
+    const mx = ((scale - 1) * w) / 2
+    const my = ((scale - 1) * h) / 2
+    return { s: scale, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) }
+  }
+  const baseline = () => {
+    const pts = [...pointers.current.values()]
+    const [a, b] = pts
+    gesture.current = { ...zRef.current, dist: a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0, px: a?.x ?? 0, py: a?.y ?? 0 }
+  }
+  const zRef = useRef(z)
+  zRef.current = z
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    // Los botones de zoom viven dentro del lienzo: su clic no es un arrastre.
+    if ((e.target as HTMLElement).closest('button')) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {
+      // Sin captura el arrastre sigue funcionando mientras el puntero este encima.
+    }
+    baseline()
+  }
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!pointers.current.has(e.pointerId)) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    const g = gesture.current
+    if (!g) return
+    const [a, b] = [...pointers.current.values()]
+    if (a && b && g.dist) {
+      const s = (g.s * Math.hypot(a.x - b.x, a.y - b.y)) / g.dist
+      const k = s / g.s
+      setZ(clamp(s, g.x * k, g.y * k))
+    } else if (a && zRef.current.s > 1) {
+      setZ(clamp(g.s, g.x + a.x - g.px, g.y + a.y - g.py))
+    }
+  }
+  const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    pointers.current.delete(e.pointerId)
+    baseline()
+  }
+  const onWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
+    setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
+  }
+  const step = (factor: number) => setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
+  const reset = () => setZ({ s: 1, x: 0, y: 0 })
+  return { z, box, reset, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onWheel, onDoubleClick: reset } }
+}
+
 /**
  * El mapa de la mesa: la imagen que dibujo el creador del pack con los
  * lugares posados encima y quien esta en cada uno. No es un tablero
@@ -35,6 +103,7 @@ interface Props {
  * escritorio, porque ese pie esta limitado al 55% del alto (Gabino, 21-09).
  */
 export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: controlled, onOpenChange, showLine = true }: Props) {
+  const zoom = useMapZoom()
   const [own, setOwn] = useState(false)
   const open = controlled ?? own
   const setOpen = (value: boolean) => {
@@ -93,7 +162,10 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
                 {maps.length > 1 ? (
                   <div className="segmented mapas" role="tablist" aria-label="Mapas del pack">
                     {maps.map((m, i) => (
-                      <button key={m.id} type="button" role="tab" aria-selected={i === index} aria-pressed={i === index} onClick={() => setChosen(i)}>
+                      <button key={m.id} type="button" role="tab" aria-selected={i === index} aria-pressed={i === index} onClick={() => {
+                        setChosen(i)
+                        zoom.reset()
+                      }}>
                         {m.name}
                       </button>
                     ))}
@@ -104,8 +176,9 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
                 Cerrar <span className="k">Esc</span>
               </button>
             </header>
-            <div className="lienzo">
-              {src ? <img src={src} alt={view.map.name} /> : null}
+            <div className={`lienzo zoomable${zoom.z.s > 1 ? ' acercado' : ''}`} ref={zoom.box} {...zoom.handlers}>
+              <div className="capa" style={{ transform: `translate(${zoom.z.x}px, ${zoom.z.y}px) scale(${zoom.z.s})` }}>
+              {src ? <img src={src} alt={view.map.name} draggable={false} /> : null}
               {/* Los caminos: de aqui solo se va a donde el pack dice. */}
               <svg className="caminos" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
                 {edges.map((e) => (
@@ -129,8 +202,18 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
                   ) : null}
                 </div>
               ))}
+              </div>
+              <div className="zoom-botones">
+                <button type="button" aria-label="Acercar" onClick={zoom.zoomIn}>
+                  +
+                </button>
+                <button type="button" aria-label="Alejar" onClick={zoom.zoomOut}>
+                  −
+                </button>
+              </div>
             </div>
             <footer>
+              <p className="hint">Rueda o pellizco para acercar, arrastra para moverte; doble clic vuelve al mapa entero.</p>
               {view.offMap.length ? <p className="hint">De camino o fuera de escena: {view.offMap.map(nameOf).join(', ')}.</p> : null}
               {view.map.description ? <p className="hint">{view.map.description}</p> : null}
             </footer>

@@ -7,6 +7,8 @@ import { DeleteAccount } from '../../components/DeleteAccount'
 import { Field } from '../../components/Field'
 import { OwnKeysPanel } from '../../components/OwnKeysPanel'
 import type { StoredUser } from '../../online/storage'
+import { Backdrop } from '../../components/Backdrop'
+import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
 
 interface Props {
@@ -86,16 +88,20 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
-      <View style={styles.header}>
-        <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Mesas</Text>
-        </Pressable>
-        <Text style={styles.title}>Tu perfil</Text>
-        <Pressable onPress={onLogout} hitSlop={10} accessibilityRole="button">
-          <Text style={[styles.link, styles.logout]}>Salir</Text>
-        </Pressable>
-      </View>
-      <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+      <PageHeader
+        back="Mesas"
+        onBack={onBack}
+        right={
+          <Pressable onPress={onLogout} hitSlop={10} accessibilityRole="button">
+            <Text style={styles.link}>Salir</Text>
+          </Pressable>
+        }
+      />
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <Backdrop />
+        <View style={styles.form}>
+        <Text style={styles.pageTitle}>Tu perfil</Text>
+        <Text style={styles.subtitle}>Tu cuenta, tus créditos y tus claves</Text>
         <View style={styles.card}>
           <Text style={styles.label}>Cuenta</Text>
           <Field label="Nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />
@@ -133,20 +139,20 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
 
         <DeleteAccount client={client} onDeleted={onDeleted} />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-  logout: { textAlign: 'right' },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
-  spacer: { minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
-  form: { padding: 16, paddingBottom: 48, gap: 16 },
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
+  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
+  scroll: { paddingBottom: 48 },
+  form: { width: '100%', maxWidth: 760, alignSelf: 'center', padding: 16, gap: 16 },
+  pageTitle: { fontFamily: theme.fonts.display, fontSize: 34, color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 8 },
+  subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -10, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6 },
+  card: { backgroundColor: 'rgba(17, 22, 34, 0.9)', borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
   label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   block: { gap: 4 },
   fieldLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },

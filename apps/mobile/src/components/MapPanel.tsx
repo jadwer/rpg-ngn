@@ -1,8 +1,8 @@
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
-import { useMemo, useState } from 'react'
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useMemo, useRef, useState } from 'react'
+import { Image, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
 
 /**
@@ -36,12 +36,71 @@ interface Props {
 }
 
 /**
- * Ancho del lienzo. El alto sale de la proporcion real de la imagen: los mapas
- * son 3:2 (o 2:3 la mina) y un lienzo cuadrado con `cover` los recortaba, con
- * lo que los porcentajes caian fuera de sitio. La web hace lo mismo con
- * `fit-content` mas `object-fit: contain`.
+ * El lienzo ocupa el ancho disponible (hasta 900, en tablet) y no mas alto
+ * que dos tercios de la pantalla. El alto sale de la proporcion real de la
+ * imagen: los mapas son 3:2 (o 2:3 la mina) y un lienzo cuadrado con `cover`
+ * los recortaba, con lo que los porcentajes caian fuera de sitio. La web hace
+ * lo mismo con `fit-content` mas `object-fit: contain`.
  */
-const ANCHO = 320
+const ZOOM_MAX = 4
+
+function distance(e: GestureResponderEvent): number | null {
+  const [a, b] = e.nativeEvent.touches
+  return a && b ? Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY) : null
+}
+
+/**
+ * Zoom del mapa (Gabino, 26-09): pellizco con dos dedos, arrastre con uno
+ * cuando esta acercado, y botones. Con PanResponder y transformaciones, sin
+ * modulo nativo nuevo. Sin zoom, un dedo deja pasar el scroll de la hoja.
+ */
+function useZoom(width: number, height: number) {
+  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
+  const zRef = useRef(z)
+  zRef.current = z
+  const base = useRef({ s: 1, x: 0, y: 0, dist: 0, dx: 0, dy: 0, fingers: 0 })
+
+  const clamp = (s: number, x: number, y: number) => {
+    const scale = Math.min(ZOOM_MAX, Math.max(1, s))
+    const mx = ((scale - 1) * width) / 2
+    const my = ((scale - 1) * height) / 2
+    return { s: scale, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) }
+  }
+
+  const responder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponderCapture: (e) => e.nativeEvent.touches.length >= 2 || zRef.current.s > 1,
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: (e, g) => {
+          base.current = { ...zRef.current, dist: distance(e) ?? 0, dx: g.dx, dy: g.dy, fingers: e.nativeEvent.touches.length }
+        },
+        onPanResponderMove: (e, g) => {
+          const fingers = e.nativeEvent.touches.length
+          // Al pasar de uno a dos dedos (o al reves) se toma de nuevo la referencia.
+          if (fingers !== base.current.fingers) {
+            base.current = { ...zRef.current, dist: distance(e) ?? 0, dx: g.dx, dy: g.dy, fingers }
+            return
+          }
+          const b = base.current
+          const d = distance(e)
+          if (d && b.dist) {
+            const s = (b.s * d) / b.dist
+            const k = s / b.s
+            setZ(clamp(s, b.x * k, b.y * k))
+          } else {
+            setZ(clamp(b.s, b.x + (g.dx - b.dx), b.y + (g.dy - b.dy)))
+          }
+        },
+      }),
+    [width, height],
+  )
+
+  const step = (factor: number) => setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
+  const reset = () => setZ({ s: 1, x: 0, y: 0 })
+  return { z, handlers: responder.panHandlers, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), reset }
+}
 
 export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: openProp, onClose }: Props) {
   const [openSelf, setOpenSelf] = useState(false)
@@ -52,6 +111,13 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
   const [chosen, setChosen] = useState<number | null>(null)
   // Proporcion ancho/alto de la imagen cargada; 3:2 hasta saberla.
   const [aspect, setAspect] = useState(1.5)
+  const screen = useWindowDimensions()
+  const ANCHO = Math.min(screen.width - 32, 900, screen.height * 0.66 * aspect)
+  const ALTO = ANCHO / aspect
+  const zoom = useZoom(ANCHO, ALTO)
+  // Con un dedo sobre el mapa la hoja no se desplaza: el scroll nativo de
+  // Android se quedaba con el gesto antes de que llegara el pellizco.
+  const [touching, setTouching] = useState(false)
   const index = chosen ?? currentMapIndex(maps, world, party, viewerCharacterId)
   const map = maps[index] ?? null
   const view = useMemo(() => mapView(map, world, party), [map, world, party])
@@ -62,7 +128,6 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
   const path = packMapUrl(packId, view.map.image)
   const src = path ? `${baseUrl}${path}` : null
   const resumen = whereEveryoneIs(view, nameOf)
-  const ALTO = ANCHO / aspect
 
   return (
     <>
@@ -84,11 +149,17 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             <Text style={styles.headerLink} />
           </View>
 
-          <ScrollView contentContainerStyle={styles.body}>
+          <ScrollView contentContainerStyle={styles.body} scrollEnabled={!touching}>
             {maps.length > 1 ? (
               <View style={styles.selector}>
                 {maps.map((m, i) => (
-                  <Pressable key={m.id} onPress={() => setChosen(i)} style={[styles.pestana, i === index && styles.pestanaActiva]}>
+                  <Pressable
+                    key={m.id}
+                    onPress={() => {
+                      setChosen(i)
+                      zoom.reset()
+                    }}
+                    style={[styles.pestana, i === index && styles.pestanaActiva]}>
                     <Text style={[styles.pestanaTexto, i === index && styles.pestanaTextoActivo]}>{m.name}</Text>
                   </Pressable>
                 ))}
@@ -96,7 +167,8 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             ) : null}
             <Text style={styles.resumen}>{resumen}</Text>
 
-            <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]}>
+            <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]} {...zoom.handlers} onTouchStart={() => setTouching(true)} onTouchEnd={() => setTouching(false)} onTouchCancel={() => setTouching(false)}>
+              <View style={{ width: ANCHO, height: ALTO, transform: [{ translateX: zoom.z.x }, { translateY: zoom.z.y }, { scale: zoom.z.s }] }}>
               {src ? (
                 <Image
                   source={{ uri: src }}
@@ -149,7 +221,17 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
                   </Text>
                 </View>
               ))}
+              </View>
+              <View style={styles.zoomBar}>
+                <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
+                  <Text style={styles.zoomText}>+</Text>
+                </Pressable>
+                <Pressable onPress={zoom.zoomOut} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Alejar">
+                  <Text style={styles.zoomText}>−</Text>
+                </Pressable>
+              </View>
             </View>
+            <Text style={styles.nota}>Pellizca para acercar y arrastra para moverte por el mapa.</Text>
 
             {view.offMap.length > 0 ? <Text style={styles.nota}>{`De camino o fuera de escena: ${view.offMap.map(nameOf).join(', ')}.`}</Text> : null}
             {view.map.description ? <Text style={styles.nota}>{view.map.description}</Text> : null}
@@ -179,6 +261,9 @@ const styles = StyleSheet.create({
   pestanaTexto: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   pestanaTextoActivo: { color: '#ffffff' },
 
+  zoomBar: { position: 'absolute', right: 8, bottom: 8, gap: 6 },
+  zoomBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11, 15, 20, 0.8)', borderWidth: 1, borderColor: theme.colors.border },
+  zoomText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 20, color: theme.colors.ink, lineHeight: 22 },
   lienzo: { borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
 
   // Dos trazos: uno oscuro debajo, o las lineas claras se pierden sobre el

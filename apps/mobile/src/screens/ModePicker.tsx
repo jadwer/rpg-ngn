@@ -3,7 +3,7 @@ import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, t
 import { cardView, passView } from '@rpg-ngn/ui-logic'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomNav, type BottomTab } from '../components/BottomNav'
 import { Isotipo, LogoHorizontal, LogoVertical } from '../components/Brand'
@@ -80,6 +80,9 @@ const VELO = ['rgba(11, 15, 20, 0)', 'rgba(11, 15, 20, 0.55)', 'rgba(11, 15, 20,
  */
 export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
   const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
+  // El carrusel corre a todo lo ancho pero arranca donde arranca el texto (columna de 960).
+  const inset = Math.max(20, (width - 960) / 2 + 20)
   const live = useCatalog()
   const destacados = (live?.worlds ?? []).slice(0, FILA)
   const pase = passView(live?.pass ?? null)
@@ -127,7 +130,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
           </View>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.carousel, { paddingHorizontal: inset }]}>
           {live
             ? destacados.map((w) => {
                 const view = cardView(w)
