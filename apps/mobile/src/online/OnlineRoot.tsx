@@ -19,6 +19,8 @@ interface Props {
   /** El pack empaquetado en la app; se usa si coincide con el packId de la mesa. */
   pack: LoadedPack
   onExit: () => void
+  /** La pestaña con la que se entra desde la barra inferior del Inicio; sin ella, las mesas. */
+  initialTab?: 'mundos' | 'mesas' | 'comunidad'
 }
 
 type Stage =
@@ -47,9 +49,11 @@ const DEVICE_NAME = 'expo-rpg-ngn'
  * consulta por referencia en cada peticion; un 401 en cualquier pantalla
  * borra la sesion y vuelve al login con aviso.
  */
-export function OnlineRoot({ pack, onExit }: Props) {
+export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
   const tokenRef = useRef<string | null>(null)
   const [stage, setStage] = useState<Stage>({ name: 'booting' })
+  // Donde cae la sesion al entrar: la pestaña que se toco en el Inicio.
+  const landing: Stage = initialTab === 'mundos' ? { name: 'explore' } : initialTab === 'comunidad' ? { name: 'pronto' } : { name: 'tables' }
   const [session, setSession] = useState<Session | null>(null)
   const [serverUrl, setServerUrl] = useState<string>('')
   const [busy, setBusy] = useState(false)
@@ -129,7 +133,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
     await Promise.all([storage.setServerUrl(normalizeBaseUrl(url)), storage.setToken(token), storage.setUser(user)])
     setServerUrl(normalizeBaseUrl(url))
     setSession({ client, user })
-    setStage({ name: 'tables' })
+    setStage(landing)
     void loadTables(client)
   }
 
@@ -147,7 +151,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
           if (!alive) return
           const stored = { id: me.id, name: me.name, email: me.email }
           setSession({ client, user: stored })
-          setStage({ name: 'tables' })
+          setStage(landing)
           void loadTables(client)
           return
         } catch (caught) {

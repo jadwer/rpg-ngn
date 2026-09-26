@@ -2,7 +2,7 @@ import { memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharact
 import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Image, ImageBackground, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
+import { ActivityIndicator, Image, ImageBackground, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
@@ -16,6 +16,12 @@ import { theme } from '../../theme'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const FONDO: ImageSourcePropType = require('../../../assets/fondo-mesas.webp')
+// En horizontal (tablet) el recorte ancho, como la web: el vertical se pixelaba al estirarlo.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const FONDO_ANCHO: ImageSourcePropType = require('../../../assets/fondo-mesas-ancho.webp')
+
+/** Ancho a partir del cual el contenido se centra y los botones van en fila (tablet). */
+const ANCHO_TABLET = 700
 
 interface Props {
   client: ApiClient
@@ -47,6 +53,8 @@ interface Props {
  */
 export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, remoteCharacters = {}, onOpen, onCreate, onRefresh, onProfile, onTab, onUnauthorized }: Props) {
   const insets = useSafeAreaInsets()
+  const { width, height } = useWindowDimensions()
+  const wide = width >= ANCHO_TABLET
   const [filter, setFilter] = useState<TableFilter>('todas')
   const [joining, setJoining] = useState(false)
   const [options, setOptions] = useState<string | null>(null)
@@ -76,30 +84,37 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.accentBright} colors={[theme.colors.accentBright]} progressBackgroundColor={theme.colors.panel} />}
       >
-        <ImageBackground source={FONDO} style={styles.hero} imageStyle={styles.heroImage} resizeMode="cover">
+        <ImageBackground source={width > height ? FONDO_ANCHO : FONDO} style={styles.hero} imageStyle={styles.heroImage} resizeMode="cover">
           <View style={styles.heroShade} />
-          <Text style={styles.title}>Tus mesas</Text>
-          <Text style={styles.subtitle}>Historias en las que estás jugando</Text>
-          <Pressable onPress={onCreate} style={({ pressed }) => [styles.bigBtn, styles.primary, pressed && styles.pressed]} accessibilityRole="button">
-            <Icon d={ICON.plus} size={18} color="#ffffff" />
-            <Text style={styles.bigBtnText}>Crear mesa</Text>
-          </Pressable>
-          <Pressable onPress={() => setJoining((v) => !v)} style={({ pressed }) => [styles.bigBtn, styles.outline, pressed && styles.pressed]} accessibilityRole="button">
-            <Icon d={ICON.link} size={18} color={theme.colors.ink} />
-            <Text style={styles.bigBtnText}>Unirme con enlace</Text>
-          </Pressable>
+          <View style={[styles.column, styles.heroInner]}>
+            <Text style={styles.title}>Tus mesas</Text>
+            <Text style={styles.subtitle}>Historias en las que estás jugando</Text>
+            <View style={[styles.actions, wide && styles.actionsWide]}>
+              <Pressable onPress={onCreate} style={({ pressed }) => [styles.bigBtn, styles.primary, wide && styles.bigBtnWide, pressed && styles.pressed]} accessibilityRole="button">
+                <Icon d={ICON.plus} size={18} color="#ffffff" />
+                <Text style={styles.bigBtnText}>Crear mesa</Text>
+              </Pressable>
+              <Pressable onPress={() => setJoining((v) => !v)} style={({ pressed }) => [styles.bigBtn, styles.outline, wide && styles.bigBtnWide, pressed && styles.pressed]} accessibilityRole="button">
+                <Icon d={ICON.link} size={18} color={theme.colors.ink} />
+                <Text style={styles.bigBtnText}>Unirme con enlace</Text>
+              </Pressable>
+            </View>
+          </View>
         </ImageBackground>
 
-        <View style={styles.body}>
+        <View style={[styles.column, styles.body]}>
           {joining ? <JoinByLink client={client} onOpen={onOpen} onRefresh={onRefresh} startOpen onClose={() => setJoining(false)} /> : null}
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-            {TABLE_FILTERS.map((f) => (
-              <Pressable key={f} onPress={() => setFilter(f)} style={[styles.chip, filter === f && styles.chipOn]} accessibilityRole="tab" accessibilityState={{ selected: filter === f }}>
-                <Text style={[styles.chipText, filter === f && styles.chipTextOn]}>{filterLabel(f, counts[f])}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          {/* Altura fija: en Android la fila horizontal se colapsaba a 0 dentro del scroll vertical (v6). */}
+          <View style={styles.filtersBox}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll} contentContainerStyle={styles.filters}>
+              {TABLE_FILTERS.map((f) => (
+                <Pressable key={f} onPress={() => setFilter(f)} style={[styles.chip, filter === f && styles.chipOn]} accessibilityRole="tab" accessibilityState={{ selected: filter === f }}>
+                  <Text style={[styles.chipText, filter === f && styles.chipTextOn]}>{filterLabel(f, counts[f])}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
           {tables === null && loading ? (
@@ -122,7 +137,8 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
               <View key={table.id} style={[styles.card, state === 'finalizadas' && styles.cardQuiet]}>
                 <Pressable onPress={() => onOpen(table)} style={({ pressed }) => [styles.cardMain, pressed && styles.pressed]} accessibilityRole="button">
                   <View style={styles.coverBox}>
-                    {cover ? <Image source={{ uri: `${client.baseUrl}${cover}` }} style={styles.cover} resizeMode="cover" /> : <Text style={styles.coverLetter}>{(world?.name ?? table.name).charAt(0)}</Text>}
+                    {/* Absoluta: con alto 100% sin alto en el padre, Android usaba el alto real de la imagen y la tarjeta crecia a 1000 px (v6). */}
+                    {cover ? <Image source={{ uri: `${client.baseUrl}${cover}` }} style={StyleSheet.absoluteFill} resizeMode="cover" /> : <Text style={styles.coverLetter}>{(world?.name ?? table.name).charAt(0)}</Text>}
                   </View>
                   <View style={styles.cardBody}>
                     <View style={styles.cardTop}>
@@ -194,7 +210,12 @@ const styles = StyleSheet.create({
   avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.accent },
   avatarText: { fontFamily: theme.fonts.display, fontSize: 16, color: '#ffffff' },
   scroll: { paddingBottom: 24 },
-  hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18, gap: 10, overflow: 'hidden' },
+  hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18, overflow: 'hidden' },
+  column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
+  heroInner: { gap: 10 },
+  actions: { gap: 10 },
+  actionsWide: { flexDirection: 'row' },
+  bigBtnWide: { flex: 1 },
   heroImage: { resizeMode: 'cover' },
   heroShade: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
   title: { fontFamily: theme.fonts.display, fontSize: 36, color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 2 } },
@@ -204,8 +225,10 @@ const styles = StyleSheet.create({
   outline: { borderWidth: 1, borderColor: theme.colors.border, backgroundColor: 'rgba(11, 15, 20, 0.72)' },
   bigBtnText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 16, color: '#ffffff' },
   pressed: { opacity: 0.8 },
-  body: { paddingHorizontal: 16, gap: 12 },
-  filters: { gap: 8, paddingVertical: 4, paddingRight: 16 },
+  body: { paddingHorizontal: 16, paddingTop: 12, gap: 12 },
+  filtersBox: { height: 44 },
+  filtersScroll: { flexGrow: 0 },
+  filters: { gap: 8, alignItems: 'center', paddingRight: 16 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
   chipOn: { borderColor: theme.colors.accentBright, backgroundColor: 'rgba(124, 58, 237, 0.25)' },
   chipText: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
@@ -215,9 +238,8 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger, textAlign: 'center' },
   card: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 14, backgroundColor: theme.colors.panel, overflow: 'hidden' },
   cardQuiet: { opacity: 0.75 },
-  cardMain: { flexDirection: 'row' },
-  coverBox: { width: 104, backgroundColor: theme.colors.panel2, alignItems: 'center', justifyContent: 'center' },
-  cover: { width: '100%', height: '100%' },
+  cardMain: { flexDirection: 'row', minHeight: 120 },
+  coverBox: { width: 104, overflow: 'hidden', backgroundColor: theme.colors.panel2, alignItems: 'center', justifyContent: 'center' },
   coverLetter: { fontFamily: theme.fonts.display, fontSize: 36, color: theme.colors.inkFaint },
   cardBody: { flex: 1, padding: 12, gap: 3 },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },

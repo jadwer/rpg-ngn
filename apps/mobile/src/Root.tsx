@@ -13,7 +13,7 @@ import { SessionScreen } from './screens/SessionScreen'
 import { NarratorProvider } from './state/narrator'
 import { FONT_ASSETS, SYSTEM_SERIF, theme } from './theme'
 
-type Screen = { name: 'mode' } | { name: 'online' } | { name: 'picker' } | { name: 'session'; sessionId: string }
+type Screen = { name: 'mode' } | { name: 'online'; tab?: 'mundos' | 'mesas' | 'comunidad' } | { name: 'picker' } | { name: 'session'; sessionId: string }
 
 /**
  * Raiz de la app. Las fuentes del tema (Cinzel, Crimson Pro) y el pack
@@ -57,9 +57,17 @@ export function Root() {
       </View>
     )
   } else if (screen.name === 'mode') {
-    body = <ModePicker packName={pack.manifest.name} motto={pack.manifest.motto ?? null} onOnline={() => setScreen({ name: 'online' })} onOffline={goOffline} />
+    body = (
+      <ModePicker
+        packName={pack.manifest.name}
+        motto={pack.manifest.motto ?? null}
+        onOnline={() => setScreen({ name: 'online' })}
+        onOffline={goOffline}
+        onTab={(tab) => (tab === 'inicio' ? undefined : setScreen({ name: 'online', tab }))}
+      />
+    )
   } else if (screen.name === 'online') {
-    body = <OnlineRoot pack={pack} onExit={() => setScreen({ name: 'mode' })} />
+    body = <OnlineRoot pack={pack} onExit={() => setScreen({ name: 'mode' })} {...(screen.tab ? { initialTab: screen.tab } : {})} />
   } else if (screen.name === 'picker') {
     body = <SessionPicker campaign={campaign!} onSelect={(sessionId) => setScreen({ name: 'session', sessionId })} onBack={() => setScreen({ name: 'mode' })} />
   } else {
