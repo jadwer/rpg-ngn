@@ -111,3 +111,16 @@ export function topUpUrl(serverUrl: string): string {
     return ''
   }
 }
+
+/**
+ * Lo que se le dice a quien acaba de comprar, en tono de cronica (Gabino,
+ * 26-09: "que el cliente entre en mood"). Los turnos los acredita el webhook
+ * un momento despues; el texto no promete que ya esten.
+ */
+export function purchaseBlessing(turns: number): { title: string; text: string; farewell: string } {
+  return {
+    title: 'Habéis efectuado una adquisición magnífica',
+    text: `Los escribas del reino ya anotan ${turns} turnos más en vuestra crónica; aparecerán en vuestro saldo en un suspiro.`,
+    farewell: 'Que los altos espíritus acompañen vuestras aventuras.',
+  }
+}

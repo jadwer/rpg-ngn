@@ -1,7 +1,8 @@
 'use client'
 
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue } from '@rpg-ngn/ui-logic'
+import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
+import { Isotipo } from './Brand'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
@@ -22,6 +23,8 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  // La compra que acaba de salir bien: se celebra en una tarjeta propia.
+  const [blessed, setBlessed] = useState<number | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -65,9 +68,10 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
     }
   }
 
-  const done = async (message: string) => {
+  const done = async (turns: number) => {
     setBuying(null)
-    setNotice(message)
+    setNotice(null)
+    setBlessed(turns)
     await load()
     // El saldo lo sube el webhook de Stripe, que llega uno o varios segundos
     // despues: se vuelve a mirar un par de veces para que se vea sin recargar.
@@ -93,6 +97,8 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       ) : (
         <p className="hint">Cargando…</p>
       )}
+
+      {blessed !== null ? <Blessing turns={blessed} onClose={() => setBlessed(null)} /> : null}
 
       {buying && stripePromise ? (
         <Elements stripe={stripePromise} options={{ clientSecret: buying.clientSecret, locale: 'es' }}>
@@ -139,6 +145,22 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
   )
 }
 
+/** La compra salio bien: una tarjeta con tono de cronica, no una linea gris. */
+function Blessing({ turns, onClose }: { turns: number; onClose: () => void }) {
+  const b = purchaseBlessing(turns)
+  return (
+    <div className="blessing" role="status">
+      <Isotipo className="sello" height={56} />
+      <p className="titulo">{b.title}</p>
+      <p className="texto">{b.text}</p>
+      <p className="despedida">{b.farewell}</p>
+      <button type="button" className="btn primary" onClick={onClose}>
+        Continuar la aventura
+      </button>
+    </div>
+  )
+}
+
 /** El formulario de tarjeta. Vive dentro de <Elements> porque usa su contexto. */
 function PayForm({
   pack,
@@ -147,7 +169,7 @@ function PayForm({
   onError,
 }: {
   pack: CreditPack
-  onDone: (message: string) => Promise<void>
+  onDone: (turns: number) => Promise<void>
   onCancel: () => void
   onError: (message: string) => void
 }) {
@@ -169,7 +191,7 @@ function PayForm({
     }
     if (paymentIntent?.status === 'succeeded') {
       // El saldo lo actualiza el webhook, que puede tardar un segundo.
-      await onDone(`Pago recibido. Tus ${pack.turns} turnos aparecerán en un momento.`)
+      await onDone(pack.turns)
       return
     }
     onError('El pago quedó pendiente. Si se completa, los turnos se añadirán solos.')

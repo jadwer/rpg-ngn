@@ -1,6 +1,6 @@
 import type { CreditPack } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packSessions, packValue, topUpUrl } from './credits.js'
+import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packSessions, packValue, purchaseBlessing, topUpUrl } from './credits.js'
 
 const pack = (over: Partial<CreditPack>): CreditPack => ({
   id: 'prepago-5',
@@ -24,6 +24,13 @@ describe('credits', () => {
     expect(packPrice(mxn)).toBe('$2 USD ($37 MXN)')
     expect(packCharge(mxn)).toBe('$37 MXN')
     expect(packCharge(pack({}))).toBe('$5 USD')
+  })
+
+  it('la compra se celebra en tono de cronica y dice cuantos turnos llegan', () => {
+    const b = purchaseBlessing(40)
+    expect(b.title).toBe('Habéis efectuado una adquisición magnífica')
+    expect(b.text).toContain('40 turnos')
+    expect(b.farewell).toContain('altos espíritus')
   })
 
   it('traduce turnos a partidas, que es lo que el jugador entiende', () => {
