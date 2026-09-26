@@ -72,10 +72,10 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={10}>
           <Text style={styles.link} numberOfLines={1}>
-            ‹ Mesas
+            ‹ Explorar
           </Text>
         </Pressable>
-        <Text style={styles.title}>Mundos</Text>
+        <Text style={styles.title}>Mis mundos</Text>
         <View style={{ minWidth: 64 }} />
       </View>
       <ScrollView contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={false} onRefresh={() => void load()} tintColor={theme.colors.accentBright} />}>

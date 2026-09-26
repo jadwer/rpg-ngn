@@ -21,6 +21,8 @@ interface Props {
   /** Entrar a la mesa recien creada. */
   onOpen: (table: TableSummary) => void
   onUnauthorized: () => void
+  /** "Jugar" desde Explorar mundos: ese mundo va elegido. */
+  initialPackId?: string | undefined
 }
 
 /**
@@ -29,7 +31,7 @@ interface Props {
  * probar el DM e invitar amigos (la mesa ya existe y se puede entrar sin
  * invitar). El pack es el empaquetado en la app.
  */
-export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthorized }: Props) {
+export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthorized, initialPackId }: Props) {
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
@@ -38,7 +40,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
   const [packs, setPacks] = useState<PackOption[]>([])
-  const [packId, setPackId] = useState<string>(PACK_OPTION.id)
+  const [packId, setPackId] = useState<string>(initialPackId ?? PACK_OPTION.id)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<TableSummary | null>(null)

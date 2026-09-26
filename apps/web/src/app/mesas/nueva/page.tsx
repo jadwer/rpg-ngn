@@ -51,7 +51,9 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       (result) => {
         if (!alive) return
         setPacks(result)
-        setPackId((actual) => actual || result.find((p) => p.id === PACK_ID)?.id || result[0]?.id || '')
+        // "Jugar" desde Explorar mundos llega con ?mundo=<id>: ese va elegido.
+        const pedido = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mundo') : null
+        setPackId((actual) => actual || result.find((p) => p.id === pedido)?.id || result.find((p) => p.id === PACK_ID)?.id || result[0]?.id || '')
       },
       () => undefined,
     )

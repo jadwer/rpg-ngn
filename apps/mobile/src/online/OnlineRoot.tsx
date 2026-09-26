@@ -3,6 +3,7 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { ConnectScreen } from '../screens/online/ConnectScreen'
+import { ExploreScreen } from '../screens/online/ExploreScreen'
 import { ForgotPasswordScreen } from '../screens/online/ForgotPasswordScreen'
 import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { ProfileScreen } from '../screens/online/ProfileScreen'
@@ -28,8 +29,9 @@ type Stage =
   | { name: 'tables' }
   | { name: 'profile' }
   | { name: 'worlds' }
+  | { name: 'explore' }
   | { name: 'pronto' }
-  | { name: 'new-table' }
+  | { name: 'new-table'; packId?: string }
   | { name: 'table'; table: TableSummary }
 
 interface Session {
@@ -225,7 +227,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
   /** La barra inferior (26-09): Inicio sale a la portada, Mundos y Mesas cambian de pantalla, Comunidad es "Pronto". */
   const goTab = (tab: 'inicio' | 'mundos' | 'mesas' | 'comunidad') => {
     if (tab === 'inicio') onExit()
-    else if (tab === 'mundos') setStage({ name: 'worlds' })
+    else if (tab === 'mundos') setStage({ name: 'explore' })
     else if (tab === 'comunidad') setStage({ name: 'pronto' })
     else {
       setStage({ name: 'tables' })
@@ -293,6 +295,10 @@ export function OnlineRoot({ pack, onExit }: Props) {
     )
   }
 
+  if (stage.name === 'explore') {
+    return <ExploreScreen client={session.client} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
+  }
+
   if (stage.name === 'pronto') {
     return <ProntoScreen onTab={goTab} onTables={() => setStage({ name: 'tables' })} />
   }
@@ -301,10 +307,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
     return (
       <WorldsScreen
         client={session.client}
-        onBack={() => {
-          setStage({ name: 'tables' })
-          void loadTables(session.client)
-        }}
+        onBack={() => setStage({ name: 'explore' })}
         onUnauthorized={() => unauthorized()}
       />
     )
@@ -333,6 +336,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
         client={session.client}
         user={session.user}
         pack={pack}
+        initialPackId={stage.packId}
         onBack={() => {
           setStage({ name: 'tables' })
           void loadTables(session.client)

@@ -16,6 +16,8 @@ export const SHELL_ICON = {
   jugar: 'M7 4.5v15L19.5 12z',
   opciones: 'M5 12h.01M12 12h.01M19 12h.01',
   orden: 'M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0-3 3m3-3 3 3',
+  candado: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3',
+  volver: 'M15 5l-7 7 7 7',
 } as const
 
 export type ShellIconName = keyof typeof SHELL_ICON

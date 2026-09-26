@@ -1,7 +1,7 @@
 import type { PackSheets } from '@rpg-ngn/engine-contract'
 
 export type { PackSheets }
-import type { HttpResult, RequestOptions } from './http.js'
+import { query, type HttpResult, type RequestOptions } from './http.js'
 
 /**
  * Ajustes de la mesa (entrega 5b): el DM se elige entre los presets del
@@ -67,6 +67,45 @@ export interface WorldCatalog {
   gallery: string[]
   author: string
   provenance: 'original' | 'licensed' | 'user-provided'
+}
+
+/** Estado de una tarjeta del catalogo para quien mira (docs/24 seccion 3). */
+export type WorldState = 'gratis' | 'tuyo' | 'camino' | 'pase' | 'venta' | 'comunidad'
+
+/** Un mundo en Explorar mundos. */
+export interface CatalogWorldCard {
+  id: string
+  version: string
+  name: string
+  tagline: string | null
+  system: string | null
+  characters: number
+  sessions: number
+  origin: 'oficial' | 'comunidad'
+  catalog: WorldCatalog
+  state: WorldState
+  /** De donde salio si es tuyo: gratis, desbloqueo, pase, compra, creador o comunidad. */
+  source: string | null
+  price: { amount: number; currency: string } | null
+  featured: boolean
+  /** Solo en los de la comunidad: el id numerico para añadirlo a mis mundos. */
+  packId?: number
+  /** Camino de temporada (3b): capitulos que faltan y el umbral. */
+  path?: { threshold: number; have: number } | null
+}
+
+export interface CatalogWorldDetail extends CatalogWorldCard {
+  playable: Array<{ id: string; name: string; role: string; portrait: string | null }>
+  maps: Array<{ id: string; name: string; image: string }>
+}
+
+export interface CatalogFilters {
+  q?: string | undefined
+  genre?: string | undefined
+  tone?: string | undefined
+  players?: number | undefined
+  duration?: 'corta' | 'media' | 'larga' | undefined
+  origin?: 'oficial' | 'comunidad' | undefined
 }
 
 export interface PackOption {
@@ -164,6 +203,9 @@ export interface SettingsApi {
   listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
+  /** Explorar mundos (E9): publico; con sesion, cada mundo trae su estado para quien mira. */
+  catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[] }>
+  catalogWorld(id: string): Promise<CatalogWorldDetail>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
   /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
@@ -213,6 +255,17 @@ export function settingsApi(request: Request): SettingsApi {
     async listDmPresets() {
       const { data } = await request<{ data: DmPreset[]; meta: { default: string } }>('/api/v1/dm/presets')
       return { presets: data.data, defaultPreset: data.meta.default }
+    },
+
+    async catalogWorlds(filters = {}) {
+      const params: Record<string, string | number | undefined> = { ...filters }
+      const { data } = await request<{ data: CatalogWorldCard[]; meta: { genres: string[] } }>(`/api/v1/catalog/worlds${query(params)}`)
+      return { worlds: data.data, genres: data.meta.genres }
+    },
+
+    async catalogWorld(id) {
+      const { data } = await request<{ data: CatalogWorldDetail }>(`/api/v1/catalog/worlds/${encodeURIComponent(id)}`)
+      return data.data
     },
 
     async listPacks() {

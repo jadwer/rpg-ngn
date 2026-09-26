@@ -5134,3 +5134,346 @@ a {
     flex-shrink: 0;
   }
 }
+
+/* ===== Explorar mundos (26-09, conceptboard_catalog.png) ===== */
+.explorar {
+  max-width: 1180px;
+}
+.explorar-hero {
+  padding: 36px 0 30px;
+}
+.explorar-hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 4.6vw, 3.3rem);
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+.explorar-hero p {
+  max-width: 520px;
+  margin: 12px 0 20px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+.explorar-hero .acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.explorar-hero .btn:not(.primary) {
+  background: rgba(11, 15, 20, 0.7);
+}
+.explorar-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 20px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(18, 24, 38, 0.86);
+  scroll-margin-top: 80px;
+}
+.explorar-filtros .buscar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink-dim);
+}
+.explorar-filtros .buscar input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.explorar-filtros select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+.explorar-filtros .origen {
+  display: inline-flex;
+  gap: 4px;
+}
+.explorar-filtros .origen button {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.explorar-filtros .origen button[aria-pressed='true'] {
+  color: #fff;
+  border-color: var(--accent-bright);
+  background: rgba(124, 58, 237, 0.25);
+}
+.mundo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+.mundo-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(18, 24, 38, 0.92);
+}
+.mundo-card.estado-tuyo,
+.mundo-card.estado-pase {
+  border-color: var(--gold-dim);
+}
+.mundo-card .portada {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+.mundo-card .portada img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mundo-card.estado-camino .portada img {
+  filter: grayscale(0.5) brightness(0.6);
+}
+.mundo-card .sello {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(11, 15, 20, 0.85);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold-bright);
+  font-size: 0.78rem;
+}
+.mundo-card .candado {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: inline-flex;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(11, 15, 20, 0.85);
+  color: var(--ink);
+}
+.mundo-card .cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  padding: 12px 14px 14px;
+}
+.mundo-card .titulo {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: #fff;
+  text-decoration: none;
+}
+.mundo-card .chips,
+.mundo-detalle .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mundo-card .chips li,
+.mundo-detalle .chips li {
+  padding: 2px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+}
+.mundo-card .byline,
+.mundo-card .pista {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+}
+.mundo-card .precio {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mundo-card .barra {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--panel-3);
+  overflow: hidden;
+}
+.mundo-card .barra span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+}
+.mundo-card .btn {
+  margin-top: auto;
+  justify-content: center;
+}
+
+/* Detalle de un mundo */
+.mundo-detalle {
+  max-width: 1080px;
+}
+.mundo-detalle .migas {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.mundo-detalle .cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background-color: var(--panel);
+  background-size: cover;
+  background-position: center right;
+}
+.mundo-detalle h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #fff;
+}
+.mundo-detalle .byline {
+  margin: 0;
+  color: var(--ink-dim);
+}
+.mundo-detalle .accion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.mundo-detalle .accion .precio {
+  font-weight: 600;
+}
+.mundo-detalle .accion .sello {
+  color: var(--gold-bright);
+}
+.mundo-detalle .sinopsis {
+  max-width: 600px;
+  margin: 6px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.mundo-detalle .galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.mundo-detalle .galeria img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.mundo-detalle h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+}
+.mundo-detalle .jugables {
+  margin-top: 24px;
+}
+.mundo-detalle .jugables .lista {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.mundo-detalle .pj {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 124px;
+  text-align: center;
+}
+.mundo-detalle .pj .nombre {
+  font-weight: 600;
+}
+.mundo-detalle .pj .rol {
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+.mundo-detalle .fichas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+.mundo-detalle .fichas > div {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(18, 24, 38, 0.9);
+}
+.mundo-detalle dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 18px;
+  margin: 0;
+}
+.mundo-detalle dt {
+  color: var(--ink-dim);
+}
+.mundo-detalle dd {
+  margin: 0;
+}
+.mundo-detalle .incluye ul {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.9;
+}
+@media (max-width: 760px) {
+  .mundo-detalle .fichas {
+    grid-template-columns: 1fr;
+  }
+  .mundo-detalle .cabecera {
+    padding: 20px;
+    background-position: center;
+  }
+  .explorar-filtros select {
+    flex: 1;
+    min-width: 45%;
+  }
+}
