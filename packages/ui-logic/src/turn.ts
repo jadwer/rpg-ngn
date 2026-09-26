@@ -48,7 +48,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text }
     case 'roll': {
       const actor = block.actor ? (block.actor.includes(':') ? resolve(block.actor, null) : resolve(null, block.actor)) : null
-      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: null, text: block.text, ...(block.requested ? { requested: true } : {}) }
+      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: block.advantage ?? null, text: block.text, ...(block.requested ? { requested: true } : {}) }
     }
     case 'system':
       // Titulo y puntos: los usa la apertura de sesion (briefing y "como se juega" del pack).

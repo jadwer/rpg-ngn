@@ -233,6 +233,8 @@ export const TurnBlock = z.discriminatedUnion('type', [
     rolls: z.array(z.number().int()).optional(),
     /** La pidio el DM y la resolvio la API (no una tirada rapida ni el motor). Opcional: no sube la version. */
     requested: z.literal(true).optional(),
+    /** Con dos d20, cual cuenta (el mayor o el menor): para atenuar el otro. Opcional: no sube la version. */
+    advantage: z.enum(['advantage', 'disadvantage']).optional(),
   }),
   z.strictObject({
     type: z.literal('system'),

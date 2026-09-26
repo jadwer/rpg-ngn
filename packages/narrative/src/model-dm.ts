@@ -830,7 +830,7 @@ class LineInterpreter {
     }
     if (event['type'] === 'roll') {
       // La mesa ve el dado caer: un bloque roll con el resultado, tirado por el engine o escrito por el jugador.
-      const resolved = event['resolved'] as { die: string; result: number; skill?: string; source: string; rolls?: number[] }
+      const resolved = event['resolved'] as { die: string; result: number; skill?: string; source: string; rolls?: number[]; advantage?: boolean; disadvantage?: boolean }
       const actor = event['actor'] as string
       const name = this.ctx.pack.characters.get(refId(actor))?.name ?? refId(actor)
       const detail = resolved.skill ? ` (${resolved.skill})` : ''
@@ -845,6 +845,7 @@ class LineInterpreter {
           die: resolved.die,
           result: resolved.result,
           ...(resolved.rolls ? { rolls: resolved.rolls } : {}),
+          ...(resolved.advantage ? { advantage: 'advantage' as const } : resolved.disadvantage ? { advantage: 'disadvantage' as const } : {}),
         },
       }
     }

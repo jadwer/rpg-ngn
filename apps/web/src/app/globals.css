@@ -2963,6 +2963,10 @@ a.plain {
   height: 96px;
   font-size: 2.4rem;
 }
+.sprite-die .sprite.dropped {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
 .sprite-die.rolling .sprite,
 .sprite-die.rolling .generic {
   animation: die-shake 0.14s linear infinite;
@@ -4176,6 +4180,24 @@ a {
 .home-pie > .hint {
   grid-column: 1 / -1;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  /* La tarjeta de tirada en el telefono: el dado arriba, el texto debajo. */
+  .turn .roll-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px;
+  }
+  .turn .roll-card .sprite-die {
+    align-self: center;
+  }
+  .turn .roll-card .text {
+    min-width: 0;
+    text-align: center;
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 900px) {

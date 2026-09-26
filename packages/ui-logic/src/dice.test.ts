@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { diceFaces, facesOf, keptFace } from './dice.js'
+import { allFacesOf, diceFaces, droppedFace, facesOf, keptFace } from './dice.js'
 
 describe('diceFaces', () => {
+  it('con dos d20 solo uno cuenta y el otro se atenua; con 2d6 cuentan los dos', () => {
+    expect(droppedFace('1d20', 17, [17, 3])).toBe(1)
+    expect(droppedFace('1d20', 3, [17, 3])).toBe(0)
+    expect(droppedFace('1d20+2', 19, [17, 3])).toBe(1)
+    expect(droppedFace('2d6', 8, [3, 5])).toBeNull()
+    expect(droppedFace('1d20', 14, [14])).toBeNull()
+  })
+
+  it('todas las caras de un dado, para precargarlas; nada si no hay lamina', () => {
+    expect(allFacesOf('1d20')).toHaveLength(20)
+    expect(allFacesOf('2d6+1').map((f) => f.asset).slice(0, 2)).toEqual(['d6-1', 'd6-2'])
+    expect(allFacesOf('1d12')).toEqual([])
+    expect(allFacesOf('nada')).toEqual([])
+  })
+
   it('un dado solo sin modificador se pinta con el total', () => {
     expect(diceFaces('1d20', 14)).toEqual([{ sides: 20, value: 14, asset: 'd20-14' }])
     expect(diceFaces('1d6', 6)).toEqual([{ sides: 6, value: 6, asset: 'd6-6' }])

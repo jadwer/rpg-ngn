@@ -1,4 +1,4 @@
-import { diceFaces, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
+import { diceFaces, droppedFace, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { DICE_FACES } from '../../generated/dice'
@@ -74,6 +74,8 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
 
   const rolling = phase === 'holding' || phase === 'settling'
   const faces = outcome ? diceFaces(die, outcome.result, outcome.rolls ?? null) : face !== null ? diceFaces(die, face) : []
+  // Con ventaja o desventaja caen dos d20 y solo uno cuenta: el otro se atenua.
+  const dropped = outcome ? droppedFace(die, outcome.result, outcome.rolls ?? null) : null
   const idle = phase === 'idle' ? diceFaces(`1d${sides}`, sides)[0] : undefined
   const shown = face !== null ? face : sides
   const size = large ? styles.spriteLarge : styles.sprite
@@ -92,7 +94,7 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
         {faces.length > 0 ? (
           faces.map((f, index) => {
             const source = DICE_FACES[f.asset]
-            return source ? <Image key={`${f.asset}-${index}`} source={source} style={[size, glow]} /> : <Generic key={`g-${index}`} value={f.value} large={large} landed={phase === 'landed'} />
+            return source ? <Image key={`${f.asset}-${index}`} source={source} style={[size, glow, dropped === index && styles.dropped]} /> : <Generic key={`g-${index}`} value={f.value} large={large} landed={phase === 'landed'} />
           })
         ) : idle && DICE_FACES[idle.asset] ? (
           <Image source={DICE_FACES[idle.asset]} style={size} />
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
   sprite: { width: 56, height: 56, borderRadius: 10 },
   spriteLarge: { width: 96, height: 96, borderRadius: 14 },
   landed: { borderWidth: 2, borderColor: theme.colors.goldBright },
+  dropped: { opacity: 0.35 },
   generic: { width: 56, height: 56, borderRadius: 10, borderWidth: 1, borderColor: theme.colors.gold, backgroundColor: '#1a1526', alignItems: 'center', justifyContent: 'center' },
   genericLarge: { width: 96, height: 96, borderRadius: 14 },
   genericText: { fontFamily: theme.fonts.display, fontSize: 22, color: theme.colors.goldBright },

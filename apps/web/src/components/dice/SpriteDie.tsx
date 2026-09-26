@@ -1,6 +1,6 @@
 'use client'
 
-import { diceFaces, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
+import { allFacesOf, diceFaces, droppedFace, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import type { DiceRollerProps, RollOutcome } from './DiceRoller'
 
@@ -10,6 +10,9 @@ import type { DiceRollerProps, RollOutcome } from './DiceRoller'
  * soltar frena sobre el numero que trae `resolve`. Lo unico que sabe es
  * pintar caras: la maquina de estados vive en ui-logic (`runDieRoll`).
  */
+/** Dados cuyas caras ya se pidieron en esta pagina. */
+const preloaded = new Set<string>()
+
 export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onFailed, large = false }: DiceRollerProps) {
   const [face, setFace] = useState<number | null>(null)
   const [outcome, setOutcome] = useState<RollOutcome | null>(null)
@@ -29,6 +32,17 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
     },
     [],
   )
+
+  // Todas las caras se piden al montar el dado: cada una es un archivo y la
+  // primera vez salia a mitad del giro (Gabino, 25-09).
+  useEffect(() => {
+    if (!preloaded.has(die)) preloaded.add(die)
+    else return
+    for (const f of allFacesOf(die)) {
+      const img = new Image()
+      img.src = `/dice/${f.asset}.png`
+    }
+  }, [die])
 
   const start = () => {
     if (disabled || phase === 'holding' || phase === 'settling') return
@@ -70,6 +84,8 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
   const rolling = phase === 'holding' || phase === 'settling'
   // Al aterrizar se pintan todos los dados (2d6 son dos cubos); mientras gira, uno.
   const faces = outcome ? diceFaces(die, outcome.result, outcome.rolls ?? null) : face !== null ? diceFaces(die, face) : []
+  // Con ventaja o desventaja caen dos d20 y solo uno cuenta: el otro se atenua.
+  const dropped = outcome ? droppedFace(die, outcome.result, outcome.rolls ?? null) : null
   const shown = face !== null ? face : sides
   const idleAsset = diceFaces(`1d${sides}`, sides)[0]?.asset ?? null
 
@@ -98,7 +114,7 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
     >
       <span className="faces" aria-hidden>
         {faces.length > 0 ? (
-          faces.map((f, index) => <img key={`${f.asset}-${index}`} src={`/dice/${f.asset}.png`} alt="" className="sprite" />)
+          faces.map((f, index) => <img key={`${f.asset}-${index}`} src={`/dice/${f.asset}.png`} alt="" className={`sprite${dropped === index ? ' dropped' : ''}`} />)
         ) : phase === 'idle' && idleAsset ? (
           <img src={`/dice/${idleAsset}.png`} alt="" className="sprite" />
         ) : (
