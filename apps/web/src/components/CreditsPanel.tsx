@@ -2,10 +2,10 @@
 
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
 import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
-import { Isotipo } from './Brand'
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { Elements } from '@stripe/react-stripe-js'
+import { type Stripe } from '@stripe/stripe-js'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Blessing, PayForm, stripeFor } from './payments/Checkout'
 
 /**
  * Creditos de prepago: saldo, paquetes y pago con Stripe.
@@ -36,7 +36,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       setOwnKey((await client.listOwnKeys().catch(() => [])).some((k) => k.configured))
       // La clave la manda la API: cambiar de cuenta de Stripe no obliga a
       // reconstruir la web.
-      if (publishableKey) setStripePromise((actual) => actual ?? loadStripe(publishableKey))
+      if (publishableKey) setStripePromise((actual) => actual ?? stripeFor(publishableKey))
     } catch (e) {
       if (e instanceof ApiError && e.isUnauthorized) return unauthorized()
       setError('No se pudieron cargar los créditos.')
@@ -98,11 +98,18 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
         <p className="hint">Cargando…</p>
       )}
 
-      {blessed !== null ? <Blessing turns={blessed} onClose={() => setBlessed(null)} /> : null}
+      {blessed !== null ? <Blessing {...purchaseBlessing(blessed)} onClose={() => setBlessed(null)} /> : null}
 
       {buying && stripePromise ? (
         <Elements stripe={stripePromise} options={{ clientSecret: buying.clientSecret, locale: 'es' }}>
-          <PayForm pack={buying.pack} onDone={done} onCancel={() => setBuying(null)} onError={setError} />
+          <PayForm
+            summary={`${buying.pack.name}: ${packPrice(buying.pack)} por ${buying.pack.turns} turnos.`}
+            payLabel={packCharge(buying.pack)}
+            pendingNote="El pago quedó pendiente. Si se completa, los turnos se añadirán solos."
+            onPaid={() => done(buying.pack.turns)}
+            onCancel={() => setBuying(null)}
+            onError={setError}
+          />
         </Elements>
       ) : (
         <>
@@ -142,75 +149,5 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       {error ? <p className="error">{error}</p> : null}
       {notice ? <p className="hint">{notice}</p> : null}
     </section>
-  )
-}
-
-/** La compra salio bien: una tarjeta con tono de cronica, no una linea gris. */
-function Blessing({ turns, onClose }: { turns: number; onClose: () => void }) {
-  const b = purchaseBlessing(turns)
-  return (
-    <div className="blessing" role="status">
-      <Isotipo className="sello" height={56} />
-      <p className="titulo">{b.title}</p>
-      <p className="texto">{b.text}</p>
-      <p className="despedida">{b.farewell}</p>
-      <button type="button" className="btn primary" onClick={onClose}>
-        Continuar la aventura
-      </button>
-    </div>
-  )
-}
-
-/** El formulario de tarjeta. Vive dentro de <Elements> porque usa su contexto. */
-function PayForm({
-  pack,
-  onDone,
-  onCancel,
-  onError,
-}: {
-  pack: CreditPack
-  onDone: (turns: number) => Promise<void>
-  onCancel: () => void
-  onError: (message: string) => void
-}) {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [busy, setBusy] = useState(false)
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault()
-    if (!stripe || !elements || busy) return
-
-    setBusy(true)
-    const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: 'if_required' })
-    setBusy(false)
-
-    if (error) {
-      onError(error.message ?? 'El pago no se pudo completar.')
-      return
-    }
-    if (paymentIntent?.status === 'succeeded') {
-      // El saldo lo actualiza el webhook, que puede tardar un segundo.
-      await onDone(pack.turns)
-      return
-    }
-    onError('El pago quedó pendiente. Si se completa, los turnos se añadirán solos.')
-  }
-
-  return (
-    <form className="stack" onSubmit={(e) => void submit(e)}>
-      <p className="hint" style={{ margin: 0 }}>
-        {pack.name}: {packPrice(pack)} por {pack.turns} turnos.
-      </p>
-      <PaymentElement />
-      <div className="row">
-        <button type="submit" className="btn primary" disabled={!stripe || busy}>
-          {busy ? 'Pagando…' : `Pagar ${packCharge(pack)}`}
-        </button>
-        <button type="button" className="btn" onClick={onCancel} disabled={busy}>
-          Cancelar
-        </button>
-      </div>
-    </form>
   )
 }

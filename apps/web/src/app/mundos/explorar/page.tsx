@@ -1,10 +1,11 @@
 'use client'
 
-import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
+import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, durationLabel, passView, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { CatalogCheckout, type CatalogProduct } from '../../../components/payments/Checkout'
 import { PublicOrApp } from '../../../components/shell/PublicOrApp'
 import { ShellIcon } from '../../../components/shell/icons'
 
@@ -22,6 +23,8 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
   const [genres, setGenres] = useState<string[]>([])
   const [season, setSeason] = useState<SeasonPath | null>(null)
+  const [pass, setPass] = useState<SeasonPassOffer | null>(null)
+  const [buying, setBuying] = useState<CatalogProduct | null>(null)
   // Nombre y portada de cada mundo del camino, aunque un filtro lo esconda de la lista.
   const [known, setKnown] = useState<Record<string, CatalogWorldCard>>({})
   const [filters, setFilters] = useState<CatalogFilters>({})
@@ -34,6 +37,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
       const result = await client.catalogWorlds({ ...filters, ...(q.trim() ? { q: q.trim() } : {}) })
       setWorlds(result.worlds)
       setSeason(result.season)
+      setPass(result.pass)
       setKnown((actual) => ({ ...actual, ...Object.fromEntries(result.worlds.map((w) => [w.id, w])) }))
       if (result.genres.length) setGenres((actual) => (actual.length ? actual : result.genres))
       setError(null)
@@ -69,7 +73,17 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
       }
       return
     }
+    if (view.action === 'comprar') {
+      if (!signedIn) return router.push('/entrar?volver=/mundos/explorar')
+      setBuying({ kind: 'mundo', id: world.id, name: world.name })
+      return
+    }
     router.push(`/mundos/explorar/${encodeURIComponent(world.id)}`)
+  }
+
+  const buyPass = () => {
+    if (!signedIn) return router.push('/entrar?volver=/mundos/explorar')
+    if (season) setBuying({ kind: 'pase', name: season.name })
   }
 
   return (
@@ -91,7 +105,8 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
         </div>
       </section>
 
-      {season && season.worlds.length > 0 ? <SeasonBlock season={season} known={known} signedIn={signedIn} /> : null}
+      {season && season.worlds.length > 0 ? <SeasonBlock season={season} known={known} signedIn={signedIn} pass={pass} onBuyPass={buyPass} /> : null}
+      {buying ? <CatalogCheckout client={client} product={buying} onClose={() => setBuying(null)} onDone={load} /> : null}
 
       <div className="explorar-filtros" id="mundos">
         <label className="buscar">
@@ -184,8 +199,9 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
 }
 
 /** "Temporada actual: caminos que se abren jugando" (tablero A). */
-function SeasonBlock({ season, known, signedIn }: { season: SeasonPath; known: Record<string, CatalogWorldCard>; signedIn: boolean }) {
+function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: SeasonPath; known: Record<string, CatalogWorldCard>; signedIn: boolean; pass: SeasonPassOffer | null; onBuyPass: () => void }) {
   const { progress, stops } = seasonProgress(season)
+  const offer = passView(pass)
   return (
     <section className="temporada" aria-label="Temporada actual">
       <div className="cabeza">
@@ -230,6 +246,20 @@ function SeasonBlock({ season, known, signedIn }: { season: SeasonPath; known: R
             })}
           </ol>
         </div>
+        {offer ? (
+          <aside className={`pase${offer.owned ? ' activo' : ''}`} aria-label="Pase de temporada">
+            <h3>Pase de temporada</h3>
+            <ul>
+              {offer.perks.map((perk) => (
+                <li key={perk}>{perk}</li>
+              ))}
+            </ul>
+            <p className="precio">{offer.owned ? 'Pago único, ya hecho' : `${offer.price}, pago único`}</p>
+            <button type="button" className={`btn${offer.owned ? '' : ' primary'}`} disabled={offer.owned} onClick={onBuyPass}>
+              {offer.label}
+            </button>
+          </aside>
+        ) : null}
       </div>
     </section>
   )

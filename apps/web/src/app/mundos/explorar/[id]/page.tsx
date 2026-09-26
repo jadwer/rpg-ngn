@@ -5,6 +5,7 @@ import { cardView, durationLabel, playersTag } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { CatalogCheckout } from '../../../../components/payments/Checkout'
 import { Portrait } from '../../../../components/Portrait'
 import { PublicOrApp } from '../../../../components/shell/PublicOrApp'
 import { ShellIcon } from '../../../../components/shell/icons'
@@ -26,6 +27,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
   const [world, setWorld] = useState<CatalogWorldDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [buying, setBuying] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -55,6 +57,11 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
   const gallery = [...world.catalog.gallery.map((f) => packArtUrl(world.id, f)), ...world.maps.map((m) => packMapUrl(world.id, m.image))].filter((u): u is string => !!u)
 
   const act = async () => {
+    if (view.action === 'comprar') {
+      if (!signedIn) return router.push(`/entrar?volver=/mundos/explorar/${world.id}`)
+      setBuying(true)
+      return
+    }
     if (view.action === 'jugar') {
       router.push(signedIn ? `/mesas/nueva?mundo=${encodeURIComponent(world.id)}` : `/entrar?volver=${encodeURIComponent(`/mesas/nueva?mundo=${world.id}`)}`)
       return
@@ -75,6 +82,14 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
 
   return (
     <div className="mundo-detalle">
+      {buying ? (
+        <CatalogCheckout
+          client={client}
+          product={{ kind: 'mundo', id: world.id, name: world.name }}
+          onClose={() => setBuying(false)}
+          onDone={async () => setWorld(await client.catalogWorld(world.id))}
+        />
+      ) : null}
       <section className="cabecera" style={cover ? { backgroundImage: `linear-gradient(90deg, rgba(11,15,20,0.95) 0%, rgba(11,15,20,0.75) 45%, rgba(11,15,20,0.2) 100%), url(${cover})` } : undefined}>
         <Link href="/mundos/explorar" className="migas">
           <ShellIcon name="volver" /> Explorar mundos · {world.catalog.genre}
@@ -90,7 +105,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
         </ul>
         <p className="byline">{view.byline}</p>
         <div className="accion">
-          {view.action === 'jugar' || view.action === 'anadir' ? (
+          {view.action === 'jugar' || view.action === 'anadir' || view.action === 'comprar' ? (
             <button type="button" className="btn primary grande" disabled={busy} onClick={() => void act()}>
               {busy ? <span className="spinner" aria-hidden /> : null}
               {view.label}

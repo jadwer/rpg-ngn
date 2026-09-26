@@ -468,30 +468,29 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
   (60 turnos, 65 con la apertura); el anfitrion ve un aviso cuando la sesion
   agota su cupo. Antes eran 3 y 6, y la mesa 39 dejo de ilustrar en el turno
   22 sin que nadie supiera por que
-- [ ] **2. Mesas con el tablero nuevo** (`img/design_ui_ux/mesas_ux.png`):
-  barra superior con logo y nombre (Historias, Mundos, Mesas, Comunidad,
-  busqueda, avisos, avatar), barra lateral en escritorio (Inicio, Mundos,
-  Mis mesas, Campañas, Personajes, Amigos, Configuracion) y barra inferior en
-  la app (Inicio, Mundos, Mesas, Comunidad). Lo que aun no existe lleva a una
-  pagina "Pronto". Fondo `fondo-mesas.webp` / `fondo-mesas-movil.webp`
-  (recortados de `img/assets/backgrounds/`), cabecera "Tus mesas" con Crear
-  mesa y Unirme con enlace, filtros Todas/Activas/En pausa/Finalizadas con
-  conteo y orden por ultima actividad, tarjeta con portada del mundo,
-  etiquetas, sinopsis, avatares, Continuar y Opciones
-- [ ] **3a. Explorar mundos** (`img/design_ui_ux/conceptboard_catalog.png`):
-  bloque `catalog` en `pack.json` (genero, tono, jugadores, duracion,
-  sinopsis, portada, autor), tabla `catalog_worlds`, `catalog:sync`,
-  `GET /api/v1/catalog/worlds` publico con filtros y estado por usuario,
-  detalle del mundo con personajes, mapa y "que incluye", "Jugar" que crea la
-  mesa. Menu: **Explorar mundos** (catalogo) y **Mis mundos** (subir,
-  revisar, activar)
-- [ ] **3b. Capitulos y camino de temporada**: ledger de capitulos al
-  resolver turnos, temporadas con umbrales, desbloqueo permanente
-- [ ] **3c. Pase de temporada** (depende de 1): 5 USD pago unico,
-  `atomo-subscriptions`, capitulos x2, mundos de temporada, 5 mundos
-  privados, revision con prioridad
-- [ ] **3d. Compra directa** (depende de 1): solo mundos originales o
-  licenciados
+- [x] **2. Mesas con el tablero nuevo** (26-09, `img/design_ui_ux/mesas_ux.png`):
+  barra superior con logo, barra lateral en escritorio, barra inferior en la
+  app, paginas "Pronto", fondo nuevo, filtros con conteo y tarjetas con
+  portada y avatares. El mismo marco cubre Mis mundos, Mi cuenta, Voz y Nueva
+  mesa, y el menu de la mesa lleva las mismas secciones que la barra lateral
+- [x] **3a. Explorar mundos** (26-09): bloque `catalog` en `pack.json`,
+  `catalog_worlds` y `catalog:set`, catalogo publico con filtros y estado por
+  usuario, detalle con personajes y mapas, "Jugar" crea la mesa
+- [x] **3b. Capitulos y camino de temporada** (26-09): ledger de capitulos
+  al resolver, temporadas con umbrales, desbloqueo permanente
+  (`season:open`). Temporada 1: piloto gratis, La Mascarada a 20
+- [x] **3c. Pase de temporada** (26-09): 5 USD pago unico cobrado en MXN
+  como los paquetes (`season_passes`, `PassService`). Da capitulos x2, abre
+  los mundos del camino al momento (`source = pase`, se quedan) y sube los
+  mundos propios de 2 a 5. No usa `atomo-subscriptions`: ese package es el
+  editorial (lectores, paywall, medidores) y un pago unico no lo necesita.
+  La revision con prioridad queda fuera hasta que la cola tenga volumen
+- [x] **3d. Compra directa** (26-09): `POST /api/v1/catalog/worlds/{id}/purchase`
+  para mundos oficiales con precio (`catalog:set <pack> --price=300`), solo
+  los de procedencia original o con licencia. El webhook crea la activacion
+  (`source = compra`) y un reembolso la retira; `PackAccess` bloquea el
+  mundo hasta comprarlo, salvo a quien ya lo juega en una mesa. En la app,
+  "Comprar en la web", como los paquetes
 - [ ] **4. APK v6** al cerrar 2 y 3a
 
 ## Pendientes del 25-09

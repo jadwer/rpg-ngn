@@ -5543,7 +5543,7 @@ a {
   padding: 0;
   list-style: none;
 }
-.temporada li {
+.temporada .camino li {
   position: absolute;
   top: 0;
   display: flex;
@@ -5653,4 +5653,55 @@ a {
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   color: #fff;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* Pase de temporada (E9 3c): tercera columna del bloque de temporada, como en el tablero A. */
+.temporada .cuerpo:has(.pase) {
+  grid-template-columns: 150px 1fr 240px;
+}
+.temporada .pase {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: linear-gradient(160deg, rgba(212, 175, 55, 0.12), rgba(124, 58, 237, 0.1));
+}
+.temporada .pase h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--gold, #d4af37);
+}
+.temporada .pase ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.temporada .pase .precio {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+.temporada .pase.activo {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+@media (max-width: 1100px) {
+  .temporada .cuerpo:has(.pase) {
+    grid-template-columns: 150px 1fr;
+  }
+  .temporada .pase {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 760px) {
+  .temporada .cuerpo:has(.pase) {
+    grid-template-columns: 1fr;
+  }
+}
+.checkout-card h2 {
+  margin-bottom: 10px;
 }

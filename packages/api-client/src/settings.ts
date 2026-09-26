@@ -86,7 +86,8 @@ export interface CatalogWorldCard {
   state: WorldState
   /** De donde salio si es tuyo: gratis, desbloqueo, pase, compra, creador o comunidad. */
   source: string | null
-  price: { amount: number; currency: string } | null
+  /** En venta (3d): precio en USD y lo que se cobra hoy en pesos; null sin tipo de cambio. */
+  price: { amount: number; currency: string; charge?: { amount: number; currency: string } | null } | null
   featured: boolean
   /** Solo en los de la comunidad: el id numerico para añadirlo a mis mundos. */
   packId?: number
@@ -106,6 +107,24 @@ export interface SeasonPath {
   endsAt: string
   chapters: number
   worlds: Array<{ packId: string; threshold: number; unlocked: boolean }>
+}
+
+/** El pase de temporada (E9 3c): precio, lo que se cobra hoy y si ya es tuyo. */
+export interface SeasonPassOffer {
+  season: string
+  amount: number
+  currency: string
+  charge: { amount: number; currency: string } | null
+  owned: boolean
+}
+
+/** Lo que hace falta para confirmar en el navegador el pago del pase o de un mundo. */
+export interface CatalogPurchase {
+  transactionId: number
+  clientSecret: string
+  amount: number
+  currency: string
+  charge: { amount: number; currency: string }
 }
 
 export interface CatalogFilters {
@@ -213,8 +232,11 @@ export interface SettingsApi {
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
   /** Explorar mundos (E9): publico; con sesion, cada mundo trae su estado para quien mira. */
-  catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[]; season: SeasonPath | null }>
+  catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[]; season: SeasonPath | null; pass: SeasonPassOffer | null }>
   catalogWorld(id: string): Promise<CatalogWorldDetail>
+  /** Arrancan el pago del pase o de un mundo; lo comprado llega con el webhook. */
+  buySeasonPass(): Promise<CatalogPurchase>
+  buyWorld(id: string): Promise<CatalogPurchase>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
   /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
@@ -268,12 +290,22 @@ export function settingsApi(request: Request): SettingsApi {
 
     async catalogWorlds(filters = {}) {
       const params: Record<string, string | number | undefined> = { ...filters }
-      const { data } = await request<{ data: CatalogWorldCard[]; meta: { genres: string[]; season?: SeasonPath | null } }>(`/api/v1/catalog/worlds${query(params)}`)
-      return { worlds: data.data, genres: data.meta.genres, season: data.meta.season ?? null }
+      const { data } = await request<{ data: CatalogWorldCard[]; meta: { genres: string[]; season?: SeasonPath | null; pass?: SeasonPassOffer | null } }>(`/api/v1/catalog/worlds${query(params)}`)
+      return { worlds: data.data, genres: data.meta.genres, season: data.meta.season ?? null, pass: data.meta.pass ?? null }
     },
 
     async catalogWorld(id) {
       const { data } = await request<{ data: CatalogWorldDetail }>(`/api/v1/catalog/worlds/${encodeURIComponent(id)}`)
+      return data.data
+    },
+
+    async buySeasonPass() {
+      const { data } = await request<{ data: CatalogPurchase }>('/api/v1/season/pass/purchase', { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async buyWorld(id) {
+      const { data } = await request<{ data: CatalogPurchase }>(`/api/v1/catalog/worlds/${encodeURIComponent(id)}/purchase`, { method: 'POST', body: {} })
       return data.data
     },
 

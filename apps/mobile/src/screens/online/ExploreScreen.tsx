@@ -1,12 +1,13 @@
-import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
+import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, durationLabel, passView, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
 import { Icon, ICON } from '../../components/Icon'
 import { Portrait } from '../../components/Portrait'
+import { webOriginOf } from '../../online/server-url'
 import { theme } from '../../theme'
 
 interface Props {
@@ -29,6 +30,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
   const [genres, setGenres] = useState<string[]>([])
   const [season, setSeason] = useState<SeasonPath | null>(null)
+  const [pass, setPass] = useState<SeasonPassOffer | null>(null)
   const [names, setNames] = useState<Record<string, string>>({})
   const [genre, setGenre] = useState<string | null>(null)
   const [q, setQ] = useState('')
@@ -36,12 +38,14 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
   const [detail, setDetail] = useState<CatalogWorldDetail | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const url = (path: string | null) => (path ? `${client.baseUrl}${path}` : null)
+  const offer = passView(pass)
 
   const load = useCallback(async () => {
     try {
       const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined })
       setWorlds(result.worlds)
       setSeason(result.season)
+      setPass(result.pass)
       setNames((actual) => ({ ...actual, ...Object.fromEntries(result.worlds.map((w) => [w.id, w.name])) }))
       if (result.genres.length) setGenres((actual) => (actual.length ? actual : result.genres))
       setError(null)
@@ -70,6 +74,8 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
   const act = async (world: CatalogWorldCard) => {
     const view = cardView(world)
     if (view.action === 'jugar') return onPlay(world.id)
+    // Se paga en la web, como los paquetes: la app todavia no cobra dentro.
+    if (view.action === 'comprar') return void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar/${encodeURIComponent(world.id)}`)
     if (view.action === 'anadir' && world.packId !== undefined) {
       setBusy(world.id)
       try {
@@ -109,9 +115,9 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
           </View>
           <Text style={styles.byline}>{view.byline}</Text>
           <View style={styles.row}>
-            {view.action === 'jugar' || view.action === 'anadir' ? (
+            {view.action === 'jugar' || view.action === 'anadir' || view.action === 'comprar' ? (
               <Pressable onPress={() => void act(detail)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
-                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.label}</Text>}
+                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.action === 'comprar' ? 'Comprar en la web' : view.label}</Text>}
               </Pressable>
             ) : null}
             {view.price ? <Text style={styles.price}>{view.price}</Text> : null}
@@ -179,6 +185,19 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
               <View style={[styles.barFill, { width: `${Math.round(seasonProgress(season).progress * 100)}%` }]} />
             </View>
             <Text style={styles.meta}>{season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.unlocked ? 'abierto' : `${w.threshold} capítulos`}`).join('  ·  ')}</Text>
+            {offer ? (
+              <View style={styles.pass}>
+                <Text style={styles.passTitle}>Pase de temporada</Text>
+                <Text style={styles.meta}>{offer.perks.join('  ·  ')}</Text>
+                {offer.owned ? (
+                  <Text style={styles.seasonChapters}>{offer.label}</Text>
+                ) : (
+                  <Pressable onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar`)} accessibilityRole="button">
+                    <Text style={styles.link}>{`${offer.price}, pago único · Comprar en la web`}</Text>
+                  </Pressable>
+                )}
+              </View>
+            ) : null}
           </View>
         ) : null}
         <View style={styles.search}>
@@ -242,6 +261,8 @@ const styles = StyleSheet.create({
   title: { fontFamily: theme.fonts.display, fontSize: 32, color: '#ffffff' },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -6 },
   season: { gap: 6, padding: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: theme.colors.panel },
+  pass: { gap: 4, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: theme.colors.border },
+  passTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 15, color: theme.colors.gold },
   seasonHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   seasonName: { fontFamily: theme.fonts.serifSemiBold, fontSize: 17, color: theme.colors.ink },
   seasonChapters: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.accentBright },
