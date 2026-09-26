@@ -2,7 +2,7 @@ import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
-import { Image, Modal, PanResponder, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
+import { Image, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
 
 /**
@@ -44,21 +44,29 @@ interface Props {
  */
 const ZOOM_MAX = 4
 
-function distance(e: GestureResponderEvent): number | null {
-  const [a, b] = e.nativeEvent.touches
-  return a && b ? Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY) : null
+/** Los dedos en pantalla: cuantos, su centro y la distancia entre los dos primeros. */
+function fingers(e: GestureResponderEvent): { count: number; cx: number; cy: number; dist: number } {
+  const touches = e.nativeEvent.touches
+  const [a, b] = touches
+  if (!a) return { count: 0, cx: 0, cy: 0, dist: 0 }
+  if (!b) return { count: touches.length, cx: a.pageX, cy: a.pageY, dist: 0 }
+  return { count: touches.length, cx: (a.pageX + b.pageX) / 2, cy: (a.pageY + b.pageY) / 2, dist: Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY) }
 }
 
 /**
  * Zoom del mapa (Gabino, 26-09): pellizco con dos dedos, arrastre con uno
- * cuando esta acercado, y botones. Con PanResponder y transformaciones, sin
- * modulo nativo nuevo. Sin zoom, un dedo deja pasar el scroll de la hoja.
+ * (o con dos a la vez), y botones. Sin modulo nativo nuevo.
+ *
+ * El lienzo se queda con el gesto desde el primer toque y lee los dedos de
+ * cada evento; cada vez que cambia cuantos hay toma de nuevo la referencia.
+ * Con PanResponder (v10 y v11) el pellizco con dos dedos a la vez no
+ * arrancaba hasta levantar uno y volver a ponerlo.
  */
 function useZoom(width: number, height: number) {
   const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
   const zRef = useRef(z)
   zRef.current = z
-  const base = useRef({ s: 1, x: 0, y: 0, dist: 0, dx: 0, dy: 0, fingers: 0 })
+  const base = useRef({ s: 1, x: 0, y: 0, count: 0, cx: 0, cy: 0, dist: 0 })
 
   const clamp = (s: number, x: number, y: number) => {
     const scale = Math.min(ZOOM_MAX, Math.max(1, s))
@@ -66,42 +74,35 @@ function useZoom(width: number, height: number) {
     const my = ((scale - 1) * height) / 2
     return { s: scale, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) }
   }
+  const rebase = (e: GestureResponderEvent) => {
+    base.current = { ...zRef.current, ...fingers(e) }
+  }
+  const move = (e: GestureResponderEvent) => {
+    const now = fingers(e)
+    const b = base.current
+    if (now.count !== b.count) return rebase(e)
+    if (now.count >= 2 && b.dist > 0) {
+      const s = (b.s * now.dist) / b.dist
+      const k = Math.min(ZOOM_MAX, Math.max(1, s)) / b.s
+      setZ(clamp(s, b.x * k + (now.cx - b.cx), b.y * k + (now.cy - b.cy)))
+    } else if (now.count === 1 && b.s > 1) {
+      setZ(clamp(b.s, b.x + (now.cx - b.cx), b.y + (now.cy - b.cy)))
+    }
+  }
 
-  const responder = useMemo(
-    () =>
-      PanResponder.create({
-        // El lienzo toma cualquier arrastre o pellizco; los toques sueltos (botones) no.
-        onStartShouldSetPanResponder: (e) => e.nativeEvent.touches.length >= 2,
-        onMoveShouldSetPanResponder: (e) => e.nativeEvent.touches.length >= 2 || zRef.current.s > 1,
-        onMoveShouldSetPanResponderCapture: (e) => e.nativeEvent.touches.length >= 2 || zRef.current.s > 1,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (e, g) => {
-          base.current = { ...zRef.current, dist: distance(e) ?? 0, dx: g.dx, dy: g.dy, fingers: e.nativeEvent.touches.length }
-        },
-        onPanResponderMove: (e, g) => {
-          const fingers = e.nativeEvent.touches.length
-          // Al pasar de uno a dos dedos (o al reves) se toma de nuevo la referencia.
-          if (fingers !== base.current.fingers) {
-            base.current = { ...zRef.current, dist: distance(e) ?? 0, dx: g.dx, dy: g.dy, fingers }
-            return
-          }
-          const b = base.current
-          const d = distance(e)
-          if (d && b.dist) {
-            const s = (b.s * d) / b.dist
-            const k = s / b.s
-            setZ(clamp(s, b.x * k, b.y * k))
-          } else {
-            setZ(clamp(b.s, b.x + (g.dx - b.dx), b.y + (g.dy - b.dy)))
-          }
-        },
-      }),
-    [width, height],
-  )
+  const handlers = {
+    onStartShouldSetResponder: () => true,
+    onMoveShouldSetResponder: () => true,
+    onResponderTerminationRequest: () => false,
+    onResponderGrant: rebase,
+    onResponderStart: rebase,
+    onResponderMove: move,
+    onResponderEnd: rebase,
+  }
 
   const step = (factor: number) => setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
   const reset = () => setZ({ s: 1, x: 0, y: 0 })
-  return { z, handlers: responder.panHandlers, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), reset }
+  return { z, handlers, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), reset }
 }
 
 export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: openProp, onClose }: Props) {
@@ -167,6 +168,8 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             ) : null}
             <Text style={styles.resumen}>{resumen}</Text>
 
+            {/* Los botones van fuera del lienzo: dentro, arrastrar desde ellos movia el mapa. */}
+            <View style={{ width: ANCHO, height: ALTO }}>
             <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]} {...zoom.handlers}>
               <View style={{ width: ANCHO, height: ALTO, transform: [{ translateX: zoom.z.x }, { translateY: zoom.z.y }, { scale: zoom.z.s }] }}>
               {src ? (
@@ -222,6 +225,7 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
                 </View>
               ))}
               </View>
+            </View>
               <View style={styles.zoomBar}>
                 <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
                   <Text style={styles.zoomText}>+</Text>
