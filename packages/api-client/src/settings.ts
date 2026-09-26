@@ -120,6 +120,8 @@ export interface CreditPack {
   description: string
   amount: number
   currency: string
+  /** Lo que se cobra si es en otra moneda (precio en USD, cobro en MXN al tipo del dia); null si no hay tipo de cambio. */
+  charge?: { amount: number; currency: string } | null
   /** Turnos que suma al cupo; 0 en los planes que todavia no se venden. */
   turns: number
   /** false: se enseña pero no se puede comprar todavia. */

@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packPrice, packValue } from '@rpg-ngn/ui-logic'
+import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue } from '@rpg-ngn/ui-logic'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
@@ -183,7 +183,7 @@ function PayForm({
       <PaymentElement />
       <div className="row">
         <button type="submit" className="btn primary" disabled={!stripe || busy}>
-          {busy ? 'Pagando…' : `Pagar ${packPrice(pack)}`}
+          {busy ? 'Pagando…' : `Pagar ${packCharge(pack)}`}
         </button>
         <button type="button" className="btn" onClick={onCancel} disabled={busy}>
           Cancelar

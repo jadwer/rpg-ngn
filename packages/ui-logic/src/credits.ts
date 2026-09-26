@@ -9,10 +9,27 @@ import type { CreditBalance, CreditPack } from '@rpg-ngn/api-client'
  */
 
 /** Precio con su moneda, desde la unidad menor que manda la API. */
-export function packPrice(pack: Pick<CreditPack, 'amount' | 'currency'>): string {
-  const amount = pack.amount / 100
+function money(amountMinor: number, currency: string): string {
+  const amount = amountMinor / 100
   const entero = Number.isInteger(amount)
-  return `${pack.currency === 'usd' ? '$' : ''}${amount.toFixed(entero ? 0 : 2)} ${pack.currency.toUpperCase()}`
+  const sign = currency === 'usd' || currency === 'mxn' ? '$' : ''
+  return `${sign}${amount.toFixed(entero ? 0 : 2)} ${currency.toUpperCase()}`
+}
+
+/**
+ * El precio del paquete, y entre parentesis lo que se cobra si es en otra
+ * moneda: "$2 USD ($37 MXN)" (Gabino, 26-09: precio en dolares, cobro en
+ * pesos al tipo del dia).
+ */
+export function packPrice(pack: Pick<CreditPack, 'amount' | 'currency' | 'charge'>): string {
+  const price = money(pack.amount, pack.currency)
+  const charge = pack.charge
+  return charge && charge.currency !== pack.currency ? `${price} (${money(charge.amount, charge.currency)})` : price
+}
+
+/** Lo que de verdad se cobra, para el boton de pagar: "$37 MXN". */
+export function packCharge(pack: Pick<CreditPack, 'amount' | 'currency' | 'charge'>): string {
+  return pack.charge ? money(pack.charge.amount, pack.charge.currency) : money(pack.amount, pack.currency)
 }
 
 /**
