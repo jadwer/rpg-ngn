@@ -431,7 +431,7 @@ premium, imagenes fuera del tope) espera a Stripe.
   para que las caras se mantengan. Solo en packs originales o con licencia
   (`docs/07`). Ajuste por mesa para apagarlas. Tabla de costes por imagen
   para `turns:usage`. Web, app y cronica pintan el bloque
-- [x] **Mesa con escena de fondo** (24-09, web; pedido de Gabino al verla en el telefono): la ultima ilustracion es el fondo de la mesa, el texto se lee en la mitad de abajo sobre vidrio ahumado, y el cuadro de respuesta queda plegado en una barra "¿Que hace tu personaje?" que se abre al tocarla o al bajar leyendo hasta el final (la carga y el autoscroll no cuentan); mientras se escribe, la escena cede alto. Minimo 3 turnos entre imagenes (`images.min_turn_gap`), la apertura siempre lleva la suya. En la app desde el 24-09 por la noche (velo negro sin desenfoque, barra plegada con "Ocultar", apertura al bajar con el dedo, la escena cede alto al escribir); sin verificar en el telefono
+- [x] **Mesa con escena de fondo** (24-09, web; pedido de Gabino al verla en el telefono): la ultima ilustracion es el fondo de la mesa, el texto se lee en la mitad de abajo sobre vidrio ahumado, y el cuadro de respuesta queda plegado en una barra "¿Que hace tu personaje?" que se abre al tocarla o al bajar leyendo hasta el final (la carga y el autoscroll no cuentan); mientras se escribe, la escena cede alto. Minimo 5 turnos entre imagenes (`images.min_turn_gap`, eran 3 hasta el 26-09) y tope de 12 por sesion (eran 6), la apertura siempre lleva la suya. En la app desde el 24-09 por la noche (velo negro sin desenfoque, barra plegada con "Ocultar", apertura al bajar con el dedo, la escena cede alto al escribir); sin verificar en el telefono
 - [x] **10b. Sugerencias de respuesta por jugador** (24-09, desplegada; "Otras" desde el 25-09: llamada aparte al modelo (`POST /v1/turns/suggest` en el engine, `DMProvider.suggest`, `IdeasService` en la API, `POST turns/{turn}/ideas`), la primera ronda de cada turno gratis y las siguientes solo con clave propia o con un paquete de 10 USD o mas ya cobrado (Gabino), tope 5 por turno, una llamada que falla no cobra; las nuevas sustituyen a las anteriores y el motor recibe las que ya vio). Dos acciones por
   personaje interpelado, en la misma llamada del DM, filtradas por lo que el
   personaje sabe; tocarla la copia al cuadro. **El cuadro de texto siempre
@@ -457,6 +457,47 @@ premium, imagenes fuera del tope) espera a Stripe.
 Van a otras entregas: invitacion con recompensa y etiquetas de
 descubrimiento (E9), editor web de mundos (beta con creadores), ayuda en la
 app, idiomas y pulido (sin fecha).
+
+## Plan del 26-09 (aprobado por Gabino): Stripe en real, mesas nuevas, catalogo completo
+
+Sale de probar el APK v5 y la web el 25-09 por la noche. Orden y
+dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
+
+- [ ] **1. Stripe en real** (primero; la cuenta ya esta validada): endpoint
+  live `https://adastramentis.com/api/webhooks/stripe` con
+  `payment_intent.succeeded`, `payment_intent.payment_failed` y
+  `charge.refunded`; claves live al `.env` por `read -rs` (nunca por chat);
+  compra de humo de 2 USD con reembolso; limpiar los pagos de sandbox. USD
+  hasta la beta
+- [x] **0. Imagenes** (26-09): una cada 5 turnos y tope de 12 por sesion
+  (60 turnos, 65 con la apertura); el anfitrion ve un aviso cuando la sesion
+  agota su cupo. Antes eran 3 y 6, y la mesa 39 dejo de ilustrar en el turno
+  22 sin que nadie supiera por que
+- [ ] **2. Mesas con el tablero nuevo** (`img/design_ui_ux/mesas_ux.png`):
+  barra superior con logo y nombre (Historias, Mundos, Mesas, Comunidad,
+  busqueda, avisos, avatar), barra lateral en escritorio (Inicio, Mundos,
+  Mis mesas, Campañas, Personajes, Amigos, Configuracion) y barra inferior en
+  la app (Inicio, Mundos, Mesas, Comunidad). Lo que aun no existe lleva a una
+  pagina "Pronto". Fondo `fondo-mesas.webp` / `fondo-mesas-movil.webp`
+  (recortados de `img/assets/backgrounds/`), cabecera "Tus mesas" con Crear
+  mesa y Unirme con enlace, filtros Todas/Activas/En pausa/Finalizadas con
+  conteo y orden por ultima actividad, tarjeta con portada del mundo,
+  etiquetas, sinopsis, avatares, Continuar y Opciones
+- [ ] **3a. Explorar mundos** (`img/design_ui_ux/conceptboard_catalog.png`):
+  bloque `catalog` en `pack.json` (genero, tono, jugadores, duracion,
+  sinopsis, portada, autor), tabla `catalog_worlds`, `catalog:sync`,
+  `GET /api/v1/catalog/worlds` publico con filtros y estado por usuario,
+  detalle del mundo con personajes, mapa y "que incluye", "Jugar" que crea la
+  mesa. Menu: **Explorar mundos** (catalogo) y **Mis mundos** (subir,
+  revisar, activar)
+- [ ] **3b. Capitulos y camino de temporada**: ledger de capitulos al
+  resolver turnos, temporadas con umbrales, desbloqueo permanente
+- [ ] **3c. Pase de temporada** (depende de 1): 5 USD pago unico,
+  `atomo-subscriptions`, capitulos x2, mundos de temporada, 5 mundos
+  privados, revision con prioridad
+- [ ] **3d. Compra directa** (depende de 1): solo mundos originales o
+  licenciados
+- [ ] **4. APK v6** al cerrar 2 y 3a
 
 ## Pendientes del 25-09
 
