@@ -344,7 +344,7 @@ sesion antes de desplegar, no antes de empezar).
 ## Dominio propio (24-09, hecho)
 
 - [x] adastramentis.com con HTTPS, correo de entrada en JettHost y de salida por Resend; el dominio viejo redirige salvo /movil y el webhook de Stripe
-- [ ] Cambiar el webhook de Stripe al dominio nuevo cuando se pase a modo real
+- [x] Webhook de Stripe live en el dominio nuevo (26-09)
 
 ## Antes de abrir a usuarios reales
 
@@ -356,7 +356,7 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
 - [x] **Guia del anfitrion** (24-09, `/guia`): crear mesa, invitar, abrir sesion, turnos, quien paga, cerrar, cronica y retirar, con los nombres de la interfaz. Falta la del jugador y la completa con capturas (B6). Lo que decia antes: no existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
 - [x] **Cuentas sembradas borradas** (24-09, con dump previo): `god`, `gabino@example.com`, `armando`, `jaz` y `ux@example.com`. `jadwer@msn.com` pasa a `admin` para la cola de revision de mundos. `DatabaseSeeder` se niega a correr en produccion. Lo que decia: `gabino@example.com` es `admin` con `password`, y `admin` recibe de los seeders de Atomo `users.*` y `payments.refund` (VAM del 19-09): se borra, no se le cambia la clave. `god@example.com` tiene todos los permisos con la clave de `SEED_GOD_PASSWORD`: rotarla. `jaz` y `armando` tienen `password`: cambiarlas. La cuenta real de Gabino es `jadwer@msn.com`, `customer`
 - [ ] **El correo todavia no prueba quien eres.** Ya sale correo (ver "Correo saliente"), pero `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`: cualquiera puede registrarse con una direccion ajena. Recuperar contraseña **si funciona** desde el 22-09, asi que la via de rescate ya no es el anfitrion. Encender la verificacion es una decision aparte, porque añade un paso al registro justo donde la gente abandona (`docs/18`, D-UX-1)
-- [ ] **Stripe en modo real**: resolver la tarea vencida de la cuenta (transferencias suspendidas) y pasar a claves `live`. Hoy todo esta en sandbox
+- [x] **Stripe en modo real** (26-09): claves live, cobro en MXN al tipo del dia, compra y reembolso reales verificados (ver "Plan del 26-09")
 - [x] **Terminos de servicio y aviso de privacidad** (2026-09-22): publicados como **version 1** en `/terminos` y `/privacidad`, enlazados desde el pie de la portada y desde el registro en web y movil. **Pendiente la revision del abogado**; Gabino decidio publicar antes porque tener algo publicado protege mas que esperar sin nada. Escritos mirando el sistema y no una plantilla: los datos que se guardan, los cuatro terceros (Anthropic, Stripe, Resend, Hetzner con el servidor en Alemania) y que el numero de tarjeta nunca toca el servidor. Alcance: solo mayores de 18, responsable persona fisica, ley mexicana. Texto y cinco preguntas para el abogado en `docs/19-legal-aviso-y-terminos.md`
 - [x] **Retirar una mesa desde el producto** (2026-09-22). Lo señalo Gabino y era una promesa incumplida desde que se publicaron los legales. Tres acciones con reglas distintas: **archivar** (la saca de la lista sin tocar la cronica, y es lo normal porque una partida jugada tambien es de los demas), **borrar** solo si la mesa nunca llego a jugarse (409 con el motivo si ya tiene eventos), y **salir de la mesa** para el invitado, que antes tampoco podia. El anfitrion no puede salirse de lo suyo: dejaria la mesa sin quien abra sesiones ni pague los turnos. **Hallazgo de paso: el `DELETE` que JSON:API dejaba expuesto respondia 500 con la sentencia SQL y el nombre de la base**, porque chocaba con el disparador de solo-anexar; ahora esa ruta es propia y da un motivo entendible. `tableRetirement` decide en ui-logic con tests; 6 tests nuevos en la API
 - [x] **Guardar la aceptacion de los legales** (2026-09-22): tabla `legal_acceptances` con version, fecha y origen, en tabla aparte porque una persona acepta varias veces y la constancia **sobrevive al borrado de su cuenta**, disociada. El origen sale de `device_name` y no de una cabecera: el registro web lo hace el servidor de Next, asi que ninguna cabecera del navegador llega a la API
@@ -463,12 +463,7 @@ app, idiomas y pulido (sin fecha).
 Sale de probar el APK v5 y la web el 25-09 por la noche. Orden y
 dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
 
-- [ ] **1. Stripe en real** (primero; la cuenta ya esta validada): endpoint
-  live `https://adastramentis.com/api/webhooks/stripe` con
-  `payment_intent.succeeded`, `payment_intent.payment_failed` y
-  `charge.refunded`; claves live al `.env` por `read -rs` (nunca por chat);
-  compra de humo de 2 USD con reembolso; limpiar los pagos de sandbox. USD
-  hasta la beta
+- [x] **1. Stripe en real** (26-09, madrugada): claves live instaladas (por `read -rs`, respaldo del `.env` y de la base antes), webhook live verificado. La primera compra real la rechazo la tarjeta de debito de Gabino ("Non-MXN currencies are not supported for this card"), asi que desde hoy **los precios se anuncian en USD y se cobran en MXN** al tipo del dia (BCE via Frankfurter, respaldo open.er-api y ultimo conocido) mas 5 %, redondeado hacia abajo a pesos: "$2 USD ($37 MXN)". Vive en `atomo-payments` (`ExchangeRates`, `CreditPackCatalog::charge`). Compra de humo de $37 MXN capturada, 40 turnos acreditados por el webhook, reembolso con `charge.refunded` recibido; pagos de sandbox borrados. Tras pagar, una tarjeta dorada con tono de cronica. "Otras" ideas se desbloquea por paquete (Campaña o mayor), no por importe. Deuda: un reembolso no retira los turnos acreditados
 - [x] **0. Imagenes** (26-09): una cada 5 turnos y tope de 12 por sesion
   (60 turnos, 65 con la apertura); el anfitrion ve un aviso cuando la sesion
   agota su cupo. Antes eran 3 y 6, y la mesa 39 dejo de ilustrar en el turno
