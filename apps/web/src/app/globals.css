@@ -5705,3 +5705,253 @@ a {
 .checkout-card h2 {
   margin-bottom: 10px;
 }
+
+/* Catalogo vivo en la portada (26-09): destacados con estado y huecos para lo que viene. */
+.home-mundos .cabeza {
+  justify-content: space-between;
+}
+.home-mundos .ver-todos {
+  color: var(--accent-bright);
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+.home-mundos .ver-todos::after {
+  content: ' \2192';
+}
+.home-mundos .grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.home-mundos .mundo .portada {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(160deg, rgba(124, 58, 237, 0.22), rgba(11, 15, 20, 0.9));
+  overflow: hidden;
+}
+.home-mundos .mundo .portada img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+.home-mundos .mundo.estado-camino .portada img {
+  filter: saturate(0.55) brightness(0.7);
+}
+.home-mundos .mundo .candado {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(11, 15, 20, 0.75) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6e0f5' stroke-width='1.8'%3E%3Crect x='5' y='11' width='14' height='9' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center / 16px no-repeat;
+}
+.home-mundos .mundo .genero {
+  margin: 12px 14px 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.home-mundos .mundo h3 {
+  margin-top: 4px;
+}
+.home-mundos .mundo:not(.propio) p {
+  flex: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-mundos .mundo:not(.propio) .tags {
+  margin-top: auto;
+}
+.home-mundos .mundo .estado {
+  margin: -4px 14px 14px;
+  font-size: 0.85rem;
+  color: var(--accent-bright);
+}
+.home-mundos .mundo.proximo {
+  border-style: dashed;
+  opacity: 0.75;
+}
+.home-mundos .mundo.proximo .portada {
+  color: var(--ink-faint, var(--ink-dim));
+}
+.home-mundos .mundo.cargando {
+  min-height: 320px;
+  background: linear-gradient(100deg, var(--panel) 30%, var(--panel-2) 50%, var(--panel) 70%) 0 0 / 300% 100%;
+  animation: home-carga 1.4s linear infinite;
+}
+@keyframes home-carga {
+  to {
+    background-position: -150% 0;
+  }
+}
+@media (max-width: 1100px) {
+  .home-mundos .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .home-mundos .grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 72%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .home-mundos .mundo {
+    scroll-snap-align: start;
+  }
+}
+
+/* Temporada en la portada: el camino y el pase, con hueco para su ilustracion. */
+.home-temporada {
+  position: relative;
+  max-width: 1052px;
+  margin: 0 auto 48px;
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  background: var(--panel);
+}
+.home-temporada .arte {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 85% 20%, rgba(124, 58, 237, 0.35), transparent 55%), radial-gradient(ellipse at 60% 110%, rgba(212, 175, 55, 0.14), transparent 50%);
+  background-size: cover;
+  background-position: right center;
+}
+.home-temporada .arte::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(11, 15, 20, 0.92) 0%, rgba(11, 15, 20, 0.7) 55%, rgba(11, 15, 20, 0.35) 100%);
+}
+.home-temporada .contenido {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 28px;
+  padding: 32px;
+}
+.home-temporada .kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.home-temporada h2 {
+  margin: 6px 0 8px;
+}
+.home-temporada .texto > p {
+  margin: 0 0 10px;
+  color: var(--ink-dim);
+  max-width: 560px;
+}
+.home-temporada .capitulos b {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: var(--accent-bright);
+}
+.home-temporada .camino {
+  position: relative;
+  margin-top: 22px;
+  padding: 0 50px 70px;
+}
+.home-temporada .camino .linea {
+  position: relative;
+  top: 30px;
+  height: 2px;
+  background: var(--border);
+}
+.home-temporada .camino .hecho {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent-bright);
+}
+.home-temporada .camino ol {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.home-temporada .camino li {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.home-temporada .camino li a {
+  display: block;
+  width: 88px;
+  height: 60px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--accent-bright);
+  background: var(--panel-2);
+}
+.home-temporada .camino li.cerrado a {
+  border-color: var(--border);
+}
+.home-temporada .camino li img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.home-temporada .camino li.cerrado img {
+  filter: grayscale(0.7) brightness(0.55);
+}
+.home-temporada .camino .nombre {
+  margin-top: 6px;
+  font-size: 0.82rem;
+}
+.home-temporada .camino .umbral {
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+.home-temporada .pase {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: center;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: linear-gradient(160deg, rgba(212, 175, 55, 0.14), rgba(124, 58, 237, 0.14)), rgba(11, 15, 20, 0.6);
+}
+.home-temporada .pase h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  color: var(--gold);
+}
+.home-temporada .pase ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.home-temporada .pase .precio {
+  margin: 0;
+  font-weight: 600;
+}
+@media (max-width: 860px) {
+  .home-temporada {
+    margin: 0 16px 40px;
+  }
+  .home-temporada .contenido {
+    grid-template-columns: 1fr;
+    padding: 22px 18px;
+  }
+  .home-temporada .camino {
+    padding: 0 44px 84px;
+  }
+}

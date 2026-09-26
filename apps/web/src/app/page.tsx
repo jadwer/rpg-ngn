@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Isotipo, LogoHorizontal, LogoVertical } from '../components/Brand'
+import { LogoHorizontal, LogoVertical } from '../components/Brand'
 import { SessionCta } from '../components/SessionCta'
+import { HomeCatalog } from '../components/home/HomeCatalog'
 
 const REPO = 'https://github.com/jadwer/rpg-ngn'
 
@@ -37,7 +38,8 @@ function Icon({ d }: { d: string }) {
 /**
  * La portada (docs/22, "Home Hero"; propuesta de GPT en img/branding/hero.png):
  * primero asombro, luego que es, luego como se juega. Estatica salvo los
- * botones, que cambian a "tus mesas" si el navegador ya tiene sesion.
+ * botones, que cambian a "tus mesas" si el navegador ya tiene sesion, y el
+ * catalogo (`HomeCatalog`), que se lee en vivo.
  */
 export default function LandingPage() {
   return (
@@ -48,6 +50,7 @@ export default function LandingPage() {
         </Link>
         <nav className="links" aria-label="Secciones">
           <a href="#mundos">Mundos</a>
+          <Link href="/mundos/explorar">Explorar</Link>
           <a href="#como-funciona">Cómo funciona</a>
           <a href={`${REPO}/tree/dev/docs`} target="_blank" rel="noreferrer">
             Docs
@@ -113,50 +116,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="home-mundos" id="mundos" aria-labelledby="mundos-titulo">
-        <div className="cabeza">
-          <h2 id="mundos-titulo">Mundos</h2>
-          <p className="hint">Tres formas de jugar con las que ya se juega hoy. Las tuyas, pronto.</p>
-        </div>
-        <div className="grid">
-          <article className="mundo">
-            <img src="/branding/mundo-valdoria.webp" alt="Un castillo sobre cascadas, en un valle de montaña" loading="lazy" />
-            <h3>Fantasía medieval</h3>
-            <p>Un pueblo minero, una mina cerrada y nueve viajeros a los que nadie recuerda. Dados, riesgo y aventura.</p>
-            <ul className="tags">
-              <li>Fantasía</li>
-              <li>Aventura</li>
-            </ul>
-          </article>
-          <article className="mundo">
-            <img src="/branding/mundo-boticaria.webp" alt="Un palacio imperial de noche" loading="lazy" />
-            <h3>China antigua</h3>
-            <p>Intriga en el palacio interior: crédito, sospecha y pistas en lugar de golpes. Nadie saca un arma.</p>
-            <ul className="tags">
-              <li>Intriga</li>
-              <li>Misterio</li>
-            </ul>
-          </article>
-          <article className="mundo">
-            <img src="/branding/mundo-mascarada.webp" alt="Un baile de máscaras" loading="lazy" />
-            <h3>Baile de máscaras</h3>
-            <p>Una noche de salón donde lo que cambia son las relaciones: prestigio, escándalo, rumores y vínculos.</p>
-            <ul className="tags">
-              <li>Romance</li>
-              <li>Drama</li>
-            </ul>
-          </article>
-          <a className="mundo propio" href={`${REPO}/blob/dev/docs/05-content-pack-spec.md`} target="_blank" rel="noreferrer">
-            <Isotipo mini height={64} />
-            <h3>Crea tu propio mundo</h3>
-            <p>Un mundo es un pack de datos: personajes, lugares, secretos y sesiones. El formato es público.</p>
-            <ul className="tags">
-              <li>Sin límites</li>
-              <li>Tu historia</li>
-            </ul>
-          </a>
-        </div>
-      </section>
+      <HomeCatalog />
 
       <section className="home-como" id="como-funciona" aria-labelledby="como-titulo">
         <h2 id="como-titulo">Cómo funciona</h2>
