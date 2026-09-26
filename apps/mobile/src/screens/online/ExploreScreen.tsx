@@ -1,5 +1,5 @@
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, passView, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, Linking, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -193,7 +193,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
             <View style={styles.bar}>
               <View style={[styles.barFill, { width: `${Math.round(seasonProgress(season).progress * 100)}%` }]} />
             </View>
-            <Text style={styles.meta}>{season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.unlocked ? 'abierto' : `${w.threshold} capítulos`}`).join('  ·  ')}</Text>
+            <Text style={styles.meta}>{seasonPathLine(season.worlds, names)}</Text>
             {offer ? (
               <View style={styles.pass}>
                 <Text style={styles.passTitle}>Pase de temporada</Text>
@@ -202,7 +202,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
                   <Text style={styles.seasonChapters}>{offer.label}</Text>
                 ) : (
                   <>
-                    <Text style={styles.passPrice}>{`${offer.price}, pago único`}</Text>
+                    <Text style={styles.passPrice}>{offer.priceLine}</Text>
                     <Pressable onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar`)} accessibilityRole="button">
                       <Text style={styles.link}>Comprar en la web</Text>
                     </Pressable>

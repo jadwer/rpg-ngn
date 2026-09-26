@@ -96,7 +96,7 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
           </button>
         </div>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          {sceneImagesHint(images)}
+          {sceneImagesHint(images, table.imagesPerSession)}
         </span>
       </div>
 

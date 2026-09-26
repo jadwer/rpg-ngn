@@ -1,7 +1,7 @@
 'use client'
 
 import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, passView, seasonProgress } from '@rpg-ngn/ui-logic'
+import { cardView, passView, seasonProgress, stopLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { WEB_HEADER, useSession } from '../../lib/session'
@@ -164,7 +164,7 @@ function Camino({ season, names }: { season: SeasonPath; names: Record<string, C
             <li key={stop.packId} className={stop.unlocked ? 'abierto' : 'cerrado'} style={{ left: `${stop.at * 100}%` }}>
               <Link href={`/mundos/explorar/${encodeURIComponent(stop.packId)}`}>{cover ? <img src={cover} alt="" loading="lazy" /> : <span className="vacio" />}</Link>
               <span className="nombre">{w?.name ?? stop.packId}</span>
-              <span className="umbral">{stop.threshold === 0 ? 'Gratis' : `${stop.threshold} capítulos`}</span>
+              <span className="umbral">{stopLabel(stop)}</span>
             </li>
           )
         })}
@@ -185,7 +185,7 @@ function Pase({ offer, href }: { offer: SeasonPassOffer | null; href: string }) 
           <li key={perk}>{perk}</li>
         ))}
       </ul>
-      <p className="precio">{view.owned ? 'Ya es tuyo esta temporada' : `${view.price} · pago único`}</p>
+      <p className="precio">{view.priceLine}</p>
       {view.owned ? null : (
         <Link href={href} className="btn primary">
           Obtener el pase

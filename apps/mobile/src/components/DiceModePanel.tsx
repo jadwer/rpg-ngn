@@ -61,7 +61,7 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
       <Text style={[styles.label, styles.spaced]}>Ilustraciones</Text>
       <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />
       <RadioRow label="Solo texto" selected={!images} onSelect={() => chooseImages(false)} />
-      <Text style={styles.hint}>{sceneImagesHint(images)}</Text>
+      <Text style={styles.hint}>{sceneImagesHint(images, table.imagesPerSession)}</Text>
       {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
     </View>
   )

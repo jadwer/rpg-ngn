@@ -75,10 +75,12 @@ export function seasonProgress(path: { chapters: number; worlds: ReadonlyArray<{
  * El bloque del pase de temporada (tablero A: "Capitulos x2, 5 USD, pago
  * unico"). Null sin temporada en curso.
  */
-export function passView(offer: SeasonPassOffer | null): { price: string; perks: string[]; owned: boolean; label: string } | null {
+export function passView(offer: SeasonPassOffer | null): { price: string; priceLine: string; perks: string[]; owned: boolean; label: string } | null {
   if (!offer) return null
   return {
     price: packPrice(offer),
+    // La linea de precio que pintan web y app, igual en las dos (VAM 26-09, A9).
+    priceLine: offer.owned ? 'Ya es tuyo esta temporada' : `${packPrice(offer)}, pago único`,
     perks: ['Capítulos x2 toda la temporada', 'Los mundos del camino, abiertos desde ya', 'Hasta 5 mundos propios'],
     owned: offer.owned,
     label: offer.owned ? 'Tu pase está activo' : 'Comprar el pase',
@@ -95,4 +97,20 @@ export function catalogBlessing(kind: 'pase' | 'mundo', name: string): { title: 
         : `Las puertas de ${name} se abren para vos; los escribas ya lo inscriben entre vuestros mundos.`,
     farewell: 'Que los altos espíritus acompañen vuestras aventuras.',
   }
+}
+
+/**
+ * Lo que dice cada parada del camino de temporada, igual en web y app (VAM
+ * 26-09, A1: habia cuatro copias con textos distintos). Umbral cero es gratis;
+ * abierto si ya es tuyo o lo juegas; si no, cuantos capitulos pide.
+ */
+export function stopLabel(stop: { threshold: number; unlocked: boolean }): string {
+  if (stop.threshold === 0) return 'Gratis'
+  if (stop.unlocked) return 'Abierto'
+  return `${stop.threshold} ${stop.threshold === 1 ? 'capítulo' : 'capítulos'}`
+}
+
+/** El camino en una linea ("Los Nueve Viajeros: gratis · La Mascarada: 20 capítulos"), para donde no cabe la linea grafica. */
+export function seasonPathLine(worlds: ReadonlyArray<{ packId: string; threshold: number; unlocked: boolean }>, names: Readonly<Record<string, string>>): string {
+  return worlds.map((w) => `${names[w.packId] ?? w.packId}: ${stopLabel(w).toLowerCase()}`).join('  ·  ')
 }

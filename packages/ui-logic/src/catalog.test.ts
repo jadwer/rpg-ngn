@@ -1,6 +1,6 @@
 import type { WorldCatalog } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { cardView, catalogBlessing, durationLabel, passView, playersTag, seasonProgress } from './catalog.js'
+import { cardView, catalogBlessing, durationLabel, passView, playersTag, seasonPathLine, seasonProgress, stopLabel } from './catalog.js'
 
 const catalog = { genre: 'Intriga', author: 'Nara', players: { min: 2, max: 5 }, duration: 'media' } as WorldCatalog
 const w = (over: object) => ({ state: 'gratis', origin: 'oficial', catalog, price: null, path: null, name: 'X', ...over }) as Parameters<typeof cardView>[0]
@@ -43,5 +43,15 @@ describe('seasonProgress', () => {
     expect(v).toMatchObject({ price: '$5 USD ($92 MXN)', owned: false, label: 'Comprar el pase' })
     expect(passView({ season: 't1', amount: 500, currency: 'usd', charge: null, owned: true })?.label).toBe('Tu pase está activo')
     expect(catalogBlessing('mundo', 'El Faro').text).toContain('El Faro')
+  })
+
+  it('el camino y el precio del pase dicen lo mismo en web y app', () => {
+    expect(stopLabel({ threshold: 0, unlocked: true })).toBe('Gratis')
+    expect(stopLabel({ threshold: 20, unlocked: true })).toBe('Abierto')
+    expect(stopLabel({ threshold: 20, unlocked: false })).toBe('20 capítulos')
+    expect(stopLabel({ threshold: 1, unlocked: false })).toBe('1 capítulo')
+    expect(seasonPathLine([{ packId: 'pilot', threshold: 0, unlocked: true }, { packId: 'mascarada', threshold: 20, unlocked: false }], { pilot: 'Los Nueve Viajeros' })).toBe('Los Nueve Viajeros: gratis  ·  mascarada: 20 capítulos')
+    expect(passView({ season: 't1', amount: 500, currency: 'usd', charge: { amount: 9200, currency: 'mxn' }, owned: false })?.priceLine).toBe('$5 USD ($92 MXN), pago único')
+    expect(passView({ season: 't1', amount: 500, currency: 'usd', charge: null, owned: true })?.priceLine).toBe('Ya es tuyo esta temporada')
   })
 })

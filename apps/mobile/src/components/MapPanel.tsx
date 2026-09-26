@@ -1,6 +1,6 @@
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
-import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
+import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEveryoneIs, ZOOM_IDENTITY, ZOOM_STEP, zoomGesture, type ZoomState, zoomStep } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
 import { Image, Modal, Pressable, StatusBar, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
@@ -42,20 +42,15 @@ interface Props {
  * los recortaba, con lo que los porcentajes caian fuera de sitio. La web hace
  * lo mismo con `fit-content` mas `object-fit: contain`.
  */
-const ZOOM_MAX = 4
-
-/** Los dedos en pantalla: cuantos, su centro y la distancia entre los dos primeros. */
-function fingers(e: GestureResponderEvent): { count: number; cx: number; cy: number; dist: number } {
-  const touches = e.nativeEvent.touches
-  const [a, b] = touches
-  if (!a) return { count: 0, cx: 0, cy: 0, dist: 0 }
-  if (!b) return { count: touches.length, cx: a.pageX, cy: a.pageY, dist: 0 }
-  return { count: touches.length, cx: (a.pageX + b.pageX) / 2, cy: (a.pageY + b.pageY) / 2, dist: Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY) }
+/** Los dedos del evento como puntos, para el calculo compartido de ui-logic. */
+function fingers(e: GestureResponderEvent): Fingers {
+  return fingersFrom(Array.from(e.nativeEvent.touches, (t) => ({ x: t.pageX, y: t.pageY })))
 }
 
 /**
  * Zoom del mapa (Gabino, 26-09): pellizco con dos dedos, arrastre con uno
- * (o con dos a la vez), y botones. Sin modulo nativo nuevo.
+ * (o con dos a la vez), y botones. Sin modulo nativo nuevo. El calculo vive
+ * en ui-logic (`map-zoom`), el mismo que usa la web; aqui solo los dedos.
  *
  * El lienzo se queda con el gesto desde el primer toque y lee los dedos de
  * cada evento; cada vez que cambia cuantos hay toma de nuevo la referencia.
@@ -63,31 +58,18 @@ function fingers(e: GestureResponderEvent): { count: number; cx: number; cy: num
  * arrancaba hasta levantar uno y volver a ponerlo.
  */
 function useZoom(width: number, height: number) {
-  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
+  const [z, setZ] = useState<ZoomState>(ZOOM_IDENTITY)
   const zRef = useRef(z)
   zRef.current = z
-  const base = useRef({ s: 1, x: 0, y: 0, count: 0, cx: 0, cy: 0, dist: 0 })
+  const base = useRef<ZoomState & Fingers>({ ...ZOOM_IDENTITY, count: 0, cx: 0, cy: 0, dist: 0 })
 
-  const clamp = (s: number, x: number, y: number) => {
-    const scale = Math.min(ZOOM_MAX, Math.max(1, s))
-    const mx = ((scale - 1) * width) / 2
-    const my = ((scale - 1) * height) / 2
-    return { s: scale, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) }
-  }
   const rebase = (e: GestureResponderEvent) => {
     base.current = { ...zRef.current, ...fingers(e) }
   }
   const move = (e: GestureResponderEvent) => {
-    const now = fingers(e)
-    const b = base.current
-    if (now.count !== b.count) return rebase(e)
-    if (now.count >= 2 && b.dist > 0) {
-      const s = (b.s * now.dist) / b.dist
-      const k = Math.min(ZOOM_MAX, Math.max(1, s)) / b.s
-      setZ(clamp(s, b.x * k + (now.cx - b.cx), b.y * k + (now.cy - b.cy)))
-    } else if (now.count === 1 && b.s > 1) {
-      setZ(clamp(b.s, b.x + (now.cx - b.cx), b.y + (now.cy - b.cy)))
-    }
+    const next = zoomGesture(base.current, fingers(e), width, height)
+    if (next === null) rebase(e)
+    else setZ(next)
   }
 
   const handlers = {
@@ -100,9 +82,8 @@ function useZoom(width: number, height: number) {
     onResponderEnd: rebase,
   }
 
-  const step = (factor: number) => setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
-  const reset = () => setZ({ s: 1, x: 0, y: 0 })
-  return { z, handlers, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), reset }
+  const step = (factor: number) => setZ((cur) => zoomStep(cur, factor, width, height))
+  return { z, handlers, zoomIn: () => step(ZOOM_STEP), zoomOut: () => step(1 / ZOOM_STEP), reset: () => setZ(ZOOM_IDENTITY) }
 }
 
 export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterId, nameOf, portraitOf, open: openProp, onClose }: Props) {

@@ -2,7 +2,7 @@
 
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
-import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
+import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEveryoneIs, ZOOM_IDENTITY, ZOOM_STEP, ZOOM_WHEEL, zoomGesture, type ZoomState, zoomStep } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react'
 
 interface Props {
@@ -24,35 +24,26 @@ interface Props {
   showLine?: boolean | undefined
 }
 
-const ZOOM_MAX = 4
-
 /**
  * Zoom del mapa (Gabino, 26-09): rueda o pellizco para acercar, arrastrar
  * para moverse, botones y doble clic para volver. Transformacion CSS sobre
  * una capa interior: la caja sigue midiendo lo que la imagen, asi los puntos
- * en porcentaje no se mueven de su sitio.
+ * en porcentaje no se mueven de su sitio. El calculo vive en ui-logic
+ * (`map-zoom`), el mismo que usa la app; aqui solo los punteros.
  */
 function useMapZoom() {
-  const [z, setZ] = useState({ s: 1, x: 0, y: 0 })
-  const box = useRef<HTMLDivElement | null>(null)
-  const pointers = useRef(new Map<number, { x: number; y: number }>())
-  const gesture = useRef<{ s: number; x: number; y: number; dist: number; px: number; py: number } | null>(null)
-
-  const clamp = (s: number, x: number, y: number) => {
-    const scale = Math.min(ZOOM_MAX, Math.max(1, s))
-    const w = box.current?.clientWidth ?? 0
-    const h = box.current?.clientHeight ?? 0
-    const mx = ((scale - 1) * w) / 2
-    const my = ((scale - 1) * h) / 2
-    return { s: scale, x: Math.min(mx, Math.max(-mx, x)), y: Math.min(my, Math.max(-my, y)) }
-  }
-  const baseline = () => {
-    const pts = [...pointers.current.values()]
-    const [a, b] = pts
-    gesture.current = { ...zRef.current, dist: a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0, px: a?.x ?? 0, py: a?.y ?? 0 }
-  }
+  const [z, setZ] = useState<ZoomState>(ZOOM_IDENTITY)
   const zRef = useRef(z)
   zRef.current = z
+  const box = useRef<HTMLDivElement | null>(null)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const base = useRef<ZoomState & Fingers>({ ...ZOOM_IDENTITY, count: 0, cx: 0, cy: 0, dist: 0 })
+
+  const size = () => ({ w: box.current?.clientWidth ?? 0, h: box.current?.clientHeight ?? 0 })
+  const fingers = () => fingersFrom([...pointers.current.values()])
+  const rebase = () => {
+    base.current = { ...zRef.current, ...fingers() }
+  }
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     // Los botones de zoom viven dentro del lienzo: su clic no es un arrastre.
@@ -63,33 +54,28 @@ function useMapZoom() {
     } catch {
       // Sin captura el arrastre sigue funcionando mientras el puntero este encima.
     }
-    baseline()
+    rebase()
   }
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(e.pointerId)) return
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    const g = gesture.current
-    if (!g) return
-    const [a, b] = [...pointers.current.values()]
-    if (a && b && g.dist) {
-      const s = (g.s * Math.hypot(a.x - b.x, a.y - b.y)) / g.dist
-      const k = s / g.s
-      setZ(clamp(s, g.x * k, g.y * k))
-    } else if (a && zRef.current.s > 1) {
-      setZ(clamp(g.s, g.x + a.x - g.px, g.y + a.y - g.py))
-    }
+    const { w, h } = size()
+    const next = zoomGesture(base.current, fingers(), w, h)
+    if (next === null) rebase()
+    else setZ(next)
   }
   const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     pointers.current.delete(e.pointerId)
-    baseline()
+    rebase()
   }
-  const onWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
-    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-    setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
-  }
-  const step = (factor: number) => setZ((cur) => clamp(cur.s * factor, cur.x * factor, cur.y * factor))
-  const reset = () => setZ({ s: 1, x: 0, y: 0 })
-  return { z, box, reset, zoomIn: () => step(1.5), zoomOut: () => step(1 / 1.5), handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onWheel, onDoubleClick: reset } }
+  const step = (factor: number) =>
+    setZ((cur) => {
+      const { w, h } = size()
+      return zoomStep(cur, factor, w, h)
+    })
+  const onWheel = (e: ReactWheelEvent<HTMLDivElement>) => step(e.deltaY < 0 ? ZOOM_WHEEL : 1 / ZOOM_WHEEL)
+  const reset = () => setZ(ZOOM_IDENTITY)
+  return { z, box, reset, zoomIn: () => step(ZOOM_STEP), zoomOut: () => step(1 / ZOOM_STEP), handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, onWheel, onDoubleClick: reset } }
 }
 
 /**

@@ -12,8 +12,13 @@ export function withSceneImages(settings: Record<string, unknown> | null | undef
   return { ...(settings ?? {}), images: on }
 }
 
-export function sceneImagesHint(on: boolean): string {
-  return on
-    ? 'El director ilustra la apertura, los cambios de lugar y los momentos clave (hasta 6 por sesión). Solo en mundos originales o con licencia.'
-    : 'La mesa juega solo con texto.'
+/**
+ * El tope sale de la API (`imagesPerSession` de la mesa); antes estaba escrito
+ * aqui como 6 y la config ya decia 12 (VAM 26-09, D2). Sin el dato, no se
+ * inventa un numero.
+ */
+export function sceneImagesHint(on: boolean, perSession?: number | null): string {
+  if (!on) return 'La mesa juega solo con texto.'
+  const tope = perSession && perSession > 0 ? ` (hasta ${perSession} por sesión)` : ''
+  return `El director ilustra la apertura, los cambios de lugar y los momentos clave${tope}. Solo en mundos originales o con licencia.`
 }

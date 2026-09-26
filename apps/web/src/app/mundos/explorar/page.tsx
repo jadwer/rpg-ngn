@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, passView, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, passView, playersTag, seasonProgress, stopLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -240,7 +240,7 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
                     ) : null}
                   </Link>
                   <span className="nombre">{w?.name ?? stop.packId}</span>
-                  <span className="umbral">{stop.threshold === 0 ? 'Gratis' : `${stop.threshold} capítulos`}</span>
+                  <span className="umbral">{stopLabel(stop)}</span>
                 </li>
               )
             })}
@@ -254,7 +254,7 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
                 <li key={perk}>{perk}</li>
               ))}
             </ul>
-            <p className="precio">{offer.owned ? 'Pago único, ya hecho' : `${offer.price}, pago único`}</p>
+            <p className="precio">{offer.priceLine}</p>
             <button type="button" className={`btn${offer.owned ? '' : ' primary'}`} disabled={offer.owned} onClick={onBuyPass}>
               {offer.label}
             </button>

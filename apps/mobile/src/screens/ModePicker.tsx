@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
 import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, passView } from '@rpg-ngn/ui-logic'
+import { cardView, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
@@ -183,12 +183,12 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
               <Text style={styles.seasonTitle}>Caminos que se abren jugando</Text>
               <Text style={styles.body}>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</Text>
               <Text style={styles.seasonPath}>
-                {live.season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.threshold === 0 ? 'gratis' : w.unlocked ? 'abierto' : `${w.threshold} capítulos`}`).join('  ·  ')}
+                {seasonPathLine(live.season.worlds, names)}
               </Text>
               {pase ? (
                 <View style={styles.pass}>
                   <Text style={styles.passTitle}>Pase de temporada · Capítulos x2</Text>
-                  <Text style={styles.passPrice}>{pase.owned ? 'Ya es tuyo esta temporada' : `${pase.price}, pago único`}</Text>
+                  <Text style={styles.passPrice}>{pase.priceLine}</Text>
                 </View>
               ) : null}
             </Pressable>

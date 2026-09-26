@@ -51,6 +51,8 @@ export interface TableSummary {
   sessionOpen?: boolean
   /** Ultimo movimiento de la mesa o de su campaña (ISO), para ordenar por actividad. */
   lastActivityAt?: string | null
+  /** Tope real de ilustraciones por sesion (config de la API); null si la API no lo manda. */
+  imagesPerSession?: number | null
   /** Viene con `include=members.user`. */
   members: TableMember[]
 }

@@ -410,6 +410,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     headSeq,
     sessionOpen,
     lastActivityAt,
+    imagesPerSession: attr<number | null>(resource, 'imagesPerSession', null),
     members,
   }
 }
