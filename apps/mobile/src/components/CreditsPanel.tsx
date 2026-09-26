@@ -79,7 +79,8 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10 },
-  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
+  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
   pack: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.ink },

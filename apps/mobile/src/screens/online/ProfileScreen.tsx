@@ -153,7 +153,8 @@ const styles = StyleSheet.create({
   pageTitle: { fontFamily: theme.fonts.display, fontSize: 34, color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 8 },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -10, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6 },
   card: { backgroundColor: 'rgba(17, 22, 34, 0.9)', borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
-  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
+  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   block: { gap: 4 },
   fieldLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   static: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.inkDim },

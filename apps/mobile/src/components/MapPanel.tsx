@@ -2,7 +2,7 @@ import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
-import { Image, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
+import { Image, Modal, PanResponder, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
 
 /**
@@ -70,7 +70,9 @@ function useZoom(width: number, height: number) {
   const responder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
+        // El lienzo toma cualquier arrastre o pellizco; los toques sueltos (botones) no.
+        onStartShouldSetPanResponder: (e) => e.nativeEvent.touches.length >= 2,
+        onMoveShouldSetPanResponder: (e) => e.nativeEvent.touches.length >= 2 || zRef.current.s > 1,
         onMoveShouldSetPanResponderCapture: (e) => e.nativeEvent.touches.length >= 2 || zRef.current.s > 1,
         onPanResponderTerminationRequest: () => false,
         onPanResponderGrant: (e, g) => {
@@ -112,12 +114,9 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
   // Proporcion ancho/alto de la imagen cargada; 3:2 hasta saberla.
   const [aspect, setAspect] = useState(1.5)
   const screen = useWindowDimensions()
-  const ANCHO = Math.min(screen.width - 32, 900, screen.height * 0.66 * aspect)
+  const ANCHO = Math.min(screen.width - 32, 900, screen.height * 0.55 * aspect)
   const ALTO = ANCHO / aspect
   const zoom = useZoom(ANCHO, ALTO)
-  // Con un dedo sobre el mapa la hoja no se desplaza: el scroll nativo de
-  // Android se quedaba con el gesto antes de que llegara el pellizco.
-  const [touching, setTouching] = useState(false)
   const index = chosen ?? currentMapIndex(maps, world, party, viewerCharacterId)
   const map = maps[index] ?? null
   const view = useMemo(() => mapView(map, world, party), [map, world, party])
@@ -149,7 +148,8 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             <Text style={styles.headerLink} />
           </View>
 
-          <ScrollView contentContainerStyle={styles.body} scrollEnabled={!touching}>
+          {/* Sin ScrollView: en Android el scroll nativo se quedaba con el arrastre antes que el zoom (v10). El mapa cabe en la pantalla. */}
+          <View style={styles.body}>
             {maps.length > 1 ? (
               <View style={styles.selector}>
                 {maps.map((m, i) => (
@@ -167,7 +167,7 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             ) : null}
             <Text style={styles.resumen}>{resumen}</Text>
 
-            <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]} {...zoom.handlers} onTouchStart={() => setTouching(true)} onTouchEnd={() => setTouching(false)} onTouchCancel={() => setTouching(false)}>
+            <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]} {...zoom.handlers}>
               <View style={{ width: ANCHO, height: ALTO, transform: [{ translateX: zoom.z.x }, { translateY: zoom.z.y }, { scale: zoom.z.s }] }}>
               {src ? (
                 <Image
@@ -234,8 +234,12 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
             <Text style={styles.nota}>Pellizca para acercar y arrastra para moverte por el mapa.</Text>
 
             {view.offMap.length > 0 ? <Text style={styles.nota}>{`De camino o fuera de escena: ${view.offMap.map(nameOf).join(', ')}.`}</Text> : null}
-            {view.map.description ? <Text style={styles.nota}>{view.map.description}</Text> : null}
-          </ScrollView>
+            {view.map.description ? (
+              <Text style={styles.nota} numberOfLines={3}>
+                {view.map.description}
+              </Text>
+            ) : null}
+          </View>
         </View>
       </Modal>
     </>
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
   headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 56 },
   headerTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
-  body: { padding: 16, paddingBottom: 40, gap: 12, alignItems: 'center' },
+  body: { flex: 1, padding: 16, gap: 12, alignItems: 'center' },
   resumen: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink, alignSelf: 'stretch' },
   selector: { flexDirection: 'row', gap: 6, alignSelf: 'stretch', flexWrap: 'wrap' },
   pestana: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
