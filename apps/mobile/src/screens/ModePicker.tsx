@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Isotipo, LogoHorizontal } from '../components/Brand'
+import { LogoHorizontal, LogoVertical } from '../components/Brand'
 import { theme } from '../theme'
 
 interface Props {
@@ -34,9 +34,10 @@ export function ModePicker({ packName, onOnline, onOffline }: Props) {
 
       <ImageBackground source={HERO} style={styles.hero} resizeMode="cover">
         <View style={styles.veil} />
+        {/* El logo completo en vector, como en la web: el hero ya no lo trae pintado (25-09). */}
         <View style={styles.emblem}>
-          <Isotipo height={62} color="#f1f0fb" />
-          <Text style={styles.emblemText}>AD ASTRA</Text>
+          <LogoVertical height={190} color="#f1f0fb" />
+          <Text style={styles.motto}>WORLDS BORN FROM IMAGINATION</Text>
         </View>
         <Text style={styles.phrase}>Tu imaginación también es un mundo.</Text>
         <Pressable onPress={onOnline} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
@@ -89,10 +90,10 @@ export function ModePicker({ packName, onOnline, onOffline }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   bar: { paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center' },
-  hero: { minHeight: 440, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
+  hero: { minHeight: 560, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
   veil: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
-  emblem: { width: 132, height: 132, borderRadius: 66, alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: 'rgba(11, 15, 20, 0.72)', borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.6)', marginBottom: 'auto', marginTop: 28 },
-  emblemText: { fontFamily: theme.fonts.display, fontSize: 10, letterSpacing: 3, color: '#f1f0fb' },
+  emblem: { alignItems: 'center', gap: 10, marginBottom: 'auto', marginTop: 32 },
+  motto: { fontFamily: theme.fonts.display, fontSize: 11, letterSpacing: 3.5, color: '#f1f0fb', textAlign: 'center', textShadowColor: 'rgba(0, 0, 0, 0.8)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
   phrase: { fontFamily: theme.fonts.serifItalic, fontSize: 22, lineHeight: 28, color: '#f1f0fb', textAlign: 'center' },
   cta: { backgroundColor: theme.colors.accent, borderRadius: 999, paddingHorizontal: 26, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   ctaText: { fontFamily: theme.fonts.displayBold, fontSize: 13, letterSpacing: 1.5, color: '#ffffff' },

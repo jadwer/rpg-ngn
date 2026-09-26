@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } f
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
-import { Isotipo } from '../../components/Brand'
+import { LogoVertical } from '../../components/Brand'
 import { theme } from '../../theme'
 
 interface Props {
@@ -39,7 +39,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
-          <Isotipo height={72} color={theme.colors.ink} />
+          <LogoVertical height={130} color={theme.colors.ink} />
         </View>
         {showServer ? (
           <Field
