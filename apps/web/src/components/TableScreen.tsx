@@ -666,7 +666,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         {sceneUrl ? (
           <div
-            className="veil-grip hide-on-screen"
+            className="veil-grip"
             role="separator"
             aria-orientation="horizontal"
             aria-label="Arrastra para ver más escena o más texto"

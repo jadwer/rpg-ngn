@@ -2758,7 +2758,11 @@ a.plain {
   -webkit-backdrop-filter: blur(2px);
 }
 .table.has-scene.screen .scroll {
-  margin-top: 45dvh;
+  /* En modo pantalla tambien manda lo que se arrastro (Gabino, 26-09). */
+  margin-top: var(--veil-top, 45dvh);
+}
+.table.has-scene.screen .veil-grip {
+  top: calc(var(--veil-top, 45dvh) - 14px);
 }
 @media (min-width: 900px) {
   .table.has-scene .scroll {
@@ -2789,7 +2793,7 @@ a.plain {
   border-radius: 3px;
   background: rgba(229, 231, 255, 0.55);
 }
-.table.has-scene:has(.turn textarea) .veil-grip {
+.table.has-scene:not(.screen):has(.turn textarea) .veil-grip {
   display: none;
 }
 
