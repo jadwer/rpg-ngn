@@ -41,6 +41,7 @@ interface Props {
 }
 
 const EMPTY_IDEAS: string[] = []
+const NO_IDEAS = { more: 'none' as const, used: 0 }
 const EMPTY: never[] = []
 
 /** Cada cuanto se renueva "escribiendo" mientras se teclea; la API lo caduca a los 8 s. */
@@ -277,6 +278,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
   // La tirada que pidio el DM: el numero lo pone el servidor y queda como la respuesta del turno.
   const rollTurnId = turn?.id ?? null
+  // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
+  const moreIdeas = useCallback(async () => {
+    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    const { options } = await client.moreIdeas(rollTurnId)
+    refresh()
+    return options
+  }, [client, rollTurnId, refresh])
   const rollRequested = useCallback(async () => {
     if (rollTurnId === null) throw new Error('No hay turno abierto.')
     const receipt = await client.rollRequested(rollTurnId)
@@ -832,7 +840,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </section>
         ) : null}
-        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} outOfTurns={viewer.role === 'host' && snapshot?.quota?.remainingTurns === 0} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} />
+        <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} waiting={waiting} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} outOfTurns={viewer.role === 'host' && snapshot?.quota?.remainingTurns === 0} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} ideas={snapshot?.ideas ?? NO_IDEAS} onMoreIdeas={moreIdeas} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} />
       </div>
       {gameBar('bottom')}
     </div>

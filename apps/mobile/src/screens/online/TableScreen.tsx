@@ -231,6 +231,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
   // La tirada que pidio el DM: el numero lo pone el servidor y queda como la respuesta del turno.
   const rollTurnId = turn?.id ?? null
+  // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
+  const moreIdeas = useCallback(async () => {
+    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    const { options } = await client.moreIdeas(rollTurnId)
+    refresh()
+    return options
+  }, [client, rollTurnId, refresh])
   const rollRequested = useCallback(async () => {
     if (rollTurnId === null) throw new Error('No hay turno abierto.')
     const receipt = await client.rollRequested(rollTurnId)
@@ -675,7 +682,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           <Text style={styles.screenExitText}>Salir de pantalla</Text>
         </Pressable>
       ) : null}
-      {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
+      {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} ideas={snapshot?.ideas ?? NO_IDEAS} onMoreIdeas={moreIdeas} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
       {screen ? null : <GameBar panels={gamePanels} active={sheetsOpen ? 'sheets' : panel} badges={{ host: isHost && snapshot !== null && !snapshot.session, players: (snapshot?.typing.length ?? 0) > 0 }} onOpen={(p) => (p === 'sheets' ? openSheets() : setPanel(p))} />}
 
       {maps.length > 0 ? (
@@ -764,6 +771,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 }
 
 const EMPTY_IDEAS: string[] = []
+const NO_IDEAS = { more: 'none' as const, used: 0 }
 const EMPTY: never[] = []
 
 function Segment({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {

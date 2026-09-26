@@ -199,6 +199,23 @@ export const ResolveTurnRequest = z.strictObject({
 })
 export type ResolveTurnRequest = z.infer<typeof ResolveTurnRequest>
 
+/**
+ * "Otras" ideas (E10b): dos sugerencias nuevas para un personaje, en una
+ * llamada aparte al modelo con el mismo contexto del turno. `exclude` son
+ * las que ya vio, para que no las repita.
+ */
+export const SuggestRequest = ResolveTurnRequest.extend({
+  characterId: KebabId,
+  exclude: z.array(z.string().max(160)).max(12).default([]),
+})
+export type SuggestRequest = z.infer<typeof SuggestRequest>
+
+export const SuggestResponse = z.strictObject({
+  options: z.array(z.string().min(1).max(120)).max(2),
+  usage: z.strictObject({ inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative() }),
+})
+export type SuggestResponse = z.infer<typeof SuggestResponse>
+
 /** Hallazgo del lint de conocimiento sobre un bloque o evento del turno. */
 export const LintFinding = z.strictObject({
   level: z.enum(['error', 'warning']),

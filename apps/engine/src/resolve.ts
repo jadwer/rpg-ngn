@@ -1,6 +1,6 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
-import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest } from '@rpg-ngn/engine-contract'
+import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
@@ -194,5 +194,41 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     ...(Object.keys(suggestions).length ? { suggestions: Object.fromEntries(Object.entries(suggestions).filter(([id]) => addressed.includes(id))) } : {}),
     // Tiradas pedidas: esos personajes tiran en vez de escribir el turno que viene.
     ...(rollRequests.length ? { rollRequests: rollRequests.filter((r) => addressed.includes(r.characterId)) } : {}),
+  }
+}
+
+/**
+ * "Otras" ideas (E10b): dos sugerencias nuevas para un personaje con el
+ * contexto del turno abierto, en una llamada aparte que no narra ni escribe
+ * nada. Lanza si el proveedor no sabe (DM con guion) o si el modelo falla;
+ * la plataforma decide quien puede pedirlas y cuantas veces.
+ */
+export async function suggestMore(request: SuggestRequest, deps: ResolveDeps): Promise<SuggestResponse> {
+  const credential = request.provider.kind === 'scripted' ? undefined : request.provider.credential
+  try {
+    const pack = await deps.loadPack(request.pack)
+    const ruleset = resolveRuleset(request.ruleset)
+    const { state, events: recentEvents } = rebuildState(pack, ruleset, request.snapshot, request.events)
+    const session = state.meta.sessions[request.turn.sessionId]
+    if (!session || session.status !== 'open') throw new Error(`la sesion ${request.turn.sessionId} no esta abierta en la campaña`)
+    const provider = deps.provider ?? createProvider(request.provider, deps.providers ?? {})
+    if (!provider.suggest) throw new Error('el director de esta mesa no da ideas: no tiene modelo')
+    return await provider.suggest(
+      {
+        pack,
+        state,
+        session: pack.sessions.get(request.turn.sessionId),
+        turn: request.turn,
+        notes: request.context,
+        recentEvents,
+        lint: request.lint ?? deps.lintMode,
+        dice: request.dice,
+        rulesetId: ruleset.id,
+      },
+      request.characterId,
+      request.exclude,
+    )
+  } catch (error) {
+    throw new Error(redact(error instanceof Error ? error.message : String(error), credential))
   }
 }

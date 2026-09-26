@@ -108,6 +108,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   rollFortune(tableId: string | number): Promise<{ result: number; label: string }>
   /** Suelta el dado de la tirada que el DM pidio en este turno; el numero lo saca el servidor y queda como la respuesta del personaje. 409 si no toca. */
   rollRequested(turnId: number): Promise<RollReceipt>
+  /** "Otras" ideas para el propio personaje; sustituyen a las anteriores. 409 si no toca o hay que pagar. */
+  moreIdeas(turnId: number): Promise<{ options: string[]; ideas: TableState['ideas'] }>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
   closeTurn(turnId: number, force?: boolean): Promise<TurnView>
   /** Cancela (true) o reanuda (false) la cuenta atras del cierre; cualquiera de la mesa puede. */
@@ -290,7 +292,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async tableState(tableId, after = 0) {
       const { data } = await request<{ data: Omit<TableState, 'lastBlockId'>; meta: { lastBlockId: number } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
       // `narrators` y `typing` no existian antes de los avisos compartidos: una API vieja no rompe al cliente.
-      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, rolls: data.data.rolls ?? { pending: null }, suggestions: data.data.suggestions ?? [], lastBlockId: data.meta.lastBlockId }
+      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, rolls: data.data.rolls ?? { pending: null }, suggestions: data.data.suggestions ?? [], ideas: data.data.ideas ?? { more: 'none', used: 0 }, lastBlockId: data.meta.lastBlockId }
     },
 
     async setNarrating(tableId, narrating) {
@@ -300,6 +302,11 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async rollFortune(tableId) {
       const { data } = await request<{ data: { result: number; label: string } }>(`/api/v1/tables/${tableId}/fortune`, { method: 'POST' })
+      return data.data
+    },
+
+    async moreIdeas(turnId) {
+      const { data } = await request<{ data: { options: string[]; ideas: TableState['ideas'] } }>(`/api/v1/turns/${turnId}/ideas`, { method: 'POST' })
       return data.data
     },
 

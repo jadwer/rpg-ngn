@@ -432,7 +432,7 @@ premium, imagenes fuera del tope) espera a Stripe.
   (`docs/07`). Ajuste por mesa para apagarlas. Tabla de costes por imagen
   para `turns:usage`. Web, app y cronica pintan el bloque
 - [x] **Mesa con escena de fondo** (24-09, web; pedido de Gabino al verla en el telefono): la ultima ilustracion es el fondo de la mesa, el texto se lee en la mitad de abajo sobre vidrio ahumado, y el cuadro de respuesta queda plegado en una barra "¿Que hace tu personaje?" que se abre al tocarla o al bajar leyendo hasta el final (la carga y el autoscroll no cuentan); mientras se escribe, la escena cede alto. Minimo 3 turnos entre imagenes (`images.min_turn_gap`), la apertura siempre lleva la suya. En la app desde el 24-09 por la noche (velo negro sin desenfoque, barra plegada con "Ocultar", apertura al bajar con el dedo, la escena cede alto al escribir); sin verificar en el telefono
-- [x] **10b. Sugerencias de respuesta por jugador** (24-09, desplegada, sin "Otras" todavia: esa necesita una llamada aparte al modelo). Dos acciones por
+- [x] **10b. Sugerencias de respuesta por jugador** (24-09, desplegada; "Otras" desde el 25-09: llamada aparte al modelo (`POST /v1/turns/suggest` en el engine, `DMProvider.suggest`, `IdeasService` en la API, `POST turns/{turn}/ideas`), la primera ronda de cada turno gratis y las siguientes solo con clave propia o con un paquete de 10 USD o mas ya cobrado (Gabino), tope 5 por turno, una llamada que falla no cobra; las nuevas sustituyen a las anteriores y el motor recibe las que ya vio). Dos acciones por
   personaje interpelado, en la misma llamada del DM, filtradas por lo que el
   personaje sabe; tocarla la copia al cuadro. **El cuadro de texto siempre
   sigue abierto** para "otra respuesta" (Gabino, 24-09): las sugerencias

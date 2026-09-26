@@ -1,5 +1,5 @@
-import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import type { TableState, TurnView } from '@rpg-ngn/api-client'
+import { appendRoll, countdownLine, moreIdeasButton, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -39,6 +39,10 @@ interface Props {
   onRolled: () => void
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
+  /** Si puede pedir "Otras" ideas y en que condiciones. */
+  ideas: TableState['ideas']
+  /** Pide dos ideas nuevas al director; devuelve las que sustituyen a las de arriba. */
+  onMoreIdeas: () => Promise<string[]>
   /** Se abre solo cuando quien lee bajo hasta el final y el director ya no narra (como la web). */
   autoOpen: boolean
   /** Avisa si el cuadro esta abierto: la escena de fondo cede alto mientras se escribe. */
@@ -51,8 +55,31 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, autoOpen, onComposingChange }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, ideas, onMoreIdeas, autoOpen, onComposingChange }: Props) {
   const [showIdeas, setShowIdeas] = useState(true)
+  // "Otras" ideas: las nuevas se enseñan al momento, sin esperar al sondeo.
+  const [freshIdeas, setFreshIdeas] = useState<string[] | null>(null)
+  const [askingIdeas, setAskingIdeas] = useState(false)
+  const [ideasError, setIdeasError] = useState<string | null>(null)
+  useEffect(() => {
+    setFreshIdeas(null)
+    setIdeasError(null)
+  }, [turn?.id])
+  const shownIdeas = freshIdeas ?? suggestions
+  const moreButton = moreIdeasButton(ideas.more)
+  const askMore = async () => {
+    if (askingIdeas) return
+    setAskingIdeas(true)
+    setIdeasError(null)
+    try {
+      setFreshIdeas(await onMoreIdeas())
+      setShowIdeas(true)
+    } catch (error) {
+      setIdeasError(error instanceof Error ? error.message : 'No se pudieron pedir más ideas.')
+    } finally {
+      setAskingIdeas(false)
+    }
+  }
   const [opened, setOpened] = useState(false)
   // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
   const [folded, setFolded] = useState(false)
@@ -204,7 +231,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           accessibilityRole="button"
         >
           <Text style={styles.composeBarText}>¿Qué hace tu personaje?</Text>
-          {fortunePending && !fortuneLanded ? <Text style={styles.ideasToggle}>Tira tu Fortuna</Text> : suggestions.length > 0 ? <Text style={styles.ideasToggle}>{`${suggestions.length} ideas`}</Text> : null}
+          {fortunePending && !fortuneLanded ? <Text style={styles.ideasToggle}>Tira tu Fortuna</Text> : shownIdeas.length > 0 ? <Text style={styles.ideasToggle}>{`${shownIdeas.length} ideas`}</Text> : null}
         </Pressable>
       ) : null}
       {progress.canRespond && composing ? (
@@ -221,14 +248,23 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           </Pressable>
           {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
           {/* Ideas del DM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
-          {suggestions.length > 0 && !focused ? (
+          {(shownIdeas.length > 0 || moreButton) && !focused ? (
             showIdeas ? (
               <View style={styles.ideas}>
-                {suggestions.map((idea) => (
+                {shownIdeas.map((idea) => (
                   <Pressable key={idea} style={({ pressed }) => [styles.idea, pressed && styles.ideaPressed]} disabled={busy} onPress={() => setText(idea)} accessibilityRole="button">
                     <Text style={styles.ideaText}>{idea}</Text>
                   </Pressable>
                 ))}
+                {/* "Otras": una llamada aparte al director. La primera ronda del turno es gratis. */}
+                {moreButton ? (
+                  <Pressable style={({ pressed }) => [styles.idea, styles.more, pressed && styles.ideaPressed, (!moreButton.enabled || askingIdeas) && styles.sendOff]} disabled={busy || askingIdeas || !moreButton.enabled} onPress={() => void askMore()} accessibilityRole="button">
+                    {askingIdeas ? <ActivityIndicator size="small" color={theme.colors.ink} /> : null}
+                    <Text style={styles.ideaText}>{moreButton.label}</Text>
+                  </Pressable>
+                ) : null}
+                {moreButton && !moreButton.enabled ? <Text style={styles.diceNotice}>{moreButton.hint}</Text> : null}
+                {ideasError ? <Text style={styles.notice}>{ideasError}</Text> : null}
                 <Pressable onPress={() => setShowIdeas(false)} hitSlop={8}>
                   <Text style={styles.ideasToggle}>Ocultar ideas</Text>
                 </Pressable>
@@ -296,6 +332,7 @@ const styles = StyleSheet.create({
   hide: { alignSelf: 'flex-end' },
   idea: { borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
   ideaPressed: { backgroundColor: 'rgba(124, 58, 237, 0.26)' },
+  more: { flexDirection: 'row', alignItems: 'center', gap: 8, borderStyle: 'dashed', backgroundColor: 'transparent' },
   ideaText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   ideasToggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula },
   fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },

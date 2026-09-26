@@ -217,6 +217,12 @@ export interface TableState {
   quota?: { remainingTurns: number } | null
   /** Ideas de accion para el personaje de quien consulta (E10b); vacio si no hay. */
   suggestions: string[]
+  /**
+   * Si puede pedir "Otras" ideas: `free` (le queda la ronda gratis del
+   * turno), `unlocked` (clave propia o paquete), `locked` (gasto la gratis y
+   * no tiene como pagar mas), `exhausted` (tope del turno) o `none`.
+   */
+  ideas: { more: 'free' | 'unlocked' | 'locked' | 'exhausted' | 'none'; used: number }
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }

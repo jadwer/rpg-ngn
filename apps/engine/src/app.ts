@@ -1,10 +1,10 @@
-import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, PackValidateRequest, ProjectRequest, ProviderConfig, ResolveTurnRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
+import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, PackValidateRequest, ProjectRequest, ProviderConfig, ResolveTurnRequest, SuggestRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
 import { createProvider, redact, type ProviderDeps } from '@rpg-ngn/narrative'
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
 import type { PackStore } from './packs.js'
 import { project, validateEvents } from './project.js'
-import { resolveTurn } from './resolve.js'
+import { resolveTurn, suggestMore } from './resolve.js'
 
 export interface EngineOptions {
   token: string
@@ -132,6 +132,19 @@ export function createEngine(options: EngineOptions): Hono {
         await out.write(JSON.stringify(line) + '\n')
       }
     })
+  })
+
+  /** "Otras" ideas (E10b): una llamada corta al modelo; la plataforma decide quien puede y cuantas. */
+  app.post('/v1/turns/suggest', async (c) => {
+    const parsed = SuggestRequest.safeParse(await c.req.json())
+    if (!parsed.success) {
+      return c.json({ error: 'peticion invalida', issues: parsed.error.issues }, 422)
+    }
+    try {
+      return c.json(await suggestMore(parsed.data, { loadPack: (ref) => options.packs.get(ref), now, providers, lintMode: options.lintMode }))
+    } catch (error) {
+      return c.json({ error: error instanceof Error ? error.message : String(error) }, 502)
+    }
   })
 
   app.post('/v1/validate/events', async (c) => {

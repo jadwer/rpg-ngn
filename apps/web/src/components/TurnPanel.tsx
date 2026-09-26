@@ -1,7 +1,7 @@
 'use client'
 
-import type { TurnView } from '@rpg-ngn/api-client'
-import { appendRoll, countdownLine, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
+import type { TableState, TurnView } from '@rpg-ngn/api-client'
+import { appendRoll, countdownLine, moreIdeasButton, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import { DiceRoller, type RollOutcome } from './dice'
@@ -38,6 +38,10 @@ interface Props {
   outOfTurns: boolean
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
+  /** Si puede pedir "Otras" ideas y en que condiciones. */
+  ideas: TableState['ideas']
+  /** Pide dos ideas nuevas al director; devuelve las que sustituyen a las de arriba. */
+  onMoreIdeas: () => Promise<string[]>
   /**
    * El cuadro se abre solo cuando quien lee llego al final y el director ya
    * no narra ni habla; mientras tanto queda una barra que lo abre al tocarla
@@ -53,7 +57,7 @@ interface Props {
  * Cuando no falta nadie, cuenta atras cancelable por cualquiera; en espera,
  * se cierra a mano.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, onRoll, onRolled, outOfTurns, suggestions, autoOpen }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, waiting, onRespond, onClose, onHold, onTyping, fortunePending, onFortune, onRoll, onRolled, outOfTurns, suggestions, ideas, onMoreIdeas, autoOpen }: Props) {
   const [opened, setOpened] = useState(false)
   // Plegado a mano: manda sobre la apertura sola hasta el turno siguiente.
   const [folded, setFolded] = useState(false)
@@ -63,6 +67,29 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     setFolded(false)
   }, [turn?.id])
   const [showIdeas, setShowIdeas] = useState(() => readShowIdeas())
+  // "Otras" ideas: las nuevas se enseñan al momento, sin esperar al sondeo.
+  const [freshIdeas, setFreshIdeas] = useState<string[] | null>(null)
+  const [askingIdeas, setAskingIdeas] = useState(false)
+  const [ideasError, setIdeasError] = useState<string | null>(null)
+  useEffect(() => {
+    setFreshIdeas(null)
+    setIdeasError(null)
+  }, [turn?.id])
+  const shownIdeas = freshIdeas ?? suggestions
+  const moreButton = moreIdeasButton(ideas.more)
+  const askMore = async () => {
+    if (askingIdeas) return
+    setAskingIdeas(true)
+    setIdeasError(null)
+    try {
+      setFreshIdeas(await onMoreIdeas())
+      setShowIdeas(true)
+    } catch (error) {
+      setIdeasError(error instanceof Error ? error.message : 'No se pudieron pedir más ideas.')
+    } finally {
+      setAskingIdeas(false)
+    }
+  }
   const [fortuneError, setFortuneError] = useState<string | null>(null)
   // Tras caer el dado el cuadro se va sin esperar al siguiente sondeo, que
   // es el que confirma que ya no toca; si vuelve a tocar (sesion nueva), vuelve.
@@ -229,7 +256,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           }}
         >
           <span>¿Qué hace tu personaje?</span>
-          {fortunePending && !fortuneLanded ? <span className="count">Tira tu Fortuna</span> : suggestions.length > 0 ? <span className="count">{suggestions.length} ideas</span> : null}
+          {fortunePending && !fortuneLanded ? <span className="count">Tira tu Fortuna</span> : shownIdeas.length > 0 ? <span className="count">{shownIdeas.length} ideas</span> : null}
         </button>
       ) : null}
       {progress.canRespond && composing ? (
@@ -246,15 +273,24 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           </button>
           {/* Ideas del DM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
-          {suggestions.length > 0 ? (
+          {shownIdeas.length > 0 || moreButton ? (
             showIdeas ? (
               <div className="ideas" role="group" aria-label="Ideas para tu personaje">
                 <span className="label">Ideas</span>
-                {suggestions.map((idea) => (
+                {shownIdeas.map((idea) => (
                   <button key={idea} type="button" className="idea" disabled={busy} onClick={() => setText(idea)}>
                     {idea}
                   </button>
                 ))}
+                {/* "Otras": una llamada aparte al director. La primera ronda del turno es gratis. */}
+                {moreButton ? (
+                  <button type="button" className="idea more" disabled={busy || askingIdeas || !moreButton.enabled} onClick={() => void askMore()} title={moreButton.hint ?? undefined}>
+                    {askingIdeas ? <span className="spinner" aria-hidden /> : null}
+                    {moreButton.label}
+                  </button>
+                ) : null}
+                {moreButton && !moreButton.enabled ? <span className="ideas-hint">{moreButton.hint}</span> : null}
+                {ideasError ? <span className="ideas-hint error">{ideasError}</span> : null}
                 <button type="button" className="ideas-toggle" onClick={() => toggleIdeas(false)}>
                   Ocultar ideas
                 </button>

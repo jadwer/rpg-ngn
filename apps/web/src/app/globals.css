@@ -2887,6 +2887,23 @@ a.plain {
   padding: 4px 0;
 }
 
+/* "Otras" ideas (E10b): el boton punteado al final de las ideas. */
+.turn .idea.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-style: dashed;
+  background: transparent;
+}
+.turn .ideas-hint {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+.turn .ideas-hint.error {
+  color: var(--danger, #f87171);
+}
+
 /* La tirada que pide el DM: en vez del cuadro, el dado de la lamina (25-09). */
 .turn .roll-card {
   display: flex;

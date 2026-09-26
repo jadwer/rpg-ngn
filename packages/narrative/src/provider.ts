@@ -64,8 +64,19 @@ export interface DMProbe {
   message: string | null
 }
 
+/** Dos ideas nuevas para un personaje ("Otras", E10b) y lo que costo pedirlas. */
+export interface DMSuggestion {
+  options: string[]
+  usage: { inputTokens: number; outputTokens: number }
+}
+
 export interface DMProvider {
   readonly kind: string
   narrate(context: DMTurnContext): AsyncIterable<DMOutput>
   probe(): Promise<DMProbe>
+  /**
+   * "Otras" ideas: dos sugerencias mas para un personaje con el contexto del
+   * turno, sin narrar nada. Opcional: el DM con guion no tiene modelo.
+   */
+  suggest?(context: DMTurnContext, characterId: string, exclude: readonly string[]): Promise<DMSuggestion>
 }

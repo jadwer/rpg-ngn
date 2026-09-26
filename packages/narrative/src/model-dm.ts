@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
-import type { DMOutput, DMProbe, DMProvider, DMTurnContext, ProposedEvent } from './provider.js'
+import type { DMOutput, DMProbe, DMProvider, DMSuggestion, DMTurnContext, ProposedEvent } from './provider.js'
 import { DMProviderError, errorMessage, redact } from './redact.js'
 
 /** Lo que ve la mesa cuando el lint corta un bloque. No dice cual era el secreto. */
@@ -410,6 +410,63 @@ export class ModelDMProvider implements DMProvider {
     const addressed = interpreter.addressed ?? party
     yield { kind: 'addressed', characterIds: [...addressed, ...requests.map((r) => r.characterId).filter((id) => !addressed.includes(id))] }
     yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
+  }
+
+  /**
+   * "Otras" ideas (E10b): una llamada corta con el mismo contexto del turno
+   * (el prefijo de sistema es el mismo, asi que el proveedor lo cachea) que
+   * solo pide la linea `suggest` de un personaje. Cada idea pasa el lint
+   * como las del turno: una sugerencia tambien puede filtrar un secreto.
+   */
+  async suggest(ctx: DMTurnContext, characterId: string, exclude: readonly string[]): Promise<DMSuggestion> {
+    const compact = this.options.contextProfile === 'compact'
+    const built = buildTurnContext(ctx, this.options.budget ?? budgetFor(this.options.contextProfile))
+    const id = refId(characterId)
+    if (!built.party.includes(id)) throw new DMProviderError(`${characterId} no está en la sesión`, this.credential)
+    const name = ctx.pack.characters.get(id)?.name ?? id
+    const seen = exclude.filter((e) => e.trim()).map((e) => `"${e.trim()}"`)
+    const ask = [
+      '',
+      `AHORA NO NARRES NADA. ${name} (character:${id}) pidió otras ideas. Responde con UNA sola línea JSON y nada más:`,
+      `{"kind":"suggest","characterId":"${id}","options":["...","..."]}`,
+      `Dos cosas distintas que ${name} podría intentar ahora, en primera persona, en menos de 12 palabras cada una, una prudente y una atrevida, basadas solo en lo que ${name} sabe.`,
+      ...(seen.length ? [`Distintas de estas, que ya vio: ${seen.join(', ')}.`] : []),
+    ].join('\n')
+    const prompt: ModelPrompt = { system: systemPromptFor(ctx.rulesetId, compact, ctx.dice ?? 'engine'), user: built.user + ask, maxOutputTokens: 300 }
+
+    let raw = ''
+    let reply: ModelReply
+    try {
+      const stream = this.transport.stream(prompt)
+      for (;;) {
+        const next = await stream.next()
+        if (next.done) {
+          reply = next.value
+          break
+        }
+        raw += next.value
+      }
+    } catch (error) {
+      throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
+    }
+
+    const knowledge = (ctx.lint ?? 'enforce') === 'off' ? null : buildKnowledgeView(ctx, built.party)
+    const options: string[] = []
+    for (const piece of raw.split('\n').flatMap((line) => (/^[{[]/.test(line.trim()) ? splitJsonObjects(line.trim()) : [line]))) {
+      const parsed = parseLoose(piece)
+      const line = ModelLine.safeParse(parsed)
+      if (!line.success || line.data.kind !== 'suggest' || refId(line.data.characterId) !== id) continue
+      for (const rawOption of line.data.options) {
+        const option = rawOption.trim().replace(/\s+/g, ' ').slice(0, 120)
+        if (!option || options.includes(option) || exclude.includes(option)) continue
+        if (knowledge && (ctx.lint ?? 'enforce') === 'enforce' && lintText(option, knowledge, ctx.pack).some((f) => f.level === 'error')) continue
+        options.push(option)
+        if (options.length === 2) break
+      }
+      if (options.length) break
+    }
+    if (!options.length) throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ideas (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
+    return { options, usage: { inputTokens: reply.inputTokens, outputTokens: reply.outputTokens } }
   }
 
   async probe(): Promise<DMProbe> {

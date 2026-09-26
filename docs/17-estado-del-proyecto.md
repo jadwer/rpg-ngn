@@ -196,6 +196,17 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
   llego bien.
 
+### "Otras" ideas (25-09, noche)
+
+- El jugador que no sabe que hacer pide dos ideas nuevas al director sin
+  gastar un turno: llamada corta al modelo con el mismo prefijo de sistema
+  (`DMProvider.suggest`, `POST /v1/turns/suggest`), `IdeasService` decide
+  quien puede. Regla de Gabino: la primera ronda de cada turno es gratis; las
+  siguientes, solo con clave propia o con un paquete de 10 USD o mas ya
+  cobrado; tope de 5 por turno y personaje. Una llamada que falla no cobra.
+- En la mesa (web y app), el boton punteado "Otras ideas" al final de las
+  ideas; bloqueado, dice por que. Las nuevas sustituyen a las anteriores.
+
 ### Tirada pedida por el director (25-09, tarde)
 
 - **Lo que fallo:** en la mesa 39, con los dados en manos de la mesa, el DM
