@@ -78,7 +78,8 @@ export function Root() {
     <SafeAreaProvider>
       <NarratorProvider>
         <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-          <StatusBar style="light" />
+          {/* Sin barra de estado en toda la app (Gabino, 26-09): ocultarla hoja por hoja dejaba que apareciera y desapareciera. */}
+          <StatusBar style="light" hidden />
           {body}
         </SafeAreaView>
       </NarratorProvider>

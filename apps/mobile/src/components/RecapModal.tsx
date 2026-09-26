@@ -1,6 +1,6 @@
 import type { SystemBlock } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -32,7 +32,8 @@ export function RecapModal({ recap, enabled }: Props) {
   }
 
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
+    <Modal visible={open} transparent animationType="fade" statusBarTranslucent onRequestClose={close}>
+      <StatusBar hidden />
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <Text style={styles.title}>Anteriormente...</Text>
