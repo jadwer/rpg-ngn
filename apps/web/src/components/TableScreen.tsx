@@ -61,6 +61,27 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [screen, setScreen] = useState(false)
+  // Tamaño del texto en modo pantalla (A- / A+), por navegador: cada proyector o
+  // escena de OBS pide el suyo (Gabino, 26-09).
+  const [screenScale, setScreenScale] = useState(1)
+  useEffect(() => {
+    try {
+      const saved = Number(window.localStorage.getItem('rpg.screen-scale'))
+      if (saved >= 0.6 && saved <= 2) setScreenScale(saved)
+    } catch {
+      // Sin almacenamiento se queda en 1.
+    }
+  }, [])
+  const scaleScreen = (delta: number) =>
+    setScreenScale((cur) => {
+      const next = Math.round(Math.min(2, Math.max(0.6, cur + delta)) * 10) / 10
+      try {
+        window.localStorage.setItem('rpg.screen-scale', String(next))
+      } catch {
+        // Sin almacenamiento el ajuste dura lo que la pestaña.
+      }
+      return next
+    })
   const [panel, setPanel] = useState<GamePanel | null>(null)
   const sheetsOpen = panel === 'sheets'
   const togglePanel = (next: GamePanel) => setPanel((current) => (current === next ? null : next))
@@ -598,7 +619,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={togglePanel} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
 
   return (
-    <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`}>
+    <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
       <header className="table-header hide-on-screen">
         <SystemMenu user={user} onLogout={onLogout} />
@@ -802,6 +823,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
 
       <footer className="screen-foot">
         <span>{line}</span>
+        <span className="escala" role="group" aria-label="Tamaño del texto">
+          <button type="button" className="btn ghost small" onClick={() => scaleScreen(-0.1)} aria-label="Texto más pequeño" disabled={screenScale <= 0.6}>
+            A−
+          </button>
+          <span className="valor">{Math.round(screenScale * 100)}%</span>
+          <button type="button" className="btn ghost small" onClick={() => scaleScreen(0.1)} aria-label="Texto más grande" disabled={screenScale >= 2}>
+            A+
+          </button>
+        </span>
         <button type="button" className="btn ghost small" onClick={() => setScreen(false)}>
           Salir de pantalla <span className="k">F</span>
         </button>

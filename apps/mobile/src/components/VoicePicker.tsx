@@ -1,5 +1,5 @@
 import { PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, readingLanguageLabel } from '@rpg-ngn/ui-logic'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
 import { voiceLabel, type VoiceInfo } from '../speech/voices'
 import { theme } from '../theme'
@@ -25,7 +25,9 @@ export function VoicePicker({ visible, tts, onClose }: Props) {
   const language = readingLanguageLabel(settings.lang)
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={onClose}>
+      {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
+      <StatusBar hidden />
       <View style={styles.modal}>
         <View style={styles.header}>
           <View style={styles.headerSide} />

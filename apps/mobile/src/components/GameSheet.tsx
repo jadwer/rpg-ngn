@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 
 interface Props {
@@ -16,7 +16,9 @@ interface Props {
  */
 export function GameSheet({ visible, title, onClose, children }: Props) {
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={onClose}>
+      {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
+      <StatusBar hidden />
       <View style={styles.modal}>
         <View style={styles.header}>
           <View style={styles.side} />

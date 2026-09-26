@@ -2,7 +2,7 @@ import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, mapEdges, mapView, whereEveryoneIs } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
-import { Image, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
+import { Image, Modal, Pressable, StatusBar, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
 
 /**
@@ -139,7 +139,9 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
         </Pressable>
       )}
 
-      <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
+      <Modal visible={open} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={() => setOpen(false)}>
+        {/* Mapa a pantalla completa: sin la barra de estado, que tapaba "Cerrar" (Gabino, 26-09). Vuelve al cerrar. */}
+        <StatusBar hidden />
         <View style={styles.modal}>
           <View style={styles.header}>
             <Pressable onPress={() => setOpen(false)} hitSlop={10}>

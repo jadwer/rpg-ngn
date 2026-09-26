@@ -1,6 +1,6 @@
 import { characterSheet } from '@rpg-ngn/ui-logic'
 import { useState, type ReactNode } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import { Portrait } from '../components/Portrait'
 import { Sheet } from '../components/Sheet'
 import { abilityModifier } from '../pack/offline'
@@ -36,7 +36,9 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
   }
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={selected ? () => setSelectedId(null) : close}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={selected ? () => setSelectedId(null) : close}>
+      {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
+      <StatusBar hidden />
       <View style={styles.modal}>
         <View style={styles.header}>
           <Pressable onPress={selected ? () => setSelectedId(null) : close} hitSlop={10} style={styles.headerSide}>
