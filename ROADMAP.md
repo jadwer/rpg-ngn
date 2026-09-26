@@ -497,7 +497,20 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
   fila) y una franja de temporada con el camino, tus capitulos y el pase.
   Hueco para su ilustracion en `ARTE_TEMPORADA` de
   `components/home/HomeCatalog.tsx` (1600x600, escena a la derecha)
-- [ ] **4. APK v6** al cerrar 2 y 3a
+- [x] **4. APK v6** (26-09), y de ahi a la **v14** la misma noche con lo que
+  salio de probarla en telefono y tablet: tarjeta de mesa que crecia con su
+  portada, filtros que se colapsaban, fondo de toda la pantalla con degradado
+  real (`expo-linear-gradient`), login sobre el arte, perfil y Mis mundos en
+  el marco nuevo, tablet centrada, zoom en los mapas y sin barra de estado
+- [x] **Extra 26-09 (web)**: zoom en los mapas, modo pantalla con texto que
+  escala con la ventana, A- / A+ y la agarradera del panel de texto; el pie
+  de la web recupero sus redes (choque de la clase `.pronto`)
+- [ ] **5. Auditoria valida a matar** (pedida por Gabino el 26-09, antes de
+  que crezca): inconsistencias de diseño entre web y app, arquitectura y
+  errores posibles. Rediseñar bien donde haga falta en vez de parchear.
+  Hallazgos de entrada: el selector de voz "Nadie narra en voz alta" no
+  parece boton (dejarlo desplegado) y la hoja del anfitrion dice "hasta 6"
+  ilustraciones por sesion cuando son 12
 
 ## Pendientes del 25-09
 

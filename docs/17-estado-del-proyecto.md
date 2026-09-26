@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-25, 18:45 CST**. Rama `dev`, commit `21640b8`; API `f2c8f96` con platform `12d82aa`.
+Fecha de corte: **2026-09-26, 04:30 CST**. Rama `dev`, commit `6172a81`; API `49ddb31` con platform `5b17f92`. Produccion en https://adastramentis.com.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -487,14 +487,36 @@ amistades de por medio.
   real. **Copias de seguridad automaticas diarias** (timer activo, 5 dumps al
   dia del corte). HTTPS con renovacion automatica, cortafuegos, fail2ban.
 
+### Del 26-09 (plan del 26-09, cerrado)
+
+- **Stripe en real**, cobro en MXN al tipo del dia mas 5 % (precio en USD).
+- **Mesas con el tablero** `mesas_ux.png` en web y app; marco comun (barra
+  superior, lateral en escritorio, inferior en la app), paginas "Pronto".
+- **Explorar mundos** (catalogo publico con estado por usuario y detalle),
+  **capitulos y temporada** (Temporada 1: piloto gratis, La Mascarada a 20),
+  **pase de temporada** (5 USD, capitulos x2, mundos del camino, 5 mundos
+  propios) y **compra directa** de mundos oficiales con precio. Sin
+  `atomo-subscriptions` (es el paquete editorial).
+- **Home con el catalogo vivo**: destacados con estado y huecos
+  "Proximamente", franja de temporada con el pase, hueco para su arte.
+- **Boticaria en beta cerrada** (`catalog:set private-botica --beta`), gratis
+  y sin venta; sale antes de abrir al publico.
+- **Mapas con zoom** en web y app (pellizco, arrastre, botones).
+- **Modo pantalla**: texto que escala con la ventana, A- / A+ y la
+  agarradera del panel de texto.
+- **App v6 a v14**: fondo de toda la pantalla, degradados reales
+  (`expo-linear-gradient`), login sobre el arte, perfil y Mis mundos en el
+  marco nuevo, tablet centrada, sin barra de estado en toda la app.
+
 ### Verificacion
 
 | Donde | Tests |
 |---|---|
-| **Monorepo** (`pnpm -r test`) | **403** |
-| **API (Laravel)** | **123** (646 aserciones) |
+| **Monorepo** (`pnpm check`) | **482** |
+| **API (Laravel)** | **181** (1040 aserciones) |
 
-Contados corriendo las suites el 22-09 a las 23:00 (la version anterior de
+Contados corriendo las suites el 26-09 (la tabla anterior, del 22-09 a las
+23:00, decia 403 y 123) (la version anterior de
 esta tabla decia 384 y 99: se quedo vieja el mismo dia, porque el enlace de
 invitacion, retirar mesas, borrar cuenta y los NPC remotos trajeron tests).
 El detalle por package lo da CI, no este archivo. Todo en verde el dia del
@@ -509,13 +531,14 @@ conviene asumir que hasta que no se juega, no esta probado.
 
 ## 4. Que esta en progreso ahora mismo
 
-**Nada a medias.** El arbol esta limpio, todo lo empezado esta desplegado y
-verificado. El trabajo del 21-09 (ubicacion inicial de la party, mapa en la
-app, `docs/15`, revision de `docs/16`) se cerro completo.
-
-Lo unico abierto es **observacion, no construccion**: el mapa lleva un dia en
-produccion y falta ver, con gente jugando, si lo abren por su cuenta y si el
-director se acuerda de emitir `move` en una partida larga.
+**Auditoria "valida a matar" (26-09).** Tras un dia de muchos cambios
+visuales en web y app, Gabino pidio parar y auditar antes de que crezca:
+inconsistencias de diseño, arquitectura y errores posibles, con el principio
+de que rediseñar bien ahorra mas que parchear sobre parche. El arbol estaba
+limpio y todo desplegado al empezar (punto de retorno: monorepo `6172a81`,
+API `49ddb31`). Hallazgos ya anotados: el selector "Nadie narra en voz alta"
+no parece boton, y la hoja del anfitrion dice "hasta 6" ilustraciones por
+sesion cuando son 12.
 
 ---
 
