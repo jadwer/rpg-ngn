@@ -3,12 +3,19 @@
 import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
 import { RequireSession } from '../../components/RequireSession'
-import { UserBar } from '../../components/UserBar'
-import type { StoredUser } from '../../lib/storage'
+import { AppShell } from '../../components/shell/AppShell'
 import { useTts } from '../../lib/useTts'
 
 export default function SettingsPage() {
-  return <RequireSession>{({ user, logout }) => <Settings user={user} logout={logout} />}</RequireSession>
+  return (
+    <RequireSession>
+      {({ user, logout }) => (
+        <AppShell user={user} onLogout={logout}>
+          <Settings />
+        </AppShell>
+      )}
+    </RequireSession>
+  )
 }
 
 /** La prueba lee narracion, un dialogo de la party y uno de un NPC, para oir los tres tonos. */
@@ -24,14 +31,14 @@ const SAMPLE = [
  * cuenta); la barra de voz de la mesa es el acceso rapido a los mismos. Los
  * creditos y la clave propia estan en /perfil (docs/18, D-UX-7).
  */
-function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
+function Settings() {
   const blocks = useMemo(() => SAMPLE, [])
   const tts = useTts(blocks)
   const speaking = tts.state.status === 'speaking'
 
   return (
-    <main className="page narrow">
-      <UserBar title="Voz" user={user} onLogout={logout} />
+    <div className="page en-shell narrow">
+      <h1 className="pagina-titulo">Voz</h1>
 
       <section className="card stack">
         <div className="label" style={{ marginTop: 0 }}>
@@ -105,6 +112,6 @@ function Settings({ user, logout }: { user: StoredUser; logout: () => void }) {
           {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">Se guarda en este navegador.</span>}
         </div>
       </section>
-    </main>
+    </div>
   )
 }

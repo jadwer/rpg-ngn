@@ -6,12 +6,20 @@ import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
 import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
-import { UserBar } from '../../components/UserBar'
+import { AppShell } from '../../components/shell/AppShell'
 import { useSession } from '../../lib/session'
 import type { StoredUser } from '../../lib/storage'
 
 export default function ProfilePage() {
-  return <RequireSession>{({ client, user, unauthorized, logout }) => <Profile client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
+  return (
+    <RequireSession>
+      {({ client, user, unauthorized, logout }) => (
+        <AppShell user={user} onLogout={logout}>
+          <Profile client={client} user={user} unauthorized={unauthorized} logout={logout} />
+        </AppShell>
+      )}
+    </RequireSession>
+  )
 }
 
 /**
@@ -77,8 +85,8 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
   }
 
   return (
-    <main className="page narrow">
-      <UserBar title="Mi cuenta" user={user} onLogout={logout} />
+    <div className="page en-shell narrow">
+      <h1 className="pagina-titulo">Mi cuenta</h1>
 
       <form className="card stack" onSubmit={(e) => void saveName(e)}>
         <div className="label" style={{ marginTop: 0 }}>
@@ -136,6 +144,6 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       <OwnKeys client={client} unauthorized={unauthorized} />
 
       <DeleteAccount client={client} onDeleted={logout} />
-    </main>
+    </div>
   )
 }

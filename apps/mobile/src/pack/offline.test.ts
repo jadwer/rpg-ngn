@@ -26,7 +26,9 @@ describe('pack empaquetado', () => {
       .map(([, text]) => JSON.parse(text) as { portrait?: string | null; image?: string })
       .map((entity) => entity.portrait ?? entity.image)
       .filter((p): p is string => typeof p === 'string')
-      .sort()
+    const catalogo = (JSON.parse(packFiles['pack.json'] ?? '{}') as { catalog?: { cover?: string; gallery?: string[] } }).catalog
+    declarados.push(...[catalogo?.cover, ...(catalogo?.gallery ?? [])].filter((p): p is string => typeof p === 'string').map((p) => `art/${p}`))
+    declarados.sort()
     expect([...packBinaries].sort()).toEqual(declarados)
     expect(PACK_OPTION).toEqual({ id: 'pilot', version: PACK_VERSION, ruleset: 'fantasy-d20-lite@1.0.0' })
   })

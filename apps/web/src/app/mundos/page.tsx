@@ -5,13 +5,20 @@ import { packOriginText, packStatusText } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { PackPreview } from '../../components/PackPreview'
 import { RequireSession } from '../../components/RequireSession'
-import { UserBar } from '../../components/UserBar'
-import type { StoredUser } from '../../lib/storage'
+import { AppShell } from '../../components/shell/AppShell'
 
 const SPEC = 'https://github.com/jadwer/rpg-ngn/blob/dev/docs/05-content-pack-spec.md'
 
 export default function WorldsPage() {
-  return <RequireSession>{({ client, user, unauthorized, logout }) => <Worlds client={client} user={user} unauthorized={unauthorized} logout={logout} />}</RequireSession>
+  return (
+    <RequireSession>
+      {({ client, user, unauthorized, logout }) => (
+        <AppShell user={user} onLogout={logout}>
+          <Worlds client={client} unauthorized={unauthorized} />
+        </AppShell>
+      )}
+    </RequireSession>
+  )
 }
 
 /**
@@ -19,7 +26,7 @@ export default function WorldsPage() {
  * estado, pedir publicarlos, retirarlos, y añadir de el catalogo lo que otros
  * publicaron. Privado al instante; publico tras revision.
  */
-function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void; logout: () => void }) {
+function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (notice?: string) => void }) {
   const [mine, setMine] = useState<{ packs: PackOption[]; freeLimit: number; used: number } | null>(null)
   const [catalog, setCatalog] = useState<PackOption[] | null>(null)
   // La cola de revision: null si la cuenta no es de administracion (403).
@@ -104,8 +111,8 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
   )
 
   return (
-    <main className="page narrow mundos">
-      <UserBar title="Mis mundos" user={user} onLogout={logout} />
+    <div className="page en-shell narrow mundos">
+      <h1 className="pagina-titulo">Mis mundos</h1>
 
       <section className="card stack">
         <div className="label" style={{ marginTop: 0 }}>
@@ -281,6 +288,6 @@ function Worlds({ client, user, unauthorized, logout }: { client: ApiClient; use
           </article>
         ))}
       </section>
-    </main>
+    </div>
   )
 }

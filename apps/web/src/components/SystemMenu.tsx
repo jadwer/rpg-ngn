@@ -1,8 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { StoredUser } from '../lib/storage'
+import { ShellIcon } from './shell/icons'
+import { ACCOUNT_ITEMS, isActive, SITE_SECTIONS } from './shell/nav'
 
 interface Props {
   user: StoredUser
@@ -20,6 +23,7 @@ interface Props {
 export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const path = usePathname() ?? '/'
 
   useEffect(() => {
     if (!open) return
@@ -61,27 +65,23 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
       {open ? (
         <nav className="sysmenu-panel" role="menu" aria-label="Sitio">
           <div className="who">{user.name}</div>
-          <Link role="menuitem" href="/mesas" onClick={() => setOpen(false)}>
-            Mesas
-          </Link>
-          <Link role="menuitem" href="/mesas/nueva" onClick={() => setOpen(false)}>
-            Nueva mesa
-          </Link>
-          <Link role="menuitem" href="/mundos/explorar" onClick={() => setOpen(false)}>
-            Explorar mundos
-          </Link>
-          <Link role="menuitem" href="/mundos" onClick={() => setOpen(false)}>
-            Mis mundos
-          </Link>
-          <Link role="menuitem" href="/perfil" onClick={() => setOpen(false)}>
-            Mi cuenta y créditos
-          </Link>
-          <Link role="menuitem" href="/ajustes" onClick={() => setOpen(false)}>
-            Voz
-          </Link>
-          <Link role="menuitem" href="/guia" onClick={() => setOpen(false)}>
-            Guía del anfitrión
-          </Link>
+          {/* Las mismas secciones que la barra lateral del sitio; en el menu del
+              avatar no se repiten, porque ahi ya estan a la vista. */}
+          {variant === 'burger'
+            ? SITE_SECTIONS.map((item) => (
+                <Link key={item.href} role="menuitem" href={item.href} className={isActive(item, path) ? 'active' : undefined} onClick={() => setOpen(false)}>
+                  <ShellIcon name={item.icon} />
+                  {item.label}
+                </Link>
+              ))
+            : null}
+          {variant === 'burger' ? <hr /> : null}
+          {ACCOUNT_ITEMS.map((item) => (
+            <Link key={item.href} role="menuitem" href={item.href} className={isActive(item, path) ? 'active' : undefined} onClick={() => setOpen(false)}>
+              <ShellIcon name={item.icon} />
+              {item.label}
+            </Link>
+          ))}
           {onLogout ? (
             <button
               type="button"

@@ -28,7 +28,10 @@ describe('pack empaquetado en la web', () => {
       .map(([, text]) => JSON.parse(text) as { portrait?: string | null; image?: string })
       .map((entity) => entity.portrait ?? entity.image)
       .filter((p): p is string => typeof p === 'string')
-      .sort()
+    // Y la portada y galeria del bloque `catalog`, que viven en `art/`.
+    const catalogo = (JSON.parse(packFiles['pack.json'] ?? '{}') as { catalog?: { cover?: string; gallery?: string[] } }).catalog
+    declarados.push(...[catalogo?.cover, ...(catalogo?.gallery ?? [])].filter((p): p is string => typeof p === 'string').map((p) => `art/${p}`))
+    declarados.sort()
     expect([...packBinaries].sort()).toEqual(declarados)
     for (const path of packBinaries) {
       expect(() => readFileSync(join(resolve(import.meta.dirname, '../../public/packs/pilot'), path))).not.toThrow()

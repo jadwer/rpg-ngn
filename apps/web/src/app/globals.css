@@ -5599,3 +5599,58 @@ a {
     margin: 0 44px;
   }
 }
+
+/* Menu del sitio homologado con la barra lateral (26-09): iconos y el mismo violeta. */
+.sysmenu-panel {
+  min-width: 250px;
+  background: var(--panel);
+}
+.sysmenu-panel a,
+.sysmenu-panel button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+}
+.sysmenu-panel a:hover,
+.sysmenu-panel a:focus-visible,
+.sysmenu-panel button:hover,
+.sysmenu-panel button:focus-visible {
+  background: var(--panel-2);
+  color: var(--ink);
+}
+.sysmenu-panel a.active {
+  color: #fff;
+  background: rgba(124, 58, 237, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.45);
+}
+.sysmenu-panel hr {
+  width: 100%;
+  margin: 6px 0;
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+}
+.shell-actions .sysmenu-panel,
+.topbar .sysmenu-panel {
+  left: auto;
+  right: 0;
+}
+.table-header .sysmenu-panel {
+  left: 0;
+  right: auto;
+}
+
+/* Paginas de antes dentro del marco comun */
+.page.en-shell {
+  margin: 0 auto;
+  padding: 12px 0 48px;
+}
+.pagina-titulo {
+  margin: 8px 0 18px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}

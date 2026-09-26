@@ -8,13 +8,21 @@ import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
 import { RemoteCharacterPicker } from '../../../components/RemoteCharacterPicker'
 import { RequireSession } from '../../../components/RequireSession'
-import { UserBar } from '../../../components/UserBar'
+import { AppShell } from '../../../components/shell/AppShell'
 import { PACK_ID, RULESET_ID } from '../../../lib/pack'
 import { usePack } from '../../../lib/usePack'
 import type { StoredUser } from '../../../lib/storage'
 
 export default function NewTablePage() {
-  return <RequireSession>{({ client, user, unauthorized }) => <NewTable client={client} user={user} unauthorized={unauthorized} />}</RequireSession>
+  return (
+    <RequireSession>
+      {({ client, user, unauthorized, logout }) => (
+        <AppShell user={user} onLogout={logout}>
+          <NewTable client={client} user={user} unauthorized={unauthorized} />
+        </AppShell>
+      )}
+    </RequireSession>
+  )
 }
 
 /**
@@ -129,8 +137,8 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
   if (created) {
     return (
-      <main className="page">
-        <UserBar title={created.name} user={user} />
+      <div className="page en-shell">
+        <h1 className="pagina-titulo">{created.name}</h1>
         <div className="card stack">
           <p className="hint">La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</p>
           <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack?.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={unauthorized} />
@@ -140,13 +148,13 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="page">
-      <UserBar title="Nueva mesa" user={user} />
+    <div className="page en-shell">
+      <h1 className="pagina-titulo">Nueva mesa</h1>
 
       <form className="card stack" onSubmit={(e) => void submit(e)}>
         <label className="field">
@@ -215,6 +223,6 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           <span className="hint">Después podrás invitar a tus amigos.</span>
         </div>
       </form>
-    </main>
+    </div>
   )
 }

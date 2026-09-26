@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 export const portraits: Readonly<Record<string, number>> = {
+  "art/cover.webp": require("../../assets/pack/pilot/art/cover.webp"),
   "maps/mina.webp": require("../../assets/pack/pilot/maps/mina.webp"),
   "maps/valdoria.webp": require("../../assets/pack/pilot/maps/valdoria.webp"),
   "portraits/bren.webp": require("../../assets/pack/pilot/portraits/bren.webp"),
