@@ -196,6 +196,14 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   Corregido (APP_NAME, `lang/es.json`, acentos en atomo-auth); el segundo
   llego bien.
 
+### Laminas completas y dos heros (25-09, noche)
+
+- Gabino genero con GPT las seis hojas de dados (reticula 6x6) y los dos
+  heros. `tools/dice/crop-sheets.py` recorta las 60 caras; la mesa ya pinta
+  d4, d10 y d12 con lamina. Los heros nuevos no llevan el logo pintado: la
+  web y la app lo ponen en vector sobre el hueco estrellado, con lo que
+  desaparece el doble logo. La web elige el hero por orientacion.
+
 ### "Otras" ideas (25-09, noche)
 
 - El jugador que no sabe que hacer pide dos ideas nuevas al director sin

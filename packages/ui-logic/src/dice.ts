@@ -1,11 +1,12 @@
 import type { RollBlock } from './blocks.js'
 
 /**
- * Caras de dado para pintar una tirada con la lamina de Gabino (d20, d8 y
- * d6; `tools/dice/crop.py` genera `d<caras>-<valor>.png`). Sin React ni
- * rutas: devuelve que imagenes corresponden y cada app las resuelve.
+ * Caras de dado para pintar una tirada con las hojas de Gabino (los seis
+ * dados desde el 25-09; `tools/dice/crop-sheets.py` genera
+ * `d<caras>-<valor>.png`). Sin React ni rutas: devuelve que imagenes
+ * corresponden y cada app las resuelve.
  */
-export const DICE_WITH_FACES = [20, 8, 6] as const
+export const DICE_WITH_FACES = [20, 12, 10, 8, 6, 4] as const
 export type DiceSides = (typeof DICE_WITH_FACES)[number]
 
 export interface DiceFace {

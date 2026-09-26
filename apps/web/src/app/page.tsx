@@ -60,7 +60,7 @@ export default function LandingPage() {
 
       <section className="home-hero" aria-label="Ad Astra Mentis">
         <picture>
-          <source media="(max-width: 700px)" srcSet="/branding/hero-movil.webp" />
+          <source media="(orientation: portrait)" srcSet="/branding/hero-movil.webp" />
           <img src="/branding/hero.webp" alt="" fetchPriority="high" />
         </picture>
         <div className="velo" aria-hidden />

@@ -13,7 +13,8 @@ describe('diceFaces', () => {
   it('todas las caras de un dado, para precargarlas; nada si no hay lamina', () => {
     expect(allFacesOf('1d20')).toHaveLength(20)
     expect(allFacesOf('2d6+1').map((f) => f.asset).slice(0, 2)).toEqual(['d6-1', 'd6-2'])
-    expect(allFacesOf('1d12')).toEqual([])
+    expect(allFacesOf('1d12')).toHaveLength(12)
+    expect(allFacesOf('1d100')).toEqual([])
     expect(allFacesOf('nada')).toEqual([])
   })
 
@@ -34,7 +35,7 @@ describe('diceFaces', () => {
   })
 
   it('ignora dados sin lamina y valores fuera de rango', () => {
-    expect(diceFaces('1d12', 7)).toEqual([])
+    expect(diceFaces('1d12', 7).map((f) => f.asset)).toEqual(['d12-7'])
     expect(diceFaces('1d100', 42, [42])).toEqual([])
     expect(diceFaces('1d20', 21)).toEqual([])
     expect(diceFaces('1d6', 0, [0, 3]).map((f) => f.value)).toEqual([3])
