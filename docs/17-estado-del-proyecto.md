@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-25, 18:00 CST**. Rama `dev`, commit `3c0301d`; API `23fde12` con platform `12d82aa`.
+Fecha de corte: **2026-09-25, 18:45 CST**. Rama `dev`, commit `21640b8`; API `f2c8f96` con platform `12d82aa`.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -217,7 +217,9 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   prompt de sistema cambia por modo; un numero inventado se vuelve peticion
   y el anfitrion lo ve en el aviso.
 - **Fortuna** pasa por la misma pieza de registro. La Fortuna y las tiradas
-  pedidas usan el mismo dado de la lamina.
+  pedidas usan el mismo dado de la lamina. Gabino lo probo en el APK v4:
+  "jugabilidad en movil 10/10". En la web las caras tardaban: ahora se
+  precargan. Ventaja y desventaja enseñan los dos d20 y atenuan el que sobra.
 
 ### Primera sesion de prueba y primer APK (25-09)
 
