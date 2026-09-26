@@ -5477,3 +5477,125 @@ a {
     min-width: 45%;
   }
 }
+
+/* Temporada del camino (E9 3b) */
+.temporada {
+  margin: 0 0 18px;
+  padding: 16px 18px 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(18, 24, 38, 0.9);
+}
+.temporada h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+}
+.temporada h2 span {
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+}
+.temporada .cuerpo {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.temporada .capitulos {
+  display: flex;
+  flex-direction: column;
+}
+.temporada .capitulos b {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  line-height: 1;
+  color: #fff;
+}
+.temporada .capitulos span {
+  color: var(--accent-bright);
+}
+.temporada .capitulos small {
+  margin-top: 4px;
+  color: var(--ink-dim);
+}
+.temporada .camino {
+  position: relative;
+  min-height: 150px;
+  margin: 0 50px;
+}
+.temporada .linea {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel-3);
+}
+.temporada .linea .hecho {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+}
+.temporada ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.temporada li {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.temporada li a {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 64px;
+  overflow: hidden;
+  border: 2px solid var(--accent-bright);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+.temporada li.cerrado a {
+  border-color: var(--border);
+}
+.temporada li img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.temporada li.cerrado img {
+  filter: grayscale(0.7) brightness(0.5);
+}
+.temporada li .candado {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.temporada li .nombre {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+.temporada li .umbral {
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+@media (max-width: 760px) {
+  .temporada .cuerpo {
+    grid-template-columns: 1fr;
+  }
+  .temporada .camino {
+    margin: 0 44px;
+  }
+}

@@ -99,6 +99,15 @@ export interface CatalogWorldDetail extends CatalogWorldCard {
   maps: Array<{ id: string; name: string; image: string }>
 }
 
+/** El camino de la temporada en curso (E9 3b); con cuenta, con tus capitulos. */
+export interface SeasonPath {
+  code: string
+  name: string
+  endsAt: string
+  chapters: number
+  worlds: Array<{ packId: string; threshold: number; unlocked: boolean }>
+}
+
 export interface CatalogFilters {
   q?: string | undefined
   genre?: string | undefined
@@ -204,7 +213,7 @@ export interface SettingsApi {
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
   /** Explorar mundos (E9): publico; con sesion, cada mundo trae su estado para quien mira. */
-  catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[] }>
+  catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[]; season: SeasonPath | null }>
   catalogWorld(id: string): Promise<CatalogWorldDetail>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
@@ -259,8 +268,8 @@ export function settingsApi(request: Request): SettingsApi {
 
     async catalogWorlds(filters = {}) {
       const params: Record<string, string | number | undefined> = { ...filters }
-      const { data } = await request<{ data: CatalogWorldCard[]; meta: { genres: string[] } }>(`/api/v1/catalog/worlds${query(params)}`)
-      return { worlds: data.data, genres: data.meta.genres }
+      const { data } = await request<{ data: CatalogWorldCard[]; meta: { genres: string[]; season?: SeasonPath | null } }>(`/api/v1/catalog/worlds${query(params)}`)
+      return { worlds: data.data, genres: data.meta.genres, season: data.meta.season ?? null }
     },
 
     async catalogWorld(id) {

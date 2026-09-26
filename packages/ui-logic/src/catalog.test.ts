@@ -1,6 +1,6 @@
 import type { WorldCatalog } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { cardView, durationLabel, playersTag } from './catalog.js'
+import { cardView, durationLabel, playersTag, seasonProgress } from './catalog.js'
 
 const catalog = { genre: 'Intriga', author: 'Nara', players: { min: 2, max: 5 }, duration: 'media' } as WorldCatalog
 const w = (over: object) => ({ state: 'gratis', origin: 'oficial', catalog, price: null, path: null, name: 'X', ...over }) as Parameters<typeof cardView>[0]
@@ -25,5 +25,13 @@ describe('catalog', () => {
     expect(playersTag({ min: 3, max: 5 })).toBe('3-5')
     expect(playersTag({ min: 1, max: 1 })).toBe('1')
     expect(durationLabel('larga')).toBe('Larga')
+  })
+})
+
+describe('seasonProgress', () => {
+  it('coloca cada mundo en la linea contra el ultimo umbral', () => {
+    const r = seasonProgress({ chapters: 30, worlds: [{ packId: 'a', threshold: 0, unlocked: true }, { packId: 'b', threshold: 20, unlocked: true }, { packId: 'c', threshold: 120, unlocked: false }] })
+    expect(r.progress).toBeCloseTo(0.25)
+    expect(r.stops.map((s) => s.at)).toEqual([0, 20 / 120, 1])
   })
 })

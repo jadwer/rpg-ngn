@@ -1,5 +1,5 @@
-import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, playersTag } from '@rpg-ngn/ui-logic'
+import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, durationLabel, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -28,6 +28,8 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
   const insets = useSafeAreaInsets()
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
   const [genres, setGenres] = useState<string[]>([])
+  const [season, setSeason] = useState<SeasonPath | null>(null)
+  const [names, setNames] = useState<Record<string, string>>({})
   const [genre, setGenre] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -39,6 +41,8 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
     try {
       const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined })
       setWorlds(result.worlds)
+      setSeason(result.season)
+      setNames((actual) => ({ ...actual, ...Object.fromEntries(result.worlds.map((w) => [w.id, w.name])) }))
       if (result.genres.length) setGenres((actual) => (actual.length ? actual : result.genres))
       setError(null)
     } catch (e) {
@@ -165,6 +169,18 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
       <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Mundos</Text>
         <Text style={styles.subtitle}>Historias que existen porque tú las viviste</Text>
+        {season && season.worlds.length > 0 ? (
+          <View style={styles.season}>
+            <View style={styles.seasonHead}>
+              <Text style={styles.seasonName}>{season.name}</Text>
+              <Text style={styles.seasonChapters}>{`${season.chapters} ${season.chapters === 1 ? 'capítulo' : 'capítulos'}`}</Text>
+            </View>
+            <View style={styles.bar}>
+              <View style={[styles.barFill, { width: `${Math.round(seasonProgress(season).progress * 100)}%` }]} />
+            </View>
+            <Text style={styles.meta}>{season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.unlocked ? 'abierto' : `${w.threshold} capítulos`}`).join('  ·  ')}</Text>
+          </View>
+        ) : null}
         <View style={styles.search}>
           <Icon d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm9 3-4-4" size={18} color={theme.colors.inkDim} />
           <TextInput value={q} onChangeText={setQ} placeholder="Buscar mundos…" placeholderTextColor={theme.colors.inkFaint} style={styles.searchInput} />
@@ -225,6 +241,10 @@ const styles = StyleSheet.create({
   list: { padding: 16, gap: 12, paddingBottom: 32 },
   title: { fontFamily: theme.fonts.display, fontSize: 32, color: '#ffffff' },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -6 },
+  season: { gap: 6, padding: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: theme.colors.panel },
+  seasonHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  seasonName: { fontFamily: theme.fonts.serifSemiBold, fontSize: 17, color: theme.colors.ink },
+  seasonChapters: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.accentBright },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10, backgroundColor: theme.colors.panel },
   searchInput: { flex: 1, paddingVertical: 10, fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   chipsRow: { gap: 8, paddingRight: 16 },

@@ -59,3 +59,18 @@ export function playersTag(players: { min: number; max: number }): string {
 export function durationLabel(duration: 'corta' | 'media' | 'larga'): string {
   return { corta: 'Corta', media: 'Media', larga: 'Larga' }[duration]
 }
+
+/**
+ * El camino de la temporada para pintarlo: cuanto se lleva (0 a 1 contra el
+ * ultimo umbral) y cada parada en su sitio de la linea.
+ */
+export function seasonProgress(path: { chapters: number; worlds: ReadonlyArray<{ packId: string; threshold: number; unlocked: boolean }> }): {
+  progress: number
+  stops: Array<{ packId: string; threshold: number; unlocked: boolean; at: number }>
+} {
+  const top = Math.max(1, ...path.worlds.map((w) => w.threshold))
+  return {
+    progress: Math.min(1, path.chapters / top),
+    stops: path.worlds.map((w) => ({ ...w, at: w.threshold / top })),
+  }
+}

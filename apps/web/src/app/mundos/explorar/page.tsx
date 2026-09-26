@@ -1,7 +1,7 @@
 'use client'
 
-import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, playersTag } from '@rpg-ngn/ui-logic'
+import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, durationLabel, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,9 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
   const router = useRouter()
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
   const [genres, setGenres] = useState<string[]>([])
+  const [season, setSeason] = useState<SeasonPath | null>(null)
+  // Nombre y portada de cada mundo del camino, aunque un filtro lo esconda de la lista.
+  const [known, setKnown] = useState<Record<string, CatalogWorldCard>>({})
   const [filters, setFilters] = useState<CatalogFilters>({})
   const [q, setQ] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +33,8 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
     try {
       const result = await client.catalogWorlds({ ...filters, ...(q.trim() ? { q: q.trim() } : {}) })
       setWorlds(result.worlds)
+      setSeason(result.season)
+      setKnown((actual) => ({ ...actual, ...Object.fromEntries(result.worlds.map((w) => [w.id, w])) }))
       if (result.genres.length) setGenres((actual) => (actual.length ? actual : result.genres))
       setError(null)
     } catch (e) {
@@ -85,6 +90,8 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
           </button>
         </div>
       </section>
+
+      {season && season.worlds.length > 0 ? <SeasonBlock season={season} known={known} signedIn={signedIn} /> : null}
 
       <div className="explorar-filtros" id="mundos">
         <label className="buscar">
@@ -173,5 +180,57 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
         })}
       </div>
     </div>
+  )
+}
+
+/** "Temporada actual: caminos que se abren jugando" (tablero A). */
+function SeasonBlock({ season, known, signedIn }: { season: SeasonPath; known: Record<string, CatalogWorldCard>; signedIn: boolean }) {
+  const { progress, stops } = seasonProgress(season)
+  return (
+    <section className="temporada" aria-label="Temporada actual">
+      <div className="cabeza">
+        <h2>
+          {season.name} <span>· Caminos que se abren jugando</span>
+        </h2>
+      </div>
+      <div className="cuerpo">
+        <div className="capitulos">
+          {signedIn ? (
+            <>
+              <b>{season.chapters}</b>
+              <span>{season.chapters === 1 ? 'capítulo' : 'capítulos'}</span>
+              <small>Has avanzado un {Math.round(progress * 100)}%</small>
+            </>
+          ) : (
+            <small>Cada turno que juegas es un capítulo. Entra para ver tu avance.</small>
+          )}
+        </div>
+        <div className="camino">
+          <div className="linea">
+            <span className="hecho" style={{ width: `${Math.round(progress * 100)}%` }} />
+          </div>
+          <ol>
+            {stops.map((stop) => {
+              const w = known[stop.packId]
+              const cover = w ? packArtUrl(w.id, w.catalog.cover) : null
+              return (
+                <li key={stop.packId} className={stop.unlocked ? 'abierto' : 'cerrado'} style={{ left: `${stop.at * 100}%` }}>
+                  <Link href={`/mundos/explorar/${encodeURIComponent(stop.packId)}`}>
+                    {cover ? <img src={cover} alt="" /> : <span className="vacio" />}
+                    {!stop.unlocked ? (
+                      <span className="candado">
+                        <ShellIcon name="candado" />
+                      </span>
+                    ) : null}
+                  </Link>
+                  <span className="nombre">{w?.name ?? stop.packId}</span>
+                  <span className="umbral">{stop.threshold === 0 ? 'Gratis' : `${stop.threshold} capítulos`}</span>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+      </div>
+    </section>
   )
 }
