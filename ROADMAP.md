@@ -508,47 +508,54 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
 - [x] **5. Auditoria valida a matar** (26-09, 3 frentes con Fiscal y Defensor
   por frente, Juez: Claude). Punto de retorno: monorepo `6172a81`, API
   `49ddb31`. Veredicto en la lista de abajo, **pendiente de aprobacion de
-  Gabino antes de tocar codigo**.
+  Gabino antes de tocar codigo**. Aprobado y ejecutado el 26-09 por la tarde
+  (P0 a P2); lo que salio de mas se anota en cada punto.
 
 ### Veredicto del VAM del 26-09 (por prioridad)
 
 **P0, dinero (arreglar primero, con test antes del arreglo):**
-- [ ] **E1. Webhook que se consume sin entregar.** `PaymentService::handleWebhook`
+- [x] **E1. Webhook que se consume sin entregar.** `PaymentService::handleWebhook`
   registra el evento (`recordEvent`, fuera de la transaccion) antes de
   entregar; si el listener falla, la entrega hace rollback, Stripe reintenta
   y el reintento se ignora por duplicado: cobro sin pase, mundo ni turnos.
   Rediseño en atomo-payments: evento "recibido" y "aplicado" por separado;
   solo es duplicado lo ya aplicado. Test: listener que lanza y reintento que
-  entrega. No ha pasado en produccion.
-- [ ] **E2. Reembolso de paquete de turnos.** Retirar los turnos del paquete al
+  entrega. No ha pasado en produccion. Hecho: platform `858ae95`.
+- [x] **E2. Reembolso de paquete de turnos.** Retirar los turnos del paquete al
   reembolsar (hasta dejar el cupo en lo ya gastado, nunca negativo), igual
   que ya hacen el pase y los mundos. Paso con la compra de humo (37 MXN).
+  Hecho: `CreditRefundedTurns` (los 40 turnos de la compra de humo se
+  quedan: el reembolso fue antes del arreglo).
 
 **P1, una sola fuente de verdad (rediseño de piezas, no parches):**
-- [ ] **A2. Estado de acceso a un mundo** calculado en un solo servicio de la
+- [x] **A2. Estado de acceso a un mundo** calculado en un solo servicio de la
   API (tuyo, camino, venta, beta, gratis) que usen `PackAccess`,
   `CatalogService` y `PurchaseService`; hoy dos lo recalculan por su cuenta.
-- [ ] **D2. Numeros de la config en la UI desde la API**: "hasta 6
+  Hecho: `WorldAccess`. Salieron dos bugs reales: quien jugaba un mundo con
+  precio veia su tarjeta en venta y podia pagarlo otra vez.
+- [x] **D2. Numeros de la config en la UI desde la API**: "hasta 6
   ilustraciones" (son 12) sale de `ui-logic/scene-images.ts`; la API debe
   mandar `per_session` y el texto usarlo.
-- [ ] **A1 + A9. Textos del camino y del pase** a `ui-logic` (`stopLabel`, frase
+- [x] **A1 + A9. Textos del camino y del pase** a `ui-logic` (`stopLabel`, frase
   de precio del pase): hoy hay 4 copias en web y app con textos distintos.
-- [ ] **A3. Algebra del zoom del mapa** (limites, clamp, pellizco) a `ui-logic`;
+- [x] **A3. Algebra del zoom del mapa** (limites, clamp, pellizco) a `ui-logic`;
   web y app solo ponen los eventos.
 
 **P2, diseño:**
-- [ ] **D3. Selector de voz desplegado** siempre en la hoja Lectura (decision de
+- [x] **D3. Selector de voz desplegado** siempre en la hoja Lectura (decision de
   Gabino): "Nadie narra en voz alta" no parece boton.
-- [ ] **D6 + D5. Una sola cabecera de hoja en la app** (`SheetHeader`: volver o
+- [x] **D6 + D5. Una sola cabecera de hoja en la app** (`SheetHeader`: volver o
   titulo, y Cerrar siempre a la derecha) para GameSheet, SheetsModal,
   VoicePicker, MapPanel y el flujo de entrar; hoy el mapa pone Cerrar a la
   izquierda.
-- [ ] **D8. Proveedor sin configurar**: decir que hacer (clave propia en Mi
-  cuenta) en vez de solo "sin configurar en el servidor".
-- [ ] **D4 + A7. CSS**: consolidar `.table-header` (3 bloques) y dejar de crecer
+- [x] **D8. Proveedor sin configurar**: decir que hacer (clave propia en Mi
+  cuenta) en vez de solo "sin configurar en el servidor". Era un bug: con tu
+  clave guardada el proveedor seguia bloqueado aunque la API lo acepta.
+  `presetAvailability` en ui-logic lo resuelve en web y app.
+- [x] **D4 + A7. CSS**: consolidar `.table-header` (3 bloques) y dejar de crecer
   `globals.css` (6007 lineas): lo nuevo en archivos por dominio, sin
   migracion masiva.
-- [ ] **D7.** Comentario de `theme.ts` ("Cinzel solo para la marca") desfasado.
+- [x] **D7.** Comentario de `theme.ts` ("Cinzel solo para la marca") desfasado.
 
 **P3, deuda planificada (no ahora):**
 - [ ] **A4.** Catalogo comercial generico (`CatalogWorld`, estados, featured) a

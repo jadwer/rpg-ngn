@@ -1,10 +1,11 @@
 import { createApiClient, normalizeBaseUrl } from '@rpg-ngn/api-client'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, ScrollView, StyleSheet, Text } from 'react-native'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
 import { theme } from '../../theme'
+import { SheetHeader } from '../../components/SheetHeader'
 
 interface Props {
   initialUrl: string
@@ -41,13 +42,7 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
-      <View style={styles.header}>
-        <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Entrar</Text>
-        </Pressable>
-        <Text style={styles.title}>Recuperar contraseña</Text>
-        <View style={styles.spacer} />
-      </View>
+      <SheetHeader title="Recuperar contraseña" back={{ label: 'Entrar', onPress: onBack }} />
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         {done ? (
           <>
@@ -71,10 +66,6 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },
-  spacer: { minWidth: 64 },
-  title: { flex: 1, fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink, textAlign: 'center', letterSpacing: 0.2 },
   form: { padding: 20, gap: 16 },
   body: { fontFamily: theme.fonts.ui, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },

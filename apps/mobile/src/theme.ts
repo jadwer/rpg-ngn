@@ -74,8 +74,9 @@ export const theme = {
     serifItalic: 'CrimsonPro_400Regular_Italic',
     serifSemiBold: 'CrimsonPro_600SemiBold',
     serifBold: 'CrimsonPro_700Bold',
-    // Texto de interfaz (brand board: Inter para texto y UI). La serif queda
-    // para titulos y narracion; Cinzel, solo para la marca.
+    // Texto de interfaz (brand board: Inter para texto y UI). Crimson Pro para
+    // narracion y cuerpo; Cinzel (`display`) para la marca, titulos de pagina
+    // y de seccion, y acentos como los dados (26-09).
     ui: 'Inter_400Regular',
     uiMedium: 'Inter_500Medium',
     uiSemiBold: 'Inter_600SemiBold',

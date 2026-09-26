@@ -57,3 +57,14 @@ export function ownKeyProblem(credential: string): string | null {
 export function removeOwnKeyWarning(key: OwnKey): string {
   return `Se borrará tu clave de ${describePreset(key.preset)}. Tus mesas volverán al DM del servidor y gastarán cupo.`
 }
+
+/**
+ * Si un proveedor se puede elegir para la mesa: con clave en el servidor, o
+ * con la tuya guardada (la API la acepta; VAM 26-09, D8: la web y la app lo
+ * bloqueaban igual y solo decian "sin configurar"). Si no, que hacer.
+ */
+export function presetAvailability(preset: { name: string; configured: boolean }, ownKeys: readonly Pick<OwnKey, 'preset' | 'configured'>[]): { selectable: boolean; note: string | null } {
+  if (preset.configured) return { selectable: true, note: null }
+  if (ownKeys.some((k) => k.preset === preset.name && k.configured)) return { selectable: true, note: 'con tu clave' }
+  return { selectable: false, note: 'sin clave en el servidor: guarda la tuya en Mi cuenta' }
+}

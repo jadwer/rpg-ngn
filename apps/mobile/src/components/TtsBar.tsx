@@ -10,6 +10,12 @@ interface Props {
   tts: Tts
   /** Online: ofrecer "leer lo nuevo". */
   autoRead?: boolean | undefined
+  /**
+   * false: siempre desplegada y el resumen es solo estado, sin flecha. En la
+   * hoja Lectura el pliegue no ahorra nada y "Nadie narra en voz alta ▾" no
+   * parecia boton (Gabino, 26-09). Plegable donde el espacio si cuenta.
+   */
+  collapsible?: boolean | undefined
 }
 
 /**
@@ -21,8 +27,9 @@ interface Props {
  * voz en el idioma. El resumen y la bandera vienen de ui-logic, como en la
  * web.
  */
-export function TtsBar({ tts, autoRead = false }: Props) {
-  const [expanded, setExpanded] = useState(false)
+export function TtsBar({ tts, autoRead = false, collapsible = true }: Props) {
+  const [open, setExpanded] = useState(false)
+  const expanded = !collapsible || open
   const [pickerOpen, setPickerOpen] = useState(false)
   const narrator = useNarrator()
   const { state } = tts
@@ -39,12 +46,20 @@ export function TtsBar({ tts, autoRead = false }: Props) {
         {state.status === 'speaking' ? <Small label="Pausa" onPress={tts.pause} /> : null}
         {state.status === 'paused' ? <Small label="Seguir" primary onPress={tts.resume} /> : null}
         {active ? <Small label="Parar" onPress={tts.stop} /> : null}
-        <Pressable onPress={() => setExpanded((v) => !v)} style={styles.summary} accessibilityRole="button" accessibilityState={{ expanded }} hitSlop={6}>
-          <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={1}>
-            {summary.text}
-          </Text>
-          <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
-        </Pressable>
+        {collapsible ? (
+          <Pressable onPress={() => setExpanded((v) => !v)} style={styles.summary} accessibilityRole="button" accessibilityState={{ expanded }} hitSlop={6}>
+            <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={1}>
+              {summary.text}
+            </Text>
+            <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.summary}>
+            <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={2}>
+              {summary.text}
+            </Text>
+          </View>
+        )}
       </View>
 
       {expanded ? (

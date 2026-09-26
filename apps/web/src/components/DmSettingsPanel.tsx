@@ -1,7 +1,7 @@
 'use client'
 
-import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { describePreset, savedProviderText, tableDmText, type TableDmInfo } from '@rpg-ngn/ui-logic'
+import { type ApiClient, ApiError, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
+import { describePreset, presetAvailability, savedProviderText, type TableDmInfo, tableDmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
@@ -22,6 +22,8 @@ interface Props {
  */
 export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
   const [presets, setPresets] = useState<DmPreset[] | null>(null)
+  // Tus claves propias: con una, el proveedor se elige aunque el servidor no tenga la suya.
+  const [ownKeys, setOwnKeys] = useState<OwnKey[]>([])
   const [defaultPreset, setDefaultPreset] = useState<string>('')
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
   // Con que narra de verdad la mesa y quien lo paga (23-09: elegir Anthropic no decia si era la clave propia).
@@ -69,6 +71,17 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   }, [client, onUnauthorized])
 
   const chosen: DmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
+  useEffect(() => {
+    let alive = true
+    void client.listOwnKeys().then(
+      (keys) => alive && setOwnKeys(keys),
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
+
   const current = presets?.find((p) => p.name === (preset || defaultPreset)) ?? null
   const dirty = (chosen?.preset ?? '') !== (saved?.preset ?? '') || (chosen?.model ?? '') !== (saved?.model ?? '')
 
@@ -115,9 +128,9 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
         <select className="select" name="preset" value={preset} onChange={(e) => setPreset(e.target.value)} disabled={disabled || presets === null}>
           <option value="">{defaultPreset ? `El del servidor (${describePreset(defaultPreset)})` : 'El del servidor'}</option>
           {(presets ?? []).map((p) => (
-            <option key={p.name} value={p.name} disabled={!p.configured}>
+            <option key={p.name} value={p.name} disabled={!presetAvailability(p, ownKeys).selectable}>
               {describePreset(p.name)}
-              {p.configured ? '' : ', sin configurar'}
+              {presetAvailability(p, ownKeys).note ? `, ${presetAvailability(p, ownKeys).note}` : ''}
             </option>
           ))}
         </select>

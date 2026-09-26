@@ -1,6 +1,6 @@
 import type { OwnKey } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { hasOwnKey, keyConsole, ownKeyLabel, ownKeyProblem, ownKeyStatus, removeOwnKeyWarning } from './own-key.js'
+import { hasOwnKey, keyConsole, ownKeyLabel, ownKeyProblem, ownKeyStatus, presetAvailability, removeOwnKeyWarning } from './own-key.js'
 
 const sin: OwnKey = { preset: 'anthropic', configured: false, hint: null, model: null, verifiedAt: null }
 const con: OwnKey = { preset: 'anthropic', configured: true, hint: '9999', model: null, verifiedAt: '2026-09-19T03:00:00Z' }
@@ -35,5 +35,11 @@ describe('own-key', () => {
 
   it('avisa de la consecuencia antes de borrar', () => {
     expect(removeOwnKeyWarning(con)).toContain('gastarán cupo')
+  })
+
+  it('un proveedor sin clave del servidor se puede elegir con la tuya', () => {
+    expect(presetAvailability({ name: 'anthropic', configured: true }, [])).toEqual({ selectable: true, note: null })
+    expect(presetAvailability({ name: 'deepseek', configured: false }, [{ preset: 'deepseek', configured: true }])).toEqual({ selectable: true, note: 'con tu clave' })
+    expect(presetAvailability({ name: 'deepseek', configured: false }, [{ preset: 'openai', configured: true }]).selectable).toBe(false)
   })
 })

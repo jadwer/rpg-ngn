@@ -4,6 +4,7 @@ import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEve
 import { useMemo, useRef, useState } from 'react'
 import { Image, Modal, Pressable, StatusBar, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
+import { SheetHeader } from './SheetHeader'
 
 /**
  * El mapa de la mesa en el telefono, con la misma idea que en la web: la
@@ -124,13 +125,7 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
         {/* Mapa a pantalla completa: sin la barra de estado, que tapaba "Cerrar" (Gabino, 26-09). Vuelve al cerrar. */}
         <StatusBar hidden />
         <View style={styles.modal}>
-          <View style={styles.header}>
-            <Pressable onPress={() => setOpen(false)} hitSlop={10}>
-              <Text style={styles.headerLink}>Cerrar</Text>
-            </Pressable>
-            <Text style={styles.headerTitle}>{view.map.name}</Text>
-            <Text style={styles.headerLink} />
-          </View>
+          <SheetHeader title={view.map.name} onClose={() => setOpen(false)} />
 
           {/* Sin ScrollView: en Android el scroll nativo se quedaba con el arrastre antes que el zoom (v10). El mapa cabe en la pantalla. */}
           <View style={styles.body}>
@@ -241,9 +236,6 @@ const styles = StyleSheet.create({
   headLink: { fontFamily: theme.fonts.uiMedium, fontSize: 11, color: theme.colors.nebula, letterSpacing: 0.2 },
 
   modal: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 56 },
-  headerTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
   body: { flex: 1, padding: 16, gap: 12, alignItems: 'center' },
   resumen: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink, alignSelf: 'stretch' },
   selector: { flexDirection: 'row', gap: 6, alignSelf: 'stretch', flexWrap: 'wrap' },

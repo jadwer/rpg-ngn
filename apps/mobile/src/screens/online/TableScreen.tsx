@@ -734,7 +734,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
         </View>
         <Text style={styles.sheetLabel}>Voz</Text>
-        <TtsBar tts={tts} autoRead />
+        <TtsBar tts={tts} autoRead collapsible={false} />
         <Text style={styles.sheetLabel}>Compartir la historia</Text>
         <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
         <Text style={styles.sheetLabel}>Pantalla</Text>

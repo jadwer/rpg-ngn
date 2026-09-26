@@ -1,5 +1,5 @@
-import { ApiError, providerChoice, withProvider, type ApiClient, type DmPreset, type DmProbeResult, type DmProviderChoice, type TableSummary } from '@rpg-ngn/api-client'
-import { describePreset, savedProviderText, tableDmText, type TableDmInfo } from '@rpg-ngn/ui-logic'
+import { type ApiClient, ApiError, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
+import { describePreset, presetAvailability, savedProviderText, type TableDmInfo, tableDmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -38,6 +38,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
     }
   }, [client, table.id, table.settings])
   const [presets, setPresets] = useState<DmPreset[] | null>(null)
+  // Tus claves propias: con una, el proveedor se elige aunque el servidor no tenga la suya.
+  const [ownKeys, setOwnKeys] = useState<OwnKey[]>([])
   const [defaultPreset, setDefaultPreset] = useState<string>('')
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
   const [preset, setPreset] = useState<string>(saved?.preset ?? '')
@@ -73,6 +75,17 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   }, [client, onUnauthorized])
 
   const chosen: DmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
+  useEffect(() => {
+    let alive = true
+    void client.listOwnKeys().then(
+      (keys) => alive && setOwnKeys(keys),
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client])
+
   const current = presets?.find((p) => p.name === (preset || defaultPreset)) ?? null
   const dirty = (chosen?.preset ?? '') !== (saved?.preset ?? '') || (chosen?.model ?? '') !== (saved?.model ?? '')
 
@@ -116,7 +129,14 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
       {presets === null ? <Text style={styles.hint}>Consultando los presets del servidor...</Text> : null}
       <RadioRow label={defaultPreset ? `El del servidor (${describePreset(defaultPreset)})` : 'El del servidor'} selected={preset === ''} disabled={disabled || presets === null} onSelect={() => setPreset('')} />
       {(presets ?? []).map((p) => (
-        <RadioRow key={p.name} label={describePreset(p.name)} sub={p.configured ? (p.model ?? null) : 'sin configurar en el servidor'} selected={preset === p.name} disabled={disabled || !p.configured} onSelect={() => setPreset(p.name)} />
+        <RadioRow
+          key={p.name}
+          label={describePreset(p.name)}
+          sub={presetAvailability(p, ownKeys).note ?? p.model ?? null}
+          selected={preset === p.name}
+          disabled={disabled || !presetAvailability(p, ownKeys).selectable}
+          onSelect={() => setPreset(p.name)}
+        />
       ))}
 
       {current && current.kind !== 'scripted' ? (

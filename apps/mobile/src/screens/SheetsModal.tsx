@@ -6,6 +6,7 @@ import { Sheet } from '../components/Sheet'
 import { abilityModifier } from '../pack/offline'
 import type { SheetEntry } from '../sheets/entries'
 import { theme } from '../theme'
+import { SheetHeader } from '../components/SheetHeader'
 
 /**
  * Fichas de toda la party como modal sobre la narracion (docs/09, "Fichas").
@@ -40,17 +41,7 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
       {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
       <StatusBar hidden />
       <View style={styles.modal}>
-        <View style={styles.header}>
-          <Pressable onPress={selected ? () => setSelectedId(null) : close} hitSlop={10} style={styles.headerSide}>
-            <Text style={styles.headerLink}>{selected ? '‹ Fichas' : 'Cerrar'}</Text>
-          </Pressable>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {selected ? selected.character.name : 'La party'}
-          </Text>
-          <Pressable onPress={close} hitSlop={10} style={styles.headerSide}>
-            <Text style={[styles.headerLink, styles.right]}>{selected ? 'Cerrar' : ''}</Text>
-          </Pressable>
-        </View>
+        <SheetHeader title={selected ? selected.character.name : 'La party'} onClose={close} back={selected ? { label: 'Fichas', onPress: () => setSelectedId(null) } : undefined} />
 
         {sheet ? (
           <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} footer={selected?.mine && persona ? persona : undefined} />
@@ -76,11 +67,6 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
 
 const styles = StyleSheet.create({
   modal: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  headerSide: { minWidth: 72 },
-  headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
-  right: { textAlign: 'right' },
-  headerTitle: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 16, paddingBottom: 40 },
   card: { width: '47%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 10, alignItems: 'center', gap: 3 },
   cardFree: { borderColor: theme.colors.borderSoft },

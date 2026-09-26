@@ -1,0 +1,40 @@
+/* Importado en layout.tsx despues de globals.css; el orden de la cascada es el de antes. */
+
+/* Zoom del mapa (26-09): la caja mide lo que la imagen; la capa interior se
+   transforma, asi los puntos en porcentaje siguen sobre su lugar. */
+.mapa-modal .lienzo.zoomable {
+  touch-action: none;
+  cursor: zoom-in;
+  user-select: none;
+}
+.mapa-modal .lienzo.zoomable.acercado {
+  cursor: grab;
+}
+.mapa-modal .lienzo .capa {
+  position: relative;
+  transform-origin: center center;
+  will-change: transform;
+}
+.mapa-modal .zoom-botones {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: normal;
+  z-index: 2;
+}
+.mapa-modal .zoom-botones button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(11, 15, 20, 0.8);
+  color: var(--ink);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.mapa-modal .zoom-botones button:hover {
+  border-color: var(--accent-bright);
+}

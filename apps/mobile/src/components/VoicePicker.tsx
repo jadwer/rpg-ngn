@@ -4,6 +4,7 @@ import type { Tts } from '../hooks/useTts'
 import { voiceLabel, type VoiceInfo } from '../speech/voices'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { SheetHeader } from './SheetHeader'
 
 interface Props {
   visible: boolean
@@ -29,13 +30,7 @@ export function VoicePicker({ visible, tts, onClose }: Props) {
       {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
       <StatusBar hidden />
       <View style={styles.modal}>
-        <View style={styles.header}>
-          <View style={styles.headerSide} />
-          <Text style={styles.headerTitle}>Voz</Text>
-          <Pressable onPress={onClose} hitSlop={10} style={styles.headerSide}>
-            <Text style={styles.headerLink}>Cerrar</Text>
-          </Pressable>
-        </View>
+        <SheetHeader title="Voz" onClose={onClose} />
 
         <ScrollView contentContainerStyle={styles.body}>
           <Text style={styles.label}>Idioma de lectura</Text>
@@ -108,10 +103,6 @@ export type { VoiceInfo }
 
 const styles = StyleSheet.create({
   modal: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.panel },
-  headerSide: { minWidth: 56, alignItems: 'flex-end' },
-  headerLink: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
-  headerTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
   body: { padding: 16, paddingBottom: 40, gap: 8 },
   label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginTop: 14 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },
