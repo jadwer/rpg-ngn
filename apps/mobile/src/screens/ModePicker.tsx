@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
 import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, passView } from '@rpg-ngn/ui-logic'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -21,38 +22,36 @@ interface Props {
 /** Mundos que caben en el carrusel antes del hueco "Proximamente". */
 const FILA = 4
 
-/** El catalogo publico, para que el Inicio diga lo mismo que la web. Sin red, las tarjetas de siempre. */
-function useCatalog(): {
+interface Live {
   worlds: CatalogWorldCard[]
   season: SeasonPath | null
   pass: SeasonPassOffer | null
   base: string
-} | null {
-  const [live, setLive] = useState<{
-    worlds: CatalogWorldCard[]
-    season: SeasonPath | null
-    pass: SeasonPassOffer | null
-    base: string
-  } | null>(null)
+}
+
+/**
+ * El catalogo, para que el Inicio diga lo mismo que la web. Con sesion
+ * guardada pregunta con ella (el camino dice lo tuyo, como en Mundos); si la
+ * sesion caduco, sin ella. Sin red, null y las tarjetas de siempre.
+ */
+function useCatalog(): Live | null {
+  const [live, setLive] = useState<Live | null>(null)
   useEffect(() => {
     let alive = true
-    void storage
-      .serverUrl()
-      .then(async (url) => {
-        const client = createApiClient({
-          baseUrl: normalizeBaseUrl(url),
-          tokenProvider: () => null,
-        })
-        const r = await client.catalogWorlds()
-        if (alive)
-          setLive({
-            worlds: r.worlds.filter((w) => w.origin === 'oficial'),
-            season: r.season,
-            pass: r.pass,
-            base: client.baseUrl,
-          })
-      })
-      .catch(() => undefined)
+    void (async () => {
+      const [url, token] = await Promise.all([storage.serverUrl(), storage.token()])
+      const baseUrl = normalizeBaseUrl(url)
+      for (const withToken of token ? [token, null] : [null]) {
+        try {
+          const client = createApiClient({ baseUrl, tokenProvider: () => withToken })
+          const r = await client.catalogWorlds()
+          if (alive) setLive({ worlds: r.worlds.filter((w) => w.origin === 'oficial'), season: r.season, pass: r.pass, base: client.baseUrl })
+          return
+        } catch {
+          // Con token caducado se intenta sin el; sin red no hay mas que hacer.
+        }
+      }
+    })()
     return () => {
       alive = false
     }
@@ -62,27 +61,14 @@ function useCatalog(): {
 
 const HERO: ImageSourcePropType = require('../../assets/hero-movil.webp')
 // Respaldo sin conexion (el Inicio tambien es la puerta a leer sin red).
-const WORLDS: Array<{
-  image: ImageSourcePropType
-  title: string
-  tags: string[]
-}> = [
-  {
-    image: require('../../assets/mundo-valdoria.webp'),
-    title: 'Fantasía medieval',
-    tags: ['Aventura', 'Dados'],
-  },
-  {
-    image: require('../../assets/mundo-boticaria.webp'),
-    title: 'China antigua',
-    tags: ['Intriga', 'Misterio'],
-  },
-  {
-    image: require('../../assets/mundo-mascarada.webp'),
-    title: 'Romance',
-    tags: ['Drama', 'Social'],
-  },
+const WORLDS: Array<{ image: ImageSourcePropType; title: string; tags: string[] }> = [
+  { image: require('../../assets/mundo-valdoria.webp'), title: 'Fantasía medieval', tags: ['Aventura', 'Dados'] },
+  { image: require('../../assets/mundo-boticaria.webp'), title: 'China antigua', tags: ['Intriga', 'Misterio'] },
+  { image: require('../../assets/mundo-mascarada.webp'), title: 'Romance', tags: ['Drama', 'Social'] },
 ]
+
+/** Degradado de las tarjetas: transparente arriba, casi negro donde va el texto. */
+const VELO = ['rgba(11, 15, 20, 0)', 'rgba(11, 15, 20, 0.55)', 'rgba(11, 15, 20, 0.92)'] as const
 
 /**
  * La portada de la app segun la version movil de img/branding/concepto
@@ -118,25 +104,29 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
           </Pressable>
         </ImageBackground>
 
-        <View style={styles.section}>
-          <Text style={styles.h2}>Un motor.{'\n'}Infinitos mundos.</Text>
-          <Text style={styles.body}>Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un director de juego que no se cansa. Tú decides el mundo.</Text>
-          <View style={styles.row}>
-            <Pressable onPress={onOnline} style={({ pressed }) => [styles.btnPrimary, pressed && styles.pressed]} accessibilityRole="button">
-              <Text style={styles.btnPrimaryText}>Explorar mundos</Text>
-            </Pressable>
-            <Pressable onPress={onOffline} style={({ pressed }) => [styles.btnOutline, pressed && styles.pressed]} accessibilityRole="button">
-              <Text style={styles.btnOutlineText}>Leer sin conexión</Text>
+        {/* En tablet el contenido se centra con un ancho maximo; el hero y el carrusel van a todo lo ancho. */}
+        <View style={styles.column}>
+          <View style={styles.section}>
+            <Text style={styles.h2}>Un motor.{'\n'}Infinitos mundos.</Text>
+            <Text style={styles.body}>Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un director de juego que no se cansa. Tú decides el mundo.</Text>
+            <View style={styles.row}>
+              <Pressable onPress={onOnline} style={({ pressed }) => [styles.btnPrimary, pressed && styles.pressed]} accessibilityRole="button">
+                <Text style={styles.btnPrimaryText}>Explorar mundos</Text>
+              </Pressable>
+              <Pressable onPress={onOffline} style={({ pressed }) => [styles.btnOutline, pressed && styles.pressed]} accessibilityRole="button">
+                <Text style={styles.btnOutlineText}>Leer sin conexión</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={styles.sectionHead}>
+            <Text style={styles.h3}>MUNDOS DESTACADOS</Text>
+            <Pressable onPress={() => onTab('mundos')} hitSlop={8}>
+              <Text style={styles.seeAll}>Ver todos →</Text>
             </Pressable>
           </View>
         </View>
 
-        <View style={styles.sectionHead}>
-          <Text style={styles.h3}>MUNDOS DESTACADOS</Text>
-          <Pressable onPress={onOnline} hitSlop={8}>
-            <Text style={styles.seeAll}>Ver todos →</Text>
-          </Pressable>
-        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
           {live
             ? destacados.map((w) => {
@@ -145,15 +135,12 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
                 return (
                   <Pressable key={w.id} onPress={() => onTab('mundos')} style={styles.world} accessibilityRole="button" accessibilityLabel={w.name}>
                     <ImageBackground source={cover ? { uri: `${live.base}${cover}` } : WORLDS[0]!.image} style={styles.worldImage} resizeMode="cover">
-                      {/* Velo escalonado abajo (sin degradado nativo): el texto sobre la portada se perdia (Gabino, 26-09). */}
-                      <View style={styles.worldLive}>
-                        <View style={styles.scrimSoft} />
-                        <View style={styles.scrim}>
-                          <Text style={styles.worldKicker}>{w.catalog.genre}</Text>
-                          <Text style={styles.worldTitle}>{w.name}</Text>
-                          <Text style={styles.worldState}>{view.badge ?? view.hint ?? view.price ?? ''}</Text>
-                        </View>
-                      </View>
+                      {/* Degradado real abajo: el texto sobre la portada se perdia y el velo por escalones marcaba una linea (Gabino, 26-09). */}
+                      <LinearGradient colors={VELO} locations={[0.3, 0.55, 0.85]} style={styles.worldLive}>
+                        <Text style={styles.worldKicker}>{w.catalog.genre}</Text>
+                        <Text style={styles.worldTitle}>{w.name}</Text>
+                        <Text style={styles.worldState}>{view.badge ?? view.hint ?? view.price ?? ''}</Text>
+                      </LinearGradient>
                     </ImageBackground>
                   </Pressable>
                 )
@@ -161,7 +148,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             : WORLDS.map((w) => (
                 <Pressable key={w.title} onPress={onOnline} style={styles.world} accessibilityRole="button">
                   <ImageBackground source={w.image} style={styles.worldImage} resizeMode="cover">
-                    <View style={styles.worldShade}>
+                    <LinearGradient colors={VELO} locations={[0.3, 0.55, 0.85]} style={styles.worldLive}>
                       <Text style={styles.worldTitle}>{w.title}</Text>
                       <View style={styles.tags}>
                         {w.tags.map((t) => (
@@ -170,7 +157,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
                           </Text>
                         ))}
                       </View>
-                    </View>
+                    </LinearGradient>
                   </ImageBackground>
                 </Pressable>
               ))}
@@ -183,22 +170,29 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
           ) : null}
         </ScrollView>
 
-        {live?.season && live.season.worlds.length > 0 ? (
-          <Pressable onPress={() => onTab('mundos')} style={styles.season} accessibilityRole="button">
-            <Text style={styles.seasonKicker}>{live.season.name}</Text>
-            <Text style={styles.seasonTitle}>Caminos que se abren jugando</Text>
-            <Text style={styles.body}>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</Text>
-            <Text style={styles.seasonPath}>{live.season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.threshold === 0 ? 'gratis' : `${w.threshold} capítulos`}`).join('  ·  ')}</Text>
-            {pase ? (
-              <View style={styles.pass}>
-                <Text style={styles.passTitle}>Pase de temporada · Capítulos x2</Text>
-                <Text style={styles.passPrice}>{`${pase.price}, pago único`}</Text>
+        <View style={styles.column}>
+          {live?.season && live.season.worlds.length > 0 ? (
+            <Pressable onPress={() => onTab('mundos')} style={styles.season} accessibilityRole="button">
+              <View style={styles.seasonHead}>
+                <Text style={styles.seasonKicker}>{live.season.name}</Text>
+                {live.season.chapters > 0 ? <Text style={styles.seasonChapters}>{`${live.season.chapters} ${live.season.chapters === 1 ? 'capítulo' : 'capítulos'}`}</Text> : null}
               </View>
-            ) : null}
-          </Pressable>
-        ) : null}
+              <Text style={styles.seasonTitle}>Caminos que se abren jugando</Text>
+              <Text style={styles.body}>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</Text>
+              <Text style={styles.seasonPath}>
+                {live.season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.threshold === 0 ? 'gratis' : w.unlocked ? 'abierto' : `${w.threshold} capítulos`}`).join('  ·  ')}
+              </Text>
+              {pase ? (
+                <View style={styles.pass}>
+                  <Text style={styles.passTitle}>Pase de temporada · Capítulos x2</Text>
+                  <Text style={styles.passPrice}>{pase.owned ? 'Ya es tuyo esta temporada' : `${pase.price}, pago único`}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+          ) : null}
 
-        <Text style={styles.offline}>{`Sin conexión puedes leer ${packName}: sus sesiones, fichas y reglas.`}</Text>
+          <Text style={styles.offline}>{`Sin conexión puedes leer ${packName}: sus sesiones, fichas y reglas.`}</Text>
+        </View>
       </ScrollView>
       <BottomNav active="inicio" onSelect={onTab} />
     </View>
@@ -207,244 +201,46 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  bar: {
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  hero: {
-    minHeight: 560,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 24,
-    paddingBottom: 28,
-    gap: 14,
-  },
-  veil: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(11, 15, 20, 0.35)',
-  },
-  emblem: {
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 'auto',
-    marginTop: 32,
-  },
-  motto: {
-    fontFamily: theme.fonts.display,
-    fontSize: 11,
-    letterSpacing: 3.5,
-    color: '#f1f0fb',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowRadius: 4,
-    textShadowOffset: { width: 0, height: 1 },
-  },
-  phrase: {
-    fontFamily: theme.fonts.serifItalic,
-    fontSize: 22,
-    lineHeight: 28,
-    color: '#f1f0fb',
-    textAlign: 'center',
-  },
-  cta: {
-    backgroundColor: theme.colors.accent,
-    borderRadius: 999,
-    paddingHorizontal: 26,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ctaText: {
-    fontFamily: theme.fonts.displayBold,
-    fontSize: 13,
-    letterSpacing: 1.5,
-    color: '#ffffff',
-  },
+  bar: { paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center' },
+  hero: { minHeight: 560, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
+  veil: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
+  emblem: { alignItems: 'center', gap: 10, marginBottom: 'auto', marginTop: 32 },
+  motto: { fontFamily: theme.fonts.display, fontSize: 11, letterSpacing: 3.5, color: '#f1f0fb', textAlign: 'center', textShadowColor: 'rgba(0, 0, 0, 0.8)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  phrase: { fontFamily: theme.fonts.serifItalic, fontSize: 22, lineHeight: 28, color: '#f1f0fb', textAlign: 'center' },
+  cta: { backgroundColor: theme.colors.accent, borderRadius: 999, paddingHorizontal: 26, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+  ctaText: { fontFamily: theme.fonts.displayBold, fontSize: 13, letterSpacing: 1.5, color: '#ffffff' },
   pressed: { opacity: 0.8 },
+  column: { width: '100%', maxWidth: 960, alignSelf: 'center' },
   section: { paddingHorizontal: 20, paddingTop: 28, gap: 10 },
-  h2: {
-    fontFamily: theme.fonts.display,
-    fontSize: 24,
-    lineHeight: 30,
-    color: theme.colors.ink,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  body: {
-    fontFamily: theme.fonts.serif,
-    fontSize: 16,
-    lineHeight: 23,
-    color: theme.colors.inkDim,
-  },
+  h2: { fontFamily: theme.fonts.display, fontSize: 24, lineHeight: 30, color: theme.colors.ink, textTransform: 'uppercase', letterSpacing: 1 },
+  body: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 23, color: theme.colors.inkDim },
   row: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  btnPrimary: {
-    flex: 1,
-    backgroundColor: theme.colors.accent,
-    borderRadius: 12,
-    minHeight: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnPrimaryText: {
-    fontFamily: theme.fonts.display,
-    fontSize: 14,
-    color: '#ffffff',
-  },
-  btnOutline: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: theme.colors.accentBright,
-    borderRadius: 12,
-    minHeight: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnOutlineText: {
-    fontFamily: theme.fonts.display,
-    fontSize: 14,
-    color: theme.colors.ink,
-  },
-  sectionHead: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 12,
-  },
-  h3: {
-    fontFamily: theme.fonts.display,
-    fontSize: 14,
-    letterSpacing: 1.5,
-    color: theme.colors.ink,
-  },
-  seeAll: {
-    fontFamily: theme.fonts.serif,
-    fontSize: 14,
-    color: theme.colors.accentBright,
-  },
+  btnPrimary: { flex: 1, backgroundColor: theme.colors.accent, borderRadius: 12, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  btnPrimaryText: { fontFamily: theme.fonts.display, fontSize: 14, color: '#ffffff' },
+  btnOutline: { flex: 1, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
+  btnOutlineText: { fontFamily: theme.fonts.display, fontSize: 14, color: theme.colors.ink },
+  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 30, paddingBottom: 12 },
+  h3: { fontFamily: theme.fonts.display, fontSize: 14, letterSpacing: 1.5, color: theme.colors.ink },
+  seeAll: { fontFamily: theme.fonts.serif, fontSize: 14, color: theme.colors.accentBright },
   carousel: { paddingHorizontal: 20, gap: 12 },
-  world: {
-    width: 170,
-    height: 220,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: theme.colors.panel2,
-  },
+  world: { width: 170, height: 220, borderRadius: 16, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
   worldImage: { flex: 1, overflow: 'hidden' },
-  worldShade: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: 12,
-    gap: 6,
-    backgroundColor: 'rgba(11, 15, 20, 0.35)',
-  },
-  worldTitle: {
-    fontFamily: theme.fonts.display,
-    fontSize: 15,
-    color: '#ffffff',
-  },
+  worldLive: { flex: 1, justifyContent: 'flex-end', padding: 12, gap: 4 },
+  worldTitle: { fontFamily: theme.fonts.display, fontSize: 15, color: '#ffffff' },
   tags: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  tag: {
-    fontFamily: theme.fonts.serif,
-    fontSize: 11,
-    color: theme.colors.ink,
-    borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.35)',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 1,
-  },
-  worldKicker: {
-    fontFamily: theme.fonts.uiMedium,
-    fontSize: 10,
-    letterSpacing: 1.5,
-    color: theme.colors.gold,
-    textTransform: 'uppercase',
-  },
-  worldState: {
-    fontFamily: theme.fonts.uiMedium,
-    fontSize: 12,
-    color: '#d8ccff',
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
-    textShadowRadius: 4,
-  },
-  worldLive: { flex: 1, justifyContent: 'flex-end' },
-  scrimSoft: { height: 28, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
-  scrim: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 12, gap: 4, backgroundColor: 'rgba(11, 15, 20, 0.8)' },
-  proximo: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 14,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: theme.colors.border,
-  },
-  proximoText: {
-    fontFamily: theme.fonts.serif,
-    fontSize: 13,
-    color: theme.colors.inkDim,
-    textAlign: 'center',
-  },
-  season: {
-    marginHorizontal: 20,
-    marginTop: 24,
-    padding: 16,
-    gap: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.panel,
-  },
-  seasonKicker: {
-    fontFamily: theme.fonts.uiMedium,
-    fontSize: 11,
-    letterSpacing: 1.5,
-    color: theme.colors.gold,
-    textTransform: 'uppercase',
-  },
-  seasonTitle: {
-    fontFamily: theme.fonts.display,
-    fontSize: 20,
-    color: theme.colors.ink,
-  },
-  seasonPath: {
-    fontFamily: theme.fonts.ui,
-    fontSize: 13,
-    color: theme.colors.inkDim,
-  },
-  pass: {
-    marginTop: 4,
-    padding: 12,
-    gap: 2,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.45)',
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
-  },
-  passTitle: {
-    fontFamily: theme.fonts.serifSemiBold,
-    fontSize: 15,
-    color: theme.colors.gold,
-  },
-  passPrice: {
-    fontFamily: theme.fonts.uiSemiBold,
-    fontSize: 14,
-    color: theme.colors.ink,
-  },
-  offline: {
-    fontFamily: theme.fonts.serifItalic,
-    fontSize: 13,
-    color: theme.colors.inkFaint,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-  },
+  tag: { fontFamily: theme.fonts.serif, fontSize: 11, color: theme.colors.ink, borderWidth: 1, borderColor: 'rgba(229, 231, 235, 0.35)', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1 },
+  worldKicker: { fontFamily: theme.fonts.uiMedium, fontSize: 10, letterSpacing: 1.5, color: theme.colors.gold, textTransform: 'uppercase' },
+  worldState: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: '#d8ccff', textShadowColor: 'rgba(0, 0, 0, 0.9)', textShadowRadius: 4 },
+  proximo: { alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.colors.border },
+  proximoText: { fontFamily: theme.fonts.serif, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
+  season: { marginHorizontal: 20, marginTop: 24, padding: 16, gap: 8, borderRadius: 16, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
+  seasonHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  seasonKicker: { fontFamily: theme.fonts.uiMedium, fontSize: 11, letterSpacing: 1.5, color: theme.colors.gold, textTransform: 'uppercase' },
+  seasonChapters: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.accentBright },
+  seasonTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.ink },
+  seasonPath: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  pass: { marginTop: 4, padding: 12, gap: 2, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.45)', backgroundColor: 'rgba(212, 175, 55, 0.08)' },
+  passTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 15, color: theme.colors.gold },
+  passPrice: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.ink },
+  offline: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkFaint, paddingHorizontal: 20, paddingTop: 18 },
 })

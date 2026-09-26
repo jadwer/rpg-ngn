@@ -2,8 +2,9 @@ import { memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharact
 import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
+import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
 import { FriendsPanel } from '../../components/FriendsPanel'
@@ -13,12 +14,6 @@ import { Portrait } from '../../components/Portrait'
 import { RetireTable } from '../../components/RetireTable'
 import type { StoredUser } from '../../online/storage'
 import { theme } from '../../theme'
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const FONDO: ImageSourcePropType = require('../../../assets/fondo-mesas.webp')
-// En horizontal (tablet) el recorte ancho, como la web: el vertical se pixelaba al estirarlo.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const FONDO_ANCHO: ImageSourcePropType = require('../../../assets/fondo-mesas-ancho.webp')
 
 /** Ancho a partir del cual el contenido se centra y los botones van en fila (tablet). */
 const ANCHO_TABLET = 700
@@ -53,9 +48,8 @@ interface Props {
  */
 export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, remoteCharacters = {}, onOpen, onCreate, onRefresh, onProfile, onTab, onUnauthorized }: Props) {
   const insets = useSafeAreaInsets()
-  const { width, height } = useWindowDimensions()
+  const { width } = useWindowDimensions()
   const wide = width >= ANCHO_TABLET
-  const landscape = width > height
   const [filter, setFilter] = useState<TableFilter>('todas')
   const [joining, setJoining] = useState(false)
   const [options, setOptions] = useState<string | null>(null)
@@ -85,8 +79,8 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.accentBright} colors={[theme.colors.accentBright]} progressBackgroundColor={theme.colors.panel} />}
       >
-        {/* El fondo es de toda la pantalla, no de la cabecera (mesas_ux.png): la escena arriba y su parte oscura detras de las tarjetas. */}
-        <Image source={landscape ? FONDO_ANCHO : FONDO} style={[styles.backdrop, { width, height: width * (landscape ? 1024 / 1145 : 1024 / 367) }]} resizeMode="cover" />
+        {/* El fondo es de toda la pantalla, no de la cabecera (mesas_ux.png). */}
+        <Backdrop />
         <View style={styles.hero}>
           <View style={[styles.column, styles.heroInner]}>
             <Text style={styles.title}>Tus mesas</Text>
@@ -222,7 +216,6 @@ const styles = StyleSheet.create({
   avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.accent },
   avatarText: { fontFamily: theme.fonts.display, fontSize: 16, color: '#ffffff' },
   scroll: { paddingBottom: 24 },
-  backdrop: { position: 'absolute', top: 0, left: 0 },
   hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   heroInner: { gap: 10 },

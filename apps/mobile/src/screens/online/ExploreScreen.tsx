@@ -1,8 +1,9 @@
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, durationLabel, passView, playersTag, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Image, Linking, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
 import { Icon, ICON } from '../../components/Icon'
@@ -27,6 +28,8 @@ interface Props {
  */
 export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }: Props) {
   const insets = useSafeAreaInsets()
+  // En tablet, tres columnas y el contenido centrado.
+  const wide = useWindowDimensions().width >= 700
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
   const [genres, setGenres] = useState<string[]>([])
   const [season, setSeason] = useState<SeasonPath | null>(null)
@@ -103,7 +106,9 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
             <Text style={styles.link}>Explorar</Text>
           </Pressable>
         </View>
-        <ScrollView contentContainerStyle={styles.detail}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <Backdrop />
+          <View style={styles.detail}>
           {cover ? <Image source={{ uri: cover }} style={styles.detailCover} resizeMode="cover" /> : null}
           <Text style={styles.detailTitle}>{detail.name}</Text>
           <View style={styles.chips}>
@@ -158,6 +163,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
             <Text style={styles.item}>Director de juego por IA</Text>
             <Text style={styles.meta}>{`Autor: ${detail.catalog.author}`}</Text>
           </View>
+          </View>
         </ScrollView>
         <BottomNav active="mundos" onSelect={onTab} />
       </View>
@@ -172,7 +178,10 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
           <Text style={styles.link}>Mis mundos</Text>
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        {/* El mismo fondo que Mesas (Gabino, 26-09). */}
+        <Backdrop />
+        <View style={styles.list}>
         <Text style={styles.title}>Mundos</Text>
         <Text style={styles.subtitle}>Historias que existen porque tú las viviste</Text>
         {season && season.worlds.length > 0 ? (
@@ -224,7 +233,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
             const view = cardView(world)
             const cover = url(packArtUrl(world.id, world.catalog.cover))
             return (
-              <View key={world.id} style={[styles.card, (world.state === 'tuyo' || world.state === 'pase') && styles.cardOwned]}>
+              <View key={world.id} style={[styles.card, wide && styles.cardWide, (world.state === 'tuyo' || world.state === 'pase') && styles.cardOwned]}>
                 <Pressable onPress={() => void open(world)} accessibilityRole="button">
                   <View style={styles.coverBox}>
                     {cover ? <Image source={{ uri: cover }} style={[styles.cover, view.action === 'bloqueado' && styles.coverLocked]} resizeMode="cover" /> : null}
@@ -249,6 +258,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
             )
           })}
         </View>
+        </View>
       </ScrollView>
       <BottomNav active="mundos" onSelect={onTab} />
     </View>
@@ -260,10 +270,11 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft },
   back: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   link: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.nebula },
-  list: { padding: 16, gap: 12, paddingBottom: 32 },
+  scroll: { paddingBottom: 32 },
+  list: { width: '100%', maxWidth: 1000, alignSelf: 'center', padding: 16, gap: 12 },
   title: { fontFamily: theme.fonts.display, fontSize: 32, color: '#ffffff' },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -6 },
-  season: { gap: 6, padding: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: theme.colors.panel },
+  season: { gap: 6, padding: 12, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: 'rgba(17, 22, 34, 0.9)' },
   pass: { gap: 4, marginTop: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: theme.colors.border },
   passPrice: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.ink },
   passTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 15, color: theme.colors.gold },
@@ -280,7 +291,8 @@ const styles = StyleSheet.create({
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
   meta: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  card: { width: '47.5%', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: theme.colors.panel, overflow: 'hidden' },
+  card: { width: '47.5%', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, backgroundColor: 'rgba(17, 22, 34, 0.9)', overflow: 'hidden' },
+  cardWide: { width: '31.6%' },
   cardOwned: { borderColor: theme.colors.goldDim },
   coverBox: { aspectRatio: 1.1, backgroundColor: theme.colors.panel2 },
   cover: { width: '100%', height: '100%' },
@@ -294,7 +306,7 @@ const styles = StyleSheet.create({
   cardBtnOutline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.accentBright },
   cardBtnText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 13, color: '#ffffff' },
   pressed: { opacity: 0.8 },
-  detail: { padding: 16, gap: 10, paddingBottom: 32 },
+  detail: { width: '100%', maxWidth: 1000, alignSelf: 'center', padding: 16, gap: 10 },
   detailCover: { width: '100%', aspectRatio: 1.6, borderRadius: 14 },
   detailTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 28, color: '#ffffff' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
