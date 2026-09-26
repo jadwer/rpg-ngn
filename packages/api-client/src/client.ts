@@ -390,6 +390,10 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
   // Cuantos eventos lleva la campaña: con cero, la mesa nunca se jugo y se
   // puede borrar de verdad (`tableRetirement` en ui-logic).
   const headSeq = attr<number>(included.get(campaign), 'headSeq', 0)
+  const sessionOpen = attr<boolean>(included.get(campaign), 'sessionOpen', false)
+  // La campaña se toca en cada turno resuelto; la mesa, al cambiar ajustes.
+  const stamps = [attr<string | null>(included.get(campaign), 'updatedAt', null), attr<string | null>(resource, 'updatedAt', null)].filter((v): v is string => typeof v === 'string')
+  const lastActivityAt = stamps.length ? stamps.reduce((a, b) => (Date.parse(a) >= Date.parse(b) ? a : b)) : null
   const settings = attr<Record<string, unknown> | null>(resource, 'settings', null)
   const premise = settings && typeof settings['premise'] === 'string' && settings['premise'].trim() ? settings['premise'].trim() : null
   return {
@@ -404,6 +408,8 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     settings: settings ?? {},
     campaignId: campaign ? String(campaign.id) : null,
     headSeq,
+    sessionOpen,
+    lastActivityAt,
     members,
   }
 }

@@ -64,6 +64,20 @@ export function createEngine(options: EngineOptions): Hono {
    * Un retrato del pack. La web lleva los del piloto empaquetados, pero los
    * de un pack instalado en el servidor solo los tiene el engine.
    */
+  /** Portada y galeria del mundo (`art/`), para el catalogo. Como los retratos. */
+  app.get('/v1/packs/:id/art/:file', async (c) => {
+    const file = c.req.param('file')
+    if (!/^[a-z0-9][a-z0-9._-]*\.(jpg|jpeg|png|webp)$/i.test(file)) {
+      return c.json({ error: 'nombre de imagen invalido' }, 400)
+    }
+    const bytes = await options.packs.art(c.req.param('id'), file)
+    if (!bytes) return c.json({ error: 'imagen no encontrada' }, 404)
+    const type = file.toLowerCase().endsWith('.png') ? 'image/png' : file.toLowerCase().endsWith('.webp') ? 'image/webp' : 'image/jpeg'
+    c.header('Content-Type', type)
+    c.header('Cache-Control', 'public, max-age=86400')
+    return c.body(bytes as unknown as ArrayBuffer)
+  })
+
   app.get('/v1/packs/:id/portraits/:file', async (c) => {
     const file = c.req.param('file')
     // Solo un nombre de archivo: nada de subir por el arbol.

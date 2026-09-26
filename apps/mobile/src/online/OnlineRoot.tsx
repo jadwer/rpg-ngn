@@ -1,4 +1,4 @@
-import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type PackOption, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type PackCharacter, type PackOption, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
@@ -6,6 +6,7 @@ import { ConnectScreen } from '../screens/online/ConnectScreen'
 import { ForgotPasswordScreen } from '../screens/online/ForgotPasswordScreen'
 import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { ProfileScreen } from '../screens/online/ProfileScreen'
+import { ProntoScreen } from '../screens/online/ProntoScreen'
 import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
@@ -27,6 +28,7 @@ type Stage =
   | { name: 'tables' }
   | { name: 'profile' }
   | { name: 'worlds' }
+  | { name: 'pronto' }
   | { name: 'new-table' }
   | { name: 'table'; table: TableSummary }
 
@@ -55,6 +57,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
   // app no lleva dentro: sin esto las mesas enseñan ids y jerga del motor.
   const [packs, setPacks] = useState<PackOption[]>([])
   const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
+  const [remoteCharacters, setRemoteCharacters] = useState<Record<string, PackCharacter[]>>({})
 
   const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => tokenRef.current }), [])
 
@@ -78,10 +81,13 @@ export function OnlineRoot({ pack, onExit }: Props) {
       setPacks(catalogo)
       const usados = new Set(lista.map((t) => t.packId))
       const nombres: Record<string, string> = {}
+      const personajes: Record<string, PackCharacter[]> = {}
       for (const p of catalogo.filter((p) => p.id !== pack.manifest.id && usados.has(p.id))) {
-        for (const c of await client.listPackCharacters(p.id, p.version).catch(() => [])) nombres[c.id] = c.name
+        personajes[p.id] = await client.listPackCharacters(p.id, p.version).catch(() => [])
+        for (const c of personajes[p.id]!) nombres[c.id] = c.name
       }
       if (Object.keys(nombres).length > 0) setRemoteNames((actual) => ({ ...actual, ...nombres }))
+      if (Object.keys(personajes).length > 0) setRemoteCharacters((actual) => ({ ...actual, ...personajes }))
     },
     [pack],
   )
@@ -216,6 +222,17 @@ export function OnlineRoot({ pack, onExit }: Props) {
     )
   }
 
+  /** La barra inferior (26-09): Inicio sale a la portada, Mundos y Mesas cambian de pantalla, Comunidad es "Pronto". */
+  const goTab = (tab: 'inicio' | 'mundos' | 'mesas' | 'comunidad') => {
+    if (tab === 'inicio') onExit()
+    else if (tab === 'mundos') setStage({ name: 'worlds' })
+    else if (tab === 'comunidad') setStage({ name: 'pronto' })
+    else {
+      setStage({ name: 'tables' })
+      if (session) void loadTables(session.client)
+    }
+  }
+
   if (stage.name === 'booting') {
     return (
       <View style={styles.center}>
@@ -265,15 +282,19 @@ export function OnlineRoot({ pack, onExit }: Props) {
         pack={pack}
         packs={packs}
         remoteNames={remoteNames}
+        remoteCharacters={remoteCharacters}
         onOpen={(table) => setStage({ name: 'table', table })}
         onCreate={() => setStage({ name: 'new-table' })}
         onRefresh={() => void loadTables(session.client)}
         onProfile={() => setStage({ name: 'profile' })}
-        onWorlds={() => setStage({ name: 'worlds' })}
-        onLogout={() => void logout()}
+        onTab={goTab}
         onUnauthorized={() => unauthorized()}
       />
     )
+  }
+
+  if (stage.name === 'pronto') {
+    return <ProntoScreen onTab={goTab} onTables={() => setStage({ name: 'tables' })} />
   }
 
   if (stage.name === 'worlds') {
@@ -301,6 +322,7 @@ export function OnlineRoot({ pack, onExit }: Props) {
         // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,
         // que respondera 401 a partir de ahora.
         onDeleted={() => unauthorized('Tu cuenta se borró. Lo que escribiste en las partidas se conserva sin tu nombre.')}
+        onLogout={() => void logout()}
       />
     )
   }

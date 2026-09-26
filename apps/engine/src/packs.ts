@@ -97,6 +97,11 @@ export class PackStore {
     return this.file(packId, 'portraits', file)
   }
 
+  /** Portada y galeria del mundo (`art/`), para el catalogo. */
+  async art(packId: string, file: string): Promise<Buffer | null> {
+    return this.file(packId, 'art', file)
+  }
+
   /** La imagen de un mapa del pack, como los retratos. */
   async mapImage(packId: string, file: string): Promise<Buffer | null> {
     return this.file(packId, 'maps', file)
@@ -139,7 +144,7 @@ export class PackStore {
     return pending
   }
 
-  private async file(packId: string, kind: 'portraits' | 'maps', file: string): Promise<Buffer | null> {
+  private async file(packId: string, kind: 'portraits' | 'maps' | 'art', file: string): Promise<Buffer | null> {
     // `packId` viene de la URL: se limita a un id de pack, sin separadores.
     if (!PACK_ID.test(packId)) return null
     const dir = await this.dirOf(packId)
@@ -184,6 +189,21 @@ function summaryOf(pack: LoadedPack): PackSummary {
     characters: m.characters.length,
     sessions: m.sessions.length,
     playerPersona: m.playerPersona,
+    catalog: m.catalog
+      ? {
+          genre: m.catalog.genre,
+          tags: [...m.catalog.tags],
+          players: { ...m.catalog.players },
+          duration: m.catalog.duration,
+          hours: m.catalog.hours ?? null,
+          format: m.catalog.format,
+          synopsis: m.catalog.synopsis,
+          cover: m.catalog.cover,
+          gallery: [...m.catalog.gallery],
+          author: m.catalog.author ?? m.provenance.authors[0] ?? 'Anónimo',
+          provenance: m.provenance.class,
+        }
+      : null,
   }
 }
 

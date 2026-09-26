@@ -53,6 +53,22 @@ export interface OwnKey {
 }
 
 /** Un pack que el servidor puede jugar; se elige al crear la mesa. */
+/** La ficha de un mundo en el catalogo (bloque `catalog` de su pack.json). */
+export interface WorldCatalog {
+  genre: string
+  tags: string[]
+  players: { min: number; max: number }
+  duration: 'corta' | 'media' | 'larga'
+  hours: string | null
+  format: 'campaña' | 'aventura' | 'one-shot'
+  synopsis: string
+  /** Archivo de `art/`; se pinta con `packArtUrl`. */
+  cover: string
+  gallery: string[]
+  author: string
+  provenance: 'original' | 'licensed' | 'user-provided'
+}
+
 export interface PackOption {
   id: string
   version: string
@@ -78,6 +94,8 @@ export interface PackOption {
   reviewNote?: string | null
   /** Id numerico del pack subido, para publicar, activar o borrar. */
   packId?: number
+  /** La ficha del catalogo, si el pack la declara. */
+  catalog?: WorldCatalog | null
   createdAt?: string | null
   /** Mesas que lo juegan (solo en "mis mundos"). */
   tables?: number
@@ -361,6 +379,14 @@ export function packMapUrl(packId: string, image: string | null | undefined): st
   if (!image) return null
   const file = image.split('/').pop()
   return file ? `/api/v1/packs/${encodeURIComponent(packId)}/maps/${encodeURIComponent(file)}` : null
+}
+
+/** Portada o imagen de galeria de un mundo (`art/` del pack), relativa a la API. */
+export function packArtUrl(packId: string, file: string | null | undefined): string | null {
+  if (!file) return null
+  const name = file.split('/').pop()
+  if (!name) return null
+  return `/api/v1/packs/${encodeURIComponent(packId)}/art/${encodeURIComponent(name)}`
 }
 
 export function packPortraitUrl(packId: string, portrait: string | null | undefined): string | null {

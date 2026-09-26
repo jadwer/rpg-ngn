@@ -348,6 +348,23 @@ export const PackSummary = z.strictObject({
   sessions: z.number().int().nonnegative(),
   /** El pack pide que cada jugador escriba la personalidad de su personaje. */
   playerPersona: z.boolean().default(false),
+  /** La ficha del catalogo, con el primer autor de la procedencia si no firma otro. Opcional: no sube la version. */
+  catalog: z
+    .strictObject({
+      genre: z.string(),
+      tags: z.array(z.string()),
+      players: z.strictObject({ min: z.number().int(), max: z.number().int() }),
+      duration: z.enum(['corta', 'media', 'larga']),
+      hours: z.string().nullable(),
+      format: z.enum(['campaña', 'aventura', 'one-shot']),
+      synopsis: z.string(),
+      cover: z.string(),
+      gallery: z.array(z.string()),
+      author: z.string(),
+      provenance: z.enum(['original', 'licensed', 'user-provided']),
+    })
+    .nullable()
+    .optional(),
 })
 export type PackSummary = z.infer<typeof PackSummary>
 

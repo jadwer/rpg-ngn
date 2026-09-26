@@ -19,6 +19,33 @@ export const Provenance = z.strictObject({
 
 export const PackType = z.enum(['setting', 'campaign'])
 
+/** Un archivo de la carpeta `art/` del pack: solo el nombre, sin subir por el arbol. */
+const ArtFile = z.string().regex(/^[a-z0-9][a-z0-9._-]*\.(webp|png|jpg|jpeg)$/i, 'archivo de art/ (webp, png o jpg)')
+
+/**
+ * Lo que el catalogo enseña de un mundo (E9, Explorar mundos; Gabino, 26-09).
+ * Vive en el pack y no en codigo: un mundo de la comunidad trae el suyo. La
+ * portada y la galeria son archivos de `art/`. Sin spoilers en la sinopsis:
+ * la lee quien todavia no juega.
+ */
+export const PackCatalog = z.strictObject({
+  /** "Fantasia clasica", "Intriga", "Misterio". */
+  genre: z.string().min(1).max(40),
+  /** Tono, en pocas palabras: "aventura", "drama", "romance". */
+  tags: z.array(z.string().min(1).max(30)).max(6).default([]),
+  players: z.strictObject({ min: z.number().int().min(1).max(12), max: z.number().int().min(1).max(12) }),
+  duration: z.enum(['corta', 'media', 'larga']),
+  /** Duracion estimada de cara al jugador: "10-15 h". */
+  hours: z.string().min(1).max(20).optional(),
+  format: z.enum(['campaña', 'aventura', 'one-shot']),
+  synopsis: z.string().min(1).max(700),
+  cover: ArtFile,
+  gallery: z.array(ArtFile).max(8).default([]),
+  /** Quien lo firma en la tarjeta; sin el, el primer autor de la procedencia. */
+  author: z.string().min(1).max(60).optional(),
+})
+export type PackCatalog = z.infer<typeof PackCatalog>
+
 export const PackManifest = z.strictObject({
   id: KebabId,
   type: PackType,
@@ -56,6 +83,8 @@ export const PackManifest = z.strictObject({
    * Sin el, se usa un estilo pictorico neutro.
    */
   artStyle: z.string().min(1).optional(),
+  /** La ficha del mundo en el catalogo (E9). Obligatoria para publicar; opcional en un mundo privado. */
+  catalog: PackCatalog.optional(),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

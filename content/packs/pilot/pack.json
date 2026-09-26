@@ -60,5 +60,22 @@
   "maps": [
     "mina",
     "valdoria"
-  ]
+  ],
+  "catalog": {
+    "genre": "Fantasía clásica",
+    "tags": [
+      "aventura",
+      "misterio"
+    ],
+    "players": {
+      "min": 1,
+      "max": 5
+    },
+    "duration": "larga",
+    "hours": "10-15 h",
+    "format": "campaña",
+    "synopsis": "Nueve extraños que viajaban cada quien por su cuenta quedan atrapados en Valdoria, un pueblo minero entre colinas, cuando la crecida se lleva el único puente. La mina guarda silencio desde hace días y el pueblo calla más de lo que cuenta. Una historia sobre vínculos, decisiones y el precio de proteger lo que importa.",
+    "cover": "cover.webp",
+    "author": "Equipo Ad Astra Mentis"
+  }
 }

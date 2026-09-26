@@ -7,6 +7,8 @@ import type { StoredUser } from '../lib/storage'
 interface Props {
   user: StoredUser
   onLogout?: (() => void) | undefined
+  /** `avatar`: la inicial y el nombre, como en la barra del marco comun (26-09). */
+  variant?: 'burger' | 'avatar' | undefined
 }
 
 /**
@@ -15,7 +17,7 @@ interface Props {
  * (fichas, mapa, jugadores) va en su propia barra. El saldo vive aqui y no
  * en la mesa (D-UX-4).
  */
-export function SystemMenu({ user, onLogout }: Props) {
+export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -37,13 +39,25 @@ export function SystemMenu({ user, onLogout }: Props) {
 
   return (
     <div className="sysmenu" ref={ref}>
-      <button type="button" className="sysmenu-btn" aria-label="Menú del sitio" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        <span className="bars" aria-hidden>
-          <i />
-          <i />
-          <i />
-        </span>
-      </button>
+      {variant === 'avatar' ? (
+        <button type="button" className="sysmenu-avatar" aria-label="Menú de tu cuenta" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          <span className="inicial" aria-hidden>
+            {(user.name.trim()[0] ?? '?').toUpperCase()}
+          </span>
+          <span className="nombre">{user.name}</span>
+          <span className="flecha" aria-hidden>
+            ▾
+          </span>
+        </button>
+      ) : (
+        <button type="button" className="sysmenu-btn" aria-label="Menú del sitio" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+          <span className="bars" aria-hidden>
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
+      )}
       {open ? (
         <nav className="sysmenu-panel" role="menu" aria-label="Sitio">
           <div className="who">{user.name}</div>
@@ -52,6 +66,9 @@ export function SystemMenu({ user, onLogout }: Props) {
           </Link>
           <Link role="menuitem" href="/mesas/nueva" onClick={() => setOpen(false)}>
             Nueva mesa
+          </Link>
+          <Link role="menuitem" href="/mundos/explorar" onClick={() => setOpen(false)}>
+            Explorar mundos
           </Link>
           <Link role="menuitem" href="/mundos" onClick={() => setOpen(false)}>
             Mis mundos

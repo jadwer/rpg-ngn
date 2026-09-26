@@ -20,6 +20,8 @@ interface Props {
   onUnauthorized: () => void
   /** La cuenta se borro: limpiar la sesion local, sin llamar a la API. */
   onDeleted: () => void
+  /** Cerrar sesion en este telefono (antes estaba en la lista de mesas). */
+  onLogout: () => void
 }
 
 /**
@@ -28,7 +30,7 @@ interface Props {
  * pide la actual). El correo se muestra pero no se edita (cambiarlo exige
  * verificarlo).
  */
-export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted }: Props) {
+export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout }: Props) {
   const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
@@ -89,7 +91,9 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
           <Text style={styles.link}>‹ Mesas</Text>
         </Pressable>
         <Text style={styles.title}>Tu perfil</Text>
-        <View style={styles.spacer} />
+        <Pressable onPress={onLogout} hitSlop={10} accessibilityRole="button">
+          <Text style={[styles.link, styles.logout]}>Salir</Text>
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
@@ -135,6 +139,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
 }
 
 const styles = StyleSheet.create({
+  logout: { textAlign: 'right' },
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: theme.colors.panel, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula, minWidth: 64 },

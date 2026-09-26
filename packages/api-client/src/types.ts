@@ -47,6 +47,10 @@ export interface TableSummary {
   campaignId: string | null
   /** Eventos de la campaña. Cero significa que la mesa nunca se jugo. */
   headSeq: number
+  /** Hay una sesion abierta: se esta jugando. Sin ella, la mesa esta en pausa entre sesiones. */
+  sessionOpen?: boolean
+  /** Ultimo movimiento de la mesa o de su campaña (ISO), para ordenar por actividad. */
+  lastActivityAt?: string | null
   /** Viene con `include=members.user`. */
   members: TableMember[]
 }

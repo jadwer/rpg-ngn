@@ -11,6 +11,9 @@ interface Props {
   /** Abre la mesa recien aceptada, como si se hubiera tocado en la lista. */
   onOpen: (table: TableSummary) => void
   onRefresh: () => void
+  /** Abierto desde fuera ("Unirme con enlace" de la lista de mesas): sin boton propio y avisa al cerrar. */
+  startOpen?: boolean | undefined
+  onClose?: (() => void) | undefined
 }
 
 /**
@@ -21,8 +24,12 @@ interface Props {
  * quien, igual que en la pagina `/unirse` de la web. Es la paridad de la
  * funcion que quita los seis pasos de antes.
  */
-export function JoinByLink({ client, onOpen, onRefresh }: Props) {
-  const [open, setOpen] = useState(false)
+export function JoinByLink({ client, onOpen, onRefresh, startOpen = false, onClose }: Props) {
+  const [open, setOpenState] = useState(startOpen)
+  const setOpen = (value: boolean) => {
+    setOpenState(value)
+    if (!value) onClose?.()
+  }
   const [text, setText] = useState('')
   const [preview, setPreview] = useState<InvitePreview | null>(null)
   const [busy, setBusy] = useState(false)

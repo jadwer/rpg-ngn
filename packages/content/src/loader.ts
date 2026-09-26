@@ -114,6 +114,13 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
     }
   }
 
+  // La portada y la galeria del catalogo viven en `art/`.
+  for (const file of manifest.catalog ? [manifest.catalog.cover, ...manifest.catalog.gallery] : []) {
+    if (!(await source.exists(`art/${file}`))) {
+      issues.push({ level: 'error', path: 'pack.json', message: `catalog apunta a art/${file}, que no existe en el pack` })
+    }
+  }
+
   for (const [id, map] of maps) {
     if (!(await source.exists(map.image))) {
       issues.push({ level: 'error', path: `maps/${id}.json`, message: `image apunta a ${map.image}, que no existe en el pack` })
