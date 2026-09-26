@@ -1,103 +1,88 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
-import {
-  createApiClient,
-  normalizeBaseUrl,
-  packArtUrl,
-  type CatalogWorldCard,
-  type SeasonPassOffer,
-  type SeasonPath,
-} from "@rpg-ngn/api-client";
-import { cardView, passView } from "@rpg-ngn/ui-logic";
-import { useEffect, useState } from "react";
-import {
-  ImageBackground,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type ImageSourcePropType,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomNav, type BottomTab } from "../components/BottomNav";
-import { Isotipo, LogoHorizontal, LogoVertical } from "../components/Brand";
-import { storage } from "../online/storage";
-import { theme } from "../theme";
+import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, passView } from '@rpg-ngn/ui-logic'
+import { useEffect, useState } from 'react'
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BottomNav, type BottomTab } from '../components/BottomNav'
+import { Isotipo, LogoHorizontal, LogoVertical } from '../components/Brand'
+import { storage } from '../online/storage'
+import { theme } from '../theme'
 
 interface Props {
-  packName: string;
-  motto: string | null;
-  onOnline: () => void;
-  onOffline: () => void;
+  packName: string
+  motto: string | null
+  onOnline: () => void
+  onOffline: () => void
   /** La barra inferior: Mundos, Mesas y Comunidad entran a la app en esa pestaña. */
-  onTab: (tab: BottomTab) => void;
+  onTab: (tab: BottomTab) => void
 }
 
 /** Mundos que caben en el carrusel antes del hueco "Proximamente". */
-const FILA = 4;
+const FILA = 4
 
 /** El catalogo publico, para que el Inicio diga lo mismo que la web. Sin red, las tarjetas de siempre. */
 function useCatalog(): {
-  worlds: CatalogWorldCard[];
-  season: SeasonPath | null;
-  pass: SeasonPassOffer | null;
-  base: string;
+  worlds: CatalogWorldCard[]
+  season: SeasonPath | null
+  pass: SeasonPassOffer | null
+  base: string
 } | null {
   const [live, setLive] = useState<{
-    worlds: CatalogWorldCard[];
-    season: SeasonPath | null;
-    pass: SeasonPassOffer | null;
-    base: string;
-  } | null>(null);
+    worlds: CatalogWorldCard[]
+    season: SeasonPath | null
+    pass: SeasonPassOffer | null
+    base: string
+  } | null>(null)
   useEffect(() => {
-    let alive = true;
+    let alive = true
     void storage
       .serverUrl()
       .then(async (url) => {
         const client = createApiClient({
           baseUrl: normalizeBaseUrl(url),
           tokenProvider: () => null,
-        });
-        const r = await client.catalogWorlds();
+        })
+        const r = await client.catalogWorlds()
         if (alive)
           setLive({
-            worlds: r.worlds.filter((w) => w.origin === "oficial"),
+            worlds: r.worlds.filter((w) => w.origin === 'oficial'),
             season: r.season,
             pass: r.pass,
             base: client.baseUrl,
-          });
+          })
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
     return () => {
-      alive = false;
-    };
-  }, []);
-  return live;
+      alive = false
+    }
+  }, [])
+  return live
 }
 
-const HERO: ImageSourcePropType = require("../../assets/hero-movil.webp");
+const HERO: ImageSourcePropType = require('../../assets/hero-movil.webp')
 // Respaldo sin conexion (el Inicio tambien es la puerta a leer sin red).
 const WORLDS: Array<{
-  image: ImageSourcePropType;
-  title: string;
-  tags: string[];
+  image: ImageSourcePropType
+  title: string
+  tags: string[]
 }> = [
   {
-    image: require("../../assets/mundo-valdoria.webp"),
-    title: "Fantasía medieval",
-    tags: ["Aventura", "Dados"],
+    image: require('../../assets/mundo-valdoria.webp'),
+    title: 'Fantasía medieval',
+    tags: ['Aventura', 'Dados'],
   },
   {
-    image: require("../../assets/mundo-boticaria.webp"),
-    title: "China antigua",
-    tags: ["Intriga", "Misterio"],
+    image: require('../../assets/mundo-boticaria.webp'),
+    title: 'China antigua',
+    tags: ['Intriga', 'Misterio'],
   },
   {
-    image: require("../../assets/mundo-mascarada.webp"),
-    title: "Romance",
-    tags: ["Drama", "Social"],
+    image: require('../../assets/mundo-mascarada.webp'),
+    title: 'Romance',
+    tags: ['Drama', 'Social'],
   },
-];
+]
 
 /**
  * La portada de la app segun la version movil de img/branding/concepto
@@ -108,19 +93,14 @@ const WORLDS: Array<{
  * y la barra inferior de las demas pantallas.
  */
 export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
-  const insets = useSafeAreaInsets();
-  const live = useCatalog();
-  const destacados = (live?.worlds ?? []).slice(0, FILA);
-  const pase = passView(live?.pass ?? null);
-  const names = Object.fromEntries(
-    (live?.worlds ?? []).map((w) => [w.id, w.name]),
-  );
+  const insets = useSafeAreaInsets()
+  const live = useCatalog()
+  const destacados = (live?.worlds ?? []).slice(0, FILA)
+  const pase = passView(live?.pass ?? null)
+  const names = Object.fromEntries((live?.worlds ?? []).map((w) => [w.id, w.name]))
   return (
     <View style={styles.screen}>
-      <ScrollView
-        style={styles.screen}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
+      <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={[styles.bar, { paddingTop: insets.top + 10 }]}>
           <LogoHorizontal height={30} color="#f1f0fb" />
         </View>
@@ -133,41 +113,19 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             <Text style={styles.motto}>WORLDS BORN FROM IMAGINATION</Text>
           </View>
           <Text style={styles.phrase}>Tu imaginación también es un mundo.</Text>
-          <Pressable
-            onPress={onOnline}
-            style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
-            accessibilityRole="button"
-          >
+          <Pressable onPress={onOnline} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
             <Text style={styles.ctaText}>COMIENZA TU HISTORIA →</Text>
           </Pressable>
         </ImageBackground>
 
         <View style={styles.section}>
-          <Text style={styles.h2}>Un motor.{"\n"}Infinitos mundos.</Text>
-          <Text style={styles.body}>
-            Explora, crea y vive historias en cualquier universo: tu novela
-            ligera o tu campaña de rol, con amigos o sola, y un director de
-            juego que no se cansa. Tú decides el mundo.
-          </Text>
+          <Text style={styles.h2}>Un motor.{'\n'}Infinitos mundos.</Text>
+          <Text style={styles.body}>Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un director de juego que no se cansa. Tú decides el mundo.</Text>
           <View style={styles.row}>
-            <Pressable
-              onPress={onOnline}
-              style={({ pressed }) => [
-                styles.btnPrimary,
-                pressed && styles.pressed,
-              ]}
-              accessibilityRole="button"
-            >
+            <Pressable onPress={onOnline} style={({ pressed }) => [styles.btnPrimary, pressed && styles.pressed]} accessibilityRole="button">
               <Text style={styles.btnPrimaryText}>Explorar mundos</Text>
             </Pressable>
-            <Pressable
-              onPress={onOffline}
-              style={({ pressed }) => [
-                styles.btnOutline,
-                pressed && styles.pressed,
-              ]}
-              accessibilityRole="button"
-            >
+            <Pressable onPress={onOffline} style={({ pressed }) => [styles.btnOutline, pressed && styles.pressed]} accessibilityRole="button">
               <Text style={styles.btnOutlineText}>Leer sin conexión</Text>
             </Pressable>
           </View>
@@ -179,57 +137,30 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             <Text style={styles.seeAll}>Ver todos →</Text>
           </Pressable>
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carousel}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
           {live
             ? destacados.map((w) => {
-                const view = cardView(w);
-                const cover = packArtUrl(w.id, w.catalog.cover);
+                const view = cardView(w)
+                const cover = packArtUrl(w.id, w.catalog.cover)
                 return (
-                  <Pressable
-                    key={w.id}
-                    onPress={() => onTab("mundos")}
-                    style={styles.world}
-                    accessibilityRole="button"
-                    accessibilityLabel={w.name}
-                  >
-                    <ImageBackground
-                      source={
-                        cover
-                          ? { uri: `${live.base}${cover}` }
-                          : WORLDS[0]!.image
-                      }
-                      style={styles.worldImage}
-                      resizeMode="cover"
-                    >
-                      <View style={styles.worldShade}>
-                        <Text style={styles.worldKicker}>
-                          {w.catalog.genre}
-                        </Text>
-                        <Text style={styles.worldTitle}>{w.name}</Text>
-                        <Text style={styles.worldState}>
-                          {view.badge ?? view.hint ?? view.price ?? ""}
-                        </Text>
+                  <Pressable key={w.id} onPress={() => onTab('mundos')} style={styles.world} accessibilityRole="button" accessibilityLabel={w.name}>
+                    <ImageBackground source={cover ? { uri: `${live.base}${cover}` } : WORLDS[0]!.image} style={styles.worldImage} resizeMode="cover">
+                      {/* Velo escalonado abajo (sin degradado nativo): el texto sobre la portada se perdia (Gabino, 26-09). */}
+                      <View style={styles.worldLive}>
+                        <View style={styles.scrimSoft} />
+                        <View style={styles.scrim}>
+                          <Text style={styles.worldKicker}>{w.catalog.genre}</Text>
+                          <Text style={styles.worldTitle}>{w.name}</Text>
+                          <Text style={styles.worldState}>{view.badge ?? view.hint ?? view.price ?? ''}</Text>
+                        </View>
                       </View>
                     </ImageBackground>
                   </Pressable>
-                );
+                )
               })
             : WORLDS.map((w) => (
-                <Pressable
-                  key={w.title}
-                  onPress={onOnline}
-                  style={styles.world}
-                  accessibilityRole="button"
-                >
-                  <ImageBackground
-                    source={w.image}
-                    style={styles.worldImage}
-                    resizeMode="cover"
-                  >
+                <Pressable key={w.title} onPress={onOnline} style={styles.world} accessibilityRole="button">
+                  <ImageBackground source={w.image} style={styles.worldImage} resizeMode="cover">
                     <View style={styles.worldShade}>
                       <Text style={styles.worldTitle}>{w.title}</Text>
                       <View style={styles.tags}>
@@ -247,53 +178,31 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             <View style={[styles.world, styles.proximo]}>
               <Isotipo height={40} color={theme.colors.inkFaint} />
               <Text style={styles.worldKicker}>Próximamente</Text>
-              <Text style={styles.proximoText}>
-                Un mundo nuevo se está escribiendo.
-              </Text>
+              <Text style={styles.proximoText}>Un mundo nuevo se está escribiendo.</Text>
             </View>
           ) : null}
         </ScrollView>
 
         {live?.season && live.season.worlds.length > 0 ? (
-          <Pressable
-            onPress={() => onTab("mundos")}
-            style={styles.season}
-            accessibilityRole="button"
-          >
+          <Pressable onPress={() => onTab('mundos')} style={styles.season} accessibilityRole="button">
             <Text style={styles.seasonKicker}>{live.season.name}</Text>
             <Text style={styles.seasonTitle}>Caminos que se abren jugando</Text>
-            <Text style={styles.body}>
-              Cada turno que juegas es un capítulo. Los capítulos abren mundos
-              nuevos, y lo que abres se queda contigo.
-            </Text>
-            <Text style={styles.seasonPath}>
-              {live.season.worlds
-                .map(
-                  (w) =>
-                    `${names[w.packId] ?? w.packId}: ${w.threshold === 0 ? "gratis" : `${w.threshold} capítulos`}`,
-                )
-                .join("  ·  ")}
-            </Text>
+            <Text style={styles.body}>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</Text>
+            <Text style={styles.seasonPath}>{live.season.worlds.map((w) => `${names[w.packId] ?? w.packId}: ${w.threshold === 0 ? 'gratis' : `${w.threshold} capítulos`}`).join('  ·  ')}</Text>
             {pase ? (
               <View style={styles.pass}>
-                <Text style={styles.passTitle}>
-                  Pase de temporada · Capítulos x2
-                </Text>
-                <Text
-                  style={styles.passPrice}
-                >{`${pase.price}, pago único`}</Text>
+                <Text style={styles.passTitle}>Pase de temporada · Capítulos x2</Text>
+                <Text style={styles.passPrice}>{`${pase.price}, pago único`}</Text>
               </View>
             ) : null}
           </Pressable>
         ) : null}
 
-        <Text
-          style={styles.offline}
-        >{`Sin conexión puedes leer ${packName}: sus sesiones, fichas y reglas.`}</Text>
+        <Text style={styles.offline}>{`Sin conexión puedes leer ${packName}: sus sesiones, fichas y reglas.`}</Text>
       </ScrollView>
       <BottomNav active="inicio" onSelect={onTab} />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -301,39 +210,39 @@ const styles = StyleSheet.create({
   bar: {
     paddingHorizontal: 20,
     paddingBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   hero: {
     minHeight: 560,
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "flex-end",
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
     paddingHorizontal: 24,
     paddingBottom: 28,
     gap: 14,
   },
   veil: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(11, 15, 20, 0.35)",
+    backgroundColor: 'rgba(11, 15, 20, 0.35)',
   },
   emblem: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 10,
-    marginBottom: "auto",
+    marginBottom: 'auto',
     marginTop: 32,
   },
   motto: {
     fontFamily: theme.fonts.display,
     fontSize: 11,
     letterSpacing: 3.5,
-    color: "#f1f0fb",
-    textAlign: "center",
-    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    color: '#f1f0fb',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowRadius: 4,
     textShadowOffset: { width: 0, height: 1 },
   },
@@ -341,22 +250,22 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.serifItalic,
     fontSize: 22,
     lineHeight: 28,
-    color: "#f1f0fb",
-    textAlign: "center",
+    color: '#f1f0fb',
+    textAlign: 'center',
   },
   cta: {
     backgroundColor: theme.colors.accent,
     borderRadius: 999,
     paddingHorizontal: 26,
     minHeight: 48,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   ctaText: {
     fontFamily: theme.fonts.displayBold,
     fontSize: 13,
     letterSpacing: 1.5,
-    color: "#ffffff",
+    color: '#ffffff',
   },
   pressed: { opacity: 0.8 },
   section: { paddingHorizontal: 20, paddingTop: 28, gap: 10 },
@@ -365,7 +274,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 30,
     color: theme.colors.ink,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   body: {
@@ -374,19 +283,19 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     color: theme.colors.inkDim,
   },
-  row: { flexDirection: "row", gap: 10, marginTop: 4 },
+  row: { flexDirection: 'row', gap: 10, marginTop: 4 },
   btnPrimary: {
     flex: 1,
     backgroundColor: theme.colors.accent,
     borderRadius: 12,
     minHeight: 46,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnPrimaryText: {
     fontFamily: theme.fonts.display,
     fontSize: 14,
-    color: "#ffffff",
+    color: '#ffffff',
   },
   btnOutline: {
     flex: 1,
@@ -394,8 +303,8 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.accentBright,
     borderRadius: 12,
     minHeight: 46,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnOutlineText: {
     fontFamily: theme.fonts.display,
@@ -403,9 +312,9 @@ const styles = StyleSheet.create({
     color: theme.colors.ink,
   },
   sectionHead: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 30,
     paddingBottom: 12,
@@ -426,29 +335,29 @@ const styles = StyleSheet.create({
     width: 170,
     height: 220,
     borderRadius: 16,
-    overflow: "hidden",
+    overflow: 'hidden',
     backgroundColor: theme.colors.panel2,
   },
-  worldImage: { flex: 1, overflow: "hidden" },
+  worldImage: { flex: 1, overflow: 'hidden' },
   worldShade: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
     padding: 12,
     gap: 6,
-    backgroundColor: "rgba(11, 15, 20, 0.35)",
+    backgroundColor: 'rgba(11, 15, 20, 0.35)',
   },
   worldTitle: {
     fontFamily: theme.fonts.display,
     fontSize: 15,
-    color: "#ffffff",
+    color: '#ffffff',
   },
-  tags: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+  tags: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   tag: {
     fontFamily: theme.fonts.serif,
     fontSize: 11,
     color: theme.colors.ink,
     borderWidth: 1,
-    borderColor: "rgba(229, 231, 235, 0.35)",
+    borderColor: 'rgba(229, 231, 235, 0.35)',
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 1,
@@ -458,27 +367,32 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 1.5,
     color: theme.colors.gold,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   worldState: {
-    fontFamily: theme.fonts.ui,
+    fontFamily: theme.fonts.uiMedium,
     fontSize: 12,
-    color: theme.colors.accentBright,
+    color: '#d8ccff',
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowRadius: 4,
   },
+  worldLive: { flex: 1, justifyContent: 'flex-end' },
+  scrimSoft: { height: 28, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
+  scrim: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 12, gap: 4, backgroundColor: 'rgba(11, 15, 20, 0.8)' },
   proximo: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     padding: 14,
     borderWidth: 1,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderColor: theme.colors.border,
   },
   proximoText: {
     fontFamily: theme.fonts.serif,
     fontSize: 13,
     color: theme.colors.inkDim,
-    textAlign: "center",
+    textAlign: 'center',
   },
   season: {
     marginHorizontal: 20,
@@ -495,7 +409,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1.5,
     color: theme.colors.gold,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   seasonTitle: {
     fontFamily: theme.fonts.display,
@@ -513,8 +427,8 @@ const styles = StyleSheet.create({
     gap: 2,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(212, 175, 55, 0.45)",
-    backgroundColor: "rgba(212, 175, 55, 0.08)",
+    borderColor: 'rgba(212, 175, 55, 0.45)',
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
   },
   passTitle: {
     fontFamily: theme.fonts.serifSemiBold,
@@ -533,4 +447,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 18,
   },
-});
+})

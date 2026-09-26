@@ -2,7 +2,7 @@ import { memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharact
 import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Image, ImageBackground, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
+import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
@@ -55,6 +55,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
   const insets = useSafeAreaInsets()
   const { width, height } = useWindowDimensions()
   const wide = width >= ANCHO_TABLET
+  const landscape = width > height
   const [filter, setFilter] = useState<TableFilter>('todas')
   const [joining, setJoining] = useState(false)
   const [options, setOptions] = useState<string | null>(null)
@@ -84,8 +85,9 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
         keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={loading && tables !== null} onRefresh={onRefresh} tintColor={theme.colors.accentBright} colors={[theme.colors.accentBright]} progressBackgroundColor={theme.colors.panel} />}
       >
-        <ImageBackground source={width > height ? FONDO_ANCHO : FONDO} style={styles.hero} imageStyle={styles.heroImage} resizeMode="cover">
-          <View style={styles.heroShade} />
+        {/* El fondo es de toda la pantalla, no de la cabecera (mesas_ux.png): la escena arriba y su parte oscura detras de las tarjetas. */}
+        <Image source={landscape ? FONDO_ANCHO : FONDO} style={[styles.backdrop, { width, height: width * (landscape ? 1024 / 1145 : 1024 / 367) }]} resizeMode="cover" />
+        <View style={styles.hero}>
           <View style={[styles.column, styles.heroInner]}>
             <Text style={styles.title}>Tus mesas</Text>
             <Text style={styles.subtitle}>Historias en las que estás jugando</Text>
@@ -100,7 +102,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
               </Pressable>
             </View>
           </View>
-        </ImageBackground>
+        </View>
 
         <View style={[styles.column, styles.body]}>
           {joining ? <JoinByLink client={client} onOpen={onOpen} onRefresh={onRefresh} startOpen onClose={() => setJoining(false)} /> : null}
@@ -133,6 +135,23 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
             const members = table.members.slice(0, 2)
             const extra = table.members.length - members.length
             const tags = worldTags(world?.catalog)
+            const avatars = (
+              <View style={styles.avatars}>
+                {members.map((m) => {
+                  const p = portraitOf(table.packId, m.characterId)
+                  return (
+                    <View key={m.id} style={styles.avatarRing}>
+                      <Portrait path={p.path} uri={p.uri} name={m.characterId ? nameOf(m.characterId) : (m.userName ?? '?')} size={30} round />
+                    </View>
+                  )
+                })}
+                {extra > 0 ? (
+                  <View style={[styles.avatarRing, styles.more]}>
+                    <Text style={styles.moreText}>+{extra}</Text>
+                  </View>
+                ) : null}
+              </View>
+            )
             return (
               <View key={table.id} style={[styles.card, state === 'finalizadas' && styles.cardQuiet]}>
                 <Pressable onPress={() => onOpen(table)} style={({ pressed }) => [styles.cardMain, pressed && styles.pressed]} accessibilityRole="button">
@@ -146,7 +165,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                         <View style={[styles.dot, state === 'pausa' && styles.dotPausa, state === 'finalizadas' && styles.dotFin]} />
                         <Text style={[styles.stateText, state === 'pausa' && styles.statePausaText, state === 'finalizadas' && styles.stateFinText]}>{stateLabel(state)}</Text>
                       </View>
-                      <Text style={styles.when}>{relativeTime(table.lastActivityAt)}</Text>
+                      {wide ? null : <Text style={styles.when}>{relativeTime(table.lastActivityAt)}</Text>}
                     </View>
                     <Text style={styles.cardTitle} numberOfLines={2}>
                       {table.name}
@@ -158,23 +177,16 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                       {tags.length ? tags.join('  ·  ') : (world?.name ?? table.packId)}
                     </Text>
                   </View>
+                  {/* En tablet, quien juega a la derecha y arriba de la fecha (Gabino, 26-09). */}
+                  {wide ? (
+                    <View style={styles.side}>
+                      {avatars}
+                      <Text style={styles.when}>{relativeTime(table.lastActivityAt)}</Text>
+                    </View>
+                  ) : null}
                 </Pressable>
                 <View style={styles.cardFoot}>
-                  <View style={styles.avatars}>
-                    {members.map((m) => {
-                      const p = portraitOf(table.packId, m.characterId)
-                      return (
-                        <View key={m.id} style={styles.avatarRing}>
-                          <Portrait path={p.path} uri={p.uri} name={m.characterId ? nameOf(m.characterId) : (m.userName ?? '?')} size={30} round />
-                        </View>
-                      )
-                    })}
-                    {extra > 0 ? (
-                      <View style={[styles.avatarRing, styles.more]}>
-                        <Text style={styles.moreText}>+{extra}</Text>
-                      </View>
-                    ) : null}
-                  </View>
+                  {wide ? null : avatars}
                   <Pressable onPress={() => onOpen(table)} style={({ pressed }) => [styles.continue, pressed && styles.pressed]} accessibilityRole="button">
                     <Icon d={ICON.play} size={14} color="#ffffff" />
                     <Text style={styles.continueText}>Continuar</Text>
@@ -210,14 +222,13 @@ const styles = StyleSheet.create({
   avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.accent },
   avatarText: { fontFamily: theme.fonts.display, fontSize: 16, color: '#ffffff' },
   scroll: { paddingBottom: 24 },
-  hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18, overflow: 'hidden' },
+  backdrop: { position: 'absolute', top: 0, left: 0 },
+  hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   heroInner: { gap: 10 },
   actions: { gap: 10 },
   actionsWide: { flexDirection: 'row' },
   bigBtnWide: { flex: 1 },
-  heroImage: { resizeMode: 'cover' },
-  heroShade: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
   title: { fontFamily: theme.fonts.display, fontSize: 36, color: '#ffffff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 2 } },
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 18, color: theme.colors.ink, marginTop: -4, marginBottom: 6, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6, textShadowOffset: { width: 0, height: 1 } },
   bigBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 50, borderRadius: 12 },
@@ -236,7 +247,9 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', padding: 24, gap: 10 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim, textAlign: 'center' },
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger, textAlign: 'center' },
-  card: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 14, backgroundColor: theme.colors.panel, overflow: 'hidden' },
+  // Algo translucida: detras se adivina el fondo, como en el tablero.
+  card: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: 14, backgroundColor: 'rgba(17, 22, 34, 0.88)', overflow: 'hidden' },
+  side: { alignItems: 'flex-end', justifyContent: 'flex-start', gap: 8, paddingTop: 12, paddingRight: 14 },
   cardQuiet: { opacity: 0.75 },
   cardMain: { flexDirection: 'row', minHeight: 120 },
   coverBox: { width: 104, overflow: 'hidden', backgroundColor: theme.colors.panel2, alignItems: 'center', justifyContent: 'center' },
@@ -257,8 +270,9 @@ const styles = StyleSheet.create({
   role: { fontFamily: theme.fonts.serif, fontSize: 15, color: theme.colors.ink },
   tags: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim },
   cardFoot: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 12, paddingTop: 4 },
-  avatars: { flexDirection: 'row', width: 90 },
-  avatarRing: { marginRight: -8, borderWidth: 2, borderColor: theme.colors.panel, borderRadius: 17 },
+  avatars: { flexDirection: 'row', minWidth: 90 },
+  // Aro dorado: sobre el panel oscuro los retratos se perdian (Gabino, 26-09).
+  avatarRing: { marginRight: -8, borderWidth: 2, borderColor: theme.colors.gold, borderRadius: 17 },
   more: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.panel3 },
   moreText: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: theme.colors.ink },
   continue: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 40, borderRadius: 10, backgroundColor: theme.colors.accent },

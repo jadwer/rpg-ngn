@@ -211,17 +211,18 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
                 {text ? <p className="sinopsis">{text}</p> : null}
                 {!table.campaignId ? <div className="error">Esta mesa no tiene campaña todavía.</div> : null}
               </div>
+              {/* Quien juega arriba y la fecha debajo, a la derecha (Gabino, 26-09). */}
               <div className="lado">
-                <div className="actividad">
-                  <span>Última actividad</span>
-                  <span>{relativeTime(table.lastActivityAt) || '—'}</span>
-                </div>
                 <div className="avatares" title={others.map((m) => m.userName).filter(Boolean).join(', ')}>
                   {shownMembers.map((m) => {
                     const p = portraitOf(table.packId, m.characterId)
                     return <Portrait key={m.id} path={p.path} uri={p.uri} name={m.characterId ? nameOf(m.characterId) : (m.userName ?? '?')} size={40} />
                   })}
                   {extra > 0 ? <span className="mas">+{extra}</span> : null}
+                </div>
+                <div className="actividad">
+                  <span>Última actividad</span>
+                  <span>{relativeTime(table.lastActivityAt) || '—'}</span>
                 </div>
                 <div className="botones">
                   <Link href={`/mesas/${table.id}`} className="btn primary">

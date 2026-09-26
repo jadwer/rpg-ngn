@@ -23,7 +23,7 @@ export default function ProntoPage() {
     <RequireSession>
       {({ user, logout }) => (
         <AppShell user={user} onLogout={logout}>
-          <section className="pronto">
+          <section className="pagina-pronto">
             <p className="sello">Pronto</p>
             <h1>{s.titulo}</h1>
             <p>{s.texto}</p>

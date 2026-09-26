@@ -4793,7 +4793,8 @@ a {
 }
 
 /* Pagina "Pronto" */
-.pronto {
+/* Pagina "Pronto": nombre propio, el pie usa .pronto para las redes que aun no existen. */
+.pagina-pronto {
   max-width: 560px;
   margin: 40px auto;
   padding: 28px;
@@ -4802,7 +4803,7 @@ a {
   background: rgba(18, 24, 38, 0.86);
   text-align: center;
 }
-.pronto .sello {
+.pagina-pronto .sello {
   margin: 0;
   font-family: var(--font-display);
   letter-spacing: 0.3em;
@@ -4810,15 +4811,15 @@ a {
   color: var(--gold-bright);
   font-size: 0.8rem;
 }
-.pronto h1 {
+.pagina-pronto h1 {
   margin: 6px 0 10px;
 }
-.pronto p {
+.pagina-pronto p {
   font-family: var(--font-serif);
   font-size: 1.05rem;
   line-height: 1.5;
 }
-.pronto .row {
+.pagina-pronto .row {
   justify-content: center;
   margin-top: 16px;
 }
