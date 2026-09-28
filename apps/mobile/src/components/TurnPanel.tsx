@@ -244,7 +244,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               setFolded(true)
             }}
           >
-            <Text style={styles.ideasToggle}>Ocultar</Text>
+            <Text style={styles.hideText}>Ocultar</Text>
           </Pressable>
           {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
           {/* Ideas del DM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
   more: { flexDirection: 'row', alignItems: 'center', gap: 8, borderStyle: 'dashed', backgroundColor: 'transparent' },
   ideaText: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   ideasToggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula },
+  hideText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 16, color: theme.colors.gold },
   fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
   rollCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 12, backgroundColor: 'rgba(0, 0, 0, 0.35)' },
   fortuneText: { flex: 1, gap: 2 },

@@ -2811,9 +2811,10 @@ a.plain {
   margin: 2px 0 4px auto;
   border: 0;
   background: none;
-  color: var(--nebula, #a78bfa);
+  color: var(--gold, #d4af37);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
