@@ -2,7 +2,7 @@ import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type
 import { cardView, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, Linking, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTopInset } from '../../hooks/useTopInset'
 import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
@@ -27,7 +27,7 @@ interface Props {
  * tocar una abre el detalle con personajes y lo que incluye.
  */
 export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }: Props) {
-  const insets = useSafeAreaInsets()
+  const topInset = useTopInset()
   // En tablet, tres columnas y el contenido centrado.
   const wide = useWindowDimensions().width >= 700
   const [worlds, setWorlds] = useState<CatalogWorldCard[] | null>(null)
@@ -100,7 +100,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
     const cover = url(packArtUrl(detail.id, detail.catalog.cover))
     return (
       <View style={styles.screen}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <View style={[styles.header, { paddingTop: topInset + 8 }]}>
           <Pressable onPress={() => setDetail(null)} hitSlop={10} style={styles.back}>
             <Icon d={ICON.back} size={20} color={theme.colors.nebula} />
             <Text style={styles.link}>Explorar</Text>
@@ -172,7 +172,7 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.header, { paddingTop: topInset + 8 }]}>
         <LogoHorizontal height={28} color={theme.colors.ink} />
         <Pressable onPress={onMine} hitSlop={10} accessibilityRole="button">
           <Text style={styles.link}>Mis mundos</Text>

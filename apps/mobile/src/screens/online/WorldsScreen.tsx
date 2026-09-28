@@ -8,6 +8,7 @@ import { webOriginOf } from '../../online/server-url'
 import { Backdrop } from '../../components/Backdrop'
 import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
+import { SectionTitle } from '../../components/Panel'
 
 interface Props {
   client: ApiClient
@@ -82,7 +83,7 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
         {/* Cada seccion en su panel: el texto suelto sobre el fondo no se leia (Gabino, 26-09). */}
         {review ? (
           <View style={styles.panel}>
-            <Text style={styles.label}>Revisión del catálogo</Text>
+            <SectionTitle>Revisión del catálogo</SectionTitle>
             {review.length === 0 ? <Text style={styles.hint}>Nada en la cola.</Text> : null}
             {review.map((p) => (
               <View key={`r${p.packId}`} style={styles.card}>
@@ -120,7 +121,7 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
         ) : null}
 
         <View style={styles.panel}>
-        <Text style={styles.label}>Tus mundos</Text>
+        <SectionTitle>Tus mundos</SectionTitle>
         <Text style={styles.hint}>
           {mine ? `${mine.used} de ${mine.freeLimit} mundos propios. ` : ''}
           Para subir uno nuevo (un .rpgpack), entra a la web.
@@ -145,7 +146,7 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
         </View>
 
         <View style={styles.panel}>
-        <Text style={styles.label}>Catálogo</Text>
+        <SectionTitle>Catálogo</SectionTitle>
         <Text style={styles.hint}>Mundos que otros publicaron y pasaron revisión. Añadirlos no copia nada: al crear una mesa los ves como opción.</Text>
         {catalog?.length === 0 ? (
           <Text style={styles.hint}>
@@ -227,7 +228,6 @@ const styles = StyleSheet.create({
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -6, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6 },
   linkInline: { color: theme.colors.nebula, textDecorationLine: 'underline' },
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
-  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   panel: { gap: 10, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: 'rgba(15, 18, 30, 0.9)' },
   hint: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },

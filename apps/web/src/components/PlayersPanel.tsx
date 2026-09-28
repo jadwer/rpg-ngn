@@ -3,6 +3,7 @@
 import { SEAT_LABELS, type Seat } from '@rpg-ngn/ui-logic'
 import type { ReactNode } from 'react'
 import { Drawer } from './Drawer'
+import { Panel } from './Panel'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -30,6 +31,8 @@ interface Props {
 export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTogglePresence, onPresence, invite, onClose }: Props) {
   return (
     <Drawer title="Jugadores" onClose={onClose} className="seats-panel">
+      <div className="hojas">
+      <Panel title="En la mesa">
       <ul className="seats">
         {seats.map((seat) => {
           const away = seat.state === 'away'
@@ -61,12 +64,9 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
           )
         })}
       </ul>
-      {invite ? (
-        <div className="invitar stack">
-          <div className="label">Invitar</div>
-          {invite}
-        </div>
-      ) : null}
+      </Panel>
+      {invite}
+      </div>
     </Drawer>
   )
 }

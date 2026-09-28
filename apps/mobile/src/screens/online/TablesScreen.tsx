@@ -3,11 +3,10 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTopInset } from '../../hooks/useTopInset'
 import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { LogoHorizontal } from '../../components/Brand'
-import { FriendsPanel } from '../../components/FriendsPanel'
 import { Icon, ICON } from '../../components/Icon'
 import { JoinByLink } from '../../components/JoinByLink'
 import { Portrait } from '../../components/Portrait'
@@ -37,7 +36,6 @@ interface Props {
   /** Tocar la inicial abre el perfil (nombre, contraseña, creditos). */
   onProfile: () => void
   onTab: (tab: BottomTab) => void
-  onUnauthorized: () => void
 }
 
 /**
@@ -46,8 +44,8 @@ interface Props {
  * filtros con conteo, orden por ultima actividad y tarjetas con la portada
  * del mundo y quien juega. Al pie, amigos y la barra inferior.
  */
-export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, remoteCharacters = {}, onOpen, onCreate, onRefresh, onProfile, onTab, onUnauthorized }: Props) {
-  const insets = useSafeAreaInsets()
+export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, remoteCharacters = {}, onOpen, onCreate, onRefresh, onProfile, onTab }: Props) {
+  const topInset = useTopInset()
   const { width } = useWindowDimensions()
   const wide = width >= ANCHO_TABLET
   const [filter, setFilter] = useState<TableFilter>('todas')
@@ -67,7 +65,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.header, { paddingTop: topInset + 8 }]}>
         <LogoHorizontal height={28} color={theme.colors.ink} />
         <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel="Tu cuenta" style={styles.avatar}>
           <Text style={styles.avatarText}>{(user.name.trim()[0] ?? '?').toUpperCase()}</Text>
@@ -199,9 +197,6 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
             )
           })}
 
-          <View style={styles.friends}>
-            <FriendsPanel client={client} meId={user.id} onUnauthorized={onUnauthorized} />
-          </View>
         </View>
       </ScrollView>
 
@@ -273,5 +268,4 @@ const styles = StyleSheet.create({
   dots: { width: 44, minHeight: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 10, borderWidth: 1, borderColor: theme.colors.border },
   optionsBox: { paddingHorizontal: 12, paddingBottom: 12 },
   warn: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger, paddingHorizontal: 12, paddingBottom: 10 },
-  friends: { marginTop: 14 },
 })

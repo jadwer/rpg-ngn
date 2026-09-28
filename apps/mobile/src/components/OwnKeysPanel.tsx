@@ -3,6 +3,7 @@ import { keyConsole, ownKeyLabel, ownKeyProblem, ownKeyStatus, removeOwnKeyWarni
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
+import { SectionTitle } from './Panel'
 import { Button } from './Button'
 import { Field } from './Field'
 
@@ -81,7 +82,7 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Tu propia clave de IA</Text>
+      <SectionTitle>Tu propia clave de IA</SectionTitle>
       <Text style={styles.hint}>Si pones tu clave, tus mesas narran con ella y no gastan del cupo gratuito: le pagas los tokens directamente al proveedor. Se guarda cifrada y no vuelve a mostrarse.</Text>
 
       {keys.map((key) => (
@@ -138,7 +139,6 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
-  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   row: { gap: 8, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingTop: 12 },
   provider: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.ink },

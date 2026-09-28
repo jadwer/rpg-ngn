@@ -4,6 +4,7 @@ import { Share, StyleSheet, Text, View } from 'react-native'
 import { webOriginOf } from '../online/server-url'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { Panel } from './Panel'
 
 interface Props {
   client: ApiClient
@@ -71,9 +72,7 @@ export function InviteLink({ client, tableId, tableName }: Props) {
   }
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Invitar con un enlace</Text>
-
+    <Panel title="Invitar con un enlace">
       {enlace ? (
         <>
           <Text style={styles.hint}>Mándaselo por donde quieras. Quien lo abra entra a la mesa y elige personaje.</Text>
@@ -106,13 +105,11 @@ export function InviteLink({ client, tableId, tableName }: Props) {
       )}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
-    </View>
+    </Panel>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10, marginBottom: 14 },
-  title: { fontFamily: theme.fonts.serifSemiBold, fontSize: 15, color: theme.colors.ink, letterSpacing: 0.2 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, flexShrink: 1 },
   enlace: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, padding: 10 },
   row: { flexDirection: 'row', gap: 10, alignItems: 'center', flexWrap: 'wrap' },

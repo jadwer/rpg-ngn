@@ -14,6 +14,7 @@ import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
 import { ChroniclePanel } from './ChroniclePanel'
 import { Drawer } from './Drawer'
+import { Panel } from './Panel'
 import { GameBar, type GamePanel } from './GameBar'
 import { HostPanel } from './HostPanel'
 import { InviteLink } from './InviteLink'
@@ -756,7 +757,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 <>
                   {/* El enlace primero: es la via rapida y la que no pide amistad. */}
                   <InviteLink client={client} tableId={table.id} />
-                  <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                  <Panel labelledBy="Invitar por correo">
+                    <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                  </Panel>
                 </>
               ) : undefined
             }
@@ -770,10 +773,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         {panel === 'more' && !screen ? (
           <Drawer title="Lectura" onClose={() => setPanel(null)} className="more-drawer">
-            <div className="stack">
-              <div className="label" style={{ marginTop: 0 }}>
-                Vista
-              </div>
+            <div className="hojas">
+              <Panel title="Vista">
               <div className="segmented" role="group" aria-label="Vista" style={{ alignSelf: 'flex-start' }}>
                 <button type="button" aria-pressed={mode === 'narrative'} onClick={() => setMode('narrative')}>
                   Narrativa
@@ -782,7 +783,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                   Diálogo
                 </button>
               </div>
-              <div className="label">Voz</div>
+              </Panel>
+              <Panel title="Voz">
               <TtsBar tts={tts} />
               {showVoiceNotice ? (
                 <p className="hint">
@@ -799,9 +801,11 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                   </button>
                 </p>
               ) : null}
-              <div className="label">Compartir la historia</div>
+              </Panel>
+              <Panel title="Compartir la historia">
               <ChroniclePanel client={client} tableId={table.id} />
-              <div className="label">Pantalla</div>
+              </Panel>
+              <Panel title="Pantalla">
               <div className="row">
                 <button
                   type="button"
@@ -815,6 +819,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 </button>
                 <span className="hint">Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).</span>
               </div>
+              </Panel>
             </div>
           </Drawer>
         ) : null}

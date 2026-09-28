@@ -1,14 +1,16 @@
 'use client'
 
 import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { packCharacters, packOptionLabel, packOriginText, packSummaryText, premisePlaceholder, presetOptionLabel, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
 import { InvitePanel } from '../../../components/InvitePanel'
+import { Panel } from '../../../components/Panel'
 import { RemoteCharacterPicker } from '../../../components/RemoteCharacterPicker'
 import { RequireSession } from '../../../components/RequireSession'
 import { AppShell } from '../../../components/shell/AppShell'
+import { WorldOption } from '../../../components/WorldOption'
 import { PACK_ID, RULESET_ID } from '../../../lib/pack'
 import { usePack } from '../../../lib/usePack'
 import type { StoredUser } from '../../../lib/storage'
@@ -139,9 +141,11 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     return (
       <div className="page en-shell">
         <h1 className="pagina-titulo">{created.name}</h1>
-        <div className="card stack">
+        <div className="hojas">
           <p className="hint">La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</p>
-          <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack?.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={unauthorized} />
+          <Panel labelledBy="Invitar">
+            <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack?.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={unauthorized} />
+          </Panel>
           <div className="row" style={{ marginTop: 8 }}>
             <Link href={`/mesas/${created.id}`} className="btn primary">
               Ir a la mesa
@@ -156,28 +160,25 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     <div className="page en-shell">
       <h1 className="pagina-titulo">Nueva mesa</h1>
 
-      <form className="card stack" onSubmit={(e) => void submit(e)}>
-        <label className="field">
-          <span>Nombre de la mesa</span>
-          <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder={tableNamePlaceholder(option)} maxLength={120} required autoFocus />
-        </label>
+      <form className="hojas nueva-mesa" onSubmit={(e) => void submit(e)}>
+        <Panel title="La mesa">
+          <label className="field">
+            <span>Nombre</span>
+            <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder={tableNamePlaceholder(option)} maxLength={120} required autoFocus />
+          </label>
+        </Panel>
 
-        <label className="field">
-          <span>Qué van a jugar</span>
-          <select className="select" name="pack" value={packId} onChange={(e) => setPackId(e.target.value)} disabled={packs.length < 2}>
-            {packs.length === 0 ? <option value="">Cargando…</option> : null}
+        <Panel title="Qué van a jugar">
+          <div className="mundos-opciones" role="radiogroup" aria-label="Qué van a jugar">
+            {packs.length === 0 ? <p className="hint">Cargando…</p> : null}
             {packs.map((p) => (
-              <option key={`${p.id}@${p.version}`} value={p.id}>
-                {packOptionLabel(p)}
-                {packOriginText(p) ? `, ${packOriginText(p)}` : ''}
-              </option>
+              <WorldOption key={`${p.id}@${p.version}`} world={p} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
             ))}
-          </select>
-          {packSummaryText(option) ? <span className="hint">{packSummaryText(option)}</span> : null}
-        </label>
+          </div>
+          {option?.tagline ? <p className="premise">{option.tagline}</p> : packSummaryText(option) ? <span className="hint">{packSummaryText(option)}</span> : null}
+        </Panel>
 
-        <div className="field">
-          <span>Tu personaje</span>
+        <Panel title="Tu personaje">
           {packError ? <div className="error">{packError}</div> : null}
           {!bundled && option ? (
             remoteCharacters.length > 0 ? (
@@ -190,28 +191,32 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           ) : (
             <p className="hint">Cargando el pack...</p>
           )}
-        </div>
+        </Panel>
 
         {presets.length > 0 ? (
-          <label className="field">
-            <span>Director de juego</span>
-            <select className="select" name="dm" value={preset} onChange={(e) => setPreset(e.target.value)}>
-              {presets.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {presetOptionLabel(p, ownKeys.includes(p.name))}
-                </option>
-              ))}
-            </select>
-            <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-              Se puede cambiar y probar después desde el mando del anfitrión, pestaña DM.
-            </span>
-          </label>
+          <Panel title="Director de juego">
+            <div className="mundos-opciones" role="radiogroup" aria-label="Director de juego">
+              {presets.map((p) => {
+                const parts = presetOptionParts(p, ownKeys.includes(p.name))
+                return (
+                  <button key={p.name} type="button" role="radio" aria-checked={preset === p.name} className="mundo-opcion opcion-fila" onClick={() => setPreset(p.name)}>
+                    <span className="texto">
+                      <span className="titulo">{parts.title}</span>
+                      {parts.detail ? <span className="sub">{parts.detail}</span> : null}
+                    </span>
+                    <span className="punto" aria-hidden />
+                  </button>
+                )
+              })}
+            </div>
+            <span className="hint">Se puede cambiar y probar después desde el mando del anfitrión.</span>
+          </Panel>
         ) : null}
 
-        <label className="field">
-          <span>Premisa de la mesa (opcional)</span>
-          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={premisePlaceholder(option)} rows={4} maxLength={2000} />
-        </label>
+        <Panel title="Premisa">
+          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={premisePlaceholder(option)} rows={4} maxLength={2000} aria-label="Premisa de la mesa" />
+          <span className="hint">Opcional: el director de juego la usa como punto de partida.</span>
+        </Panel>
 
         {error ? <div className="error">{error}</div> : null}
 

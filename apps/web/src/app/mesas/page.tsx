@@ -5,7 +5,6 @@ import { characterNameFrom, filterCounts, filterLabel, filterTables, inviteToken
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { FriendsPanel } from '../../components/FriendsPanel'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
 import { RetireTable } from '../../components/RetireTable'
@@ -154,9 +153,9 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
 
       {error ? <div className="error">{error}</div> : null}
       {pendingFriends > 0 ? (
-        <a href="#amigos" className="notice" style={{ display: 'block', marginBottom: 14 }}>
-          {pendingFriends === 1 ? 'Tienes una solicitud de amistad esperando. Acéptala abajo, en Amigos.' : `Tienes ${pendingFriends} solicitudes de amistad esperando. Acéptalas abajo, en Amigos.`}
-        </a>
+        <Link href="/comunidad" className="notice" style={{ display: 'block', marginBottom: 14 }}>
+          {pendingFriends === 1 ? 'Tienes una solicitud de amistad esperando. Acéptala en Comunidad.' : `Tienes ${pendingFriends} solicitudes de amistad esperando. Acéptalas en Comunidad.`}
+        </Link>
       ) : null}
 
       <div className="mesas-filtros" role="tablist" aria-label="Filtrar mesas">
@@ -245,9 +244,6 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
         })}
       </div>
 
-      <div id="amigos" style={{ marginTop: 28 }}>
-        <FriendsPanel client={client} meId={user.id} onUnauthorized={unauthorized} />
-      </div>
     </div>
   )
 }

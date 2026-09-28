@@ -1,0 +1,198 @@
+/* Hojas de la mesa y Nueva mesa (27-09): la textura de fondo, secciones en */
+/* superficie translucida y titulos en Cinzel dorado, como en la app.        */
+
+.aside {
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0) 240px),
+    linear-gradient(180deg, var(--bg) 45%, rgba(11, 15, 20, 0) 75%),
+    url('/branding/textura-hoja.webp') left bottom / 100% auto no-repeat,
+    var(--bg);
+}
+
+.aside .head {
+  background: rgba(11, 15, 20, 0.88);
+}
+
+.aside .head h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+}
+
+.hoja-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.09), rgba(124, 58, 237, 0) 72px),
+    rgba(18, 24, 38, 0.86);
+}
+
+.hoja-panel + .hoja-panel,
+.hojas > * + * {
+  margin-top: 14px;
+}
+
+.hoja-titulo,
+.hoja-panel .label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Lo anidado en una seccion va un tono mas oscuro: nada de caja sobre caja igual. */
+.hoja-panel .card,
+.hoja-panel .radio-row,
+.hoja-panel input,
+.hoja-panel textarea,
+.hoja-panel select {
+  background: rgba(11, 15, 20, 0.55);
+}
+
+.hoja-panel .card {
+  margin: 0;
+}
+
+/* Peligro es rojo en la paleta (Retirar el enlace, borrar la cuenta), no violeta. */
+.btn.danger {
+  border-color: rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+}
+
+.btn.danger:hover,
+.btn.danger:focus-visible {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+}
+
+/* Retratos de personas con el anillo dorado de los avatares de Mesas. */
+.hoja-panel .seat .portrait,
+.party-grid .portrait {
+  border: 2px solid var(--gold);
+}
+
+.hoja-panel .seat .portrait {
+  border-radius: 50%;
+}
+
+/* Elegir mundo al crear la mesa, con su portada. */
+.mundo-opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 14px 0 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(11, 15, 20, 0.55);
+  color: var(--ink);
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mundo-opcion[aria-checked='true'] {
+  border-color: var(--accent-bright);
+  background: rgba(124, 58, 237, 0.14);
+}
+
+.mundo-opcion .portada {
+  flex: none;
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2) center / cover no-repeat;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--ink-faint);
+}
+
+.mundo-opcion .texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 0;
+}
+
+.mundo-opcion .nombre {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.mundo-opcion .sub {
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+}
+
+.mundo-opcion .punto {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-faint);
+  display: grid;
+  place-items: center;
+}
+
+.mundo-opcion[aria-checked='true'] .punto {
+  border-color: var(--accent-bright);
+}
+
+.mundo-opcion[aria-checked='true'] .punto::after {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+}
+
+.mundos-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opcion-sub {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+
+/* El director de juego como fila de opcion: nombre arriba, quien paga y modelo abajo. */
+.mundo-opcion.opcion-fila {
+  padding: 10px 14px;
+}
+
+.mundo-opcion.opcion-fila .texto {
+  padding: 0;
+}
+
+.mundo-opcion.opcion-fila .titulo {
+  font-size: 1rem;
+}
+
+.nueva-mesa .row {
+  margin-top: 14px;
+}
+
+.pagina-sub {
+  margin: -6px 0 18px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.party-grid .portrait.muted {
+  border-color: var(--border);
+}

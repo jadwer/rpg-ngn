@@ -1,10 +1,10 @@
 import { PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, readingLanguageLabel } from '@rpg-ngn/ui-logic'
-import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { Tts } from '../hooks/useTts'
 import { voiceLabel, type VoiceInfo } from '../speech/voices'
 import { theme } from '../theme'
 import { Button } from './Button'
-import { SheetHeader } from './SheetHeader'
+import { SheetModal } from './SheetModal'
 
 interface Props {
   visible: boolean
@@ -26,49 +26,43 @@ export function VoicePicker({ visible, tts, onClose }: Props) {
   const language = readingLanguageLabel(settings.lang)
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={onClose}>
-      {/* Sin la barra de estado, que tapaba la cabecera (26-09). */}
-      <StatusBar hidden />
-      <View style={styles.modal}>
-        <SheetHeader title="Voz" onClose={onClose} />
+    <SheetModal visible={visible} title="Voz" onClose={onClose}>
+      <ScrollView contentContainerStyle={styles.body}>
+        <Text style={styles.label}>Idioma de lectura</Text>
+        <Text style={styles.hint}>Filtra las voces del teléfono. El DM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.</Text>
+        <View style={styles.chips}>
+          {READING_LANGUAGES.map((l) => {
+            const selected = l.code === settings.lang
+            return (
+              <Pressable key={l.code} onPress={() => tts.setLang(l.code)} style={[styles.chip, selected && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected }}>
+                <Text style={[styles.chipText, selected && styles.chipTextOn]}>{l.label}</Text>
+              </Pressable>
+            )
+          })}
+        </View>
 
-        <ScrollView contentContainerStyle={styles.body}>
-          <Text style={styles.label}>Idioma de lectura</Text>
-          <Text style={styles.hint}>Filtra las voces del teléfono. El DM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.</Text>
-          <View style={styles.chips}>
-            {READING_LANGUAGES.map((l) => {
-              const selected = l.code === settings.lang
-              return (
-                <Pressable key={l.code} onPress={() => tts.setLang(l.code)} style={[styles.chip, selected && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected }}>
-                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>{l.label}</Text>
-                </Pressable>
-              )
-            })}
-          </View>
+        <Text style={styles.label}>Voz del narrador</Text>
+        <Text style={styles.hint}>Las voces son las que trae el teléfono. Ninguna dice si es de hombre o de mujer: elige de oído.</Text>
 
-          <Text style={styles.label}>Voz del narrador</Text>
-          <Text style={styles.hint}>Las voces son las que trae el teléfono. Ninguna dice si es de hombre o de mujer: elige de oído.</Text>
+        <VoiceRow label={`La voz del sistema para ${language.toLowerCase()}`} sub="Sin elegir; el teléfono decide" selected={selectedId === null} onSelect={() => tts.setVoiceId(null)} onPreview={() => tts.preview(null)} />
+        {voices === null ? <Text style={styles.hint}>El teléfono no ha contestado qué voces tiene.</Text> : null}
+        {voices?.length === 0 ? <Text style={styles.warn}>{`No hay voces en ${language.toLowerCase()} instaladas. En Android: Ajustes, Texto a voz, Instalar datos de voz. En iOS: Accesibilidad, Contenido leído, Voces.`}</Text> : null}
+        {voices?.map((voice) => (
+          <VoiceRow key={voice.id} label={voiceLabel(voice)} sub={voice.enhanced ? 'Mejorada: suena más natural' : null} selected={selectedId === voice.id} onSelect={() => tts.setVoiceId(voice.id)} onPreview={() => tts.preview(voice)} />
+        ))}
 
-          <VoiceRow label={`La voz del sistema para ${language.toLowerCase()}`} sub="Sin elegir; el teléfono decide" selected={selectedId === null} onSelect={() => tts.setVoiceId(null)} onPreview={() => tts.preview(null)} />
-          {voices === null ? <Text style={styles.hint}>El teléfono no ha contestado qué voces tiene.</Text> : null}
-          {voices?.length === 0 ? <Text style={styles.warn}>{`No hay voces en ${language.toLowerCase()} instaladas. En Android: Ajustes, Texto a voz, Instalar datos de voz. En iOS: Accesibilidad, Contenido leído, Voces.`}</Text> : null}
-          {voices?.map((voice) => (
-            <VoiceRow key={voice.id} label={voiceLabel(voice)} sub={voice.enhanced ? 'Mejorada: suena más natural' : null} selected={selectedId === voice.id} onSelect={() => tts.setVoiceId(voice.id)} onPreview={() => tts.preview(voice)} />
-          ))}
+        <Text style={styles.label}>Velocidad</Text>
+        <Stepper value={settings.rate} min={RATE_MIN} max={RATE_MAX} step={RATE_STEP} format={(v) => `${v.toFixed(2)}x`} onChange={tts.setRate} />
 
-          <Text style={styles.label}>Velocidad</Text>
-          <Stepper value={settings.rate} min={RATE_MIN} max={RATE_MAX} step={RATE_STEP} format={(v) => `${v.toFixed(2)}x`} onChange={tts.setRate} />
+        <Text style={styles.label}>Tono del narrador</Text>
+        <Text style={styles.hint}>Más bajo suena más grave. Los personajes de la party hablan con el tono normal y cada NPC lleva el suyo.</Text>
+        <Stepper value={settings.narratorPitch} min={PITCH_MIN} max={PITCH_MAX} step={PITCH_STEP} format={(v) => v.toFixed(2)} onChange={tts.setNarratorPitch} />
 
-          <Text style={styles.label}>Tono del narrador</Text>
-          <Text style={styles.hint}>Más bajo suena más grave. Los personajes de la party hablan con el tono normal y cada NPC lleva el suyo.</Text>
-          <Stepper value={settings.narratorPitch} min={PITCH_MIN} max={PITCH_MAX} step={PITCH_STEP} format={(v) => v.toFixed(2)} onChange={tts.setNarratorPitch} />
-
-          <View style={styles.actions}>
-            <Button label="Oír con estos ajustes" onPress={() => tts.preview(tts.voice)} />
-          </View>
-        </ScrollView>
-      </View>
-    </Modal>
+        <View style={styles.actions}>
+          <Button label="Oír con estos ajustes" onPress={() => tts.preview(tts.voice)} />
+        </View>
+      </ScrollView>
+    </SheetModal>
   )
 }
 
@@ -102,7 +96,6 @@ function Stepper({ value, min, max, step, format, onChange }: { value: number; m
 export type { VoiceInfo }
 
 const styles = StyleSheet.create({
-  modal: { flex: 1, backgroundColor: theme.colors.bg },
   body: { padding: 16, paddingBottom: 40, gap: 8 },
   label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginTop: 14 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 19, color: theme.colors.inkDim },

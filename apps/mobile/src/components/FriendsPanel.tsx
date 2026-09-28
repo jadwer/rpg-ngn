@@ -88,9 +88,8 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
   const state = found ? friendshipWith(list, meId, found.id) : null
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.label}>Amigos</Text>
-      <Text style={styles.hint}>Para sentarte en una mesa, el anfitrión y tú tienen que ser amigos. Busca su correo y mándale la solicitud, o acepta la que te mandó.</Text>
+    <View style={styles.wrap}>
+      <Text style={styles.hint}>Con tus amigos, invitarlos a una mesa es elegirlos de la lista. Para sentar a alguien sin ser amigos, basta el enlace de invitación de la mesa.</Text>
 
       {pending.map((f) => (
         <View key={f.id} style={styles.row}>
@@ -117,18 +116,32 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
 
       {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
 
-      {friends.length > 0 ? <Text style={styles.friends}>{`Tus amigos: ${friends.map((u) => u.name).join(', ')}`}</Text> : friendships !== null && pending.length === 0 ? <Text style={styles.hint}>Todavía no tienes amigos aquí.</Text> : null}
+      {friends.length > 0 ? (
+        <View style={styles.list}>
+          {friends.map((u) => (
+            <View key={u.id} style={styles.friend}>
+              <View style={styles.initial}>
+                <Text style={styles.initialText}>{(u.name.trim()[0] ?? '?').toUpperCase()}</Text>
+              </View>
+              <Text style={styles.friendName} numberOfLines={1}>
+                {u.name}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : friendships !== null && pending.length === 0 ? (
+        <Text style={styles.hint}>Todavía no tienes amigos aquí.</Text>
+      ) : null}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 8 },
-  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
+  wrap: { gap: 10 },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rowText: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
-  input: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
+  input: { flex: 1, fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.bg, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8 },
   found: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, padding: 12, gap: 6 },
   foundName: { fontFamily: theme.fonts.serifSemiBold, fontSize: 16, color: theme.colors.ink },
   foundEmail: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
@@ -136,5 +149,9 @@ const styles = StyleSheet.create({
   notice: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, borderWidth: 1, borderRadius: 8, padding: 8 },
   ok: { color: '#bbf7d0', borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: 'rgba(34, 197, 94, 0.12)' },
   error: { color: theme.colors.danger, borderColor: theme.colors.accentBright, backgroundColor: theme.colors.warning },
-  friends: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
+  list: { gap: 2, marginTop: 4 },
+  friend: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, borderTopWidth: 1, borderTopColor: theme.colors.borderSoft },
+  initial: { width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: theme.colors.gold, backgroundColor: theme.colors.panel3, alignItems: 'center', justifyContent: 'center' },
+  initialText: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink },
+  friendName: { flex: 1, fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.ink },
 })

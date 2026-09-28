@@ -60,13 +60,13 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
 
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  card: { width: '31%', flexGrow: 1, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 8, alignItems: 'center', gap: 2 },
+  card: { width: '31%', flexGrow: 1, backgroundColor: 'rgba(11, 15, 20, 0.55)', borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 8, alignItems: 'center', gap: 2 },
   selected: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
   taken: { opacity: 0.6 },
   pressed: { opacity: 0.8 },
   none: { width: 72, height: 72, borderRadius: 14, backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, alignItems: 'center', justifyContent: 'center' },
   noneMark: { fontFamily: theme.fonts.uiSemiBold, fontSize: 30, color: theme.colors.inkDim },
-  name: { fontFamily: theme.fonts.serifSemiBold, fontSize: 14, color: theme.colors.ink, marginTop: 4, textAlign: 'center' },
+  name: { fontFamily: theme.fonts.display, fontSize: 13, color: theme.colors.ink, marginTop: 4, textAlign: 'center' },
   nameSelected: { color: '#ffffff' },
   sub: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim, textAlign: 'center' },
   tag: { fontFamily: theme.fonts.uiMedium, fontSize: 10, color: theme.colors.inkFaint, textAlign: 'center', letterSpacing: 0.2 },

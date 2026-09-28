@@ -14,7 +14,7 @@ const TOP: readonly NavItem[] = [
   { href: '/', label: 'Historias', icon: 'inicio' },
   { href: '/mundos/explorar', label: 'Mundos', icon: 'mundos', match: ['/mundos'] },
   { href: '/mesas', label: 'Mesas', icon: 'mesas' },
-  { href: '/pronto/comunidad', label: 'Comunidad', icon: 'comunidad' },
+  { href: '/comunidad', label: 'Comunidad', icon: 'comunidad' },
 ]
 
 /** En el telefono, abajo: las cuatro de siempre al alcance del pulgar. */
@@ -22,7 +22,7 @@ const BOTTOM: readonly NavItem[] = [
   { href: '/', label: 'Inicio', icon: 'inicio' },
   { href: '/mundos/explorar', label: 'Mundos', icon: 'mundos', match: ['/mundos'] },
   { href: '/mesas', label: 'Mesas', icon: 'mesas' },
-  { href: '/pronto/comunidad', label: 'Comunidad', icon: 'comunidad' },
+  { href: '/comunidad', label: 'Comunidad', icon: 'comunidad' },
 ]
 
 interface Props {

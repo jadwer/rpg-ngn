@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ImageBackground, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTopInset } from '../../hooks/useTopInset'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
@@ -36,13 +37,14 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
   const [password, setPassword] = useState('')
   const canSubmit = serverUrl.trim().length > 0 && email.trim().length > 0 && password.length > 0 && !busy
   const insets = useSafeAreaInsets()
+  const topInset = useTopInset()
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <ImageBackground source={HERO} style={StyleSheet.absoluteFill} resizeMode="cover">
         <View style={styles.veil} />
       </ImageBackground>
-      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+      <View style={[styles.header, { paddingTop: topInset + 6 }]}>
         <Pressable onPress={onBack} hitSlop={10}>
           <Text style={styles.link}>‹ Inicio</Text>
         </Pressable>

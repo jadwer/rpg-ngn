@@ -31,9 +31,9 @@ export function SheetHeader({ title, onClose, back }: { title: string; onClose?:
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft, backgroundColor: theme.colors.bg },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft, backgroundColor: 'rgba(11, 15, 20, 0.88)' },
   side: { width: 88 },
   right: { alignItems: 'flex-end' },
-  title: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.serifSemiBold, fontSize: 18, color: theme.colors.ink, letterSpacing: 0.2 },
+  title: { flex: 1, textAlign: 'center', fontFamily: theme.fonts.display, fontSize: 19, color: theme.colors.ink, letterSpacing: 1 },
   link: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.nebula },
 })

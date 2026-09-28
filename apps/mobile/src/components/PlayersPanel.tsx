@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { Icon, ICON } from './Icon'
+import { Panel } from './Panel'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -37,60 +38,56 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
   const withCharacter = seats.filter((s) => s.characterId)
   const ready = withCharacter.filter((s) => s.state === 'ready').length
   return (
-    <View style={styles.wrap}>
-      {withCharacter.length > 0 ? (
-        <View style={styles.summary}>
-          <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
-          <Text style={styles.summaryText}>{`${ready}/${withCharacter.length} listos`}</Text>
-        </View>
-      ) : null}
-      {seats.map((seat, i) => {
-        const away = seat.state === 'away'
-        return (
-          <View key={seat.memberId} style={[styles.seat, i > 0 && styles.divider]}>
-            <Portrait path={null} uri={seat.characterId ? portraitOf(seat.characterId) : null} name={seat.name} size={52} muted={away} round />
-            <View style={styles.who}>
-              <View style={styles.nameRow}>
-                <Text style={styles.name} numberOfLines={1}>
-                  {seat.name}
-                </Text>
-                {seat.mine ? <Text style={styles.pill}>Tú</Text> : null}
-                {seat.role === 'host' ? <Text style={styles.pill}>Anfitrión</Text> : null}
-              </View>
-              <View style={styles.stateRow}>
-                <View style={[styles.dot, { backgroundColor: DOT[seat.state] }]} />
-                <Text style={[styles.state, seat.state === 'writing' && styles.writing, seat.state === 'ready' && styles.ready, away && styles.away]}>{SEAT_LABELS[seat.state]}</Text>
-              </View>
-              {seat.mine && ownPresent !== null ? (
-                <Pressable onPress={onTogglePresence} disabled={busy} hitSlop={6}>
-                  <Text style={styles.action}>{ownPresent ? 'Me tengo que ir' : 'He vuelto'}</Text>
-                </Pressable>
-              ) : null}
-              {!seat.mine && isHost && seat.characterId ? (
-                <Pressable onPress={() => onPresence(seat.memberId, away)} disabled={busy} hitSlop={6}>
-                  <Text style={styles.action}>{away ? 'Marcar presente' : 'Marcar ausente'}</Text>
-                </Pressable>
-              ) : null}
-            </View>
-            {seat.state === 'ready' ? <Icon d={ICON.check} size={24} color={theme.colors.success} strokeWidth={2.2} /> : null}
+    <>
+      <Panel title="En la mesa">
+        {withCharacter.length > 0 ? (
+          <View style={styles.summary}>
+            <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
+            <Text style={styles.summaryText}>{`${ready}/${withCharacter.length} listos`}</Text>
           </View>
-        )
-      })}
-      {invite ? (
-        <>
-          <Text style={styles.label}>Invitar</Text>
-          {invite}
-        </>
-      ) : null}
-    </View>
+        ) : null}
+        {seats.map((seat, i) => {
+          const away = seat.state === 'away'
+          return (
+            <View key={seat.memberId} style={[styles.seat, i > 0 && styles.divider]}>
+              <Portrait path={null} uri={seat.characterId ? portraitOf(seat.characterId) : null} name={seat.name} size={52} muted={away} round ring={!away} />
+              <View style={styles.who}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.name} numberOfLines={1}>
+                    {seat.name}
+                  </Text>
+                  {seat.mine ? <Text style={styles.pill}>Tú</Text> : null}
+                  {seat.role === 'host' ? <Text style={styles.pill}>Anfitrión</Text> : null}
+                </View>
+                <View style={styles.stateRow}>
+                  <View style={[styles.dot, { backgroundColor: DOT[seat.state] }]} />
+                  <Text style={[styles.state, seat.state === 'writing' && styles.writing, seat.state === 'ready' && styles.ready, away && styles.away]}>{SEAT_LABELS[seat.state]}</Text>
+                </View>
+                {seat.mine && ownPresent !== null ? (
+                  <Pressable onPress={onTogglePresence} disabled={busy} hitSlop={6}>
+                    <Text style={styles.action}>{ownPresent ? 'Me tengo que ir' : 'He vuelto'}</Text>
+                  </Pressable>
+                ) : null}
+                {!seat.mine && isHost && seat.characterId ? (
+                  <Pressable onPress={() => onPresence(seat.memberId, away)} disabled={busy} hitSlop={6}>
+                    <Text style={styles.action}>{away ? 'Marcar presente' : 'Marcar ausente'}</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+              {seat.state === 'ready' ? <Icon d={ICON.check} size={24} color={theme.colors.success} strokeWidth={2.2} /> : null}
+            </View>
+          )
+        })}
+      </Panel>
+      {invite}
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 2 },
   seat: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12 },
   divider: { borderTopWidth: 1, borderTopColor: theme.colors.borderSoft },
-  summary: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-end' },
+  summary: { flexDirection: 'row', alignItems: 'center', gap: 8, position: 'absolute', top: 16, right: 16 },
   summaryText: { fontFamily: theme.fonts.uiMedium, fontSize: 14, color: theme.colors.success },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   pill: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: theme.colors.inkDim, backgroundColor: theme.colors.panel3, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1, overflow: 'hidden' },
@@ -103,5 +100,4 @@ const styles = StyleSheet.create({
   stateRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   away: { color: theme.colors.inkFaint },
-  label: { marginTop: 10, fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
 })

@@ -10,6 +10,7 @@ import type { StoredUser } from '../../online/storage'
 import { Backdrop } from '../../components/Backdrop'
 import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
+import { SectionTitle } from '../../components/Panel'
 
 interface Props {
   client: ApiClient
@@ -103,7 +104,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         <Text style={styles.pageTitle}>Tu perfil</Text>
         <Text style={styles.subtitle}>Tu cuenta, tus créditos y tus claves</Text>
         <View style={styles.card}>
-          <Text style={styles.label}>Cuenta</Text>
+          <SectionTitle>Cuenta</SectionTitle>
           <Field label="Nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />
           <Field
             label="Correo"
@@ -123,7 +124,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.label}>Contraseña</Text>
+          <SectionTitle>Contraseña</SectionTitle>
           <Field label="Contraseña actual" value={current} onChangeText={setCurrent} secureTextEntry textContentType="password" />
           <Field label="Nueva contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint="Al menos 8 caracteres." />
           <Field label="Repite la nueva" value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={() => void savePassword()} />
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
   subtitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink, marginTop: -10, textShadowColor: 'rgba(0,0,0,0.8)', textShadowRadius: 6 },
   card: { backgroundColor: 'rgba(17, 22, 34, 0.9)', borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
-  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   block: { gap: 4 },
   fieldLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   static: { fontFamily: theme.fonts.ui, fontSize: 16, color: theme.colors.inkDim },

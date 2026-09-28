@@ -2,6 +2,7 @@
 
 import type { ApiClient, TableInvite } from '@rpg-ngn/api-client'
 import { useCallback, useEffect, useState } from 'react'
+import { Panel } from './Panel'
 
 interface Props {
   client: ApiClient
@@ -70,10 +71,7 @@ export function InviteLink({ client, tableId }: Props) {
   }
 
   return (
-    <div className="card stack invitar-enlace">
-      <div className="label" style={{ marginTop: 0 }}>
-        Invitar con un enlace
-      </div>
+    <Panel title="Invitar con un enlace" className="invitar-enlace">
 
       {enlace ? (
         <>
@@ -114,6 +112,6 @@ export function InviteLink({ client, tableId }: Props) {
       )}
 
       {error ? <div className="error">{error}</div> : null}
-    </div>
+    </Panel>
   )
 }

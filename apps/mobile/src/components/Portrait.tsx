@@ -12,16 +12,18 @@ interface Props {
   muted?: boolean
   /** Circulo en vez de esquinas redondeadas (listas de jugadores del concepto). */
   round?: boolean
+  /** Anillo dorado, el de los avatares de Mesas: una persona en la mesa. */
+  ring?: boolean
 }
 
-export function Portrait({ path, uri, name, size = 48, muted = false, round = false }: Props) {
+export function Portrait({ path, uri, name, size = 48, muted = false, round = false, ring = false }: Props) {
   const source = uri ? { uri } : portraitSource(path)
   const box = { width: size, height: size, borderRadius: round ? size / 2 : Math.round(size / 5) }
   if (source) {
-    return <Image source={source} style={[styles.image, box, muted && styles.muted]} accessibilityLabel={`Retrato de ${name}`} />
+    return <Image source={source} style={[styles.image, box, ring && styles.ring, muted && styles.muted]} accessibilityLabel={`Retrato de ${name}`} />
   }
   return (
-    <View style={[styles.placeholder, box]}>
+    <View style={[styles.placeholder, box, ring && styles.ring]}>
       <Text style={[styles.initial, { fontSize: size * 0.45 }]}>{name.charAt(0)}</Text>
     </View>
   )
@@ -29,6 +31,7 @@ export function Portrait({ path, uri, name, size = 48, muted = false, round = fa
 
 const styles = StyleSheet.create({
   image: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft },
+  ring: { borderWidth: 2, borderColor: theme.colors.gold },
   muted: { opacity: 0.55 },
   placeholder: { backgroundColor: theme.colors.panel2, borderWidth: 1, borderColor: theme.colors.borderSoft, alignItems: 'center', justifyContent: 'center' },
   initial: { fontFamily: theme.fonts.uiSemiBold, color: theme.colors.accentBright },

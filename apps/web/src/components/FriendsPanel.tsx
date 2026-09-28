@@ -88,12 +88,9 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
   const state = found ? friendshipWith(list, meId, found.id) : null
 
   return (
-    <section className="card stack friends" aria-label="Amigos">
-      <div className="label" style={{ marginTop: 0 }}>
-        Amigos
-      </div>
+    <section className="stack friends" aria-label="Amigos">
       <p className="hint" style={{ margin: 0 }}>
-        Para sentarte en una mesa, el anfitrión y tú tienen que ser amigos. Busca su correo y mándale la solicitud, o acepta la que te mandó.
+        Con tus amigos, invitarlos a una mesa es elegirlos de la lista. Para sentar a alguien sin ser amigos, basta el enlace de invitación de la mesa.
       </p>
 
       {pending.length > 0 ? (

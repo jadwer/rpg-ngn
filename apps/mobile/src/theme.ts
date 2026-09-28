@@ -42,6 +42,8 @@ export const theme = {
     // Paleta de docs/22 (la misma que la web, apps/web/src/app/globals.css).
     bg: '#0b0f14',
     panel: '#121826',
+    /** `panel` translucido: tarjetas y secciones de las hojas sobre su textura (27-09). */
+    surface: 'rgba(18, 24, 38, 0.86)',
     panel2: '#161d2e',
     panel3: '#1b2336',
     border: '#252d42',

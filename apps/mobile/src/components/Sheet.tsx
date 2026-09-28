@@ -30,7 +30,7 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <View style={styles.hero}>
-        <Portrait path={sheet.portrait} uri={portraitUri} name={sheet.name} size={104} />
+        <Portrait path={sheet.portrait} uri={portraitUri} name={sheet.name} size={104} ring />
         <View style={styles.who}>
           <Text style={styles.name}>{sheet.name}</Text>
           <Text style={styles.sub}>{`${sheet.race} · ${sheet.class}`}</Text>
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   wrap: { padding: 16, paddingBottom: 40, gap: 14 },
   hero: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   who: { flex: 1, gap: 4 },
-  name: { fontFamily: theme.fonts.serifSemiBold, fontSize: 24, color: theme.colors.ink },
+  name: { fontFamily: theme.fonts.display, fontSize: 22, color: theme.colors.ink, letterSpacing: 0.5 },
   sub: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim },
   barHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 6 },
   barLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 13, color: theme.colors.inkDim },
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   minorText: { fontFamily: theme.fonts.uiMedium, fontSize: 12, color: theme.colors.nebula },
   quote: { fontFamily: theme.fonts.serifItalic, fontSize: 16, lineHeight: 22, color: theme.colors.ink, borderLeftWidth: 3, borderLeftColor: theme.colors.accentBright, paddingLeft: 10 },
   veil: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim, backgroundColor: theme.colors.panel2, borderRadius: 12, padding: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', borderRadius: 14, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel, overflow: 'hidden' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', borderRadius: 14, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.surface, overflow: 'hidden' },
   cell: { width: '33.333%', alignItems: 'center', paddingVertical: 10 },
   cellLeft: { borderLeftWidth: 1, borderLeftColor: theme.colors.borderSoft },
   cellTop: { borderTopWidth: 1, borderTopColor: theme.colors.borderSoft },
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
   cellValue: { fontFamily: theme.fonts.uiSemiBold, fontSize: 20, color: theme.colors.ink },
   cellMod: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.nebula },
   tabs: { flexDirection: 'row', gap: 8 },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
+  tab: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
   tabOn: { borderColor: theme.colors.accentBright, backgroundColor: 'rgba(124, 58, 237, 0.22)' },
   tabText: { fontFamily: theme.fonts.uiMedium, fontSize: 14, color: theme.colors.inkDim },
   tabTextOn: { color: '#ffffff' },
   list: { gap: 10 },
-  row: { flexDirection: 'row', gap: 12, alignItems: 'center', padding: 12, borderRadius: 12, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft },
+  row: { flexDirection: 'row', gap: 12, alignItems: 'center', padding: 12, borderRadius: 12, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.borderSoft },
   rowIcon: { width: 42, height: 42, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.panel3 },
   rowText: { flex: 1, gap: 3 },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   rowMeta: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   damage: { fontFamily: theme.fonts.uiSemiBold, fontSize: 12, color: theme.colors.gold, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.4)', borderRadius: 6, paddingHorizontal: 6, overflow: 'hidden' },
   effect: { fontFamily: theme.fonts.ui, fontSize: 14, lineHeight: 20, color: theme.colors.inkDim },
-  section: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.ink, marginTop: 4 },
+  section: { fontFamily: theme.fonts.display, fontSize: 14, letterSpacing: 1.2, textTransform: 'uppercase', color: theme.colors.gold, marginTop: 6 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.ink, backgroundColor: theme.colors.panel2, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden' },
   chipDanger: { color: '#fecaca', backgroundColor: 'rgba(239, 68, 68, 0.16)' },

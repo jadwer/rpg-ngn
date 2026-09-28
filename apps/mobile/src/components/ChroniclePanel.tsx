@@ -69,6 +69,7 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
         <Button
           label="Retirar el enlace"
           small
+          danger
           busy={busy}
           onPress={() =>
             void act(async () => {

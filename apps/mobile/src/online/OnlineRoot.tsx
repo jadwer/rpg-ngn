@@ -7,7 +7,7 @@ import { ExploreScreen } from '../screens/online/ExploreScreen'
 import { ForgotPasswordScreen } from '../screens/online/ForgotPasswordScreen'
 import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { ProfileScreen } from '../screens/online/ProfileScreen'
-import { ProntoScreen } from '../screens/online/ProntoScreen'
+import { CommunityScreen } from '../screens/online/CommunityScreen'
 import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
@@ -294,7 +294,6 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
         onRefresh={() => void loadTables(session.client)}
         onProfile={() => setStage({ name: 'profile' })}
         onTab={goTab}
-        onUnauthorized={() => unauthorized()}
       />
     )
   }
@@ -304,7 +303,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
   }
 
   if (stage.name === 'pronto') {
-    return <ProntoScreen onTab={goTab} onTables={() => setStage({ name: 'tables' })} />
+    return <CommunityScreen client={session.client} user={session.user} onTab={goTab} onProfile={() => setStage({ name: 'profile' })} onUnauthorized={() => unauthorized()} />
   }
 
   if (stage.name === 'worlds') {

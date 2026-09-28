@@ -3,6 +3,7 @@ import { balanceText, buyablePacks, lowBalance, packPrice, packValue, topUpUrl }
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
+import { SectionTitle } from './Panel'
 import { Button } from './Button'
 
 interface Props {
@@ -51,7 +52,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Tus créditos</Text>
+      <SectionTitle>Tus créditos</SectionTitle>
 
       {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>Cargando…</Text>}
 
@@ -80,7 +81,6 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 10 },
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
-  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
   pack: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.ink },

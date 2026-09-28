@@ -1,8 +1,9 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
 import { DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import { theme } from '../theme'
+import { Panel } from './Panel'
 import { RadioRow } from './RadioRow'
 
 interface Props {
@@ -52,25 +53,24 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
   }
 
   return (
-    <View style={styles.block}>
-      <Text style={styles.label}>Dados</Text>
-      {DICE_MODES.map((mode) => (
-        <RadioRow key={mode} label={diceModeLabel(mode)} selected={saved === mode} onSelect={() => choose(mode)} />
-      ))}
-      <Text style={styles.hint}>{diceModeHint(saved)}</Text>
-      <Text style={[styles.label, styles.spaced]}>Ilustraciones</Text>
-      <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />
-      <RadioRow label="Solo texto" selected={!images} onSelect={() => chooseImages(false)} />
-      <Text style={styles.hint}>{sceneImagesHint(images, table.imagesPerSession)}</Text>
-      {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
-    </View>
+    <>
+      <Panel title="Dados">
+        {DICE_MODES.map((mode) => (
+          <RadioRow key={mode} label={diceModeLabel(mode)} selected={saved === mode} onSelect={() => choose(mode)} />
+        ))}
+        <Text style={styles.hint}>{diceModeHint(saved)}</Text>
+      </Panel>
+      <Panel title="Ilustraciones">
+        <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />
+        <RadioRow label="Solo texto" selected={!images} onSelect={() => chooseImages(false)} />
+        <Text style={styles.hint}>{sceneImagesHint(images, table.imagesPerSession)}</Text>
+        {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
+      </Panel>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  block: { gap: 6 },
-  spaced: { marginTop: 10 },
-  label: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   notice: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, borderWidth: 1, borderRadius: 8, padding: 8 },
   ok: { color: '#bbf7d0', borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: 'rgba(34, 197, 94, 0.12)' },

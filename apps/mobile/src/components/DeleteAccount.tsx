@@ -2,6 +2,7 @@ import type { ApiClient } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
+import { SectionTitle } from './Panel'
 import { Button } from './Button'
 import { Field } from './Field'
 
@@ -56,7 +57,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Borrar mi cuenta</Text>
+      <SectionTitle>Borrar mi cuenta</SectionTitle>
 
       {!open ? (
         <>
@@ -112,7 +113,6 @@ export function DeleteAccount({ client, onDeleted }: Props) {
 const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, padding: 14, gap: 12 },
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
-  label: { fontFamily: theme.fonts.display, fontSize: 15, letterSpacing: 1.5, textTransform: 'uppercase', color: theme.colors.gold },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, lineHeight: 18 },
   aviso: { fontFamily: theme.fonts.uiSemiBold, fontSize: 13, color: theme.colors.ink, lineHeight: 18 },
   mesa: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink, paddingLeft: 8 },

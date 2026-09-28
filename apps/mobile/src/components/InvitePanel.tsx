@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 import { CharacterPicker } from './CharacterPicker'
+import { SectionTitle } from './Panel'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -131,18 +132,25 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
   return (
     <View style={styles.wrap}>
-      {hideMembers ? null : <Text style={styles.label}>En la mesa</Text>}
+      {hideMembers ? null : <SectionTitle>En la mesa</SectionTitle>}
       {(hideMembers ? [] : table.members).map((member) => (
         <View key={member.id} style={styles.member}>
-          <Portrait path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null} uri={pack ? null : uriOf(member.characterId)} name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')} size={32} />
+          <Portrait
+            path={member.characterId ? (pack?.characters.get(member.characterId)?.portrait ?? null) : null}
+            uri={pack ? null : uriOf(member.characterId)}
+            name={member.characterId ? nameOf(member.characterId) : (member.userName ?? '?')}
+            size={32}
+          />
           <Text style={styles.memberText}>{memberLine(member, nameOf)}</Text>
-          {member.characterId ? <Button label={member.present === false ? 'Presente' : 'Ausente'} small busy={busy} onPress={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))} /> : null}
+          {member.characterId ? (
+            <Button label={member.present === false ? 'Presente' : 'Ausente'} small busy={busy} onPress={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))} />
+          ) : null}
         </View>
       ))}
 
       {pending.length > 0 ? (
         <>
-          <Text style={styles.label}>Solicitudes de amistad pendientes</Text>
+          <SectionTitle>Solicitudes de amistad</SectionTitle>
           {pending.map((f) => (
             <View key={f.id} style={styles.row}>
               <Text style={styles.rowText}>{`${f.user.name} (${f.user.email})`}</Text>
@@ -152,9 +160,21 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         </>
       ) : null}
 
-      <Text style={styles.label}>Invitar por correo</Text>
+      <SectionTitle>Invitar por correo</SectionTitle>
       <View style={styles.row}>
-        <TextInput value={email} onChangeText={setEmail} placeholder="correo@ejemplo.com" placeholderTextColor={theme.colors.inkFaint} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" editable={!busy} onSubmitEditing={() => void search()} returnKeyType="search" style={styles.input} />
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="correo@ejemplo.com"
+          placeholderTextColor={theme.colors.inkFaint}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          editable={!busy}
+          onSubmitEditing={() => void search()}
+          returnKeyType="search"
+          style={styles.input}
+        />
         <Button label="Buscar" small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
       </View>
       {friends.length > 0 ? (

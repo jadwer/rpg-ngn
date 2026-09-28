@@ -56,6 +56,17 @@ export function presetOptionLabel(preset: DmPreset, ownKey = false): string {
   return `${describePreset(preset.name)}${whose}${preset.model ? `, ${preset.model}` : ''}`
 }
 
+/**
+ * El mismo preset partido para pintarlo como opcion: el nombre arriba y, en
+ * pequeño, quien paga y el modelo. En una sola linea se leia como cadena
+ * tecnica ("Anthropic (Claude) (con tu clave, no gasta cupo), claude-sonnet-5", 27-09).
+ */
+export function presetOptionParts(preset: DmPreset, ownKey = false): { title: string; detail: string | null } {
+  const whose = ownKey ? 'Con tu clave, no gasta cupo' : preset.default ? 'El del servidor' : null
+  const detail = [whose, preset.model].filter((part): part is string => !!part).join(' · ')
+  return { title: describePreset(preset.name), detail: detail || null }
+}
+
 /** Mensaje tras guardar el proveedor de la mesa. */
 export function savedProviderText(choice: DmProviderChoice | null): string {
   if (!choice) return 'La mesa usa el DM del servidor.'

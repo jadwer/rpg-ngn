@@ -5,6 +5,7 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { DmSettingsPanel } from './DmSettingsPanel'
+import { Panel } from './Panel'
 import { TableRulesPanel } from './TableRulesPanel'
 
 interface Props {
@@ -84,8 +85,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
           </div>
 
           {tab === 'session' && !session ? (
-            <div className="stack">
-              {table.premise ? <p className="premise">{table.premise}</p> : null}
+            <Panel title="Abrir sesión">
               <div className="row">
                 {opciones.length > 0 ? (
                   <label className="field" style={{ minWidth: 260 }}>
@@ -115,12 +115,11 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                 </button>
                 <span className="hint">{elegida ? elegida.summary : 'Abre el turno 1 e interpela a la party.'}</span>
               </div>
-            </div>
+            </Panel>
           ) : null}
 
           {tab === 'session' && session ? (
-            <div className="stack">
-              {table.premise ? <p className="premise">{table.premise}</p> : null}
+            <Panel title={`Sesión ${session.code}`}>
               <label className="field">
                 <span>Cliffhanger para la próxima</span>
                 <input className="input" name="cliffhanger" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder="Opcional: con qué se queda la mesa" />
@@ -149,14 +148,23 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                   </>
                 )}
               </div>
-            </div>
+            </Panel>
+          ) : null}
+
+          {tab === 'session' && table.premise ? (
+            <Panel title="Premisa">
+              <p className="premise">{table.premise}</p>
+            </Panel>
           ) : null}
 
           {tab === 'settings' ? (
-            <div className="stack">
-              <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-              <div className="label">Director de juego</div>
-              <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <div className="hojas">
+              <Panel title="Reglas de la mesa">
+                <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+              </Panel>
+              <Panel title="Director de juego">
+                <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+              </Panel>
             </div>
           ) : null}
         </div>

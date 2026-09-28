@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTopInset } from '../hooks/useTopInset'
 import { theme } from '../theme'
 import { LogoHorizontal } from './Brand'
 
@@ -10,9 +10,9 @@ import { LogoHorizontal } from './Brand'
  * derecha. Sustituye a la barra lisa con el titulo pequeño (26-09).
  */
 export function PageHeader({ back, onBack, right }: { back: string; onBack: () => void; right?: ReactNode }) {
-  const insets = useSafeAreaInsets()
+  const topInset = useTopInset()
   return (
-    <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+    <View style={[styles.header, { paddingTop: topInset + 8 }]}>
       <Pressable onPress={onBack} hitSlop={10} style={styles.side} accessibilityRole="button">
         <Text style={styles.link} numberOfLines={1}>{`‹ ${back}`}</Text>
       </Pressable>

@@ -557,6 +557,25 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
   migracion masiva.
 - [x] **D7.** Comentario de `theme.ts` ("Cinzel solo para la marca") desfasado.
 
+**Despues del VAM, 27-09 (lo que salio de la sesion de Gabino con sus amigos):**
+- [x] **Las hojas de la mesa con la semantica del tablero** (Lectura, Anfitrion,
+  Jugadores, la party, el mapa y la voz, en web y app): textura de fondo
+  sacada de `img/assets/backgrounds/backgrounds.png`, secciones en superficie
+  translucida con titulo en Cinzel dorado (una sola pieza: `Panel` y
+  `SectionTitle`; en la app habia cinco copias del estilo), cabeceras en
+  Cinzel, anillo dorado en los retratos de personas y el rojo de peligro de
+  la paleta en retirar y borrar (la web lo tenia violeta). En la app, un solo
+  armazon de hoja (`SheetModal`) en vez de cuatro modales armados a mano.
+- [x] **Nueva mesa en el marco nuevo**: mundos como tarjetas con portada y el
+  director de juego legible (`presetOptionParts`: nombre arriba, quien paga y
+  modelo abajo).
+- [x] **Amigos con lugar propio**: la pestaña Comunidad (app) y `/comunidad`
+  (web), con el texto corregido (ya no hace falta ser amigos para sentarse:
+  basta el enlace).
+- [x] **Hueco negro arriba en la app**: Android reporta el alto de la barra de
+  estado aunque este oculta; `useTopInset` lo resuelve en un solo sitio.
+- [x] **Ocultar** del cuadro de respuesta en dorado y mas grande.
+
 **P3, deuda planificada (no ahora):**
 - [ ] **A4.** Catalogo comercial generico (`CatalogWorld`, estados, featured) a
   un `atomo/catalog` cuando haya un segundo producto que lo use.

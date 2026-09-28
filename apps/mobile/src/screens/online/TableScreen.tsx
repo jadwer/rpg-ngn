@@ -11,6 +11,7 @@ import { ChroniclePanel } from '../../components/ChroniclePanel'
 import { GameBar, type GamePanel } from '../../components/GameBar'
 import { Icon, ICON } from '../../components/Icon'
 import { GameSheet } from '../../components/GameSheet'
+import { Panel } from '../../components/Panel'
 import { InviteLink } from '../../components/InviteLink'
 import { InvitePanel } from '../../components/InvitePanel'
 import { PlayersPanel } from '../../components/PlayersPanel'
@@ -716,7 +717,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             isHost ? (
               <>
                 <InviteLink client={client} tableId={table.id} tableName={table.name} />
-                <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} hideMembers />
+                <Panel>
+                  <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} hideMembers />
+                </Panel>
               </>
             ) : undefined
           }
@@ -728,25 +731,29 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </GameSheet>
       ) : null}
       <GameSheet visible={panel === 'reading'} title="Lectura" onClose={() => setPanel(null)}>
-        <Text style={styles.sheetLabel}>Vista</Text>
-        <View style={styles.segmented}>
-          <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
-          <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
-        </View>
-        <Text style={styles.sheetLabel}>Voz</Text>
-        <TtsBar tts={tts} autoRead collapsible={false} />
-        <Text style={styles.sheetLabel}>Compartir la historia</Text>
-        <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
-        <Text style={styles.sheetLabel}>Pantalla</Text>
-        <Button
-          label="Pantalla de lectura"
-          small
-          onPress={() => {
-            setPanel(null)
-            setScreen(true)
-          }}
-        />
-        <Text style={styles.screenHint}>Solo la historia, en grande, sin controles: para leer de lejos o proyectar.</Text>
+        <Panel title="Vista">
+          <View style={styles.segmented}>
+            <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
+            <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
+          </View>
+        </Panel>
+        <Panel title="Voz">
+          <TtsBar tts={tts} autoRead collapsible={false} />
+        </Panel>
+        <Panel title="Compartir la historia">
+          <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
+        </Panel>
+        <Panel title="Pantalla">
+          <Button
+            label="Pantalla de lectura"
+            small
+            onPress={() => {
+              setPanel(null)
+              setScreen(true)
+            }}
+          />
+          <Text style={styles.screenHint}>Solo la historia, en grande, sin controles: para leer de lejos o proyectar.</Text>
+        </Panel>
       </GameSheet>
 
       <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : absolutePortrait}
@@ -798,7 +805,6 @@ const styles = StyleSheet.create({
   subtitle: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.nebula },
   connection: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
   segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
-  sheetLabel: { fontFamily: theme.fonts.uiMedium, fontSize: 12, letterSpacing: 0.2, color: theme.colors.inkDim, marginTop: 6 },
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },
   segmentActive: { backgroundColor: theme.colors.accent },
   segmentText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 12, color: theme.colors.ink },

@@ -6,6 +6,7 @@ import { SessionProvider } from '../lib/session'
 import './globals.css'
 import './styles/portada.css'
 import './styles/mapa.css'
+import './styles/hojas.css'
 
 const cinzel = Cinzel({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-cinzel', display: 'swap' })
 const crimson = Crimson_Pro({ subsets: ['latin'], weight: ['400', '600'], style: ['normal', 'italic'], variable: '--font-crimson', display: 'swap' })

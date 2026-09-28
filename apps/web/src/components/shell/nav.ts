@@ -20,7 +20,7 @@ export const SITE_SECTIONS: readonly NavItem[] = [
   { href: '/mesas', label: 'Mis mesas', icon: 'mesas' },
   { href: '/pronto/campanas', label: 'Campañas', icon: 'campanas' },
   { href: '/pronto/personajes', label: 'Personajes', icon: 'personajes' },
-  { href: '/mesas#amigos', label: 'Amigos', icon: 'amigos' },
+  { href: '/comunidad', label: 'Amigos', icon: 'amigos' },
 ]
 
 /** Lo de la cuenta: va en el menu del avatar y al pie de la hamburguesa. */

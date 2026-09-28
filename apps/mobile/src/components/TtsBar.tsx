@@ -53,7 +53,8 @@ export function TtsBar({ tts, autoRead = false, collapsible = true }: Props) {
             </Text>
             <Text style={styles.chevron}>{expanded ? '▴' : '▾'}</Text>
           </Pressable>
-        ) : (
+        ) : nobodyWarns ? null : (
+          // Desplegada, el aviso de abajo ya dice que nadie narra: no se repite (27-09).
           <View style={styles.summary}>
             <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={2}>
               {summary.text}

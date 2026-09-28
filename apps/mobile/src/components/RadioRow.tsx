@@ -25,8 +25,8 @@ export function RadioRow({ label, sub, selected, disabled = false, onSelect }: P
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
-  rowSelected: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.panel2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(11, 15, 20, 0.55)', borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  rowSelected: { borderColor: theme.colors.accentBright, backgroundColor: 'rgba(124, 58, 237, 0.14)' },
   rowDisabled: { opacity: 0.5 },
   pressed: { opacity: 0.8 },
   radio: { color: theme.colors.inkDim, fontSize: 16 },

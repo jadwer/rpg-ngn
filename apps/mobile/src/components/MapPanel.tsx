@@ -2,9 +2,9 @@ import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEveryoneIs, ZOOM_IDENTITY, ZOOM_STEP, zoomGesture, type ZoomState, zoomStep } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
-import { Image, Modal, Pressable, StatusBar, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
 import { theme } from '../theme'
-import { SheetHeader } from './SheetHeader'
+import { SheetModal } from './SheetModal'
 
 /**
  * El mapa de la mesa en el telefono, con la misma idea que en la web: la
@@ -121,109 +121,104 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
         </Pressable>
       )}
 
-      <Modal visible={open} animationType="slide" presentationStyle="pageSheet" statusBarTranslucent onRequestClose={() => setOpen(false)}>
-        {/* Mapa a pantalla completa: sin la barra de estado, que tapaba "Cerrar" (Gabino, 26-09). Vuelve al cerrar. */}
-        <StatusBar hidden />
-        <View style={styles.modal}>
-          <SheetHeader title={view.map.name} onClose={() => setOpen(false)} />
+      <SheetModal visible={open} title={view.map.name} onClose={() => setOpen(false)}>
+        {/* Sin ScrollView: en Android el scroll nativo se quedaba con el arrastre antes que el zoom (v10). El mapa cabe en la pantalla. */}
+        <View style={styles.body}>
+          {maps.length > 1 ? (
+            <View style={styles.selector}>
+              {maps.map((m, i) => (
+                <Pressable
+                  key={m.id}
+                  onPress={() => {
+                    setChosen(i)
+                    zoom.reset()
+                  }}
+                  style={[styles.pestana, i === index && styles.pestanaActiva]}
+                >
+                  <Text style={[styles.pestanaTexto, i === index && styles.pestanaTextoActivo]}>{m.name}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+          <Text style={styles.resumen}>{resumen}</Text>
 
-          {/* Sin ScrollView: en Android el scroll nativo se quedaba con el arrastre antes que el zoom (v10). El mapa cabe en la pantalla. */}
-          <View style={styles.body}>
-            {maps.length > 1 ? (
-              <View style={styles.selector}>
-                {maps.map((m, i) => (
-                  <Pressable
-                    key={m.id}
-                    onPress={() => {
-                      setChosen(i)
-                      zoom.reset()
-                    }}
-                    style={[styles.pestana, i === index && styles.pestanaActiva]}>
-                    <Text style={[styles.pestanaTexto, i === index && styles.pestanaTextoActivo]}>{m.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : null}
-            <Text style={styles.resumen}>{resumen}</Text>
-
-            {/* Los botones van fuera del lienzo: dentro, arrastrar desde ellos movia el mapa. */}
-            <View style={{ width: ANCHO, height: ALTO }}>
+          {/* Los botones van fuera del lienzo: dentro, arrastrar desde ellos movia el mapa. */}
+          <View style={{ width: ANCHO, height: ALTO }}>
             <View style={[styles.lienzo, { width: ANCHO, height: ALTO }]} {...zoom.handlers}>
               <View style={{ width: ANCHO, height: ALTO, transform: [{ translateX: zoom.z.x }, { translateY: zoom.z.y }, { scale: zoom.z.s }] }}>
-              {src ? (
-                <Image
-                  source={{ uri: src }}
-                  style={{ width: ANCHO, height: ALTO }}
-                  resizeMode="contain"
-                  onLoad={(e) => {
-                    const { width, height } = e.nativeEvent.source
-                    if (width && height) setAspect(width / height)
-                  }}
-                />
-              ) : null}
+                {src ? (
+                  <Image
+                    source={{ uri: src }}
+                    style={{ width: ANCHO, height: ALTO }}
+                    resizeMode="contain"
+                    onLoad={(e) => {
+                      const { width, height } = e.nativeEvent.source
+                      if (width && height) setAspect(width / height)
+                    }}
+                  />
+                ) : null}
 
-              {edges.map((e) => {
-                const x1 = (e.from.x / 100) * ANCHO
-                const y1 = (e.from.y / 100) * ALTO
-                const x2 = (e.to.x / 100) * ANCHO
-                const y2 = (e.to.y / 100) * ALTO
-                const largo = Math.hypot(x2 - x1, y2 - y1)
-                const angulo = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI
-                // El trazo se ancla en su punto medio, que es donde React
-                // Native rota, asi que se centra restando medio largo.
-                const base = { left: (x1 + x2) / 2 - largo / 2, top: (y1 + y2) / 2, width: largo, transform: [{ rotate: `${angulo}deg` }] }
-                return (
-                  <View key={`${e.from.id}-${e.to.id}`} pointerEvents="none">
-                    <View style={[styles.caminoSombra, base]} />
-                    <View style={[styles.camino, base]} />
-                  </View>
-                )
-              })}
-
-              {view.pins.map((pin) => (
-                <View key={pin.id} style={[styles.pin, { left: (pin.x / 100) * ANCHO, top: (pin.y / 100) * ALTO }]} pointerEvents="none">
-                  <View style={[styles.punto, pin.who.length > 0 && styles.puntoConGente]} />
-                  {pin.who.length > 0 ? (
-                    <View style={styles.gente}>
-                      {pin.who.map((id) => {
-                        const retrato = portraitOf(id)
-                        return retrato ? (
-                          <Image key={id} source={{ uri: retrato }} style={styles.retrato} />
-                        ) : (
-                          <View key={id} style={styles.inicial}>
-                            <Text style={styles.inicialTexto}>{nameOf(id).slice(0, 1)}</Text>
-                          </View>
-                        )
-                      })}
+                {edges.map((e) => {
+                  const x1 = (e.from.x / 100) * ANCHO
+                  const y1 = (e.from.y / 100) * ALTO
+                  const x2 = (e.to.x / 100) * ANCHO
+                  const y2 = (e.to.y / 100) * ALTO
+                  const largo = Math.hypot(x2 - x1, y2 - y1)
+                  const angulo = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI
+                  // El trazo se ancla en su punto medio, que es donde React
+                  // Native rota, asi que se centra restando medio largo.
+                  const base = { left: (x1 + x2) / 2 - largo / 2, top: (y1 + y2) / 2, width: largo, transform: [{ rotate: `${angulo}deg` }] }
+                  return (
+                    <View key={`${e.from.id}-${e.to.id}`} pointerEvents="none">
+                      <View style={[styles.caminoSombra, base]} />
+                      <View style={[styles.camino, base]} />
                     </View>
-                  ) : null}
-                  <Text style={styles.etiqueta} numberOfLines={1}>
-                    {pin.name}
-                  </Text>
-                </View>
-              ))}
-              </View>
-            </View>
-              <View style={styles.zoomBar}>
-                <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
-                  <Text style={styles.zoomText}>+</Text>
-                </Pressable>
-                <Pressable onPress={zoom.zoomOut} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Alejar">
-                  <Text style={styles.zoomText}>−</Text>
-                </Pressable>
-              </View>
-            </View>
-            <Text style={styles.nota}>Pellizca para acercar y arrastra para moverte por el mapa.</Text>
+                  )
+                })}
 
-            {view.offMap.length > 0 ? <Text style={styles.nota}>{`De camino o fuera de escena: ${view.offMap.map(nameOf).join(', ')}.`}</Text> : null}
-            {view.map.description ? (
-              <Text style={styles.nota} numberOfLines={3}>
-                {view.map.description}
-              </Text>
-            ) : null}
+                {view.pins.map((pin) => (
+                  <View key={pin.id} style={[styles.pin, { left: (pin.x / 100) * ANCHO, top: (pin.y / 100) * ALTO }]} pointerEvents="none">
+                    <View style={[styles.punto, pin.who.length > 0 && styles.puntoConGente]} />
+                    {pin.who.length > 0 ? (
+                      <View style={styles.gente}>
+                        {pin.who.map((id) => {
+                          const retrato = portraitOf(id)
+                          return retrato ? (
+                            <Image key={id} source={{ uri: retrato }} style={styles.retrato} />
+                          ) : (
+                            <View key={id} style={styles.inicial}>
+                              <Text style={styles.inicialTexto}>{nameOf(id).slice(0, 1)}</Text>
+                            </View>
+                          )
+                        })}
+                      </View>
+                    ) : null}
+                    <Text style={styles.etiqueta} numberOfLines={1}>
+                      {pin.name}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.zoomBar}>
+              <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
+                <Text style={styles.zoomText}>+</Text>
+              </Pressable>
+              <Pressable onPress={zoom.zoomOut} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Alejar">
+                <Text style={styles.zoomText}>−</Text>
+              </Pressable>
+            </View>
           </View>
+          <Text style={styles.nota}>Pellizca para acercar y arrastra para moverte por el mapa.</Text>
+
+          {view.offMap.length > 0 ? <Text style={styles.nota}>{`De camino o fuera de escena: ${view.offMap.map(nameOf).join(', ')}.`}</Text> : null}
+          {view.map.description ? (
+            <Text style={styles.nota} numberOfLines={3}>
+              {view.map.description}
+            </Text>
+          ) : null}
         </View>
-      </Modal>
+      </SheetModal>
     </>
   )
 }
@@ -235,7 +230,6 @@ const styles = StyleSheet.create({
   headSub: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   headLink: { fontFamily: theme.fonts.uiMedium, fontSize: 11, color: theme.colors.nebula, letterSpacing: 0.2 },
 
-  modal: { flex: 1, backgroundColor: theme.colors.bg },
   body: { flex: 1, padding: 16, gap: 12, alignItems: 'center' },
   resumen: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink, alignSelf: 'stretch' },
   selector: { flexDirection: 'row', gap: 6, alignSelf: 'stretch', flexWrap: 'wrap' },

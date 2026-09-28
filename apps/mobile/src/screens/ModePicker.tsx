@@ -4,7 +4,7 @@ import { cardView, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTopInset } from '../hooks/useTopInset'
 import { BottomNav, type BottomTab } from '../components/BottomNav'
 import { Isotipo, LogoHorizontal, LogoVertical } from '../components/Brand'
 import { storage } from '../online/storage'
@@ -79,7 +79,7 @@ const VELO = ['rgba(11, 15, 20, 0)', 'rgba(11, 15, 20, 0.55)', 'rgba(11, 15, 20,
  * y la barra inferior de las demas pantallas.
  */
 export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
-  const insets = useSafeAreaInsets()
+  const topInset = useTopInset()
   const { width } = useWindowDimensions()
   // El carrusel corre a todo lo ancho pero arranca donde arranca el texto (columna de 960).
   const inset = Math.max(20, (width - 960) / 2 + 20)
@@ -90,7 +90,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 24 }}>
-        <View style={[styles.bar, { paddingTop: insets.top + 10 }]}>
+        <View style={[styles.bar, { paddingTop: topInset + 10 }]}>
           <LogoHorizontal height={30} color="#f1f0fb" />
         </View>
 

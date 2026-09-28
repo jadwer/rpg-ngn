@@ -1,6 +1,6 @@
 import type { DmPreset } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { describePreset, presetOptionLabel, providerForNewTable, savedProviderText, selectablePresets } from './dm-presets.js'
+import { describePreset, presetOptionLabel, presetOptionParts, providerForNewTable, savedProviderText, selectablePresets } from './dm-presets.js'
 
 const presets: DmPreset[] = [
   { name: 'scripted', kind: 'scripted', model: null, configured: true, default: false },
@@ -14,6 +14,13 @@ describe('presets del DM', () => {
     expect(describePreset('otro')).toBe('otro')
     expect(presetOptionLabel(presets[1]!)).toBe('Anthropic (Claude) (el del servidor), claude-sonnet-5')
     expect(presetOptionLabel(presets[0]!)).toBe('DM con guion (sin modelo)')
+  })
+
+  it('partido para pintarlo: el nombre arriba, quien paga y el modelo abajo', () => {
+    expect(presetOptionParts(presets[1]!, true)).toEqual({ title: 'Anthropic (Claude)', detail: 'Con tu clave, no gasta cupo · claude-sonnet-5' })
+    expect(presetOptionParts(presets[1]!)).toEqual({ title: 'Anthropic (Claude)', detail: 'El del servidor · claude-sonnet-5' })
+    expect(presetOptionParts(presets[2]!)).toEqual({ title: 'OpenAI', detail: 'gpt-5' })
+    expect(presetOptionParts(presets[0]!)).toEqual({ title: 'DM con guion (sin modelo)', detail: null })
   })
 
   it('con clave propia el preset se ofrece aunque el servidor no lo tenga, va primero y lo dice', () => {
