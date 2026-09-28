@@ -102,7 +102,7 @@ Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el re
 - [x] Amigos fuera de la mesa: panel al pie de `/mesas` con solicitudes recibidas, busqueda por correo y lista de amigos (una jugadora nueva no tiene mesa donde aceptar)
 - [x] Cambio de correo (2026-09-14): el perfil lo edita en web y movil. En AtomoPlatform se cerro un agujero real (`PATCH /api/v1/profile` aceptaba el correo de otra cuenta y dejaba cambiarse el `status`): ahora exige unicidad entre usuarios vivos, ignora `status` y deja el correo nuevo sin verificar, con `emailVerified` en la respuesta. El aviso de verificacion solo sale si el proyecto marca su usuario como `MustVerifyEmail`; el de Atomo no lo hace todavia y esta API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`
 - [x] BYOK: clave propia en `provider_configs` con cast `encrypted` (docs/11 D6), administrada por el usuario desde `GET/PUT/DELETE /api/v1/profile/keys`. **Cambio sobre el ADR: la clave es por usuario y las mesas la heredan**, no por mesa, porque pegar la misma clave en cada mesa era justo la incomodidad que esto quita. Se comprueba contra el proveedor antes de guardarla y no vuelve a salir (solo las ultimas cuatro letras como pista). Quien trae su clave **no gasta cupo ni se le cobra por turno**: paga sus tokens al proveedor y nosotros ponemos motor, web y mesa. Pantalla en web (`/ajustes`) y en movil (perfil), las dos sobre `ui-logic/own-key.ts`
-- [ ] Admin con `@atomo/ui` y `@atomo/core`
+- [ ] Admin con `@atomo/ui` y `@atomo/core`: planeado en `docs/25` (E11b), como app aparte en el repo privado
 
 ### Paridad web y movil (revisada el 2026-09-12, hecha tras la partida)
 
@@ -652,6 +652,25 @@ abierto.
 - [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
 - [x] **Migrar la campaña de la mina al servidor** (hecho el 2026-09-19, rehecho el 20-09 tras el borrado de mesas de prueba): vive como mesa 15 a nombre de Gabino, importada desde `campaigns/pilot/events.jsonl` + `snapshots/002.json`. **La partida piloto es el repo, no el servidor**: ahi solo vive su continuacion web
 - [x] APKs de Android (25-09): se compilan en local con el SDK y JDK 17, sin EAS (memoria `apk-local`); v3 instalado en el telefono de Gabino
+
+## Entrega 11: Administracion y trazabilidad (planeada el 2026-09-28, `docs/25`)
+
+Hoy todo se opera por comandos y SSH. Plan completo, inventario de Atomo y
+decisiones en `docs/25-plan-administracion.md`.
+
+- [ ] **E11a. Trazabilidad**: `LogsActivity` en todos los modelos de negocio, actor en cada cambio (usuario, `cli`, `webhook`), id de peticion en los logs, comandos que anotan lo que hacen, copias fuera del servidor (S1) y roles de Postgres (S5)
+- [ ] **E11b. Panel**: app Vite aparte en `rpg-ngn-api/admin/` desde `platform/templates/frontend` con los `@atomo/*-ui`; salud, auditoria, usuarios; mesas, campañas, pagos, cupos y pases en lectura; las operaciones de hoy (catalogo, revision, cupo, desatascar, reembolsar, suspender) con motivo y rastro
+- [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
+- Decisiones de Gabino: dominio del panel (`admin.` o `/admin`) y el almacenamiento externo de las copias
+
+## Entrega 12: Temporadas y pases desde el panel (bosquejo, se platica)
+
+- [ ] Programar temporadas (fechas, arte, camino y umbrales) y pases **free** y **gold** por temporada, con vista previa y reportes. Preguntas abiertas en `docs/25`, E12
+
+## Entrega 13: Constructor de historias (planeada el 2026-09-28)
+
+- [ ] Editor de packs sobre el schema de `packages/content`, borradores versionados, salida `.rpgpack` por el camino de siempre y mesa de prueba desde el panel
+- [ ] Validador de propiedad intelectual (procedencia + revision automatica con evidencia; lo marcado no sale al catalogo abierto) y validador de calidad (rubrica fija + datos de partidas reales). Ninguno publica solo
 
 ## v2 (sin fecha)
 
