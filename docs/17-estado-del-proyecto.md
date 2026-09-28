@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-26, 04:30 CST**. Rama `dev`, commit `6172a81`; API `49ddb31` con platform `5b17f92`. Produccion en https://adastramentis.com.
+Fecha de corte: **2026-09-28, 06:30 CST**. Rama `dev`, commit del cierre de sesion (ver `git log`); API `33ae6f9` con platform `536c0bf`. Produccion en https://adastramentis.com.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -8,7 +8,7 @@ decisiones estan cerradas. Se escribio a peticion de un colaborador externo
 que revisaba `docs/16`.
 
 **Como leerlo.** Todo lo marcado como implementado esta **desplegado en
-produccion** (https://rpg-worlds.gabinoramirez.com) salvo que diga otra cosa.
+produccion** (https://adastramentis.com) salvo que diga otra cosa.
 Los numeros de tests y los estados del servidor de este documento se
 verificaron el dia del corte, no se citan de memoria. Cuando algo no se pudo
 comprobar, se dice.
@@ -508,19 +508,44 @@ amistades de por medio.
   (`expo-linear-gradient`), login sobre el arte, perfil y Mis mundos en el
   marco nuevo, tablet centrada, sin barra de estado en toda la app.
 
+### Del 27 y 28-09 (cerrar pendientes antes de mas contenido)
+
+- **Hojas coherentes con el tablero** en web y app: marco con textura,
+  titulos en Cinzel dorado, boton de peligro en rojo, aro dorado en retratos,
+  "Nueva mesa" con portadas de mundo. **Comunidad** tiene lugar propio (pestaña
+  en la app, `/comunidad` en web) con los amigos. Mapa con titulo, textura y
+  bisel de las hojas.
+- **Mesa**: cambiar a "Tiras el dado en pantalla" a media partida ya funciona;
+  la cuenta atras para enviar el turno se elige por mesa (0, 3, 5, 10 o 15 s).
+  Polling a 1.5 s con sesion abierta y 5 s sin ella; el cursor de bloques
+  avanza hasta lo leido y la mesa sabe si hay mas.
+- **E1, S14, S9**: lo secreto del DM no entra al registro de la mesa, la ficha
+  ajena llega recortada, la proyeccion narrativa es solo del anfitrion y cerrar
+  sesion con el engine caido no deja la mesa a medias.
+- **S5. Roles de Postgres**: `rpg_owner` es dueño de las tablas y migra; la app
+  solo lee e inserta en `campaign_events`. Respaldo bajado a
+  `D:\BackUp\ad-astra-mentis` (`deploy/pull-backup.sh`) y restaurado de prueba.
+- **E11a. Trazabilidad**: cada registro de auditoria lleva id de peticion y
+  origen (http, webhook, cli, cola); los modelos del juego auditan una lista
+  cerrada de campos.
+- **Panel en https://dashboard.adastramentis.com** (E11b.1): salud, auditoria
+  con filtros, usuarios y roles. Permisos al estilo de LWM (E11b.1b): roles
+  vivos god, admin y customer; tech y storyteller son plantillas; el codigo
+  pregunta por permisos, no por nombre de rol. Rol **Story Teller** con
+  `packs.create` (hasta 50 mundos propios).
+
 ### Verificacion
 
 | Donde | Tests |
 |---|---|
-| **Monorepo** (`pnpm check`) | **482** |
-| **API (Laravel)** | **181** (1040 aserciones) |
+| **Monorepo** (`pnpm check`) | **497** (1 omitido) |
+| **API (Laravel)** | **208** (1185 aserciones) |
 
-Contados corriendo las suites el 26-09 (la tabla anterior, del 22-09 a las
-23:00, decia 403 y 123) (la version anterior de
-esta tabla decia 384 y 99: se quedo vieja el mismo dia, porque el enlace de
-invitacion, retirar mesas, borrar cuenta y los NPC remotos trajeron tests).
-El detalle por package lo da CI, no este archivo. Todo en verde el dia del
-corte. CI en GitHub Actions en ambos repos.
+Contados corriendo las suites el 28-09 (el 26-09 eran 482 y 181). El detalle
+por package lo da CI, no este archivo. CI de la API en verde; el de `dev` en el
+monorepo estuvo en rojo del 27-09 al 28-09 por el paso de `expo-doctor`
+(`pnpm --filter mobile doctor` corria el `doctor` propio de pnpm), arreglado
+en el cierre.
 
 **Advertencia de metodo, pagada cuatro veces esta semana: los tests verdes no
 ven el circuito completo.** Cuatro fallos reales de este mes pasaron los tests
@@ -531,14 +556,12 @@ conviene asumir que hasta que no se juega, no esta probado.
 
 ## 4. Que esta en progreso ahora mismo
 
-**Auditoria "valida a matar" (26-09).** Tras un dia de muchos cambios
-visuales en web y app, Gabino pidio parar y auditar antes de que crezca:
-inconsistencias de diseño, arquitectura y errores posibles, con el principio
-de que rediseñar bien ahorra mas que parchear sobre parche. El arbol estaba
-limpio y todo desplegado al empezar (punto de retorno: monorepo `6172a81`,
-API `49ddb31`). Hallazgos ya anotados: el selector "Nadie narra en voz alta"
-no parece boton, y la hoja del anfitrion dice "hasta 6" ilustraciones por
-sesion cuando son 12.
+**E11b.2, panel con lo del juego (28-09).** Mesas (miembros, sesiones,
+turnos, tokens), turnos atascados, pagos, cupos, pases y trabajos fallidos en
+lectura; despues E11b.3, las operaciones con motivo y rastro. La auditoria VAM
+del 26-09 cerro y su veredicto esta en el ROADMAP. Por platicar con Gabino:
+planes Plata, Oro y Diamante, temporadas y pases (E12) y el constructor de
+historias (E13). Las copias fuera del servidor esperan al NAS (deuda S1).
 
 ---
 

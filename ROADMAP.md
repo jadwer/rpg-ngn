@@ -102,7 +102,7 @@ Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el re
 - [x] Amigos fuera de la mesa: panel al pie de `/mesas` con solicitudes recibidas, busqueda por correo y lista de amigos (una jugadora nueva no tiene mesa donde aceptar)
 - [x] Cambio de correo (2026-09-14): el perfil lo edita en web y movil. En AtomoPlatform se cerro un agujero real (`PATCH /api/v1/profile` aceptaba el correo de otra cuenta y dejaba cambiarse el `status`): ahora exige unicidad entre usuarios vivos, ignora `status` y deja el correo nuevo sin verificar, con `emailVerified` en la respuesta. El aviso de verificacion solo sale si el proyecto marca su usuario como `MustVerifyEmail`; el de Atomo no lo hace todavia y esta API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`
 - [x] BYOK: clave propia en `provider_configs` con cast `encrypted` (docs/11 D6), administrada por el usuario desde `GET/PUT/DELETE /api/v1/profile/keys`. **Cambio sobre el ADR: la clave es por usuario y las mesas la heredan**, no por mesa, porque pegar la misma clave en cada mesa era justo la incomodidad que esto quita. Se comprueba contra el proveedor antes de guardarla y no vuelve a salir (solo las ultimas cuatro letras como pista). Quien trae su clave **no gasta cupo ni se le cobra por turno**: paga sus tokens al proveedor y nosotros ponemos motor, web y mesa. Pantalla en web (`/ajustes`) y en movil (perfil), las dos sobre `ui-logic/own-key.ts`
-- [ ] Admin con `@atomo/ui` y `@atomo/core`: planeado en `docs/25` (E11b), como app aparte en el repo privado
+- [x] Admin con `@atomo/ui` y `@atomo/core`: panel en https://dashboard.adastramentis.com (E11b.1, 28-09), app aparte en `rpg-ngn-api/admin/`; lo del juego sigue en E11b.2
 
 ### Paridad web y movil (revisada el 2026-09-12, hecha tras la partida)
 
@@ -583,6 +583,8 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
   (prebuild limpio, JDK 17, se niega sin la llave de subida y comprueba el
   certificado) y `expo-doctor` en CI. Salieron dos fallas: `splash` duplicado
   en `app.json` (el SDK 57 lo ignora) y cuatro parches de Expo atrasados.
+  El paso de CI estuvo en rojo hasta el 28-09: `pnpm --filter mobile doctor`
+  corria el `doctor` de pnpm; ahora es `run doctor` con `npx expo-doctor`.
 - [ ] **A8.** Partir `TableScreen` (878 web, 834 app) la proxima vez que se
   toque a fondo.
 
@@ -662,7 +664,7 @@ decisiones en `docs/25-plan-administracion.md`.
 - [x] **S5. Roles de Postgres** (28-09, API `fb99362`): `rpg_owner` es dueño de las tablas y migra; la app solo lee e inserta en `campaign_events` (comprobado: borrar, vaciar o apagar el trigger da error de permisos). Respaldo previo bajado a `D:\BackUp\ad-astra-mentis` con `deploy/pull-backup.sh` y restaurado de prueba con los mismos conteos que produccion
 - [x] **E11b.1. Panel, primera version** (28-09, en `https://dashboard.adastramentis.com`): login por cookie de Sanctum, solo el equipo (god, admin, tech), inicio con salud y actividad, usuarios, roles, auditoria con filtros por peticion, origen y registro y el detalle campo por campo, y salud del sistema. De paso se arreglo Atomo: `@atomo/ui` no tenia CSS para sus 88 clases (todo salia sin estilo), la API de auditoria serializaba el modelo entero del causante y del afectado, la plantilla usaba un token de color que no existe y la plataforma no versionaba su lockfile. Deuda: el formulario de login de `@atomo/auth-ui` esta en ingles
 - [x] **E11b.1b. Permisos al estilo de LWM** (28-09, platform `f171e48`, API `33ae6f9`): roles vivos god, admin y customer; `tech` y `storyteller` son plantillas que copian permisos directos al usuario y luego se ajustan por persona. El codigo revisa permisos (`packs.create`, `packs.review`, `dm-providers.index`, `dashboard.access`), no nombres de rol. `PermissionCatalog` da etiqueta, modulo y recurso a cada permiso; el panel trae el gestor de plantillas (pestañas Plantillas y Permisos) y, por usuario, roles de sistema, plantilla y checklist con lo que se aparta de la plantilla. Rol Story Teller creado: sube mundos sin el tope de propios (50)
-- [ ] **E11b.2 y .3. Panel, lo del juego**: app Vite aparte en `rpg-ngn-api/admin/` desde `platform/templates/frontend` con los `@atomo/*-ui`; salud, auditoria, usuarios; mesas, campañas, pagos, cupos y pases en lectura; las operaciones de hoy (catalogo, revision, cupo, desatascar, reembolsar, suspender) con motivo y rastro
+- [ ] **E11b.2 y .3. Panel, lo del juego** (siguiente): mesas (miembros, sesiones, turnos, tokens), turnos atascados, campañas, pagos, cupos, pases y trabajos fallidos en lectura; despues las operaciones de hoy (catalogo, revision, cupo, desatascar, reembolsar, suspender) con motivo y rastro. Gabino prepara permisos granulares por usuario en Atomo; revisarlos cuando lleguen
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
