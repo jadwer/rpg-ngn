@@ -290,9 +290,9 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     },
 
     async tableState(tableId, after = 0) {
-      const { data } = await request<{ data: Omit<TableState, 'lastBlockId'>; meta: { lastBlockId: number } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
+      const { data } = await request<{ data: Omit<TableState, 'lastBlockId' | 'more'>; meta: { lastBlockId: number; more?: boolean } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
       // `narrators` y `typing` no existian antes de los avisos compartidos: una API vieja no rompe al cliente.
-      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, rolls: data.data.rolls ?? { pending: null }, suggestions: data.data.suggestions ?? [], ideas: data.data.ideas ?? { more: 'none', used: 0 }, lastBlockId: data.meta.lastBlockId }
+      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, rolls: data.data.rolls ?? { pending: null }, suggestions: data.data.suggestions ?? [], ideas: data.data.ideas ?? { more: 'none', used: 0 }, lastBlockId: data.meta.lastBlockId, more: data.meta.more ?? data.data.blocks.length >= 200 }
     },
 
     async setNarrating(tableId, narrating) {

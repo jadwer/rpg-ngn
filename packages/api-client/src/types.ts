@@ -231,8 +231,10 @@ export interface TableState {
   ideas: { more: 'free' | 'unlocked' | 'locked' | 'exhausted' | 'none'; used: number }
   /** Segundos de cuenta atras antes de narrar que eligio el anfitrion (0, 3, 5, 10 o 15). */
   countdown?: number
-  /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
+  /** Para el siguiente `after`: el ultimo bloque leido, tambien si era solo para el anfitrion. */
   lastBlockId: number
+  /** La pagina vino llena: hay mas bloques por pedir. */
+  more?: boolean
 }
 
 /** Un miembro señalado por la API en un aviso (narra, escribe, puso el turno en espera). */
