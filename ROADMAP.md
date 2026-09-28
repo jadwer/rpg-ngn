@@ -668,9 +668,15 @@ decisiones en `docs/25-plan-administracion.md`.
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
-## Entrega 12: Temporadas y pases desde el panel (bosquejo, se platica)
+## Entrega 12: Modelo de monetizacion (platicado el 2026-09-29)
 
-- [ ] Programar temporadas (fechas, arte, camino y umbrales) y pases **free** y **gold** por temporada, con vista previa y reportes. Preguntas abiertas en `docs/25`, E12
+El modelo completo (free, temporadas, pases, suscripciones, social) vive en el repo privado: `rpg-ngn-api/docs/modelo-de-monetizacion.md`, porque trae precios y costos. Lo revisa el concilio antes de implementar. Sustituye al bosquejo de E12 en `docs/25`. Reglas de juego que salen de ahi y no dependen del concilio:
+
+- [ ] La tirada y la accion van en el mismo turno
+- [ ] El tope de jugadores lo pone la historia (quitar el tope fijo de 5 invitados)
+- [ ] Rehacer la ultima accion (de paga)
+- [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
+- [ ] Colaboraciones con streamers: despues de ajustar el producto base
 
 ## Entrega 13: Constructor de historias (planeada el 2026-09-28)
 
