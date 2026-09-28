@@ -199,6 +199,8 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
                   </View>
                 ))}
               </View>
+              {/* Bisel: delimita el espacio de vision del mapa (Gabino, 27-09). Encima de la imagen, sin tocar los gestos. */}
+              <View style={styles.bisel} pointerEvents="none" />
             </View>
             <View style={styles.zoomBar}>
               <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
@@ -241,7 +243,20 @@ const styles = StyleSheet.create({
   zoomBar: { position: 'absolute', right: 8, bottom: 8, gap: 6 },
   zoomBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11, 15, 20, 0.8)', borderWidth: 1, borderColor: theme.colors.border },
   zoomText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 20, color: theme.colors.ink, lineHeight: 22 },
-  lienzo: { borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
+  lienzo: { borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.45)', borderRadius: theme.radius, overflow: 'hidden', backgroundColor: theme.colors.panel2 },
+  bisel: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: theme.radius - 1,
+    borderWidth: 3,
+    borderTopColor: 'rgba(255, 255, 255, 0.14)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.55)',
+    borderRightColor: 'rgba(0, 0, 0, 0.45)',
+  },
 
   // Dos trazos: uno oscuro debajo, o las lineas claras se pierden sobre el
   // marmol de la imagen (misma razon que en la web).
