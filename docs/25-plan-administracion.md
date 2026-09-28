@@ -50,8 +50,8 @@ Los packages `-ui` son React con Vite y cliente axios; no son para Next.
    monorepo es publico, asi que no puede depender de ellos; y el codigo de
    administracion no debe viajar en el bundle de los jugadores. Costo: otra
    app que desplegar y su propia sesion. Se sirve en
-   `admin.adastramentis.com` (misma cookie de Sanctum por dominio padre) o en
-   `/admin`; lo decide Gabino.
+   **`dashboard.adastramentis.com`** (Gabino, 28-09), con la cookie de Sanctum
+   del dominio padre.
 2. **Toda accion de administracion pasa por la API**, con permiso y con
    rastro. Nada de SQL a mano ni de comandos sin actor. Los comandos que
    queden anotan `cli` como actor.
@@ -76,7 +76,8 @@ Proteger los datos va antes que verlos bonito.
   id de peticion (`X-Request-Id`) que tambien va al log de Laravel, para
   seguir un problema de punta a punta.
 - Los comandos de operacion anotan lo que hicieron en `activity_log`.
-- S1: copia de la base fuera del servidor y una restauracion de prueba al
+- S1, copia de la base fuera del servidor: **deuda hasta comprar el NAS**
+  (Gabino, 28-09); entonces, envio diario y una restauracion de prueba al
   mes. S5: dos roles de Postgres para que ni la credencial de la app pueda
   borrar `campaign_events`.
 - Retencion: `activity_log` no se poda antes de un año.
@@ -165,12 +166,12 @@ pack nuevo puede salir mejor que el anterior.
 
 | Paso | Que | Tamaño | Depende de |
 |---|---|---|---|
-| 1 | E11a trazabilidad y S1/S5 | M | cuenta de almacenamiento (Gabino) |
+| 1 | E11a trazabilidad y S5 (S1 espera el NAS) | M | nada |
 | 2 | E11b.1 panel: entrar, salud, auditoria, usuarios | M | 1 |
 | 3 | E11b.2 y .3 lo del juego y las operaciones | L | 2 |
 | 4 | E11c soporte (`atomo/support`) y "Reportar un problema" | L | 2 |
 | 5 | E12 temporadas y pases | M a L | platicarlo |
 | 6 | E13 constructor de historias | XL | 3 |
 
-Decisiones de Gabino para arrancar: dominio del panel (`admin.` o `/admin`),
-y el alta del almacenamiento externo para las copias (S1).
+Decidido el 28-09: el panel va en `dashboard.adastramentis.com`; las copias
+fuera del servidor esperan a que se compre el NAS.
