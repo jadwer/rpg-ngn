@@ -29,6 +29,8 @@ export interface TableSnapshot {
   rolls: TableState['rolls']
   suggestions: TableState['suggestions']
   ideas: TableState['ideas']
+  /** La cuenta atras que eligio el anfitrion; llega con el estado para que todos cuenten igual. */
+  countdown: number | null
   /** El historial ya llego entero (la API pagina de 200 en 200). */
   caughtUp: boolean
   envelopes: BlockEnvelope[]
@@ -85,7 +87,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
         }
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, caughtUp: state.blocks.length < 200, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, countdown: state.countdown ?? null, caughtUp: state.blocks.length < 200, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

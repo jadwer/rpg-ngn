@@ -100,8 +100,32 @@ export function seatsSummary(list: readonly Seat[]): string {
   return `${ready} de ${playing.length} listos`
 }
 
-/** Segundos que se cuentan antes de cerrar solo; lo fija docs/18, D-UX-3. */
+/** Segundos que se cuentan antes de cerrar solo, si la mesa no eligio otros (docs/18, D-UX-3). */
 export const COUNTDOWN_SECONDS = 10
+
+/** Lo que el anfitrion puede elegir (Gabino, 27-09: diez segundos se hacian largos). 0 es cerrar al completarse. */
+export const COUNTDOWN_OPTIONS: readonly number[] = [0, 3, 5, 10, 15]
+
+/** La cuenta atras de la mesa (`settings.countdown`); la de por omision si no eligio o si el valor no vale. */
+export function countdownSecondsOf(settings: Record<string, unknown> | null | undefined): number {
+  const value = settings?.['countdown']
+  return typeof value === 'number' && COUNTDOWN_OPTIONS.includes(value) ? value : COUNTDOWN_SECONDS
+}
+
+export function withCountdown(settings: Record<string, unknown> | null | undefined, seconds: number): Record<string, unknown> {
+  return { ...(settings ?? {}), countdown: seconds }
+}
+
+/** "Sin espera" o "5 s", para el selector. */
+export function countdownLabel(seconds: number): string {
+  return seconds === 0 ? 'Sin espera' : `${seconds} s`
+}
+
+export function countdownHint(seconds: number): string {
+  return seconds === 0
+    ? 'El turno se cierra en cuanto responde el último: nadie tiene tiempo de pedir un momento.'
+    : `Cuando todos respondieron, ${seconds} segundos para corregir o pedir un momento antes de que narre el director.`
+}
 
 export interface Countdown {
   /** Hay cuenta atras en marcha (turno abierto, completo y sin espera). */

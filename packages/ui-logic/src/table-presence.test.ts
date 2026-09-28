@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTDOWN_SECONDS, countdown, countdownLine, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
+import { COUNTDOWN_OPTIONS, COUNTDOWN_SECONDS, countdown, countdownLabel, countdownLine, countdownSecondsOf, withCountdown, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
 import { turnProgress, type TurnSummary } from './turn.js'
 
 const nameOf = (id: string) => ({ zahira: 'Zahira', calder: 'Calder', kael: 'Kael' })[id] ?? id
@@ -94,5 +94,18 @@ describe('waitingPhrase', () => {
     expect(waitingPhrase(3, 1000)).toBe(waitingPhrase(3, 5999))
     expect(waitingPhrase(3, 1000)).not.toBe(waitingPhrase(3, 6001))
     expect(WAITING_PHRASES).toContain(waitingPhrase(9, 123_456))
+  })
+})
+
+describe('cuenta atras elegida por la mesa', () => {
+  it('vale solo lo que ofrece el selector; si no, la de por omision', () => {
+    expect(COUNTDOWN_OPTIONS).toEqual([0, 3, 5, 10, 15])
+    expect(countdownSecondsOf({ countdown: 3 })).toBe(3)
+    expect(countdownSecondsOf({ countdown: 0 })).toBe(0)
+    expect(countdownSecondsOf({ countdown: 7 })).toBe(10)
+    expect(countdownSecondsOf(null)).toBe(10)
+    expect(withCountdown({ dice: 'dice' }, 5)).toEqual({ dice: 'dice', countdown: 5 })
+    expect(countdownLabel(0)).toBe('Sin espera')
+    expect(countdownLabel(5)).toBe('5 s')
   })
 })

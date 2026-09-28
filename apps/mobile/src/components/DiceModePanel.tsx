@@ -1,7 +1,7 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { COUNTDOWN_OPTIONS, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
-import { StyleSheet, Text } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { Panel } from './Panel'
 import { RadioRow } from './RadioRow'
@@ -26,6 +26,12 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
   const images = sceneImagesOn(table.settings)
+  const seconds = countdownSecondsOf(table.settings)
+
+  const chooseCountdown = (value: number) => {
+    if (value === seconds || busy) return
+    void save(withCountdown(table.settings, value), value === 0 ? 'Guardado: se narra al responder el último.' : `Guardado: ${value} segundos antes de narrar.`)
+  }
 
   const choose = (mode: DiceMode) => {
     if (mode === saved || busy) return
@@ -60,6 +66,16 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
         ))}
         <Text style={styles.hint}>{diceModeHint(saved)}</Text>
       </Panel>
+      <Panel title="Cuenta atrás">
+        <View style={styles.chips}>
+          {COUNTDOWN_OPTIONS.map((value) => (
+            <Pressable key={value} onPress={() => chooseCountdown(value)} style={[styles.chip, seconds === value && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected: seconds === value }}>
+              <Text style={[styles.chipText, seconds === value && styles.chipTextOn]}>{countdownLabel(value)}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.hint}>{countdownHint(seconds)}</Text>
+      </Panel>
       <Panel title="Ilustraciones">
         <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />
         <RadioRow label="Solo texto" selected={!images} onSelect={() => chooseImages(false)} />
@@ -71,6 +87,11 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
 }
 
 const styles = StyleSheet.create({
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { minWidth: 56, alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: 'rgba(11, 15, 20, 0.55)' },
+  chipOn: { borderColor: theme.colors.accentBright, backgroundColor: theme.colors.accent },
+  chipText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.inkDim },
+  chipTextOn: { color: '#ffffff' },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   notice: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, borderWidth: 1, borderRadius: 8, padding: 8 },
   ok: { color: '#bbf7d0', borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: 'rgba(34, 197, 94, 0.12)' },

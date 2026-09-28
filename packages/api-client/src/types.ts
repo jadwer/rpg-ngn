@@ -229,6 +229,8 @@ export interface TableState {
    * no tiene como pagar mas), `exhausted` (tope del turno) o `none`.
    */
   ideas: { more: 'free' | 'unlocked' | 'locked' | 'exhausted' | 'none'; used: number }
+  /** Segundos de cuenta atras antes de narrar que eligio el anfitrion (0, 3, 5, 10 o 15). */
+  countdown?: number
   /** Para el siguiente `after`; si no vinieron bloques, repite el que se pidio. */
   lastBlockId: number
 }
