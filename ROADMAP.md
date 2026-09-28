@@ -658,7 +658,8 @@ abierto.
 Hoy todo se opera por comandos y SSH. Plan completo, inventario de Atomo y
 decisiones en `docs/25-plan-administracion.md`.
 
-- [ ] **E11a. Trazabilidad**: `LogsActivity` en todos los modelos de negocio, actor en cada cambio (usuario, `cli`, `webhook`), id de peticion en los logs, comandos que anotan lo que hacen, roles de Postgres (S5). Las copias fuera del servidor (S1) esperan el NAS
+- [x] **E11a. Trazabilidad** (28-09, API `acbbfdc`, platform `3602f3a`): rastro en todos los modelos de negocio con lista cerrada de campos (trait `Audited`), origen de cada cambio (`http`, `webhook:stripe`, `cli:<comando>`, `queue:<job>`) e id de peticion en el rastro, en los logs y en la respuesta (`X-Request-Id`), cambios de rol registrados. Lo generico vive en `atomo-audit`, ahora con tests reales en el CI
+- [ ] **S5. Roles de Postgres**: que ni la credencial de la app pueda borrar `campaign_events`. Toca la base de produccion: con respaldo y en una ventana sin partidas
 - [ ] **E11b. Panel** en `dashboard.adastramentis.com`: app Vite aparte en `rpg-ngn-api/admin/` desde `platform/templates/frontend` con los `@atomo/*-ui`; salud, auditoria, usuarios; mesas, campañas, pagos, cupos y pases en lectura; las operaciones de hoy (catalogo, revision, cupo, desatascar, reembolsar, suspender) con motivo y rastro
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
