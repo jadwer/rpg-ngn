@@ -38,5 +38,8 @@ jobs:
       - name: Build de la web (Next.js)
         run: pnpm build:web
 
+      - name: Salud de la app (expo-doctor, config y versiones del SDK)
+        run: pnpm --filter mobile doctor
+
       - name: Estilo de docs y JSON (mismo verificador que el hook local)
         run: bash .claude/hooks/verify.sh stop

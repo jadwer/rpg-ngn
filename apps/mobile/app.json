@@ -40,11 +40,6 @@
       "./plugins/withNoAutofillHighlight",
       "./plugins/withReleaseSigning"
     ],
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0b0f14"
-    },
     "androidStatusBar": {
       "hidden": true,
       "translucent": true,

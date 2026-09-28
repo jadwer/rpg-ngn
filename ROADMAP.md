@@ -146,7 +146,7 @@ ellos, de punta a punta en produccion.
 - [x] **Creditos de prepago con Stripe**: `config/credits.php` con cuatro paquetes (2, 5, 10 y 15 USD) y tres planes con beneficios sin definir, visibles pero apagados. **Solo el webhook acredita** y es idempotente porque Stripe reintenta. Pantalla con Stripe Elements en la web; la movil enseña el saldo y manda a **nuestra** web a recargar (el SDK nativo romperia Expo Go)
 - [ ] **Revisar los turnos por paquete con una sesion de cuatro jugadores medida.** Los numeros actuales salen de seis turnos con **un** jugador; el factor de cuatro esta extrapolado
 - [ ] Pago dentro de la app movil, cuando existan builds propias con EAS
-- [ ] Definir que incluyen Plata, Oro y Diamante (decision de Gabino)
+- [ ] Definir que incluyen Plata, Oro y Diamante (decision de Gabino; siguen anunciados como "Pronto" en Mi cuenta, se discute el 27-09)
 
 ## Cierre del motor y mapa (2026-09-20 y 21)
 
@@ -371,11 +371,11 @@ que falta para que entre alguien que no seamos nosotros. **El orden esta en
   - [x] **SPF con `include:_spf.resend.com`** (2026-09-22, lo puso Gabino en JettHost editando el registro existente, nunca añadiendo un segundo). Sin el, DMARC pasaba solo por DKIM y Outlook mandaba el correo a no deseado. Propagado y comprobado desde dos resolvedores
   - [ ] **Avisos de mesa**: "es tu turno", "abrieron sesion". Es lo que trae a la gente de vuelta sin que tenga que acordarse sola. Se decide cuando avisar sin volverse pesado viendo jugar a gente, no antes
 - [x] Sin creditos (24-09): el 409 dice donde recargar y la web avisa al anfitrion con enlace a Mi cuenta y créditos antes de que choque
-- [ ] **Lo que salio del VAM de arquitectura del 19-09** (rpg-ngn-api/docs/vam-2026-09-19.md, con orden de ejecucion y horas): copias de seguridad, roles de Postgres, reserva de cupo, redaccion de credenciales en logs, modo pantalla que lee bloques de anfitrion, el segundo ruleset jugable de verdad, `world` y la capa `dm` antes de roles ocultos, la app antes del primer APK. Los supuestos nuevos estan escritos en docs/11, docs/06 y los READMEs que cada fallo indica
+- [ ] **Lo que salio del VAM de arquitectura del 19-09** (rpg-ngn-api/docs/vam-2026-09-19.md, con orden de ejecucion y horas): copias de seguridad, roles de Postgres, reserva de cupo, redaccion de credenciales en logs, modo pantalla que lee bloques de anfitrion, el segundo ruleset jugable de verdad, `world` y la capa `dm` antes de roles ocultos, la app antes del primer APK. Los supuestos nuevos estan escritos en docs/11, docs/06 y los READMEs que cada fallo indica. **Revisado contra el codigo el 27-09**: hechos H1, H2, H4, H5, H7, H9 a H14, S2, R4, P2 a P4, E2 y E3. Superados por decisiones posteriores: A2, A4 y A5 (la app entra por `/movil` a proposito, ver `server-url.ts`) y A3 (APK local, sin EAS). A medias: S12 (queda `PACK_OPTIONS`), S13 (`DM_LINT` sigue en `report`), R2 (falta el 422 de la API), R3 (arreglado sin el contrato `publicView`), P1 (falta `Idempotency-Key` en el cliente), E4 (reembolso si, libro por transaccion no). Abiertos: H8, S1, S3 a S11, S14, R1, A1, E1 y E5
 
 ## Entrega 8: Packs de usuario
 
-- [x] **WebP como formato de los retratos** (24-09, los nueve jugables del piloto convertidos de sus recortes de 512; el visor de `main` sigue con JPG hasta el siguiente merge). Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. **Faltan los nueve jugables del piloto, que siguen en JPG** (`content/packs/pilot/portraits/*.jpg`): recortarlos desde `img/LosNueveViajeros/personajes.png` y cambiar la extension en los nueve JSON. Una hora, y de paso el visor de fichas de `main`
+- [x] **WebP como formato de los retratos** (24-09, los nueve jugables del piloto convertidos de sus recortes de 512; el visor de `main` sigue con JPG hasta el siguiente merge). Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. Los doce retratos del piloto ya son WebP; el visor de fichas de `main` sigue con JPG hasta el siguiente merge
 
 - [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
 - [x] **Fichas completas por API** (23-09, E3 del VAM): el engine expone `GET /v1/packs/:id/:version/sheets` (fichas y sesiones), la API lo releva con cache y la web y la app lo piden cuando el pack no viene empaquetado; los retratos salen de la API. La logica de que se ve de cada personaje vive en ui-logic (`sheet-source.ts`) con una fuente comun para el pack empaquetado y para la respuesta de la API. Probado en local (boticaria) y en produccion (La Mascarada, mesa temporal borrada). De paso, una Armadura sin valor se pinta con ? en vez de null
@@ -395,10 +395,10 @@ cerrada: sin cobro vivo el pase no cobra, y sin embudo no se fijan precios
 ni umbrales. El diseño visual del catalogo lo trae Gabino (bosquejo de GPT,
 como la portada).
 
-- [ ] **9a. Catalogo como escaparate**: tabla `catalog_worlds` (portada, titulo, genero, etiquetas de tono, jugadores y duracion, autor, sinopsis sin spoilers, precio nulo o en centavos, origen oficial o comunidad) apuntando a una version de pack inmutable; `pack_activations.source` (gratis, desbloqueo, pase, compra, creador); `GET /api/v1/catalog/worlds` **publico** con filtros y paginacion (sin cuenta se ve; jugar pide cuenta); `/mundos` rediseñado con los estados de tarjeta de `docs/24` seccion 3 y "Jugar" que crea la mesa
-- [ ] **9b. Capitulos y camino de temporada**: ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
-- [ ] **9c. Pase de temporada**: compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
-- [ ] **9d. Compra directa de un mundo**: solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
+- [x] **9a. Catalogo como escaparate** (26-09, ver "Plan del 26-09", 3a): tabla `catalog_worlds` (portada, titulo, genero, etiquetas de tono, jugadores y duracion, autor, sinopsis sin spoilers, precio nulo o en centavos, origen oficial o comunidad) apuntando a una version de pack inmutable; `pack_activations.source` (gratis, desbloqueo, pase, compra, creador); `GET /api/v1/catalog/worlds` **publico** con filtros y paginacion (sin cuenta se ve; jugar pide cuenta); `/mundos` rediseñado con los estados de tarjeta de `docs/24` seccion 3 y "Jugar" que crea la mesa
+- [x] **9b. Capitulos y camino de temporada** (26-09, 3b): ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
+- [x] **9c. Pase de temporada** (26-09, 3c; sin `atomo-subscriptions`.): compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
+- [x] **9d. Compra directa de un mundo** (26-09, 3d): solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
 - [x] **Cronica compartible** (23-09, en produccion; `docs/24` seccion 4): cualquiera de la mesa pide el enlace desde Lectura, responde 404 hasta que acepta cada miembro actual (y vuelve a pendiente si entra alguien), cualquiera lo retira para siempre, opcion de no enseñar quien jugo. `/cronica/<token>` publica, por sesiones, con lo que hizo cada personaje y lo que paso; nunca bloques `system`. En la app desde el 23-09 por la tarde (Lectura)
 - [x] **Embudo** (23-09): `php artisan funnel:report [--weeks=8] [--exclude-domain=example.com]`, por semana de registro: con mesa, primer turno, segunda sesion, invitados por anfitrion, capitulos por persona y compras
 
@@ -560,8 +560,10 @@ dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
 **P3, deuda planificada (no ahora):**
 - [ ] **A4.** Catalogo comercial generico (`CatalogWorld`, estados, featured) a
   un `atomo/catalog` cuando haya un segundo producto que lo use.
-- [ ] **A5.** Build de la APK reproducible: `apps/mobile/scripts/release.sh` con
-  prebuild, gradle y firma, y `expo-doctor` en CI.
+- [x] **A5.** Build de la APK reproducible (27-09): `apps/mobile/scripts/release.sh`
+  (prebuild limpio, JDK 17, se niega sin la llave de subida y comprueba el
+  certificado) y `expo-doctor` en CI. Salieron dos fallas: `splash` duplicado
+  en `app.json` (el SDK 57 lo ignora) y cuatro parches de Expo atrasados.
 - [ ] **A8.** Partir `TableScreen` (878 web, 834 app) la proxima vez que se
   toque a fondo.
 
@@ -583,7 +585,7 @@ ROADMAP del monorepo, donde el CLAUDE.md de la API la busca).
 ## Pendientes del 25-09
 
 - [ ] **Claves de imagen rotadas**: Gabino creo claves nuevas de Gemini y OpenAI pero el servidor sigue con las viejas (que siguen activas). Subirlas con `read -rs` a `/root/.rpg/`, pasarlas al `.env` y revocar las viejas
-- [ ] **Stripe en real**: la cuenta espera la validacion de telefono, constancia fiscal y biometria; al quedar "Completo", seguir la lista de `rpg-ngn-api/deploy/README.md` y decidir USD o MXN
+- [x] **Stripe en real** (26-09): ver "Plan del 26-09", punto 1. Precios en USD, cobro en MXN
 - [x] **Verificar en el telefono** (APK v3, 25-09): el dado ya no cierra la app y las imagenes salen; en tablet el hero se ve bien. Lo que salio mal fueron las tiradas (abajo)
 - [x] **Tirada pedida por el director** (25-09, tras la mesa 39: con los dados en manos de la mesa, el DM inventaba un 13 y un 9 "del motor", narraba la consecuencia y el motor descartaba la linea en silencio; nadie le pedia tirar a Gabino). Tres capas que no se conocen: el DM **pide** (`ask_roll`, `turns.roll_requests`), la API **resuelve** (`DiceService`: `random_int`, evento y bloque `roll`, y la tirada es la respuesta del personaje, `turn_responses.roll`) y el cliente **presenta** (`DiceRoller`, hoy `SpriteDie` con la lamina; un dado 3D con fisicas entra cambiando una linea porque el resultado llega antes que la animacion). Si el turno solo exige tirada, no hay cuadro de texto: se tira directo. **Tres modos de dados**: `dice` (por omision desde hoy: el jugador suelta el dado en pantalla, el numero lo pone el servidor, lo escrito no cuenta), `engine` (el motor tira en silencio y narra al momento) y `table` (presencial, el numero escrito vale). El prompt cambia por modo (`withDiceMode`); red de seguridad: un numero inventado se vuelve peticion y el anfitrion lo ve. Hecho tambien: caras precargadas en la web (la primera tirada las pedia a mitad del giro), tarjeta apilada en el telefono, ventaja y desventaja con los dos d20 a la vista y el que no cuenta atenuado (dado y bloque). Las seis laminas (d4, d6, d8, d10, d12, d20) llegaron el 25-09 por la noche (`img/assets/dices/`, reticula 6x6): `tools/dice/crop-sheets.py` detecta las celdas ocupadas y recorta las 60 caras a 192 px para web y app. La mesa 39 ya esta en `dice` (cambiada en produccion el 25-09 al desplegar)
 

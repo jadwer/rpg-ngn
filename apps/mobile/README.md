@@ -96,6 +96,15 @@ pnpm --filter mobile doctor           # expo-doctor
 
 Exportar el bundle sin telefono, como hace el CI: `pnpm --filter mobile exec expo export --platform android` (debe listar seis `.ttf`).
 
+## APK de release
+
+```bash
+apps/mobile/scripts/release.sh               # arm64 con R8, la que se instala en el telefono
+apps/mobile/scripts/release.sh --universal   # cuatro arquitecturas, sin R8
+```
+
+Sube antes `android.versionCode` en `app.json` (una APK con el mismo numero no se instala encima). El script regenera `android/` con `expo prebuild --clean`, restaura el `package.json` que prebuild reescribe, compila con el JDK 17 y el SDK de `~/Android/Sdk`, se niega a seguir sin la llave de subida (`RPG_UPLOAD_*` en `~/.gradle/gradle.properties`) y comprueba el certificado de la firma. La APK queda en `dist/apk/ad-astra-mentis-v<versionCode>-arm64.apk`. `--no-clean` reusa `android/` para iterar rapido; la que se reparte sale sin esa opcion.
+
 ## Probar en el telefono
 
 Servicios como en `RUNBOOK.md` (engine, API, Metro). Expo Go 57 en cada telefono, misma Wi-Fi.
