@@ -1,16 +1,17 @@
 'use client'
 
 import { ApiError, NetworkError, type ApiClient, type BlockEnvelope, type TableState } from '@rpg-ngn/api-client'
+import { pollDelay } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * Polling de `GET /tables/{id}/state` cada 1.5 s (docs/11, D5). Los bloques
+ * Polling de `GET /tables/{id}/state` (docs/11, D5): cada 1.5 s con la mesa
+ * jugando, cada 5 s sin sesion, y nada con la pantalla oculta; al volver,
+ * en el acto (`pollDelay`, VAM del 19-09 S10). Los bloques
  * se acumulan por id y solo se pide lo posterior al ultimo; el turno, la
  * sesion y el viewer se reemplazan en cada vuelta. Con la red caida sigue
  * intentando y lo dice; un 401 corta y avisa para volver al acceso.
  */
-export const POLL_INTERVAL_MS = 1500
-
 export interface TableSnapshot {
   campaign: TableState['campaign']
   viewer: TableState['viewer']
@@ -46,13 +47,16 @@ export interface TableStateHook {
   refresh: () => void
 }
 
-export function useTableState(client: ApiClient, tableId: string, onUnauthorized: () => void, intervalMs = POLL_INTERVAL_MS): TableStateHook {
+/** `listening`: quien mira tiene "Leer lo nuevo" encendido; oculta, la mesa sigue llegando despacio. */
+export function useTableState(client: ApiClient, tableId: string, onUnauthorized: () => void, listening = false): TableStateHook {
   const [snapshot, setSnapshot] = useState<TableSnapshot | null>(null)
   const [connection, setConnection] = useState<Connection>('loading')
   const [error, setError] = useState<string | null>(null)
   const tickRef = useRef<(() => void) | null>(null)
   const unauthorizedRef = useRef(onUnauthorized)
   unauthorizedRef.current = onUnauthorized
+  const listeningRef = useRef(listening)
+  listeningRef.current = listening
 
   useEffect(() => {
     let alive = true
@@ -60,11 +64,15 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
     let inFlight = false
     let after = 0
     let envelopes: BlockEnvelope[] = []
+    let visible = typeof document === 'undefined' || document.visibilityState === 'visible'
+    let last: Pick<TableState, 'session' | 'turn'> = { session: null, turn: null }
 
     const schedule = () => {
       if (!alive) return
       if (timer) clearTimeout(timer)
-      timer = setTimeout(() => void tick(), intervalMs)
+      timer = null
+      const delay = pollDelay({ visible, listening: listeningRef.current, session: last.session, turn: last.turn })
+      if (delay !== null) timer = setTimeout(() => void tick(), delay)
     }
 
     const tick = async () => {
@@ -73,6 +81,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
       try {
         const state = await client.tableState(tableId, after)
         if (!alive) return
+        last = { session: state.session, turn: state.turn }
         if (state.blocks.length > 0) {
           envelopes = [...envelopes, ...state.blocks]
           after = state.lastBlockId
@@ -104,12 +113,22 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
     }
     void tick()
 
+    // Pestaña oculta: no se pregunta. Al volver, se pregunta ya.
+    const onVisibility = () => {
+      visible = document.visibilityState === 'visible'
+      if (visible) tickRef.current?.()
+      else schedule()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    const stopListening = () => document.removeEventListener('visibilitychange', onVisibility)
+
     return () => {
       alive = false
       tickRef.current = null
       if (timer) clearTimeout(timer)
+      stopListening()
     }
-  }, [client, tableId, intervalMs])
+  }, [client, tableId])
 
   const refresh = useCallback(() => tickRef.current?.(), [])
 

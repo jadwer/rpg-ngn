@@ -57,7 +57,9 @@ const NEAR_BOTTOM = 160
  */
 export function TableScreen({ client, table, me, user, pack, remoteNames = {}, onBack, onTableChanged, onUnauthorized }: Props) {
   const campaignId = table.campaignId
-  const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
+  // "Leer lo nuevo" encendido: con la pantalla oculta la mesa sigue llegando, despacio (S10).
+  const [listening, setListening] = useState(false)
+  const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized, listening)
   const narrator = useNarrator()
 
   const [mode, setMode] = useState<ViewMode>('narrative')
@@ -187,6 +189,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
   const veilTop = Math.round(windowHeight * (composing ? Math.min(veilRatio, 0.12) : veilRatio))
   const tts = useTts(blocks, { autoRead: true })
+  useEffect(() => setListening(tts.autoRead), [tts.autoRead])
   const pendingRoll = snapshot?.rolls?.pending ?? null
   const progress = useMemo(() => turnProgress(turn, viewer, pendingRoll), [turn, viewer, pendingRoll])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])

@@ -57,7 +57,9 @@ const TYPING_EVERY_MS = 4000
  */
 export function TableScreen({ client, table, user, pack, remoteNames = {}, onTableChanged, onUnauthorized, onLogout }: Props) {
   const campaignId = table.campaignId
-  const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized)
+  // "Leer lo nuevo" encendido: con la pantalla oculta la mesa sigue llegando, despacio (S10).
+  const [listening, setListening] = useState(false)
+  const { snapshot, connection, error, refresh } = useTableState(client, table.id, onUnauthorized, listening)
   const narrator = useNarrator()
 
   const [mode, setMode] = useState<ViewMode>('narrative')
@@ -232,6 +234,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const groups = useMemo(() => groupBlocks(withoutImages(blocks), mode), [blocks, mode])
   const sceneImage = useMemo(() => latestSceneImage(blocks), [blocks])
   const tts = useTts(blocks)
+  useEffect(() => setListening(tts.autoRead), [tts.autoRead])
 
   // Entrar en pantalla corta la lectura en curso: la cola que ya sonaba puede
   // llevar un bloque de anfitrion, y `useTts` no adopta la cola nueva hasta

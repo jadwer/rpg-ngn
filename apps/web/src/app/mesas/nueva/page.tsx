@@ -121,7 +121,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       // El ruleset lo declara el pack (`system`), no esta web. Antes se mandaba
       // siempre el del piloto y una mesa de intriga nacia con reglas de combate
       // (VAM del 19-09, motor A1). Sin version: el motor resuelve la unica que
-      // tiene; el 422 que lo vigile en la API esta pendiente (R2).
+      // tiene; la API rechaza con 422 un ruleset distinto al del pack (R2).
       const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
