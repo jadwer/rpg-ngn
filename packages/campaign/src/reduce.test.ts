@@ -88,6 +88,15 @@ describe('applyEvent', () => {
     expect(() => applyEvent(state, fortune, fantasyD20Lite)).toThrow(/character:/)
   })
 
+  it('lo que el DM marca como suyo no entra al registro que lee la mesa (VAM 19-09, S14)', async () => {
+    const { pack, events } = await loadPilot()
+    let state = reduce(events.slice(0, 1), { pack, ruleset: fantasyD20Lite })
+    state = applyEvent(state, base({ type: 'narration', payload: { text: 'Osric esconde la llave.' }, visibility: { layer: 'dm' } }), fantasyD20Lite)
+    state = applyEvent(state, base({ seq: 3, id: 'evt-00003', type: 'world_event', payload: { note: 'El pozo guarda algo.' }, visibility: { layer: 'dm' } }), fantasyD20Lite)
+    state = applyEvent(state, base({ seq: 4, id: 'evt-00004', type: 'narration', payload: { text: 'Llueve.' } }), fantasyD20Lite)
+    expect(state.narrative.log.map((e) => e.text)).toEqual(['Llueve.'])
+  })
+
   it('testigos, correcciones, narracion y discovery a un target que no es personaje', async () => {
     const { pack, events } = await loadPilot()
     let state = reduce(events.slice(0, 1), { pack, ruleset: fantasyD20Lite })

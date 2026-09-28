@@ -40,6 +40,19 @@ describe('characterSheet con el estado reducido del piloto', () => {
     expect(sheet.inventory).toEqual([{ id: 'llave-de-hierro-sin-cerradura', note: 'fortuna:19' }])
   })
 
+  it('la ficha de otro jugador llega solo con lo publico y no se cae (VAM 19-09, E1)', () => {
+    const calder = pilot.pack.characters.get('calder')!
+    const full = pilot.state.world.characters['calder']!
+    // Lo que la API manda de una ficha ajena: sin inventario, Fortuna ni custom.
+    const publico = { id: full.id, hp: full.hp, conditions: full.conditions } as unknown as typeof full
+    const sheet = characterSheet(calder, { visibility: characterVisibility(sessionOf(pilot.pack, '002'), calder, new Set(['calder'])), state: publico, modifier })
+    expect(sheet.inventoryHidden).toBe(true)
+    expect(sheet.inventory).toEqual([])
+    expect(sheet.ac).toBe(calder.ac ?? null)
+    expect(sheet.fortune).toBeNull()
+    expect(characterSheet(calder, { visibility: characterVisibility(sessionOf(pilot.pack, '002'), calder, new Set(['calder'])), state: full, modifier }).inventoryHidden).toBe(false)
+  })
+
   it('Brorg en la 003 sale velado: sin bio, objetivo, cita ni capacidades, pero con ataques y stats', () => {
     const brorg = pilot.pack.characters.get('brorg')!
     const played = everPlayed(pilot.pack.sessions.values())

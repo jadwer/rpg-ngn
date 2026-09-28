@@ -83,7 +83,7 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
 
       {tab === 'inventory' ? (
         <View style={styles.list}>
-          {sheet.inventory.length === 0 && sheet.memoriesRecovered === 0 ? <Text style={styles.empty}>No llevas nada todavía.</Text> : null}
+          {sheet.inventoryHidden ? <Text style={styles.empty}>Lo que lleva solo lo sabe quien lo juega.</Text> : sheet.inventory.length === 0 && sheet.memoriesRecovered === 0 ? <Text style={styles.empty}>No llevas nada todavía.</Text> : null}
           {sheet.inventory.map((item) => (
             <View key={item.id} style={styles.row}>
               <View style={styles.rowIcon}>

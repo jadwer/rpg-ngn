@@ -39,6 +39,11 @@ export interface SheetView {
   ac: number | null
   fortune: { result: number; tier: string } | null
   inventory: Array<{ id: string; note: string | null }>
+  /**
+   * El inventario de otro jugador no llega (la API solo manda lo publico de
+   * las fichas ajenas, VAM del 19-09 E1): no es que no lleve nada.
+   */
+  inventoryHidden: boolean
   conditions: string[]
   memoriesRecovered: number
   veiled: boolean
@@ -81,9 +86,11 @@ export function characterSheet(character: Character, options: SheetOptions): She
     roles: character.roles,
     stats: STAT_ORDER.map((key) => ({ key, label: STAT_LABELS[key], value: character.stats[key], modifier: formatModifier(modifier(character.stats[key])) })),
     hp: state ? { current: state.hp.current, max: state.hp.max } : { current: character.hp, max: character.hp },
-    ac: typeof state?.custom['ac'] === 'number' ? (state.custom['ac'] as number) : (character.ac ?? null),
+    // De las fichas ajenas la API no manda `custom` ni inventario: nada de leerlos a ciegas.
+    ac: typeof state?.custom?.['ac'] === 'number' ? (state.custom['ac'] as number) : (character.ac ?? null),
     fortune: state?.fortune ?? null,
     inventory: (state?.inventory ?? []).map((item) => ({ id: item.id, note: item.note ?? null })),
+    inventoryHidden: state !== undefined && state !== null && !Array.isArray(state.inventory),
     conditions: state?.conditions ?? [],
     memoriesRecovered: state?.memoriesRecovered ?? 0,
     veiled: visibility.veiled,
