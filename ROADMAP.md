@@ -672,8 +672,10 @@ decisiones en `docs/25-plan-administracion.md`.
 
 El modelo completo (free, temporadas, pases, suscripciones, social) vive en el repo privado: `rpg-ngn-api/docs/modelo-de-monetizacion.md`, porque trae precios y costos. Lo revisa el concilio antes de implementar. Sustituye al bosquejo de E12 en `docs/25`. Reglas de juego que salen de ahi y no dependen del concilio:
 
+- [x] **Paso 1, plan gratuito** (29-09, API `0b76b50`, monorepo `c509c47`, platform `ae7af9d`, desplegado): cubeta de 5 turnos que recarga uno cada 96 min y se gasta antes que la reserva; quien no paga lleva hasta 2 mesas activas como anfitrion, narra a los 10 s fijos y tiene 1 ilustracion por sesion; ser anfitrion pide el correo confirmado (entrar a mesas ajenas no); `plans.bypass` exime (god y admin por rol, cualquiera a mano desde el panel). Web y app dicen cuando llega el siguiente turno gratuito y bloquean el selector de cuenta atras. En Atomo: la verificacion de correo nunca habia funcionado (el enlace no llevaba la firma que exige la ruta); ahora va firmada y caduca, y el registro rechaza alias de un correo existente y buzones desechables
+- [ ] Paso 1, lo que falta: avisos de recarga (notificaciones de Expo en la app y Web Push en la web)
 - [ ] La tirada y la accion van en el mismo turno
-- [ ] El tope de jugadores lo pone la historia (quitar el tope fijo de 5 invitados)
+- [x] El tope de jugadores lo pone la historia (29-09): `catalog.players.max`, con techo de 9 en packs oficiales y 6 en los de usuario; Los Nueve Viajeros pasa a 9
 - [ ] Rehacer la ultima accion (de paga)
 - [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
 - [ ] Colaboraciones con streamers: despues de ajustar el producto base
