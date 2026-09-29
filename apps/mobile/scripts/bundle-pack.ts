@@ -41,14 +41,14 @@ statSync(packDir)
 const files = walk(packDir)
 const manifest = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) as { id: string; version: string }
 
-// La capa dm del pack (secrets/) nunca viaja al telefono: el manifiesto empaquetado la declara vacia.
+// La capa gm del pack (secrets/) nunca viaja al telefono: el manifiesto empaquetado la declara vacia.
 const isSecret = (f: string): boolean => relPosix(f).startsWith('secrets/')
 const textFiles = files.filter((f) => TEXT.test(f) && !isSecret(f))
 const imageFiles = files.filter((f) => IMAGE.test(f))
 const skipped = files.filter((f) => !TEXT.test(f) && !IMAGE.test(f))
 for (const file of skipped) console.warn(`omitido (ni texto ni imagen): ${relPosix(file)}`)
 const secretsOmitted = files.filter(isSecret).length
-if (secretsOmitted > 0) console.warn(`omitidos ${secretsOmitted} secretos del pack (capa dm, no se empaquetan)`)
+if (secretsOmitted > 0) console.warn(`omitidos ${secretsOmitted} secretos del pack (capa gm, no se empaquetan)`)
 
 function textOf(file: string): string {
   const text = readFileSync(file, 'utf8')

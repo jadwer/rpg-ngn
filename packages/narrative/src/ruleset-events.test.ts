@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { allowedEventFor } from './model-dm.js'
-import { DM_SYSTEM_PROMPT, DM_SYSTEM_PROMPT_COMPACT, systemPromptFor } from './prompt.js'
+import { allowedEventFor } from './model-gm.js'
+import { GM_SYSTEM_PROMPT, GM_SYSTEM_PROMPT_COMPACT, systemPromptFor } from './prompt.js'
 
 /**
  * El prompt y los eventos aceptados dependen del ruleset. La mesa 4 de
@@ -10,9 +10,9 @@ import { DM_SYSTEM_PROMPT, DM_SYSTEM_PROMPT_COMPACT, systemPromptFor } from './p
  */
 describe('prompt por ruleset', () => {
   it('el d20 recibe el prompt de siempre, byte a byte', () => {
-    expect(systemPromptFor('fantasy-d20-lite')).toBe(DM_SYSTEM_PROMPT)
-    expect(systemPromptFor(undefined)).toBe(DM_SYSTEM_PROMPT)
-    expect(systemPromptFor('fantasy-d20-lite', true)).toBe(DM_SYSTEM_PROMPT_COMPACT)
+    expect(systemPromptFor('fantasy-d20-lite')).toBe(GM_SYSTEM_PROMPT)
+    expect(systemPromptFor(undefined)).toBe(GM_SYSTEM_PROMPT)
+    expect(systemPromptFor('fantasy-d20-lite', true)).toBe(GM_SYSTEM_PROMPT_COMPACT)
   })
 
   it('la corte ofrece credito, sospecha y pistas, y no puntos de vida', () => {
@@ -23,12 +23,12 @@ describe('prompt por ruleset', () => {
     expect(prompt).not.toContain('"op":"hp"')
     expect(prompt).not.toContain('"op":"memory_recovered"')
     // El tronco (contrato de realidad, agencia, estilo, formato) es el mismo.
-    expect(prompt.startsWith(DM_SYSTEM_PROMPT.slice(0, DM_SYSTEM_PROMPT.indexOf('# Eventos que puedes proponer')))).toBe(true)
+    expect(prompt.startsWith(GM_SYSTEM_PROMPT.slice(0, GM_SYSTEM_PROMPT.indexOf('# Eventos que puedes proponer')))).toBe(true)
 
     const compact = systemPromptFor('court-intrigue', true)
     expect(compact).toContain('"op":"suspicion"')
     expect(compact).not.toContain('"op":"hp"')
-    expect(compact.length).toBeLessThan(DM_SYSTEM_PROMPT.length)
+    expect(compact.length).toBeLessThan(GM_SYSTEM_PROMPT.length)
   })
 })
 
@@ -41,10 +41,10 @@ describe('prompt de la mascarada', () => {
     expect(prompt).not.toContain('"op":"hp"')
     expect(prompt).not.toContain('"op":"suspicion"')
     expect(prompt).toContain('Nunca digas al jugador lo que un NPC siente')
-    expect(prompt.startsWith(DM_SYSTEM_PROMPT.slice(0, DM_SYSTEM_PROMPT.indexOf('# Eventos que puedes proponer')))).toBe(true)
+    expect(prompt.startsWith(GM_SYSTEM_PROMPT.slice(0, GM_SYSTEM_PROMPT.indexOf('# Eventos que puedes proponer')))).toBe(true)
     const compact = systemPromptFor('masquerade', true)
     expect(compact).toContain('"op":"bond"')
-    expect(compact.length).toBeLessThan(DM_SYSTEM_PROMPT.length)
+    expect(compact.length).toBeLessThan(GM_SYSTEM_PROMPT.length)
   })
 })
 
@@ -124,7 +124,7 @@ describe('lo que pasa en una escena social', () => {
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'relationship', who: 'character:calder', with: 'npc:tomas', delta: 1 }] }).success).toBe(false)
   })
 
-  it('el prompt se las ofrece al DM en los tres rulesets', () => {
+  it('el prompt se las ofrece al GM en los tres rulesets', () => {
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       const prompt = systemPromptFor(id)
       expect(prompt).toContain('"type":"npc_action"')
@@ -139,7 +139,7 @@ describe('escenas y paso del tiempo', () => {
 
   it('los tres rulesets aceptan abrir y cerrar escena, con o sin worldTime', () => {
     // El reductor ya guardaba scene_started/scene_closed y ya aplicaba
-    // worldTime; el DM no podia emitirlos, asi que una sesion nueva
+    // worldTime; el GM no podia emitirlos, asi que una sesion nueva
     // arrastraba el momento de la anterior (20-09).
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       const allowed = allowedEventFor(id)
@@ -156,7 +156,7 @@ describe('escenas y paso del tiempo', () => {
     expect(allowed.safeParse({ type: 'scene_started', payload: {} }).success).toBe(false)
   })
 
-  it('el prompt se las ofrece al DM', () => {
+  it('el prompt se las ofrece al GM', () => {
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       expect(systemPromptFor(id)).toContain('"type":"scene_started"')
       expect(systemPromptFor(id)).toContain('"worldTime"')
@@ -166,7 +166,7 @@ describe('escenas y paso del tiempo', () => {
 
 describe('condiciones sobre NPC', () => {
   it('un NPC puede quedar receloso, y el sujeto sigue sin poder ser otra cosa', () => {
-    // Lo que mas intentaba el DM y mas se descartaba: los rulesets solo
+    // Lo que mas intentaba el GM y mas se descartaba: los rulesets solo
     // saben aplicar condiciones a personajes jugadores (20-09).
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       const allowed = allowedEventFor(id)
@@ -226,7 +226,7 @@ describe('misiones', () => {
 })
 
 describe('NPCs improvisados', () => {
-  it('un NPC que el DM inventa sobre la marcha tambien puede actuar', () => {
+  it('un NPC que el GM inventa sobre la marcha tambien puede actuar', () => {
     // El pack piloto no declara ningun NPC y su historia esta llena de
     // ellos (Tomas, Osric, Bren). Un bloque `dialogue` de un desconocido ya
     // se aceptaba; su npc_action se descartaba (20-09).
@@ -257,7 +257,7 @@ describe('ubicacion de los personajes', () => {
     expect(allowed.safeParse({ type: 'state_change', effects: [{ op: 'move', who: 'character:zahira' }] }).success).toBe(false)
   })
 
-  it('el prompt le pide al DM que lo diga en el mismo turno', () => {
+  it('el prompt le pide al GM que lo diga en el mismo turno', () => {
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       expect(systemPromptFor(id)).toContain('"op":"move"')
       expect(systemPromptFor(id)).toContain('en ese mismo turno')

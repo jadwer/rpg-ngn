@@ -1,5 +1,5 @@
 import type { OwnKey } from '@rpg-ngn/api-client'
-import { describePreset } from './dm-presets.js'
+import { describePreset } from './gm-presets.js'
 
 /**
  * Clave propia del usuario (BYOK): lo que la pantalla necesita saber sin
@@ -28,7 +28,7 @@ export function ownKeyLabel(key: OwnKey): string {
  * que pasa si la pone.
  */
 export function ownKeyStatus(key: OwnKey): string {
-  if (!key.configured) return 'Sin clave propia. Tus mesas usan el DM del servidor.'
+  if (!key.configured) return 'Sin clave propia. Tus mesas usan el GM del servidor.'
   const cola = key.hint ? ` terminada en ${key.hint}` : ''
   const modelo = key.model ? `, modelo ${key.model}` : ''
   return `Clave guardada${cola}${modelo}. Tus mesas la usan y no gastan cupo.`
@@ -55,7 +55,7 @@ export function ownKeyProblem(credential: string): string | null {
 
 /** Lo que se avisa antes de quitar una clave. */
 export function removeOwnKeyWarning(key: OwnKey): string {
-  return `Se borrará tu clave de ${describePreset(key.preset)}. Tus mesas volverán al DM del servidor y gastarán cupo.`
+  return `Se borrará tu clave de ${describePreset(key.preset)}. Tus mesas volverán al GM del servidor y gastarán cupo.`
 }
 
 /**

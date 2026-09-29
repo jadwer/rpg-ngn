@@ -26,7 +26,7 @@ export interface LoadedPack {
   maps: Map<string, PackMap>
   quests: Map<string, Quest>
   sessions: Map<string, Session>
-  /** Capa `dm`: solo la lee el motor y el DM; nunca una proyeccion de jugador. */
+  /** Capa `gm`: solo la lee el motor y el GM; nunca una proyeccion de jugador. */
   secrets: Map<string, Secret>
 }
 

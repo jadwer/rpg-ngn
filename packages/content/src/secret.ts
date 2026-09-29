@@ -3,7 +3,7 @@ import { EntityRef, FactRef, KebabId } from './common.js'
 import { EventType } from './event.js'
 
 /**
- * Secreto del pack: la capa `dm` de docs/04 y docs/08 como datos. Un
+ * Secreto del pack: la capa `gm` de docs/04 y docs/08 como datos. Un
  * secreto es un hecho del mundo que existe pero que la party no sabe. Su
  * texto y sus `keywords` entran al contexto del modelo marcados como no
  * revelables, nunca a una proyeccion de jugador ni al visor de fichas.
@@ -30,7 +30,7 @@ export const RevealOnEvent = z.strictObject({
 })
 export type RevealOnEvent = z.infer<typeof RevealOnEvent>
 
-/** Solo lo revela el DM a proposito, con un evento `secret_revealed`. */
+/** Solo lo revela el GM a proposito, con un evento `secret_revealed`. */
 export const RevealManual = z.strictObject({ manual: z.literal(true) })
 
 export const RevealWhen = z.union([RevealOnEvent, RevealManual])
@@ -44,7 +44,7 @@ export const SecretSubjectRef = z
 export const Secret = z.strictObject({
   id: KebabId,
   about: SecretSubjectRef,
-  /** El hecho, escrito para el DM. */
+  /** El hecho, escrito para el GM. */
   text: z.string().min(1),
   /**
    * Marcadores del secreto en prosa: frases que solo aparecen si se esta
@@ -55,7 +55,7 @@ export const Secret = z.strictObject({
   revealWhen: RevealWhen,
   /** Quien puede soltarlo en la ficcion (un NPC, normalmente). */
   revealedBy: EntityRef.optional(),
-  /** Nota para el DM humano o para quien mantiene el pack. */
+  /** Nota para el GM humano o para quien mantiene el pack. */
   note: z.string().optional(),
 })
 

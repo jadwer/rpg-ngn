@@ -88,11 +88,11 @@ describe('applyEvent', () => {
     expect(() => applyEvent(state, fortune, fantasyD20Lite)).toThrow(/character:/)
   })
 
-  it('lo que el DM marca como suyo no entra al registro que lee la mesa (VAM 19-09, S14)', async () => {
+  it('lo que el GM marca como suyo no entra al registro que lee la mesa (VAM 19-09, S14)', async () => {
     const { pack, events } = await loadPilot()
     let state = reduce(events.slice(0, 1), { pack, ruleset: fantasyD20Lite })
-    state = applyEvent(state, base({ type: 'narration', payload: { text: 'Osric esconde la llave.' }, visibility: { layer: 'dm' } }), fantasyD20Lite)
-    state = applyEvent(state, base({ seq: 3, id: 'evt-00003', type: 'world_event', payload: { note: 'El pozo guarda algo.' }, visibility: { layer: 'dm' } }), fantasyD20Lite)
+    state = applyEvent(state, base({ type: 'narration', payload: { text: 'Osric esconde la llave.' }, visibility: { layer: 'gm' } }), fantasyD20Lite)
+    state = applyEvent(state, base({ seq: 3, id: 'evt-00003', type: 'world_event', payload: { note: 'El pozo guarda algo.' }, visibility: { layer: 'gm' } }), fantasyD20Lite)
     state = applyEvent(state, base({ seq: 4, id: 'evt-00004', type: 'narration', payload: { text: 'Llueve.' } }), fantasyD20Lite)
     expect(state.narrative.log.map((e) => e.text)).toEqual(['Llueve.'])
   })
@@ -136,7 +136,7 @@ describe('diffSnapshot', () => {
 })
 
 describe('relaciones con NPC', () => {
-  /** Un `state_change` con el efecto `relationship`, como lo propone el DM. */
+  /** Un `state_change` con el efecto `relationship`, como lo propone el GM. */
   const trato = (delta: number, seq: number): CampaignEvent =>
     ({
       id: `evt-rel-${seq}`,
@@ -159,7 +159,7 @@ describe('relaciones con NPC', () => {
     state = applyEvent(state, trato(-3, seq + 2), fantasyD20Lite)
     expect((state.world.npcs['tomas']?.custom['relationships'] as Record<string, number>)['character:calder']).toBe(-1)
 
-    // Tope: por mucho que el DM insista, de -5 a 5.
+    // Tope: por mucho que el GM insista, de -5 a 5.
     for (let i = 3; i <= 8; i++) state = applyEvent(state, trato(3, seq + i), fantasyD20Lite)
     expect((state.world.npcs['tomas']?.custom['relationships'] as Record<string, number>)['character:calder']).toBe(5)
 
@@ -256,7 +256,7 @@ describe('rumores oidos', () => {
     expect(rumores[0]?.from).toBe('npc:tomas')
     // Un rumor NO es un hecho: no entra en lo que el personaje sabe.
     expect(Object.keys(state.knowledge['zahira']?.facts ?? {})).toHaveLength(factsAntes)
-    // Pero si queda en la cronica, para que el DM pueda retomarlo.
+    // Pero si queda en la cronica, para que el GM pueda retomarlo.
     expect(state.narrative.log.some((e) => e.text.includes('la campana suena sola'))).toBe(true)
   })
 })
@@ -313,7 +313,7 @@ describe('donde esta cada personaje', () => {
     state = applyEvent(state, mover('capilla-de-los-mineros', seq + 1), fantasyD20Lite)
     expect(state.world.characters['zahira']?.location).toBe('capilla-de-los-mineros')
 
-    // Acepta tambien la referencia con prefijo, como la escribe el DM.
+    // Acepta tambien la referencia con prefijo, como la escribe el GM.
     state = applyEvent(state, mover('location:segundo-nivel', seq + 2), fantasyD20Lite)
     expect(state.world.characters['zahira']?.location).toBe('segundo-nivel')
 

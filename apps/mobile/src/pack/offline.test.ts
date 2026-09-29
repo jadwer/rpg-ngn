@@ -8,7 +8,7 @@ import { loadOfflineCampaign, PACK_OPTION } from './offline'
 const repoRoot = resolve(import.meta.dirname, '../../../..')
 
 describe('pack empaquetado', () => {
-  it('coincide byte a byte con content/packs/pilot y campaigns/pilot, sin la capa dm; si no, correr bundle-pack', () => {
+  it('coincide byte a byte con content/packs/pilot y campaigns/pilot, sin la capa gm; si no, correr bundle-pack', () => {
     for (const [path, text] of Object.entries(packFiles)) {
       expect(path.startsWith('secrets/'), path).toBe(false)
       const original = readFileSync(join(repoRoot, 'content/packs/pilot', path), 'utf8')

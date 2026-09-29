@@ -51,8 +51,8 @@ const NEAR_BOTTOM = 160
 
 /**
  * La mesa en linea: polling del estado, las dos vistas sobre los bloques del
- * DM, cuadro de respuesta, cierre de turno, mando del anfitrion y fichas con
- * el estado vivo de las proyecciones. El DM es la IA; el anfitrion es la
+ * GM, cuadro de respuesta, cierre de turno, mando del anfitrion y fichas con
+ * el estado vivo de las proyecciones. El GM es la IA; el anfitrion es la
  * persona con el asiento `host` de la API.
  */
 export function TableScreen({ client, table, me, user, pack, remoteNames = {}, onBack, onTableChanged, onUnauthorized }: Props) {
@@ -233,7 +233,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
 
   const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
-  // La tirada que pidio el DM: el numero lo pone el servidor y queda como la respuesta del turno.
+  // La tirada que pidio el GM: el numero lo pone el servidor y queda como la respuesta del turno.
   const rollTurnId = turn?.id ?? null
   // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
   const moreIdeas = useCallback(async () => {
@@ -637,7 +637,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
                 <Text key={step} style={styles.startStep}>{`${i + 1}. ${step}`}</Text>
               ))}
               {start.action ? <Button label={start.action} primary busy={busy} onPress={() => openSession(suggestedCode, null)} /> : null}
-              {start.action ? <Text style={styles.startHint}>Para otro código o una nota al DM, usa el mando del anfitrión de abajo.</Text> : null}
+              {start.action ? <Text style={styles.startHint}>Para otro código o una nota al GM, usa el mando del anfitrión de abajo.</Text> : null}
             </View>
           ) : null}
           {progress.narrating ? (

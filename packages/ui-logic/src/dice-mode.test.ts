@@ -18,7 +18,7 @@ describe('dice-mode', () => {
     expect(isDiceMode('engine')).toBe(true)
     expect(isDiceMode('dice')).toBe(true)
     expect(isDiceMode('table')).toBe(true)
-    expect(isDiceMode('dm')).toBe(false)
+    expect(isDiceMode('gm')).toBe(false)
   })
 
   it('explica cada modo por lo que le pasa a quien juega', () => {

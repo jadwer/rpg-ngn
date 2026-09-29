@@ -1,12 +1,12 @@
 # rpg-ngn
 
-Motor agnostico para campañas de rol de mesa dirigidas por un DM asistido por IA.
+Motor agnostico para campañas de rol de mesa dirigidas por un GM asistido por IA.
 
 Agnostico en cuatro ejes:
 
 - **Setting**: el mundo, los personajes y el lore viven en content packs versionados, no en el codigo.
 - **Sistema de juego**: el core son primitivas; cada ruleset define como se combinan (d20 fantasy, sistemas elementales, otros).
-- **Proveedor LLM**: el DM narra a traves de una interfaz de proveedor con adapters intercambiables.
+- **Proveedor LLM**: el GM narra a traves de una interfaz de proveedor con adapters intercambiables.
 - **Cliente**: el motor no sabe si lo consume una web, una app Expo o un CLI.
 
 ```
@@ -35,9 +35,9 @@ La plataforma (cuentas, mesas, cobro, event store) vive en un repo privado apart
 ## Documentos clave
 
 - [Vision](docs/00-vision.md)
-- [Contrato de realidad](docs/06-reality-contract.md) (la filosofia del DM)
+- [Contrato de realidad](docs/06-reality-contract.md) (la filosofia del GM)
 - [Modelo de eventos y conocimiento](docs/08-event-model.md) (el corazon tecnico)
-- [Contrato del DM](docs/03-dm-contract.md)
+- [Contrato del GM](docs/03-gm-contract.md)
 - [Especificacion de content packs](docs/05-content-pack-spec.md)
 - [Alcance del SaaS](docs/09-saas-scope.md) (lo que pidio la mesa)
 - [ADR de stack y arquitectura](docs/11-adr-stack-saas.md)

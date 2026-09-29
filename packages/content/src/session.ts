@@ -39,9 +39,9 @@ export const Session = z.strictObject({
   availableCharacters: z.array(KebabId).optional(),
   /**
    * Lugar donde arranca la party al abrir la sesion. Sin esto nadie tiene
-   * ubicacion hasta que el DM mueva a alguien, y el mapa de la mesa sale
+   * ubicacion hasta que el GM mueva a alguien, y el mapa de la mesa sale
    * vacio de gente toda la primera escena. El autor del pack decide el
-   * sitio (el baile empieza en el salon); el DM los mueve despues.
+   * sitio (el baile empieza en el salon); el GM los mueve despues.
    */
   startLocation: KebabId.optional(),
   party: z.array(PartyMember),

@@ -29,7 +29,7 @@ export interface PlayerKnowledge {
   witnessed: string[]
   /**
    * Secretos del pack revelados a este personaje (knowledge.ts). Solo
-   * aparece cuando hay alguno: los snapshots anteriores a la capa dm no
+   * aparece cuando hay alguno: los snapshots anteriores a la capa gm no
    * cambian de forma.
    */
   secrets?: Record<string, RevealedSecret>
@@ -45,7 +45,7 @@ export interface HeardRumor {
   text: string
   /** De quien vino, si se sabe. */
   from?: string
-  /** El DM o el pack saben que es falso; el jugador no lo ve. */
+  /** El GM o el pack saben que es falso; el jugador no lo ve. */
   false?: boolean
   event: string
   seq: number
@@ -61,7 +61,7 @@ export interface QuestProgress {
   status: 'active' | 'done' | 'failed'
   /** Ids de objetivos cumplidos, en el orden en que se cumplieron. */
   completed: string[]
-  /** Ultima nota del DM sobre esta mision. */
+  /** Ultima nota del GM sobre esta mision. */
   note?: string
   seq: number
 }

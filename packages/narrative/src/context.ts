@@ -3,7 +3,7 @@ import { isManualReveal, refId, refKind, type CampaignEvent, type Character, typ
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
 import { secretTouchesScene } from './lint.js'
-import type { DMTurnContext } from './provider.js'
+import type { GMTurnContext } from './provider.js'
 
 /**
  * Context builder de cuatro capas (docs/04): mundo y premisa, party con su
@@ -12,7 +12,7 @@ import type { DMTurnContext } from './provider.js'
  * la memoria se recorta por longitud para que el prompt no crezca con la
  * campaña.
  *
- * Capa `dm` del pack (secrets/): entra aqui, marcada como no revelable y
+ * Capa `gm` del pack (secrets/): entra aqui, marcada como no revelable y
  * con quien de la party ya la conoce, y nunca en las proyecciones del
  * jugador. El lint (lint.ts) vigila que el modelo la respete.
  */
@@ -46,7 +46,7 @@ export interface BuiltContext {
   party: string[]
 }
 
-export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEFAULT_BUDGET): BuiltContext {
+export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEFAULT_BUDGET): BuiltContext {
   const session = ctx.state.meta.sessions[ctx.turn.sessionId]
   const party = session?.party ?? []
 
@@ -54,22 +54,22 @@ export function buildTurnContext(ctx: DMTurnContext, budget: ContextBudget = DEF
     worldLayer(ctx, budget, party),
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
-    dmLayer(ctx, party, budget),
+    gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx)),
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
 }
 
-// Capa dm: secretos del pack con su estado de revelacion para la party
+// Capa gm: secretos del pack con su estado de revelacion para la party
 // presente. Solo los que la escena roza (`secretTouchesScene`): lo que el
 // modelo no tiene delante no lo puede parafrasear.
-function dmLayer(ctx: DMTurnContext, party: string[], budget: ContextBudget): string | null {
+function gmLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string | null {
   const secrets = [...ctx.pack.secrets.values()].filter((s) => secretTouchesScene(s, ctx, party))
   if (secrets.length === 0) return null
   const known = secretsKnownBy(ctx.state, party)
   const names = (ids: string[]): string => ids.map((id) => ctx.pack.characters.get(id)?.name ?? id).join(', ')
-  const lines: string[] = ['# Capa del DM: secretos', '', 'Hechos que existen en el mundo y que la party NO ha descubierto salvo donde se indica. No los cuentes ni los insinúes con estas palabras a quien no los conoce; si la escena los revela de verdad, emite antes el evento secret_revealed.']
+  const lines: string[] = ['# Capa del GM: secretos', '', 'Hechos que existen en el mundo y que la party NO ha descubierto salvo donde se indica. No los cuentes ni los insinúes con estas palabras a quien no los conoce; si la escena los revela de verdad, emite antes el evento secret_revealed.']
 
   for (const secret of secrets) {
     const knowers = [...(known.get(secret.id) ?? [])]
@@ -93,7 +93,7 @@ function describeReveal(secret: Secret): string {
 }
 
 // Capa a: mundo y premisa.
-function worldLayer(ctx: DMTurnContext, budget: ContextBudget, party: string[] = []): string {
+function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] = []): string {
   const { manifest } = ctx.pack
   const lines: string[] = ['# Mundo y premisa', '']
   lines.push(`Campaña: ${manifest.name}${manifest.tagline ? ` (${manifest.tagline})` : ''}`)
@@ -123,7 +123,7 @@ function worldLayer(ctx: DMTurnContext, budget: ContextBudget, party: string[] =
 
   const locations = [...ctx.pack.locations.values()]
   if (locations.length) {
-    // Con `connections` el DM sabe que caminos existen: del comedor no se
+    // Con `connections` el GM sabe que caminos existen: del comedor no se
     // pasa a la biblioteca sin cruzar el salon. Y con quien esta en cada
     // sitio puede narrar quien se cruza con quien.
     const dondeEsta = new Map<string, string[]>()
@@ -182,7 +182,7 @@ function worldLayer(ctx: DMTurnContext, budget: ContextBudget, party: string[] =
 }
 
 // Capa b: party con estado vivo.
-function partyLayer(ctx: DMTurnContext, party: string[], budget: ContextBudget): string {
+function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string {
   const lines: string[] = ['# Party presente', '']
   if (party.length === 0) lines.push('(nadie en escena)')
 
@@ -239,7 +239,7 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
   }
   const facts = Object.keys(state.knowledge[id]?.facts ?? {})
   if (facts.length) lines.push(`Sabe (descubierto): ${facts.map((f) => refId(f)).join(', ')}.`)
-  // Lo que ha oido, aparte de lo que sabe: un rumor puede ser falso, y el DM
+  // Lo que ha oido, aparte de lo que sabe: un rumor puede ser falso, y el GM
   // tiene que poder jugarlo como tal.
   const rumors = state.knowledge[id]?.rumors ?? []
   if (rumors.length) lines.push(`Ha oído (rumores, no hechos): ${rumors.map((r) => (r.false ? `${r.text} [FALSO]` : r.text)).join('; ')}.`)
@@ -260,7 +260,7 @@ function refName(pack: LoadedPack, ref: string): string {
 }
 
 // Capa c: memoria, recortada por longitud.
-function memoryLayer(ctx: DMTurnContext, session: SessionRecord | undefined, budget: ContextBudget): string {
+function memoryLayer(ctx: GMTurnContext, session: SessionRecord | undefined, budget: ContextBudget): string {
   const lines: string[] = ['# Crónica', '']
   const startedSeq = session?.startedSeq ?? Number.POSITIVE_INFINITY
   let remaining = budget.memoryChars
@@ -321,7 +321,7 @@ function describeEvent(event: CampaignEvent, pack: LoadedPack): string | null {
     case 'scene_started':
     case 'scene_closed': {
       const text = typeof event.payload?.['text'] === 'string' ? event.payload['text'] : ''
-      return text ? `DM: ${clip(text, 400)}` : null
+      return text ? `GM: ${clip(text, 400)}` : null
     }
     case 'npc_action': {
       const text = typeof event.payload?.['text'] === 'string' ? event.payload['text'] : (event.declared ?? '')
@@ -385,7 +385,7 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
 
 // Capa d: el turno.
 /** Si la campaña ya jugo otra sesion antes de esta: entonces la apertura trae "Anteriormente...". */
-export function hasPreviousSession(ctx: Pick<DMTurnContext, 'state' | 'turn'>): boolean {
+export function hasPreviousSession(ctx: Pick<GMTurnContext, 'state' | 'turn'>): boolean {
   return Object.values(ctx.state.meta.sessions).some((s) => s.id !== ctx.turn.sessionId && s.status === 'closed')
 }
 
@@ -412,7 +412,7 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
       const name = pack.characters.get(response.characterId)?.name ?? response.characterId
       const late = response.late ? ' [llegó tarde, del turno anterior]' : ''
       if (response.roll) {
-        // La tirada que el DM pidio, ya registrada por la API cuando el
+        // La tirada que el GM pidio, ya registrada por la API cuando el
         // jugador solto el dado: ahora toca narrar su consecuencia, no
         // volver a tirarla.
         const r = response.roll

@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 describe('modo pantalla como asiento', () => {
   const bloques = [
     narration('b1', 'La posada huele a estofado.'),
-    system('b2', { text: 'El DM propuso 1 linea que no se pudo aplicar.', audience: 'host', detail: 'revela el secreto osric-esta-abajo' }),
+    system('b2', { text: 'El GM propuso 1 linea que no se pudo aplicar.', audience: 'host', detail: 'revela el secreto osric-esta-abajo' }),
     narration('b3', 'Afuera suena la campana.'),
   ]
 

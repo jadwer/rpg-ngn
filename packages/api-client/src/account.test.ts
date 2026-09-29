@@ -99,15 +99,15 @@ describe('cuenta', () => {
 describe('ajustes de la mesa', () => {
   it('lista presets, prueba el elegido y guarda settings entero', async () => {
     const { api, calls } = client({
-      'GET /api/v1/dm/presets': { body: { data: [{ name: 'scripted', kind: 'scripted', model: null, configured: true, default: false }, { name: 'anthropic', kind: 'anthropic', model: 'claude-sonnet-5', configured: true, default: true }], meta: { default: 'anthropic' } } },
-      'POST /api/v1/tables/2/dm/probe': { body: { data: { ok: true, preset: 'anthropic', provider: 'anthropic', model: 'claude-haiku-4-5', message: 'disponible' } } },
+      'GET /api/v1/gm/presets': { body: { data: [{ name: 'scripted', kind: 'scripted', model: null, configured: true, default: false }, { name: 'anthropic', kind: 'anthropic', model: 'claude-sonnet-5', configured: true, default: true }], meta: { default: 'anthropic' } } },
+      'POST /api/v1/tables/2/gm/probe': { body: { data: { ok: true, preset: 'anthropic', provider: 'anthropic', model: 'claude-haiku-4-5', message: 'disponible' } } },
       'PATCH /api/v1/tables/2': { body: { data: { type: 'tables', id: '2', attributes: { settings: { premise: 'Llueve.', provider: { preset: 'anthropic', model: 'claude-haiku-4-5' } } } } } },
     })
-    const presets = await api.listDmPresets()
+    const presets = await api.listGmPresets()
     expect(presets.defaultPreset).toBe('anthropic')
     expect(presets.presets.map((p) => p.name)).toEqual(['scripted', 'anthropic'])
 
-    const probe = await api.probeDm(2, { preset: 'anthropic', model: 'claude-haiku-4-5' })
+    const probe = await api.probeGm(2, { preset: 'anthropic', model: 'claude-haiku-4-5' })
     expect(probe.ok).toBe(true)
     expect(JSON.parse((calls[1]?.init.body as string | undefined) ?? '{}')).toEqual({ preset: 'anthropic', model: 'claude-haiku-4-5' })
 

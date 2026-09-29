@@ -178,7 +178,7 @@ Terminos tecnicos permitidos:
 - Narrative Provider
 - Campaign
 - Engine
-- DM
+- GM
 - Provider Adapter
 
 La comunicacion tecnica debe explicar el producto sin convertir la marca en documentacion de API.

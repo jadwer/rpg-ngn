@@ -35,11 +35,11 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
-  /** Suelta el dado de la tirada que el DM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
+  /** Suelta el dado de la tirada que el GM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
   onRoll: () => Promise<RollOutcome>
   /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
   onRolled: () => void
-  /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
+  /** Ideas de accion del GM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
   /** Si puede pedir "Otras" ideas y en que condiciones. */
   ideas: TableState['ideas']
@@ -54,7 +54,7 @@ interface Props {
 /**
  * Cuadro de respuesta siempre visible (docs/09): quien respondio y quien
  * falta (nombres, nunca textos), el cuadro para escribir si toca, y el
- * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
+ * cierre cuando no falta nadie. Mientras el GM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
 export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, ideas, onMoreIdeas, autoOpen, onComposingChange }: Props) {
@@ -161,10 +161,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
 
 
       {outOfTurns ? <Text style={styles.error}>{outOfTurns}</Text> : null}
-      {turn?.error ? <Text style={styles.error}>{`El DM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
+      {turn?.error ? <Text style={styles.error}>{`El GM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
 
-      {/* El DM pidio una tirada: el turno de este personaje es soltar el dado,
+      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
           no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
       {turn?.status === 'open' && hasCharacter && activeRoll ? (
         <View style={styles.rollCard}>
@@ -250,7 +250,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
             <Text style={styles.hideText}>Ocultar</Text>
           </Pressable>
           {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
-          {/* Ideas del DM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
+          {/* Ideas del GM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {(shownIdeas.length > 0 || moreButton) && !focused ? (
             showIdeas ? (
               <View style={styles.ideas}>

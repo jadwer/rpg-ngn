@@ -74,11 +74,11 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
   porque no dependen del sistema de juego: `move` (donde esta cada uno),
   `relationship` (como trata un NPC a un personaje, -5 a 5) y `condition`
   cuando el sujeto es un NPC.
-- **Eventos del dominio** que el DM puede emitir: `roll`, `discovery`,
+- **Eventos del dominio** que el GM puede emitir: `roll`, `discovery`,
   `rumor_heard`, `quest_update`, `npc_action`, `scene_started`/`scene_closed`,
   `world_event`, `inventory_change`, `correction`.
 - **Capa de conocimiento por jugador**: `visibility.layer`
-  (canon/campaign/player/dm), testigos, y un lint que corta si el DM va a
+  (canon/campaign/player/gm), testigos, y un lint que corta si el GM va a
   filtrar un secreto que la mesa no conoce.
 
 ### Mesa y turnos
@@ -88,7 +88,7 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
   cualquiera (D-UX-3, 23-09); el anfitrion puede forzar el cierre si falta
   alguien.
 - **Dados pre-tirados**: con `dice: engine` (por omision) el motor tira un d20
-  por personaje que declaro **antes** de llamar al modelo y se lo enseña. El DM
+  por personaje que declaro **antes** de llamar al modelo y se lo enseña. El GM
   narra la consecuencia en el mismo turno. Modo `table` para dados fisicos.
 - **Reintento silencioso**: si el modelo falla, se reintenta una vez borrando
   los bloques del intento fallido. Si el segundo sale, solo el anfitrion ve el
@@ -97,11 +97,11 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 - **Apertura de sesion**: presenta titulo, briefing y como se juega del pack, y
   **coloca a la party** en el lugar que declara la sesion (`startLocation`).
 - **Presencia**: "me tengo que ir" / "he vuelto". El ausente no cuenta para
-  cerrar el turno y el DM recibe aviso para apartar al personaje sin matarlo.
+  cerrar el turno y el GM recibe aviso para apartar al personaje sin matarlo.
 - **Eleccion de personaje**: cada miembro elige al entrar, el primero que llega
   se lo queda.
 - **Personalidad por jugador** (600 caracteres, con plantilla): la escribe el
-  jugador y el DM la recibe en la ficha. Activable por pack
+  jugador y el GM la recibe en la ficha. Activable por pack
   (`playerPersona`), no sale en packs donde no aplica.
 
 ### La mesa a 390 px, en la web (23-09; la app va detras)
@@ -123,7 +123,7 @@ congelamiento visual el 22-09:
   completo, asi que un reloj desviado no cierra antes; si dos llegan a cero,
   el primero cierra y el otro recibe 409 y refresca.
 - **La espera como ficcion**: frases que rotan ("El destino se prepara")
-  en vez de "el DM esta narrando".
+  en vez de "el GM esta narrando".
 - **Cabecera de escena** arriba de la narracion, con el titulo de la sesion,
   el momento del mundo y el turno sobre el mapa del pack (hasta que haya
   imagen por escena, campo pendiente en `docs/05`).
@@ -208,7 +208,7 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 
 - El jugador que no sabe que hacer pide dos ideas nuevas al director sin
   gastar un turno: llamada corta al modelo con el mismo prefijo de sistema
-  (`DMProvider.suggest`, `POST /v1/turns/suggest`), `IdeasService` decide
+  (`GMProvider.suggest`, `POST /v1/turns/suggest`), `IdeasService` decide
   quien puede. Regla de Gabino: la primera ronda de cada turno es gratis; las
   siguientes, solo con clave propia o con un paquete de 10 USD o mas ya
   cobrado; tope de 5 por turno y personaje. Una llamada que falla no cobra.
@@ -217,11 +217,11 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 
 ### Tirada pedida por el director (25-09, tarde)
 
-- **Lo que fallo:** en la mesa 39, con los dados en manos de la mesa, el DM
+- **Lo que fallo:** en la mesa 39, con los dados en manos de la mesa, el GM
   invento un 13 y un 9 "del motor", narro la consecuencia y el motor descarto
   la linea en silencio. El prompt decia "el motor ya tiro" en todos los
   modos, y en ese modo no habia dado. Nadie le pidio tirar a Gabino.
-- **Tres capas que no se conocen:** el DM **pide** (`ask_roll`, guardado en
+- **Tres capas que no se conocen:** el GM **pide** (`ask_roll`, guardado en
   `turns.roll_requests`), la API **resuelve** (`DiceService`: `random_int`,
   evento y bloque `roll`, y la tirada queda como la respuesta del personaje
   en `turn_responses.roll`) y el cliente **presenta** (`DiceRoller`, hoy
@@ -229,7 +229,7 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
   animacion, asi que un dado 3D con fisicas entra cambiando una linea.
 - **Si el turno solo exige tirada, no hay cuadro de texto:** sale el dado,
   se mantiene presionado y se suelta; el numero lo pone el servidor y el
-  turno queda respondido. El DM narra la consecuencia al turno siguiente.
+  turno queda respondido. El GM narra la consecuencia al turno siguiente.
 - **Tres modos de dados** (`settings.dice`): `dice` por omision (dado en
   pantalla, lo escrito no cuenta), `engine` (el motor tira en silencio y
   narra al momento) y `table` (presencial, el numero escrito vale). El
@@ -242,7 +242,7 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 
 ### Primera sesion de prueba y primer APK (25-09)
 
-- **Mesa 39 (piloto, 10 turnos):** el DM narraba los movimientos sin emitir
+- **Mesa 39 (piloto, 10 turnos):** el GM narraba los movimientos sin emitir
   `move`, asi que para el motor la party nunca salio de la posada: sin imagen
   de cambio de lugar y con el lint marcando cada lugar como no presenciado.
   Ahora cada turno termina con `where` (el motor mueve a la party) y `scene`
@@ -269,7 +269,7 @@ demas lo vean sin recargar, y la app dejo de enseñar los dados dos veces.
 Sale de analizar Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
 
 - **Imagenes de escena (10a)**: el motor propone ilustrar la apertura, un
-  cambio de lugar o un momento que el DM marca (linea `scene`); la API
+  cambio de lugar o un momento que el GM marca (linea `scene`); la API
   decide (tope 6 por sesion, minimo 3 turnos entre imagenes, solo packs
   originales o con licencia, ajuste por mesa) y genera en la cola `images`
   con su propio worker. Gemini 3.1 Flash Lite Image con los retratos como
@@ -282,7 +282,7 @@ Sale de analizar Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
   respuesta plegado en una barra que se abre al tocarla o al bajar leyendo.
 - **Ideas de accion (10b)**: dos por personaje interpelado, filtradas por lo
   que sabe, sobre el cuadro, que siempre sigue libre.
-- **"Anteriormente..." (10c)**: el DM resume la sesion previa en la apertura
+- **"Anteriormente..." (10c)**: el GM resume la sesion previa en la apertura
   y quien entra lo ve en una pantalla con Continuar.
 - La cronica publica incluye las imagenes.
 
@@ -301,7 +301,7 @@ Sale de analizar Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
 ### Lo que salio de jugar la mesa 33 (23-09, tarde)
 
 - Los primeros 20 turnos de cupo de cada cuenta narran con Sonnet; despues,
-  Haiku. La mesa dice con que narra y quien lo paga (`GET tables/{t}/dm`).
+  Haiku. La mesa dice con que narra y quien lo paga (`GET tables/{t}/gm`).
 - Fortuna al abrir sesion si la sesion trae tabla (la tabla es opcional
   desde hoy); desde el 24-09 la tira el jugador, no el motor. El aviso del lint va al final del turno y,
   si corto la pregunta, el motor devuelve la palabra. Mesa de una persona:
@@ -519,7 +519,7 @@ amistades de por medio.
   la cuenta atras para enviar el turno se elige por mesa (0, 3, 5, 10 o 15 s).
   Polling a 1.5 s con sesion abierta y 5 s sin ella; el cursor de bloques
   avanza hasta lo leido y la mesa sabe si hay mas.
-- **E1, S14, S9**: lo secreto del DM no entra al registro de la mesa, la ficha
+- **E1, S14, S9**: lo secreto del GM no entra al registro de la mesa, la ficha
   ajena llega recortada, la proyeccion narrativa es solo del anfitrion y cerrar
   sesion con el engine caido no deja la mesa a medias.
 - **S5. Roles de Postgres**: `rpg_owner` es dueño de las tablas y migra; la app
@@ -619,7 +619,7 @@ roto) y los **textos legales**, publicados como version 1 en `/terminos` y
    importada se ve vacia.
 7. `composer analyse` declarado sin `phpstan.neon`.
 8. Un solo comando que levante los cuatro servicios locales.
-9. Renombre de DM a GM: plan escrito en `docs/12`, sin ejecutar.
+9. ~~Renombre de DM a GM~~: hecho el 2026-09-29 (`docs/12`).
 
 ### Congelado a proposito
 
@@ -709,7 +709,7 @@ verde, que quita el binario exito/fracaso.
 |---|---|
 | Vision y alcance | `docs/00`, `docs/09` |
 | Arquitectura y ADR del stack | `docs/02`, `docs/11` |
-| Contrato del DM y de la realidad | `docs/03`, `docs/06` |
+| Contrato del GM y de la realidad | `docs/03`, `docs/06` |
 | Formato de pack (personajes, lugares, mapas, secretos) | `docs/05` |
 | Procedencia de contenido | `docs/07` |
 | Modelo de eventos y ubicacion | `docs/08` |

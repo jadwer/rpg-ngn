@@ -301,7 +301,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   )
 
   const rollFortune = useCallback(async () => (await client.rollFortune(table.id)).result, [client, table.id])
-  // La tirada que pidio el DM: el numero lo pone el servidor y queda como la respuesta del turno.
+  // La tirada que pidio el GM: el numero lo pone el servidor y queda como la respuesta del turno.
   const rollTurnId = turn?.id ?? null
   // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
   const moreIdeas = useCallback(async () => {
@@ -392,7 +392,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // Fichas con estado vivo: la propia desde player:<id>, las ajenas desde
   // world. Se piden al abrir las fichas y cuando avanza la campaña, y
   // tambien si la mesa tiene mapa, porque de ahi sale donde esta cada uno:
-  // sin esto el mapa decia "nadie situado" aunque el DM hubiera movido a
+  // sin esto el mapa decia "nadie situado" aunque el GM hubiera movido a
   // alguien (21-09).
   useEffect(() => {
     if ((!sheetsOpen && maps.length === 0) || !campaignId) return
@@ -707,7 +707,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     {start.action}
                   </button>
                 ) : null}
-                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al DM, abre Anfitrión en la barra del juego.</p> : null}
+                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al GM, abre Anfitrión en la barra del juego.</p> : null}
               </section>
             ) : null}
             {/* La espera se ve en el pie, que siempre esta a la vista; aqui solo el modo pantalla, que no tiene pie. */}

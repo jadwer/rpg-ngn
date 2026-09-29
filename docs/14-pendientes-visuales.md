@@ -103,7 +103,7 @@ lo que mas cambia la partida:
    cual deja el panel vacio o mintiendo en dos de los tres rulesets.
 7. **Jugadores con estado, no una linea de texto.** "3/4 listos" con una
    fila por persona y su marca (Listo, Escribiendo, Pensando) en vez del
-   actual "Faltan por responder: Zahira, Calder". Hace que la espera del DM
+   actual "Faltan por responder: Zahira, Calder". Hace que la espera del GM
    se sienta acompañada. **"Escribiendo" no existe hoy**: hace falta que el
    cliente avise mientras se teclea, parecido a la bandera de narrador que
    ya existe. Es barato y se nota mucho.
@@ -119,13 +119,13 @@ lo que mas cambia la partida:
 no rediscutirlo:
 
 - **Ficha de D&D** (ver punto 6): contradice el eje agnostico del motor.
-- **"Mensaje al DM (privado)"**: no es un boton, es una decision de diseño.
-  Toda declaracion ya es privada hasta que el DM narra. Un canal secreto con
+- **"Mensaje al GM (privado)"**: no es un boton, es una decision de diseño.
+  Toda declaracion ya es privada hasta que el GM narra. Un canal secreto con
   una IA que tiene lint de secretos obliga a decidir que pasa cuando alguien
   le pide por privado algo que revelaria un secreto a la mesa.
 - **"Abandonar sesion" en rojo y arriba a la derecha**: es el color de
   destructivo de la propia paleta, en el sitio donde la gente busca cerrar
-  cosas. Ya existe "Me tengo que ir", que hace lo correcto (el DM aparta al
+  cosas. Ya existe "Me tengo que ir", que hace lo correcto (el GM aparta al
   personaje sin matarlo). Ese boton invita a salirse por error.
 - **"D&D 5e" y "Faerun (Custom)" en la cabecera**: Faerun es de Wizards of
   the Coast y docs/07 solo admite contenido original o licenciado. En un

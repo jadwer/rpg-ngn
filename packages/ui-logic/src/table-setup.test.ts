@@ -116,7 +116,7 @@ describe('amistades', () => {
 describe('asientos', () => {
   const nameOf = (id: string) => ({ narivyl: 'Narivyl', zahira: 'Zahira' })[id] ?? id
 
-  it('nombra al anfitrion y describe cada asiento sin decir DM', () => {
+  it('nombra al anfitrion y describe cada asiento sin decir GM', () => {
     expect(hostOf({ members })?.userName).toBe('Gabino')
     expect(isHost(members[0]!)).toBe(true)
     expect(isHost(null)).toBe(false)
@@ -131,9 +131,9 @@ describe('asientos', () => {
     expect(memberTag(members[2]!, nameOf)).toBe('Armando')
   })
 
-  it('solo el anfitrion invita, abre y cierra sesiones y configura el DM', () => {
-    expect(seatPowers('host')).toEqual({ canInvite: true, canOpenSession: true, canCloseSession: true, canConfigureDm: true })
-    expect(seatPowers('player')).toEqual({ canInvite: false, canOpenSession: false, canCloseSession: false, canConfigureDm: false })
+  it('solo el anfitrion invita, abre y cierra sesiones y configura el GM', () => {
+    expect(seatPowers('host')).toEqual({ canInvite: true, canOpenSession: true, canCloseSession: true, canConfigureGm: true })
+    expect(seatPowers('player')).toEqual({ canInvite: false, canOpenSession: false, canCloseSession: false, canConfigureGm: false })
     expect(seatPowers(null).canInvite).toBe(false)
   })
 })

@@ -54,7 +54,7 @@ describe('proseExcerpt', () => {
 })
 
 describe('blocksForSeat', () => {
-  const ruido = system('s1', { text: 'El DM propuso 1 línea que no se pudo aplicar.', audience: 'host' })
+  const ruido = system('s1', { text: 'El GM propuso 1 línea que no se pudo aplicar.', audience: 'host' })
   const paraTodos = system('s2', { text: 'El turno se cerró sin declaraciones.', audience: 'table', tone: 'action' })
   const blocks: TurnBlock[] = [narration('n1', 'La mina huele a piedra mojada.'), ruido, paraTodos]
 

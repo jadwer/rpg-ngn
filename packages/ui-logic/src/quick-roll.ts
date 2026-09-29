@@ -2,14 +2,14 @@ import { rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 
 /**
  * Tirada rapida desde el cuadro de respuesta. No es una segunda fuente de
- * verdad: cuando el DM pide una tirada, el engine la resuelve solo (evento
+ * verdad: cuando el GM pide una tirada, el engine la resuelve solo (evento
  * `roll` sin `result`). Esto es para el jugador que quiere tirar por su
  * cuenta al declarar algo ("saco la ganzua y tiro"), y lo unico que hace es
- * escribir el resultado en su texto, que es lo que el DM ya sabe leer.
+ * escribir el resultado en su texto, que es lo que el GM ya sabe leer.
  *
  * Usa el mismo generador del motor (Web Crypto), asi que el numero es tan
  * bueno como el que tiraria el engine; queda registrado como tirada
- * reportada por el jugador (`source: physical`) cuando el DM la recoge.
+ * reportada por el jugador (`source: physical`) cuando el GM la recoge.
  */
 export const QUICK_DICE = ['1d20', '1d12', '1d10', '1d8', '1d6', '1d4', '2d6'] as const
 export type QuickDie = (typeof QUICK_DICE)[number]

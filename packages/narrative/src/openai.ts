@@ -1,6 +1,6 @@
 import OpenAI from 'openai'
-import type { DMProbe } from './provider.js'
-import { ModelDMProvider, type ModelDMOptions, type ModelPrompt, type ModelReply, type ModelTransport } from './model-dm.js'
+import type { GMProbe } from './provider.js'
+import { ModelGMProvider, type ModelGMOptions, type ModelPrompt, type ModelReply, type ModelTransport } from './model-gm.js'
 
 /**
  * Lo minimo que el transporte usa del SDK `openai`. Un cliente real lo
@@ -17,7 +17,7 @@ export interface OpenAIClientLike {
   }
 }
 
-export interface OpenAIProviderOptions extends ModelDMOptions {
+export interface OpenAIProviderOptions extends ModelGMOptions {
   model: string
   credential: string
   /** Otro proveedor compatible (DeepSeek: https://api.deepseek.com). Sin esto, api.openai.com. */
@@ -91,7 +91,7 @@ export class OpenAITransport implements ModelTransport {
     return { finish, inputTokens, outputTokens }
   }
 
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     const ids: string[] = []
     for await (const model of this.client.models.list()) {
       ids.push(model.id)
@@ -109,6 +109,6 @@ function acceptsReasoningEffort(model: string): boolean {
   return /^(gpt-5|o[1-9])/.test(model)
 }
 
-export function createOpenAIProvider(options: OpenAIProviderOptions): ModelDMProvider {
-  return new ModelDMProvider(new OpenAITransport(options), options.credential, options)
+export function createOpenAIProvider(options: OpenAIProviderOptions): ModelGMProvider {
+  return new ModelGMProvider(new OpenAITransport(options), options.credential, options)
 }

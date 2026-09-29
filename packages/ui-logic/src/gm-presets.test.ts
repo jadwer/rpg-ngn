@@ -1,26 +1,26 @@
-import type { DmPreset } from '@rpg-ngn/api-client'
+import type { GmPreset } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { describePreset, presetOptionLabel, presetOptionParts, providerForNewTable, savedProviderText, selectablePresets } from './dm-presets.js'
+import { describePreset, presetOptionLabel, presetOptionParts, providerForNewTable, savedProviderText, selectablePresets } from './gm-presets.js'
 
-const presets: DmPreset[] = [
+const presets: GmPreset[] = [
   { name: 'scripted', kind: 'scripted', model: null, configured: true, default: false },
   { name: 'anthropic', kind: 'anthropic', model: 'claude-sonnet-5', configured: true, default: true },
   { name: 'openai', kind: 'openai', model: 'gpt-5', configured: false, default: false },
 ]
 
-describe('presets del DM', () => {
+describe('presets del GM', () => {
   it('nombra los conocidos y deja pasar los desconocidos', () => {
     expect(describePreset('anthropic')).toBe('Anthropic (Claude)')
     expect(describePreset('otro')).toBe('otro')
     expect(presetOptionLabel(presets[1]!)).toBe('Anthropic (Claude) (el del servidor), claude-sonnet-5')
-    expect(presetOptionLabel(presets[0]!)).toBe('DM con guion (sin modelo)')
+    expect(presetOptionLabel(presets[0]!)).toBe('GM con guion (sin modelo)')
   })
 
   it('partido para pintarlo: el nombre arriba, quien paga y el modelo abajo', () => {
     expect(presetOptionParts(presets[1]!, true)).toEqual({ title: 'Anthropic (Claude)', detail: 'Con tu clave, no gasta cupo · claude-sonnet-5' })
     expect(presetOptionParts(presets[1]!)).toEqual({ title: 'Anthropic (Claude)', detail: 'El del servidor · claude-sonnet-5' })
     expect(presetOptionParts(presets[2]!)).toEqual({ title: 'OpenAI', detail: 'gpt-5' })
-    expect(presetOptionParts(presets[0]!)).toEqual({ title: 'DM con guion (sin modelo)', detail: null })
+    expect(presetOptionParts(presets[0]!)).toEqual({ title: 'GM con guion (sin modelo)', detail: null })
   })
 
   it('con clave propia el preset se ofrece aunque el servidor no lo tenga, va primero y lo dice', () => {
@@ -39,7 +39,7 @@ describe('presets del DM', () => {
   })
 
   it('describe lo guardado', () => {
-    expect(savedProviderText(null)).toBe('La mesa usa el DM del servidor.')
+    expect(savedProviderText(null)).toBe('La mesa usa el GM del servidor.')
     expect(savedProviderText({ preset: 'ollama', model: 'llama3' })).toBe('Guardado: Ollama (modelo local en la red), modelo llama3.')
   })
 })

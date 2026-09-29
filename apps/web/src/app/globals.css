@@ -2144,10 +2144,10 @@ a.plain {
   margin: 4px 0;
 }
 
-/* Ajustes del DM en el mando */
+/* Ajustes del GM en el mando */
 
-.dm-settings .select,
-.dm-settings .input {
+.gm-settings .select,
+.gm-settings .input {
   max-width: 420px;
 }
 
@@ -2843,7 +2843,7 @@ a.plain {
   font-size: 0.85rem;
 }
 
-/* Ideas de accion del DM (E10b): sobre el cuadro, que sigue libre. */
+/* Ideas de accion del GM (E10b): sobre el cuadro, que sigue libre. */
 .turn .ideas {
   display: flex;
   flex-wrap: wrap;
@@ -2896,7 +2896,7 @@ a.plain {
   color: var(--danger, #f87171);
 }
 
-/* La tirada que pide el DM: en vez del cuadro, el dado de la lamina (25-09). */
+/* La tirada que pide el GM: en vez del cuadro, el dado de la lamina (25-09). */
 .turn .roll-card {
   display: flex;
   align-items: center;
@@ -4482,7 +4482,7 @@ a {
 .narrate-btn:disabled {
   opacity: 0.4;
 }
-.dm-now {
+.gm-now {
   margin: 0 0 8px;
   padding: 10px 12px;
   border-radius: 10px;

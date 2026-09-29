@@ -2,7 +2,7 @@
   "name": "rpg-ngn",
   "private": true,
   "type": "module",
-  "description": "Motor agnostico para campanas de rol de mesa dirigidas por un DM asistido por IA",
+  "description": "Motor agnostico para campanas de rol de mesa dirigidas por un GM asistido por IA",
   "engines": {
     "node": ">=22"
   },

@@ -19,7 +19,7 @@ interface Props {
   diceMode: DiceMode
   /** La cuenta atras del cierre (docs/18, D-UX-3). */
   countdown: Countdown
-  /** La espera como ficcion mientras el DM narra; null si no narra. */
+  /** La espera como ficcion mientras el GM narra; null si no narra. */
   waiting: string | null
   onRespond: (text: string) => Promise<boolean>
   onClose: (force: boolean) => void
@@ -30,7 +30,7 @@ interface Props {
   fortunePending: boolean
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
-  /** Suelta el dado de la tirada que el DM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
+  /** Suelta el dado de la tirada que el GM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
   onRoll: () => Promise<RollOutcome>
   /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
   onRolled: () => void
@@ -40,7 +40,7 @@ interface Props {
    * recargar; `next` dice cuando llega el siguiente turno gratuito.
    */
   outOfTurns: { host: boolean; next: string | null } | null
-  /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
+  /** Ideas de accion del GM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
   /** Si puede pedir "Otras" ideas y en que condiciones. */
   ideas: TableState['ideas']
@@ -196,10 +196,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           )}
         </div>
       ) : null}
-      {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
+      {turn?.error ? <div className="error">El GM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 
-      {/* El DM pidio una tirada: el turno de este personaje es soltar el dado,
+      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
           no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
       {open && hasCharacter && activeRoll ? (
         <div className="roll-card" role="group" aria-label="Te toca tirar">
@@ -282,7 +282,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           >
             Ocultar
           </button>
-          {/* Ideas del DM para quien no sabe que espera el narrador. Tocar una la
+          {/* Ideas del GM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {shownIdeas.length > 0 || moreButton ? (
             showIdeas ? (

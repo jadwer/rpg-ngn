@@ -1,4 +1,4 @@
-import { ApiError, packPortraitUrl, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, packPortraitUrl, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
@@ -6,7 +6,7 @@ import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } f
 import { Backdrop } from '../../components/Backdrop'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
-import { DmSettingsPanel } from '../../components/DmSettingsPanel'
+import { GmSettingsPanel } from '../../components/GmSettingsPanel'
 import { Field } from '../../components/Field'
 import { InvitePanel } from '../../components/InvitePanel'
 import { PageHeader } from '../../components/PageHeader'
@@ -32,14 +32,14 @@ interface Props {
 /**
  * Crear mesa en dos pasos, como en la web: nombre, personaje del anfitrion,
  * director de juego (entre los presets del servidor) y premisa; despues,
- * probar el DM e invitar amigos (la mesa ya existe y se puede entrar sin
+ * probar el GM e invitar amigos (la mesa ya existe y se puede entrar sin
  * invitar). El pack es el empaquetado en la app.
  */
 export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthorized, initialPackId }: Props) {
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
-  const [presets, setPresets] = useState<DmPreset[]>([])
+  const [presets, setPresets] = useState<GmPreset[]>([])
   const [ownKeys, setOwnKeys] = useState<string[]>([])
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
@@ -93,12 +93,12 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
     }
   }, [client])
 
-  // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
+  // Presets del GM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
     let alive = true
     // Con las claves propias: una clave guardada se ofrece al crear la mesa y
     // se preselecciona, aunque el servidor no tenga ese proveedor.
-    void Promise.all([client.listDmPresets(), client.listOwnKeys().catch(() => [])]).then(
+    void Promise.all([client.listGmPresets(), client.listOwnKeys().catch(() => [])]).then(
       ([result, keys]) => {
         if (!alive) return
         const own = keys.filter((k) => k.configured).map((k) => k.preset)
@@ -162,7 +162,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
                 <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
               </Panel>
               <Panel title="Director de juego">
-                <DmSettingsPanel client={client} table={created} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
+                <GmSettingsPanel client={client} table={created} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
               </Panel>
               <View style={styles.actions}>
                 <Button label="Ir a la mesa" primary onPress={() => onOpen(created)} />
@@ -206,7 +206,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
               {error ? <Text style={styles.error}>{error}</Text> : null}
               <View style={styles.actions}>
                 <Button label="Crear mesa" primary busy={busy} disabled={!cleanName} onPress={() => void submit()} />
-                <Text style={styles.hint}>Después podrás probar el DM e invitar a tus amigos.</Text>
+                <Text style={styles.hint}>Después podrás probar el GM e invitar a tus amigos.</Text>
               </View>
             </>
           )}

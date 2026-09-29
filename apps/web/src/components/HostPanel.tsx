@@ -4,7 +4,7 @@ import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-clien
 import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
-import { DmSettingsPanel } from './DmSettingsPanel'
+import { GmSettingsPanel } from './GmSettingsPanel'
 import { Panel } from './Panel'
 import { TableRulesPanel } from './TableRulesPanel'
 
@@ -32,7 +32,7 @@ interface Props {
  * Mando del anfitrion, en dos pestañas (docs/18, D-UX-7): **Sesion**, lo de
  * cada noche (abrir con codigo y nota, cerrar con cliffhanger, la premisa), y
  * **Ajustes de la mesa**, lo que casi nunca cambia (dados, secretos del pack,
- * director de juego). Invitar vive en Jugadores. El DM es la IA; el anfitrion
+ * director de juego). Invitar vive en Jugadores. El GM es la IA; el anfitrion
  * dirige la mesa.
  */
 export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
@@ -106,7 +106,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                 )}
                 <label className="field" style={{ flex: 1, minWidth: 220 }}>
                   <span>Nota de la sesión</span>
-                  <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el DM la recibe" maxLength={120} />
+                  <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el GM la recibe" maxLength={120} />
                 </label>
               </div>
               <div className="row">
@@ -163,7 +163,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                 <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
               </Panel>
               <Panel title="Director de juego">
-                <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
               </Panel>
             </div>
           ) : null}

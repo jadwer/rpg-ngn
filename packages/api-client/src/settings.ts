@@ -4,13 +4,13 @@ export type { PackSheets }
 import { query, type HttpResult, type RequestOptions } from './http.js'
 
 /**
- * Ajustes de la mesa (entrega 5b): el DM se elige entre los presets del
+ * Ajustes de la mesa (entrega 5b): el GM se elige entre los presets del
  * servidor (`settings.provider = {preset, model?}`); las credenciales nunca
  * salen del .env de la API. El probe llama al engine con el preset elegido
  * antes de guardarlo. BYOK con clave propia por mesa queda para la entrega 7.
  */
 
-export interface DmPreset {
+export interface GmPreset {
   /** scripted, anthropic, openai, deepseek u ollama. */
   name: string
   /** Kind del contrato del engine: scripted, anthropic u openai (compatible). */
@@ -19,17 +19,17 @@ export interface DmPreset {
   model: string | null
   /** true si el servidor tiene la clave o la URL que el preset necesita. */
   configured: boolean
-  /** El que usa una mesa sin proveedor propio (DM_PROVIDER). */
+  /** El que usa una mesa sin proveedor propio (GM_PROVIDER). */
   default: boolean
 }
 
-export interface DmProviderChoice {
+export interface GmProviderChoice {
   preset: string
   /** Modelo distinto al del preset; null para el del servidor. */
   model: string | null
 }
 
-export interface DmProbeResult {
+export interface GmProbeResult {
   ok: boolean
   preset: string
   provider: string
@@ -270,7 +270,7 @@ export interface CreditPurchase {
 }
 
 export interface SettingsApi {
-  listDmPresets(): Promise<{ presets: DmPreset[]; defaultPreset: string }>
+  listGmPresets(): Promise<{ presets: GmPreset[]; defaultPreset: string }>
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
   /** Explorar mundos (E9): publico; con sesion, cada mundo trae su estado para quien mira. */
@@ -300,7 +300,7 @@ export interface SettingsApi {
   /** El catalogo publico: lo que otros publicaron y paso revision. */
   listCatalog(): Promise<PackOption[]>
   /** Con que narra la mesa y quien lo paga (clave propia, cupo o gratis). */
-  tableDm(tableId: string | number): Promise<{ source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null }>
+  tableGm(tableId: string | number): Promise<{ source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null }>
   /** La cola de revision del catalogo; 403 si la cuenta no es de administracion. */
   reviewQueue(): Promise<Array<PackOption & { requestedAt?: string | null; bytes?: number }>>
   /** Aprobar un mundo pendiente, o rechazarlo con el motivo que leera su autor. */
@@ -317,10 +317,10 @@ export interface SettingsApi {
   listOwnKeys(): Promise<OwnKey[]>
   /** Guarda la clave del usuario; el servidor la comprueba antes (422 si el proveedor la rechaza). */
   saveOwnKey(preset: string, credential: string, model?: string | null): Promise<{ keys: OwnKey[]; message: string }>
-  /** Quita la clave: las mesas vuelven al DM del servidor. */
+  /** Quita la clave: las mesas vuelven al GM del servidor. */
   deleteOwnKey(preset: string): Promise<{ keys: OwnKey[]; message: string }>
   /** Solo el anfitrion; 422 si el preset no esta configurado, 502 si el engine no responde. */
-  probeDm(tableId: string | number, choice: DmProviderChoice): Promise<DmProbeResult>
+  probeGm(tableId: string | number, choice: GmProviderChoice): Promise<GmProbeResult>
   /** Sustituye `settings` entero (JSON:API PATCH); usa `withProvider` para conservar la premisa. Solo el dueño. */
   updateTableSettings(tableId: string | number, settings: Record<string, unknown>): Promise<Record<string, unknown>>
 }
@@ -329,8 +329,8 @@ type Request = <T = unknown>(path: string, init?: RequestOptions) => Promise<Htt
 
 export function settingsApi(request: Request): SettingsApi {
   return {
-    async listDmPresets() {
-      const { data } = await request<{ data: DmPreset[]; meta: { default: string } }>('/api/v1/dm/presets')
+    async listGmPresets() {
+      const { data } = await request<{ data: GmPreset[]; meta: { default: string } }>('/api/v1/gm/presets')
       return { presets: data.data, defaultPreset: data.meta.default }
     },
 
@@ -409,8 +409,8 @@ export function settingsApi(request: Request): SettingsApi {
       return data.data
     },
 
-    async tableDm(tableId) {
-      const { data } = await request<{ data: { source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null } }>(`/api/v1/tables/${tableId}/dm`)
+    async tableGm(tableId) {
+      const { data } = await request<{ data: { source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null } }>(`/api/v1/tables/${tableId}/gm`)
       return data.data
     },
 
@@ -478,8 +478,8 @@ export function settingsApi(request: Request): SettingsApi {
       return { keys: data.data, message: data.meta.message }
     },
 
-    async probeDm(tableId, choice) {
-      const { data } = await request<{ data: DmProbeResult }>(`/api/v1/tables/${tableId}/dm/probe`, {
+    async probeGm(tableId, choice) {
+      const { data } = await request<{ data: GmProbeResult }>(`/api/v1/tables/${tableId}/gm/probe`, {
         method: 'POST',
         body: choice.model ? { preset: choice.preset, model: choice.model } : { preset: choice.preset },
       })
@@ -498,7 +498,7 @@ export function settingsApi(request: Request): SettingsApi {
 }
 
 /** El proveedor que la mesa eligio, o null si usa el del servidor. Entiende la forma vieja `{kind: 'scripted'}`. */
-export function providerChoice(settings: Record<string, unknown> | null | undefined): DmProviderChoice | null {
+export function providerChoice(settings: Record<string, unknown> | null | undefined): GmProviderChoice | null {
   const provider = settings?.['provider']
   if (!provider || typeof provider !== 'object') return null
   const raw = provider as { preset?: unknown; model?: unknown; kind?: unknown }
@@ -508,7 +508,7 @@ export function providerChoice(settings: Record<string, unknown> | null | undefi
 }
 
 /** Los ajustes con el proveedor cambiado (o quitado con null), conservando premisa y lo demas. */
-export function withProvider(settings: Record<string, unknown> | null | undefined, choice: DmProviderChoice | null): Record<string, unknown> {
+export function withProvider(settings: Record<string, unknown> | null | undefined, choice: GmProviderChoice | null): Record<string, unknown> {
   const { provider: _previous, ...rest } = settings ?? {}
   if (!choice) return rest
   return { ...rest, provider: choice.model ? { preset: choice.preset, model: choice.model } : { preset: choice.preset } }

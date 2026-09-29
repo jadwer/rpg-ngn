@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 import { DiceModePanel } from './DiceModePanel'
-import { DmSettingsPanel } from './DmSettingsPanel'
+import { GmSettingsPanel } from './GmSettingsPanel'
 import { Panel } from './Panel'
 
 interface Props {
@@ -58,7 +58,7 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
         <>
           <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           <Panel title="Director de juego">
-            <DmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Panel>
         </>
       ) : (
@@ -87,7 +87,7 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
                     style={[styles.input, styles.code]}
                   />
                 )}
-                <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el DM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={styles.input} />
+                <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el GM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={styles.input} />
                 <Button label="Abrir sesión" primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
               </>
             ) : (

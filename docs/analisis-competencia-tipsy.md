@@ -41,7 +41,7 @@ Si, y la arquitectura ya lo permite sin tocar el contrato del motor:
   imagen es **un bloque mas** (`type: image`) que se añade al turno cuando
   termina de generarse, igual que la Fortuna de hoy se añade desde la API.
   El texto nunca espera a la imagen.
-- El DM ya marca cambios de lugar y momentos (`world_event`, ubicacion en el
+- El GM ya marca cambios de lugar y momentos (`world_event`, ubicacion en el
   estado). El disparador natural es **cambio de escena o momento clave, no
   cada turno**.
 - La consistencia visual sale del propio pack: retratos de 512 como
@@ -113,7 +113,7 @@ cronica. Despues, el video de sesion como exportacion de la cronica.
    acciones posibles generadas para ese momento ("Toma el telefono y dile a
    Tim que deje de molestarla") y un boton "Revisar" para pedir otras. Quita
    el miedo a la hoja en blanco, que es justo el problema del publico de
-   novela ligera. Barato: el DM las devuelve en la misma llamada, por
+   novela ligera. Barato: el GM las devuelve en la misma llamada, por
    personaje.
 2. **"Anteriormente..."** al volver: pantalla de resumen antes de retomar,
    con boton Continuar. Ya tenemos el recap y el cliffhanger de la sesion
@@ -181,7 +181,7 @@ entrar. Lo que ellos no tienen, y es dificil de copiar:
   anfitrion que paga por todos: un grupo de amigos, no una persona sola.
 - **Reglas de verdad**: el modelo propone, el motor valida y el estado
   persiste. Dados que tira el servidor, Fortuna del jugador, fichas y
-  secretos que el DM no puede filtrar.
+  secretos que el GM no puede filtrar.
 - **Campañas por sesiones** con cronica, cliffhanger y memoria del mundo,
   no una conversacion infinita que "confunde" al personaje (su propia ayuda
   tiene una pregunta sobre eso).

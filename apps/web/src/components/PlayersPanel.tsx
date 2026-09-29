@@ -50,12 +50,12 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
                   {SEAT_LABELS[seat.state]}
                 </span>
                 {seat.mine && ownPresent !== null ? (
-                  <button type="button" className="btn ghost small" disabled={busy} onClick={onTogglePresence} title={ownPresent ? 'El DM aparta a tu personaje sin matarlo y la mesa no te espera para cerrar el turno' : 'Vuelves a contar para el turno y el DM te devuelve la palabra'}>
+                  <button type="button" className="btn ghost small" disabled={busy} onClick={onTogglePresence} title={ownPresent ? 'El GM aparta a tu personaje sin matarlo y la mesa no te espera para cerrar el turno' : 'Vuelves a contar para el turno y el GM te devuelve la palabra'}>
                     {ownPresent ? 'Me tengo que ir' : 'He vuelto'}
                   </button>
                 ) : null}
                 {!seat.mine && isHost && seat.characterId ? (
-                  <button type="button" className="btn ghost small" disabled={busy} onClick={() => onPresence(seat.memberId, away)} title={away ? 'Vuelve a contar para el turno' : 'Si se fue sin avisar: la mesa no lo espera y el DM lo aparta sin matarlo'}>
+                  <button type="button" className="btn ghost small" disabled={busy} onClick={() => onPresence(seat.memberId, away)} title={away ? 'Vuelve a contar para el turno' : 'Si se fue sin avisar: la mesa no lo espera y el GM lo aparta sin matarlo'}>
                     {away ? 'Marcar presente' : 'Marcar ausente'}
                   </button>
                 ) : null}

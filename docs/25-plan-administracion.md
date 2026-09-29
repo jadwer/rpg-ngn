@@ -18,7 +18,7 @@ En rpg-ngn-api:
   sesiones cambian sin dejar rastro de quien ni cuando.
 - Roles `god`, `admin`, `tech` y `customer` (atomo-permissions). Las
   comprobaciones de administracion estan repartidas en `PackAccess`,
-  `DmController` y `PackReviewController`.
+  `GmController` y `PackReviewController`.
 - Operacion por comandos: `catalog:set`, `season:open`, `quota:grant`,
   `packs:review`, `tables:prune`, `funnel:report`, `turns:usage`. Ninguno
   anota quien lo corrio.
@@ -143,7 +143,7 @@ El constructor es un editor en el panel sobre ese schema, con versiones.
   comparar con la anterior.
 - **Salida**: el `.rpgpack` de siempre por el mismo camino de subida y
   validacion, asi que no hay un segundo formato.
-- **Probar antes de publicar**: una mesa de prueba con el DM con guion o con
+- **Probar antes de publicar**: una mesa de prueba con el GM con guion o con
   el modelo, desde el mismo panel.
 
 Dos validadores, que nunca publican solos (el modelo señala, una persona

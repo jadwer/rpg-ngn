@@ -9,7 +9,7 @@ interface Props {
   onSelect: () => void
 }
 
-/** Una opcion de una lista excluyente (presets del DM), con el mismo dibujo que las voces del selector. */
+/** Una opcion de una lista excluyente (presets del GM), con el mismo dibujo que las voces del selector. */
 export function RadioRow({ label, sub, selected, disabled = false, onSelect }: Props) {
   return (
     <Pressable onPress={onSelect} disabled={disabled} style={({ pressed }) => [styles.row, selected && styles.rowSelected, disabled && styles.rowDisabled, pressed && !disabled && styles.pressed]} accessibilityRole="radio" accessibilityState={{ selected, disabled }}>

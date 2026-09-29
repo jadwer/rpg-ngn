@@ -4,7 +4,7 @@
  * invitaciones (aqui por fetch directo, para que el smoke no dependa de la
  * UI), sesion abierta por el anfitrion, respuestas de jaz y armando, cierre,
  * polling hasta que el engine narra y el turno 2 abre, y cierre de sesion
- * por el anfitrion. El asiento se llama `dm` en la API; el DM es la IA.
+ * por el anfitrion. El asiento se llama `gm` en la API; el GM es la IA.
  */
 import { ApiError, createApiClient, memberOf, type ApiClient } from '@rpg-ngn/api-client'
 

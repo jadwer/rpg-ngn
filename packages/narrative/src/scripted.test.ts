@@ -5,7 +5,7 @@ import { loadPack, parseEventLog, type FileSource } from '@rpg-ngn/content'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
 import { describe, expect, it } from 'vitest'
 import { createProvider } from './factory.js'
-import type { DMOutput } from './provider.js'
+import type { GMOutput } from './provider.js'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
 
@@ -24,13 +24,13 @@ async function pilotContext() {
   return { pack: pack!, state }
 }
 
-async function collect(iterable: AsyncIterable<DMOutput>): Promise<DMOutput[]> {
-  const out: DMOutput[] = []
+async function collect(iterable: AsyncIterable<GMOutput>): Promise<GMOutput[]> {
+  const out: GMOutput[] = []
   for await (const item of iterable) out.push(item)
   return out
 }
 
-describe('ScriptedDMProvider', () => {
+describe('ScriptedGMProvider', () => {
   it('convierte cada respuesta en dialogo y player_action, y cierra con una narracion', async () => {
     const { pack, state } = await pilotContext()
     const provider = createProvider({ kind: 'scripted' })

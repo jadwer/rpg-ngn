@@ -3,11 +3,11 @@ import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
 import type { DiceMode, LintFinding, LintMode, RollRequest, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
- * Lo que el DM recibe para narrar un turno. El estado completo llega tal
+ * Lo que el GM recibe para narrar un turno. El estado completo llega tal
  * cual; el context builder (context.ts) lo reduce a las cuatro capas de
  * docs/04 y deja fuera lo que no puede emerger todavia.
  */
-export interface DMTurnContext {
+export interface GMTurnContext {
   pack: LoadedPack
   state: CampaignState
   session: Session | undefined
@@ -30,7 +30,7 @@ export interface DMTurnContext {
   rulesetId?: string | undefined
   /**
    * Un d20 ya tirado por el motor para cada personaje que declaro algo este
-   * turno (`characterId -> resultado`). El DM lo usa cuando la accion tiene
+   * turno (`characterId -> resultado`). El GM lo usa cuando la accion tiene
    * riesgo y narra la consecuencia en el mismo turno; antes pedia la tirada
    * y la pagaba un turno despues, o no la pedia. Lo rellena el provider.
    */
@@ -38,45 +38,45 @@ export interface DMTurnContext {
 }
 
 /**
- * Evento propuesto por el DM. El engine le pone id, v, seq, sessionId y
+ * Evento propuesto por el GM. El engine le pone id, v, seq, sessionId y
  * recordedAt, lo valida contra el schema y lo aplica con el ruleset; si
  * algo falla, el turno falla entero. El modelo propone, el engine dispone.
  */
 export type ProposedEvent = Record<string, unknown> & { type: string }
 
-export type DMOutput =
+export type GMOutput =
   | { kind: 'block'; block: TurnBlock }
   | { kind: 'event'; event: ProposedEvent }
   | { kind: 'addressed'; characterIds: string[] }
   | { kind: 'usage'; inputTokens: number; outputTokens: number }
   /** Hallazgo del lint de conocimiento; el engine lo acumula en `result.lint`. */
   | { kind: 'lint'; finding: LintFinding }
-  /** El DM marco un momento para ilustrar: una frase de lo que se ve (docs/ROADMAP, E10a). */
+  /** El GM marco un momento para ilustrar: una frase de lo que se ve (docs/ROADMAP, E10a). */
   | { kind: 'illustrate'; moment: string }
   /** Ideas de accion por personaje interpelado (E10b); el cuadro de texto sigue libre. */
   | { kind: 'suggestions'; byCharacter: Record<string, string[]> }
-  /** Tiradas que el DM pidio para el turno que viene (modos `dice` y `table`): esos personajes tiran en vez de escribir. */
+  /** Tiradas que el GM pidio para el turno que viene (modos `dice` y `table`): esos personajes tiran en vez de escribir. */
   | { kind: 'rollRequests'; requests: RollRequest[] }
 
-export interface DMProbe {
+export interface GMProbe {
   ok: boolean
   model: string | null
   message: string | null
 }
 
 /** Dos ideas nuevas para un personaje ("Otras", E10b) y lo que costo pedirlas. */
-export interface DMSuggestion {
+export interface GMSuggestion {
   options: string[]
   usage: { inputTokens: number; outputTokens: number }
 }
 
-export interface DMProvider {
+export interface GMProvider {
   readonly kind: string
-  narrate(context: DMTurnContext): AsyncIterable<DMOutput>
-  probe(): Promise<DMProbe>
+  narrate(context: GMTurnContext): AsyncIterable<GMOutput>
+  probe(): Promise<GMProbe>
   /**
    * "Otras" ideas: dos sugerencias mas para un personaje con el contexto del
-   * turno, sin narrar nada. Opcional: el DM con guion no tiene modelo.
+   * turno, sin narrar nada. Opcional: el GM con guion no tiene modelo.
    */
-  suggest?(context: DMTurnContext, characterId: string, exclude: readonly string[]): Promise<DMSuggestion>
+  suggest?(context: GMTurnContext, characterId: string, exclude: readonly string[]): Promise<GMSuggestion>
 }

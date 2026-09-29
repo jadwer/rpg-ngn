@@ -1,17 +1,17 @@
 # Contexto narrativo
 
-El motor nunca le da al modelo "estamos en Valdoria" y libertad creativa. Cada turno del DM recibe un contexto construido, acotado y auditable.
+El motor nunca le da al modelo "estamos en Valdoria" y libertad creativa. Cada turno del GM recibe un contexto construido, acotado y auditable.
 
 ## Las cuatro capas de conocimiento
 
 | Capa | Contenido | Quien la ve |
 |---|---|---|
-| Canon | Lo cierto en el mundo del content pack | Motor y DM |
-| Campaign canon | Lo ocurrido en esta campana | Motor y DM |
-| Player knowledge | Lo que cada personaje sabe (por personaje) | Motor, DM y ese jugador |
-| DM knowledge | Secretos, tramas, identidades ocultas | Motor y DM, jamas la narrativa sin `record_discovery` |
+| Canon | Lo cierto en el mundo del content pack | Motor y GM |
+| Campaign canon | Lo ocurrido en esta campana | Motor y GM |
+| Player knowledge | Lo que cada personaje sabe (por personaje) | Motor, GM y ese jugador |
+| GM knowledge | Secretos, tramas, identidades ocultas | Motor y GM, jamas la narrativa sin `record_discovery` |
 
-La distincion critica es entre "esto existe en el lore" y "mi personaje sabe que esto existe". El DM recibe ambas y tiene prohibido narrar la primera como si fuera la segunda.
+La distincion critica es entre "esto existe en el lore" y "mi personaje sabe que esto existe". El GM recibe ambas y tiene prohibido narrar la primera como si fuera la segunda.
 
 ## Estructura del NarrativeContext
 
@@ -28,7 +28,7 @@ NarrativeContext
 ├── activeQuests         (vista del jugador, no la resolucion)
 ├── recentEvents         (ultimos N eventos visibles para la party)
 ├── playerKnowledge      (que sabe cada personaje, para dosificar informacion)
-├── secretState          (DM knowledge relevante a la escena, marcado como NO revelable)
+├── secretState          (GM knowledge relevante a la escena, marcado como NO revelable)
 └── constraints
     ├── tono de la campana
     ├── limites de contenido acordados en session 0
@@ -43,7 +43,7 @@ Son dos cosas distintas y el contexto las separa (Issue #1, punto 5):
 - **World State**: lo objetivamente cierto en el mundo. HP, posiciones, inventarios, relaciones, hechos. Es la proyeccion de los `effects` del log de eventos.
 - **Narrative State**: la escena en curso. Que tension esta activa, que hilos quedaron abiertos, que informacion esta preparada para emerger y bajo que condicion. Se deriva de los eventos narrativos (`scene_started`, `narration`, cabos de sesiones previas) mas las restricciones de escena.
 
-La distincion existe para atacar el peligro central de un LLM como DM: confundir "lo se" con "debo contarselo al jugador". El World State completo esta disponible para resolver mecanica; a la narrativa solo entra lo que el Narrative State marca como emergible. En la estructura de arriba, `world` y `party` son World State; `constraints` y `secretState` (con sus condiciones de revelacion) son la parte explicita del Narrative State.
+La distincion existe para atacar el peligro central de un LLM como GM: confundir "lo se" con "debo contarselo al jugador". El World State completo esta disponible para resolver mecanica; a la narrativa solo entra lo que el Narrative State marca como emergible. En la estructura de arriba, `world` y `party` son World State; `constraints` y `secretState` (con sus condiciones de revelacion) son la parte explicita del Narrative State.
 
 ## Reglas de construccion
 
@@ -51,4 +51,4 @@ La distincion existe para atacar el peligro central de un LLM como DM: confundir
 2. `secretState` incluye solo los secretos que la escena puede rozar, cada uno con su condicion de revelacion.
 3. Los jugadores ausentes de la sesion se representan con su justificacion narrativa, no desaparecen.
 4. El historial largo se compacta: resumenes de sesion en lugar de transcripciones.
-5. Todo contexto enviado se registra, de modo que un fallo del DM sea reproducible y diagnosticable.
+5. Todo contexto enviado se registra, de modo que un fallo del GM sea reproducible y diagnosticable.

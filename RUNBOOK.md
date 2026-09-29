@@ -10,7 +10,7 @@ Variables: cada servicio lee su propio `.env` (gitignored, no viaja con el repo)
 
 1. Comprobar que la IP del Wi-Fi sigue siendo la del runbook: `ip -4 addr | grep 192`. Si cambio, es la nueva la que se comparte con los jugadores (`http://<ip>:3010`); nada mas cambia.
 2. Levantar los cuatro servicios de la seccion 1 (engine, API, web en modo produccion y el worker de la cola) y dejar las terminales abiertas.
-3. Verificar: `curl -s http://127.0.0.1:3100/health` responde `ok`, y `cd ~/dev/rpg-ngn-api && php artisan dm:probe` dice `ok=si modelo=claude-sonnet-5`.
+3. Verificar: `curl -s http://127.0.0.1:3100/health` responde `ok`, y `cd ~/dev/rpg-ngn-api && php artisan gm:probe` dice `ok=si modelo=claude-sonnet-5`.
 4. Abrir `http://<ip>:3010` desde un telefono en la misma Wi-Fi: si carga la landing, el firewall esta bien.
 5. Si vas a usar la app movil, terminal 5 (Expo) y volver a escanear el QR.
 
@@ -18,10 +18,10 @@ Variables: cada servicio lee su propio `.env` (gitignored, no viaja con el repo)
 
 ```bash
 # Terminal 1: engine (Node). Health en http://127.0.0.1:3100/health.
-# apps/engine/.env trae DM_LINT=report (el lint de conocimiento avisa, no corta); enforce cuando se confie
+# apps/engine/.env trae GM_LINT=report (el lint de conocimiento avisa, no corta); enforce cuando se confie
 cd ~/dev/rpg-ngn && pnpm --filter engine dev
 
-# Terminal 2: API (Laravel). DM_PROVIDER=anthropic y la clave estan en su .env
+# Terminal 2: API (Laravel). GM_PROVIDER=anthropic y la clave estan en su .env
 cd ~/dev/rpg-ngn-api && php artisan serve --host 0.0.0.0 --port 8010
 
 # Terminal 3: web (Next.js), la mesa principal, en modo produccion (mas rapida y estable que el dev server).
@@ -38,7 +38,7 @@ cd ~/dev/rpg-ngn-api && php artisan queue:work --queue=turns,default --timeout=6
 cd ~/dev/rpg-ngn && pnpm --filter mobile start
 ```
 
-Cola: el `.env` de la API esta en `QUEUE_CONNECTION=database` desde el 2026-09-14, y la terminal 4 es obligatoria. "Cerrar turno y narrar" responde 202 en menos de 100 ms y el worker narra por detras; la web y la app muestran "El DM esta narrando..." hasta que llegan los bloques. Medido el 14: 0.09 s el cierre, contra los 20 a 35 s que esperaba la peticion con `sync`. **Si el worker no esta corriendo, el turno se queda en `resolving` para siempre**: esa es la unica pega de este modo, y se arregla levantando la terminal 4. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo y la mesa lo cierra otra vez. `php artisan queue:failed` lista los que murieron. Para volver al modo de una sola terminal: `QUEUE_CONNECTION=sync` en el `.env` y `php artisan config:clear`.
+Cola: el `.env` de la API esta en `QUEUE_CONNECTION=database` desde el 2026-09-14, y la terminal 4 es obligatoria. "Cerrar turno y narrar" responde 202 en menos de 100 ms y el worker narra por detras; la web y la app muestran "El GM esta narrando..." hasta que llegan los bloques. Medido el 14: 0.09 s el cierre, contra los 20 a 35 s que esperaba la peticion con `sync`. **Si el worker no esta corriendo, el turno se queda en `resolving` para siempre**: esa es la unica pega de este modo, y se arregla levantando la terminal 4. El job es unico por turno y no reintenta: si el modelo falla, el turno vuelve a `open` con el motivo y la mesa lo cierra otra vez. `php artisan queue:failed` lista los que murieron. Para volver al modo de una sola terminal: `QUEUE_CONNECTION=sync` en el `.env` y `php artisan config:clear`.
 
 Si un servicio no arranca por "address already in use", queda un proceso viejo: `ss -ltnp | grep :<puerto>` da el pid y `kill <pid>` lo libera.
 
@@ -70,7 +70,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8010/api/v1/system-hea
 cd ~/dev/rpg-ngn && bash tools/smoke/turn.sh
 ```
 
-Crea una mesa nueva con Jaz (Zahira) y Armando (Calder), abre la sesion 003, resuelve el turno 1 con el DM scripted y deja el turno 2 abierto. Imprime cada paso con su codigo HTTP; el final debe mostrar `"number": 2` y `"status": "open"`.
+Crea una mesa nueva con Jaz (Zahira) y Armando (Calder), abre la sesion 003, resuelve el turno 1 con el GM scripted y deja el turno 2 abierto. Imprime cada paso con su codigo HTTP; el final debe mostrar `"number": 2` y `"status": "open"`.
 
 ## 3. Telefonos
 
@@ -79,23 +79,23 @@ Crea una mesa nueva con Jaz (Zahira) y Armando (Calder), abre la sesion 003, res
 3. Telefono A: `jaz@example.com` / `password`. Telefono B: `armando@example.com` / `password`.
 4. Entrar a la mesa mas reciente. Cada uno escribe su accion; cuando los dos respondieron, cualquiera cierra el turno. En dos o tres segundos ambos ven los bloques nuevos y el turno siguiente abierto.
 
-El anfitrion es `gabino@example.com` / `password` (abre y cierra sesiones, invita, fuerza cierres, y juega con su personaje). El DM es la IA.
+El anfitrion es `gabino@example.com` / `password` (abre y cierra sesiones, invita, fuerza cierres, y juega con su personaje). El GM es la IA.
 
-## 3a. El DM (entrega 6)
+## 3a. El GM (entrega 6)
 
-La API elige el proveedor con `DM_PROVIDER` en `rpg-ngn-api/.env`: `anthropic` (el de la partida, `ANTHROPIC_MODEL=claude-sonnet-5`, `ANTHROPIC_API_KEY`), `openai`, `deepseek`, `ollama` (M1 en la LAN, `OLLAMA_URL`, `OLLAMA_MODEL`) o `scripted` (sin modelo; las mesas con guion en `settings.provider` siguen usando scripted aunque el default sea otro). Comprobar sin gastar:
+La API elige el proveedor con `GM_PROVIDER` en `rpg-ngn-api/.env`: `anthropic` (el de la partida, `ANTHROPIC_MODEL=claude-sonnet-5`, `ANTHROPIC_API_KEY`), `openai`, `deepseek`, `ollama` (M1 en la LAN, `OLLAMA_URL`, `OLLAMA_MODEL`) o `scripted` (sin modelo; las mesas con guion en `settings.provider` siguen usando scripted aunque el default sea otro). Comprobar sin gastar:
 
 ```bash
-cd ~/dev/rpg-ngn-api && php artisan dm:probe          # ok=si modelo=claude-sonnet-5
+cd ~/dev/rpg-ngn-api && php artisan gm:probe          # ok=si modelo=claude-sonnet-5
 ```
 
-Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dolar; con la cola en `database` el cierre responde al instante y el worker narra por detras, mientras la web y la app muestran "El DM esta narrando...". La premisa de la mesa (al crearla) y la nota de la sesion (al abrirla) llegan al DM como contexto. Si el engine se reinicia, el probe lo confirma; si el turno vuelve a `open` con un bloque de sistema, el error esta en la terminal del engine.
+Un turno con Sonnet 5 tarda de 20 a 35 s y cuesta alrededor de un centavo de dolar; con la cola en `database` el cierre responde al instante y el worker narra por detras, mientras la web y la app muestran "El GM esta narrando...". La premisa de la mesa (al crearla) y la nota de la sesion (al abrirla) llegan al GM como contexto. Si el engine se reinicia, el probe lo confirma; si el turno vuelve a `open` con un bloque de sistema, el error esta en la terminal del engine.
 
 ## 3b. Web (laptops e iPhone por Safari)
 
 1. En cada dispositivo, misma Wi-Fi, abrir `http://<IP de la laptop>:3010` (hoy `http://192.168.100.16:3010`; comprobar con `ip -4 addr | grep -oE 'inet 192[0-9.]+'`). Sale la landing; "Entrar" o "Crear cuenta". La sesion va en una cookie httpOnly y las peticiones pasan por el proxy de Next: no hace falta CORS. Solo si alguien pulsa "Cambiar servidor" y escribe la API directa (`:8010`) hay que tener el origen en `CORS_ALLOWED_ORIGINS` de `rpg-ngn-api/.env`.
 2. Jugadora nueva desde el iPhone: abrir la URL en Safari, "Crear cuenta", escribir nombre, correo, contraseña (8 caracteres o mas) y repetirla, "Crear cuenta". Entra directo a "Tus mesas" (la API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`; no llega ningun correo). Le dice su correo al anfitrion y espera la invitacion; al recargar "Tus mesas" ya ve la mesa. Si cierra Safari, la sesion sigue (30 dias); "Salir" la borra.
-3. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, director de juego (por defecto el del servidor, Anthropic) y premisa opcional. Amistad antes de invitar: en "Invitados" (o en "Amigos" al pie de "Tus mesas") escribe el correo de la jugadora, "Buscar" y "Enviar solicitud de amistad"; ella la acepta en "Amigos" al pie de su "Tus mesas" (o al reves: ella busca `gabino@example.com` y manda la solicitud, y el anfitrion acepta). Con amistad aceptada, en "Invitados" buscar el correo otra vez e "Invitar a la mesa" con personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional). Antes de abrir, pestaña "DM" del mando y "Probar": debe decir "Listo: Anthropic: Claude Sonnet 5 disponible".
+3. Anfitrion: `gabino@example.com` / `password`. "Crear mesa": nombre, tu personaje, director de juego (por defecto el del servidor, Anthropic) y premisa opcional. Amistad antes de invitar: en "Invitados" (o en "Amigos" al pie de "Tus mesas") escribe el correo de la jugadora, "Buscar" y "Enviar solicitud de amistad"; ella la acepta en "Amigos" al pie de su "Tus mesas" (o al reves: ella busca `gabino@example.com` y manda la solicitud, y el anfitrion acepta). Con amistad aceptada, en "Invitados" buscar el correo otra vez e "Invitar a la mesa" con personaje. Entrar a la mesa y "Abrir sesion" en el mando del anfitrion (codigo sugerido, nota de la sesion opcional). Antes de abrir, pestaña "GM" del mando y "Probar": debe decir "Listo: Anthropic: Claude Sonnet 5 disponible".
 4. Jugadores: entrar a la mesa, escribir la accion y Enviar (Ctrl+Enter). Cuando no falta nadie, cualquiera pulsa "Cerrar turno y narrar"; el anfitrion puede "Forzar cierre". Jaz y Armando siguen siendo `jaz@example.com` y `armando@example.com`, `password`.
 5. Pantalla compartida: en la laptop del anfitrion, "Pantalla" o tecla `F` deja solo narrativa y dialogos en grande; `Esc` sale. La voz sale del dispositivo que pulse Leer (o tenga "Leer lo nuevo"); en iPhone hay que tocar Leer una vez antes de que suene sola. Voz, idioma y velocidad se eligen en "Ajustes" (barra superior) y quedan en ese navegador.
 
@@ -113,7 +113,7 @@ cd ~/dev/rpg-ngn && pnpm --filter mobile smoke-api   # turno completo con el cli
 - 401 en la app o en la web: token caducado o servidor mal escrito; volver a iniciar sesion.
 - "Petición rechazada: falta la cabecera de la web" (403 del proxy): algo llamo a `/api/*` sin la cabecera `X-Requested-With: rpg-ngn-web`; la web la pone sola, un curl contra el 3010 debe añadirla o ir directo al 8010 con Bearer.
 - Una jugadora no aparece al buscar por correo: se registro con otro correo o con espacios; el lookup es exacto (sin distinguir mayusculas).
-- "El preset X no está configurado": falta la clave en `rpg-ngn-api/.env`; la pestaña DM solo deja elegir presets con clave.
+- "El preset X no está configurado": falta la clave en `rpg-ngn-api/.env`; la pestaña GM solo deja elegir presets con clave.
 - La web no carga desde otro dispositivo: `pnpm --filter web dev` escucha en `0.0.0.0`; revisar firewall del 3010 y que la IP sea la actual (`hostname -I`).
 - Voz muda en Safari: tocar Leer una vez (iOS exige un gesto) y elegir una voz `es` en el selector.
 - 409 al cerrar: alguien cerro antes; refrescar.

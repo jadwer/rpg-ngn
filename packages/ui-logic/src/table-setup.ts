@@ -8,7 +8,7 @@ import { packCharacters } from './pack.js'
  * la app: que codigo de sesion sugerir, que personajes quedan libres, en que
  * punto esta la amistad con alguien, que puede hacer cada asiento y como se
  * describe. El asiento del dueño es `host` en la API; en pantalla es el
- * anfitrion, porque el DM es la IA.
+ * anfitrion, porque el GM es la IA.
  */
 
 /**
@@ -107,13 +107,13 @@ export interface SeatPowers {
   canInvite: boolean
   canOpenSession: boolean
   canCloseSession: boolean
-  /** Elegir y probar el proveedor del DM de la mesa. */
-  canConfigureDm: boolean
+  /** Elegir y probar el proveedor del GM de la mesa. */
+  canConfigureGm: boolean
 }
 
 export function seatPowers(role: MemberRole | null | undefined): SeatPowers {
   const host = role === 'host'
-  return { canInvite: host, canOpenSession: host, canCloseSession: host, canConfigureDm: host }
+  return { canInvite: host, canOpenSession: host, canCloseSession: host, canConfigureGm: host }
 }
 
 /** Como se presenta un asiento en una lista: nombre, y su papel o personaje. */
@@ -156,8 +156,8 @@ export function tableTitle(tableName: string, sessionCode: string | null, appNam
 
 /** Texto cuando la mesa no tiene bloques todavia, segun quien mira. */
 export function emptyTableText(hasSession: boolean, host: boolean): string {
-  if (hasSession) return 'El DM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
-  return host ? 'Para empezar, pulsa Iniciar partida. El DM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión inicie la partida, el DM presenta la escena aquí y podrás responder.'
+  if (hasSession) return 'El GM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
+  return host ? 'Para empezar, pulsa Iniciar partida. El GM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión inicie la partida, el GM presenta la escena aquí y podrás responder.'
 }
 
 export interface StartCard {
@@ -186,22 +186,22 @@ export function startCard(input: { hasSession: boolean; host: boolean; hostName:
   if (input.hasSession) return null
   const host = input.hostName ?? 'el anfitrión'
   const steps = [
-    'El DM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el DM narra.',
-    'Cuando todos hayan respondido, el anfitrión cierra el turno y el DM narra las consecuencias.',
+    'El GM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el GM narra.',
+    'Cuando todos hayan respondido, el anfitrión cierra el turno y el GM narra las consecuencias.',
     DICE_STEP[input.dice],
-    'Si te tienes que ir, pulsa "Me tengo que ir": el DM aparta a tu personaje sin matarlo y la mesa no te espera.',
+    'Si te tienes que ir, pulsa "Me tengo que ir": el GM aparta a tu personaje sin matarlo y la mesa no te espera.',
   ]
   if (input.host) {
     return {
       title: input.firstSession ? 'La mesa está lista' : 'La sesión anterior terminó',
-      text: input.firstSession ? 'Cuando todos tengan personaje, inicia la partida. El DM presenta la escena, explica cómo se juega y abre el primer turno.' : `Inicia la sesión ${input.nextCode}: el DM retoma donde se quedaron y abre el primer turno.`,
+      text: input.firstSession ? 'Cuando todos tengan personaje, inicia la partida. El GM presenta la escena, explica cómo se juega y abre el primer turno.' : `Inicia la sesión ${input.nextCode}: el GM retoma donde se quedaron y abre el primer turno.`,
       steps,
       action: input.firstSession ? 'Iniciar partida' : `Iniciar sesión ${input.nextCode}`,
     }
   }
   return {
     title: input.firstSession ? 'Esperando a que empiece la partida' : 'Esperando la siguiente sesión',
-    text: `Elige tu personaje si aún no lo tienes. ${host.charAt(0).toUpperCase()}${host.slice(1)} inicia la partida y el DM presenta la escena aquí.`,
+    text: `Elige tu personaje si aún no lo tienes. ${host.charAt(0).toUpperCase()}${host.slice(1)} inicia la partida y el GM presenta la escena aquí.`,
     steps,
     action: null,
   }

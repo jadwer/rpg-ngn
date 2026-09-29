@@ -72,9 +72,9 @@ describe('sessionBlocks con el pack piloto', () => {
     expect(blocks.some((b) => b.kind === 'roll')).toBe(false)
   })
 
-  it('un evento de la capa dm nunca entra al registro', () => {
+  it('un evento de la capa gm nunca entra al registro', () => {
     const session = sessionOf(pilot.pack, '002')
-    const secret = { ...pilot.events[1]!, id: 'evt-99999', visibility: { layer: 'dm' as const } } as (typeof pilot.events)[number]
+    const secret = { ...pilot.events[1]!, id: 'evt-99999', visibility: { layer: 'gm' as const } } as (typeof pilot.events)[number]
     const blocks = sessionBlocks({ pack: pilot.pack, session, events: [...pilot.events, secret] })
     expect(blocks.some((b) => b.id.endsWith('evt-99999'))).toBe(false)
   })

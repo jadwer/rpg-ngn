@@ -1,7 +1,7 @@
 'use client'
 
-import { type ApiClient, ApiError, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
-import { describePreset, presetAvailability, savedProviderText, type TableDmInfo, tableDmText } from '@rpg-ngn/ui-logic'
+import { type ApiClient, ApiError, type GmPreset, type GmProbeResult, type GmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
+import { describePreset, presetAvailability, savedProviderText, type TableGmInfo, tableGmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
@@ -14,25 +14,25 @@ interface Props {
 }
 
 /**
- * Proveedor del DM de la mesa (docs/09: configurable, obligatorio antes de
+ * Proveedor del GM de la mesa (docs/09: configurable, obligatorio antes de
  * jugar). Se elige entre los presets del servidor, sin credenciales; el
  * modelo es opcional; "Probar" llama al engine con el preset antes de
  * guardarlo. Solo el anfitrion ve este panel (la API tambien lo exige).
  * Los dados y los secretos del pack viven aparte, en `TableRulesPanel`.
  */
-export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
-  const [presets, setPresets] = useState<DmPreset[] | null>(null)
+export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
+  const [presets, setPresets] = useState<GmPreset[] | null>(null)
   // Tus claves propias: con una, el proveedor se elige aunque el servidor no tenga la suya.
   const [ownKeys, setOwnKeys] = useState<OwnKey[]>([])
   const [defaultPreset, setDefaultPreset] = useState<string>('')
   const saved = useMemo(() => providerChoice(table.settings), [table.settings])
   // Con que narra de verdad la mesa y quien lo paga (23-09: elegir Anthropic no decia si era la clave propia).
-  const [dmInfo, setDmInfo] = useState<TableDmInfo | null>(null)
+  const [gmInfo, setGmInfo] = useState<TableGmInfo | null>(null)
   useEffect(() => {
     let alive = true
-    void client.tableDm(table.id).then(
+    void client.tableGm(table.id).then(
       (info) => {
-        if (alive) setDmInfo(info)
+        if (alive) setGmInfo(info)
       },
       () => undefined,
     )
@@ -43,7 +43,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const [preset, setPreset] = useState<string>(saved?.preset ?? '')
   const [model, setModel] = useState<string>(saved?.model ?? '')
   const [working, setWorking] = useState(false)
-  const [probe, setProbe] = useState<DmProbeResult | null>(null)
+  const [probe, setProbe] = useState<GmProbeResult | null>(null)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   useEffect(() => {
     let alive = true
-    void client.listDmPresets().then(
+    void client.listGmPresets().then(
       (result) => {
         if (!alive) return
         setPresets(result.presets)
@@ -70,7 +70,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
     }
   }, [client, onUnauthorized])
 
-  const chosen: DmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
+  const chosen: GmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
   useEffect(() => {
     let alive = true
     void client.listOwnKeys().then(
@@ -104,7 +104,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const test = () =>
     run(async () => {
       setProbe(null)
-      const result = await client.probeDm(table.id, chosen ?? { preset: defaultPreset, model: null })
+      const result = await client.probeGm(table.id, chosen ?? { preset: defaultPreset, model: null })
       setProbe(result)
     })
 
@@ -119,8 +119,8 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const disabled = busy || working
 
   return (
-    <div className="stack dm-settings">
-      {dmInfo ? <p className="dm-now">{tableDmText(dmInfo)}</p> : null}
+    <div className="stack gm-settings">
+      {gmInfo ? <p className="gm-now">{tableGmText(gmInfo)}</p> : null}
       <p className="hint">Tu propia clave se guarda en Mi cuenta y créditos; si tienes una para este proveedor, la mesa la usa.</p>
 
       <label className="field">

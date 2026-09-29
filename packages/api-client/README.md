@@ -29,7 +29,7 @@ await api.closeTurn(state.turn!.id)                    // 202 -> closing
 | `logout()` | `POST /api/auth/logout` | revoca el token Bearer actual |
 | `profile()` | `GET /api/v1/profile` | `{id, name, email, role}` |
 | `listTables()` / `table(id)` | `GET /api/v1/tables?include=campaign,members.user` | mesas planas con `campaignId`, `premise` (de `settings.premise`) y `members` (rol, personaje, usuario) |
-| `createTable({name, packId, packVersion, ruleset, premise?, settings?})` | `POST /api/v1/tables` (JSON:API) | la mesa creada; quien la crea queda como dueño con el asiento `dm` |
+| `createTable({name, packId, packVersion, ruleset, premise?, settings?})` | `POST /api/v1/tables` (JSON:API) | la mesa creada; quien la crea queda como dueño con el asiento `gm` |
 | `setOwnerCharacter(tableId, ownerUserId, characterId)` | `POST /api/v1/tables/{id}/members` sobre uno mismo | el asiento del dueño con su personaje |
 | `invite(tableId, userId, characterId)` | `POST /api/v1/tables/{id}/members` | el asiento nuevo; 422 sin amistad aceptada, 409 si ya es miembro |
 | `listFriendships()` | `GET /api/v1/friendships?include=user,friend` | amistades del usuario con quien pide (`user`) y quien acepta (`friend`) |
@@ -37,9 +37,9 @@ await api.closeTurn(state.turn!.id)                    // 202 -> closing
 | `findUserByEmail(email)` | `GET /api/v1/users?filter[email]=` | `{id, name, email}` o null; hoy solo las cuentas admin pueden buscar (403 al resto) |
 | `tableState(tableId, after?)` | `GET /api/v1/tables/{id}/state?after=` | campaña, `viewer` (asiento, rol y personaje de quien consulta), sesion abierta, turno vigente, bloques nuevos y `lastBlockId` |
 | `respond(turnId, text, key?)` | `POST /api/v1/turns/{id}/responses` | recibo con `created` (201) o repetido (200) |
-| `closeTurn(turnId, force?)` | `POST /api/v1/turns/{id}/close` | el turno en `closing`; `force` solo lo honra la API si eres DM |
-| `openSession(campaignId, code, worldTime?)` | `POST /api/v1/campaigns/{id}/sessions` | el primer turno de la sesion (solo DM) |
-| `closeSession(sessionId, cliffhanger?)` | `POST /api/v1/sessions/{id}/close` | `{session, status, snapshotSeq}` (solo DM) |
+| `closeTurn(turnId, force?)` | `POST /api/v1/turns/{id}/close` | el turno en `closing`; `force` solo lo honra la API si eres GM |
+| `openSession(campaignId, code, worldTime?)` | `POST /api/v1/campaigns/{id}/sessions` | el primer turno de la sesion (solo GM) |
+| `closeSession(sessionId, cliffhanger?)` | `POST /api/v1/sessions/{id}/close` | `{session, status, snapshotSeq}` (solo GM) |
 | `listSessions(campaignId)` | `GET /api/v1/game-sessions?filter[campaign]=` | para encontrar el id numerico de la sesion abierta |
 | `playerProjection(campaignId, characterId)` | `GET .../projections/player:{id}` | estado vivo del personaje propio (403 si es ajeno) |
 | `worldProjection(campaignId)` | `GET .../projections/world` | estado publico de todos los personajes |

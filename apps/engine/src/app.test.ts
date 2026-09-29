@@ -320,8 +320,8 @@ describe('apps/engine', () => {
       expect(lines.filter((l) => l.kind === 'block').map((l) => (l.kind === 'block' ? l.block : null))).toEqual([
         { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Miro la campana.' },
         { type: 'narration', text: 'El silencio pesa. ¿Qué hacéis?' },
-        // El aviso al anfitrion, una vez y al final: en medio parecia que el DM se corregia en vivo.
-        { type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info', detail: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con DM_LINT o por mesa.' },
+        // El aviso al anfitrion, una vez y al final: en medio parecia que el GM se corregia en vivo.
+        { type: 'system', text: 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info', detail: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.' },
       ])
       const result = lines.at(-1)
       expect(result?.kind).toBe('result')

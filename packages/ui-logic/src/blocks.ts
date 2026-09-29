@@ -1,5 +1,5 @@
 /**
- * Bloques tipados de un turno (docs/09, "Lectura"). Un turno del DM, o una
+ * Bloques tipados de un turno (docs/09, "Lectura"). Un turno del GM, o una
  * sesion offline construida desde el pack, es un array de bloques; cada
  * vista (narrativa, dialogo) decide como pinta cada tipo y el TTS los lee
  * de uno en uno. Nada aqui sabe de React ni de Expo.
@@ -46,7 +46,7 @@ export interface RollBlock {
   advantage: 'advantage' | 'disadvantage' | null
   /** Frase completa, lista para pintar y para leer en voz alta. */
   text: string
-  /** La pidio el DM y la resolvio el servidor cuando el jugador solto el dado (modo `dice`). */
+  /** La pidio el GM y la resolvio el servidor cuando el jugador solto el dado (modo `dice`). */
   requested?: true
 }
 

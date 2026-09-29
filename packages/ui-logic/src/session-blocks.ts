@@ -7,7 +7,7 @@ import { characterVisibility, everPlayed, sessionVisibility } from './veil.js'
 
 /**
  * Bloques de una sesion offline, construidos desde el pack y el estado
- * reducido. No hay DM: la narrativa es el recap de la sesion, partido para el
+ * reducido. No hay GM: la narrativa es el recap de la sesion, partido para el
  * TTS, y el registro son las tiradas y sucesos del log. Una sesion planeada
  * (003) no tiene recap ni cabos sueltos: muestra briefing, como se juega y la
  * tabla de Fortuna, que es lo unico que un jugador nuevo debe leer.
@@ -69,14 +69,14 @@ export function sessionBlocks(input: SessionBlocksInput): TurnBlock[] {
   return blocks
 }
 
-/** Tiradas y sucesos del log que pertenecen a la sesion, en orden de seq, sin la capa dm. */
+/** Tiradas y sucesos del log que pertenecen a la sesion, en orden de seq, sin la capa gm. */
 export function ledgerBlocks(input: SessionBlocksInput): TurnBlock[] {
   const { pack, session, events } = input
   if (!events) return []
   const blocks: TurnBlock[] = []
   for (const event of events) {
     if (event.sessionId !== session.id) continue
-    if (event.visibility?.layer === 'dm') continue
+    if (event.visibility?.layer === 'gm') continue
     if (event.type === 'roll') {
       blocks.push(rollBlock(event, pack, session))
     } else if (event.type === 'world_event') {

@@ -15,7 +15,7 @@ export const PackMap = z.strictObject({
   name: z.string().min(1),
   /** Ruta de la imagen dentro del pack, como los retratos. */
   image: z.string().min(1),
-  /** Que es y a que escala, para el DM y para quien lo mira. */
+  /** Que es y a que escala, para el GM y para quien lo mira. */
   description: z.string().min(1).optional(),
 })
 

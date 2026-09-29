@@ -5,7 +5,7 @@
 #   stop      verifica el repo completo antes de que Claude cierre el turno
 # Las reglas que aplica son las del CLAUDE.md del repo y las directrices de
 # estilo globales de Gabino (sin guion largo en prosa, sin emojis, espanol
-# correcto en contenido de jugador, JSON valido, dm/ jamas versionado).
+# correcto en contenido de jugador, JSON valido, gm/ jamas versionado).
 
 set -u
 MODE="${1:-postedit}"
@@ -45,7 +45,7 @@ check_content_es() {
 check_file() {
   local f="$1"
   case "$f" in
-    "$ROOT"/dm/*) ;; # notas privadas: sin reglas
+    "$ROOT"/gm/*) ;; # notas privadas: sin reglas
     *"/content/"*.json) check_json "$f"; check_content_es "$f" ;;
     *.json) check_json "$f" ;;
     *.md) check_style_doc "$f" ;;
@@ -62,9 +62,9 @@ else
   for f in "$ROOT"/README.md "$ROOT"/ROADMAP.md "$ROOT"/CLAUDE.md; do
     [ -f "$f" ] && check_style_doc "$f"
   done
-  # dm/ jamas debe estar versionado (el repo es publico)
-  if [ -d "$ROOT/.git" ] && [ -n "$(git -C "$ROOT" ls-files dm/ 2>/dev/null)" ]; then
-    PROBLEMS+=("ALERTA: hay archivos de dm/ versionados en un repo publico")
+  # gm/ jamas debe estar versionado (el repo es publico)
+  if [ -d "$ROOT/.git" ] && [ -n "$(git -C "$ROOT" ls-files gm/ 2>/dev/null)" ]; then
+    PROBLEMS+=("ALERTA: hay archivos de gm/ versionados en un repo publico")
   fi
 fi
 

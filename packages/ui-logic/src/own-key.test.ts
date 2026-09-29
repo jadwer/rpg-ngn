@@ -13,7 +13,7 @@ describe('own-key', () => {
   })
 
   it('explica el estado en terminos de lo que le pasa a sus mesas', () => {
-    expect(ownKeyStatus(sin)).toContain('DM del servidor')
+    expect(ownKeyStatus(sin)).toContain('GM del servidor')
     expect(ownKeyStatus(con)).toContain('terminada en 9999')
     expect(ownKeyStatus(con)).toContain('no gastan cupo')
     expect(ownKeyStatus({ ...con, model: 'claude-haiku-4-5' })).toContain('modelo claude-haiku-4-5')

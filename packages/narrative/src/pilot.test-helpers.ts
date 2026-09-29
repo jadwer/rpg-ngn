@@ -4,8 +4,8 @@ import { applyEvent, reduce, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, loadPack, parseEventLog, type FileSource, type LoadedPack } from '@rpg-ngn/content'
 import type { TurnInput, TurnResponse } from '@rpg-ngn/engine-contract'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
-import type { ModelPrompt, ModelReply, ModelTransport } from './model-dm.js'
-import type { DMOutput, DMProbe, DMTurnContext } from './provider.js'
+import type { ModelPrompt, ModelReply, ModelTransport } from './model-gm.js'
+import type { GMOutput, GMProbe, GMTurnContext } from './provider.js'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
 
@@ -49,8 +49,8 @@ export function turn(number: number, responses: TurnResponse[], id = `t-${number
   return { id, number, sessionId: '003', responses }
 }
 
-export async function collect(iterable: AsyncIterable<DMOutput>): Promise<DMOutput[]> {
-  const out: DMOutput[] = []
+export async function collect(iterable: AsyncIterable<GMOutput>): Promise<GMOutput[]> {
+  const out: GMOutput[] = []
   for await (const item of iterable) out.push(item)
   return out
 }
@@ -80,11 +80,11 @@ export class FakeTransport implements ModelTransport {
     return { finish: 'stop', inputTokens: 1200, outputTokens: 300, ...this.reply }
   }
 
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     return { ok: true, model: this.model, message: 'fake' }
   }
 }
 
-export function contextFor(base: { pack: LoadedPack; state: CampaignState; recentEvents?: CampaignEvent[] }, input: TurnInput, extra: Partial<DMTurnContext> = {}): DMTurnContext {
+export function contextFor(base: { pack: LoadedPack; state: CampaignState; recentEvents?: CampaignEvent[] }, input: TurnInput, extra: Partial<GMTurnContext> = {}): GMTurnContext {
   return { pack: base.pack, state: base.state, session: base.pack.sessions.get('003'), turn: input, recentEvents: base.recentEvents, ...extra }
 }

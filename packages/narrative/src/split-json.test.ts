@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { splitJsonObjects } from './model-dm.js'
+import { splitJsonObjects } from './model-gm.js'
 
 /**
  * Lo que rompio la apertura de la mesa "cinco personas" el 19-09: Haiku

@@ -1,7 +1,7 @@
 {
   "name": "@rpg-ngn/narrative",
   "version": "0.1.0",
-  "description": "El DM: interfaz DMProvider, proveedor scripted determinista y, desde la entrega 6, context builder y adapters de LLM",
+  "description": "El GM: interfaz GMProvider, proveedor scripted determinista y, desde la entrega 6, context builder y adapters de LLM",
   "license": "UNLICENSED",
   "private": true,
   "type": "module",

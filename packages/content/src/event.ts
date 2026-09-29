@@ -41,7 +41,12 @@ export type EventType = z.infer<typeof EventType>
 export const EventId = z.string().regex(/^evt-\d{5,}$/, 'id con forma evt-NNNNN')
 export const SessionId = z.string().regex(/^\d{3}$/)
 
-export const KnowledgeLayer = z.enum(['canon', 'campaign', 'player', 'dm'])
+/**
+ * Capas de conocimiento. `gm` se llamaba `dm` hasta el renombre a GM
+ * (29-09); ningun evento guardado la usaba, pero un pack o un log viejo
+ * puede traerla, asi que se acepta al leer y se guarda como `gm`.
+ */
+export const KnowledgeLayer = z.preprocess((v) => (v === 'dm' ? 'gm' : v), z.enum(['canon', 'campaign', 'player', 'gm']))
 export const Confidence = z.enum(['known', 'uncertain', 'conflicting', 'unknown'])
 
 export const Visibility = z.strictObject({
@@ -159,15 +164,15 @@ export const RumorHeardEvent = z.strictObject({
     text: z.string().min(3).max(300),
     /** De quien viene, si se sabe. */
     from: EntityRef.optional(),
-    /** Si el pack o el DM saben ya que es falso; el jugador no lo ve. */
+    /** Si el pack o el GM saben ya que es falso; el jugador no lo ve. */
     false: z.boolean().optional(),
   }),
 })
 
 /**
- * El DM revela a proposito un secreto del pack (secret.ts) a los testigos.
- * Es el puente explicito entre la capa `dm` y el conocimiento de la party
- * cuando la condicion de revelacion es `manual` o cuando el DM decide
+ * El GM revela a proposito un secreto del pack (secret.ts) a los testigos.
+ * Es el puente explicito entre la capa `gm` y el conocimiento de la party
+ * cuando la condicion de revelacion es `manual` o cuando el GM decide
  * adelantarla. Sin testigos no revela nada, asi que se exigen.
  */
 export const SecretRevealedEvent = z.strictObject({

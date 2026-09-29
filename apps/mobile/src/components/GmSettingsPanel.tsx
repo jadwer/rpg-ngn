@@ -1,5 +1,5 @@
-import { type ApiClient, ApiError, type DmPreset, type DmProbeResult, type DmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
-import { describePreset, presetAvailability, savedProviderText, type TableDmInfo, tableDmText } from '@rpg-ngn/ui-logic'
+import { type ApiClient, ApiError, type GmPreset, type GmProbeResult, type GmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
+import { describePreset, presetAvailability, savedProviderText, type TableGmInfo, tableGmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -16,20 +16,20 @@ interface Props {
 }
 
 /**
- * Proveedor del DM de la mesa, como la pestaña DM del mando en la web
+ * Proveedor del GM de la mesa, como la pestaña GM del mando en la web
  * (docs/09: configurable, obligatorio antes de jugar). Se elige entre los
  * presets del servidor, sin credenciales; el modelo es opcional; "Probar"
  * llama al engine con el preset antes de guardarlo. Solo el anfitrion lo ve
  * (la API tambien lo exige).
  */
-export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
+export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
   // Con que narra de verdad la mesa y quien lo paga (23-09: elegir Anthropic no decia si era la clave propia).
-  const [dmInfo, setDmInfo] = useState<TableDmInfo | null>(null)
+  const [gmInfo, setGmInfo] = useState<TableGmInfo | null>(null)
   useEffect(() => {
     let alive = true
-    void client.tableDm(table.id).then(
+    void client.tableGm(table.id).then(
       (info) => {
-        if (alive) setDmInfo(info)
+        if (alive) setGmInfo(info)
       },
       () => undefined,
     )
@@ -37,7 +37,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
       alive = false
     }
   }, [client, table.id, table.settings])
-  const [presets, setPresets] = useState<DmPreset[] | null>(null)
+  const [presets, setPresets] = useState<GmPreset[] | null>(null)
   // Tus claves propias: con una, el proveedor se elige aunque el servidor no tenga la suya.
   const [ownKeys, setOwnKeys] = useState<OwnKey[]>([])
   const [defaultPreset, setDefaultPreset] = useState<string>('')
@@ -47,7 +47,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   // Los dados van aparte, en DiceModePanel, que guarda al elegir: aqui
   // estaban repetidos y el modal los enseñaba dos veces.
   const [working, setWorking] = useState(false)
-  const [probe, setProbe] = useState<DmProbeResult | null>(null)
+  const [probe, setProbe] = useState<GmProbeResult | null>(null)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   useEffect(() => {
     let alive = true
-    void client.listDmPresets().then(
+    void client.listGmPresets().then(
       (result) => {
         if (!alive) return
         setPresets(result.presets)
@@ -74,7 +74,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
     }
   }, [client, onUnauthorized])
 
-  const chosen: DmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
+  const chosen: GmProviderChoice | null = preset ? { preset, model: model.trim() || null } : null
   useEffect(() => {
     let alive = true
     void client.listOwnKeys().then(
@@ -108,7 +108,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   const test = () =>
     run(async () => {
       setProbe(null)
-      setProbe(await client.probeDm(table.id, chosen ?? { preset: defaultPreset, model: null }))
+      setProbe(await client.probeGm(table.id, chosen ?? { preset: defaultPreset, model: null }))
     })
 
   const save = () =>
@@ -122,7 +122,7 @@ export function DmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
   return (
     <View style={styles.wrap}>
-      {dmInfo ? <Text style={styles.now}>{tableDmText(dmInfo)}</Text> : null}
+      {gmInfo ? <Text style={styles.now}>{tableGmText(gmInfo)}</Text> : null}
       <Text style={styles.hint}>Tu propia clave se guarda en Mi cuenta; si tienes una para este proveedor, la mesa la usa.</Text>
 
       <Text style={styles.label}>Proveedor</Text>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Monta una mesa con una escena corta guiada por el DM scripted y la deja lista
+# Monta una mesa con una escena corta guiada por el GM scripted y la deja lista
 # para jugar desde telefonos: Gabino (dueño) juega a Narivyl, Jaz a Zahira.
 # El guion viaja en settings.provider de la mesa (tools/scenes/*.json). El
 # turno 1 se cierra vacio de inmediato para que la presentacion de la escena

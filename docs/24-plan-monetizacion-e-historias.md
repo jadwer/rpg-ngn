@@ -127,7 +127,7 @@ publica"):
   de la mesa (cada quien acepta desde su cuenta), anonimizacion opcional de
   nombres de jugadores, y retirada en cualquier momento por cualquiera de
   ellos.
-- Bloques `system` y de capa `dm` fuera siempre (docs/08).
+- Bloques `system` y de capa `gm` fuera siempre (docs/08).
 
 Producir video a partir de eso es trabajo editorial de Gabino con
 herramientas externas, no una dependencia del producto.

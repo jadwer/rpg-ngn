@@ -48,7 +48,7 @@ export interface ApiClient extends AccountApi, SettingsApi {
   profile(): Promise<Profile>
   listTables(): Promise<TableSummary[]>
   table(tableId: string | number): Promise<TableSummary>
-  /** Crea la mesa (JSON:API); el que la crea queda como dueño con el asiento `dm` y sin personaje. */
+  /** Crea la mesa (JSON:API); el que la crea queda como dueño con el asiento `gm` y sin personaje. */
   createTable(input: NewTable): Promise<TableSummary>
   /** El dueño fija o cambia su propio personaje (`POST tables/{t}/members` sobre si mismo). */
   setOwnerCharacter(tableId: string | number, ownerUserId: string | number, characterId: string | null): Promise<TableMemberRecord>
@@ -106,7 +106,7 @@ export interface ApiClient extends AccountApi, SettingsApi {
   setTyping(tableId: string | number, typing: boolean): Promise<Presence[]>
   /** Tira la Fortuna de la sesion del propio personaje; el numero lo saca el servidor. 409 si ya se tiro o no toca. */
   rollFortune(tableId: string | number): Promise<{ result: number; label: string }>
-  /** Suelta el dado de la tirada que el DM pidio en este turno; el numero lo saca el servidor y queda como la respuesta del personaje. 409 si no toca. */
+  /** Suelta el dado de la tirada que el GM pidio en este turno; el numero lo saca el servidor y queda como la respuesta del personaje. 409 si no toca. */
   rollRequested(turnId: number): Promise<RollReceipt>
   /** "Otras" ideas para el propio personaje; sustituyen a las anteriores. 409 si no toca o hay que pagar. */
   moreIdeas(turnId: number): Promise<{ options: string[]; ideas: TableState['ideas'] }>

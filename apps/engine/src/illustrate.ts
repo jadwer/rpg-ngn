@@ -8,7 +8,7 @@ import type { Illustration } from '@rpg-ngn/engine-contract'
  *
  * El prompt sale solo del pack y del estado (lo que ve un recien llegado al
  * lugar, raza y clase de quien esta en cuadro, el estilo del pack) y de la
- * frase que el DM marco como momento, que ya paso el lint de conocimiento.
+ * frase que el GM marco como momento, que ya paso el lint de conocimiento.
  * Nunca del texto libre de un jugador: es la puerta a imagenes que no
  * queremos generar.
  */
@@ -26,7 +26,7 @@ export interface IllustrationInput {
   party: readonly string[]
   /** Turno 1 sin declaraciones: la apertura de la sesion. */
   opening: boolean
-  /** La frase del DM, si marco un momento. */
+  /** La frase del GM, si marco un momento. */
   moment: string | null
 }
 

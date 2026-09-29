@@ -42,6 +42,6 @@ Toda pieza de informacion pertenece a una capa (ver [04-narrative-context.md](04
 1. **Canon**: lo que es cierto en el mundo del content pack.
 2. **Campaign canon**: lo que ha ocurrido en esta campana concreta.
 3. **Player knowledge**: lo que cada personaje sabe (por personaje, no por mesa).
-4. **DM knowledge**: lo que el sistema sabe y los jugadores no (secretos, tramas, identidades).
+4. **GM knowledge**: lo que el sistema sabe y los jugadores no (secretos, tramas, identidades).
 
 Regla derivada: un Event registra quien lo presencio; una Location distingue su ficha completa de "lo que sabria un recien llegado".

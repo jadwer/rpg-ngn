@@ -224,7 +224,7 @@ function applyEffects(state: CampaignState, event: CampaignEvent, ruleset: Rules
     }
     // Una condicion sobre un NPC ("el guardia queda receloso") tampoco
     // depende del sistema de juego, y los rulesets solo saben aplicarla a
-    // personajes jugadores. Es lo que mas veces intentaba el DM y se
+    // personajes jugadores. Es lo que mas veces intentaba el GM y se
     // descartaba (20-09).
     if (effect['op'] === 'condition' && refKind(String(effect['who'] ?? '')) === 'npc') {
       world = applyNpcCondition(world, effect)
@@ -312,13 +312,13 @@ function applyWitnesses(state: CampaignState, event: CampaignEvent): CampaignSta
 }
 
 /**
- * El registro narrativo es lo que la mesa leeria. Lo que el DM marca con la
- * capa `dm` no entra (VAM del 19-09, S14): antes entraba y la proyeccion
+ * El registro narrativo es lo que la mesa leeria. Lo que el GM marca con la
+ * capa `gm` no entra (VAM del 19-09, S14): antes entraba y la proyeccion
  * `narrative` lo servia a todos. Sus demas efectos (estado, conocimiento del
- * DM) se aplican igual; solo no se narra. `knowledge.ts` ya hacia lo mismo.
+ * GM) se aplican igual; solo no se narra. `knowledge.ts` ya hacia lo mismo.
  */
 function appendLog(state: CampaignState, event: CampaignEvent, text: string): CampaignState {
-  if (event.visibility?.layer === 'dm') return state
+  if (event.visibility?.layer === 'gm') return state
   return {
     ...state,
     narrative: { ...state.narrative, log: [...state.narrative.log, { seq: event.seq, event: event.id, type: event.type, text }] },

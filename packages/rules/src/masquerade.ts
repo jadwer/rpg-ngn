@@ -19,7 +19,7 @@ import { UnknownEffectError, type Ruleset } from './ruleset.js'
  *   estado por persona (`interes`, `atraccion`, `confianza`, `quimica`,
  *   `decepcion`, `desconfianza`). Un vinculo nuevo con la misma persona
  *   sustituye al anterior: la noche cambia de opinion. El jugador no lo ve
- *   en pantalla; el DM si, y de ahi sale el resumen de la noche.
+ *   en pantalla; el GM si, y de ahi sale el resumen de la noche.
  *
  * Los rumores NO viven aqui: son un evento del dominio (`rumor_heard`) que
  * el reductor guarda en lo que ha oido cada personaje, porque un rumor puede

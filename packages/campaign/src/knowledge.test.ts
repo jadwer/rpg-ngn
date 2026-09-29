@@ -51,14 +51,14 @@ describe('proyeccion de secretos sobre el log del piloto', () => {
 })
 
 describe('visibleTo', () => {
-  it('testigos, destinatarios de discovery y knowledgeGranted; la capa dm no es visible para nadie', async () => {
+  it('testigos, destinatarios de discovery y knowledgeGranted; la capa gm no es visible para nadie', async () => {
     const { pack, events } = await loadPilot()
     const state = reduce(events, { pack, ruleset: fantasyD20Lite })
 
     expect(visibleTo(event({ type: 'narration', visibility: { layer: 'campaign', witnesses: ['character:zahira', 'npc:tomas'] } }), state)).toEqual(['zahira'])
     expect(visibleTo(event({ type: 'discovery', targets: ['character:calder'], payload: { fact: 'fact:x', confidence: 'known', method: 'm' } }), state)).toEqual(['calder'])
     expect(visibleTo(event({ type: 'world_event', payload: { note: 'n' }, knowledgeGranted: [{ to: 'character:narivyl', fact: 'fact:x', confidence: 'known' }] }), state)).toEqual(['narivyl'])
-    expect(visibleTo(event({ type: 'narration', visibility: { layer: 'dm', witnesses: ['character:zahira'] } }), state)).toEqual([])
+    expect(visibleTo(event({ type: 'narration', visibility: { layer: 'gm', witnesses: ['character:zahira'] } }), state)).toEqual([])
     // Sin testigos ni capa: lo oyo la party de la sesion.
     expect(visibleTo(event({ type: 'world_event', payload: { note: 'n' } }), state)).toEqual(['calder', 'narivyl', 'zahira'])
     expect(visibleTo(event({ type: 'world_event', sessionId: '003', payload: { note: 'n' } }), state)).toEqual([])

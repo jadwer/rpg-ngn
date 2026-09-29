@@ -1,10 +1,10 @@
 import { fold, secretsKnownBy, visibleTo } from '@rpg-ngn/campaign'
 import { isManualReveal, refId, refKind, type CampaignEvent, type LoadedPack, type Secret } from '@rpg-ngn/content'
 import type { LintFinding, LintMode } from '@rpg-ngn/engine-contract'
-import type { DMTurnContext } from './provider.js'
+import type { GMTurnContext } from './provider.js'
 
 /**
- * Lint de conocimiento (docs/08, invariante 3): compara lo que el DM va a
+ * Lint de conocimiento (docs/08, invariante 3): compara lo que el GM va a
  * decir con la proyeccion de conocimiento de quienes lo van a oir. No
  * intenta entender prosa: trabaja sobre marcadores verificables.
  *
@@ -17,7 +17,7 @@ import type { DMTurnContext } from './provider.js'
  *
  * Receptores: la party presente en la sesion. Lo que un jugador declaro
  * este turno o lo que ya esta en la cronica publica cuenta como oido por la
- * mesa, asi el DM puede repetir lo que los propios jugadores dijeron.
+ * mesa, asi el GM puede repetir lo que los propios jugadores dijeron.
  */
 
 export type { LintFinding, LintMode }
@@ -32,7 +32,7 @@ export interface KnowledgeView {
   heard: string
 }
 
-export function buildKnowledgeView(ctx: DMTurnContext, party: readonly string[]): KnowledgeView {
+export function buildKnowledgeView(ctx: GMTurnContext, party: readonly string[]): KnowledgeView {
   const { pack, state } = ctx
   const heardParts: string[] = []
   const knownRefs = new Set<string>()
@@ -132,13 +132,13 @@ export function secretSubjectPresent(secret: Secret, party: readonly string[]): 
 }
 
 /**
- * Si la escena roza el secreto (docs/04, regla 2: la capa del DM lleva solo
+ * Si la escena roza el secreto (docs/04, regla 2: la capa del GM lleva solo
  * los secretos que la escena puede tocar, no todos los del pack). Hasta hoy
  * se volcaban todos en cada turno, que es la superficie que un modelo puede
  * parafrasear sin tropezar con el lint (VAM del 19-09, motor A4).
  *
  * Criterio, con lo que hay (las sesiones no declaran reparto):
- * - `manual`: siempre. Es la verdad de la trama que el DM decide cuando
+ * - `manual`: siempre. Es la verdad de la trama que el GM decide cuando
  *   soltar; sin ella narraria un culpable distinto al del pack.
  * - El sujeto es un personaje de la party presente: si.
  * - El sujeto o quien lo puede soltar aparece en lo que la escena ya dijo:
@@ -146,7 +146,7 @@ export function secretSubjectPresent(secret: Secret, party: readonly string[]): 
  *   nota de sesion. Por nombre o por ref.
  * - Si no, fuera: no se le cuenta al modelo lo que la escena no toca.
  */
-export function secretTouchesScene(secret: Secret, ctx: DMTurnContext, party: readonly string[]): boolean {
+export function secretTouchesScene(secret: Secret, ctx: GMTurnContext, party: readonly string[]): boolean {
   if (isManualReveal(secret.revealWhen)) return true
   if (secretSubjectPresent(secret, party)) return true
   const refs = [secret.about, secret.revealedBy].filter((r): r is string => typeof r === 'string')

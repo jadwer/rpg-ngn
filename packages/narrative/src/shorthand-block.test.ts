@@ -1,8 +1,8 @@
 import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
-import { ModelDMProvider, type ModelPrompt, type ModelReply, type ModelTransport } from './model-dm.js'
+import { ModelGMProvider, type ModelPrompt, type ModelReply, type ModelTransport } from './model-gm.js'
 import { contextFor, openSession003, response, turn } from './pilot.test-helpers.js'
-import type { DMProbe } from './provider.js'
+import type { GMProbe } from './provider.js'
 
 /**
  * Sonnet abrevio `{"kind":"block","block":{"type":"dialogue",...}}` como
@@ -18,7 +18,7 @@ class Once implements ModelTransport {
     yield this.reply
     return { finish: 'stop', inputTokens: 10, outputTokens: 10 }
   }
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     return { ok: true, model: this.model, message: 'ok' }
   }
 }
@@ -32,7 +32,7 @@ async function collect<T>(it: AsyncIterable<T>): Promise<T[]> {
 describe('bloques abreviados del modelo', () => {
   it('entiende {"kind":"dialogue"} y {"kind":"narration"} sin envoltura', async () => {
     const base = await openSession003()
-    const provider = new ModelDMProvider(
+    const provider = new ModelGMProvider(
       new Once('{"kind":"dialogue","speaker":"Bren","speakerRef":"npc:bren","text":"La campana funciona, sí."}\n{"kind":"narration","text":"El portón chirría al abrirse."}'),
       'sk-test-0000000000',
       { random: seededRandom(7) },

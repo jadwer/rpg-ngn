@@ -25,7 +25,7 @@ export interface TableSnapshot {
   away: TableState['away']
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion. */
   fortune: TableState['fortune']
-  /** La tirada que el DM pidio a quien consulta en este turno, si aun no la solto. */
+  /** La tirada que el GM pidio a quien consulta en este turno, si aun no la solto. */
   rolls: TableState['rolls']
   suggestions: TableState['suggestions']
   ideas: TableState['ideas']

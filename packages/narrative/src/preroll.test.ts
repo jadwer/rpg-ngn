@@ -1,8 +1,8 @@
 import { rollD20, seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
-import { ModelDMProvider, preRollFor, type ModelPrompt, type ModelReply, type ModelTransport } from './model-dm.js'
+import { ModelGMProvider, preRollFor, type ModelPrompt, type ModelReply, type ModelTransport } from './model-gm.js'
 import { contextFor, openSession003, response, turn } from './pilot.test-helpers.js'
-import type { DMProbe } from './provider.js'
+import type { GMProbe } from './provider.js'
 
 /**
  * Con el servidor tirando, el motor tira un d20 por cada personaje que
@@ -23,7 +23,7 @@ class OneShotTransport implements ModelTransport {
     return { finish: 'stop', inputTokens: 10, outputTokens: 10 }
   }
 
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     return { ok: true, model: this.model, message: 'ok' }
   }
 }
@@ -53,7 +53,7 @@ describe('dados pre-tirados', () => {
         '{"kind":"addressed","characterIds":["zahira"]}',
       ].join('\n')
     })
-    const provider = new ModelDMProvider(transport, 'sk-test-0000000000', { random: seededRandom(7) })
+    const provider = new ModelGMProvider(transport, 'sk-test-0000000000', { random: seededRandom(7) })
     const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Empujo la viga.')]))))
 
     const roll = outputs.find((o) => o.kind === 'event' && o.event.type === 'roll')
@@ -71,7 +71,7 @@ describe('dados pre-tirados', () => {
     const transport = new OneShotTransport(
       () => `{"kind":"event","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","result":${bogus},"source":"engine"}}}\n{"kind":"block","block":{"type":"narration","text":"Sigue."}}`,
     )
-    const provider = new ModelDMProvider(transport, 'sk-test-0000000000', { random: seededRandom(7) })
+    const provider = new ModelGMProvider(transport, 'sk-test-0000000000', { random: seededRandom(7) })
     const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Empujo la viga.')]))))
     const roll = outputs.find((o) => o.kind === 'event' && o.event.type === 'roll') as unknown as { event: { resolved: { result: number; source: string } } } | undefined
     expect(roll).toBeDefined()

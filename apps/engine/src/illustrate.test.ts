@@ -41,7 +41,7 @@ describe('illustrationFor', () => {
     expect(illustrationFor({ pack, before: inn, after: mine, party, opening: false, moment: null })).toMatchObject({ reason: 'location', location: 'boca-de-la-mina' })
   })
 
-  it('el momento del DM manda y es el texto alternativo', () => {
+  it('el momento del GM manda y es el texto alternativo', () => {
     const inn = at(base, { zahira: 'posada', calder: 'posada' })
     const illustration = illustrationFor({ pack, before: inn, after: inn, party, opening: false, moment: 'Una figura de niebla gris se forma junto a la chimenea.' })
 

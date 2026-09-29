@@ -77,7 +77,7 @@ export interface Viewer {
   characterId: string | null
 }
 
-/** La tirada que el DM pidio a quien mira, tal como la manda `state.rolls.pending`. */
+/** La tirada que el GM pidio a quien mira, tal como la manda `state.rolls.pending`. */
 export interface PendingRoll {
   die: string
   kind: string
@@ -92,12 +92,12 @@ export interface TurnProgress {
   responded: string[]
   /** No falta nadie de los obligatorios. */
   complete: boolean
-  /** `closing` o `resolving`: el DM esta narrando. */
+  /** `closing` o `resolving`: el GM esta narrando. */
   narrating: boolean
   /** El que mira puede escribir: turno abierto, tiene personaje, no ha respondido y no le toca tirar. */
   canRespond: boolean
   /**
-   * Le toca tirar, no escribir: el DM pidio una tirada a su personaje y ese
+   * Le toca tirar, no escribir: el GM pidio una tirada a su personaje y ese
    * es su turno entero (Gabino, 25-09: "si el turno solo exige tirada, no
    * habilites el input"). Null si no hay tirada pendiente o ya respondio.
    */
@@ -106,7 +106,7 @@ export interface TurnProgress {
   hasResponded: boolean
   /** Cualquiera cierra cuando estan todas las obligatorias (docs/09). */
   canClose: boolean
-  /** Solo el DM fuerza el cierre con faltantes. */
+  /** Solo el GM fuerza el cierre con faltantes. */
   canForceClose: boolean
 }
 
@@ -136,10 +136,10 @@ export function turnProgress(turn: TurnSummary | null, viewer: Viewer, pendingRo
 /** Frase corta de estado para la barra del turno. */
 export function turnStatusLine(turn: TurnSummary | null, progress: TurnProgress, nameOf: (id: string) => string): string {
   if (!turn) return 'No hay turno abierto.'
-  if (progress.narrating) return 'El DM está narrando...'
+  if (progress.narrating) return 'El GM está narrando...'
   if (turn.status === 'resolved') return 'Turno resuelto.'
   if (progress.mustRoll) return `Te toca tirar ${rollLabel(progress.mustRoll)}.`
-  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa: cierra el turno y el DM narra.' : 'Todos respondieron: cierra el turno y el DM narra.'
+  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa: cierra el turno y el GM narra.' : 'Todos respondieron: cierra el turno y el GM narra.'
   return `Faltan por responder: ${progress.pending.map(nameOf).join(', ')}.`
 }
 

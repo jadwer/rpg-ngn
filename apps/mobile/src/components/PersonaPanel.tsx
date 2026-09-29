@@ -16,7 +16,7 @@ interface Props {
 /**
  * La personalidad del personaje, escrita por su jugador (misma logica que la
  * web): el arquetipo viene del pack, quien es lo decide quien lo juega. Solo
- * la ven el jugador y el DM. Abierto cuando no hay nada escrito.
+ * la ven el jugador y el GM. Abierto cuando no hay nada escrito.
  */
 export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
   const [expanded, setExpanded] = useState(saved === null)
@@ -39,7 +39,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
       </Pressable>
       {expanded ? (
         <View style={styles.body}>
-          <Text style={styles.hint}>El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el DM. Responde a lo que quieras de esto:</Text>
+          <Text style={styles.hint}>El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el GM. Responde a lo que quieras de esto:</Text>
           <TextInput
             value={text}
             onChangeText={(v) => {
@@ -70,7 +70,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
                 void onSave(cleaned.persona).then((ok) => setDone(ok))
               }}
             />
-            <Text style={[styles.hint, styles.counter]}>{error ?? (done ? 'Guardado: el DM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}</Text>
+            <Text style={[styles.hint, styles.counter]}>{error ?? (done ? 'Guardado: el GM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}</Text>
           </View>
         </View>
       ) : null}

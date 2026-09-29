@@ -10,19 +10,19 @@ sobre ambos.
 
 Dos sesiones con tres jugadores distintos dieron datos que no teniamos:
 
-1. **Una sola pantalla pierde la atencion.** El DM narra en un dispositivo y la
+1. **Una sola pantalla pierde la atencion.** El GM narra en un dispositivo y la
    mesa se dispersa. Cada jugador necesita su propia superficie.
 2. **Las fichas se consultan constantemente**, y salir de la narracion para verlas
    rompe el hilo.
 3. **Las capacidades tienen que estar declaradas.** Un jugador pregunto "que puedo
-   hacer" y el DM improviso. Ya resuelto en el pack v0.2 (`attacks`, `abilities`).
+   hacer" y el GM improviso. Ya resuelto en el pack v0.2 (`attacks`, `abilities`).
 4. **El log de eventos se escribe solo si es barato.** A mano durante la partida
    funciono para `roll` y `discovery`; mas tipos hubieran matado el ritmo.
 
 ## Modo de juego objetivo
 
 **Mesa presencial, un dispositivo por jugador.** Todos en el mismo cuarto, cada
-quien con su telefono, el DM (humano o IA) en su propia sesion.
+quien con su telefono, el GM (humano o IA) en su propia sesion.
 
 Consecuencia de diseno: no hace falta sincronia en tiempo real dura. Un polling
 corto o SSE alcanza; los jugadores se hablan en voz alta, que es el canal de
@@ -40,7 +40,7 @@ Dos vistas sobre el mismo turno, alternables:
   linea lleva el `portrait` de su hablante, sea PJ o NPC.
 
 No son dos pantallas: son dos formas de pintar el mismo array de bloques. Un turno
-del DM produce bloques tipados (`narration`, `dialogue`, `roll`, `system`) y cada
+del GM produce bloques tipados (`narration`, `dialogue`, `roll`, `system`) y cada
 vista decide como renderiza cada tipo. En la vista narrativa los dialogos aparecen
 intercalados encima del cuadro de respuesta; en la vista dialogo, la narracion se
 comprime.
@@ -60,7 +60,7 @@ separacion no se rompe por conveniencia de UI.
 
 ### Respuesta y cierre de turno
 
-El turno del DM marca a quien interpela directamente. Reglas:
+El turno del GM marca a quien interpela directamente. Reglas:
 
 - Todo jugador puede escribir siempre, tenga pregunta directa o no.
 - Un jugador puede describir **acciones conjuntas** con otros. Se registran como un
@@ -117,7 +117,7 @@ Lo que se conserva de aqui porque no cambia con el stack:
 - **Estado de campaña** como log append-only ([08](08-event-model.md)); en el
   SaaS vive en la base de datos de la plataforma, no en Git. Cada mesa es una
   campaña con su log. El contenido puede ser publico o privado del usuario.
-- **Secretos del DM** fuera del repo publico (`dm/`, o capa `dm` del event store).
+- **Secretos del GM** fuera del repo publico (`gm/`, o capa `gm` del event store).
 - **Ramas**: `main` sirve GitHub Pages, `legacy` es la campaña de Valdoria en
   curso, `dev` es el SaaS y no toca `content/packs/pilot` salvo para migrarlo.
 
@@ -139,7 +139,7 @@ Requisito de producto, no de codigo: **tutoriales**. Configurar Ollama con un
 modelo decente no es dificil, pero si nadie lo explica, no se usa. Un tutorial por
 proveedor, con el modelo recomendado y como apuntar la app.
 
-Consecuencia tecnica: el contrato de `DMProvider` ([02](02-architecture.md)) es el
+Consecuencia tecnica: el contrato de `GMProvider` ([02](02-architecture.md)) es el
 mismo para ambos casos, pero donde corre el adapter no era una decision tomada
 (hallazgo BA3 de [10](10-audit-2026-09-05.md)). Lo resuelve [11](11-adr-stack-saas.md),
 D6: nube con la clave custodiada en el servidor; modelo local a traves de un relay
@@ -268,7 +268,7 @@ momento mejor, no peor. Un modificador secreto del que el jugador no percibe nad
 es un modificador que igual podria no existir.
 
 Consecuencia tecnica: los eventos `roll` de tipo fortuna no llevan
-`visibility.layer: "dm"`. La proyeccion de conocimiento del jugador incluye su
+`visibility.layer: "gm"`. La proyeccion de conocimiento del jugador incluye su
 propio tier.
 
 Esto cierra el hallazgo IL6 de [10](10-audit-2026-09-05.md), donde el diseno estaba
@@ -282,12 +282,12 @@ la tabla estaba publicada en el visor.
 2. **Donde viven los packs subidos.** Almacenamiento del dispositivo, bucket
    propio o un tercero. Cambia el coste de infraestructura.
 3. **Terminos del proveedor** que financie el cupo gratuito de One Shot.
-4. **Modo DM humano (v2).** Arrastra narracion por microfono y analisis de
+4. **Modo GM humano (v2).** Arrastra narracion por microfono y analisis de
    respuestas de texto, que son piezas del modo remoto: los dos van juntos.
 
 ## Orden
 
-V1 es con **DM IA**. El DM humano es v2, junto con el modo remoto.
+V1 es con **GM IA**. El GM humano es v2, junto con el modo remoto.
 
 El orden de construccion vive en el [ROADMAP](../ROADMAP.md), derivado de
 [11](11-adr-stack-saas.md). Dos correcciones respecto a la version anterior de

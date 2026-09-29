@@ -5,15 +5,15 @@ import { z } from 'zod'
 import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
-import type { DMOutput, DMProbe, DMProvider, DMSuggestion, DMTurnContext, ProposedEvent } from './provider.js'
-import { DMProviderError, errorMessage, redact } from './redact.js'
+import type { GMOutput, GMProbe, GMProvider, GMSuggestion, GMTurnContext, ProposedEvent } from './provider.js'
+import { GMProviderError, errorMessage, redact } from './redact.js'
 
 /** Lo que ve la mesa cuando el lint corta un bloque. No dice cual era el secreto. */
-export const LINT_SYSTEM_TEXT = 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.'
+export const LINT_SYSTEM_TEXT = 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.'
 /** Los avisos de calidad del turno son para el anfitrion: un jugador no puede hacer nada con ellos. */
 const HOST_NOTICE = { audience: 'host', tone: 'info' } as const
 
-/** Lo que el DM manda al modelo en un turno. */
+/** Lo que el GM manda al modelo en un turno. */
 export interface ModelPrompt {
   system: string
   user: string
@@ -30,23 +30,23 @@ export interface ModelReply {
  * Transporte hacia un modelo de texto: emite el texto conforme llega y
  * termina con el resumen de la llamada. Un adapter por SDK (anthropic.ts,
  * openai.ts); todo lo demas (contexto, prompt, parser, validacion,
- * redaccion) es comun y vive en ModelDMProvider.
+ * redaccion) es comun y vive en ModelGMProvider.
  */
 export interface ModelTransport {
   readonly kind: string
   readonly model: string
   stream(prompt: ModelPrompt): AsyncGenerator<string, ModelReply, undefined>
-  probe(): Promise<DMProbe>
+  probe(): Promise<GMProbe>
 }
 
-export interface ModelDMOptions {
+export interface ModelGMOptions {
   /** `compact` apunta a menos de 3000 tokens de entrada (modelos locales). */
   contextProfile?: ContextProfile | undefined
   /** Anula el presupuesto que da el perfil. */
   budget?: ContextBudget
   /** Tope por defecto cuando la peticion no trae budget. */
   maxOutputTokens?: number
-  /** Fuente de azar para las tiradas que pide el DM; Web Crypto por defecto, semilla en tests. */
+  /** Fuente de azar para las tiradas que pide el GM; Web Crypto por defecto, semilla en tests. */
   random?: RandomSource
 }
 
@@ -127,7 +127,7 @@ const SecretEvent = z.strictObject({
  */
 const NpcActionEvent = z.strictObject({
   type: z.literal('npc_action'),
-  /** Siempre un NPC, tambien uno que el DM invente sobre la marcha. */
+  /** Siempre un NPC, tambien uno que el GM invente sobre la marcha. */
   actor: z.string().regex(/^npc:[a-z0-9]+(?:-[a-z0-9]+)*$/),
   payload: z.strictObject({ text: z.string().min(1) }),
 })
@@ -163,7 +163,7 @@ const RelationshipEffect = z.strictObject({
 /**
  * Abrir y cerrar escena, y mover el momento del mundo. El reductor ya
  * guardaba `scene_started`/`scene_closed` en la cronica y ya aplicaba
- * `worldTime` de cualquier evento, pero el DM no podia emitirlos: por eso
+ * `worldTime` de cualquier evento, pero el GM no podia emitirlos: por eso
  * una sesion nueva arrastraba el "anochecer" de la anterior y las escenas no
  * tenian principio (20-09).
  */
@@ -270,7 +270,7 @@ const ModelLine = z.discriminatedUnion('kind', [
 ])
 
 /**
- * DM con modelo. Recorre el stream del transporte linea a linea, emite
+ * GM con modelo. Recorre el stream del transporte linea a linea, emite
  * cada bloque en cuanto llega y filtra localmente los eventos que el engine
  * no podria aplicar (personaje inexistente, objeto que no se tiene, tirada
  * que nadie reporto). Lo que no se puede usar se ignora y se avisa al final
@@ -278,25 +278,25 @@ const ModelLine = z.discriminatedUnion('kind', [
  * suelta (modelos chicos que olvidan el formato) se convierte en narracion
  * en vez de perderse.
  */
-export class ModelDMProvider implements DMProvider {
+export class ModelGMProvider implements GMProvider {
   readonly kind: string
 
   constructor(
     private readonly transport: ModelTransport,
     private readonly credential: string,
-    private readonly options: ModelDMOptions = {},
+    private readonly options: ModelGMOptions = {},
   ) {
     this.kind = transport.kind
   }
 
-  async *narrate(ctx: DMTurnContext): AsyncIterable<DMOutput> {
+  async *narrate(ctx: GMTurnContext): AsyncIterable<GMOutput> {
     const compact = this.options.contextProfile === 'compact'
     const random = this.options.random ?? webCryptoRandom()
     // Sin modo, tira el servidor: aceptar numeros escritos es una eleccion
     // explicita para la mesa presencial, nunca lo que pasa por omision.
     const diceMode: DiceMode = ctx.dice ?? 'engine'
     // Con el servidor tirando, un d20 por cada personaje que declaro algo,
-    // ANTES de llamar al modelo: el DM lo ve, lo usa si la accion tiene
+    // ANTES de llamar al modelo: el GM lo ve, lo usa si la accion tiene
     // riesgo y narra la consecuencia en el mismo turno. Antes pedia la
     // tirada y la pagaba un turno despues, o no la pedia (seis turnos de
     // una mesa de cinco sin un solo dado, 19-09).
@@ -307,7 +307,7 @@ export class ModelDMProvider implements DMProvider {
 
     // La Fortuna de la sesion la tira cada jugador con su dado, y el numero
     // lo saca la API (Gabino, 24-09: tirada por el motor nadie la sentia
-    // suya). Al DM solo se le dice que no la pida ni la invente; la que ya
+    // suya). Al GM solo se le dice que no la pida ni la invente; la que ya
     // se tiro llega en la ficha de cada personaje.
     const fortuneNote = ctx.session?.fortune?.length
       ? '\n\nFortuna de esta sesión: la tira cada jugador con su dado desde la mesa. No la pidas, no la tires tú ni inventes su número; la que ya se tiró está en la ficha de cada personaje y se nota en la escena sin explicarla.'
@@ -355,23 +355,23 @@ export class ModelDMProvider implements DMProvider {
       }
       if (buffer.trim() !== '') yield* interpreter.line(buffer)
       yield* interpreter.finish()
-      // Con DM_LOG_RAW=1 el engine deja en su log lo que el modelo dijo tal
+      // Con GM_LOG_RAW=1 el engine deja en su log lo que el modelo dijo tal
       // cual. Es la unica forma de afinar un prompt sin adivinar; nunca en
       // produccion con mesas ajenas, porque el texto lleva la escena entera.
-      if (wantsRawLog()) console.warn(`[dm raw ${this.transport.kind}/${this.transport.model}]\n${raw}\n[/dm raw]`)
+      if (wantsRawLog()) console.warn(`[gm raw ${this.transport.kind}/${this.transport.model}]\n${raw}\n[/gm raw]`)
     } catch (error) {
-      throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
     }
 
     if (reply.finish === 'refusal') {
-      throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} rechazó narrar el turno`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} rechazó narrar el turno`, this.credential)
     }
     if (interpreter.blocks === 0) {
-      throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ningún bloque (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ningún bloque (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
     }
 
     if (interpreter.cuts > 0) {
-      yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: `El lint de conocimiento cortó ${interpreter.cuts === 1 ? 'un bloque' : `${interpreter.cuts} bloques`}. El motivo va en el resultado del turno; el modo se fija con DM_LINT o por mesa.` } }
+      yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: `El lint de conocimiento cortó ${interpreter.cuts === 1 ? 'un bloque' : `${interpreter.cuts} bloques`}. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.` } }
     }
     // Cada turno devuelve la palabra (docs/03), y el modelo suele hacerlo en
     // su ultimo bloque. Si el lint corto justo ese, la mesa se quedaba sin
@@ -383,7 +383,7 @@ export class ModelDMProvider implements DMProvider {
     }
 
     if (reply.finish === 'length') {
-      yield { kind: 'block', block: { type: 'system', text: 'La narración se cortó a medias: el DM llegó a su límite de escritura.', audience: 'table', tone: 'action', detail: 'El modelo agotó maxOutputTokens. Cierra otro turno para que siga, o sube el presupuesto de salida.' } }
+      yield { kind: 'block', block: { type: 'system', text: 'La narración se cortó a medias: el GM llegó a su límite de escritura.', audience: 'table', tone: 'action', detail: 'El modelo agotó maxOutputTokens. Cierra otro turno para que siga, o sube el presupuesto de salida.' } }
     }
     if (interpreter.ignored > 0) {
       // Ruido tecnico: el modelo propuso un evento que el motor no pudo aplicar. La narracion esta intacta.
@@ -391,7 +391,7 @@ export class ModelDMProvider implements DMProvider {
         kind: 'block',
         block: {
           type: 'system',
-          text: `El DM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.`,
+          text: `El GM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.`,
           ...HOST_NOTICE,
           // Cuales fueron, recortadas: sin esto no habia forma de saber que se
           // rechazaba (mesa 39, 25-09). Solo lo ve el anfitrion.
@@ -418,11 +418,11 @@ export class ModelDMProvider implements DMProvider {
    * solo pide la linea `suggest` de un personaje. Cada idea pasa el lint
    * como las del turno: una sugerencia tambien puede filtrar un secreto.
    */
-  async suggest(ctx: DMTurnContext, characterId: string, exclude: readonly string[]): Promise<DMSuggestion> {
+  async suggest(ctx: GMTurnContext, characterId: string, exclude: readonly string[]): Promise<GMSuggestion> {
     const compact = this.options.contextProfile === 'compact'
     const built = buildTurnContext(ctx, this.options.budget ?? budgetFor(this.options.contextProfile))
     const id = refId(characterId)
-    if (!built.party.includes(id)) throw new DMProviderError(`${characterId} no está en la sesión`, this.credential)
+    if (!built.party.includes(id)) throw new GMProviderError(`${characterId} no está en la sesión`, this.credential)
     const name = ctx.pack.characters.get(id)?.name ?? id
     const seen = exclude.filter((e) => e.trim()).map((e) => `"${e.trim()}"`)
     const ask = [
@@ -447,7 +447,7 @@ export class ModelDMProvider implements DMProvider {
         raw += next.value
       }
     } catch (error) {
-      throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
     }
 
     const knowledge = (ctx.lint ?? 'enforce') === 'off' ? null : buildKnowledgeView(ctx, built.party)
@@ -465,11 +465,11 @@ export class ModelDMProvider implements DMProvider {
       }
       if (options.length) break
     }
-    if (!options.length) throw new DMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ideas (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
+    if (!options.length) throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ideas (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
     return { options, usage: { inputTokens: reply.inputTokens, outputTokens: reply.outputTokens } }
   }
 
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     try {
       const probe = await this.transport.probe()
       return { ...probe, message: probe.message === null ? null : redact(probe.message, this.credential) }
@@ -528,7 +528,7 @@ function isChatter(text: string): boolean {
   return false
 }
 
-/** Interpreta cada linea del modelo: la valida, la convierte en salidas del DM o la cuenta como ignorada. */
+/** Interpreta cada linea del modelo: la valida, la convierte en salidas del GM o la cuenta como ignorada. */
 class LineInterpreter {
   /** Bloques que el lint corto este turno. */
   cuts: number
@@ -559,7 +559,7 @@ class LineInterpreter {
    * puede (personaje ausente, dado mal formado). La primera peticion por
    * personaje manda; un `reason` o `skill` que cuente un secreto se corta.
    */
-  private *requestRoll(raw: { characterId: string; die?: string | undefined; rollKind?: string | undefined; skill?: string | undefined; reason?: string | undefined; advantage?: boolean | undefined; disadvantage?: boolean | undefined }): Generator<DMOutput, boolean> {
+  private *requestRoll(raw: { characterId: string; die?: string | undefined; rollKind?: string | undefined; skill?: string | undefined; reason?: string | undefined; advantage?: boolean | undefined; disadvantage?: boolean | undefined }): Generator<GMOutput, boolean> {
     const id = refId(raw.characterId)
     if (!this.party.includes(id)) return false
     if (this.rollRequests[id]) return true
@@ -582,7 +582,7 @@ class LineInterpreter {
     return true
   }
   addressed: string[] | null = null
-  /** El momento que el DM pidio ilustrar este turno, si lo pidio. */
+  /** El momento que el GM pidio ilustrar este turno, si lo pidio. */
   scene: string | null = null
   /** "Anteriormente..." (E10c): permitido solo en la apertura con sesion previa, y uno. */
   recapAllowed = false
@@ -596,7 +596,7 @@ class LineInterpreter {
   private readonly usedPreRoll = new Set<string>()
 
   constructor(
-    private readonly ctx: DMTurnContext,
+    private readonly ctx: GMTurnContext,
     private readonly party: string[],
     private readonly lintMode: LintMode,
     private readonly random: RandomSource,
@@ -613,14 +613,14 @@ class LineInterpreter {
    * Lint de conocimiento sobre un texto que la mesa va a oir. Devuelve los
    * hallazgos y si el texto debe cortarse (algun error en modo enforce).
    */
-  private *lint(text: string): Generator<DMOutput, boolean> {
+  private *lint(text: string): Generator<GMOutput, boolean> {
     if (!this.knowledge) return false
     const findings = lintText(text, this.knowledge, this.ctx.pack)
     for (const finding of findings) yield { kind: 'lint', finding }
     return this.lintMode === 'enforce' && findings.some((f) => f.level === 'error')
   }
 
-  *line(rawLine: string): Generator<DMOutput> {
+  *line(rawLine: string): Generator<GMOutput> {
     const text = rawLine.trim()
     this.current = text
     // Fences de markdown y etiquetas sueltas (`<json>`, `</output>`) con las
@@ -673,11 +673,11 @@ class LineInterpreter {
     yield* this.prose(text)
   }
 
-  *finish(): Generator<DMOutput> {
+  *finish(): Generator<GMOutput> {
     if (this.pending !== null) yield* this.flushPending()
   }
 
-  private *flushPending(): Generator<DMOutput> {
+  private *flushPending(): Generator<GMOutput> {
     const parsed = parseLoose(this.pending?.text ?? '')
     this.pending = null
     if (parsed !== undefined) yield* this.items(parsed)
@@ -689,18 +689,18 @@ class LineInterpreter {
     this.ignore()
   }
 
-  private *items(parsed: unknown): Generator<DMOutput> {
+  private *items(parsed: unknown): Generator<GMOutput> {
     const list = Array.isArray(parsed) ? parsed : [parsed]
     for (const item of list) yield* this.item(item)
   }
 
-  private *prose(text: string): Generator<DMOutput> {
+  private *prose(text: string): Generator<GMOutput> {
     const cleaned = text.replace(/^\*\*[^*]{1,40}\*\*:?\s*/, '').replace(/^[-*•]\s+/, '').trim()
     if (cleaned === '' || isChatter(cleaned)) return
     yield* this.block({ type: 'narration', text: cleaned })
   }
 
-  private *item(parsed: unknown): Generator<DMOutput> {
+  private *item(parsed: unknown): Generator<GMOutput> {
     const line = ModelLine.safeParse(parsed)
     if (!line.success) {
       // Un bloque o evento sin la envoltura {"kind":...} tambien se entiende.
@@ -801,7 +801,7 @@ class LineInterpreter {
         return
       }
       case 'ask_roll': {
-        // El DM pide la tirada y no narra su consecuencia: el jugador la
+        // El GM pide la tirada y no narra su consecuencia: el jugador la
         // suelta desde la mesa (modo `dice`) o escribe su numero (`table`).
         // Con el motor tirando no tiene sentido: ya tiro antes de llamar.
         if (this.diceMode === 'engine') {
@@ -823,7 +823,7 @@ class LineInterpreter {
     }
   }
 
-  private *block(block: TurnBlock): Generator<DMOutput> {
+  private *block(block: TurnBlock): Generator<GMOutput> {
     const witnesses = this.party.map((id) => `character:${id}`)
     this.blocks++
     if (block.type === 'narration' || block.type === 'dialogue') {
@@ -831,7 +831,7 @@ class LineInterpreter {
       if (cut) {
         // El bloque no llega a la mesa ni a la cronica; el motivo va en
         // result.lint y el aviso al anfitrion sale una vez, al final del
-        // turno: en medio de la historia parecia que el DM se corregia en
+        // turno: en medio de la historia parecia que el GM se corregia en
         // vivo (Gabino, 23-09).
         this.cuts++
         this.lastWasCut = true
@@ -864,9 +864,9 @@ class LineInterpreter {
   /**
    * Un evento validado sale al engine, salvo que cuente a la cronica algo
    * que la mesa no sabe (world_event). Un secret_revealed marca el secreto
-   * como conocido para el resto del turno: el DM lo revelo a proposito.
+   * como conocido para el resto del turno: el GM lo revelo a proposito.
    */
-  private *emitEvent(event: ProposedEvent): Generator<DMOutput> {
+  private *emitEvent(event: ProposedEvent): Generator<GMOutput> {
     if (event['type'] === 'state_change' || event['type'] === 'world_event') {
       for (const effect of (event['effects'] as Array<Record<string, unknown>> | undefined) ?? []) {
         if (effect['op'] === 'move' && typeof effect['who'] === 'string') this.moved.add(refId(effect['who']))
@@ -913,11 +913,11 @@ class LineInterpreter {
    * Un evento `roll` en los modos donde el jugador tira (`dice`, `table`).
    * Devuelve el evento si vale, o null tras decidir que hacer con el: la
    * tirada que la API ya registro como respuesta se calla sin contar; la que
-   * el DM pide sin numero se vuelve peticion; y el numero que el DM invento
+   * el GM pide sin numero se vuelve peticion; y el numero que el GM invento
    * (mesa 39, 25-09) tambien se vuelve peticion, pero se le cuenta al
    * anfitrion, porque la narracion que la mesa leyo ya lo dio por bueno.
    */
-  private *playerRoll(event: ProposedEvent & { actor: string; resolved: Record<string, unknown> }, witnesses: string[]): Generator<DMOutput, ProposedEvent | true | null> {
+  private *playerRoll(event: ProposedEvent & { actor: string; resolved: Record<string, unknown> }, witnesses: string[]): Generator<GMOutput, ProposedEvent | true | null> {
     const actorId = refId(event.actor)
     const resolved = event.resolved as { result?: number; source?: string; die: string; kind: string; skill?: string; advantage?: boolean; disadvantage?: boolean; modifier?: number }
     const response = this.ctx.turn.responses.find((r) => r.characterId === actorId)
@@ -935,7 +935,7 @@ class LineInterpreter {
     }
     // Un numero que nadie tiro. Se pide la tirada de verdad y se avisa.
     if (!(yield* this.requestRoll(ask))) return null
-    if (this.ignoredLines.length < 5) this.ignoredLines.push(`El DM inventó un ${resolved.result} y se le pidió la tirada al jugador: ${this.current.slice(0, 200)}`)
+    if (this.ignoredLines.length < 5) this.ignoredLines.push(`El GM inventó un ${resolved.result} y se le pidió la tirada al jugador: ${this.current.slice(0, 200)}`)
     this.ignored++
     return true
   }
@@ -946,7 +946,7 @@ class LineInterpreter {
    * que ignorarla. Es el unico camino para los `roll` de los modos `dice` y
    * `table`, porque decidirlos puede emitir (el lint de la peticion).
    */
-  private *emitProposed(raw: unknown): Generator<DMOutput, boolean> {
+  private *emitProposed(raw: unknown): Generator<GMOutput, boolean> {
     const event = this.event(raw)
     if (event) {
       yield* this.emitEvent(event)
@@ -982,7 +982,7 @@ class LineInterpreter {
           return null
         }
         const { result, source: _source, advantage, disadvantage, ...rest } = event.resolved
-        // El d20 que el motor ya tiro para ese personaje este turno: el DM lo
+        // El d20 que el motor ya tiro para ese personaje este turno: el GM lo
         // devuelve tal cual y narra su consecuencia ahora. Solo vale una vez y
         // solo si coincide; cualquier otro numero se ignora y se tira aqui.
         if (this.diceMode === 'engine' && result !== undefined && this.preRolled[actorId] === result && !this.usedPreRoll.has(actorId)) {
@@ -994,10 +994,10 @@ class LineInterpreter {
         // tira igual aqui. Sin esto, en una mesa en linea cualquiera escribe
         // "tiro 20" y el engine lo da por bueno.
         if (result === undefined || this.diceMode === 'engine') {
-          // El DM pide la tirada y el engine la hace con su generador: el modelo nunca inventa el numero (regla 1).
+          // El GM pide la tirada y el engine la hace con su generador: el modelo nunca inventa el numero (regla 1).
           const d20 = /^1d20$/.test(rest.die) && (advantage || disadvantage)
           const rolled = d20 ? rollD20(this.random, { advantage, disadvantage }) : rollDice(rest.die, this.random)
-          // `total` ya incluye el modificador de la expresion (2d6+1); `modifier` es el bono del personaje que el DM añade aparte.
+          // `total` ya incluye el modificador de la expresion (2d6+1); `modifier` es el bono del personaje que el GM añade aparte.
           const total = ('total' in rolled ? rolled.total : rolled.result) + (rest.modifier ?? 0)
           const resolved = { ...rest, result: total, rolls: rolled.rolls, source: rolled.source, ...(advantage ? { advantage } : {}), ...(disadvantage ? { disadvantage } : {}) }
           return { ...event, resolved, visibility: { layer: 'campaign', witnesses } }
@@ -1037,7 +1037,7 @@ class LineInterpreter {
         return { ...event, targets, visibility: { layer: 'campaign', witnesses } }
       }
       case 'quest_update': {
-        // Solo misiones que el pack declara: el DM no inventa misiones.
+        // Solo misiones que el pack declara: el GM no inventa misiones.
         if (!this.ctx.pack.quests.has(refId(event.payload.quest))) return null
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       }
@@ -1049,7 +1049,7 @@ class LineInterpreter {
         return { ...event, visibility: { layer: 'campaign', witnesses } }
       case 'npc_action': {
         // Lo que hace un NPC delante de la mesa. No se exige que este en el
-        // pack: un DM inventa NPCs sobre la marcha (el piloto no declara
+        // pack: un GM inventa NPCs sobre la marcha (el piloto no declara
         // ninguno y su historia esta llena de ellos), y un bloque `dialogue`
         // de un NPC desconocido ya se acepta. Rechazarlo aqui era la
         // incoherencia que dejaba "1 linea que no se pudo aplicar" en mesas
@@ -1072,10 +1072,11 @@ class LineInterpreter {
   }
 }
 
-/** Solo con `DM_LOG_RAW=1` en el entorno del engine; los packages no importan node, asi que se mira el global. */
+/** Solo con `GM_LOG_RAW=1` en el entorno del engine; los packages no importan node, asi que se mira el global. */
 function wantsRawLog(): boolean {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
-  return env?.['DM_LOG_RAW'] === '1'
+  // DM_LOG_RAW: nombre anterior al renombre a GM (29-09).
+  return (env?.['GM_LOG_RAW'] ?? env?.['DM_LOG_RAW']) === '1'
 }
 
 /**

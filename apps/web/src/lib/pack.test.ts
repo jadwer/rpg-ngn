@@ -7,7 +7,7 @@ import { loadBundledPack, portraitUrl, RULESET_ID } from './pack'
 const repoRoot = resolve(import.meta.dirname, '../../../..')
 
 describe('pack empaquetado en la web', () => {
-  it('coincide byte a byte con content/packs/pilot, sin la capa dm; si no, correr bundle-pack', () => {
+  it('coincide byte a byte con content/packs/pilot, sin la capa gm; si no, correr bundle-pack', () => {
     for (const [path, text] of Object.entries(packFiles)) {
       expect(path.startsWith('secrets/'), path).toBe(false)
       const original = readFileSync(join(repoRoot, 'content/packs/pilot', path), 'utf8')

@@ -5,17 +5,17 @@ import type { CampaignState, RevealedSecret } from './state.js'
  * Proyeccion de conocimiento de secretos (docs/08, invariante 3). Un secreto
  * del pack queda revelado a un personaje cuando un evento visible para el
  * cumple `revealWhen`, o cuando un `secret_revealed` lo tiene de testigo.
- * Todo es funcion pura del log y del pack; el lint del DM lee el resultado.
+ * Todo es funcion pura del log y del pack; el lint del GM lee el resultado.
  */
 
 /**
  * Personajes para los que un evento es visible: los testigos declarados,
  * los destinatarios de un discovery y de knowledgeGranted. Un evento sin
- * testigos y sin capa `dm` se considera oido por la party de su sesion
+ * testigos y sin capa `gm` se considera oido por la party de su sesion
  * (los logs del piloto anteriores a los testigos se escribieron asi).
  */
 export function visibleTo(event: CampaignEvent, state: CampaignState): string[] {
-  if (event.visibility?.layer === 'dm') return []
+  if (event.visibility?.layer === 'gm') return []
   const ids = new Set<string>()
   for (const ref of event.visibility?.witnesses ?? []) {
     if (refKind(ref) === 'character') ids.add(refId(ref))

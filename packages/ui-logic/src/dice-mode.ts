@@ -4,8 +4,8 @@
  * Tres modos desde el 25-09 (Gabino):
  *
  * - `engine`: el motor tira un d20 por personaje antes de llamar al modelo y
- *   el DM narra la consecuencia en el mismo turno. Rapido, sin dado a la vista.
- * - `dice`: el DM pide la tirada y no narra la consecuencia; el jugador suelta
+ *   el GM narra la consecuencia en el mismo turno. Rapido, sin dado a la vista.
+ * - `dice`: el GM pide la tirada y no narra la consecuencia; el jugador suelta
  *   el dado en pantalla y el numero lo pone el servidor. Lo que el jugador
  *   escriba como numero no cuenta. Es el modo por omision: es la experiencia
  *   que Gabino quiere ("es increible jugar con la tirada a mano") sin abrir

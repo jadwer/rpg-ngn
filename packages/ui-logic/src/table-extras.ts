@@ -15,8 +15,8 @@ export function latestNarrationStart(blocks: readonly TurnBlock[]): string | nul
   return from?.id ?? blocks[0]?.id ?? null
 }
 
-/** Lo que dice `GET v1/tables/{table}/dm`. */
-export interface TableDmInfo {
+/** Lo que dice `GET v1/tables/{table}/gm`. */
+export interface TableGmInfo {
   source: 'own' | 'quota' | 'free' | 'none'
   kind: string | null
   model: string | null
@@ -38,7 +38,7 @@ export function modelLabel(model: string | null): string {
  * Con que narra la mesa y quien lo paga, en una frase. Existe porque elegir
  * "Anthropic" no decia si era la clave del dueño o la del servidor.
  */
-export function tableDmText(info: TableDmInfo): string {
+export function tableGmText(info: TableGmInfo): string {
   const who = modelLabel(info.model)
   switch (info.source) {
     case 'own':

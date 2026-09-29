@@ -4,7 +4,7 @@ import { holdReleaseMs, settleSchedule } from './table-extras.js'
 /**
  * La tirada de un dado en pantalla, sin React y sin saber como se pinta.
  *
- * Tres capas que no se conocen (Gabino, 25-09): el DM PIDE la tirada, el
+ * Tres capas que no se conocen (Gabino, 25-09): el GM PIDE la tirada, el
  * servidor la RESUELVE y el cliente la PRESENTA. Esto es lo unico que la
  * presentacion comparte: mientras el dado frena van pasando caras al azar y,
  * cuando termina de frenar Y el numero ya llego, aterriza en el. **El

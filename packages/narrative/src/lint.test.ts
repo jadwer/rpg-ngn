@@ -122,8 +122,8 @@ describe('aviso por entidades no presenciadas', () => {
     const seen = buildKnowledgeView({ ...ctx, recentEvents: [started, met] }, ['ana'])
     expect(lintText('Celia sonríe. El brocal de location:pozo brilla.', seen, pack).map((f) => f.marker)).toEqual(['location:pozo'])
 
-    // Un evento de la capa dm no enseña nada a la mesa.
-    const hidden = CampaignEvent.parse({ ...met, id: 'evt-00003', seq: 3, visibility: { layer: 'dm', witnesses: ['character:ana'] } })
+    // Un evento de la capa gm no enseña nada a la mesa.
+    const hidden = CampaignEvent.parse({ ...met, id: 'evt-00003', seq: 3, visibility: { layer: 'gm', witnesses: ['character:ana'] } })
     expect(lintText('Celia sonríe.', buildKnowledgeView({ ...ctx, recentEvents: [started, hidden] }, ['ana']), pack)).toHaveLength(1)
   })
 })

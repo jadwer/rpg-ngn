@@ -7,7 +7,7 @@ import type { Ruleset } from '@rpg-ngn/rules'
  * Reconstruye el estado a partir de un snapshot (o del inicio) y una cola
  * de eventos crudos. Los eventos pasan por upcast y por el schema antes de
  * aplicarse; un evento invalido tumba la peticion, no se salta. Devuelve
- * tambien los eventos ya validados: son la memoria corta del DM.
+ * tambien los eventos ya validados: son la memoria corta del GM.
  */
 export function rebuildState(pack: LoadedPack, ruleset: Ruleset, snapshot: unknown, rawEvents: unknown[]): { state: CampaignState; events: CampaignEvent[] } {
   let state = snapshot === null || snapshot === undefined ? initialState({ pack, ruleset }) : (snapshot as CampaignState)

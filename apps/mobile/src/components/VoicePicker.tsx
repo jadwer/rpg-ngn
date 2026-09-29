@@ -29,7 +29,7 @@ export function VoicePicker({ visible, tts, onClose }: Props) {
     <SheetModal visible={visible} title="Voz" onClose={onClose}>
       <ScrollView contentContainerStyle={styles.body}>
         <Text style={styles.label}>Idioma de lectura</Text>
-        <Text style={styles.hint}>Filtra las voces del teléfono. El DM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.</Text>
+        <Text style={styles.hint}>Filtra las voces del teléfono. El GM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.</Text>
         <View style={styles.chips}>
           {READING_LANGUAGES.map((l) => {
             const selected = l.code === settings.lang

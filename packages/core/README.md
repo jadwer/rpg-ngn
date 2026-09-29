@@ -4,7 +4,7 @@ Primitivas deterministas del motor. Sin I/O, sin dependencia de plataforma, sin 
 
 | Modulo | Contenido |
 |---|---|
-| `random` | `RandomSource` inyectable: `seededRandom` (replay y tests), `recordedRandom` (dados fisicos tecleados por el DM), `webCryptoRandom` (produccion) |
+| `random` | `RandomSource` inyectable: `seededRandom` (replay y tests), `recordedRandom` (dados fisicos tecleados por el GM), `webCryptoRandom` (produccion) |
 | `dice` | `parseDice`, `rollDice`, `rollD20` con ventaja y desventaja |
 | `resource` | `Resource {current, max}` con `spend`, `restore`, `adjust` |
 | `state` | `WorldState`, `CharacterState`, `NpcState` y helpers inmutables |

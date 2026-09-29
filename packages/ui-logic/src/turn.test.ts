@@ -7,10 +7,10 @@ import { apiBlockId, blocksFromApi, packSpeakerResolver, turnLine, turnProgress,
 
 /** Los cuatro bloques que dejo el smoke real contra API y engine (turno 1 de la sesion 003). */
 const envelopes: ApiBlockEnvelope[] = [
-  { id: 1, block: { type: 'system', text: 'Turno 1: el DM escucha a la mesa.' } },
+  { id: 1, block: { type: 'system', text: 'Turno 1: el GM escucha a la mesa.' } },
   { id: 2, block: { type: 'dialogue', speaker: 'Calder', speakerRef: 'character:calder', text: 'La sigo de cerca, con la llave en la mano.' } },
   { id: 3, block: { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Miro la campana de bronce con cuidado.' } },
-  { id: 4, block: { type: 'narration', text: 'El DM toma nota de lo que Calder y Zahira declaran. La mesa tiene la palabra.' } },
+  { id: 4, block: { type: 'narration', text: 'El GM toma nota de lo que Calder y Zahira declaran. La mesa tiene la palabra.' } },
 ]
 
 describe('blocksFromApi', () => {
@@ -81,26 +81,26 @@ describe('turnProgress', () => {
     expect(turnProgress(open, { role: 'player', characterId: 'zahira' }).mustRoll).toBeNull()
   })
 
-  it('el DM sin personaje no responde pero puede forzar el cierre con faltantes', () => {
-    const dm = turnProgress(open, { role: 'host', characterId: null })
-    expect(dm).toMatchObject({ canRespond: false, canClose: false, canForceClose: true })
+  it('el GM sin personaje no responde pero puede forzar el cierre con faltantes', () => {
+    const gm = turnProgress(open, { role: 'host', characterId: null })
+    expect(gm).toMatchObject({ canRespond: false, canClose: false, canForceClose: true })
   })
 
   it('con todos los obligatorios cualquiera cierra, incluso quien no fue interpelado', () => {
     const complete: TurnSummary = { ...open, responded: ['calder', 'zahira'] }
     const other = turnProgress(complete, { role: 'player', characterId: 'kael' })
     expect(other).toMatchObject({ complete: true, canRespond: true, canClose: true, canForceClose: false })
-    expect(turnStatusLine(complete, other, nameOf)).toBe('Todos respondieron: cierra el turno y el DM narra.')
+    expect(turnStatusLine(complete, other, nameOf)).toBe('Todos respondieron: cierra el turno y el GM narra.')
   })
 
-  it('mientras el DM narra no se responde ni se cierra, y el error del engine reabre', () => {
+  it('mientras el GM narra no se responde ni se cierra, y el error del engine reabre', () => {
     const closing = turnProgress({ ...open, status: 'closing' }, { role: 'player', characterId: 'zahira' })
     expect(closing).toMatchObject({ narrating: true, canRespond: false, canClose: false })
-    expect(turnStatusLine({ ...open, status: 'closing' }, closing, nameOf)).toBe('El DM está narrando...')
-    expect(turnLine({ ...open, status: 'closing', number: 3 }, closing, nameOf)).toBe('Turno 3: El DM está narrando...')
+    expect(turnStatusLine({ ...open, status: 'closing' }, closing, nameOf)).toBe('El GM está narrando...')
+    expect(turnLine({ ...open, status: 'closing', number: 3 }, closing, nameOf)).toBe('Turno 3: El GM está narrando...')
     expect(turnLine(null, turnProgress(null, { role: 'player', characterId: null }), nameOf)).toBe('No hay turno abierto.')
 
-    const reopened: TurnSummary = { status: 'open', required: ['zahira'], responded: ['zahira'], error: 'el DM propuso un evento invalido' }
+    const reopened: TurnSummary = { status: 'open', required: ['zahira'], responded: ['zahira'], error: 'el GM propuso un evento invalido' }
     const progress = turnProgress(reopened, { role: 'player', characterId: 'zahira' })
     expect(progress).toMatchObject({ canClose: true, hasResponded: true })
     expect(reopened.error).toContain('invalido')

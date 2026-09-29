@@ -26,7 +26,7 @@ export interface CharacterState {
   fortune: Fortune | null
   memoriesRecovered: number
   /**
-   * Donde esta: el id de un lugar del pack, o null si el DM no lo ha
+   * Donde esta: el id de un lugar del pack, o null si el GM no lo ha
    * situado o anda de camino. No depende del sistema de juego (un
    * personaje esta en el comedor tanto en la corte como en la mina), asi
    * que vive aqui y no en `custom`. Opcional para que los snapshots

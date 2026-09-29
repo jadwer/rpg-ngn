@@ -131,7 +131,7 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
           ))}
         </select>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          El motor compara cada bloque del DM con lo que la mesa ha descubierto. Los avisos solo los ves tú.
+          El motor compara cada bloque del GM con lo que la mesa ha descubierto. Los avisos solo los ves tú.
         </span>
       </label>
 

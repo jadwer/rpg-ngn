@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * La personalidad del personaje, escrita por su jugador: el arquetipo viene
- * del pack, quien es lo decide quien lo juega. Solo la ve el jugador y el DM
+ * del pack, quien es lo decide quien lo juega. Solo la ve el jugador y el GM
  * (lleva su secreto). Plegado cuando ya hay algo escrito; abierto cuando no,
  * porque es lo primero que conviene hacer al sentarse.
  */
@@ -40,7 +40,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
       </button>
       {expanded ? (
         <div className="body stack">
-          <p className="hint">El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el DM, que lo usa para jugarte el mundo. Responde a lo que quieras de esto:</p>
+          <p className="hint">El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el GM, que lo usa para jugarte el mundo. Responde a lo que quieras de esto:</p>
           <textarea
             className="textarea"
             name="personalidad"
@@ -71,7 +71,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
               Guardar
             </button>
             <span className="hint">
-              {error ?? (done ? 'Guardado: el DM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}
+              {error ?? (done ? 'Guardado: el GM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}
             </span>
           </div>
         </div>

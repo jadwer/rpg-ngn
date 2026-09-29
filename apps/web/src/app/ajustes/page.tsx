@@ -56,7 +56,7 @@ function Settings() {
             ))}
           </select>
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Filtra las voces del navegador. El DM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.
+            Filtra las voces del navegador. El GM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.
           </span>
         </label>
 
@@ -96,7 +96,7 @@ function Settings() {
 
         <label className="check">
           <input type="checkbox" checked={tts.autoRead} onChange={(e) => tts.setAutoRead(e.target.checked)} />
-          Leer lo nuevo en voz alta cuando el DM narra
+          Leer lo nuevo en voz alta cuando el GM narra
         </label>
 
         <div className="row">

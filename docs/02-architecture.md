@@ -16,7 +16,7 @@
                         |
                  packages/core           (primitivas deterministas)
                         |
-                 packages/narrative      (DM: contexto controlado + DMProvider)
+                 packages/narrative      (GM: contexto controlado + GMProvider)
                         |
             +-----------+-----------+
             |           |           |
@@ -34,7 +34,7 @@
 - **rules**: rulesets que componen las primitivas de core en un juego concreto. Un ruleset define que recursos existen (HP y AC en un d20 fantasy; elementos y energia en otro sistema), que acciones son posibles y como se resuelven. El primero es `fantasy-d20-lite` (el del piloto).
 - **content**: schemas zod de todas las entidades canonicas y el loader/validador de content packs. Es el contrato entre los datos y todo lo demas.
 - **campaign**: estado vivo. Aplica eventos validados, mantiene las capas de conocimiento, produce snapshots del estado. Persistencia inicial en archivos JSON; la interfaz de persistencia permite cambiar a DB sin tocar la logica.
-- **narrative**: el DM. Se descompone en context builder (arma el [contexto narrativo](04-narrative-context.md)), prompt policy (tono, restricciones, presupuesto narrativo), provider adapter (`DMProvider`) y response interpreter (convierte la salida del modelo en propuestas verificables). Expone el [contrato de herramientas](03-dm-contract.md).
+- **narrative**: el GM. Se descompone en context builder (arma el [contexto narrativo](04-narrative-context.md)), prompt policy (tono, restricciones, presupuesto narrativo), provider adapter (`GMProvider`) y response interpreter (convierte la salida del modelo en propuestas verificables). Expone el [contrato de herramientas](03-gm-contract.md).
 
 ## El modelo propone, el engine dispone
 
@@ -51,15 +51,15 @@ Jugador: "Ataco al guardia"
 
 Pedirle al modelo que recuerde que el guardia tenia 12 HP es exactamente el bug que este motor existe para evitar.
 
-## DMProvider
+## GMProvider
 
 ```ts
-interface DMProvider {
+interface GMProvider {
   narrate(input: {
-    context: NarrativeContext;   // solo lo que el DM puede usar
+    context: NarrativeContext;   // solo lo que el GM puede usar
     action: PlayerAction;
-    tools: DMToolset;            // roll_dice, get_npc, record_event...
-  }): AsyncIterable<DMOutput>;   // streaming de narrativa + tool calls
+    tools: GMToolset;            // roll_dice, get_npc, record_event...
+  }): AsyncIterable<GMOutput>;   // streaming de narrativa + tool calls
 }
 ```
 
@@ -73,14 +73,14 @@ Los adapters (anthropic, openai, local para tests) implementan esta interfaz. Pe
 | Plataforma Laravel (core de AtomoPlatform) con el motor en `apps/engine` (Node) | Cuentas, mesas, cobro y event store ya resueltos; el reductor corre una sola vez y el engine no tiene credenciales de DB (ver [11](11-adr-stack-saas.md)) | Dos procesos que desplegar y un contrato Laravel/engine que versionar |
 | Contenido en Git, no en DB | Historial, review de cambios de lore, cero infra | Sin edicion concurrente de contenido |
 | Local-first | No sabemos aun que merece ser servidor | Multijugador en tiempo real queda para fase 5 |
-| Tiradas fuera del modelo | El DM jamas inventa un numero; toda tirada queda registrada | Mas tool calls por turno |
-| Repo publico | GitHub Pages gratis, raw JSON accesible | Los secretos del DM viven fuera del repo (`dm/`, gitignored) |
+| Tiradas fuera del modelo | El GM jamas inventa un numero; toda tirada queda registrada | Mas tool calls por turno |
+| Repo publico | GitHub Pages gratis, raw JSON accesible | Los secretos del GM viven fuera del repo (`gm/`, gitignored) |
 
 ## Clientes
 
 - **apps/sheets** (existe): visor estatico de fichas para la mesa de Valdoria, GitHub Pages, cero build. No es cliente del producto.
 - **apps/mobile** (Expo): la superficie del jugador. Primero offline con el pack local, despues contra la plataforma.
-- **apps/web** (Next.js): registro, mesas, configuracion de proveedor, pago, admin, DM harness y jugador web sin app. Delgada.
+- **apps/web** (Next.js): registro, mesas, configuracion de proveedor, pago, admin, GM harness y jugador web sin app. Delgada.
 - **apps/engine** (Node): donde corren `campaign` y `narrative` en produccion, invocado por la plataforma por turno.
 - **apps/host** (CLI): relay para modelos locales, corre junto a Ollama.
 

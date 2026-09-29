@@ -75,7 +75,7 @@ unico lugar donde `packages/campaign` y `packages/narrative` corren en produccio
 Descartadas:
 
 - **Motor en el cliente**: para reducir necesita el log completo, incluida la
-  capa `dm`; expone los secretos por construccion. El turno moriria con el
+  capa `gm`; expone los secretos por construccion. El turno moriria con el
   telefono que lo ejecuta y la clave del proveedor viajaria al cliente.
 - **Laravel ejecutando Node por CLI**: un turno con LLM dura 20 a 90 segundos y
   retiene un worker PHP-FPM todo ese tiempo. Sirve para reproyectar en batch
@@ -161,7 +161,7 @@ Contrato Laravel/engine, privado, con `X-Engine-Token` y `X-Engine-Contract`:
   escriben en logs (processor de redaccion y test que hace grep del log).
 - **Local (Ollama)**: relay `npx @rpg-ngn/host` que corre junto al modelo, se
   autentica con un token de host por mesa y abre un WebSocket al engine. Mismo
-  `DMProvider`, otro transporte. Sin host conectado el turno queda
+  `GMProvider`, otro transporte. Sin host conectado el turno queda
   `awaiting_host`; nada se pierde. El dueño del host puede ver el prompt, y con
   el los secretos: es inevitable en modo local y se declara en la UI.
 
@@ -177,11 +177,11 @@ Decisiones de contrato tomadas al construir la entrega 6 (2026-09-12):
   juntos, como ya exige D3.
 - `ProviderConfig` admite `anthropic` y `openai`; el segundo cubre cualquier
   API compatible con Chat Completions via `baseUrl` (DeepSeek, Ollama). No hay
-  un adapter por proveedor: hay un `ModelDMProvider` comun (contexto, prompt,
+  un adapter por proveedor: hay un `ModelGMProvider` comun (contexto, prompt,
   parser, validacion, redaccion) y transportes finos por SDK. `contextProfile:
   compact` recorta el contexto a menos de 3000 tokens para modelos locales.
 - En V1 la clave no vive en `provider_configs` con cast `encrypted` sino en el
-  `.env` del servidor como preset (`DM_PROVIDER`): una mesa solo puede fijar
+  `.env` del servidor como preset (`GM_PROVIDER`): una mesa solo puede fijar
   `scripted`. La tabla cifrada por mesa queda para el BYOK de la entrega 7,
   cuando exista la pantalla de proveedor. La redaccion si esta: el engine y la
   API quitan la credencial de todo mensaje de error y hay tests que lo prueban.
@@ -214,7 +214,7 @@ publica solo `apps/sheets` y `content/packs/pilot`.
 
 - **Web: Next.js 15, producto de primera** (directriz primaria de Gabino,
   2026-09-06): landing, registro, gestion de mesas y amigos, configuracion de
-  proveedor, pago, admin, DM harness y la mesa completa, con implementacion
+  proveedor, pago, admin, GM harness y la mesa completa, con implementacion
   propia e independiente de la app movil (si un dia hay clientes nativos, la
   web sigue sola). Es la cara de entrada prevista para streamers: el acabado
   visual, el rendimiento percibido y la vista limpia "en pantalla" se diseñan
@@ -223,8 +223,8 @@ publica solo `apps/sheets` y `content/packs/pilot`.
   Mientras iOS este diferido, los iPhone entran por la web.
 - **Movil: Expo** (SDK 54 o superior, por el aislamiento de pnpm). Es la
   superficie del jugador de 09. Token de Sanctum en `expo-secure-store` y cliente
-  fetch propio (`@rpg-ngn/api-client`). Modo offline con pack local y sin DM
-  reduce en el dispositivo un log sin capa `dm`: mismo `@rpg-ngn/campaign`, otro
+  fetch propio (`@rpg-ngn/api-client`). Modo offline con pack local y sin GM
+  reduce en el dispositivo un log sin capa `gm`: mismo `@rpg-ngn/campaign`, otro
   soporte.
 - `packages/ui-logic` sin React (maquina de estado del turno, agrupacion de
   bloques, TTS por bloques). Los componentes visuales de la mesa se escriben en
@@ -255,8 +255,8 @@ ni `node:*` (IA2, IA3).
 | 1 | BA1 + `packages/content`: schemas zod de evento v1, personaje y pack; `upcast`; `tools/migrate-pilot`; `tools/validate` en CI | `pnpm validate` pasa sobre `content/` y `campaigns/pilot`; un evento roto a proposito falla el CI; los 21 eventos llevan `v:1` e `id` en un commit propio |
 | 2 | Motor: `core` (RandomSource inyectable), `rules/fantasy-d20-lite`, `campaign` (reduce con ruleset como parametro, proyecciones, snapshots) | `reduce(pilot.events, ruleset@1)` reproduce byte a byte el snapshot de la sesion 002; cobertura total en core; el lint de dependencias pasa |
 | 3 | `apps/mobile` offline (spike IA2): pack piloto local, vistas narrativa y dialogo, fichas en modal, TTS por bloques | Corre en un Android y un iOS reales desde el workspace pnpm; se prueba en la siguiente sesion presencial |
-| 4 | `rpg-ngn-api`: proyecto desde Atomo core, modulos `Tables` y `Campaigns`, `campaign:import` | Los 21 eventos importados via engine; JSON:API devuelve `player:zahira` sin eventos `dm`; `UPDATE` y `DELETE` sobre `campaign_events` fallan; un `seq` duplicado da 409 |
-| 5 | `apps/engine` + turnos con `ScriptedDMProvider` (sin LLM): job, NDJSON, `turn_blocks`, CAS, idempotencia, polling | Un turno completo desde dos telefonos por LAN; dos cierres forzados con 200 ms de diferencia producen una sola resolucion; una respuesta tardia queda `late` y no se pierde |
+| 4 | `rpg-ngn-api`: proyecto desde Atomo core, modulos `Tables` y `Campaigns`, `campaign:import` | Los 21 eventos importados via engine; JSON:API devuelve `player:zahira` sin eventos `gm`; `UPDATE` y `DELETE` sobre `campaign_events` fallan; un `seq` duplicado da 409 |
+| 5 | `apps/engine` + turnos con `ScriptedGMProvider` (sin LLM): job, NDJSON, `turn_blocks`, CAS, idempotencia, polling | Un turno completo desde dos telefonos por LAN; dos cierres forzados con 200 ms de diferencia producen una sola resolucion; una respuesta tardia queda `late` y no se pierde |
 | 6 | `packages/narrative` real: context builder de cuatro capas, adapter Anthropic con clave custodiada, probe de capacidad | Blind test de dos proveedores con la misma escena; un secreto no emergible no aparece en el prompt (test); grep del log tras un turno no encuentra la clave |
 | 6b | `apps/host` con Ollama | Con el host apagado el turno queda `awaiting_host` y se reanuda al conectar |
 | 7 | Cobro y cupo: `atomo/payments`, `Quotas` de One Shot por turnos, proveedor obligatorio al crear mesa | Una mesa de pago no abre sesion sin `payment_intent.succeeded`; el cupo se descuenta en la misma transaccion que el `seq`; el webhook es idempotente |
@@ -272,7 +272,7 @@ La 3 corre en paralelo con la 4 y la 5. La 6 no empieza sin la 5.
 | Tests de Atomo no prueban contrato | Tests por invariante en `rpg-ngn-api`; los que apliquen al core suben a Atomo | Gabino |
 | Dos versiones de React entre web y mobile | `packages/*` sin React por lint; bindings en cada app | Entregas 2 y 3 |
 | Tentacion de que el engine escriba en DB | El engine no tiene credenciales de DB; regla escrita en 02 | Doc 02 |
-| Host relay ve los secretos | Declarado en UI y terminos; se recomienda que el host sea quien tendria la pantalla del DM | Entrega 6b |
+| Host relay ve los secretos | Declarado en UI y terminos; se recomienda que el host sea quien tendria la pantalla del GM | Entrega 6b |
 | Proveedor del cupo gratuito | Decision de negocio pendiente (09); hasta entonces cuenta propia y modelo barato | Gabino (negocio) |
 | Pages acoplado a `main` | Workflow `deploy-pages` antes del primer merge de `dev` | Entrega 1 |
 
@@ -280,7 +280,7 @@ La 3 corre en paralelo con la 4 y la 5. La 6 no empieza sin la 5.
 
 - 09: fecha de escritura (05, no 06); se jugaron dos sesiones, no tres; la
   seccion "Arquitectura" y el "Orden sugerido" remiten aqui; la afirmacion de
-  que `DMProvider` "ya esta diseñado" para BYOK se sustituye por D6.
+  que `GMProvider` "ya esta diseñado" para BYOK se sustituye por D6.
 - 10: la "Decision abierta: stack del SaaS" queda cerrada por D1 y D3; BA3 por
   D6; IA5 por D4 (un solo escritor). El resto de hallazgos sigue abierto y se
   cierra editando 08, 05 y 09 como estaba previsto.

@@ -1,7 +1,7 @@
 import type { RandomSource } from './random.js'
 
 /**
- * Dados. La tirada es la unica fuente de azar del motor (regla 1): el DM
+ * Dados. La tirada es la unica fuente de azar del motor (regla 1): el GM
  * nunca inventa un numero, y cada resultado queda registrado con su fuente.
  */
 

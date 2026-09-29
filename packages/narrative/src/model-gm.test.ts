@@ -1,8 +1,8 @@
 import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
-import { ModelDMProvider, parseLoose } from './model-dm.js'
+import { ModelGMProvider, parseLoose } from './model-gm.js'
 import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
-import { DMProviderError } from './redact.js'
+import { GMProviderError } from './redact.js'
 
 const KEY = 'sk-proj-SECRETA-1234567890abcdef'
 
@@ -15,8 +15,8 @@ const goodTurn = [
   '{"kind":"addressed","characterIds":["character:zahira","narivyl"]}',
 ].join('\n')
 
-describe('ModelDMProvider', () => {
-  it('cuando el DM pide una tirada sin resultado, el engine tira el dado y la mesa ve el bloque roll', async () => {
+describe('ModelGMProvider', () => {
+  it('cuando el GM pide una tirada sin resultado, el engine tira el dado y la mesa ve el bloque roll', async () => {
     const base = await openSession003()
     const lines = [
       '{"kind":"block","block":{"type":"narration","text":"Las runas exigen atención. Zahira, tu ojo de piedra las recorre."}}',
@@ -25,7 +25,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"event","event":{"type":"roll","actor":"character:calder","resolved":{"kind":"save","die":"1d20","advantage":true}}}',
       '{"kind":"addressed","characterIds":["zahira"]}',
     ].join('\n')
-    const provider = new ModelDMProvider(new FakeTransport(lines), KEY, { random: seededRandom(7) })
+    const provider = new ModelGMProvider(new FakeTransport(lines), KEY, { random: seededRandom(7) })
     const expected = seededRandom(7)
     // Con el servidor tirando, el motor pre-tira un d20 por cada personaje
     // que declaro (Zahira) antes de llamar al modelo; consume el primer valor.
@@ -52,7 +52,7 @@ describe('ModelDMProvider', () => {
   it('registra las declaraciones, emite bloques al vuelo y solo acepta eventos que el engine puede aplicar', async () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)
-    const provider = new ModelDMProvider(transport, KEY)
+    const provider = new ModelGMProvider(transport, KEY)
 
     // Mesa presencial (`dice: 'table'`): el numero que escribe el jugador vale. Ya no es el defecto.
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.'), response('calder', 'La sigo.')]), { dice: 'table' })))
@@ -84,7 +84,7 @@ describe('ModelDMProvider', () => {
   it('ignora basura, fences y eventos inaplicables sin romper el turno, y avisa al final', async () => {
     const base = await openSession003()
     const text = [
-      'Aquí va la respuesta del DM:',
+      'Aquí va la respuesta del GM:',
       '```json',
       'Claro: {"kind":"block","block":{"type":"narration","text":"El aire huele a piedra mojada."}},',
       '{"kind":"event","event":{"type":"state_change","effects":[{"op":"hp","who":"character:orion","delta":-3}]}}',
@@ -96,7 +96,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"block","block":{"type":"dialogue","speaker":"Un minero","speakerRef":"minero sin id","text":"¿Quién anda ahí?"}}',
       '```',
     ].join('\n')
-    const provider = new ModelDMProvider(new FakeTransport(text), KEY)
+    const provider = new ModelGMProvider(new FakeTransport(text), KEY)
 
     // Mesa presencial: una tirada "fisica" que nadie escribio se descarta (con el servidor tirando, se tiraria).
     const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]), { dice: 'table' })))
@@ -104,7 +104,7 @@ describe('ModelDMProvider', () => {
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'dialogue', 'system'])
     expect(blocks[2]).toMatchObject({ speaker: 'Un minero', speakerRef: null })
-    expect(blocks[3]?.type === 'system' && blocks[3].text).toMatch(/^El DM propuso 5 líneas/)
+    expect(blocks[3]?.type === 'system' && blocks[3].text).toMatch(/^El GM propuso 5 líneas/)
 
     const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))
     // Orion no esta en la sesion, el roll de 19 no fue reportado, la cosa no esta en el inventario, narration del modelo se descarta.
@@ -115,7 +115,7 @@ describe('ModelDMProvider', () => {
   it('rescata un array JSON con fences y avisa si la salida se corto por presupuesto', async () => {
     const base = await openSession003()
     const text = '```json\n[\n  {"kind":"block","block":{"type":"narration","text":"Todo en una sola estructura."}},\n  {"kind":"addressed","characterIds":["calder"]}\n]\n```'
-    const provider = new ModelDMProvider(new FakeTransport(text, { finish: 'length' }), KEY)
+    const provider = new ModelGMProvider(new FakeTransport(text, { finish: 'length' }), KEY)
 
     const outputs = await collect(provider.narrate(contextFor(base, turn(1, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
@@ -126,7 +126,7 @@ describe('ModelDMProvider', () => {
 
   it('falla el turno (para que la plataforma lo reabra) si el modelo no devuelve ningun bloque', async () => {
     const base = await openSession003()
-    const provider = new ModelDMProvider(new FakeTransport('Claro, aquí va el turno:\n```json\n```'), KEY)
+    const provider = new ModelGMProvider(new FakeTransport('Claro, aquí va el turno:\n```json\n```'), KEY)
     await expect(collect(provider.narrate(contextFor(base, turn(1, []))))).rejects.toThrow(/no devolvió ningún bloque/)
   })
 
@@ -134,7 +134,7 @@ describe('ModelDMProvider', () => {
     const base = await openSession003()
     // Salida tipica de qwen2.5 / llama3.1: encabezado, prosa en parrafos, un JSON al final dentro de fences.
     const text = [
-      '**Narración del DM:**',
+      '**Narración del GM:**',
       '',
       'La galería se estrecha y el eco de vuestros pasos vuelve con retraso. Zahira nota que el techo fue apuntalado hace poco.',
       '',
@@ -149,7 +149,7 @@ describe('ModelDMProvider', () => {
       '}',
       '```',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Avanzo.')]))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Avanzo.')]))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'narration', 'narration'])
     expect(blocks[1]).toMatchObject({ text: 'La galería se estrecha y el eco de vuestros pasos vuelve con retraso. Zahira nota que el techo fue apuntalado hace poco.' })
@@ -172,7 +172,7 @@ describe('ModelDMProvider', () => {
       '  {"kind": "block", "block": {"type": "narration", "text": "Cierra con pregunta?"}}',
       ']',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['narration', 'dialogue', 'narration'])
     expect(outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['narration', 'narration', 'world_event', 'narration'])
@@ -185,7 +185,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"block","block":{"type":"narration","text":"Este sí llega."}}',
       '{"kind":"addressed","characterIds":["calder"]}',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
     expect(blocks.map((b) => b?.type)).toEqual(['narration', 'system'])
     expect(blocks[0]).toMatchObject({ text: 'Este sí llega.' })
@@ -195,7 +195,7 @@ describe('ModelDMProvider', () => {
   it('redacta la credencial en errores del transporte y del probe', async () => {
     const base = await openSession003()
     const failing = new FakeTransport('', {}, new Error(`401 Unauthorized: invalid api key ${KEY} (x-api-key: ${KEY})`))
-    const provider = new ModelDMProvider(failing, KEY)
+    const provider = new ModelGMProvider(failing, KEY)
 
     let caught: unknown
     try {
@@ -203,7 +203,7 @@ describe('ModelDMProvider', () => {
     } catch (error) {
       caught = error
     }
-    expect(caught).toBeInstanceOf(DMProviderError)
+    expect(caught).toBeInstanceOf(GMProviderError)
     const message = (caught as Error).message
     expect(message).not.toContain(KEY)
     expect(message).not.toContain('SECRETA')
@@ -230,13 +230,13 @@ describe('ModelDMProvider', () => {
 
     it('corta los bloques que revelan un secreto antes de tiempo, no los registra y deja el motivo en el resultado', async () => {
       const base = await openSession003()
-      const outputs = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Entro en la casa de Osric.')]))))
+      const outputs = await collect(new ModelGMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Entro en la casa de Osric.')]))))
 
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-      // Un solo aviso, al final del turno: en medio de la historia parecia que el DM se corregia en vivo.
+      // Un solo aviso, al final del turno: en medio de la historia parecia que el GM se corregia en vivo.
       expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system'])
       // El aviso del lint es para el anfitrion: un jugador no puede hacer nada con el.
-      expect(blocks[2]).toMatchObject({ type: 'system', text: 'El DM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
+      expect(blocks[2]).toMatchObject({ type: 'system', text: 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
       expect(blocks[2]?.type === 'system' && blocks[2].detail).toMatch(/cortó 2 bloques/)
       expect(JSON.stringify(blocks)).not.toContain('Brorg')
       expect(JSON.stringify(blocks)).not.toContain('está abajo')
@@ -255,15 +255,15 @@ describe('ModelDMProvider', () => {
       expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira', 'calder'] })
     })
 
-    it('un turno limpio pasa sin hallazgos y el contexto lleva la capa del DM marcada', async () => {
+    it('un turno limpio pasa sin hallazgos y el contexto lleva la capa del GM marcada', async () => {
       const base = await openSession003()
       const transport = new FakeTransport(goodTurn)
-      const outputs = await collect(new ModelDMProvider(transport, KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]))))
+      const outputs = await collect(new ModelGMProvider(transport, KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]))))
 
       expect(outputs.some((o) => o.kind === 'lint')).toBe(false)
       expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
       const user = transport.prompts[0]!.user
-      expect(user).toContain('# Capa del DM: secretos')
+      expect(user).toContain('# Capa del GM: secretos')
       expect(user).toContain('- osric-esta-abajo (sobre npc:osric; NO REVELADO a Zahira, Calder). Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric.')
       // El de Brorg no viaja: nadie lo nombro y no esta en la party. El modelo
       // no puede parafrasear lo que no tiene delante (docs/04, regla 2).
@@ -271,7 +271,7 @@ describe('ModelDMProvider', () => {
 
       // En cuanto la escena lo roza, entra con su condicion de revelacion.
       const transport2 = new FakeTransport(goodTurn)
-      await collect(new ModelDMProvider(transport2, KEY).narrate(contextFor(base, turn(1, [response('zahira', '¿Y Brorg? Lo busco entre los ganchos.')]))))
+      await collect(new ModelGMProvider(transport2, KEY).narrate(contextFor(base, turn(1, [response('zahira', '¿Y Brorg? Lo busco entre los ganchos.')]))))
       expect(transport2.prompts[0]!.user).toContain('- brorg-pago-por-zahira (sobre character:brorg; NO REVELADO a Zahira, Calder). Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira; puede soltarlo character:brorg.')
     })
 
@@ -283,7 +283,7 @@ describe('ModelDMProvider', () => {
         '{"kind":"event","event":{"type":"secret_revealed","payload":{"secretId":"no-existe"}}}',
         '{"kind":"addressed","characterIds":["zahira"]}',
       ].join('\n')
-      const outputs = await collect(new ModelDMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
+      const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
 
       expect(outputs.some((o) => o.kind === 'lint')).toBe(false)
       const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event : null))
@@ -296,12 +296,12 @@ describe('ModelDMProvider', () => {
 
     it('en modo report el bloque pasa y el hallazgo se anota; en modo off no se revisa', async () => {
       const base = await openSession003()
-      const report = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'report' })))
+      const report = await collect(new ModelGMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'report' })))
       expect(report.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block.type : ''))).toEqual(['narration', 'dialogue', 'narration'])
       expect(report.filter((o) => o.kind === 'lint')).toHaveLength(3)
       expect(report.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['narration', 'narration', 'world_event', 'narration'])
 
-      const off = await collect(new ModelDMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'off' })))
+      const off = await collect(new ModelGMProvider(new FakeTransport(leak), KEY).narrate(contextFor(base, turn(1, []), { lint: 'off' })))
       expect(off.some((o) => o.kind === 'lint')).toBe(false)
       expect(off.filter((o) => o.kind === 'block')).toHaveLength(3)
     })
@@ -312,7 +312,7 @@ describe('ModelDMProvider', () => {
         '{"kind":"block","block":{"type":"narration","text":"La puerta de la casa cede con un crujido."}}',
         '{"kind":"block","block":{"type":"dialogue","speaker":"Un minero flaco","speakerRef":null,"text":"Osric está abajo, muchacha. ¿Vas a bajar?"}}',
       ].join('\n')
-      const outputs = await collect(new ModelDMProvider(new FakeTransport(endsCut), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
+      const outputs = await collect(new ModelGMProvider(new FakeTransport(endsCut), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
       expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system', 'narration'])
       expect(blocks[3]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
@@ -322,26 +322,26 @@ describe('ModelDMProvider', () => {
   it('la Fortuna la tira el jugador: el motor no la tira al abrir y el d20 del modelo no la pisa', async () => {
     const base = await openSession003()
     const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Amanece en Valdoria. ¿Qué hacen?"}}')
-    const outputs = await collect(new ModelDMProvider(transport, KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(1, []))))
+    const outputs = await collect(new ModelGMProvider(transport, KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(1, []))))
 
     expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'roll')).toBe(false)
     expect(transport.prompts[0]!.user).toContain('la tira cada jugador con su dado')
 
     // Una tirada que el modelo marque como Fortuna sale como tirada cualquiera.
     const sneaky = ['{"kind":"event","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"fortune","die":"1d20","result":20,"source":"model"}}}', '{"kind":"block","block":{"type":"narration","text":"Sigue."}}'].join('\n')
-    const later = await collect(new ModelDMProvider(new FakeTransport(sneaky), KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]), { dice: 'engine' })))
+    const later = await collect(new ModelGMProvider(new FakeTransport(sneaky), KEY, { random: seededRandom(3) }).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]), { dice: 'engine' })))
     const kinds = later.filter((o) => o.kind === 'event' && o.event['type'] === 'roll').map((o) => (o.kind === 'event' ? (o.event['resolved'] as { kind: string }).kind : null))
     expect(kinds).not.toContain('fortune')
   })
 
-  it('el DM puede marcar un momento para ilustrar: uno por turno y pasa por el lint', async () => {
+  it('el GM puede marcar un momento para ilustrar: uno por turno y pasa por el lint', async () => {
     const base = await openSession003()
     const lines = [
       '{"kind":"block","block":{"type":"narration","text":"La campana tiembla sola en la capilla."}}',
       '{"kind":"scene","text":"Una campana de bronce vibra sola en una capilla minera a la luz de un farol."}',
       '{"kind":"scene","text":"Otra escena que sobra."}',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
     const illustrate = outputs.filter((o) => o.kind === 'illustrate')
     expect(illustrate).toEqual([{ kind: 'illustrate', moment: 'Una campana de bronce vibra sola en una capilla minera a la luz de un farol.' }])
   })
@@ -355,7 +355,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"suggest","characterId":"osric","options":["No es de la party"]}',
       '{"kind":"addressed","characterIds":["zahira","calder"]}',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro la campana.')]))))
     expect(outputs.find((o) => o.kind === 'suggestions')).toEqual({
       kind: 'suggestions',
       byCharacter: { zahira: ['Le pregunto a Tomás por su hermano', 'Bajo sola al segundo nivel'], calder: ['Reviso la cuerda antes de bajar'] },
@@ -369,16 +369,16 @@ describe('ModelDMProvider', () => {
       '{"kind":"block","block":{"type":"narration","text":"Amanece gris sobre Valdoria."}}',
     ].join('\n')
     const transport = new FakeTransport(lines)
-    const opening = await collect(new ModelDMProvider(transport, KEY).narrate(contextFor(base, turn(1, []))))
+    const opening = await collect(new ModelGMProvider(transport, KEY).narrate(contextFor(base, turn(1, []))))
     const recap = opening.find((o) => o.kind === 'block' && o.block.type === 'system' && o.block.recap)
     expect(recap).toMatchObject({ block: { title: 'Anteriormente...', text: 'Descolgaron la campana en la capilla y algo respondió desde el tercer nivel.' } })
     expect(transport.prompts[0]!.user).toContain('"kind":"recap"')
 
-    const later = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    const later = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
     expect(later.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.recap)).toBe(false)
   })
 
-  it('where mueve a la party aunque el DM no emita el move, sin repetirlo ni inventar lugares', async () => {
+  it('where mueve a la party aunque el GM no emita el move, sin repetirlo ni inventar lugares', async () => {
     const base = await openSession003()
     const lines = [
       '{"kind":"block","block":{"type":"narration","text":"Bajan juntos por el camino embarrado."}}',
@@ -386,7 +386,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"where","location":"location:camino-a-la-mina"}',
       '{"kind":"where","location":"el-castillo-que-no-existe"}',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Vamos a la mina.')]))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Vamos a la mina.')]))))
     const moves = outputs
       .filter((o) => o.kind === 'event' && o.event['type'] === 'state_change')
       .flatMap((o) => (o.kind === 'event' ? (o.event['effects'] as Array<{ who: string; to: string }>) : []))
@@ -403,7 +403,7 @@ describe('ModelDMProvider', () => {
       '{"kind":"roll","event":{"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}}',
       '{"kind":"block","block":{"type":"narration","text":"Zahira escucha."}}',
     ].join('\n')
-    const outputs = await collect(new ModelDMProvider(new FakeTransport(lines), KEY, { random: seededRandom(5) }).narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]))))
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY, { random: seededRandom(5) }).narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]))))
     expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'roll')).toBe(true)
     expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('se ignoró'))).toBe(false)
   })
@@ -412,7 +412,7 @@ describe('ModelDMProvider', () => {
     const base = await openSession003()
     const transport = new FakeTransport(goodTurn)
     const outputs = await collect(
-      new ModelDMProvider(transport, KEY, { random: seededRandom(7) }).narrate(
+      new ModelGMProvider(transport, KEY, { random: seededRandom(7) }).narrate(
         contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]), { dice: 'engine' }),
       ),
     )
@@ -427,7 +427,7 @@ describe('ModelDMProvider', () => {
   it('respeta el presupuesto de salida de la peticion', async () => {
     const base = await openSession003()
     const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Breve."}}')
-    await collect(new ModelDMProvider(transport, KEY).narrate(contextFor(base, turn(1, []), { maxOutputTokens: 900 })))
+    await collect(new ModelGMProvider(transport, KEY).narrate(contextFor(base, turn(1, []), { maxOutputTokens: 900 })))
     expect(transport.prompts[0]?.maxOutputTokens).toBe(900)
   })
 })

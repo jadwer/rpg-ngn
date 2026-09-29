@@ -39,7 +39,7 @@ export function seededRandom(seed: number): RandomSource {
 
 /**
  * Devuelve valores fijados de antemano. Sirve para reproducir una tirada
- * fisica (la mesa tiro dados reales y el DM tecleo el numero) o para tests.
+ * fisica (la mesa tiro dados reales y el GM tecleo el numero) o para tests.
  * Los valores son resultados de dado (1..sides), no indices.
  */
 export function recordedRandom(faces: readonly number[], source = 'physical'): RandomSource {

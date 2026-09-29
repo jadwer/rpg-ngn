@@ -1,6 +1,6 @@
 'use client'
 
-import { ApiError, withProvider, type ApiClient, type DmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
+import { ApiError, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
@@ -39,7 +39,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [name, setName] = useState('')
   const [characterId, setCharacterId] = useState<string | null>(null)
   const [premise, setPremise] = useState('')
-  const [presets, setPresets] = useState<DmPreset[]>([])
+  const [presets, setPresets] = useState<GmPreset[]>([])
   const [ownKeys, setOwnKeys] = useState<string[]>([])
   const [defaultPreset, setDefaultPreset] = useState('')
   const [preset, setPreset] = useState('')
@@ -90,12 +90,12 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     }
   }, [client, option])
 
-  // Presets del DM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
+  // Presets del GM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
     let alive = true
     // Con las claves propias: una clave guardada se ofrece al crear la mesa y
     // se preselecciona, aunque el servidor no tenga ese proveedor.
-    void Promise.all([client.listDmPresets(), client.listOwnKeys().catch(() => [])]).then(
+    void Promise.all([client.listGmPresets(), client.listOwnKeys().catch(() => [])]).then(
       ([result, keys]) => {
         if (!alive) return
         const own = keys.filter((k) => k.configured).map((k) => k.preset)

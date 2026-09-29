@@ -21,10 +21,10 @@ export function redact(text: string, credential?: string): string {
 }
 
 /** Error del proveedor con el mensaje ya redactado y sin causa encadenada (la causa podria traer cabeceras). */
-export class DMProviderError extends Error {
+export class GMProviderError extends Error {
   constructor(message: string, credential?: string) {
     super(redact(message, credential))
-    this.name = 'DMProviderError'
+    this.name = 'GMProviderError'
   }
 }
 

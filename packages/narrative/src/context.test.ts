@@ -3,7 +3,7 @@ import { CampaignEvent } from '@rpg-ngn/content'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
 import { describe, expect, it } from 'vitest'
 import { buildTurnContext, COMPACT_BUDGET } from './context.js'
-import { DM_SYSTEM_PROMPT_COMPACT } from './prompt.js'
+import { GM_SYSTEM_PROMPT_COMPACT } from './prompt.js'
 import { contextFor, openSession003, pilotContext, response, turn } from './pilot.test-helpers.js'
 
 describe('buildTurnContext', () => {
@@ -42,16 +42,16 @@ describe('buildTurnContext', () => {
     expect(user).toContain('Ids válidos para "addressed": zahira, calder.')
   })
 
-  it('la capa del DM lista los secretos con su estado por personaje y su condicion; sin secretos no aparece', async () => {
+  it('la capa del GM lista los secretos con su estado por personaje y su condicion; sin secretos no aparece', async () => {
     const base = await openSession003()
     const { user } = buildTurnContext(contextFor(base, turn(1, [])))
-    const dm = user.slice(user.indexOf('# Capa del DM'), user.indexOf('# Turno'))
-    expect(dm).toContain('NO REVELADO a Zahira, Calder')
-    expect(dm).toContain('Osric no huyó del pueblo: bajó a la mina anoche por su cuenta')
-    expect(dm).toContain('Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric')
+    const gm = user.slice(user.indexOf('# Capa del GM'), user.indexOf('# Turno'))
+    expect(gm).toContain('NO REVELADO a Zahira, Calder')
+    expect(gm).toContain('Osric no huyó del pueblo: bajó a la mina anoche por su cuenta')
+    expect(gm).toContain('Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric')
     // El secreto sobre Brorg no entra mientras la escena no lo roce: Brorg no
     // esta en la party y nadie lo ha nombrado (docs/04, regla 2).
-    expect(dm).not.toContain('brorg-pago-por-zahira')
+    expect(gm).not.toContain('brorg-pago-por-zahira')
     const conBrorg = buildTurnContext(contextFor(base, turn(1, [response('zahira', '¿Dónde está Brorg? Lo busco entre los ganchos.')]))).user
     expect(conBrorg).toContain('Se revela con un evento discovery del hecho fact:brorg-pago-por-zahira')
 
@@ -66,7 +66,7 @@ describe('buildTurnContext', () => {
     expect(buildTurnContext(contextFor({ ...base, state: onlyCalder }, turn(2, []))).user).toContain('- osric-esta-abajo (sobre npc:osric; ya lo conoce toda la party presente)')
 
     const bare = { ...base.pack, secrets: new Map() }
-    expect(buildTurnContext(contextFor({ ...base, pack: bare }, turn(1, []))).user).not.toContain('# Capa del DM')
+    expect(buildTurnContext(contextFor({ ...base, pack: bare }, turn(1, []))).user).not.toContain('# Capa del GM')
   })
 
   it('el resumen previo de una sesion del pack solo llega si ESTA campaña la jugo', async () => {
@@ -107,7 +107,7 @@ describe('buildTurnContext', () => {
     const long = base.state.narrative.log.map((entry, i) => ({ ...entry, text: `${i} ${'x'.repeat(200)}` }))
     const state = { ...base.state, narrative: { ...base.state.narrative, log: long } }
     const built = buildTurnContext({ ...contextFor({ ...base, state }, turn(1, [])) }, { memoryChars: 700, recentEvents: 30, chronicleEntries: 50, sheets: 'full' })
-    const chronicle = built.user.slice(built.user.indexOf('# Crónica'), built.user.indexOf('# Capa del DM'))
+    const chronicle = built.user.slice(built.user.indexOf('# Crónica'), built.user.indexOf('# Capa del GM'))
     expect(chronicle.length).toBeLessThan(1100)
     expect(chronicle).toContain(`${long.length - 1} xxxx`)
     expect(chronicle).not.toContain('- Narración: 0 xxxx')
@@ -121,7 +121,7 @@ describe('buildTurnContext', () => {
     expect(built.user).toContain('HP 13/13')
     // ~3.6 caracteres por token en español: prompt corto mas usuario por debajo de 10500 caracteres.
     expect(built.user.length).toBeLessThan(6500)
-    expect(DM_SYSTEM_PROMPT_COMPACT.length + built.user.length).toBeLessThan(10500)
+    expect(GM_SYSTEM_PROMPT_COMPACT.length + built.user.length).toBeLessThan(10500)
   })
 
   it('sin sesion abierta ni eventos, dice que no hay cronica y no hay party', async () => {

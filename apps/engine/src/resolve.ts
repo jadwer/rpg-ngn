@@ -1,7 +1,7 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
 import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse } from '@rpg-ngn/engine-contract'
-import { createProvider, redact, type DMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
+import { createProvider, redact, type GMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
 import { projectionsOf, rebuildState } from './state.js'
@@ -9,9 +9,9 @@ import { projectionsOf, rebuildState } from './state.js'
 export interface ResolveDeps {
   loadPack(ref: ResolveTurnRequest['pack']): Promise<LoadedPack>
   now(): Date
-  provider?: DMProvider
+  provider?: GMProvider
   providers?: ProviderDeps
-  /** Modo del lint de conocimiento cuando la peticion no lo fija (DM_LINT del engine). */
+  /** Modo del lint de conocimiento cuando la peticion no lo fija (GM_LINT del engine). */
   lintMode?: LintMode | undefined
 }
 
@@ -46,7 +46,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     return
   }
 
-  let provider: DMProvider
+  let provider: GMProvider
   try {
     provider = deps.provider ?? createProvider(request.provider, deps.providers ?? {})
   } catch (error) {
@@ -59,7 +59,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   const secrets = [...pack.secrets.values()]
   let addressed: string[] = session.party
   let usage = { inputTokens: 0, outputTokens: 0 }
-  // Para ver al final si la party cambio de lugar, y lo que el DM pidio ilustrar.
+  // Para ver al final si la party cambio de lugar, y lo que el GM pidio ilustrar.
   const initial = state
   const opening = request.turn.number === 1 && request.turn.responses.length === 0
   let moment: string | null = null
@@ -81,10 +81,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   }
 
   try {
-    // Apertura de sesion (turno 1 sin declaraciones): antes de que el DM
+    // Apertura de sesion (turno 1 sin declaraciones): antes de que el GM
     // presente la escena, la mesa recibe lo que el pack ya sabia y nadie le
     // enseñaba: de que va la sesion y como se juega. Es lo que en el piloto
-    // hacia el DM humano antes de que nadie tirara un dado.
+    // hacia el GM humano antes de que nadie tirara un dado.
     const packSession = pack.sessions.get(request.turn.sessionId)
     if (request.turn.number === 1 && request.turn.responses.length === 0 && packSession) {
       yield {
@@ -100,7 +100,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       }
 
       // Y se coloca a la party donde el pack dice que arranca la sesion. Sin
-      // esto nadie tiene ubicacion hasta que el DM mueva a alguien, y el mapa
+      // esto nadie tiene ubicacion hasta que el GM mueva a alguien, y el mapa
       // de la mesa sale vacio de gente durante toda la primera escena.
       const start = packSession.startLocation
       const sinUbicar = start ? session.party.filter((id) => !state.world.characters[id]?.location) : []
@@ -169,7 +169,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 
       const parsed = seal(output.event)
       if (!parsed.success) {
-        throw new Error(`el DM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
+        throw new Error(`el GM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
       }
       state = applyEvent(state, parsed.data, ruleset, secrets)
       events.push(parsed.data)
@@ -200,7 +200,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 /**
  * "Otras" ideas (E10b): dos sugerencias nuevas para un personaje con el
  * contexto del turno abierto, en una llamada aparte que no narra ni escribe
- * nada. Lanza si el proveedor no sabe (DM con guion) o si el modelo falla;
+ * nada. Lanza si el proveedor no sabe (GM con guion) o si el modelo falla;
  * la plataforma decide quien puede pedirlas y cuantas veces.
  */
 export async function suggestMore(request: SuggestRequest, deps: ResolveDeps): Promise<SuggestResponse> {

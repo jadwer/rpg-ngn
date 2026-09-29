@@ -6,7 +6,7 @@ import { eventLog, PACK_ID, PACK_VERSION, packBinaries, packFiles } from '../gen
 /**
  * Campaña offline: el pack empaquetado en la app mas su log, reducidos en el
  * dispositivo con el ruleset del pack (docs/11, D8). El log empaquetado no
- * lleva capa dm, asi que reducirlo aqui no expone secretos. Las lecturas del
+ * lleva capa gm, asi que reducirlo aqui no expone secretos. Las lecturas del
  * pack (personajes, sesiones, nombres) estan en `@rpg-ngn/ui-logic`. Sin
  * React ni Expo para poder probarlo con vitest en node.
  */

@@ -1,8 +1,8 @@
 import type { ProviderConfig } from '@rpg-ngn/engine-contract'
 import { createAnthropicProvider, type AnthropicClientLike } from './anthropic.js'
 import { createOpenAIProvider, type OpenAIClientLike } from './openai.js'
-import type { DMProvider } from './provider.js'
-import { ScriptedDMProvider } from './scripted.js'
+import type { GMProvider } from './provider.js'
+import { ScriptedGMProvider } from './scripted.js'
 
 /** Dependencias inyectables: clientes falsos en tests, `fetch` propio, timeout hacia el proveedor. */
 export interface ProviderDeps {
@@ -14,10 +14,10 @@ export interface ProviderDeps {
 }
 
 /** Construye el proveedor que pide la plataforma. La credencial solo vive aqui y en el transporte. */
-export function createProvider(config: ProviderConfig, deps: ProviderDeps = {}): DMProvider {
+export function createProvider(config: ProviderConfig, deps: ProviderDeps = {}): GMProvider {
   switch (config.kind) {
     case 'scripted':
-      return new ScriptedDMProvider(config.script)
+      return new ScriptedGMProvider(config.script)
     case 'anthropic':
       return createAnthropicProvider({
         model: config.model,

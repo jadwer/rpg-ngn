@@ -1,7 +1,18 @@
 # Plan: renombrar DM a GM (Game Master)
 
-Estado: propuesta, sin ejecutar. Escrito el 2026-09-14 por Opus a peticion de
-Gabino, para que lo revise y lo ejecute Fable en una sesion dedicada.
+**Estado: ejecutado el 2026-09-29**, con un cambio sobre este plan: la capa
+de visibilidad `dm` de los eventos **si** se renombro a `gm`. Al ejecutar,
+ningun evento guardado la usaba (0 de 421 en produccion, 0 en el log del
+piloto), asi que no hizo falta migrar datos: `KnowledgeLayer` acepta `dm` al
+leer y lo guarda como `gm`. Compatibilidad que queda: rutas `/dm` para las APK
+instaladas, comandos `dm:probe` y `dm:key`, variables `DM_*` como respaldo de
+`GM_*`, y el permiso renombrado por migracion (`gm-providers.index`). La
+carpeta privada de notas paso de `dm/` a `gm/`. Se quedan como estaban, por ser
+registro: las actas de auditoria, las sesiones jugadas de Valdoria y las
+migraciones ya corridas.
+
+Escrito el 2026-09-14 por Opus a peticion de Gabino. Lo que sigue es el plan
+original.
 
 ## Por que
 

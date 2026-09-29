@@ -23,7 +23,7 @@ export const RollKind = z.enum(['skill', 'social', 'attack', 'save', 'other'])
 export type RollKind = z.infer<typeof RollKind>
 
 /**
- * Tirada que el DM pide a un personaje y que se resuelve fuera del motor: el
+ * Tirada que el GM pide a un personaje y que se resuelve fuera del motor: el
  * jugador la dispara desde la mesa y el numero lo pone la API (modo `dice`),
  * o la tira con su dado fisico y escribe el numero (modo `table`). Es solo
  * el dato: no dice como se pinta el dado.
@@ -70,7 +70,7 @@ export const TurnInput = z.strictObject({
 })
 export type TurnInput = z.infer<typeof TurnInput>
 
-/** Linea de un NPC que el DM scripted mete antes de su narracion. */
+/** Linea de un NPC que el GM scripted mete antes de su narracion. */
 export const ScriptedLine = z.strictObject({
   speaker: z.string().min(1),
   speakerRef: z.string().min(1).optional(),
@@ -78,7 +78,7 @@ export const ScriptedLine = z.strictObject({
 })
 
 /**
- * Guion opcional del DM scripted: narracion fija por numero de turno, para
+ * Guion opcional del GM scripted: narracion fija por numero de turno, para
  * escenas cortas y demos sin modelo. Es contenido, viaja en `settings` de la
  * mesa; el codigo del provider no sabe de lore. Un turno sin entrada en el
  * guion recibe la narracion generica.
@@ -143,8 +143,8 @@ export const TurnBudget = z.strictObject({
 
 /**
  * Texto libre que el usuario escribe al crear la mesa (`premise`) o al abrir
- * la sesion (`sessionNote`). Entra al contexto del DM como contenido no
- * confiable, delimitado; no puede cambiar las reglas del DM (entrega 6).
+ * la sesion (`sessionNote`). Entra al contexto del GM como contenido no
+ * confiable, delimitado; no puede cambiar las reglas del GM (entrega 6).
  */
 export const TurnContext = z.strictObject({
   premise: z.string().max(4000).optional(),
@@ -158,7 +158,7 @@ export type TurnContext = z.infer<typeof TurnContext>
  * Lint de conocimiento (docs/08, invariante 3). `enforce` sustituye por un
  * aviso `system` todo bloque que cuente un secreto no revelado; `report`
  * solo lo anota en `result.lint`; `off` no revisa. Si la peticion no lo
- * trae, decide el engine (variable `DM_LINT`, por defecto `enforce`).
+ * trae, decide el engine (variable `GM_LINT`, por defecto `enforce`).
  */
 export const LintMode = z.enum(['enforce', 'report', 'off'])
 export type LintMode = z.infer<typeof LintMode>
@@ -167,14 +167,14 @@ export type LintMode = z.infer<typeof LintMode>
  * Quien tira los dados de la mesa (Gabino, 25-09: tres modos).
  *
  * `engine`: el motor tira un d20 por personaje antes de llamar al modelo y
- * el DM narra la consecuencia en el mismo turno. El numero que escriba un
+ * el GM narra la consecuencia en el mismo turno. El numero que escriba un
  * jugador se ignora. Rapido y sin dado a la vista.
  *
- * `dice`: el DM pide la tirada (`RollRequest`) y no narra la consecuencia;
+ * `dice`: el GM pide la tirada (`RollRequest`) y no narra la consecuencia;
  * el jugador suelta el dado en la mesa y el numero lo pone la API. Un numero
  * escrito por el jugador no cuenta. Es el dado en pantalla.
  *
- * `table`: partida presencial con dados reales. El DM pide la tirada y el
+ * `table`: partida presencial con dados reales. El GM pide la tirada y el
  * jugador escribe el numero que saco; ese vale como tirada fisica.
  */
 export const DiceMode = z.enum(['engine', 'dice', 'table'])
@@ -248,7 +248,7 @@ export const TurnBlock = z.discriminatedUnion('type', [
     result: z.number().int(),
     /** Cada dado por separado (dos con ventaja o desventaja, varios en 2d6): para pintar las caras. */
     rolls: z.array(z.number().int()).optional(),
-    /** La pidio el DM y la resolvio la API (no una tirada rapida ni el motor). Opcional: no sube la version. */
+    /** La pidio el GM y la resolvio la API (no una tirada rapida ni el motor). Opcional: no sube la version. */
     requested: z.literal(true).optional(),
     /** Con dos d20, cual cuenta (el mayor o el menor): para atenuar el otro. Opcional: no sube la version. */
     advantage: z.enum(['advantage', 'disadvantage']).optional(),
@@ -291,7 +291,7 @@ export type TurnBlock = z.infer<typeof TurnBlock>
 
 /**
  * Lo que el engine propone ilustrar al terminar un turno. Decide cuando
- * (apertura, cambio de lugar, momento que marco el DM) y arma el prompt
+ * (apertura, cambio de lugar, momento que marco el GM) y arma el prompt
  * desde el pack y el estado, nunca desde el texto libre de un jugador. La
  * API decide si se genera (tope por sesion, procedencia del pack, ajuste de
  * la mesa) y con que proveedor.
@@ -416,7 +416,7 @@ export const ResolveLine = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('result'),
     events: z.array(CampaignEvent),
-    /** Personajes a los que el DM interpela directamente; cierran el siguiente turno. */
+    /** Personajes a los que el GM interpela directamente; cierran el siguiente turno. */
     addressed: z.array(KebabId),
     state: z.unknown(),
     projections: TurnProjections,
@@ -432,7 +432,7 @@ export const ResolveLine = z.discriminatedUnion('kind', [
      */
     suggestions: z.record(KebabId, z.array(z.string().min(1).max(120)).max(2)).optional(),
     /**
-     * Tiradas que el DM pidio para el turno que viene (modos `dice` y
+     * Tiradas que el GM pidio para el turno que viene (modos `dice` y
      * `table`): esos personajes tiran en vez de escribir. Opcional: no sube
      * la version.
      */

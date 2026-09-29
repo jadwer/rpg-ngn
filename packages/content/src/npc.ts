@@ -3,8 +3,8 @@ import { EntityRef, KebabId } from './common.js'
 
 /**
  * NPC (01, contenido canonico). Nada aqui es secreto: el repo es publico.
- * Lo que un NPC sabe y no debe decir vive en las notas del DM o en la capa
- * `dm` del estado de campaña.
+ * Lo que un NPC sabe y no debe decir vive en las notas del GM o en la capa
+ * `gm` del estado de campaña.
  */
 export const Npc = z.strictObject({
   id: KebabId,

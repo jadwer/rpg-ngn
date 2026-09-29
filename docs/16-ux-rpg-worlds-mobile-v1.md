@@ -155,7 +155,7 @@ Mostrar quién ya respondió y quién está escribiendo. El anfitrión puede res
 >    corregir.
 >
 > Propuesta de salida, si se quiere avanzar sin perder lo anterior: **cierre
-> automatico con cuenta atras visible y cancelable** ("el DM narra en 10
+> automatico con cuenta atras visible y cancelable** ("el GM narra en 10
 > segundos, cancelar"). Es automatico de facto para el 95% de los turnos,
 > mantiene la palanca de coste y da salida a los tres casos. Decide Gabino.
 
@@ -194,11 +194,11 @@ Personaje, jugadores, mapa, historial y reglas se abren como superficies indepen
 >   Formato en `docs/05`, ubicacion en `docs/08`, lo que se ve en `docs/13`
 >   4.10. Al abrir sesion la party ya aparece colocada (`startLocation`).
 > - **Personalidad escrita por el jugador** (`table_members.persona`, panel
->   "Tu personaje"), que el DM recibe en la ficha. Es la pieza que hace que dos
+>   "Tu personaje"), que el GM recibe en la ficha. Es la pieza que hace que dos
 >   jugadores con el mismo arquetipo vivan noches distintas, y encaja con el
 >   paso 2 de este flujo ("identidades jugables").
 > - **Presencia**: "me tengo que ir" / "he vuelto". El ausente no cuenta para
->   cerrar el turno y el DM recibe aviso para apartar al personaje sin matarlo.
+>   cerrar el turno y el GM recibe aviso para apartar al personaje sin matarlo.
 >   Es el estado 11 de la lista de esta propuesta, ya resuelto.
 > - **Modo de dados por mesa**: `engine` (tira el servidor, por omision) o
 >   `table` (se acepta el numero que escribe el jugador, para dados fisicos).
@@ -263,7 +263,7 @@ Estas superficies no deben convertirse en un pie permanente lleno de tarjetas.
 ## Estados de sesión que deben diseñarse
 
 1. Mesa recién creada.
-2. Primer mensaje del DM.
+2. Primer mensaje del GM.
 3. Jugador escribiendo.
 4. Jugador ya respondió.
 5. Esperando al resto.
@@ -282,7 +282,7 @@ Estas superficies no deben convertirse en un pie permanente lleno de tarjetas.
 > | # | Estado | Hoy |
 > |---|---|---|
 > | 1 | Mesa recien creada | hecho: tarjeta con pasos y boton "Iniciar partida" |
-> | 2 | Primer mensaje del DM | hecho: al abrir sesion se presenta la escena (titulo, briefing, como se juega) y la party queda colocada en el mapa |
+> | 2 | Primer mensaje del GM | hecho: al abrir sesion se presenta la escena (titulo, briefing, como se juega) y la party queda colocada en el mapa |
 > | 3 | Jugador escribiendo | **no existe**: hace falta que el cliente avise mientras se teclea |
 > | 4 | Jugador ya respondio | existe, pero como linea de texto ("Faltan por responder: Zahira") |
 > | 5 | Esperando al resto | igual que el 4 |
@@ -291,7 +291,7 @@ Estas superficies no deben convertirse en un pie permanente lleno de tarjetas.
 > | 8 | Tirada | el dado ya existe y se ve con cara de dado; falta que **se sienta** |
 > | 9 | Resultado | hecho |
 > | 10 | Nueva narracion | hecho |
-> | 11 | Jugador ausente | hecho: "me tengo que ir", el DM aparta al personaje sin matarlo |
+> | 11 | Jugador ausente | hecho: "me tengo que ir", el GM aparta al personaje sin matarlo |
 > | 12 | Fin de sesion | existe cierre con cliffhanger; sin pantalla propia |
 >
 > O sea: **de doce, uno no existe (el 3) y cuatro son de presentacion (4, 5, 7,
@@ -303,7 +303,7 @@ Estas superficies no deben convertirse en un pie permanente lleno de tarjetas.
 
 - tablero táctico;
 - ficha D&D fija;
-- chat privado con el DM como concepto principal;
+- chat privado con el GM como concepto principal;
 - dashboard permanente durante el juego;
 - configuración avanzada obligatoria;
 - copiar patrones de Alchemy o Quest Portal por similitud visual.
@@ -333,7 +333,7 @@ sin tutorial externo ni explicación verbal del anfitrión.
 >
 > 8. **Entender que la espera no es un cuelgue.** Entre 5 y 25 segundos por
 >    turno; sin señal, se percibe como que la aplicacion se rompio.
-> 9. **Saber que hacer cuando el DM no le habla a el.** En una mesa de cuatro,
+> 9. **Saber que hacer cuando el GM no le habla a el.** En una mesa de cuatro,
 >    la narracion puede dirigirse a otro dos turnos seguidos. Es donde mas
 >    facil se desengancha alguien que nunca jugo.
 >

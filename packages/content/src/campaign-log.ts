@@ -14,7 +14,7 @@ import { upcastEvent } from './upcast.js'
  *   - `sessionId` declarado en el pack, con `session_started` antes que
  *     cualquier otro evento de esa sesion y `session_closed` al final
  *   - `character:*` en actor, targets y party existen en el pack
- *   - `npc:*` que no esta en el pack es advertencia (puede vivir en dm/)
+ *   - `npc:*` que no esta en el pack es advertencia (puede vivir en gm/)
  *   - `rollRefs` y `discovery.payload.sourceEvent` apuntan a ids anteriores
  *   - `secret_revealed.payload.secretId` existe en el pack
  */
@@ -156,7 +156,7 @@ function checkReferences(events: CampaignEvent[], pack: LoadedPack | undefined, 
         if (kind === 'character' && !pack.characters.has(id)) {
           issues.push({ level: 'error', path: where, message: `${ref} no existe en el pack` })
         } else if (kind === 'npc' && !pack.npcs.has(id)) {
-          issues.push({ level: 'warning', path: where, message: `${ref} no esta en el pack (puede vivir en las notas del DM)` })
+          issues.push({ level: 'warning', path: where, message: `${ref} no esta en el pack (puede vivir en las notas del GM)` })
         } else if (kind === 'location' && !pack.locations.has(id)) {
           issues.push({ level: 'warning', path: where, message: `${ref} no esta en el pack` })
         }

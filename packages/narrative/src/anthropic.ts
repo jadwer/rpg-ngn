@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { DMProbe } from './provider.js'
-import { ModelDMProvider, type ModelDMOptions, type ModelPrompt, type ModelReply, type ModelTransport } from './model-dm.js'
+import type { GMProbe } from './provider.js'
+import { ModelGMProvider, type ModelGMOptions, type ModelPrompt, type ModelReply, type ModelTransport } from './model-gm.js'
 
 /**
  * Lo minimo que el transporte usa del SDK `@anthropic-ai/sdk`. Un cliente
@@ -15,7 +15,7 @@ export interface AnthropicClientLike {
   }
 }
 
-export interface AnthropicProviderOptions extends ModelDMOptions {
+export interface AnthropicProviderOptions extends ModelGMOptions {
   model: string
   credential: string
   client?: AnthropicClientLike
@@ -85,7 +85,7 @@ export class AnthropicTransport implements ModelTransport {
     return { finish, inputTokens, outputTokens }
   }
 
-  async probe(): Promise<DMProbe> {
+  async probe(): Promise<GMProbe> {
     const info = await this.client.models.retrieve(this.model)
     return { ok: true, model: info.id, message: `Anthropic: ${info.display_name} disponible` }
   }
@@ -100,6 +100,6 @@ function acceptsEffort(model: string): boolean {
   return !/haiku/i.test(model)
 }
 
-export function createAnthropicProvider(options: AnthropicProviderOptions): ModelDMProvider {
-  return new ModelDMProvider(new AnthropicTransport(options), options.credential, options)
+export function createAnthropicProvider(options: AnthropicProviderOptions): ModelGMProvider {
+  return new ModelGMProvider(new AnthropicTransport(options), options.credential, options)
 }

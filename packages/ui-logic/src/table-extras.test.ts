@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { dialogue, narration } from './blocks.js'
-import { holdReleaseMs, latestNarrationStart, modelLabel, settleSchedule, tableDmText } from './table-extras.js'
+import { holdReleaseMs, latestNarrationStart, modelLabel, settleSchedule, tableGmText } from './table-extras.js'
 
 const player = { ref: 'character:narivyl', name: 'Narivyl', portrait: null }
 const npc = { ref: 'npc:tomas', name: 'Tomás', portrait: null }
@@ -24,9 +24,9 @@ describe('con que narra la mesa', () => {
   })
 
   it('dice quien paga y cuantos turnos buenos quedan', () => {
-    expect(tableDmText({ source: 'own', kind: 'anthropic', model: 'claude-sonnet-5', firstTurnsLeft: null })).toContain('tu propia clave')
-    expect(tableDmText({ source: 'quota', kind: 'anthropic', model: 'claude-sonnet-5', firstTurnsLeft: 12 })).toContain('quedan 12 turnos con este modelo')
-    expect(tableDmText({ source: 'quota', kind: 'anthropic', model: 'claude-haiku-4-5-20251001', firstTurnsLeft: 0 })).toBe('Narra Claude Haiku 4.5 con tu cupo. Con tu propia clave narra el modelo que elijas.')
+    expect(tableGmText({ source: 'own', kind: 'anthropic', model: 'claude-sonnet-5', firstTurnsLeft: null })).toContain('tu propia clave')
+    expect(tableGmText({ source: 'quota', kind: 'anthropic', model: 'claude-sonnet-5', firstTurnsLeft: 12 })).toContain('quedan 12 turnos con este modelo')
+    expect(tableGmText({ source: 'quota', kind: 'anthropic', model: 'claude-haiku-4-5-20251001', firstTurnsLeft: 0 })).toBe('Narra Claude Haiku 4.5 con tu cupo. Con tu propia clave narra el modelo que elijas.')
   })
 })
 

@@ -29,7 +29,7 @@ export interface TableMember {
   characterId: string | null
   userId: string | null
   userName: string | null
-  /** false cuando tuvo que irse: no se le espera para cerrar el turno y el DM lo aparta de la escena. */
+  /** false cuando tuvo que irse: no se le espera para cerrar el turno y el GM lo aparta de la escena. */
   present?: boolean
 }
 
@@ -41,9 +41,9 @@ export interface TableSummary {
   ruleset: string
   status: string
   oneShot: boolean
-  /** `settings.premise`: la premisa que el anfitrion escribio y el DM usa como punto de partida. */
+  /** `settings.premise`: la premisa que el anfitrion escribio y el GM usa como punto de partida. */
   premise: string | null
-  /** Ajustes crudos de la mesa (premisa, proveedor del DM); `providerChoice` y `withProvider` los interpretan. */
+  /** Ajustes crudos de la mesa (premisa, proveedor del GM); `providerChoice` y `withProvider` los interpretan. */
   settings: Record<string, unknown>
   /** Viene con `include=campaign`; null si la mesa no tiene campaña. */
   campaignId: string | null
@@ -119,7 +119,7 @@ export interface NewTable {
   ruleset: string
   /** Se guarda en `settings.premise` si viene con texto. */
   premise?: string | null | undefined
-  /** Otros ajustes de la mesa (por ejemplo `provider` para el DM scripted con guion). */
+  /** Otros ajustes de la mesa (por ejemplo `provider` para el GM scripted con guion). */
   settings?: Record<string, unknown> | undefined
 }
 
@@ -155,7 +155,7 @@ export interface FriendshipRecord {
 
 export type TurnStatus = 'open' | 'closing' | 'resolving' | 'resolved'
 
-/** Lo que el DM pidio tirar: el dado, para que y por que. No dice como se pinta. */
+/** Lo que el GM pidio tirar: el dado, para que y por que. No dice como se pinta. */
 export interface PendingRollRequest {
   die: string
   kind: 'skill' | 'social' | 'attack' | 'save' | 'other'
@@ -202,7 +202,7 @@ export interface TableViewer {
   memberId: number
   role: MemberRole
   characterId: string | null
-  /** Personalidad que este jugador escribio para su personaje; solo la ve el y el DM. */
+  /** Personalidad que este jugador escribio para su personaje; solo la ve el y el GM. */
   persona?: string | null
 }
 
@@ -221,7 +221,7 @@ export interface TableState {
   away: Presence[]
   /** Si a quien consulta le falta tirar la Fortuna de esta sesion (la tira el jugador, el numero lo saca la API). */
   fortune: { pending: boolean }
-  /** La tirada que el DM pidio al personaje de quien consulta en este turno, si la hay y aun no la tiro (modos `dice` y `table`). */
+  /** La tirada que el GM pidio al personaje de quien consulta en este turno, si la hay y aun no la tiro (modos `dice` y `table`). */
   rolls: { pending: PendingRollRequest | null }
   /** Turnos de cupo o creditos que le quedan a la mesa; null si no consume (clave propia). */
   /** Turnos de la mesa (cubeta gratuita mas reserva) y cuando entra el siguiente gratuito. */
