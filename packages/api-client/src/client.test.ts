@@ -72,8 +72,9 @@ describe('login y perfil', () => {
   })
 
   it('el perfil aplana el recurso JSON:API y manda el Bearer', async () => {
-    const { api, calls } = client({ 'GET /api/v1/profile': { body: { data: { type: 'users', id: '4', attributes: { name: 'Jaz', email: 'jaz@example.com', role: 'customer' } } } } })
-    expect(await api.profile()).toEqual({ id: '4', name: 'Jaz', email: 'jaz@example.com', role: 'customer' })
+    const { api, calls } = client({ 'GET /api/v1/profile': { body: { data: { type: 'users', id: '4', attributes: { name: 'Jaz', email: 'jaz@example.com', role: 'customer', emailVerified: false } } } } })
+    // emailVerified dice si puede ser anfitriona (hace falta el correo confirmado).
+    expect(await api.profile()).toEqual({ id: '4', name: 'Jaz', email: 'jaz@example.com', role: 'customer', emailVerified: false })
     expect(calls[0]?.init.headers['Authorization']).toBe('Bearer tok')
     expect(calls[0]?.init.headers['Accept']).toBe('application/json')
   })

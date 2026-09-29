@@ -106,6 +106,11 @@ export const COUNTDOWN_SECONDS = 10
 /** Lo que el anfitrion puede elegir (Gabino, 27-09: diez segundos se hacian largos). 0 es cerrar al completarse. */
 export const COUNTDOWN_OPTIONS: readonly number[] = [0, 3, 5, 10, 15]
 
+/** Por que no se puede elegir la cuenta atras: la fija el plan gratuito del anfitrion. */
+export function countdownFixedHint(seconds: number): string {
+  return `En el plan gratuito la mesa narra a los ${seconds} s. Con un plan de pago la eliges.`
+}
+
 /** La cuenta atras de la mesa (`settings.countdown`); la de por omision si no eligio o si el valor no vale. */
 export function countdownSecondsOf(settings: Record<string, unknown> | null | undefined): number {
   const value = settings?.['countdown']

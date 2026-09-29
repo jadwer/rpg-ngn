@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTDOWN_OPTIONS, COUNTDOWN_SECONDS, countdown, countdownLabel, countdownLine, countdownSecondsOf, withCountdown, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
+import { COUNTDOWN_OPTIONS, COUNTDOWN_SECONDS, countdown, countdownFixedHint, countdownLabel, countdownLine, countdownSecondsOf, withCountdown, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
 import { turnProgress, type TurnSummary } from './turn.js'
 
 const nameOf = (id: string) => ({ zahira: 'Zahira', calder: 'Calder', kael: 'Kael' })[id] ?? id
@@ -107,5 +107,9 @@ describe('cuenta atras elegida por la mesa', () => {
     expect(withCountdown({ dice: 'dice' }, 5)).toEqual({ dice: 'dice', countdown: 5 })
     expect(countdownLabel(0)).toBe('Sin espera')
     expect(countdownLabel(5)).toBe('5 s')
+  })
+
+  it('explica por que no se elige la cuenta atras en el plan gratuito', () => {
+    expect(countdownFixedHint(10)).toBe('En el plan gratuito la mesa narra a los 10 s. Con un plan de pago la eliges.')
   })
 })

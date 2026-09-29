@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
+import { balanceText, bucketText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
 import { Elements } from '@stripe/react-stripe-js'
 import { type Stripe } from '@stripe/stripe-js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -91,9 +91,16 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       </div>
 
       {balance ? (
-        <p className={lowBalance(balance, ownKey) ? 'error' : 'hint'} style={{ margin: 0 }}>
-          {balanceText(balance, ownKey)}
-        </p>
+        <>
+          {!ownKey && bucketText(balance) ? (
+            <p className="hint" style={{ margin: 0 }}>
+              {bucketText(balance)}
+            </p>
+          ) : null}
+          <p className={lowBalance(balance, ownKey) ? 'error' : 'hint'} style={{ margin: 0 }}>
+            {balanceText(balance, ownKey)}
+          </p>
+        </>
       ) : (
         <p className="hint">Cargando…</p>
       )}

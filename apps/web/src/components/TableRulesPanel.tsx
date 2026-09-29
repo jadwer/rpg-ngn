@@ -1,7 +1,7 @@
 'use client'
 
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { COUNTDOWN_OPTIONS, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 
 interface Props {
@@ -56,7 +56,9 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
   }
 
   const images = sceneImagesOn(table.settings)
-  const seconds = countdownSecondsOf(table.settings)
+  // El plan gratuito fija la cuenta atras del anfitrion: se ve, pero no se elige.
+  const fixed = table.countdownFixed ?? null
+  const seconds = fixed ?? countdownSecondsOf(table.settings)
   const chooseCountdown = (value: number) => {
     if (value === seconds || disabled) return
     void save(withCountdown(table.settings, value), value === 0 ? 'Guardado: se narra al responder el último.' : `Guardado: ${value} segundos antes de narrar.`)
@@ -94,13 +96,13 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
         <span>Cuenta atrás</span>
         <div className="segmented" role="group" aria-label="Cuenta atrás">
           {COUNTDOWN_OPTIONS.map((value) => (
-            <button key={value} type="button" aria-pressed={seconds === value} disabled={disabled} onClick={() => chooseCountdown(value)}>
+            <button key={value} type="button" aria-pressed={seconds === value} disabled={disabled || fixed !== null} onClick={() => chooseCountdown(value)}>
               {countdownLabel(value)}
             </button>
           ))}
         </div>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          {countdownHint(seconds)}
+          {fixed !== null ? countdownFixedHint(fixed) : countdownHint(seconds)}
         </span>
       </div>
 

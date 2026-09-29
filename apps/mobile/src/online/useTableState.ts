@@ -33,6 +33,8 @@ export interface TableSnapshot {
   countdown: number | null
   /** El historial ya llego entero (la API pagina de 200 en 200). */
   caughtUp: boolean
+  /** Turnos de la mesa y cuando llega el siguiente gratuito; null si no gasta cupo. */
+  quota: NonNullable<TableState['quota']> | null
   envelopes: BlockEnvelope[]
   lastBlockId: number
 }
@@ -86,7 +88,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
         if (state.blocks.length > 0) envelopes = [...envelopes, ...state.blocks]
         // El cursor avanza hasta lo leido aunque no llegara nada visible (S9).
         after = Math.max(after, state.lastBlockId)
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, countdown: state.countdown ?? null, caughtUp: state.more !== true, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, countdown: state.countdown ?? null, caughtUp: state.more !== true, quota: state.quota ?? null, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

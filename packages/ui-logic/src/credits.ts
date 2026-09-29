@@ -76,9 +76,13 @@ export function balanceText(balance: CreditBalance, ownKey = false): string {
     const guardados = balance.remainingTurns > 0 ? ` Tienes ${balance.remainingTurns} en reserva por si la quitas.` : ''
     return `Juegas con tu clave: estos turnos no se gastan.${guardados}`
   }
-  if (balance.remainingTurns === 0) return 'Te quedaste sin turnos. Recarga para seguir jugando.'
+  // Con la cubeta gratuita, lo de aqui es la reserva: acabarla no deja sin jugar.
+  const bucket = (balance.bucketCapacity ?? 0) > 0
+  if (balance.remainingTurns === 0) {
+    return bucket ? 'No tienes turnos de reserva: juegas con los gratuitos. Recarga para no esperar.' : 'Te quedaste sin turnos. Recarga para seguir jugando.'
+  }
   const sesiones = Math.floor(balance.remainingTurns / TURNS_PER_SESSION)
-  const turnos = `${balance.remainingTurns} ${balance.remainingTurns === 1 ? 'turno' : 'turnos'}`
+  const turnos = `${balance.remainingTurns} ${balance.remainingTurns === 1 ? 'turno' : 'turnos'}${bucket ? ' de reserva' : ''}`
   if (sesiones < 1) return `Te quedan ${turnos}: para terminar la partida que tienes empezada.`
   return `Te quedan ${turnos}, unas ${sesiones} ${sesiones === 1 ? 'partida' : 'partidas'}.`
 }

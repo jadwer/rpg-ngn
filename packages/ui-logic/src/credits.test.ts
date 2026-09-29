@@ -80,4 +80,10 @@ describe('credits', () => {
     // Una URL rota no tumba la pantalla: simplemente no se ofrece el enlace.
     expect(topUpUrl('no-es-una-url')).toBe('')
   })
+
+  it('con la cubeta gratuita, lo que queda es reserva y acabarla no deja sin jugar', () => {
+    const bucket = { bucketTurns: 2, bucketCapacity: 5, nextTurnAt: null }
+    expect(balanceText({ remainingTurns: 0, usedTurns: 3, ...bucket })).toBe('No tienes turnos de reserva: juegas con los gratuitos. Recarga para no esperar.')
+    expect(balanceText({ remainingTurns: 60, usedTurns: 0, ...bucket })).toContain('60 turnos de reserva')
+  })
 })

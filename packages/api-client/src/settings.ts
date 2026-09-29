@@ -214,8 +214,13 @@ export interface CreditPack {
 }
 
 export interface CreditBalance {
+  /** Los de regalo o comprados, que quedan de reserva. */
   remainingTurns: number
   usedTurns: number
+  /** La cubeta gratuita: se gasta primero y se recarga sola. */
+  bucketTurns?: number
+  bucketCapacity?: number
+  nextTurnAt?: string | null
 }
 
 /** Lo que hace falta para confirmar el pago en el navegador. */

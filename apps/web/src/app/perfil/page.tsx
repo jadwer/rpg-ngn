@@ -6,6 +6,7 @@ import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
 import { OwnKeys } from '../../components/OwnKeys'
 import { RequireSession } from '../../components/RequireSession'
+import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
 import { AppShell } from '../../components/shell/AppShell'
 import { useSession } from '../../lib/session'
 import type { StoredUser } from '../../lib/storage'
@@ -87,6 +88,8 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
   return (
     <div className="page en-shell narrow">
       <h1 className="pagina-titulo">Mi cuenta</h1>
+
+      <VerifyEmailNotice client={client} />
 
       <form className="card stack" onSubmit={(e) => void saveName(e)}>
         <div className="label" style={{ marginTop: 0 }}>

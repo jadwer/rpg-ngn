@@ -35,7 +35,11 @@ interface Props {
   /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
   onRolled: () => void
   /** El anfitrion se quedo sin turnos: el aviso lleva a recargar antes de chocar con el cierre. */
-  outOfTurns: boolean
+  /**
+   * La mesa se quedo sin turnos: null si no. `host` decide si se le ofrece
+   * recargar; `next` dice cuando llega el siguiente turno gratuito.
+   */
+  outOfTurns: { host: boolean; next: string | null } | null
   /** Ideas de accion del DM para este personaje (E10b); el cuadro sigue libre. */
   suggestions: string[]
   /** Si puede pedir "Otras" ideas y en que condiciones. */
@@ -182,7 +186,14 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {outOfTurns ? (
         <div className="error">
-          La mesa se quedó sin turnos. <Link href="/perfil">Recarga en Mi cuenta y créditos</Link> o usa tu propia clave en los ajustes del director.
+          La mesa se quedó sin turnos.{outOfTurns.next ? ` ${outOfTurns.next}` : ''}{' '}
+          {outOfTurns.host ? (
+            <>
+              Para no esperar, <Link href="/perfil">recarga en Mi cuenta y créditos</Link> o usa tu propia clave en los ajustes del director.
+            </>
+          ) : (
+            'Quien creó la mesa puede recargar para no esperar.'
+          )}
         </div>
       ) : null}
       {turn?.error ? <div className="error">El DM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}

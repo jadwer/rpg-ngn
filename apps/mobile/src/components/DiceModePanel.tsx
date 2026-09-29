@@ -1,5 +1,5 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { COUNTDOWN_OPTIONS, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -26,7 +26,9 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
 
   const images = sceneImagesOn(table.settings)
-  const seconds = countdownSecondsOf(table.settings)
+  // El plan gratuito fija la cuenta atras del anfitrion: se ve, pero no se elige.
+  const fixed = table.countdownFixed ?? null
+  const seconds = fixed ?? countdownSecondsOf(table.settings)
 
   const chooseCountdown = (value: number) => {
     if (value === seconds || busy) return
@@ -69,12 +71,12 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
       <Panel title="Cuenta atrás">
         <View style={styles.chips}>
           {COUNTDOWN_OPTIONS.map((value) => (
-            <Pressable key={value} onPress={() => chooseCountdown(value)} style={[styles.chip, seconds === value && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected: seconds === value }}>
+            <Pressable key={value} disabled={fixed !== null} onPress={() => chooseCountdown(value)} style={[styles.chip, seconds === value && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected: seconds === value, disabled: fixed !== null }}>
               <Text style={[styles.chipText, seconds === value && styles.chipTextOn]}>{countdownLabel(value)}</Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.hint}>{countdownHint(seconds)}</Text>
+        <Text style={styles.hint}>{fixed !== null ? countdownFixedHint(fixed) : countdownHint(seconds)}</Text>
       </Panel>
       <Panel title="Ilustraciones">
         <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />

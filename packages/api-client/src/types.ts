@@ -17,6 +17,8 @@ export interface LoginResult {
 
 export interface Profile extends AuthUser {
   role: string | null
+  /** Correo confirmado: hace falta para crear mesas (ser anfitrion). */
+  emailVerified: boolean
 }
 
 export type MemberRole = 'host' | 'player'
@@ -53,6 +55,8 @@ export interface TableSummary {
   lastActivityAt?: string | null
   /** Tope real de ilustraciones por sesion (config de la API); null si la API no lo manda. */
   imagesPerSession?: number | null
+  /** Cuenta atras que fija el plan del anfitrion (10 en el gratuito); null si la elige la mesa. */
+  countdownFixed?: number | null
   /** Viene con `include=members.user`. */
   members: TableMember[]
 }
@@ -220,7 +224,8 @@ export interface TableState {
   /** La tirada que el DM pidio al personaje de quien consulta en este turno, si la hay y aun no la tiro (modos `dice` y `table`). */
   rolls: { pending: PendingRollRequest | null }
   /** Turnos de cupo o creditos que le quedan a la mesa; null si no consume (clave propia). */
-  quota?: { remainingTurns: number } | null
+  /** Turnos de la mesa (cubeta gratuita mas reserva) y cuando entra el siguiente gratuito. */
+  quota?: { remainingTurns: number; bucketTurns?: number; bucketCapacity?: number; nextTurnAt?: string | null } | null
   /** Ideas de accion para el personaje de quien consulta (E10b); vacio si no hay. */
   suggestions: string[]
   /**

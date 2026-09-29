@@ -1,5 +1,5 @@
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, buyablePacks, lowBalance, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
+import { balanceText, bucketText, buyablePacks, lowBalance, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -54,6 +54,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
     <View style={styles.card}>
       <SectionTitle>Tus créditos</SectionTitle>
 
+      {balance && !ownKey && bucketText(balance) ? <Text style={styles.hint}>{bucketText(balance)}</Text> : null}
       {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>Cargando…</Text>}
 
       {venta.length > 0 ? (

@@ -40,6 +40,13 @@ export interface AccountApi {
    * enlace; 422 si el token caduco (60 minutos) o la contraseña no coincide.
    */
   resetPassword(input: { token: string; email: string; password: string; passwordConfirmation: string }): Promise<string>
+  /** Vuelve a mandar el enlace para confirmar el correo (`POST /api/auth/email/verification-notification`). */
+  resendVerification(): Promise<string>
+  /**
+   * Confirma el correo con la consulta del enlace (`id`, `hash`, `expires`,
+   * `signature`). 403 si el enlace esta alterado o caduco.
+   */
+  verifyEmail(link: { id: string; hash: string; expires: string; signature: string }): Promise<string>
   /** Cuenta con ese correo exacto (`GET /api/v1/users/lookup`); null si no existe. Cualquier cuenta puede usarlo. */
   lookupUser(email: string): Promise<AuthUser | null>
   /** Que pasaria al borrar la cuenta: si se puede y que mesas propias lo impiden. */
@@ -99,6 +106,17 @@ export function accountApi(request: Request): AccountApi {
         body: { token: input.token, email: input.email.trim(), password: input.password, password_confirmation: input.passwordConfirmation },
       })
       return data?.message ?? 'Contraseña cambiada. Ya puedes entrar.'
+    },
+
+    async resendVerification() {
+      const { data } = await request<{ message?: string }>('/api/auth/email/verification-notification', { method: 'POST' })
+      return data?.message ?? 'Te enviamos el enlace otra vez.'
+    },
+
+    async verifyEmail(link) {
+      const path = `/api/auth/email/verify/${encodeURIComponent(link.id)}/${encodeURIComponent(link.hash)}?expires=${encodeURIComponent(link.expires)}&signature=${encodeURIComponent(link.signature)}`
+      const { data } = await request<{ message?: string }>(path, { anonymous: true })
+      return data?.message ?? 'Correo confirmado.'
     },
 
     async deletionPreview() {

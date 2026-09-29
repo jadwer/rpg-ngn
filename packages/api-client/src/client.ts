@@ -154,7 +154,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async profile() {
       const { data } = await request<Document<Resource>>('/api/v1/profile')
       const resource = data.data
-      return { id: String(resource.id), name: attr(resource, 'name', ''), email: attr(resource, 'email', ''), role: attr<string | null>(resource, 'role', null) }
+      return { id: String(resource.id), name: attr(resource, 'name', ''), email: attr(resource, 'email', ''), role: attr<string | null>(resource, 'role', null), emailVerified: attr<boolean>(resource, 'emailVerified', true) }
     },
 
     async listTables() {
@@ -411,6 +411,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     sessionOpen,
     lastActivityAt,
     imagesPerSession: attr<number | null>(resource, 'imagesPerSession', null),
+    countdownFixed: attr<number | null>(resource, 'countdownFixed', null),
     members,
   }
 }

@@ -11,6 +11,7 @@ import { Backdrop } from '../../components/Backdrop'
 import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
 import { SectionTitle } from '../../components/Panel'
+import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
 
 interface Props {
   client: ApiClient
@@ -103,6 +104,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         <View style={styles.form}>
         <Text style={styles.pageTitle}>Tu perfil</Text>
         <Text style={styles.subtitle}>Tu cuenta, tus créditos y tus claves</Text>
+        <VerifyEmailNotice client={client} />
         <View style={styles.card}>
           <SectionTitle>Cuenta</SectionTitle>
           <Field label="Nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />

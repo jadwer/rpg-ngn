@@ -15,6 +15,8 @@ interface Props {
   busy: boolean
   /** Ultimo aviso de una accion (409, 422, 403). */
   notice: string | null
+  /** La mesa se quedo sin turnos: el aviso ya armado, o null. */
+  outOfTurns?: string | null
   hasCharacter: boolean
   /** Quien tira en esta mesa; con `engine` los dados de aqui no pintan nada. */
   diceMode: DiceMode
@@ -55,7 +57,7 @@ interface Props {
  * cierre cuando no falta nadie. Mientras el DM narra, solo el aviso. Con el
  * teclado abierto los chips se esconden para que el cuadro y Enviar quepan.
  */
-export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, ideas, onMoreIdeas, autoOpen, onComposingChange }: Props) {
+export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, hasCharacter, diceMode, countdown, seatsLine, onRespond, onClose, onHold, onTyping, onFocusInput, fortunePending, onFortune, onRoll, onRolled, suggestions, ideas, onMoreIdeas, autoOpen, onComposingChange }: Props) {
   const [showIdeas, setShowIdeas] = useState(true)
   // "Otras" ideas: las nuevas se enseñan al momento, sin esperar al sondeo.
   const [freshIdeas, setFreshIdeas] = useState<string[] | null>(null)
@@ -158,6 +160,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {seatsLine && !focused ? <Text style={styles.seats}>{seatsLine}</Text> : null}
 
 
+      {outOfTurns ? <Text style={styles.error}>{outOfTurns}</Text> : null}
       {turn?.error ? <Text style={styles.error}>{`El DM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
 
