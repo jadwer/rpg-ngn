@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
 import { OwnKeys } from '../../components/OwnKeys'
+import { PushToggle } from '../../components/PushToggle'
 import { RequireSession } from '../../components/RequireSession'
 import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
 import { AppShell } from '../../components/shell/AppShell'
@@ -143,6 +144,8 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       </form>
 
       <CreditsPanel client={client} unauthorized={unauthorized} />
+
+      <PushToggle client={client} onUnauthorized={() => unauthorized()} />
 
       <OwnKeys client={client} unauthorized={unauthorized} />
 

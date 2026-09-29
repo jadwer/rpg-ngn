@@ -47,6 +47,12 @@ export interface AccountApi {
    * `signature`). 403 si el enlace esta alterado o caduco.
    */
   verifyEmail(link: { id: string; hash: string; expires: string; signature: string }): Promise<string>
+  /** La llave publica VAPID para suscribir el navegador a push; null si el servidor no tiene push. */
+  pushConfig(): Promise<{ vapidPublicKey: string | null }>
+  /** Registra este dispositivo para recibir avisos (navegador o telefono). */
+  registerPush(input: { kind: 'webpush' | 'expo'; token: string; p256dh?: string; auth?: string; device?: string }): Promise<void>
+  /** Deja de avisar a este dispositivo. */
+  unregisterPush(token: string): Promise<void>
   /** Cuenta con ese correo exacto (`GET /api/v1/users/lookup`); null si no existe. Cualquier cuenta puede usarlo. */
   lookupUser(email: string): Promise<AuthUser | null>
   /** Que pasaria al borrar la cuenta: si se puede y que mesas propias lo impiden. */
@@ -117,6 +123,19 @@ export function accountApi(request: Request): AccountApi {
       const path = `/api/auth/email/verify/${encodeURIComponent(link.id)}/${encodeURIComponent(link.hash)}?expires=${encodeURIComponent(link.expires)}&signature=${encodeURIComponent(link.signature)}`
       const { data } = await request<{ message?: string }>(path, { anonymous: true })
       return data?.message ?? 'Correo confirmado.'
+    },
+
+    async pushConfig() {
+      const { data } = await request<{ data: { vapidPublicKey: string | null } }>('/api/v1/push/config')
+      return data.data
+    },
+
+    async registerPush(input) {
+      await request('/api/v1/push/subscriptions', { method: 'POST', body: input })
+    },
+
+    async unregisterPush(token) {
+      await request('/api/v1/push/subscriptions', { method: 'DELETE', body: { token } })
     },
 
     async deletionPreview() {
