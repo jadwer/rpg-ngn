@@ -109,6 +109,43 @@ export interface SeasonPath {
   worlds: Array<{ packId: string; threshold: number; unlocked: boolean }>
 }
 
+/** Un puesto del camino del pase de descubridor. */
+export interface PassReward {
+  position: number
+  threshold: number
+  /** `item`: premio menor de la coleccion; `world`: una historia; `soon`: historia por anunciar. */
+  kind: 'item' | 'world' | 'soon'
+  label: string
+  description: string | null
+  gallery?: string
+  packId?: string
+  earned: boolean
+}
+
+export interface PassAchievement {
+  code: string
+  label: string
+  description: string
+  points: number
+  progress: number
+  goal: number
+  done: boolean
+}
+
+/** El pase de descubridor de la temporada en curso (sin cuenta, sin progreso). */
+export interface DiscovererPass {
+  season: { code: string; name: string; endsAt: string }
+  chapters: number
+  streak: number
+  playedToday: boolean
+  next: { threshold: number; label: string; missing: number } | null
+  blocks: Array<{ index: number; rewards: PassReward[] }>
+  achievements: PassAchievement[]
+}
+
+/** La coleccion por galeria (marcos, titulos, dados, tarjetas, beneficios). */
+export type Collection = Record<string, Array<{ code: string; label: string; season: string | null; expiresAt: string | null; active: boolean }>>
+
 /** El pase de temporada (E9 3c): precio, lo que se cobra hoy y si ya es tuyo. */
 export interface SeasonPassOffer {
   season: string
@@ -237,6 +274,10 @@ export interface SettingsApi {
   /** Los packs instalados en el servidor. Sustituye a la lista escrita a mano en cada cliente. */
   listPacks(): Promise<PackOption[]>
   /** Explorar mundos (E9): publico; con sesion, cada mundo trae su estado para quien mira. */
+  /** El pase de descubridor; null entre temporadas. */
+  discovererPass(): Promise<DiscovererPass | null>
+  /** La coleccion de la cuenta. */
+  collection(): Promise<Collection>
   catalogWorlds(filters?: CatalogFilters): Promise<{ worlds: CatalogWorldCard[]; genres: string[]; season: SeasonPath | null; pass: SeasonPassOffer | null }>
   catalogWorld(id: string): Promise<CatalogWorldDetail>
   /** Arrancan el pago del pase o de un mundo; lo comprado llega con el webhook. */
@@ -291,6 +332,17 @@ export function settingsApi(request: Request): SettingsApi {
     async listDmPresets() {
       const { data } = await request<{ data: DmPreset[]; meta: { default: string } }>('/api/v1/dm/presets')
       return { presets: data.data, defaultPreset: data.meta.default }
+    },
+
+    async discovererPass() {
+      const { data } = await request<{ data: DiscovererPass | null }>('/api/v1/pass')
+      return data.data
+    },
+
+    async collection() {
+      const { data } = await request<{ data: Collection | unknown[] }>('/api/v1/collection')
+      // Sin nada, PHP manda [] en vez de {}.
+      return Array.isArray(data.data) ? {} : data.data
     },
 
     async catalogWorlds(filters = {}) {

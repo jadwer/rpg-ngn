@@ -1,0 +1,204 @@
+/* Pase de descubridor y coleccion (29-09). Tokens de la paleta (docs/22);
+   primero el telefono (390 px) y en escritorio los 5 premios de un bloque en fila. */
+
+.pase-resumen {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.pase-capitulos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 76px;
+  padding: 8px 10px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.06);
+}
+
+.pase-capitulos b {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--gold-bright);
+}
+
+.pase-capitulos span {
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+}
+
+.pase-textos p {
+  margin: 0 0 4px;
+}
+
+.pase-aviso {
+  color: var(--gold-bright);
+}
+
+.pase-barra {
+  height: 8px;
+  margin: 12px 0 8px;
+  border-radius: 999px;
+  background: var(--panel-3);
+  overflow: hidden;
+}
+
+.pase-barra span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright));
+}
+
+.pase-premios {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .pase-premios {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.pase-premio {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(18, 24, 38, 0.6);
+  opacity: 0.8;
+}
+
+.pase-premio strong {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.pase-premio small {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+
+.pase-premio em {
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  margin-top: auto;
+}
+
+.pase-umbral {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.pase-premio.world {
+  border-color: var(--gold-dim);
+}
+
+.pase-premio.world strong {
+  font-family: var(--font-display);
+  color: var(--gold);
+}
+
+.pase-premio.soon {
+  border-style: dashed;
+}
+
+.pase-premio.ganado {
+  opacity: 1;
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.pase-premio.ganado em {
+  color: var(--gold-bright);
+}
+
+.pase-ver {
+  font-size: 0.8rem;
+  color: var(--nebula, #a78bfa);
+}
+
+.pase-logros {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.pase-logros li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pase-logros li:last-child {
+  border-bottom: 0;
+}
+
+.pase-logros li div {
+  display: flex;
+  flex-direction: column;
+}
+
+.pase-logros small {
+  color: var(--ink-faint);
+}
+
+.pase-puntos {
+  color: var(--gold);
+  font-size: 0.85rem;
+  align-self: center;
+}
+
+.pase-logros em {
+  grid-column: 1 / -1;
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+
+.pase-logros li.hecho strong,
+.pase-logros li.hecho em {
+  color: var(--gold-bright);
+}
+
+.coleccion-lista {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.coleccion-lista li {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border: 1px solid var(--gold-dim);
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.coleccion-lista li small {
+  color: var(--ink-faint);
+}
+
+.coleccion-lista li.vencido {
+  opacity: 0.55;
+  border-color: var(--border);
+}

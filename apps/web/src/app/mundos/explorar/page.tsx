@@ -216,6 +216,9 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
               <b>{season.chapters}</b>
               <span>{season.chapters === 1 ? 'capítulo' : 'capítulos'}</span>
               <small>Has avanzado un {Math.round(progress * 100)}%</small>
+              <Link href="/temporada" className="pase-ver">
+                Ver el pase
+              </Link>
             </>
           ) : (
             <small>Cada turno que juegas es un capítulo. Entra para ver tu avance.</small>
