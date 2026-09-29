@@ -33,7 +33,12 @@ export const PackCatalog = z.strictObject({
   genre: z.string().min(1).max(40),
   /** Tono, en pocas palabras: "aventura", "drama", "romance". */
   tags: z.array(z.string().min(1).max(30)).max(6).default([]),
-  players: z.strictObject({ min: z.number().int().min(1).max(12), max: z.number().int().min(1).max(12) }),
+  /**
+   * Jugadores que admite la historia. 9 es el tope absoluto y solo para packs
+   * contados (oficiales); la plataforma recorta a 6 los de usuario (Gabino,
+   * 29-09).
+   */
+  players: z.strictObject({ min: z.number().int().min(1).max(9), max: z.number().int().min(1).max(9) }),
   duration: z.enum(['corta', 'media', 'larga']),
   /** Duracion estimada de cara al jugador: "10-15 h". */
   hours: z.string().min(1).max(20).optional(),

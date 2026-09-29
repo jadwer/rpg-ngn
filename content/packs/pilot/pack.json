@@ -69,7 +69,7 @@
     ],
     "players": {
       "min": 1,
-      "max": 5
+      "max": 9
     },
     "duration": "larga",
     "hours": "10-15 h",
