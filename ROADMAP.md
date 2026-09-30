@@ -678,7 +678,8 @@ decisiones en `docs/25-plan-administracion.md`.
   - Reembolsar (`payments.refund` de atomo/payments, god, admin): endpoint propio que guarda el motivo y llama a `PaymentService::refund`; el efecto sigue llegando por el webhook `charge.refunded`
   - Suspender y reactivar una cuenta (`users.suspend` de atomo-user, god y admin): estado `suspended`, tokens y sesiones cerrados, y `EnsureAccountIsActive` corta lo que siga abierto
 - [x] **Diseño del panel** (30-09, platform `d6ab6ed`): plantilla de diseño neutra en Atomo (`docs/DESIGN.md` de la plataforma, regla 12 de su CLAUDE.md): tablas que pasan a tarjetas en el telefono, modal como hoja, bloques de pagina y marco nuevo; el panel es la referencia viva. La identidad visual propia del panel, si se quiere, sale de un designboard de Gabino
-- [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
+- [x] **E11c. Soporte** (30-09, platform `33b9880`, API `f761f17`, web `ed86961`, desplegado): `atomo/support` generico (reportes con estado, prioridad, responsable, notas internas y enlace a lo que tratan) y `@atomo/support-ui` (la cola del panel); en la web, Reportar un problema en la mesa y en Mi cuenta, Mis reportes y la conversacion; correo al responder o resolver
+- [ ] Soporte en la app movil y adjuntar capturas (con atomo-media)
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
 ## Entrega 12: Modelo de monetizacion (platicado el 2026-09-29)
@@ -692,6 +693,7 @@ El modelo completo (free, temporadas, pases, suscripciones, social) vive en el r
 - [ ] Pase y coleccion en la app (con el APK de los avisos)
 - [ ] La tirada y la accion van en el mismo turno
 - [x] El tope de jugadores lo pone la historia (29-09): `catalog.players.max`, con techo de 9 en packs oficiales y 6 en los de usuario; Los Nueve Viajeros pasa a 9
+- [x] **Bendicion del bardo** (30-09, API `f761f17`, web `ed86961`, desplegada): 30 dias acumulables hasta 180, 10 turnos al comprar y 4 al dia desde las 3 am (aviso a pantalla completa que solo se cierra con Recoger), reembolsable hasta la segunda recogida. Falta: el aviso en la app, el arte del tema de cada temporada y la clausula en los terminos
 - [ ] Rehacer la ultima accion (de paga)
 - [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
 - [ ] Colaboraciones con streamers: despues de ajustar el producto base
