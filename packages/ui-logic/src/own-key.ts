@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { OwnKey } from '@rpg-ngn/api-client'
 import { describePreset } from './gm-presets.js'
 
@@ -28,10 +29,10 @@ export function ownKeyLabel(key: OwnKey): string {
  * que pasa si la pone.
  */
 export function ownKeyStatus(key: OwnKey): string {
-  if (!key.configured) return 'Sin clave propia. Tus mesas usan el GM del servidor.'
-  const cola = key.hint ? ` terminada en ${key.hint}` : ''
-  const modelo = key.model ? `, modelo ${key.model}` : ''
-  return `Clave guardada${cola}${modelo}. Tus mesas la usan y no gastan cupo.`
+  if (!key.configured) return t('account.ownKey.none')
+  const cola = key.hint ? t('account.ownKey.endingIn', { hint: key.hint }) : ''
+  const modelo = key.model ? t('account.ownKey.model', { model: key.model }) : ''
+  return t('account.ownKey.saved', { ending: cola, model: modelo })
 }
 
 /** Si ya hay alguna clave propia puesta. */
@@ -47,15 +48,15 @@ export function hasOwnKey(keys: readonly OwnKey[]): boolean {
  */
 export function ownKeyProblem(credential: string): string | null {
   const limpia = credential.trim()
-  if (limpia === '') return 'Escribe tu clave.'
-  if (limpia.length < 12) return 'Esa clave es demasiado corta.'
-  if (/\s/.test(limpia)) return 'La clave no debe llevar espacios ni saltos de línea.'
+  if (limpia === '') return t('account.ownKey.empty')
+  if (limpia.length < 12) return t('account.ownKey.tooShort')
+  if (/\s/.test(limpia)) return t('account.ownKey.spaces')
   return null
 }
 
 /** Lo que se avisa antes de quitar una clave. */
 export function removeOwnKeyWarning(key: OwnKey): string {
-  return `Se borrará tu clave de ${describePreset(key.preset)}. Tus mesas volverán al GM del servidor y gastarán cupo.`
+  return t('account.ownKey.removeWarning', { preset: describePreset(key.preset) })
 }
 
 /**
@@ -65,6 +66,6 @@ export function removeOwnKeyWarning(key: OwnKey): string {
  */
 export function presetAvailability(preset: { name: string; configured: boolean }, ownKeys: readonly Pick<OwnKey, 'preset' | 'configured'>[]): { selectable: boolean; note: string | null } {
   if (preset.configured) return { selectable: true, note: null }
-  if (ownKeys.some((k) => k.preset === preset.name && k.configured)) return { selectable: true, note: 'con tu clave' }
-  return { selectable: false, note: 'sin clave en el servidor: guarda la tuya en Mi cuenta' }
+  if (ownKeys.some((k) => k.preset === preset.name && k.configured)) return { selectable: true, note: t('account.ownKey.withYourKey') }
+  return { selectable: false, note: t('account.ownKey.noServerKey') }
 }

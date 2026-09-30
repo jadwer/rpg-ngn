@@ -20,6 +20,8 @@ void instance.init({
   interpolation: { escapeValue: false },
   initAsync: false,
   returnNull: false,
+  // Sin el anuncio que i18next imprime en consola al arrancar.
+  showSupportNotice: false,
 })
 
 /** El texto de una clave en el idioma actual; `{{nombre}}` se sustituye con `vars`. */

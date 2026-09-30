@@ -1,4 +1,4 @@
-import { pitchFor, utteranceLanguage, VOICE_SAMPLE, type SpeechEngine, type VoiceSettings } from '@rpg-ngn/ui-logic'
+import { pitchFor, utteranceLanguage, voiceSample, type SpeechEngine, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import * as Speech from 'expo-speech'
 import { Platform } from 'react-native'
 import { voicesFor, type VoiceInfo } from './voices'
@@ -64,7 +64,7 @@ export async function listVoices(lang: string): Promise<VoiceInfo[] | null> {
 /** Una frase corta con la voz y el tono del narrador, para elegir de oido. */
 export function previewVoice(voice: VoiceInfo | null, settings: VoiceSettings): void {
   void Speech.stop()
-  Speech.speak(VOICE_SAMPLE, {
+  Speech.speak(voiceSample(), {
     language: voice?.language ?? utteranceLanguage(settings.lang),
     ...(voice ? { voice: voice.id } : {}),
     rate: settings.rate,

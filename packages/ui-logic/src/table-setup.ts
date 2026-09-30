@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { Friendship, MemberRole, SessionSummary, TableMember, TableSummary } from '@rpg-ngn/api-client'
 import type { Character, LoadedPack } from '@rpg-ngn/content'
 import type { DiceMode } from './dice-mode.js'
@@ -118,46 +119,46 @@ export function seatPowers(role: MemberRole | null | undefined): SeatPowers {
 
 /** Como se presenta un asiento en una lista: nombre, y su papel o personaje. */
 export function memberLine(member: TableMember, nameOf: (id: string) => string): string {
-  const who = member.userName ?? 'Alguien'
+  const who = member.userName ?? t('table.members.someone')
   const character = member.characterId ? nameOf(member.characterId) : null
-  const away = member.present === false ? ' (ausente)' : ''
-  if (member.role === 'host') return (character ? `${who}, anfitrión, juega a ${character}` : `${who}, anfitrión`) + away
-  return (character ? `${who} juega a ${character}` : `${who}, sin personaje`) + away
+  const away = member.present === false ? t('table.members.absent') : ''
+  if (member.role === 'host') return (character ? t('table.members.hostPlays', { who, character }) : t('table.members.host', { who })) + away
+  return (character ? t('table.members.plays', { who, character }) : t('table.members.noCharacter', { who })) + away
 }
 
 /** Lo que el usuario es en una mesa, para la tarjeta de la lista. */
 export function seatLabel(me: TableMember | null, nameOf: (id: string) => string): string {
-  if (!me) return 'No eres miembro de esta mesa'
+  if (!me) return t('table.members.notMember')
   const character = me.characterId ? nameOf(me.characterId) : null
-  if (me.role === 'host') return character ? `Eres el anfitrión y juegas a ${character}` : 'Eres el anfitrión, sin personaje'
-  return character ? `Juegas a ${character}` : 'Sin personaje asignado'
+  if (me.role === 'host') return character ? t('table.members.youHostPlay', { character }) : t('table.members.youHost')
+  return character ? t('table.members.youPlay', { character }) : t('table.members.youNone')
 }
 
 /** Un miembro ajeno en la tarjeta de la mesa: `Jaz (anfitrión): Zahira`. */
 export function memberTag(member: TableMember, nameOf: (id: string) => string): string {
-  return `${member.userName ?? '?'}${member.role === 'host' ? ' (anfitrión)' : ''}${member.characterId ? `: ${nameOf(member.characterId)}` : ''}`
+  return `${member.userName ?? '?'}${member.role === 'host' ? t('table.members.hostTag') : ''}${member.characterId ? `: ${nameOf(member.characterId)}` : ''}`
 }
 
 /** Subtitulo de la cabecera de la mesa: sesion, momento del mundo, turno y quien falta. */
 export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
-  const parts = [input.sessionTitle ?? (input.loading ? 'Conectando...' : 'Sin sesión abierta')]
+  const parts = [input.sessionTitle ?? (input.loading ? t('table.members.connecting') : t('table.members.noSession'))]
   if (input.worldTime) parts.push(input.worldTime)
   if (input.turnNumber !== null) {
-    parts.push(`Turno ${input.turnNumber}`)
-    if (input.pending.length > 0 && !input.narrating) parts.push(`faltan ${input.pending.join(', ')}`)
+    parts.push(t('table.members.turn', { number: input.turnNumber }))
+    if (input.pending.length > 0 && !input.narrating) parts.push(t('table.members.missing', { names: input.pending.join(', ') }))
   }
   return parts.join(' · ')
 }
 
 /** Titulo de la ventana o pestaña: mesa y sesion. */
 export function tableTitle(tableName: string, sessionCode: string | null, appName = 'rpg-ngn'): string {
-  return `${tableName}${sessionCode ? `, sesión ${sessionCode}` : ''} | ${appName}`
+  return `${tableName}${sessionCode ? t('table.members.session', { code: sessionCode }) : ''} | ${appName}`
 }
 
 /** Texto cuando la mesa no tiene bloques todavia, segun quien mira. */
 export function emptyTableText(hasSession: boolean, host: boolean): string {
-  if (hasSession) return 'El GM todavía no ha narrado. Cuando la mesa cierre el primer turno, la narración aparece aquí.'
-  return host ? 'Para empezar, pulsa Iniciar partida. El GM presenta la escena y abre el primer turno.' : 'Cuando el anfitrión inicie la partida, el GM presenta la escena aquí y podrás responder.'
+  if (hasSession) return t('table.start.emptyWithSession')
+  return host ? t('table.start.emptyHost') : t('table.start.emptyPlayer')
 }
 
 export interface StartCard {
@@ -177,31 +178,31 @@ export interface StartCard {
  * sesion abierta no hay tarjeta: la narracion manda.
  */
 const DICE_STEP: Record<DiceMode, string> = {
-  engine: 'Los dados los tira el servidor: si tu acción tiene riesgo, el resultado sale en la narración.',
-  dice: 'Si tu acción tiene riesgo, el director te pide tirar: sueltas el dado en la mesa y el número lo pone el servidor.',
-  table: 'Los dados se tiran en la mesa física y cada quien escribe su resultado.',
+  get engine() { return t('table.start.diceEngine') },
+  get dice() { return t('table.start.diceDice') },
+  get table() { return t('table.start.diceTable') },
 }
 
 export function startCard(input: { hasSession: boolean; host: boolean; hostName: string | null; nextCode: string; firstSession: boolean; dice: DiceMode }): StartCard | null {
   if (input.hasSession) return null
-  const host = input.hostName ?? 'el anfitrión'
+  const host = input.hostName ?? t('table.start.theHost')
   const steps = [
-    'El GM presenta la escena y abre el turno. Escribe lo que tu personaje hace o dice; los demás no ven tu texto, solo lo que el GM narra.',
-    'Cuando todos hayan respondido, el anfitrión cierra el turno y el GM narra las consecuencias.',
+    t('table.start.step1'),
+    t('table.start.step2'),
     DICE_STEP[input.dice],
-    'Si te tienes que ir, pulsa "Me tengo que ir": el GM aparta a tu personaje sin matarlo y la mesa no te espera.',
+    t('table.start.step4'),
   ]
   if (input.host) {
     return {
-      title: input.firstSession ? 'La mesa está lista' : 'La sesión anterior terminó',
-      text: input.firstSession ? 'Cuando todos tengan personaje, inicia la partida. El GM presenta la escena, explica cómo se juega y abre el primer turno.' : `Inicia la sesión ${input.nextCode}: el GM retoma donde se quedaron y abre el primer turno.`,
+      title: input.firstSession ? t('table.start.readyTitle') : t('table.start.endedTitle'),
+      text: input.firstSession ? t('table.start.readyText') : t('table.start.nextText', { code: input.nextCode }),
       steps,
-      action: input.firstSession ? 'Iniciar partida' : `Iniciar sesión ${input.nextCode}`,
+      action: input.firstSession ? t('table.start.startGame') : t('table.start.startSession', { code: input.nextCode }),
     }
   }
   return {
-    title: input.firstSession ? 'Esperando a que empiece la partida' : 'Esperando la siguiente sesión',
-    text: `Elige tu personaje si aún no lo tienes. ${host.charAt(0).toUpperCase()}${host.slice(1)} inicia la partida y el GM presenta la escena aquí.`,
+    title: input.firstSession ? t('table.start.waitingTitle') : t('table.start.waitingNextTitle'),
+    text: t('table.start.waitingText', { host: `${host.charAt(0).toUpperCase()}${host.slice(1)}` }),
     steps,
     action: null,
   }
@@ -211,13 +212,15 @@ export function startCard(input: { hasSession: boolean; host: boolean; hostName:
 export const PERSONA_MAX = 600
 
 /** Las seis preguntas que la mesa sugiere para escribir la personalidad; sirven de placeholder. */
-export const PERSONA_TEMPLATE = 'Cómo soy: ...\nLo que busco: ...\nLo que no soporto: ...\nCómo coqueteo (o cómo trato a la gente): ...\nMi defecto: ...\nMi secreto: ...'
+export function personaTemplate(): string {
+  return t('table.persona.template')
+}
 
 /** La personalidad lista para enviar: recortada, null si esta vacia, o un aviso si se pasa del tope. */
 export function cleanPersona(text: string): { persona: string | null; error: string | null } {
   const value = text.replace(/\r\n/g, '\n').trim()
   if (value === '') return { persona: null, error: null }
-  if (value.length > PERSONA_MAX) return { persona: null, error: `Demasiado largo: ${value.length} caracteres, y caben ${PERSONA_MAX}.` }
+  if (value.length > PERSONA_MAX) return { persona: null, error: t('table.persona.tooLong', { length: value.length, max: PERSONA_MAX }) }
   return { persona: value, error: null }
 }
 

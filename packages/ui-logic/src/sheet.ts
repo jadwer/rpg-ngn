@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { Ability, Attack, Character, StatKey } from '@rpg-ngn/content'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { CharacterVisibility } from './veil.js'
@@ -8,7 +9,15 @@ import type { CharacterVisibility } from './veil.js'
  * sesion. Los componentes pintan esto sin volver a decidir que se muestra.
  */
 
-export const STAT_LABELS: Record<StatKey, string> = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' }
+// Getters: se leen en el idioma vigente (i18n): STR, DEX... en ingles.
+export const STAT_LABELS: Record<StatKey, string> = {
+  get fue() { return t('table.sheet.fue') },
+  get des() { return t('table.sheet.des') },
+  get con() { return t('table.sheet.con') },
+  get int() { return t('table.sheet.int') },
+  get sab() { return t('table.sheet.sab') },
+  get car() { return t('table.sheet.car') },
+}
 export const STAT_ORDER: readonly StatKey[] = ['fue', 'des', 'con', 'int', 'sab', 'car']
 
 export interface StatView {
@@ -99,7 +108,7 @@ export function characterSheet(character: Character, options: SheetOptions): She
 
 /** Texto de uso de una capacidad, como lo pinta apps/sheets. */
 export function abilityUsage(ability: Ability): string | null {
-  if (ability.uses === null) return 'a voluntad'
+  if (ability.uses === null) return t('table.sheet.atWill')
   if (ability.uses === undefined) return null
-  return `${ability.uses} por ${ability.per ?? 'descanso'}`
+  return t('table.sheet.usesPer', { uses: ability.uses, per: ability.per ?? t('table.sheet.rest') })
 }

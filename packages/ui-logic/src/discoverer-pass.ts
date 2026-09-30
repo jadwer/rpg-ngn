@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { DiscovererPass, PassAchievement, PassReward } from '@rpg-ngn/api-client'
 
 /**
@@ -6,13 +7,13 @@ import type { DiscovererPass, PassAchievement, PassReward } from '@rpg-ngn/api-c
  */
 
 /** Galerias de la coleccion, en el orden en que se muestran. */
-export const COLLECTION_GALLERIES: ReadonlyArray<{ code: string; label: string }> = [
-  { code: 'marcos', label: 'Marcos de retrato' },
-  { code: 'titulos', label: 'Títulos' },
-  { code: 'dados', label: 'Dados' },
-  { code: 'tarjetas', label: 'Tarjetas de personaje' },
-  { code: 'beneficios', label: 'Beneficios' },
-]
+// Getters: el nombre de cada galeria en el idioma vigente (i18n).
+export const COLLECTION_GALLERIES: ReadonlyArray<{ code: string; label: string }> = (['marcos', 'titulos', 'dados', 'tarjetas', 'beneficios'] as const).map((code) => ({
+  code,
+  get label() {
+    return t(`worlds.galleries.${code}`)
+  },
+}))
 
 export function galleryLabel(code: string): string {
   return COLLECTION_GALLERIES.find((g) => g.code === code)?.label ?? code
@@ -20,20 +21,20 @@ export function galleryLabel(code: string): string {
 
 /** "12 capítulos", "1 capítulo". */
 export function chaptersLabel(n: number): string {
-  return `${n} ${n === 1 ? 'capítulo' : 'capítulos'}`
+  return n === 1 ? t('worlds.chapterOne') : t('worlds.chapterMany', { count: n })
 }
 
 /** La racha, con el aviso de lo que se pierde si no juega hoy. */
 export function streakText(pass: Pick<DiscovererPass, 'streak' | 'playedToday'>): string {
-  if (pass.streak === 0) return 'Juega hoy para empezar una racha: cada día seguido vale más.'
-  const dias = pass.streak === 1 ? '1 día' : `${pass.streak} días seguidos`
-  return pass.playedToday ? `Racha de ${dias}. Vuelve mañana para no perderla.` : `Racha de ${dias}. Juega hoy o la pierdes.`
+  if (pass.streak === 0) return t('worlds.pass.noStreak')
+  const dias = pass.streak === 1 ? t('worlds.pass.oneDay') : t('worlds.pass.days', { count: pass.streak })
+  return pass.playedToday ? t('worlds.pass.streakKeep', { days: dias }) : t('worlds.pass.streakRisk', { days: dias })
 }
 
 /** "Te faltan 6 capítulos para Marco de plata." */
 export function nextRewardText(pass: Pick<DiscovererPass, 'next'>): string {
-  if (!pass.next) return 'Tienes todo el camino de la temporada.'
-  return `Te ${pass.next.missing === 1 ? 'falta' : 'faltan'} ${chaptersLabel(pass.next.missing)} para ${pass.next.label}.`
+  if (!pass.next) return t('worlds.pass.allDone')
+  return t(pass.next.missing === 1 ? 'worlds.pass.nextOne' : 'worlds.pass.nextMany', { chapters: chaptersLabel(pass.next.missing), label: pass.next.label })
 }
 
 /** Cuanto del camino lleva (0 a 1), contra el umbral mas alto con premio anunciado. */
@@ -45,16 +46,16 @@ export function pathProgress(pass: Pick<DiscovererPass, 'chapters' | 'blocks'>):
 
 /** Lo que dice la tarjeta de un premio bajo su nombre. */
 export function rewardStatus(reward: PassReward, chapters: number): string {
-  if (reward.earned) return reward.kind === 'world' ? 'Tuya' : 'Ganado'
-  if (reward.kind === 'soon') return 'Por anunciar'
+  if (reward.earned) return reward.kind === 'world' ? t('worlds.pass.yoursWorld') : t('worlds.pass.earned')
+  if (reward.kind === 'soon') return t('worlds.pass.soon')
   // El umbral ya va arriba en la tarjeta: aqui, lo que falta.
   const falta = Math.max(0, reward.threshold - chapters)
-  return falta === 0 ? 'Listo al jugar tu siguiente turno' : `${falta === 1 ? 'Falta' : 'Faltan'} ${chaptersLabel(falta)}`
+  return falta === 0 ? t('worlds.pass.readyNext') : t(falta === 1 ? 'worlds.pass.missingOne' : 'worlds.pass.missingMany', { chapters: chaptersLabel(falta) })
 }
 
 /** "3 de 5" o "Logrado". */
 export function achievementProgress(a: PassAchievement): string {
-  return a.done ? 'Logrado' : `${a.progress} de ${a.goal}`
+  return a.done ? t('worlds.pass.achieved') : t('worlds.pass.progress', { progress: a.progress, goal: a.goal })
 }
 
 /** Dias que quedan de temporada, redondeando hacia arriba. */

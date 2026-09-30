@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 
@@ -80,8 +81,8 @@ export function mapEdges(pins: readonly MapPin[]): Array<{ from: MapPin; to: Map
 export function whereEveryoneIs(view: MapView | null, nameOf: (id: string) => string): string {
   if (!view) return ''
   const partes = view.pins.filter((p) => p.who.length > 0).map((p) => `${p.name}: ${p.who.map(nameOf).join(', ')}`)
-  if (view.offMap.length) partes.push(`De camino: ${view.offMap.map(nameOf).join(', ')}`)
-  return partes.length ? partes.join(' · ') : 'Nadie situado en el mapa todavía'
+  if (view.offMap.length) partes.push(t('table.map.onTheWay', { names: view.offMap.map(nameOf).join(', ') }))
+  return partes.length ? partes.join(' · ') : t('table.map.nobody')
 }
 
 /**

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { CatalogWorldCard, SeasonPassOffer, WorldState } from '@rpg-ngn/api-client'
 import { packPrice } from './credits.js'
 
@@ -28,22 +29,22 @@ export function cardView(world: Pick<CatalogWorldCard, 'state' | 'origin' | 'cat
   const base = { byline, badge: null, progress: null, hint: null } as const
   switch (world.state as WorldState) {
     case 'gratis':
-      return { ...base, price: 'Gratis', action: 'jugar', label: 'Jugar' }
+      return { ...base, price: t('worlds.free'), action: 'jugar', label: t('worlds.play') }
     case 'tuyo':
-      return { ...base, price: null, badge: world.source === 'pase' ? 'Incluido en tu pase' : 'Ya es tuyo', action: 'jugar', label: 'Jugar' }
+      return { ...base, price: null, badge: world.source === 'pase' ? t('worlds.inYourPass') : t('worlds.yours'), action: 'jugar', label: t('worlds.play') }
     case 'pase':
-      return { ...base, price: null, badge: 'Incluido en tu pase', action: 'jugar', label: 'Jugar' }
+      return { ...base, price: null, badge: t('worlds.inYourPass'), action: 'jugar', label: t('worlds.play') }
     case 'venta':
-      return { ...base, price: world.price ? packPrice(world.price) : null, action: 'comprar', label: 'Comprar' }
+      return { ...base, price: world.price ? packPrice(world.price) : null, action: 'comprar', label: t('worlds.buy') }
     case 'camino': {
       const path = world.path
       const left = path ? Math.max(0, path.threshold - path.have) : null
-      return { ...base, price: null, action: 'bloqueado', label: 'Ver detalles', progress: path ? Math.min(1, path.have / Math.max(1, path.threshold)) : 0, hint: left !== null ? `Se desbloquea en ${left} ${left === 1 ? 'capítulo' : 'capítulos'} o con el pase` : 'Se desbloquea jugando o con el pase' }
+      return { ...base, price: null, action: 'bloqueado', label: t('worlds.details'), progress: path ? Math.min(1, path.have / Math.max(1, path.threshold)) : 0, hint: left !== null ? (left === 1 ? t('worlds.unlockOne') : t('worlds.unlockMany', { count: left })) : t('worlds.unlockPlaying') }
     }
     case 'comunidad':
-      return { ...base, price: 'Gratis', action: 'anadir', label: 'Añadir a mis mundos' }
+      return { ...base, price: t('worlds.free'), action: 'anadir', label: t('worlds.addToMine') }
     default:
-      return { ...base, price: null, action: 'detalle', label: 'Ver detalles' }
+      return { ...base, price: null, action: 'detalle', label: t('worlds.details') }
   }
 }
 
@@ -53,7 +54,7 @@ export function playersTag(players: { min: number; max: number }): string {
 }
 
 export function durationLabel(duration: 'corta' | 'media' | 'larga'): string {
-  return { corta: 'Corta', media: 'Media', larga: 'Larga' }[duration]
+  return { corta: t('worlds.short'), media: t('worlds.medium'), larga: t('worlds.long') }[duration]
 }
 
 /**
@@ -80,22 +81,19 @@ export function passView(offer: SeasonPassOffer | null): { price: string; priceL
   return {
     price: packPrice(offer),
     // La linea de precio que pintan web y app, igual en las dos (VAM 26-09, A9).
-    priceLine: offer.owned ? 'Ya es tuyo esta temporada' : `${packPrice(offer)}, pago único`,
-    perks: ['Capítulos x2 toda la temporada', 'Los mundos del camino, abiertos desde ya', 'Hasta 5 mundos propios'],
+    priceLine: offer.owned ? t('worlds.passOwned') : t('worlds.oneTime', { price: packPrice(offer) }),
+    perks: [t('worlds.perkChapters'), t('worlds.perkWorlds'), t('worlds.perkPrivate')],
     owned: offer.owned,
-    label: offer.owned ? 'Tu pase está activo' : 'Comprar el pase',
+    label: offer.owned ? t('worlds.passActive') : t('worlds.buyPass'),
   }
 }
 
 /** La tarjeta dorada tras pagar el pase o un mundo, con el tono de la de los paquetes. */
 export function catalogBlessing(kind: 'pase' | 'mundo', name: string): { title: string; text: string; farewell: string } {
   return {
-    title: 'Habéis efectuado una adquisición magnífica',
-    text:
-      kind === 'pase'
-        ? `Los heraldos ya proclaman vuestro pase de ${name}: capítulos dobles y los caminos de la temporada abiertos a vuestro paso.`
-        : `Las puertas de ${name} se abren para vos; los escribas ya lo inscriben entre vuestros mundos.`,
-    farewell: 'Que los altos espíritus acompañen vuestras aventuras.',
+    title: t('account.credits.blessingTitle'),
+    text: kind === 'pase' ? t('worlds.blessingPass', { name }) : t('worlds.blessingWorld', { name }),
+    farewell: t('account.credits.blessingFarewell'),
   }
 }
 
@@ -105,9 +103,9 @@ export function catalogBlessing(kind: 'pase' | 'mundo', name: string): { title: 
  * abierto si ya es tuyo o lo juegas; si no, cuantos capitulos pide.
  */
 export function stopLabel(stop: { threshold: number; unlocked: boolean }): string {
-  if (stop.threshold === 0) return 'Gratis'
-  if (stop.unlocked) return 'Abierto'
-  return `${stop.threshold} ${stop.threshold === 1 ? 'capítulo' : 'capítulos'}`
+  if (stop.threshold === 0) return t('worlds.free')
+  if (stop.unlocked) return t('worlds.open')
+  return stop.threshold === 1 ? t('worlds.chapterOne') : t('worlds.chapterMany', { count: stop.threshold })
 }
 
 /** El camino en una linea ("Los Nueve Viajeros: gratis · La Mascarada: 20 capítulos"), para donde no cabe la linea grafica. */

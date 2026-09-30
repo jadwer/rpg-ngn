@@ -1,0 +1,47 @@
+import type { Messages } from '../../types.js'
+import type { account as es } from '../es/account.js'
+
+export const account: Messages<typeof es> = {
+  presets: {
+    scripted: 'Scripted GM (no model)',
+    ollama: 'Ollama (local model on your network)',
+    withYourKey: ' (with your key, spends no quota)',
+    server: ' (the server’s)',
+    withYourKeyShort: 'With your key, spends no quota',
+    serverShort: 'The server’s',
+    usesServer: 'The table uses the server GM.',
+    saved: 'Saved: {{preset}}{{model}}.',
+    model: ', model {{model}}',
+  },
+  credits: {
+    soon: 'Soon',
+    turns: '{{count}} turns',
+    turnsSessionsOne: '{{count}} turns, about {{sessions}} game',
+    turnsSessionsMany: '{{count}} turns, about {{sessions}} games',
+    ownKeyReserve: ' You have {{count}} in reserve in case you remove it.',
+    ownKey: 'You play with your key: these turns are not spent.{{reserve}}',
+    noReserve: 'You have no reserve turns: you play with the free ones. Top up to skip the wait.',
+    outOfTurns: 'You ran out of turns. Top up to keep playing.',
+    turnOne: '{{count}} turn',
+    turnMany: '{{count}} turns',
+    reserve: ' in reserve',
+    leftToFinish: 'You have {{turns}} left: enough to finish the game you started.',
+    leftSessionsOne: 'You have {{turns}} left, about {{sessions}} game.',
+    leftSessionsMany: 'You have {{turns}} left, about {{sessions}} games.',
+    blessingTitle: 'You have made a most magnificent acquisition',
+    blessingTurns: 'The scribes of the realm are already writing {{turns}} more turns into your chronicle; they will show up in your balance in a heartbeat.',
+    blessingFarewell: 'May the high spirits walk with you on your adventures.',
+  },
+  ownKey: {
+    none: 'No key of your own. Your tables use the server GM.',
+    endingIn: ' ending in {{hint}}',
+    model: ', model {{model}}',
+    saved: 'Key saved{{ending}}{{model}}. Your tables use it and spend no quota.',
+    empty: 'Write your key.',
+    tooShort: 'That key is too short.',
+    spaces: 'The key must not contain spaces or line breaks.',
+    removeWarning: 'Your {{preset}} key will be deleted. Your tables will go back to the server GM and spend quota.',
+    withYourKey: 'with your key',
+    noServerKey: 'no key on the server: save yours in My account',
+  },
+}

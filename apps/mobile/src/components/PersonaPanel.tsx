@@ -1,4 +1,4 @@
-import { cleanPersona, PERSONA_MAX, PERSONA_TEMPLATE } from '@rpg-ngn/ui-logic'
+import { cleanPersona, PERSONA_MAX, personaTemplate } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -47,7 +47,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
               setError(null)
               setDone(false)
             }}
-            placeholder={PERSONA_TEMPLATE}
+            placeholder={personaTemplate()}
             placeholderTextColor={theme.colors.inkFaint}
             multiline
             textAlignVertical="top"

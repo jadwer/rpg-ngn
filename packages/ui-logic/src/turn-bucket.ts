@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 /**
  * La cubeta de turnos gratuitos (docs de monetizacion, plan gratuito): tope de
  * 5, uno mas cada 96 minutos. El servidor la calcula; aqui solo se dice en
@@ -22,15 +23,15 @@ export function waitLabel(nextTurnAt: string, now: Date = new Date()): string {
 /** "El siguiente turno gratuito llega en 42 min.", o null si no hay espera. */
 export function nextFreeTurnText(bucket: TurnBucketState | null | undefined, now: Date = new Date()): string | null {
   if (!bucket?.nextTurnAt) return null
-  return `El siguiente turno gratuito llega en ${waitLabel(bucket.nextTurnAt, now)}.`
+  return t('table.bucket.next', { wait: waitLabel(bucket.nextTurnAt, now) })
 }
 
 /** "Turnos gratuitos: 3 de 5. El siguiente llega en 40 min." */
 export function bucketText(bucket: TurnBucketState | null | undefined, now: Date = new Date()): string | null {
   if (bucket?.bucketCapacity === undefined || bucket.bucketCapacity === 0) return null
-  const base = `Turnos gratuitos: ${bucket.bucketTurns ?? 0} de ${bucket.bucketCapacity}.`
-  if (!bucket.nextTurnAt) return `${base} Se recargan solos, uno cada 96 minutos, cuando los gastas.`
-  return `${base} El siguiente llega en ${waitLabel(bucket.nextTurnAt, now)}.`
+  const base = t('table.bucket.summary', { turns: bucket.bucketTurns ?? 0, capacity: bucket.bucketCapacity })
+  if (!bucket.nextTurnAt) return `${base} ${t('table.bucket.refills')}`
+  return `${base} ${t('table.bucket.nextShort', { wait: waitLabel(bucket.nextTurnAt, now) })}`
 }
 
 /**
@@ -40,6 +41,6 @@ export function bucketText(bucket: TurnBucketState | null | undefined, now: Date
 export function outOfTurnsText(quota: ({ remainingTurns: number } & TurnBucketState) | null | undefined, host: boolean, now: Date = new Date()): string | null {
   if (!quota || quota.remainingTurns > 0) return null
   const next = nextFreeTurnText(quota, now)
-  const action = host ? 'Para no esperar, recarga en Mi cuenta.' : 'Quien creó la mesa puede recargar para no esperar.'
-  return ['La mesa se quedó sin turnos.', next, action].filter(Boolean).join(' ')
+  const action = host ? t('table.bucket.hostRecharge') : t('table.bucket.playerRecharge')
+  return [t('table.bucket.outOfTurns'), next, action].filter(Boolean).join(' ')
 }

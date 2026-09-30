@@ -1,6 +1,6 @@
 'use client'
 
-import { cleanPersona, PERSONA_MAX, PERSONA_TEMPLATE } from '@rpg-ngn/ui-logic'
+import { cleanPersona, PERSONA_MAX, personaTemplate } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 
 interface Props {
@@ -50,7 +50,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
               setError(null)
               setDone(false)
             }}
-            placeholder={PERSONA_TEMPLATE}
+            placeholder={personaTemplate()}
             rows={7}
             maxLength={PERSONA_MAX + 50}
           />

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { GmPreset, GmProviderChoice } from '@rpg-ngn/api-client'
 
 /**
@@ -6,12 +7,13 @@ import type { GmPreset, GmProviderChoice } from '@rpg-ngn/api-client'
  * API; aqui solo se elige cual usar.
  */
 
+// Getters: se leen en el idioma vigente (i18n). Los nombres de marca no se traducen.
 const NAMES: Record<string, string> = {
-  scripted: 'GM con guion (sin modelo)',
+  get scripted() { return t('account.presets.scripted') },
   anthropic: 'Anthropic (Claude)',
   openai: 'OpenAI',
   deepseek: 'DeepSeek',
-  ollama: 'Ollama (modelo local en la red)',
+  get ollama() { return t('account.presets.ollama') },
 }
 
 export function describePreset(name: string): string {
@@ -52,7 +54,7 @@ export function providerForNewTable(preset: string, defaultPreset: string): GmPr
  * modelo. Con clave propia manda eso: la mesa no usa la del servidor.
  */
 export function presetOptionLabel(preset: GmPreset, ownKey = false): string {
-  const whose = ownKey ? ' (con tu clave, no gasta cupo)' : preset.default ? ' (el del servidor)' : ''
+  const whose = ownKey ? t('account.presets.withYourKey') : preset.default ? t('account.presets.server') : ''
   return `${describePreset(preset.name)}${whose}${preset.model ? `, ${preset.model}` : ''}`
 }
 
@@ -62,13 +64,13 @@ export function presetOptionLabel(preset: GmPreset, ownKey = false): string {
  * tecnica ("Anthropic (Claude) (con tu clave, no gasta cupo), claude-sonnet-5", 27-09).
  */
 export function presetOptionParts(preset: GmPreset, ownKey = false): { title: string; detail: string | null } {
-  const whose = ownKey ? 'Con tu clave, no gasta cupo' : preset.default ? 'El del servidor' : null
+  const whose = ownKey ? t('account.presets.withYourKeyShort') : preset.default ? t('account.presets.serverShort') : null
   const detail = [whose, preset.model].filter((part): part is string => !!part).join(' · ')
   return { title: describePreset(preset.name), detail: detail || null }
 }
 
 /** Mensaje tras guardar el proveedor de la mesa. */
 export function savedProviderText(choice: GmProviderChoice | null): string {
-  if (!choice) return 'La mesa usa el GM del servidor.'
-  return `Guardado: ${describePreset(choice.preset)}${choice.model ? `, modelo ${choice.model}` : ''}.`
+  if (!choice) return t('account.presets.usesServer')
+  return t('account.presets.saved', { preset: describePreset(choice.preset), model: choice.model ? t('account.presets.model', { model: choice.model }) : '' })
 }

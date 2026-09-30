@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { CreditBalance, CreditPack } from '@rpg-ngn/api-client'
 
 /**
@@ -47,10 +48,10 @@ export function packSessions(pack: Pick<CreditPack, 'turns'>): number {
 
 /** Lo que se lee bajo el precio: que da el paquete, en partidas. */
 export function packValue(pack: Pick<CreditPack, 'turns' | 'available'>): string {
-  if (!pack.available || pack.turns === 0) return 'Pronto'
+  if (!pack.available || pack.turns === 0) return t('account.credits.soon')
   const sesiones = packSessions(pack)
-  if (sesiones < 1) return `${pack.turns} turnos`
-  return `${pack.turns} turnos, unas ${sesiones} ${sesiones === 1 ? 'partida' : 'partidas'}`
+  if (sesiones < 1) return t('account.credits.turns', { count: pack.turns })
+  return t(sesiones === 1 ? 'account.credits.turnsSessionsOne' : 'account.credits.turnsSessionsMany', { count: pack.turns, sessions: sesiones })
 }
 
 /** Los que se pueden comprar hoy, primero los mas baratos. */
@@ -73,18 +74,18 @@ export function comingSoonPacks(packs: readonly CreditPack[]): CreditPack[] {
  */
 export function balanceText(balance: CreditBalance, ownKey = false): string {
   if (ownKey) {
-    const guardados = balance.remainingTurns > 0 ? ` Tienes ${balance.remainingTurns} en reserva por si la quitas.` : ''
-    return `Juegas con tu clave: estos turnos no se gastan.${guardados}`
+    const guardados = balance.remainingTurns > 0 ? t('account.credits.ownKeyReserve', { count: balance.remainingTurns }) : ''
+    return t('account.credits.ownKey', { reserve: guardados })
   }
   // Con la cubeta gratuita, lo de aqui es la reserva: acabarla no deja sin jugar.
   const bucket = (balance.bucketCapacity ?? 0) > 0
   if (balance.remainingTurns === 0) {
-    return bucket ? 'No tienes turnos de reserva: juegas con los gratuitos. Recarga para no esperar.' : 'Te quedaste sin turnos. Recarga para seguir jugando.'
+    return bucket ? t('account.credits.noReserve') : t('account.credits.outOfTurns')
   }
   const sesiones = Math.floor(balance.remainingTurns / TURNS_PER_SESSION)
-  const turnos = `${balance.remainingTurns} ${balance.remainingTurns === 1 ? 'turno' : 'turnos'}${bucket ? ' de reserva' : ''}`
-  if (sesiones < 1) return `Te quedan ${turnos}: para terminar la partida que tienes empezada.`
-  return `Te quedan ${turnos}, unas ${sesiones} ${sesiones === 1 ? 'partida' : 'partidas'}.`
+  const turnos = t(balance.remainingTurns === 1 ? 'account.credits.turnOne' : 'account.credits.turnMany', { count: balance.remainingTurns }) + (bucket ? t('account.credits.reserve') : '')
+  if (sesiones < 1) return t('account.credits.leftToFinish', { turns: turnos })
+  return t(sesiones === 1 ? 'account.credits.leftSessionsOne' : 'account.credits.leftSessionsMany', { turns: turnos, sessions: sesiones })
 }
 
 /** Si conviene avisarle de que se le acaba. Con clave propia no se le acaba. */
@@ -123,8 +124,8 @@ export function topUpUrl(serverUrl: string): string {
  */
 export function purchaseBlessing(turns: number): { title: string; text: string; farewell: string } {
   return {
-    title: 'Habéis efectuado una adquisición magnífica',
-    text: `Los escribas del reino ya anotan ${turns} turnos más en vuestra crónica; aparecerán en vuestro saldo en un suspiro.`,
-    farewell: 'Que los altos espíritus acompañen vuestras aventuras.',
+    title: t('account.credits.blessingTitle'),
+    text: t('account.credits.blessingTurns', { turns }),
+    farewell: t('account.credits.blessingFarewell'),
   }
 }

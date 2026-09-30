@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { TtsItem } from './tts.js'
 
 /**
@@ -134,4 +135,6 @@ export function pitchFor(item: Pick<TtsItem, 'kind' | 'speakerRef'> | undefined,
 }
 
 /** Frase corta con la que se prueba una voz. */
-export const VOICE_SAMPLE = 'La posada huele a pan y a lluvia. Alguien os mira desde la sombra.'
+export function voiceSample(): string {
+  return t('table.voiceSample')
+}

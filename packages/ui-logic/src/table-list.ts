@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { PackOption, TableSummary, WorldCatalog } from '@rpg-ngn/api-client'
 
 /**
@@ -19,12 +20,12 @@ export function tableState(table: ListedTable): Exclude<TableFilter, 'todas'> {
 }
 
 export function filterLabel(filter: TableFilter, count: number): string {
-  const name = { todas: 'Todas', activas: 'Activas', pausa: 'En pausa', finalizadas: 'Finalizadas' }[filter]
+  const name = { todas: t('table.list.all'), activas: t('table.list.active'), pausa: t('table.list.paused'), finalizadas: t('table.list.finished') }[filter]
   return `${name} (${count})`
 }
 
 export function stateLabel(state: Exclude<TableFilter, 'todas'>): string {
-  return { activas: 'Activa', pausa: 'En pausa', finalizadas: 'Finalizada' }[state]
+  return { activas: t('table.list.stateActive'), pausa: t('table.list.statePaused'), finalizadas: t('table.list.stateFinished') }[state]
 }
 
 export function filterCounts(tables: readonly ListedTable[]): Record<TableFilter, number> {
@@ -50,18 +51,18 @@ export function relativeTime(iso: string | null | undefined, now: Date = new Dat
   if (!iso) return ''
   const seconds = Math.max(0, Math.round((now.getTime() - Date.parse(iso)) / 1000))
   if (Number.isNaN(seconds)) return ''
-  if (seconds < 60) return 'ahora mismo'
-  const steps: Array<[number, string, string]> = [
-    [60, 'minuto', 'minutos'],
-    [60 * 60, 'hora', 'horas'],
-    [60 * 60 * 24, 'día', 'días'],
-    [60 * 60 * 24 * 30, 'mes', 'meses'],
-    [60 * 60 * 24 * 365, 'año', 'años'],
+  if (seconds < 60) return t('table.time.now')
+  const steps: Array<[number, 'minute' | 'hour' | 'day' | 'month' | 'year']> = [
+    [60, 'minute'],
+    [60 * 60, 'hour'],
+    [60 * 60 * 24, 'day'],
+    [60 * 60 * 24 * 30, 'month'],
+    [60 * 60 * 24 * 365, 'year'],
   ]
   let chosen = steps[0]!
   for (const step of steps) if (seconds >= step[0]) chosen = step
   const n = Math.floor(seconds / chosen[0])
-  return `hace ${n} ${n === 1 ? chosen[1] : chosen[2]}`
+  return n === 1 ? t(`table.time.${chosen[1]}One`) : t(`table.time.${chosen[1]}Many`, { count: n })
 }
 
 /** El mundo de una mesa en el catalogo que ya tiene la lista (`listPacks`). */
@@ -73,7 +74,7 @@ export function worldOf(table: Pick<TableSummary, 'packId'>, packs: readonly Pac
 export function worldTags(catalog: WorldCatalog | null | undefined): string[] {
   if (!catalog) return []
   const { min, max } = catalog.players
-  const players = min === max ? `${min} ${min === 1 ? 'jugador' : 'jugadores'}` : `${min}-${max} jugadores`
+  const players = min === max ? t(min === 1 ? 'table.list.playerOne' : 'table.list.playerMany', { count: min }) : t('table.list.playerRange', { min, max })
   const format = catalog.format.charAt(0).toUpperCase() + catalog.format.slice(1)
   return [catalog.genre, players, format]
 }
