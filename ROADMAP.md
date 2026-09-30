@@ -649,6 +649,7 @@ Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
 abierto.
 
 - [ ] **Desplegar sin cortar**: `deploy-rpg.sh` reinicia `rpg-web` y durante unos segundos nginx da `Connection refused` (visto el 28-09 a las 04:29 UTC con una mesa abierta). Build en otra carpeta y cambio atomico, o `systemctl reload` con dos instancias
+- [ ] **Portar a la plantilla de Atomo** (`templates/backend/bootstrap/app.php`): `redirectGuestsTo` nulo y `shouldRenderJsonWhen` para `api/*`, como en rpg-ngn-api (30-09). Sin eso, una peticion sin sesion y sin `Accept: application/json` da 500 en vez de 401. Espera a revisar los cambios nuevos de la plataforma antes de actualizar el submodulo
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
 - [x] **Renombre DM a GM** (29-09): hecho en todo el proyecto (codigo, API, rutas, permiso, prompts, UI, docs). La capa `gm` de los eventos tambien, sin migrar datos porque nada la usaba (acepta `dm` al leer). Quedan alias `/dm`, `dm:probe`, `dm:key` y `DM_*` para APK y `.env` viejos. Detalle en `docs/12-plan-renombre-gm.md`
 - [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
@@ -664,7 +665,12 @@ decisiones en `docs/25-plan-administracion.md`.
 - [x] **S5. Roles de Postgres** (28-09, API `fb99362`): `rpg_owner` es dueño de las tablas y migra; la app solo lee e inserta en `campaign_events` (comprobado: borrar, vaciar o apagar el trigger da error de permisos). Respaldo previo bajado a `D:\BackUp\ad-astra-mentis` con `deploy/pull-backup.sh` y restaurado de prueba con los mismos conteos que produccion
 - [x] **E11b.1. Panel, primera version** (28-09, en `https://dashboard.adastramentis.com`): login por cookie de Sanctum, solo el equipo (god, admin, tech), inicio con salud y actividad, usuarios, roles, auditoria con filtros por peticion, origen y registro y el detalle campo por campo, y salud del sistema. De paso se arreglo Atomo: `@atomo/ui` no tenia CSS para sus 88 clases (todo salia sin estilo), la API de auditoria serializaba el modelo entero del causante y del afectado, la plantilla usaba un token de color que no existe y la plataforma no versionaba su lockfile. Deuda: el formulario de login de `@atomo/auth-ui` esta en ingles
 - [x] **E11b.1b. Permisos al estilo de LWM** (28-09, platform `f171e48`, API `33ae6f9`): roles vivos god, admin y customer; `tech` y `storyteller` son plantillas que copian permisos directos al usuario y luego se ajustan por persona. El codigo revisa permisos (`packs.create`, `packs.review`, `gm-providers.index`, `dashboard.access`), no nombres de rol. `PermissionCatalog` da etiqueta, modulo y recurso a cada permiso; el panel trae el gestor de plantillas (pestañas Plantillas y Permisos) y, por usuario, roles de sistema, plantilla y checklist con lo que se aparta de la plantilla. Rol Story Teller creado: sube mundos sin el tope de propios (50)
-- [ ] **E11b.2 y .3. Panel, lo del juego** (siguiente): mesas (miembros, sesiones, turnos, tokens), turnos atascados, campañas, pagos, cupos, pases y trabajos fallidos en lectura; despues las operaciones de hoy (catalogo, revision, cupo, desatascar, reembolsar, suspender) con motivo y rastro. Gabino prepara permisos granulares por usuario en Atomo; revisarlos cuando lleguen
+- [ ] **E11b.2. Panel, lo del juego en lectura** (plan del 30-09, en curso). API bajo `/api/v1/admin/*` (controladores propios, sin JSON:API), cada ruta con su permiso; el panel con `DataTable` de `@atomo/ui` en un grupo "Juego":
+  - Mesas: busqueda por nombre, correo del dueño o id; dueño, mundo, idioma, estado, miembros, sesiones, turnos, ultima actividad, tokens y coste estimado. Detalle con miembros, sesiones y ultimos turnos (estado, error, tokens, tiempos)
+  - Turnos atascados: `closing` o `resolving` hace mas de 5 minutos, y turnos abiertos con error
+  - Pagos (por correo o id de Stripe), cupos (cubeta, reserva, `plans.bypass`), pases de temporada y trabajos fallidos
+  - Permisos: `admin-tables.index` y `failed-jobs.index` (god, admin, tech); `payments.index`, `quotas.index` y `season-passes.index` (god, admin: dinero). El coste sale del mismo calculo que `turns:usage`
+- [ ] **E11b.3. Operaciones desde el panel**: catalogo, revision, cupo, desatascar, reembolsar, suspender, con motivo y rastro. Gabino prepara permisos granulares por usuario en Atomo; revisarlos cuando lleguen
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
@@ -696,9 +702,10 @@ Para prospectos de Estados Unidos y streamers: una demo jugable en ingles sin ro
 - [x] Turno real en ingles en produccion (mesa 41, 30-09): Gabino lo aprobo
 - [ ] App movil en ingles
 - [x] La Mascarada (The Masquerade) y la boticaria (The Tea No One Tasted) en ingles, en sus repos privados (30-09); tramos de Fortuna traducibles (`bb50ee6`) y `pnpm validate` carga cada traduccion
-- [ ] Incoherencias de los originales que salieron al traducir: boticaria (cuatro contra cinco personajes, Maomao en palacio o en la celda, Lakan con una faccion como lugar, dos palabras clave de secretos que estan en texto publico) y Mascarada (boda antes o despues del verano, cuatro contra cinco actos, "DM" en notas, Seduccion sin personaje que la tenga)
+- [x] Incoherencias de los originales (30-09): piloto `1add271` (Mera posadera con su retrato, Bren guardia sin retrato, Tomas minero, "El GM interpreta"), boticaria `4480103` (cinco sitios, lugar nuevo corte exterior sin posicion en el mapa, Maomao encubre a la consorte, palabras clave fuera del texto publico) y Mascarada `a07b833` (boda, Conversacion en vez de Seduccion, GM, acentos)
 - [ ] Legales: version oficial en ingles con el abogado; faltan terceros en el aviso (Google Gemini y OpenAI por las imagenes, servicios push de Google y Apple), el estado del INAI y la frase "no es una suscripcion" frente a las suscripciones futuras
-- [ ] En el pack en español (rama `legacy`): "El DM interpreta" en las reglas de las sesiones, y las incoherencias de Bren, Tomas y Mera que salieron al traducir
+- [ ] Rama `legacy` (fichas de Pages): "El DM interpreta" sigue en las reglas de sus sesiones; se arregla al traer `legacy` a `dev` (deuda tecnica)
+- [ ] Pendientes visuales de Gabino: retrato de Bren (guardia) y posicion de "La corte exterior" en el mapa de la boticaria
 
 ## Entrega 13: Constructor de historias (planeada el 2026-09-28)
 
