@@ -692,6 +692,7 @@ Para prospectos de Estados Unidos y streamers: una demo jugable en ingles sin ro
 - [x] Motor: `language` en el contrato, prompt que narra en ingles, bloques de sistema con `tFor`, pack cargado por idioma
 - [x] Web: toda la interfaz, globo de idioma arriba a la derecha y `?lang=` en la URL (web `d69603f`, API `e15c10d`)
 - [x] Los Nueve Viajeros en ingles con la capa `i18n/en/` (docs/05)
+- [x] Packs multilingues (30-09, web `8922bbe`, API `cf1718d`): el manifiesto declara `language` y `translations`; solo esas se aplican y se validan (tambien al subir); el catalogo muestra y filtra por idioma; la mesa solo nace o cambia a un idioma que su mundo trae (Ajustes de la mesa)
 - [ ] Jugar un turno real en ingles en produccion y revisar la narracion
 - [ ] App movil en ingles
 - [ ] La Mascarada y la boticaria en ingles, si entran a la demo
