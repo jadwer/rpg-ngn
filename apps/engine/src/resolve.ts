@@ -128,6 +128,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       maxOutputTokens: request.budget?.maxOutputTokens,
       lint: request.lint ?? deps.lintMode,
       dice: request.dice,
+      language: request.language,
       // El prompt y los eventos aceptados dependen del ruleset de la mesa.
       rulesetId: ruleset.id,
     })
@@ -223,6 +224,7 @@ export async function suggestMore(request: SuggestRequest, deps: ResolveDeps): P
         recentEvents,
         lint: request.lint ?? deps.lintMode,
         dice: request.dice,
+        language: request.language,
         rulesetId: ruleset.id,
       },
       request.characterId,

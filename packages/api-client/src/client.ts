@@ -39,6 +39,8 @@ export interface ApiClientOptions {
   fetch?: FetchLike | undefined
   /** Generador de `Idempotency-Key`; por defecto `crypto.randomUUID` con respaldo. */
   idempotencyKey?: (() => string) | undefined
+  /** El idioma de la interfaz, para que la API conteste en el (`X-Locale`). */
+  locale?: (() => string | null) | undefined
 }
 
 export interface ApiClient extends AccountApi, SettingsApi {

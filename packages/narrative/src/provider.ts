@@ -21,6 +21,8 @@ export interface GMTurnContext {
   /** Lint de conocimiento (lint.ts); por defecto `enforce`. */
   lint?: LintMode | undefined
   /** Quien tira los dados (contrato `DiceMode`); por defecto `engine`. */
+  /** Idioma de la narracion (i18n); sin el, español. */
+  language?: 'es' | 'en' | undefined
   dice?: DiceMode | undefined
   /**
    * Id del ruleset de la campaña (`court-intrigue`, `fantasy-d20-lite`). El

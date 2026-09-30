@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GM_SYSTEM_PROMPT, GM_SYSTEM_PROMPT_COMPACT } from './prompt.js'
+import { GM_SYSTEM_PROMPT, GM_SYSTEM_PROMPT_COMPACT, NARRATE_IN_ENGLISH, systemPromptFor } from './prompt.js'
 
 describe('GM_SYSTEM_PROMPT', () => {
   it('protege la agencia del jugador con ejemplos de lo permitido y lo prohibido, y exige devolver la palabra', () => {
@@ -26,5 +26,15 @@ describe('GM_SYSTEM_PROMPT', () => {
     expect(GM_SYSTEM_PROMPT_COMPACT).toContain('nunca con un personaje jugador actuando')
     expect(GM_SYSTEM_PROMPT_COMPACT).toContain('{"type":"secret_revealed","payload":{"secretId":"<id>"}}')
     expect(GM_SYSTEM_PROMPT_COMPACT.length).toBeLessThan(4200)
+  })
+})
+
+describe('idioma de la mesa', () => {
+  it('en ingles agrega la orden al final y en español deja el prompt de siempre', () => {
+    const es = systemPromptFor('fantasy-d20-lite')
+    expect(systemPromptFor('fantasy-d20-lite', false, 'engine', 'es')).toBe(es)
+    const en = systemPromptFor('fantasy-d20-lite', false, 'engine', 'en')
+    expect(en.startsWith(es)).toBe(true)
+    expect(en.endsWith(NARRATE_IN_ENGLISH)).toBe(true)
   })
 })

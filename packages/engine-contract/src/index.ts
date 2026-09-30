@@ -180,6 +180,10 @@ export type LintMode = z.infer<typeof LintMode>
 export const DiceMode = z.enum(['engine', 'dice', 'table'])
 export type DiceMode = z.infer<typeof DiceMode>
 
+/** Idioma en que el GM narra a la mesa (i18n). Sin el, español. */
+export const NarrationLanguage = z.enum(['es', 'en'])
+export type NarrationLanguage = z.infer<typeof NarrationLanguage>
+
 export const ResolveTurnRequest = z.strictObject({
   contract: ContractVersion,
   campaignId: z.string().min(1),
@@ -196,6 +200,8 @@ export const ResolveTurnRequest = z.strictObject({
   context: TurnContext.optional(),
   lint: LintMode.optional(),
   dice: DiceMode.optional(),
+  /** Opcional y sin subir la version, como `context`: sin el, español. */
+  language: NarrationLanguage.optional(),
 })
 export type ResolveTurnRequest = z.infer<typeof ResolveTurnRequest>
 

@@ -315,14 +315,27 @@ const OWN_EVENTS: Record<string, { full: string; compact: string }> = {
 }
 
 /** El prompt de sistema para un ruleset y un modo de dados; sin ruleset o con uno desconocido, el del d20. */
-export function systemPromptFor(rulesetId: string | undefined, compact = false, dice: DiceMode = 'engine'): string {
+export function systemPromptFor(rulesetId: string | undefined, compact = false, dice: DiceMode = 'engine', language: 'es' | 'en' = 'es'): string {
   const base = compact ? GM_SYSTEM_PROMPT_COMPACT : GM_SYSTEM_PROMPT
   const own = rulesetId ? OWN_EVENTS[rulesetId] : undefined
   const mark = compact ? COMPACT_EVENTS_MARK : EVENTS_MARK
   const at = base.indexOf(mark)
   const prompt = !own || at === -1 ? base : base.slice(0, at) + (compact ? own.compact : own.full)
-  return withDiceMode(prompt, dice, compact)
+  const withDice = withDiceMode(prompt, dice, compact)
+  return language === 'en' ? withDice + NARRATE_IN_ENGLISH : withDice
 }
+
+/**
+ * Mesa en ingles (i18n): las instrucciones siguen en español, pero todo lo
+ * que ve o escucha la mesa sale en ingles. Va al final para que mande sobre
+ * el "narras en español" del principio. Los ids (characterId, eventos) no se
+ * traducen: son del motor, no de la mesa.
+ */
+export const NARRATE_IN_ENGLISH = `
+
+# Idioma de la mesa: inglés
+
+Esta mesa juega en inglés. Todo lo que ve o escucha la mesa (narración, diálogos, sugerencias, peticiones de tirada, avisos) va en inglés natural y cuidado, aunque estas instrucciones, el pack y los jugadores escriban en español. Los nombres propios del pack (personajes, lugares) se quedan como están. Los ids, tipos de evento y campos JSON no se traducen.`
 
 /** La linea con la que el GM pide una tirada en los modos `dice` y `table`. */
 export const ASK_ROLL_EXAMPLE = '{"kind":"ask_roll","characterId":"zahira","die":"1d20","rollKind":"skill","skill":"Percepción","reason":"la cornisa cede bajo tus pies"}'

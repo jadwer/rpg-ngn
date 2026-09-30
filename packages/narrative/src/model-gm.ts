@@ -324,7 +324,7 @@ export class ModelGMProvider implements GMProvider {
     }
 
     const prompt: ModelPrompt = {
-      system: systemPromptFor(ctx.rulesetId, compact, diceMode),
+      system: systemPromptFor(ctx.rulesetId, compact, diceMode, ctx.language ?? 'es'),
       user: built.user + fortuneNote,
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
     }
@@ -432,7 +432,7 @@ export class ModelGMProvider implements GMProvider {
       `Dos cosas distintas que ${name} podría intentar ahora, en primera persona, en menos de 12 palabras cada una, una prudente y una atrevida, basadas solo en lo que ${name} sabe.`,
       ...(seen.length ? [`Distintas de estas, que ya vio: ${seen.join(', ')}.`] : []),
     ].join('\n')
-    const prompt: ModelPrompt = { system: systemPromptFor(ctx.rulesetId, compact, ctx.dice ?? 'engine'), user: built.user + ask, maxOutputTokens: 300 }
+    const prompt: ModelPrompt = { system: systemPromptFor(ctx.rulesetId, compact, ctx.dice ?? 'engine', ctx.language ?? 'es'), user: built.user + ask, maxOutputTokens: 300 }
 
     let raw = ''
     let reply: ModelReply

@@ -125,4 +125,15 @@ describe('ajustes de la mesa', () => {
     expect(withProvider({ premise: 'x', provider: { preset: 'ollama' } }, null)).toEqual({ premise: 'x' })
     expect(withProvider(undefined, { preset: 'scripted', model: null })).toEqual({ provider: { preset: 'scripted' } })
   })
+
+  it('manda el idioma elegido en X-Locale para que la API conteste en el', async () => {
+    const calls: Array<{ init: { headers: Record<string, string> } }> = []
+    const fetch = async (_url: string, init: { headers: Record<string, string> }) => {
+      calls.push({ init })
+      return { ok: true, status: 200, json: async () => ({ message: 'ok' }), text: async () => '' }
+    }
+    const api = createApiClient({ baseUrl: 'http://api.test', tokenProvider: () => null, fetch: fetch as never, locale: () => 'en' })
+    await api.forgotPassword('ana@example.com')
+    expect(calls[0]?.init.headers['X-Locale']).toBe('en')
+  })
 })

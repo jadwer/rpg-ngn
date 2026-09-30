@@ -47,6 +47,8 @@ export interface HttpOptions {
   baseUrl: string
   tokenProvider: TokenProvider
   fetch?: FetchLike | undefined
+  /** El idioma que eligio la persona ('es', 'en'); va en `X-Locale` y la API contesta en el. */
+  locale?: (() => string | null) | undefined
 }
 
 export function normalizeBaseUrl(url: string): string {
@@ -62,6 +64,8 @@ export function createHttp(options: HttpOptions) {
     const media = init.media === 'jsonapi' ? JSONAPI_MEDIA : JSON_MEDIA
     const headers: Record<string, string> = { Accept: media, ...init.headers }
     if (init.body !== undefined && !init.form) headers['Content-Type'] = media
+    const locale = options.locale?.()
+    if (locale) headers['X-Locale'] = locale
     if (!init.anonymous) {
       const token = await options.tokenProvider()
       if (token) headers['Authorization'] = `Bearer ${token}`
