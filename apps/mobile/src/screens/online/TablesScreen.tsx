@@ -4,10 +4,9 @@ import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
-import { useTopInset } from '../../hooks/useTopInset'
 import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
-import { LogoHorizontal } from '../../components/Brand'
+import { TopBar } from '../../components/TopBar'
 import { Icon, ICON } from '../../components/Icon'
 import { JoinByLink } from '../../components/JoinByLink'
 import { Portrait } from '../../components/Portrait'
@@ -46,7 +45,6 @@ interface Props {
  * del mundo y quien juega. Al pie, amigos y la barra inferior.
  */
 export function TablesScreen({ client, user, tables, loading, error, pack, packs = [], remoteNames = {}, remoteCharacters = {}, onOpen, onCreate, onRefresh, onProfile, onTab }: Props) {
-  const topInset = useTopInset()
   const { width } = useWindowDimensions()
   const wide = width >= ANCHO_TABLET
   const [filter, setFilter] = useState<TableFilter>('todas')
@@ -66,12 +64,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <LogoHorizontal height={28} color={theme.colors.ink} />
-        <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('mobile.tablesScreen.tuCuenta')} style={styles.avatar}>
-          <Text style={styles.avatarText}>{(user.name.trim()[0] ?? '?').toUpperCase()}</Text>
-        </Pressable>
-      </View>
+      <TopBar client={client} user={user} onProfile={onProfile} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -208,9 +201,6 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8, backgroundColor: theme.colors.bg, borderBottomWidth: 1, borderBottomColor: theme.colors.borderSoft },
-  avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.accent },
-  avatarText: { fontFamily: theme.fonts.display, fontSize: 16, color: '#ffffff' },
   scroll: { paddingBottom: 24 },
   hero: { paddingHorizontal: 16, paddingTop: 28, paddingBottom: 18 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },

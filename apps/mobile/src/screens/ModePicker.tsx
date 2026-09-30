@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
-import { t } from '@rpg-ngn/i18n'
-import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
+import { language, t } from '@rpg-ngn/i18n'
+import { createApiClient, normalizeBaseUrl, packArtUrl, type BlessingState, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
+import { cardView, packPrice, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
 import { useTopInset } from '../hooks/useTopInset'
 import { BottomNav, type BottomTab } from '../components/BottomNav'
 import { Isotipo, LogoHorizontal, LogoVertical } from '../components/Brand'
+import { LanguageButton } from '../components/LanguageButton'
 import { storage } from '../online/storage'
 import { theme } from '../theme'
 
@@ -27,6 +28,8 @@ interface Live {
   worlds: CatalogWorldCard[]
   season: SeasonPath | null
   pass: SeasonPassOffer | null
+  /** La Bendicion de quien tiene sesion guardada; null sin sesion. */
+  blessing: BlessingState | null
   base: string
 }
 
@@ -46,7 +49,8 @@ function useCatalog(): Live | null {
         try {
           const client = createApiClient({ baseUrl, tokenProvider: () => withToken })
           const r = await client.catalogWorlds()
-          if (alive) setLive({ worlds: r.worlds.filter((w) => w.origin === 'oficial'), season: r.season, pass: r.pass, base: client.baseUrl })
+          const blessing = withToken ? await client.blessing().catch(() => null) : null
+          if (alive) setLive({ worlds: r.worlds.filter((w) => w.origin === 'oficial'), season: r.season, pass: r.pass, blessing, base: client.baseUrl })
           return
         } catch {
           // Con token caducado se intenta sin el; sin red no hay mas que hacer.
@@ -88,7 +92,6 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
   const inset = Math.max(20, (width - 960) / 2 + 20)
   const live = useCatalog()
   const destacados = (live?.worlds ?? []).slice(0, FILA)
-  const pase = passView(live?.pass ?? null)
   const names = Object.fromEntries((live?.worlds ?? []).map((w) => [w.id, w.name]))
   const worlds = offlineWorlds()
   return (
@@ -96,6 +99,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
       <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 24 }}>
         <View style={[styles.bar, { paddingTop: topInset + 10 }]}>
           <LogoHorizontal height={30} color="#f1f0fb" />
+          <LanguageButton />
         </View>
 
         <ImageBackground source={HERO} style={styles.hero} resizeMode="cover">
@@ -125,6 +129,8 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
               </Pressable>
             </View>
           </View>
+
+          <Promos live={live} onShop={() => onTab('tienda')} />
 
           <View style={styles.sectionHead}>
             <Text style={styles.h3}>{t('mobile.modePicker.mundosDestacadosMayus')}</Text>
@@ -189,12 +195,6 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
               <Text style={styles.seasonPath}>
                 {seasonPathLine(live.season.worlds, names)}
               </Text>
-              {pase ? (
-                <View style={styles.pass}>
-                  <Text style={styles.passTitle}>{`${t('catalogHome.paseDeTemporada')} · ${t('catalogHome.capitulosX2')}`}</Text>
-                  <Text style={styles.passPrice}>{pase.priceLine}</Text>
-                </View>
-              ) : null}
             </Pressable>
           ) : null}
 
@@ -208,7 +208,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
-  bar: { paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center' },
+  bar: { paddingHorizontal: 20, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   hero: { minHeight: 560, overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
   veil: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 15, 20, 0.35)' },
   emblem: { alignItems: 'center', gap: 10, marginBottom: 'auto', marginTop: 32 },
@@ -246,8 +246,59 @@ const styles = StyleSheet.create({
   seasonChapters: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.accentBright },
   seasonTitle: { fontFamily: theme.fonts.display, fontSize: 20, color: theme.colors.ink },
   seasonPath: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
-  pass: { marginTop: 4, padding: 12, gap: 2, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.45)', backgroundColor: 'rgba(212, 175, 55, 0.08)' },
-  passTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 15, color: theme.colors.gold },
-  passPrice: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.ink },
+  promos: { paddingHorizontal: 20, paddingTop: 24, gap: 12 },
+  promo: { padding: 18, gap: 8, borderRadius: 18, borderWidth: 1, overflow: 'hidden' },
+  promoGold: { borderColor: theme.colors.gold },
+  promoViolet: { borderColor: theme.colors.accentBright },
+  promoKicker: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.5, color: theme.colors.goldBright, textTransform: 'uppercase' },
+  promoTitle: { fontFamily: theme.fonts.display, fontSize: 22, color: theme.colors.ink },
+  promoTheme: { fontFamily: theme.fonts.serifItalic, fontSize: 17, color: theme.colors.goldBright },
+  promoText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
+  promoStatus: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.success },
+  promoPrice: { fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.goldBright },
+  promoCta: { alignSelf: 'flex-start', marginTop: 4, backgroundColor: theme.colors.accent, borderRadius: 999, paddingHorizontal: 20, minHeight: 42, alignItems: 'center', justifyContent: 'center' },
+  promoCtaText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: '#ffffff' },
   offline: { fontFamily: theme.fonts.serifItalic, fontSize: 13, color: theme.colors.inkFaint, paddingHorizontal: 20, paddingTop: 18 },
 })
+
+/**
+ * Lo que se promociona en Inicio (Gabino, 30-09): la Bendicion del bardo con
+ * el tema de la temporada y el pase de temporada. Los dos llevan a la Tienda.
+ * Sin sesion guardada la Bendicion se anuncia sin precio.
+ */
+function Promos({ live, onShop }: { live: Live | null; onShop: () => void }) {
+  if (!live) return null
+  const blessing = live.blessing
+  const themeName = blessing?.theme?.name ?? live.season?.name ?? null
+  const until = blessing?.active && blessing.endsAt ? new Date(blessing.endsAt).toLocaleDateString(language() === 'en' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'long' }) : null
+  const pass = passView(live.pass)
+
+  return (
+    <View style={styles.promos}>
+      <Pressable onPress={onShop} style={({ pressed }) => [styles.promo, styles.promoGold, pressed && styles.pressed]} accessibilityRole="button">
+        <LinearGradient colors={['rgba(212, 175, 55, 0.20)', 'rgba(124, 58, 237, 0.12)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
+        <Text style={styles.promoKicker}>{t('blessing.kicker')}</Text>
+        <Text style={styles.promoTitle}>{t('blessing.title')}</Text>
+        {themeName ? <Text style={styles.promoTheme}>{t('blessing.theme', { name: themeName })}</Text> : null}
+        <Text style={styles.promoText}>{t('shop.blessingPitch', { daily: blessing?.turnsPerDay ?? 4, first: 10 })}</Text>
+        {until ? <Text style={styles.promoStatus}>{t('blessing.activeUntil', { date: until })}</Text> : blessing ? <Text style={styles.promoPrice}>{packPrice(blessing.price)}</Text> : null}
+        <View style={styles.promoCta}>
+          <Text style={styles.promoCtaText}>{t('shop.seeInShop')}</Text>
+        </View>
+      </Pressable>
+
+      {pass && live.season ? (
+        <Pressable onPress={onShop} style={({ pressed }) => [styles.promo, styles.promoViolet, pressed && styles.pressed]} accessibilityRole="button">
+          <LinearGradient colors={['rgba(124, 58, 237, 0.22)', 'rgba(11, 15, 20, 0)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
+          <Text style={styles.promoKicker}>{t('catalogHome.paseDeTemporada')}</Text>
+          <Text style={styles.promoTitle}>{live.season.name}</Text>
+          <Text style={styles.promoText}>{t('shop.passPitch')}</Text>
+          <Text style={pass.owned ? styles.promoStatus : styles.promoPrice}>{pass.priceLine}</Text>
+          <View style={styles.promoCta}>
+            <Text style={styles.promoCtaText}>{t('shop.seeInShop')}</Text>
+          </View>
+        </Pressable>
+      ) : null}
+    </View>
+  )
+}

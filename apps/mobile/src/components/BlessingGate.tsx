@@ -1,25 +1,31 @@
-import { t } from '@rpg-ngn/i18n'
-import type { ApiClient, BlessingState } from '@rpg-ngn/api-client'
+import { language, t } from '@rpg-ngn/i18n'
+import { createApiClient, normalizeBaseUrl, type ApiClient, type BlessingState } from '@rpg-ngn/api-client'
 import { blessingDaysText, blessingDue } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState, Modal, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { storage } from '../online/storage'
 import { theme } from '../theme'
 import { Button } from './Button'
 
 /** Cada cuanto se pregunta si ya hay turnos: a las 3 am aparece en menos de un minuto. */
 const POLL_MS = 60_000
 
-interface Props {
-  client: ApiClient
+/** Un cliente con la sesion guardada en este momento; null si no hay sesion. */
+async function savedClient(): Promise<ApiClient | null> {
+  const [url, token] = await Promise.all([storage.serverUrl(), storage.token()])
+  if (!token) return null
+  return createApiClient({ baseUrl: normalizeBaseUrl(url), tokenProvider: () => token, locale: () => language() })
 }
 
 /**
  * El aviso diario de la Bendicion del bardo (Gabino, 30-09), igual que en la
  * web: a pantalla completa encima de lo que se este haciendo en cuanto hay
  * turnos por recoger, y solo se cierra con "Recoger" (el boton de atras de
- * Android no lo cierra). Se revisa cada minuto y al volver a la app.
+ * Android no lo cierra). Se revisa cada minuto y al volver a la app. Vive en
+ * la raiz, asi que tambien sale en Inicio y leyendo sin conexion; toma la
+ * sesion guardada en cada vuelta, sin depender de la pantalla abierta.
  */
-export function BlessingGate({ client }: Props) {
+export function BlessingGate() {
   const [state, setState] = useState<BlessingState | null>(null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<number | null>(null)
@@ -27,12 +33,17 @@ export function BlessingGate({ client }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const check = useCallback(async () => {
+    const client = await savedClient()
+    if (!client) {
+      setState(null)
+      return
+    }
     try {
       setState(await client.blessing())
     } catch {
-      // Sin red o sin sesion: se vuelve a intentar en la siguiente vuelta.
+      // Sin red o sesion caducada: se vuelve a intentar en la siguiente vuelta.
     }
-  }, [client])
+  }, [])
 
   useEffect(() => {
     void check()
@@ -52,6 +63,11 @@ export function BlessingGate({ client }: Props) {
     setBusy(true)
     setError(null)
     try {
+      const client = await savedClient()
+      if (!client) {
+        setState(null)
+        return
+      }
       const turns = state?.turnsPerDay ?? 0
       const next = await client.claimBlessing()
       setDone(turns)

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { BlessingGate } from './components/BlessingGate'
 import { Isotipo } from './components/Brand'
 import { OnlineRoot } from './online/OnlineRoot'
 import { loadBundledPack, loadOfflineCampaign, type OfflineCampaign } from './pack/offline'
@@ -15,7 +16,7 @@ import { LanguageProvider, useLanguage } from './state/language'
 import { NarratorProvider } from './state/narrator'
 import { FONT_ASSETS, SYSTEM_SERIF, theme } from './theme'
 
-type Screen = { name: 'mode' } | { name: 'online'; tab?: 'mundos' | 'mesas' | 'comunidad' } | { name: 'picker' } | { name: 'session'; sessionId: string }
+type Screen = { name: 'mode' } | { name: 'online'; tab?: 'mundos' | 'mesas' | 'tienda' | 'comunidad' } | { name: 'picker' } | { name: 'session'; sessionId: string }
 
 /**
  * Raiz de la app. Las fuentes del tema (Cinzel, Crimson Pro) y el pack
@@ -93,6 +94,8 @@ function App() {
           {/* Sin barra de estado en toda la app (Gabino, 26-09): ocultarla hoja por hoja dejaba que apareciera y desapareciera. */}
           <StatusBar style="light" hidden />
           {body}
+          {/* El aviso de la Bendicion va encima de cualquier pantalla, Inicio incluido. */}
+          <BlessingGate />
         </SafeAreaView>
       </NarratorProvider>
     </SafeAreaProvider>

@@ -11,10 +11,11 @@ import { ProfileScreen } from '../screens/online/ProfileScreen'
 import { CommunityScreen } from '../screens/online/CommunityScreen'
 import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { SeasonScreen } from '../screens/online/SeasonScreen'
+import { ShopScreen } from '../screens/online/ShopScreen'
+import type { BottomTab } from '../components/BottomNav'
 import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
-import { BlessingGate } from '../components/BlessingGate'
 import { theme } from '../theme'
 import { storage, type StoredUser } from './storage'
 
@@ -23,7 +24,7 @@ interface Props {
   pack: LoadedPack
   onExit: () => void
   /** La pestaña con la que se entra desde la barra inferior del Inicio; sin ella, las mesas. */
-  initialTab?: 'mundos' | 'mesas' | 'comunidad'
+  initialTab?: 'mundos' | 'mesas' | 'tienda' | 'comunidad'
 }
 
 type Stage =
@@ -36,6 +37,7 @@ type Stage =
   | { name: 'worlds' }
   | { name: 'explore' }
   | { name: 'pronto' }
+  | { name: 'shop' }
   | { name: 'season'; from: 'explore' | 'profile' }
   | { name: 'new-table'; packId?: string }
   | { name: 'table'; table: TableSummary }
@@ -57,7 +59,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
   const tokenRef = useRef<string | null>(null)
   const [stage, setStage] = useState<Stage>({ name: 'booting' })
   // Donde cae la sesion al entrar: la pestaña que se toco en el Inicio.
-  const landing: Stage = initialTab === 'mundos' ? { name: 'explore' } : initialTab === 'comunidad' ? { name: 'pronto' } : { name: 'tables' }
+  const landing: Stage = initialTab === 'mundos' ? { name: 'explore' } : initialTab === 'comunidad' ? { name: 'pronto' } : initialTab === 'tienda' ? { name: 'shop' } : { name: 'tables' }
   const [session, setSession] = useState<Session | null>(null)
   const [serverUrl, setServerUrl] = useState<string>('')
   const [busy, setBusy] = useState(false)
@@ -233,8 +235,9 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
   }
 
   /** La barra inferior (26-09): Inicio sale a la portada, Mundos y Mesas cambian de pantalla, Comunidad es "Pronto". */
-  const goTab = (tab: 'inicio' | 'mundos' | 'mesas' | 'comunidad') => {
+  const goTab = (tab: BottomTab) => {
     if (tab === 'inicio') onExit()
+    else if (tab === 'tienda') setStage({ name: 'shop' })
     else if (tab === 'mundos') setStage({ name: 'explore' })
     else if (tab === 'comunidad') setStage({ name: 'pronto' })
     else {
@@ -281,7 +284,6 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     )
   }
 
-  // Todo lo que tiene sesion lleva encima el aviso de la Bendicion del bardo.
   const screen = () => {
     if (stage.name === 'tables') {
       return (
@@ -308,6 +310,10 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
       return <ExploreScreen client={session.client} onSeason={() => setStage({ name: 'season', from: 'explore' })} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
     }
 
+    if (stage.name === 'shop') {
+      return <ShopScreen client={session.client} user={session.user} onProfile={() => setStage({ name: 'profile' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
+    }
+
     if (stage.name === 'season') {
       const from = stage.from
       return <SeasonScreen client={session.client} back={from === 'profile' ? t('mobile.onlineRoot.perfil') : t('home.mundos')} onBack={() => setStage(from === 'profile' ? { name: 'profile' } : { name: 'explore' })} onUnauthorized={() => unauthorized()} />
@@ -332,7 +338,6 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
         <ProfileScreen
           client={session.client}
           user={session.user}
-          serverUrl={serverUrl}
           onUserChanged={setUser}
           onSeason={() => setStage({ name: 'season', from: 'profile' })}
           onBack={() => setStage({ name: 'tables' })}
@@ -390,16 +395,10 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     )
   }
 
-  return (
-    <View style={styles.fill}>
-      {screen()}
-      <BlessingGate client={session.client} />
-    </View>
-  )
+  return screen()
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: theme.colors.bg },
   loading: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },

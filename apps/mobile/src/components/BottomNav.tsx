@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { theme } from '../theme'
 import { Icon, ICON } from './Icon'
 
-export type BottomTab = 'inicio' | 'mundos' | 'mesas' | 'comunidad'
+export type BottomTab = 'inicio' | 'mundos' | 'mesas' | 'tienda' | 'comunidad'
 
 /** La barra inferior del tablero de Gabino (`mesas_ux.png`, 26-09), la misma que la web a 390. */
 export function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (tab: BottomTab) => void }) {
@@ -14,6 +14,7 @@ export function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (
     { id: 'inicio', label: t('shell.nav.home'), icon: ICON.home },
     { id: 'mundos', label: t('shell.nav.worlds'), icon: ICON.globe },
     { id: 'mesas', label: t('shell.nav.tables'), icon: ICON.tables },
+    { id: 'tienda', label: t('shell.nav.shop'), icon: ICON.shop },
     { id: 'comunidad', label: t('shell.nav.community'), icon: ICON.community },
   ]
   return (
@@ -34,6 +35,7 @@ export function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (
 
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 8, backgroundColor: 'rgba(11, 15, 20, 0.97)', borderTopWidth: 1, borderTopColor: theme.colors.borderSoft },
-  tab: { alignItems: 'center', gap: 3, minWidth: 64, paddingVertical: 2 },
+  // Cinco pestañas como la web a 390: cada una a partes iguales.
+  tab: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 2 },
   label: { fontFamily: theme.fonts.ui, fontSize: 11 },
 })

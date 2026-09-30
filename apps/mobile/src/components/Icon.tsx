@@ -14,6 +14,8 @@ export const ICON = {
   play: 'M7 5l12 7-12 7z',
   home: 'M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5M10 20v-5h4v5',
   globe: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 0c-3 3-3 15 0 18m0-18c3 3 3 15 0 18M3 12h18M5 7.5h14M5 16.5h14',
+  // La bolsa de la tienda, el mismo trazo que la web (shell/icons.tsx).
+  shop: 'M5 8h14l-1.2 12H6.2zM9 8V6.5a3 3 0 0 1 6 0V8',
   tables: 'M4 5h16v11H4zM2 19h20M9 9h6m-6 3h4',
   community: 'M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM5 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7 20v-1a5 5 0 0 1 10 0v1',
   plus: 'M12 5v14M5 12h14',

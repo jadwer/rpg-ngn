@@ -6,7 +6,7 @@ import { ActivityIndicator, Image, Linking, useWindowDimensions, Pressable, Scro
 import { useTopInset } from '../../hooks/useTopInset'
 import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
-import { LogoHorizontal } from '../../components/Brand'
+import { TopBar } from '../../components/TopBar'
 import { Icon, ICON } from '../../components/Icon'
 import { Portrait } from '../../components/Portrait'
 import { webOriginOf } from '../../online/server-url'
@@ -175,12 +175,14 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
 
   return (
     <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <LogoHorizontal height={28} color={theme.colors.ink} />
-        <Pressable onPress={onMine} hitSlop={10} accessibilityRole="button">
-          <Text style={styles.link}>{t('myWorldsPage.misMundos')}</Text>
-        </Pressable>
-      </View>
+      <TopBar
+        client={client}
+        extra={
+          <Pressable onPress={onMine} hitSlop={10} accessibilityRole="button">
+            <Text style={styles.link}>{t('myWorldsPage.misMundos')}</Text>
+          </Pressable>
+        }
+      />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* El mismo fondo que Mesas (Gabino, 26-09). */}
         <Backdrop />

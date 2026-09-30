@@ -8,4 +8,10 @@ export const shop: Messages<typeof es> = {
   worldsTitle: 'Worlds for sale',
   worldsText: 'Some official worlds are bought once and are yours forever. They are in Explore worlds, marked with their price.',
   worldsLink: 'See the worlds',
+  packsTitle: 'Turn packs',
+  buyOnWeb: 'Buy on the web',
+  webNote: 'You pay on adastramentis.com with this same account. When you come back to the app, it is already yours.',
+  blessingPitch: '{{daily}} turns every day for 30 days, plus {{first}} when you buy it.',
+  seeInShop: 'See in the shop',
+  passPitch: 'Double chapters all season and its worlds from day one.',
 }

@@ -1,16 +1,14 @@
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
 import { t } from '@rpg-ngn/i18n'
-import { balanceText, bucketText, buyablePacks, lowBalance, packName, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Linking, StyleSheet, Text, View } from 'react-native'
+import { balanceText, bucketText, lowBalance } from '@rpg-ngn/ui-logic'
+import { useCallback, useEffect, useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { SectionTitle } from './Panel'
-import { Button } from './Button'
+import { openWebShop, PackCards } from './shop/ShopOffers'
 
 interface Props {
   client: ApiClient
-  /** El servidor con el que habla la app; de ahi sale la web para recargar. */
-  serverUrl: string
   onUnauthorized: () => void
 }
 
@@ -22,7 +20,7 @@ interface Props {
  * detras. Cobrar dentro de la app pide el SDK nativo de Stripe, que hoy
  * romperia Expo Go; queda pendiente para cuando haya builds propias.
  */
-export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
+export function CreditsPanel({ client, onUnauthorized }: Props) {
   const [packs, setPacks] = useState<CreditPack[]>([])
   const [balance, setBalance] = useState<CreditBalance | null>(null)
   const [ownKey, setOwnKey] = useState(false)
@@ -48,9 +46,6 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
   useEffect(load, [load])
 
-  const venta = useMemo(() => buyablePacks(packs), [packs])
-  const url = useMemo(() => topUpUrl(serverUrl), [serverUrl])
-
   return (
     <View style={styles.card}>
       <SectionTitle>{t('creditsPanel.tusCreditos')}</SectionTitle>
@@ -58,21 +53,11 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
       {balance && !ownKey && bucketText(balance) ? <Text style={styles.hint}>{bucketText(balance)}</Text> : null}
       {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>{t('creditsPanel.cargando')}</Text>}
 
-      {venta.length > 0 ? (
+      {packs.length > 0 ? (
         <>
-          <Text style={styles.hint}>{t('mobile.creditsPanel.topUpFromWeb')}</Text>
-          {venta.map((pack) => (
-            <Text key={pack.id} style={styles.pack}>
-              {packName(pack)}, {packPrice(pack)}: {packValue(pack)}
-            </Text>
-          ))}
+          <Text style={styles.hint}>{t('shop.webNote')}</Text>
+          <PackCards packs={packs} onBuy={() => openWebShop(client)} />
         </>
-      ) : null}
-
-      {url ? (
-        <View style={styles.actions}>
-          <Button label={t('mobile.creditsPanel.topUpOnWeb')} primary onPress={() => void Linking.openURL(url)} />
-        </View>
       ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -85,7 +70,5 @@ const styles = StyleSheet.create({
   // Titulo de seccion con la letra de titulos, no la del texto (Gabino, 26-09).
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.inkDim },
   warn: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
-  pack: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.ink },
-  actions: { alignItems: 'flex-start' },
   error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
 })

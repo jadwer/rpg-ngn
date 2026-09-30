@@ -20,8 +20,6 @@ import { useLanguage } from '../../state/language'
 interface Props {
   client: ApiClient
   user: StoredUser
-  /** El servidor con el que habla la app; de ahi sale la web para recargar. */
-  serverUrl: string
   /** El nombre cambio: el padre lo recuerda y lo pinta. */
   onUserChanged: (user: StoredUser) => void
   onBack: () => void
@@ -40,7 +38,7 @@ interface Props {
  * pide la actual). El correo se muestra pero no se edita (cambiarlo exige
  * verificarlo).
  */
-export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout, onSeason }: Props) {
+export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout, onSeason }: Props) {
   const [name, setName] = useState(user.name)
   const [support, setSupport] = useState<SupportView | null>(null)
   const { lang, choose, languages } = useLanguage()
@@ -166,7 +164,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
           </View>
         </View>
 
-        <CreditsPanel client={client} serverUrl={serverUrl} onUnauthorized={onUnauthorized} />
+        <CreditsPanel client={client} onUnauthorized={onUnauthorized} />
 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
 
