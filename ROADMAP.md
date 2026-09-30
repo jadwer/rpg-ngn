@@ -649,7 +649,7 @@ Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
 abierto.
 
 - [ ] **Desplegar sin cortar**: `deploy-rpg.sh` reinicia `rpg-web` y durante unos segundos nginx da `Connection refused` (visto el 28-09 a las 04:29 UTC con una mesa abierta). Build en otra carpeta y cambio atomico, o `systemctl reload` con dos instancias
-- [ ] **Portar a la plantilla de Atomo** (`templates/backend/bootstrap/app.php`): `redirectGuestsTo` nulo y `shouldRenderJsonWhen` para `api/*`, como en rpg-ngn-api (30-09). Sin eso, una peticion sin sesion y sin `Accept: application/json` da 500 en vez de 401. Espera a revisar los cambios nuevos de la plataforma antes de actualizar el submodulo
+- [x] **Portado a la plantilla de Atomo** (30-09, platform `8becf33`): sin sesion, `/api` responde 401 en JSON y no 500
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
 - [x] **Renombre DM a GM** (29-09): hecho en todo el proyecto (codigo, API, rutas, permiso, prompts, UI, docs). La capa `gm` de los eventos tambien, sin migrar datos porque nada la usaba (acepta `dm` al leer). Quedan alias `/dm`, `dm:probe`, `dm:key` y `DM_*` para APK y `.env` viejos. Detalle en `docs/12-plan-renombre-gm.md`
 - [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
@@ -670,13 +670,14 @@ decisiones en `docs/25-plan-administracion.md`.
   - Turnos atascados: `closing` o `resolving` hace mas de 5 minutos, y turnos abiertos con error
   - Pagos (por correo o id de Stripe), cupos (cubeta, reserva, `plans.bypass`), pases de temporada y trabajos fallidos
   - Permisos: `admin-tables.index` y `failed-jobs.index` (god, admin, tech); `payments.index`, `quotas.index` y `season-passes.index` (god, admin: dinero). El coste sale del mismo calculo que `turns:usage`
-- [ ] **E11b.3. Operaciones desde el panel** (30-09: todo menos suspender cuentas, API `f498d7f`). Cada una con confirmacion y motivo escrito, que queda en la auditoria (`log_name` admin, con quien, sobre que y el motivo), y su permiso:
+- [x] **E11b.3. Operaciones desde el panel** (30-09, API `f498d7f` y `02462df`, desplegado; suspender cuentas en atomo-user `0370c0c`). Cada una con confirmacion y motivo escrito, que queda en la auditoria (`log_name` admin, con quien, sobre que y el motivo), y su permiso:
   - Desatascar un turno (`turns.unstick`, god, admin, tech): solo `closing` o `resolving` hace mas de 10 minutos (el doble del limite del job, 300 s); lo reabre con `TurnService::abandon`, igual que cuando el job falla
   - Dar cupo (`quotas.grant`, god, admin): suma turnos a la reserva, de 1 a 1000, como `quota:grant`
   - Revision de mundos (`packs.review`, ya existe): la cola con aprobar y rechazar con motivo, sobre la API de hoy
   - Catalogo (`catalog-worlds.update`, god, admin): precio, destacado, orden, oculto y beta, como `catalog:set`
   - Reembolsar (`payments.refund` de atomo/payments, god, admin): endpoint propio que guarda el motivo y llama a `PaymentService::refund`; el efecto sigue llegando por el webhook `charge.refunded`
-  - Suspender una cuenta: **espera**. Es generico (estado `banned` y revocar tokens), va en atomo-user, y antes hay que revisar los cambios nuevos de AtomoPlatform (`b9a4279`)
+  - Suspender y reactivar una cuenta (`users.suspend` de atomo-user, god y admin): estado `suspended`, tokens y sesiones cerrados, y `EnsureAccountIsActive` corta lo que siga abierto
+- [x] **Diseño del panel** (30-09, platform `d6ab6ed`): plantilla de diseño neutra en Atomo (`docs/DESIGN.md` de la plataforma, regla 12 de su CLAUDE.md): tablas que pasan a tarjetas en el telefono, modal como hoja, bloques de pagina y marco nuevo; el panel es la referencia viva. La identidad visual propia del panel, si se quiere, sale de un designboard de Gabino
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
