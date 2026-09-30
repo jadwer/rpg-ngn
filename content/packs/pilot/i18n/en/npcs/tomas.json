@@ -1,12 +1,12 @@
 {
-  "description": "The inn's serving boy, young and hollow-eyed from lack of sleep. He watches the door more than he waits tables, and he recognizes the Nine even though the village has forgotten them.",
+  "description": "A young miner, hollow-eyed from lack of sleep. His brother is one of the nine who went down and never came back. He's the only one in the village whose memory half held: he recognizes the Nine, but doubts himself because no one believes him.",
   "goals": [
     "Get someone to believe him without having to explain everything",
-    "Keep the Nine from going back down"
+    "Bring his brother back"
   ],
   "relationships": [
     {
-      "kind": "works for"
+      "kind": "used to work for"
     }
   ]
 }

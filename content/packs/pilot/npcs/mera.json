@@ -1,0 +1,13 @@
+{
+  "id": "mera",
+  "name": "Mera",
+  "portrait": "portraits/mera.webp",
+  "location": "posada",
+  "description": "La posadera de El Farol Torcido. Práctica, cálida con quien paga. No recuerda a los Nueve, pero cuando abre el libro de huéspedes le da un vértigo que la asusta y la pone a la defensiva. En su libreta de cuentas lleva hasta la última comida cobrada.",
+  "goals": [
+    "Que quien se queda pague",
+    "No volver a sentir ese vértigo al abrir el libro"
+  ],
+  "knows": [],
+  "relationships": []
+}

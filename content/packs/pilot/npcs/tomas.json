@@ -2,17 +2,17 @@
   "id": "tomas",
   "name": "Tomás",
   "portrait": "portraits/tomas.webp",
-  "location": "posada",
-  "description": "El mozo de la posada, joven y con ojeras de no dormir. Vigila la puerta más de lo que atiende las mesas, y reconoce a los Nueve aunque el pueblo los haya olvidado.",
+  "location": "plaza",
+  "description": "Minero joven, con ojeras de no dormir. Su hermano es uno de los nueve que bajaron y no volvieron. Es el único del pueblo cuya memoria resistió a medias: reconoce a los Nueve, pero duda de sí mismo porque nadie le cree.",
   "goals": [
     "Que alguien le crea sin tener que explicarlo todo",
-    "Que los Nueve no vuelvan a bajar"
+    "Traer de vuelta a su hermano"
   ],
   "knows": [],
   "relationships": [
     {
-      "with": "npc:bren",
-      "kind": "trabaja para"
+      "with": "npc:osric",
+      "kind": "trabajaba para"
     }
   ]
 }

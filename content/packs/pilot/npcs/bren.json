@@ -1,18 +1,12 @@
 {
   "id": "bren",
   "name": "Bren",
-  "portrait": "portraits/bren.webp",
-  "location": "posada",
-  "description": "Lleva la posada y el libro de huéspedes. Anota todo y no enseña nada; con desconocidos es cortés hasta que deja de serlo.",
+  "location": "plaza",
+  "description": "El guardia de la puerta del pueblo. Bosteza porque lleva días durmiendo mal: sueña con una caravana que llega por el camino del norte, siempre la misma. Jura que hace semanas que no entra nadie nuevo, y aun así abre la puerta sin pedir nombre, como si una parte de él ya conociera a quien llega.",
   "goals": [
-    "Que el registro no salga del mostrador",
-    "Que el pueblo siga como está"
+    "Dormir una noche sin soñar con la caravana",
+    "Saber quién entra y quién sale de Valdoria"
   ],
   "knows": [],
-  "relationships": [
-    {
-      "with": "npc:osric",
-      "kind": "le teme"
-    }
-  ]
+  "relationships": []
 }

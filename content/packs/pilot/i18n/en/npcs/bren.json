@@ -1,12 +1,7 @@
 {
-  "description": "Runs the inn and keeps the guest ledger. Writes everything down and shows nothing; polite with strangers until suddenly they aren't.",
+  "description": "The village gate guard. He keeps yawning because he hasn't slept well in days: he dreams of a caravan arriving along the north road, always the same one. He swears no one new has come in for weeks, and yet he opens the gate without asking for a name, as if part of him already knew whoever arrives.",
   "goals": [
-    "Keep the ledger behind the counter",
-    "Keep the village the way it is"
-  ],
-  "relationships": [
-    {
-      "kind": "fears"
-    }
+    "Sleep one night without dreaming of the caravan",
+    "Know who comes in and out of Valdoria"
   ]
 }
