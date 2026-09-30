@@ -92,6 +92,11 @@ export function noCharacterText(context: 'create' | 'invite'): { title: string; 
   return { title: t('table.copy.noCharacterTitle'), hint: t('table.copy.noCharacterHint') }
 }
 
+/** Quien juega un personaje ya tomado, en el selector. */
+export function characterOwnerText(owner: string): string {
+  return t('table.copy.playedBy', { owner })
+}
+
 /** Lo que se puede hacer para retirar una mesa de la lista. */
 export interface TableRetirement {
   /** El anfitrion archiva; archivada, la recupera. */
@@ -141,8 +146,8 @@ export function retirementText(retirement: TableRetirement): { archive: string; 
 
 /** De donde sale un pack, para decirlo junto al nombre: nada si es oficial. */
 export function packOriginText(pack: Pick<PackOption, 'origin' | 'author'>): string | null {
-  if (pack.origin === 'mine') return 'tuyo'
-  if (pack.origin === 'catalog') return pack.author ? `de ${pack.author}` : 'del catálogo'
+  if (pack.origin === 'mine') return t('table.copy.originMine')
+  if (pack.origin === 'catalog') return pack.author ? t('table.copy.originBy', { author: pack.author }) : t('table.copy.originCatalog')
   return null
 }
 
@@ -150,14 +155,14 @@ export function packOriginText(pack: Pick<PackOption, 'origin' | 'author'>): str
 export function packStatusText(status: string | undefined): string {
   switch (status) {
     case 'pending':
-      return 'En revisión'
+      return t('table.copy.statusPending')
     case 'published':
-      return 'Publicado'
+      return t('table.copy.statusPublished')
     case 'rejected':
-      return 'Rechazado'
+      return t('table.copy.statusRejected')
     case 'retired':
-      return 'Retirado'
+      return t('table.copy.statusRetired')
     default:
-      return 'Privado'
+      return t('table.copy.statusPrivate')
   }
 }

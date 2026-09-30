@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
 import { balanceText, bucketText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
 import { Elements } from '@stripe/react-stripe-js'
@@ -109,11 +109,11 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       {blessed !== null ? <Blessing {...purchaseBlessing(blessed)} onClose={() => setBlessed(null)} /> : null}
 
       {buying && stripePromise ? (
-        <Elements stripe={stripePromise} options={{ clientSecret: buying.clientSecret, locale: 'es' }}>
+        <Elements stripe={stripePromise} options={{ clientSecret: buying.clientSecret, locale: language() }}>
           <PayForm
-            summary={`${buying.pack.name}: ${packPrice(buying.pack)} por ${buying.pack.turns} turnos.`}
+            summary={t('creditsPanel.resumenCompra', { name: buying.pack.name, price: packPrice(buying.pack), turns: buying.pack.turns })}
             payLabel={packCharge(buying.pack)}
-            pendingNote="El pago quedó pendiente. Si se completa, los turnos se añadirán solos."
+            pendingNote={t('creditsPanel.pagoQuedoPendiente')}
             onPaid={() => done(buying.pack.turns)}
             onCancel={() => setBuying(null)}
             onError={setError}

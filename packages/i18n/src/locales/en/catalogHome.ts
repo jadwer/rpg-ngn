@@ -16,4 +16,5 @@ export const catalogHome: Messages<typeof es> = {
   paseDeTemporada: 'Season pass',
   capitulosX2: 'Chapters x2',
   obtenerElPase: 'Get the pass',
+  estaTemporada: 'this season',
 }

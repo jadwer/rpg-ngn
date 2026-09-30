@@ -85,7 +85,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
     setUploadNotice(null)
     try {
       const pack = await client.uploadPack(file, file.name)
-      setUploadNotice({ ok: true, text: `${pack.name} ya es tuyo: puedes crear una mesa con él.`, issues: [] })
+      setUploadNotice({ ok: true, text: t('myWorldsPage.yaEsTuyo', { name: pack.name }), issues: [] })
       setFile(null)
       setTerms(false)
       if (fileInput.current) fileInput.current.value = ''
@@ -120,11 +120,11 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
           {t('myWorldsPage.subirUnMundo')}
         </div>
         <p className="hint">
-          {t('myWorldsPage.unMundoEsUn')} <b>{t('myWorldsPage.rpgpack')}</b>: un zip con la estructura de la{' '}
+          {t('myWorldsPage.unMundoEsUn')} <b>{t('myWorldsPage.rpgpack')}</b>: {t('myWorldsPage.zipConLaEstructura')}{' '}
           <a href={SPEC} target="_blank" rel="noreferrer">
             {t('myWorldsPage.especificacionPublica')}
           </a>{' '}
-          (personajes, lugares, secretos, sesiones, retratos y mapas). Se revisa al momento y queda listo para tus mesas. Las imágenes se convierten a WebP; nada de SVG.
+          {t('myWorldsPage.estructuraDelZip')}
         </p>
         <label className="field">
           <span>{t('myWorldsPage.archivo')}</span>
@@ -132,16 +132,17 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
         </label>
         <label className="check">
           <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} disabled={busy} />
-          Declaro que tengo derecho a subir este contenido (es mío o su licencia lo permite) y respondo de ello.
+          {t('myWorldsPage.declaroDerecho')}
         </label>
         <div className="row">
           <button type="button" className="btn primary" disabled={busy || !file || !terms || remaining === 0} onClick={() => void upload()}>
             {busy ? <span className="spinner" aria-hidden /> : null}
-            Subir
+            {t('myWorldsPage.subir')}
           </button>
           {mine ? (
             <span className="hint">
-              {mine.used} de {mine.freeLimit} mundos propios{remaining === 0 ? ': para subir otro, retira uno o sube una versión nueva de los que tienes.' : '.'}
+              {t('myWorldsPage.usadosDeLimite', { used: mine.used, freeLimit: mine.freeLimit })}
+              {remaining === 0 ? t('myWorldsPage.paraSubirOtro') : '.'}
             </span>
           ) : null}
         </div>
@@ -174,12 +175,12 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                 <div>
                   <h3>{p.name}</h3>
                   <span className="hint">
-                    {packOriginText({ origin: 'catalog', author: p.author ?? null })} · versión {p.version} · {p.system}
+                    {packOriginText({ origin: 'catalog', author: p.author ?? null })} · {t('myWorldsPage.version', { version: p.version })} · {p.system}
                   </span>
                 </div>
               </div>
               <p className="hint">
-                Procedencia: {String(p.provenance?.['class'] ?? '?')} · licencia {String(p.provenance?.['license'] ?? '?')}
+                {t('myWorldsPage.procedencia', { provenanceClass: String(p.provenance?.['class'] ?? '?'), license: String(p.provenance?.['license'] ?? '?') })}
               </p>
               {previewing === `review:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
               <div className="row">
@@ -192,7 +193,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                   className="btn ghost small danger"
                   disabled={busy}
                   onClick={() => {
-                    const note = window.prompt('Motivo del rechazo (lo lee el autor):')
+                    const note = window.prompt(t('myWorldsPage.motivoDelRechazo'))
                     if (note && note.trim()) void act(() => client.reviewPack(p.packId!, 'reject', note.trim()))
                   }}
                 >
@@ -213,7 +214,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
               <div>
                 <h3>{p.name}</h3>
                 <span className="hint">
-                  {p.slug} · versión {p.version} · {p.system}
+                  {p.slug} · {t('myWorldsPage.version', { version: p.version })} · {p.system}
                 </span>
               </div>
               <span className={`chip st-${p.status ?? 'private'}`}>{packStatusText(p.status)}</span>
@@ -222,7 +223,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
             <p className="hint">
               {t('play.packCounts', { characters: p.characters, sessions: p.sessions })} {p.tables ? t(p.tables === 1 ? 'play.tablesPlayOne' : 'play.tablesPlayMany', { count: p.tables }) : t('play.noTableYet')}
             </p>
-            {p.status === 'rejected' && p.reviewNote ? <div className="error">No se publicó: {p.reviewNote}</div> : null}
+            {p.status === 'rejected' && p.reviewNote ? <div className="error">{t('myWorldsPage.noSePublico', { reason: p.reviewNote })}</div> : null}
             {p.status === 'pending' ? <p className="hint">{t('myWorldsPage.enLaColaDe')}</p> : null}
             {previewing === `mine:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
             <div className="row">
@@ -262,7 +263,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
               <div>
                 <h3>{p.name}</h3>
                 <span className="hint">
-                  {packOriginText({ origin: 'catalog', author: p.author ?? null })} · versión {p.version} · {p.system}
+                  {packOriginText({ origin: 'catalog', author: p.author ?? null })} · {t('myWorldsPage.version', { version: p.version })} · {p.system}
                 </span>
               </div>
               {p.mine ? <span className="chip">{t('myWorldsPage.tuyo')}</span> : p.activated ? <span className="chip done">{t('myWorldsPage.enTusMundos')}</span> : null}

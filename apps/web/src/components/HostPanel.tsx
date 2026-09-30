@@ -94,7 +94,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                     <select className="select" name="sesion" value={code} onChange={(e) => setCode(e.target.value)}>
                       {opciones.map((o) => (
                         <option key={o.code} value={o.code}>
-                          {`${o.code} · ${o.title}${o.played ? ' (ya jugada)' : ''}`}
+                          {`${o.code} · ${o.title}${o.played ? t('hostPanel.yaJugada') : ''}`}
                         </option>
                       ))}
                     </select>
@@ -107,7 +107,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                 )}
                 <label className="field" style={{ flex: 1, minWidth: 220 }}>
                   <span>{t('hostPanel.notaDeLaSesion')}</span>
-                  <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el GM la recibe" maxLength={120} />
+                  <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('hostPanel.momentoDelMundo')} maxLength={120} />
                 </label>
               </div>
               <div className="row">

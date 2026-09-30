@@ -15,4 +15,6 @@ export const newTable = {
   directorDeJuego: 'Director de juego',
   premisa: 'Premisa',
   premisaDeLaMesa: 'Premisa de la mesa',
+  laMesaYaExiste: 'La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.',
+  invitar: 'Invitar',
 }

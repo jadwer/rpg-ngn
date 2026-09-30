@@ -12,4 +12,8 @@ export const voicePage = {
   escucharUnaPrueba: 'Escuchar una prueba',
   parar: 'Parar',
   seGuardaEnEste: 'Se guarda en este navegador.',
+  esteNavegadorNoTieneSintesis: 'Este navegador no tiene síntesis de voz; la mesa se juega leyendo.',
+  filtraLasVoces: 'Filtra las voces del navegador. El GM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.',
+  enLinea: ', en línea',
+  vozError: 'Voz: {{error}}',
 }

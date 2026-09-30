@@ -62,7 +62,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
           {t('deleteAccount.borrarMiCuenta')}
         </div>
         <p className="hint">
-          Puedes borrar tu cuenta cuando quieras. Lo que escribiste en las partidas se conserva sin tu nombre, porque también es de quienes jugaron contigo. Lo explica el{' '}
+          {t('deleteAccount.puedesBorrarTuCuenta')}{' '}
           <Link href="/privacidad">{t('deleteAccount.avisoDePrivacidad')}</Link>.
         </p>
         <div className="row">
@@ -91,7 +91,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
             {mesas.map((m) => (
               <li key={m.id}>
                 <Link href="/mesas">{m.name}</Link>
-                {m.played ? ' (jugada: archívala)' : ' (sin jugar: puedes borrarla)'}
+                {m.played ? t('deleteAccount.jugadaArchivala') : t('deleteAccount.sinJugarPuedesBorrarla')}
               </li>
             ))}
           </ul>

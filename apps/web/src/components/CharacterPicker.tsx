@@ -1,7 +1,7 @@
 'use client'
 
 import type { Character } from '@rpg-ngn/content'
-import { noCharacterText } from '@rpg-ngn/ui-logic'
+import { characterOwnerText, noCharacterText } from '@rpg-ngn/ui-logic'
 import { Portrait } from './Portrait'
 
 interface Props {
@@ -40,7 +40,7 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
             <div className="r">
               {character.race}, {character.class}
             </div>
-            {owner ? <span className="tag">lo juega {owner}</span> : <span className="tag">{character.roles.join(' / ')}</span>}
+            {owner ? <span className="tag">{characterOwnerText(owner)}</span> : <span className="tag">{character.roles.join(' / ')}</span>}
           </button>
         )
       })}

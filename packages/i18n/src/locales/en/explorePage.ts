@@ -27,4 +27,5 @@ export const explorePage: Messages<typeof es> = {
   origen: 'Origin',
   bloqueado: 'Locked',
   temporadaActual: 'Current season',
+  hasAvanzadoUn: 'You have progressed {{percent}}%',
 }

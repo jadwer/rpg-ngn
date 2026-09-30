@@ -1,6 +1,8 @@
 /** Guia del anfitrion (components/GuideContent.tsx). */
 export const guide = {
   guiaDelAnfitrion: 'Guía del anfitrión',
+  elAnfitrionEsQuien: 'El anfitrión es quien crea la mesa: elige el mundo, invita a su grupo, abre las sesiones y paga los turnos. El director de juego lo pone Ad Astra Mentis; tú solo tienes que reunir a la gente.',
+  tambienEstaEnEl: '(también está en el menú como',
   '1CreaLaMesa': '1. Crea la mesa',
   entraEn: 'Entra en',
   mesas: 'Mesas',

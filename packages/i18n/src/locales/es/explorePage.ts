@@ -25,4 +25,5 @@ export const explorePage = {
   origen: 'Origen',
   bloqueado: 'Bloqueado',
   temporadaActual: 'Temporada actual',
+  hasAvanzadoUn: 'Has avanzado un {{percent}}%',
 }

@@ -46,7 +46,7 @@ function Settings() {
         <div className="label" style={{ marginTop: 0 }}>
           {t('voicePage.vozDeLaNarracion')}
         </div>
-        {!tts.supported ? <p className="hint">Este navegador no tiene síntesis de voz; la mesa se juega leyendo.</p> : null}
+        {!tts.supported ? <p className="hint">{t('voicePage.esteNavegadorNoTieneSintesis')}</p> : null}
 
         <label className="field">
           <span>{t('voicePage.idiomaDeLectura')}</span>
@@ -58,7 +58,7 @@ function Settings() {
             ))}
           </select>
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Filtra las voces del navegador. El GM narra en el idioma de la mesa; esto solo cambia con qué voz se lee.
+            {t('voicePage.filtraLasVoces')}
           </span>
         </label>
 
@@ -68,7 +68,7 @@ function Settings() {
             {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? t('play.noVoices') : t('play.loadingVoices')}</option> : null}
             {tts.voices.map((voice) => (
               <option key={voice.uri} value={voice.uri}>
-                {voice.name} ({voice.lang}){voice.local ? '' : ', en línea'}
+                {voice.name} ({voice.lang}){voice.local ? '' : t('voicePage.enLinea')}
               </option>
             ))}
           </select>
@@ -111,7 +111,7 @@ function Settings() {
               {t('voicePage.parar')}
             </button>
           )}
-          {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">{t('voicePage.seGuardaEnEste')}</span>}
+          {tts.error ? <span className="error">{t('voicePage.vozError', { error: tts.error })}</span> : <span className="hint">{t('voicePage.seGuardaEnEste')}</span>}
         </div>
       </section>
     </div>

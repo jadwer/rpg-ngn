@@ -18,4 +18,6 @@ export const hostPanel: Messages<typeof es> = {
   premisa: 'Premise',
   reglasDeLaMesa: 'Table rules',
   directorDeJuego: 'Game master',
+  yaJugada: ' (already played)',
+  momentoDelMundo: 'Moment in the world or what is happening today; the GM receives it',
 }

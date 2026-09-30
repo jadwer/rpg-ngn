@@ -29,4 +29,5 @@ export const turnPanel: Messages<typeof es> = {
   queHacesEscribeTu: 'What do you do? Write your action or say you do nothing.',
   dadosMantenPresionadoY: 'Dice: press, hold and let go',
   soloElAnfitrionCierra: 'Host only: close even if someone is missing',
+  elGmTuvoUnProblema: 'The GM had a problem and the turn reopened: {{error}}',
 }

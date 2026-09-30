@@ -5688,13 +5688,8 @@ a {
 /* Lo nuevo va en archivos por dominio en ./styles, importados en layout.tsx
    despues de este (VAM 26-09, A7): este archivo no crece mas. */
 
-/* Selector de idioma (i18n, 29-09): compacto en la portada y en entrar. */
+/* Selector de idioma (i18n, 29-09): el completo, en Mi cuenta. */
 .language-switch.small button {
   padding: 4px 10px;
   font-size: 0.8rem;
-}
-.language-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 18px;
 }

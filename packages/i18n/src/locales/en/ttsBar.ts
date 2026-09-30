@@ -19,4 +19,10 @@ export const ttsBar: Messages<typeof es> = {
   quitarElAvisoDe: 'Turn off the nobody-reads-aloud warning',
   volverAAvisarSi: 'Warn again if nobody reads aloud',
   vozPorDefectoIdioma: 'Default voice, language, speed and pitch',
+  esteNavegadorNoTieneSintesis: 'this browser has no speech synthesis',
+  elNavegadorPideUnToque: 'the browser needs a tap from you before it can speak; press Read',
+  laVozDelSistema: 'the system voice failed; try another voice',
+  esaVozNoEsta: 'that voice is not available; pick another',
+  elAudioEstaOcupado: 'the audio is busy; try again',
+  elMotorDeVozFallo: 'the speech engine failed ({{code}})',
 }

@@ -72,11 +72,11 @@ export function SheetsPanel({ entries, footer, persona, portraitUriOf, onClose }
                   </div>
                   {state ? (
                     <div className="hp">
-                      Vida {state.hp.current}/{state.hp.max}
+                      {t('sheetsPanel.vida', { current: state.hp.current, max: state.hp.max })}
                     </div>
                   ) : null}
-                  {slot.kind === 'taken' ? <span className={`tag${mine ? ' mine' : ''}`}>{mine ? 'tu personaje' : slot.player}</span> : null}
-                  {slot.kind === 'free' ? <span className="tag free">{visibility.veiled ? 'disponible, sin memoria' : 'disponible'}</span> : null}
+                  {slot.kind === 'taken' ? <span className={`tag${mine ? ' mine' : ''}`}>{mine ? t('sheetsPanel.tuPersonaje') : slot.player}</span> : null}
+                  {slot.kind === 'free' ? <span className="tag free">{visibility.veiled ? t('sheetsPanel.disponibleSinMemoria') : t('sheetsPanel.disponible')}</span> : null}
                 </button>
               ))}
             </div>

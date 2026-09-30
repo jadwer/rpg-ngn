@@ -215,8 +215,8 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
           {signedIn ? (
             <>
               <b>{season.chapters}</b>
-              <span>{season.chapters === 1 ? 'capítulo' : 'capítulos'}</span>
-              <small>Has avanzado un {Math.round(progress * 100)}%</small>
+              <span>{season.chapters === 1 ? t('common.capituloWord') : t('common.capitulosWord')}</span>
+              <small>{t('explorePage.hasAvanzadoUn', { percent: Math.round(progress * 100) })}</small>
               <Link href="/temporada" className="pase-ver">
                 {t('explorePage.verElPase')}
               </Link>

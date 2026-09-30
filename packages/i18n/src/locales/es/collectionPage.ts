@@ -5,4 +5,6 @@ export const collectionPage = {
   cargando: 'Cargando…',
   aunNoTienesNada: 'Aún no tienes nada. Cada turno que juegas es un capítulo, y los capítulos abren los premios del pase.',
   verElPase: 'Ver el pase',
+  valeHasta: 'vale hasta',
+  vencioEl: 'venció el',
 }

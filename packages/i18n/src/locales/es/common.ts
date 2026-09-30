@@ -11,4 +11,6 @@ export const common = {
   browser: 'Navegador',
   pushNotEnabled: 'El servidor todavía no tiene los avisos activados.',
   languages: { es: 'Español', en: 'English' },
+  capituloWord: 'capítulo',
+  capitulosWord: 'capítulos',
 }

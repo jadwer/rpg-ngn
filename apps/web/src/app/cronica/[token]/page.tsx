@@ -83,7 +83,7 @@ export default function CronicaPage() {
 
       {chronicle.sessions.map((s) => (
         <section key={s.code} className="cronica-session">
-          <h2>Sesión {s.code}</h2>
+          <h2>{t('chroniclePage.sesionCodigo', { code: s.code })}</h2>
           {s.turns.map((turn) => (
             <article key={turn.number} className="cronica-turn">
               {turn.actions.length > 0 ? (

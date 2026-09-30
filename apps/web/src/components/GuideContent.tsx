@@ -17,14 +17,12 @@ export function GuideContent() {
       </header>
       <hr className="rule" />
 
-      <p>
-        El anfitrión es quien crea la mesa: elige el mundo, invita a su grupo, abre las sesiones y paga los turnos. El director de juego lo pone Ad Astra Mentis; tú solo tienes que reunir a la gente.
-      </p>
+      <p>{t('guide.elAnfitrionEsQuien')}</p>
 
       <h2>{t('guide.1CreaLaMesa')}</h2>
       <ol>
         <li>
-          {t('guide.entraEn')} <Link href="/mesas">{t('guide.mesas')}</Link> {t('guide.yPulsa')} <b>{t('guide.crearMesa')}</b> (también está en el menú como <b>{t('guide.nuevaMesa')}</b>).
+          {t('guide.entraEn')} <Link href="/mesas">{t('guide.mesas')}</Link> {t('guide.yPulsa')} <b>{t('guide.crearMesa')}</b> {t('guide.tambienEstaEnEl')} <b>{t('guide.nuevaMesa')}</b>).
         </li>
         <li>{t('guide.ponleNombreYElige')}</li>
         <li>{t('guide.eligeTuPersonajeSi')}</li>

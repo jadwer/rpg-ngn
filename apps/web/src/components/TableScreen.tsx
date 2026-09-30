@@ -665,7 +665,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             <div className="scene-caption hide-on-screen">
               {turn ? (
                 <span className="pill">
-                  <b>Turno {turn.number}</b> {progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}
+                  <b>{t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
                 </span>
               ) : null}
             </div>
@@ -687,7 +687,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             <section className="scene-hero hide-on-screen" style={heroStyle} aria-label={t('tableScreen.escena')}>
               {turn ? (
                 <span className="pill">
-                  <b>Turno {turn.number}</b> {progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}
+                  <b>{t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
                 </span>
               ) : null}
               <div className="kicker">{packName ?? table.name}</div>
@@ -763,7 +763,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 <>
                   {/* El enlace primero: es la via rapida y la que no pide amistad. */}
                   <InviteLink client={client} tableId={table.id} />
-                  <Panel labelledBy="Invitar por correo">
+                  <Panel labelledBy={t('invitePanel.invitarPorCorreo')}>
                     <InvitePanel client={client} table={table} meId={user.id} pack={pack} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
                   </Panel>
                 </>
@@ -794,7 +794,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               <TtsBar tts={tts} />
               {showVoiceNotice ? (
                 <p className="hint">
-                  Este navegador no tiene voces en español instaladas; la lectura sonará en otro idioma o no sonará.{' '}
+                  {t('tableScreen.esteNavegadorNoTiene')}{' '}
                   <button
                     type="button"
                     className="btn ghost small"
@@ -823,7 +823,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 >
                   {t('tableScreen.modoPantalla')}
                 </button>
-                <span className="hint">Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).</span>
+                <span className="hint">{t('tableScreen.soloNarrativaYDialogos')}</span>
               </div>
               </Panel>
             </div>

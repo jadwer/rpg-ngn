@@ -1,11 +1,12 @@
 'use client'
 
-import { language } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type ApiClient } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useMemo, type ReactNode } from 'react'
 import { WEB_HEADER, useSession } from '../../lib/session'
 import { LogoHorizontal } from '../Brand'
+import { LanguageMenu } from '../LanguageMenu'
 import { AppShell } from './AppShell'
 
 /**
@@ -44,11 +45,12 @@ export function PublicOrApp({ children }: { children: (client: ApiClient, signed
           <LogoHorizontal height={34} />
         </Link>
         <div className="shell-actions">
+          <LanguageMenu />
           <Link href="/entrar?volver=/mundos/explorar" className="btn small">
-            Entrar
+            {t('cta.entrar')}
           </Link>
           <Link href="/crear-cuenta?volver=/mundos/explorar" className="btn primary small">
-            Crear cuenta
+            {t('cta.crearCuenta')}
           </Link>
         </div>
       </header>

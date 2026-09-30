@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { matchesLanguage, pitchFor, splitNarration, type SpeechEngine } from '@rpg-ngn/ui-logic'
 
 /**
@@ -86,7 +87,7 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
   const engine: SpeechEngine = {
     speak(text, onDone, item) {
       if (!speechSupported()) {
-        options.onError?.('este navegador no tiene síntesis de voz')
+        options.onError?.(t('ttsBar.esteNavegadorNoTieneSintesis'))
         onDone()
         return
       }
@@ -142,16 +143,16 @@ export function createWebSpeechEngine(options: WebSpeechOptions): SpeechEngine {
 function describeSpeechError(code: string): string {
   switch (code) {
     case 'not-allowed':
-      return 'el navegador pide un toque tuyo antes de hablar; pulsa Leer'
+      return t('ttsBar.elNavegadorPideUnToque')
     case 'synthesis-unavailable':
     case 'synthesis-failed':
-      return 'la voz del sistema falló; prueba otra voz'
+      return t('ttsBar.laVozDelSistema')
     case 'language-unavailable':
     case 'voice-unavailable':
-      return 'esa voz no está disponible; elige otra'
+      return t('ttsBar.esaVozNoEsta')
     case 'audio-busy':
-      return 'el audio está ocupado; vuelve a intentar'
+      return t('ttsBar.elAudioEstaOcupado')
     default:
-      return `el motor de voz falló (${code})`
+      return t('ttsBar.elMotorDeVozFallo', { code })
   }
 }

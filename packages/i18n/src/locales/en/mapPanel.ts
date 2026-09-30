@@ -9,4 +9,6 @@ export const mapPanel: Messages<typeof es> = {
   mapasDelPack: 'Pack maps',
   acercar: 'Zoom in',
   alejar: 'Zoom out',
+  ruedaOPellizco: 'Scroll or pinch to zoom, drag to move; double click returns to the full map.',
+  deCaminoOFuera: 'On the way or off scene: {{names}}.',
 }

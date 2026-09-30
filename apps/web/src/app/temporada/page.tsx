@@ -58,7 +58,7 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
     <div className="page en-shell pase-page">
       <h1 className="pagina-titulo">{pass.season.name}</h1>
       <p className="pagina-sub">
-        Pase de descubridor · {dias === 1 ? 'queda 1 día' : `quedan ${dias} días`}
+        {t('seasonPage.paseDeDescubridor')} · {dias === 1 ? t('seasonPage.queda1Dia') : t('seasonPage.quedanNDias', { days: dias })}
       </p>
 
       <div className="hojas">
@@ -66,7 +66,7 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
           <div className="pase-resumen">
             <div className="pase-capitulos">
               <b>{pass.chapters}</b>
-              <span>{pass.chapters === 1 ? 'capítulo' : 'capítulos'}</span>
+              <span>{pass.chapters === 1 ? t('common.capituloWord') : t('common.capitulosWord')}</span>
             </div>
             <div className="pase-textos">
               <p>{nextRewardText(pass)}</p>

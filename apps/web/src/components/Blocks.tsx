@@ -49,7 +49,7 @@ function Prose({ group, currentBlockId, onPressBlock }: GroupProps<ProseGroup>) 
       <div className="prose" data-block={group.blocks[0]?.id}>
         <button type="button" className="excerpt" onClick={() => setExpanded(true)}>
           {excerpt}
-          {remaining > 0 ? <span className="more">({remaining} más)</span> : null}
+          {remaining > 0 ? <span className="more">{t('blocksUi.masN', { count: remaining })}</span> : null}
         </button>
       </div>
     )

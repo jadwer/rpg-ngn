@@ -11,4 +11,7 @@ export const deleteAccount: Messages<typeof es> = {
   desaparecenTuNombreTu: 'Your name, your email and your unused credits disappear. What you wrote in your games stays, without your name.',
   escribeTuContrasenaPara: 'Write your password to confirm',
   cancelar: 'Cancel',
+  puedesBorrarTuCuenta: 'You can delete your account whenever you want. What you wrote in games is kept without your name, because it also belongs to those who played with you. It is explained in the',
+  jugadaArchivala: ' (played: archive it)',
+  sinJugarPuedesBorrarla: ' (not played: you can delete it)',
 }

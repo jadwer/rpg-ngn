@@ -9,4 +9,7 @@ export const deleteAccount = {
   desaparecenTuNombreTu: 'Desaparecen tu nombre, tu correo y tus créditos sin usar. Lo que escribiste en tus partidas se queda, sin tu nombre.',
   escribeTuContrasenaPara: 'Escribe tu contraseña para confirmar',
   cancelar: 'Cancelar',
+  puedesBorrarTuCuenta: 'Puedes borrar tu cuenta cuando quieras. Lo que escribiste en las partidas se conserva sin tu nombre, porque también es de quienes jugaron contigo. Lo explica el',
+  jugadaArchivala: ' (jugada: archívala)',
+  sinJugarPuedesBorrarla: ' (sin jugar: puedes borrarla)',
 }

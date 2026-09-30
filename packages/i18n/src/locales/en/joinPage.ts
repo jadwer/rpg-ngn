@@ -9,4 +9,7 @@ export const joinPage: Messages<typeof es> = {
   terminos: 'Terms',
   avisoDePrivacidad: 'privacy notice',
   aquiElDirectorDe: 'Here the game master is the engine: nobody in the group needs to know how to run a game.',
+  teInvita: '{{name}} is inviting you.',
+  siNoTienesCuenta: 'If you do not have an account, we will ask you to create one (name, email and password) and you will come back here.',
+  y: 'and',
 }

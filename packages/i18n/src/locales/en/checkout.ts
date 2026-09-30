@@ -6,4 +6,5 @@ export const checkout: Messages<typeof es> = {
   cancelar: 'Cancel',
   preparandoElPago: 'Preparing the payment…',
   cerrar: 'Close',
+  pagoQuedoPendiente: 'The payment is pending. If it completes, you will see it in your account automatically.',
 }

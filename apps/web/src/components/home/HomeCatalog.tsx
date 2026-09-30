@@ -137,7 +137,7 @@ export function HomeCatalog() {
               <p>{t('catalogHome.cadaTurnoQueJuegas')}</p>
               {signedIn ? (
                 <p className="capitulos">
-                  <b>{season.chapters}</b> {season.chapters === 1 ? 'capítulo' : 'capítulos'} esta temporada
+                  <b>{season.chapters}</b> {season.chapters === 1 ? t('common.capituloWord') : t('common.capitulosWord')} {t('catalogHome.estaTemporada')}
                 </p>
               ) : null}
               <Camino season={season} names={names} />

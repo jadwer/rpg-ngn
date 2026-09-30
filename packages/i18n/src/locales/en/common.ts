@@ -13,4 +13,6 @@ export const common: Messages<typeof es> = {
   browser: 'Browser',
   pushNotEnabled: 'The server does not have notifications turned on yet.',
   languages: { es: 'Español', en: 'English' },
+  capituloWord: 'chapter',
+  capitulosWord: 'chapters',
 }

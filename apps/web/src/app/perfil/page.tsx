@@ -146,7 +146,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
         <div className="row">
           <button type="submit" className="btn primary" disabled={passBusy || !current || password.length < 8 || mismatch || !confirmation}>
             {passBusy ? <span className="spinner" aria-hidden /> : null}
-            Cambiar contraseña
+            {t('profilePage.cambiarContrasena')}
           </button>
           <span className="hint">{t('profilePage.alMenos8Caracteres')}</span>
         </div>

@@ -17,4 +17,10 @@ export const ttsBar = {
   quitarElAvisoDe: 'Quitar el aviso de que nadie narra',
   volverAAvisarSi: 'Volver a avisar si nadie narra',
   vozPorDefectoIdioma: 'Voz por defecto, idioma, velocidad y tono',
+  esteNavegadorNoTieneSintesis: 'este navegador no tiene síntesis de voz',
+  elNavegadorPideUnToque: 'el navegador pide un toque tuyo antes de hablar; pulsa Leer',
+  laVozDelSistema: 'la voz del sistema falló; prueba otra voz',
+  esaVozNoEsta: 'esa voz no está disponible; elige otra',
+  elAudioEstaOcupado: 'el audio está ocupado; vuelve a intentar',
+  elMotorDeVozFallo: 'el motor de voz falló ({{code}})',
 }

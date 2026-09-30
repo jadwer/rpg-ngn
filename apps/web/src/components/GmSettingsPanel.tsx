@@ -122,7 +122,7 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   return (
     <div className="stack gm-settings">
       {gmInfo ? <p className="gm-now">{tableGmText(gmInfo)}</p> : null}
-      <p className="hint">Tu propia clave se guarda en Mi cuenta y créditos; si tienes una para este proveedor, la mesa la usa.</p>
+      <p className="hint">{t('gmSettings.tuPropiaClave')}</p>
 
       <label className="field">
         <span>{t('gmSettings.proveedor')}</span>
@@ -139,10 +139,10 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
       {current && current.kind !== 'scripted' ? (
         <label className="field">
-          <span>Modelo (opcional)</span>
+          <span>{t('gmSettings.modeloOpcional')}</span>
           <input className="input" name="modelo" value={model} onChange={(e) => setModel(e.target.value)} placeholder={current.model ?? ''} maxLength={120} disabled={disabled} />
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Vacío: {current.model ?? 'el del preset'}. Solo si sabes qué modelo quieres.
+            {t('gmSettings.vacioElDelPreset', { model: current.model ?? t('gmSettings.elDelPreset') })}
           </span>
         </label>
       ) : null}
@@ -159,12 +159,12 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
       <div className="row">
         <button type="button" className="btn" onClick={() => void test()} disabled={disabled || presets === null}>
           {working ? <span className="spinner" aria-hidden /> : null}
-          Probar
+          {t('gmSettings.probar')}
         </button>
         <button type="button" className="btn primary" onClick={() => void save()} disabled={disabled || !dirty}>
           {t('gmSettings.guardar')}
         </button>
-        <span className="hint">Probar no gasta un turno; solo comprueba clave y modelo.</span>
+        <span className="hint">{t('gmSettings.probarNoGasta')}</span>
       </div>
     </div>
   )

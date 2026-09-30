@@ -17,4 +17,6 @@ export const newTable: Messages<typeof es> = {
   directorDeJuego: 'Game master',
   premisa: 'Premise',
   premisaDeLaMesa: 'Table premise',
+  laMesaYaExiste: 'The table already exists. Invite your friends now or later from the host controls; whenever you want, come in and open the session.',
+  invitar: 'Invite',
 }

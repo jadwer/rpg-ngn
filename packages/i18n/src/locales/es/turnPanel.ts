@@ -27,4 +27,5 @@ export const turnPanel = {
   queHacesEscribeTu: '¿Qué haces? Escribe tu acción o di que no haces nada.',
   dadosMantenPresionadoY: 'Dados: mantén presionado y suelta',
   soloElAnfitrionCierra: 'Solo el anfitrión: cierra aunque falte alguien',
+  elGmTuvoUnProblema: 'El GM tuvo un problema y el turno se reabrió: {{error}}',
 }

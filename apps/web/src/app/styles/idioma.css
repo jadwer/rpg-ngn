@@ -1,0 +1,39 @@
+/* Idioma arriba a la derecha (i18n, 29-09). El panel es el de .sysmenu-panel. */
+.lang-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 38px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.lang-menu-btn:hover,
+.lang-menu-btn[aria-expanded='true'] {
+  color: var(--ink);
+  background: var(--panel-2);
+}
+.lang-menu .sysmenu-panel {
+  left: auto;
+  right: 0;
+  min-width: 150px;
+}
+.lang-menu .sysmenu-panel .active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* En entrar, crear cuenta y unirse no hay barra: el globo va en la esquina. */
+.lang-corner {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  z-index: 20;
+}

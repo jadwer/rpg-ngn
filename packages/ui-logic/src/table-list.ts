@@ -75,6 +75,6 @@ export function worldTags(catalog: WorldCatalog | null | undefined): string[] {
   if (!catalog) return []
   const { min, max } = catalog.players
   const players = min === max ? t(min === 1 ? 'table.list.playerOne' : 'table.list.playerMany', { count: min }) : t('table.list.playerRange', { min, max })
-  const format = catalog.format.charAt(0).toUpperCase() + catalog.format.slice(1)
+  const format = catalog.format === 'campaña' ? t('table.list.formatCampaign') : catalog.format === 'aventura' ? t('table.list.formatAdventure') : catalog.format === 'one-shot' ? t('table.list.formatOneShot') : catalog.format
   return [catalog.genre, players, format]
 }

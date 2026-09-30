@@ -11,4 +11,5 @@ export const profilePage = {
   repiteLaNueva: 'Repite la nueva',
   lasContrasenasNoCoinciden: 'Las contraseñas no coinciden.',
   alMenos8Caracteres: 'Al menos 8 caracteres.',
+  cambiarContrasena: 'Cambiar contraseña',
 }

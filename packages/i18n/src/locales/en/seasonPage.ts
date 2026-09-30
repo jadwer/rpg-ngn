@@ -13,4 +13,7 @@ export const seasonPage: Messages<typeof es> = {
   avanceDelCamino: 'Path progress',
   logros: 'Achievements',
   tuColeccion: 'Your collection',
+  paseDeDescubridor: 'Discoverer pass',
+  queda1Dia: '1 day left',
+  quedanNDias: '{{days}} days left',
 }

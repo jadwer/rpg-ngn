@@ -2,7 +2,7 @@
 
 import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
-import { LanguageSwitch } from '../components/LanguageSwitch'
+import { LanguageMenu } from '../components/LanguageMenu'
 import { LogoHorizontal, LogoVertical } from '../components/Brand'
 import { SessionCta } from '../components/SessionCta'
 import { HomeCatalog } from '../components/home/HomeCatalog'
@@ -61,7 +61,7 @@ export default function LandingPage() {
           </a>
         </nav>
         <div className="acciones">
-          <LanguageSwitch compact />
+          <LanguageMenu />
           <SessionCta variant="nav" />
         </div>
       </header>

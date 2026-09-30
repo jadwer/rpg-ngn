@@ -35,13 +35,13 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
   return (
     <section className="persona" aria-label={t('personaPanel.tuPersonaje')}>
       <button type="button" className="head" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
-        <span className="t">Tu personaje: {characterName}</span>
+        <span className="t">{t('personaPanel.tuPersonajeNombre', { name: characterName })}</span>
         <span className="s">{saved ? t('play.personaWritten') : t('play.personaWrite')}</span>
-        <span className="muted">{expanded ? 'ocultar' : 'mostrar'}</span>
+        <span className="muted">{expanded ? t('personaPanel.ocultar') : t('personaPanel.mostrar')}</span>
       </button>
       {expanded ? (
         <div className="body stack">
-          <p className="hint">El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el GM, que lo usa para jugarte el mundo. Responde a lo que quieras de esto:</p>
+          <p className="hint">{t('personaPanel.elPackPoneElArquetipo')}</p>
           <textarea
             className="textarea"
             name="personalidad"

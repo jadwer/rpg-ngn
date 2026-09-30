@@ -49,6 +49,15 @@ export const table: Messages<typeof es> = {
   },
 
   copy: {
+    originMine: 'yours',
+    originBy: 'by {{author}}',
+    originCatalog: 'from the catalog',
+    statusPending: 'In review',
+    statusPublished: 'Published',
+    statusRejected: 'Rejected',
+    statusRetired: 'Retired',
+    statusPrivate: 'Private',
+    playedBy: 'played by {{owner}}',
     namePlaceholderPack: '{{pack}}, Saturday',
     namePlaceholder: 'The Saturday table',
     premiseBase: 'Campaign, scene or tone; the game master uses it as a starting point.',
@@ -177,6 +186,9 @@ export const table: Messages<typeof es> = {
     tooLong: 'Too long: {{length}} characters, and {{max}} fit.',
   },
   list: {
+    formatCampaign: 'Campaign',
+    formatAdventure: 'Adventure',
+    formatOneShot: 'One-shot',
     all: 'All',
     active: 'Active',
     paused: 'Paused',

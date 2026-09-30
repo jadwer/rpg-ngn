@@ -13,4 +13,5 @@ export const profilePage: Messages<typeof es> = {
   repiteLaNueva: 'Repeat the new one',
   lasContrasenasNoCoinciden: 'The passwords do not match.',
   alMenos8Caracteres: 'At least 8 characters.',
+  cambiarContrasena: 'Change password',
 }

@@ -21,8 +21,8 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
       {sheet.veiled ? <p className="veil">{veilNote()}</p> : null}
 
       <div className="vitals">
-        <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label="Vida" />
-        <Vital value={sheet.ac === null ? '?' : String(sheet.ac)} label="Armadura" />
+        <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label={t('sheetUi.vida')} />
+        <Vital value={sheet.ac === null ? '?' : String(sheet.ac)} label={t('sheetUi.armadura')} />
         <Vital value={sheet.fortune ? String(sheet.fortune.result) : '?'} label={sheet.fortune ? sheet.fortune.tier : t('play.fortune')} />
       </div>
 

@@ -6,4 +6,8 @@ export const sheetsPanel: Messages<typeof es> = {
   cerrar: 'Close',
   cargandoLasFichasDel: 'Loading the world’s sheets...',
   fichasDeLaParty: 'Party sheets',
+  vida: 'HP {{current}}/{{max}}',
+  tuPersonaje: 'your character',
+  disponibleSinMemoria: 'available, no memory',
+  disponible: 'available',
 }

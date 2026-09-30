@@ -9,4 +9,6 @@ export const sheetUi = {
   quienEres: 'Quién eres',
   tuObjetivo: 'Tu objetivo',
   veilNote: 'Tu personaje no recuerda quién es. Elige por lo que ves: raza, clase y de qué es capaz. Lo demás lo descubres jugando.',
+  vida: 'Vida',
+  armadura: 'Armadura',
 }

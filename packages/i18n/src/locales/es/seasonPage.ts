@@ -11,4 +11,7 @@ export const seasonPage = {
   avanceDelCamino: 'Avance del camino',
   logros: 'Logros',
   tuColeccion: 'Tu colección',
+  paseDeDescubridor: 'Pase de descubridor',
+  queda1Dia: 'queda 1 día',
+  quedanNDias: 'quedan {{days}} días',
 }

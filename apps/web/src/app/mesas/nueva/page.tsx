@@ -143,8 +143,8 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       <div className="page en-shell">
         <h1 className="pagina-titulo">{created.name}</h1>
         <div className="hojas">
-          <p className="hint">La mesa ya existe. Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</p>
-          <Panel labelledBy="Invitar">
+          <p className="hint">{t('newTable.laMesaYaExiste')}</p>
+          <Panel labelledBy={t('newTable.invitar')}>
             <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack?.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={unauthorized} />
           </Panel>
           <div className="row" style={{ marginTop: 8 }}>
@@ -224,7 +224,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
         <div className="row">
           <button type="submit" className="btn primary" disabled={busy || !name.trim() || !option}>
             {busy ? <span className="spinner" aria-hidden /> : null}
-            Crear mesa
+            {t('tablesPage.crearMesa')}
           </button>
           <span className="hint">{t('newTable.despuesPodrasInvitarA')}</span>
         </div>

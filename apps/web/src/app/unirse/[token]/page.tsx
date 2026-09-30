@@ -3,7 +3,7 @@
 import { t } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, normalizeBaseUrl, type InvitePreview } from '@rpg-ngn/api-client'
 import Link from 'next/link'
-import { LanguageSwitch } from '../../../components/LanguageSwitch'
+import { LanguageMenu } from '../../../components/LanguageMenu'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { WEB_HEADER, useSession } from '../../../lib/session'
@@ -107,7 +107,7 @@ export default function UnirsePage() {
       {preview ? (
         <div className="card stack">
           <h2 className="invite-name">{preview.tableName}</h2>
-          {preview.hostName ? <p className="hint">Te invita {preview.hostName}.</p> : null}
+          {preview.hostName ? <p className="hint">{t('joinPage.teInvita', { name: preview.hostName })}</p> : null}
           <p className="hint">
             {preview.alreadyMember
               ? t('play.alreadyMember')
@@ -127,7 +127,7 @@ export default function UnirsePage() {
 
           {!session.client ? (
             <p className="hint">
-              Si no tienes cuenta, te pediremos crearla (nombre, correo y contraseña) y volverás aquí. <Link href="/terminos">{t('joinPage.terminos')}</Link> y{' '}
+              {t('joinPage.siNoTienesCuenta')} <Link href="/terminos">{t('joinPage.terminos')}</Link> {t('joinPage.y')}{' '}
               <Link href="/privacidad">{t('joinPage.avisoDePrivacidad')}</Link>.
             </p>
           ) : null}
@@ -135,8 +135,8 @@ export default function UnirsePage() {
           <p className="hint">{t('joinPage.aquiElDirectorDe')}</p>
         </div>
       ) : null}
-      <div className="language-row">
-        <LanguageSwitch compact />
+      <div className="lang-corner">
+        <LanguageMenu />
       </div>
     </main>
   )

@@ -14,4 +14,8 @@ export const voicePage: Messages<typeof es> = {
   escucharUnaPrueba: 'Play a sample',
   parar: 'Stop',
   seGuardaEnEste: 'It is saved in this browser.',
+  esteNavegadorNoTieneSintesis: 'This browser has no speech synthesis; the table is played by reading.',
+  filtraLasVoces: 'Filters the browser voices. The GM narrates in the table’s language; this only changes which voice reads it.',
+  enLinea: ', online',
+  vozError: 'Voice: {{error}}',
 }

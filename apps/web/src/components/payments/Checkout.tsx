@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type CatalogPurchase } from '@rpg-ngn/api-client'
 import { catalogBlessing, packCharge } from '@rpg-ngn/ui-logic'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
@@ -142,11 +142,11 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
           <>
             <h2>{product.kind === 'pase' ? t('play.passOf', { name: product.name }) : product.name}</h2>
             {purchase && stripe ? (
-              <Elements stripe={stripe} options={{ clientSecret: purchase.clientSecret, locale: 'es' }}>
+              <Elements stripe={stripe} options={{ clientSecret: purchase.clientSecret, locale: language() }}>
                 <PayForm
                   summary={product.kind === 'pase' ? t('play.oneTimeSeason') : t('play.oneTimeWorld')}
                   payLabel={packCharge(purchase)}
-                  pendingNote="El pago quedó pendiente. Si se completa, lo verás en tu cuenta solo."
+                  pendingNote={t('checkout.pagoQuedoPendiente')}
                   onPaid={paidNow}
                   onCancel={onClose}
                   onError={setError}

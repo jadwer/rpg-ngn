@@ -47,6 +47,15 @@ export const table = {
   },
 
   copy: {
+    originMine: 'tuyo',
+    originBy: 'de {{author}}',
+    originCatalog: 'del catálogo',
+    statusPending: 'En revisión',
+    statusPublished: 'Publicado',
+    statusRejected: 'Rechazado',
+    statusRetired: 'Retirado',
+    statusPrivate: 'Privado',
+    playedBy: 'lo juega {{owner}}',
     namePlaceholderPack: '{{pack}}, sábado',
     namePlaceholder: 'La mesa del sábado',
     premiseBase: 'Campaña, escena o tono; el director de juego la usa como punto de partida.',
@@ -175,6 +184,9 @@ export const table = {
     tooLong: 'Demasiado largo: {{length}} caracteres, y caben {{max}}.',
   },
   list: {
+    formatCampaign: 'Campaña',
+    formatAdventure: 'Aventura',
+    formatOneShot: 'One-shot',
     all: 'Todas',
     active: 'Activas',
     paused: 'En pausa',

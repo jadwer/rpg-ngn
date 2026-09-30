@@ -197,7 +197,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           )}
         </div>
       ) : null}
-      {turn?.error ? <div className="error">El GM tuvo un problema y el turno se reabrió: {turn.error}</div> : null}
+      {turn?.error ? <div className="error">{t('turnPanel.elGmTuvoUnProblema', { error: turn.error })}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 
       {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
@@ -241,7 +241,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         <div className="fortune" role="group" aria-label={t('turnPanel.tuFortunaDeEsta')}>
           <DiceRoller
             die="1d20"
-            label="Fortuna"
+            label={t('play.fortune')}
             large
             disabled={busy}
             resolve={() => onFortune().then((result) => ({ result }))}

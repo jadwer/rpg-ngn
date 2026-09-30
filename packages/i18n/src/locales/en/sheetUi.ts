@@ -11,4 +11,6 @@ export const sheetUi: Messages<typeof es> = {
   quienEres: 'Who you are',
   tuObjetivo: 'Your goal',
   veilNote: 'Your character does not remember who they are. Choose by what you see: race, class and what they can do. The rest you discover by playing.',
+  vida: 'HP',
+  armadura: 'Armor',
 }

@@ -3,6 +3,8 @@ import type { guide as es } from '../es/guide.js'
 
 export const guide: Messages<typeof es> = {
   guiaDelAnfitrion: 'Host guide',
+  elAnfitrionEsQuien: 'The host is the one who creates the table: picks the world, invites their group, opens the sessions and pays for the turns. Ad Astra Mentis provides the game master; you just need to gather the people.',
+  tambienEstaEnEl: '(also in the menu as',
   '1CreaLaMesa': '1. Create the table',
   entraEn: 'Go to',
   mesas: 'Tables',

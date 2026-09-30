@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type Collection } from '@rpg-ngn/api-client'
 import { COLLECTION_GALLERIES, galleryLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -71,7 +71,9 @@ function CollectionView({ client, unauthorized }: { client: ApiClient; unauthori
                       <strong>{item.label}</strong>
                       <small>
                         {item.season ?? ''}
-                        {item.expiresAt ? ` · ${item.active ? 'vale hasta' : 'venció el'} ${new Date(item.expiresAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}` : ''}
+                        {item.expiresAt
+                          ? ` · ${item.active ? t('collectionPage.valeHasta') : t('collectionPage.vencioEl')} ${new Date(item.expiresAt).toLocaleDateString(language() === 'en' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'long' })}`
+                          : ''}
                       </small>
                     </li>
                   ))}

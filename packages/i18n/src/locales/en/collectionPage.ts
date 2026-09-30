@@ -7,4 +7,6 @@ export const collectionPage: Messages<typeof es> = {
   cargando: 'Loading…',
   aunNoTienesNada: 'You have nothing yet. Every turn you play is a chapter, and chapters open the pass rewards.',
   verElPase: 'See the pass',
+  valeHasta: 'valid until',
+  vencioEl: 'expired on',
 }

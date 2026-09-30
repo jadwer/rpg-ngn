@@ -25,4 +25,10 @@ export const tableScreen: Messages<typeof es> = {
   tamanoDelTexto: 'Text size',
   textoMasPequeno: 'Smaller text',
   textoMasGrande: 'Bigger text',
+  turnoNumero: 'Turn {{number}}',
+  elDirectorNarra: 'the GM is narrating',
+  todosRespondieron: 'everyone answered',
+  faseDeAcciones: 'action phase',
+  esteNavegadorNoTiene: 'This browser has no Spanish voices installed; the reading will sound in another language or not sound at all.',
+  soloNarrativaYDialogos: 'Only narration and dialogue, in large text, to share or project (key F).',
 }

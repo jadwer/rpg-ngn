@@ -200,8 +200,8 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
               </div>
             </div>
             <footer>
-              <p className="hint">Rueda o pellizco para acercar, arrastra para moverte; doble clic vuelve al mapa entero.</p>
-              {view.offMap.length ? <p className="hint">De camino o fuera de escena: {view.offMap.map(nameOf).join(', ')}.</p> : null}
+              <p className="hint">{t('mapPanel.ruedaOPellizco')}</p>
+              {view.offMap.length ? <p className="hint">{t('mapPanel.deCaminoOFuera', { names: view.offMap.map(nameOf).join(', ') })}</p> : null}
               {view.map.description ? <p className="hint">{view.map.description}</p> : null}
             </footer>
           </div>

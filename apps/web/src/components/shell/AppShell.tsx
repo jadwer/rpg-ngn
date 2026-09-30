@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import type { StoredUser } from '../../lib/storage'
 import { LogoHorizontal } from '../Brand'
+import { LanguageMenu } from '../LanguageMenu'
 import { SystemMenu } from '../SystemMenu'
 import { ShellIcon } from './icons'
 import { isActive, SITE_SECTIONS, type NavItem } from './nav'
@@ -61,6 +62,7 @@ export function AppShell({ user, onLogout, children, background = 'mesas' }: Pro
           <Link href="/pronto/avisos" className="shell-iconbtn" aria-label={t('shell.aria.notices')}>
             <ShellIcon name="avisos" />
           </Link>
+          <LanguageMenu />
           <SystemMenu user={user} onLogout={onLogout} variant="avatar" />
         </div>
       </header>

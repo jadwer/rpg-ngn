@@ -9,4 +9,5 @@ export const chroniclePage: Messages<typeof es> = {
   estaMesaTodaviaNo: 'This table has not played any turn yet.',
   unaHistoriaJugadaEn: 'A story played in Ad Astra Mentis, where you decide what happens: your light novel or your roleplaying campaign, with a game master who never gets tired.',
   jugarLaTuya: 'Play yours',
+  sesionCodigo: 'Session {{code}}',
 }

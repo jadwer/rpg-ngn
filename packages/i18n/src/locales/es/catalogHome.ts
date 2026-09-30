@@ -14,4 +14,5 @@ export const catalogHome = {
   paseDeTemporada: 'Pase de temporada',
   capitulosX2: 'Capítulos x2',
   obtenerElPase: 'Obtener el pase',
+  estaTemporada: 'esta temporada',
 }
