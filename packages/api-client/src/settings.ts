@@ -166,6 +166,26 @@ export interface CatalogPurchase {
   charge: { amount: number; currency: string }
 }
 
+/**
+ * La Bendicion del bardo (30-09): 30 dias, 10 turnos al comprar y 4 cada dia
+ * que se recogen con un boton desde las 3 am (centro de Mexico).
+ */
+export interface BlessingState {
+  active: boolean
+  endsAt: string | null
+  /** Hoy hay turnos por recoger: el aviso a pantalla completa aparece. */
+  claimable: boolean
+  claimedToday: boolean
+  /** Dias que le quedan por recoger, hoy incluido si no lo ha recogido. */
+  daysLeft: number
+  turnsPerDay: number
+  price: { amount: number; currency: string }
+  /** El tema de la temporada vigente, que el aviso muestra. */
+  theme: { code: string; name: string } | null
+  /** Cabe otra compra sin pasar el tope de 180 dias. */
+  canBuy: boolean
+}
+
 export interface CatalogFilters {
   q?: string | undefined
   genre?: string | undefined
@@ -288,6 +308,10 @@ export interface SettingsApi {
   catalogWorld(id: string): Promise<CatalogWorldDetail>
   /** Arrancan el pago del pase o de un mundo; lo comprado llega con el webhook. */
   buySeasonPass(): Promise<CatalogPurchase>
+  /** La Bendicion del bardo: estado, recoger los turnos del dia y comprarla. */
+  blessing(): Promise<BlessingState>
+  claimBlessing(): Promise<BlessingState>
+  buyBlessing(): Promise<CatalogPurchase>
   buyWorld(id: string): Promise<CatalogPurchase>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
   listPackCharacters(packId: string, version: string, lang?: string): Promise<PackCharacter[]>
@@ -364,6 +388,21 @@ export function settingsApi(request: Request): SettingsApi {
 
     async buySeasonPass() {
       const { data } = await request<{ data: CatalogPurchase }>('/api/v1/season/pass/purchase', { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async blessing() {
+      const { data } = await request<{ data: BlessingState }>('/api/v1/blessing')
+      return data.data
+    },
+
+    async claimBlessing() {
+      const { data } = await request<{ data: BlessingState }>('/api/v1/blessing/claim', { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async buyBlessing() {
+      const { data } = await request<{ data: CatalogPurchase }>('/api/v1/blessing/purchase', { method: 'POST', body: {} })
       return data.data
     },
 

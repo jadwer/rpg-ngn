@@ -25,6 +25,43 @@ export interface RegisterInput {
  */
 export type RegisterResult = ({ kind: 'token' } & LoginResult) | { kind: 'verify'; message: string }
 
+/** Estado de un reporte de soporte; `waiting_user` es que el equipo espera respuesta. */
+export type SupportStatus = 'open' | 'in_progress' | 'waiting_user' | 'resolved'
+
+/** Un reporte en la lista "Mis reportes", sin la conversacion. */
+export interface SupportTicketSummary {
+  id: number
+  subject: string
+  status: SupportStatus
+  priority: string
+  /** Lo que el reporte señala (mesa, turno o pago); null si es general. */
+  about: { type: 'table' | 'turn' | 'payment'; id: string; label: string | null; url: null } | null
+  lastMessageAt: string | null
+  resolvedAt: string | null
+  createdAt: string | null
+}
+
+export interface SupportMessage {
+  id: number
+  body: string
+  internal: boolean
+  /** true si lo escribio el equipo; el autor no se expone. */
+  fromTeam: boolean
+  author: null
+  createdAt: string | null
+}
+
+export interface SupportTicket extends SupportTicketSummary {
+  messages: SupportMessage[]
+}
+
+export interface NewSupportTicket {
+  subject?: string
+  message: string
+  about?: { type: 'table' | 'turn' | 'payment'; id: string }
+  context?: Record<string, string>
+}
+
 export interface AccountApi {
   register(input: RegisterInput, deviceName: string): Promise<RegisterResult>
   /** Cambia el nombre visible (`PATCH /api/v1/profile`). */
@@ -63,6 +100,14 @@ export interface AccountApi {
    * alguna mesa. Lo que escribio en las partidas se conserva sin su nombre.
    */
   deleteAccount(password: string): Promise<string>
+  /** Los reportes de soporte propios, el mas reciente primero. */
+  supportTickets(): Promise<SupportTicketSummary[]>
+  /** Un reporte con su conversacion. */
+  supportTicket(id: number | string): Promise<SupportTicket>
+  /** Abre un reporte; 422 si `about` no es del usuario, 429 si abrio demasiados en la ultima hora. */
+  createSupportTicket(input: NewSupportTicket): Promise<SupportTicket>
+  /** Responde en el reporte; si estaba resuelto, lo reabre. */
+  replySupportTicket(id: number | string, body: string): Promise<SupportTicket>
 }
 
 type Request = <T = unknown>(path: string, init?: RequestOptions) => Promise<HttpResult<T>>
@@ -147,6 +192,31 @@ export function accountApi(request: Request): AccountApi {
     async deleteAccount(password) {
       const { data } = await request<{ meta?: { message?: string } }>('/api/v1/profile', { method: 'DELETE', body: { password } })
       return data?.meta?.message ?? 'Cuenta borrada.'
+    },
+
+    async supportTickets() {
+      const { data } = await request<{ data: SupportTicketSummary[] }>('/api/v1/support/tickets')
+      return data.data
+    },
+
+    async supportTicket(id) {
+      const { data } = await request<{ data: SupportTicket }>(`/api/v1/support/tickets/${encodeURIComponent(String(id))}`)
+      return data.data
+    },
+
+    async createSupportTicket(input) {
+      const body: NewSupportTicket = { message: input.message.trim() }
+      const subject = input.subject?.trim()
+      if (subject) body.subject = subject
+      if (input.about) body.about = input.about
+      if (input.context) body.context = input.context
+      const { data } = await request<{ data: SupportTicket }>('/api/v1/support/tickets', { method: 'POST', body })
+      return data.data
+    },
+
+    async replySupportTicket(id, body) {
+      const { data } = await request<{ data: SupportTicket }>(`/api/v1/support/tickets/${encodeURIComponent(String(id))}/messages`, { method: 'POST', body: { body: body.trim() } })
+      return data.data
     },
 
     async lookupUser(email) {

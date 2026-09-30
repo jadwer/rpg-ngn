@@ -137,3 +137,31 @@ describe('ajustes de la mesa', () => {
     expect(calls[0]?.init.headers['X-Locale']).toBe('en')
   })
 })
+
+describe('soporte', () => {
+  const ticket = { id: 5, subject: 'No carga el turno', status: 'open', priority: 'normal', about: { type: 'table', id: '12', label: 'La posada', url: null }, lastMessageAt: null, resolvedAt: null, createdAt: null, messages: [] }
+
+  it('abre un reporte sin mandar el asunto vacio', async () => {
+    const { api, calls } = client({ 'POST /api/v1/support/tickets': { status: 201, body: { data: ticket } } })
+    const creado = await api.createSupportTicket({ subject: '  ', message: ' No carga el turno de la mesa. ', about: { type: 'table', id: '12' }, context: { app: 'web' } })
+    expect(creado.id).toBe(5)
+    expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ message: 'No carga el turno de la mesa.', about: { type: 'table', id: '12' }, context: { app: 'web' } })
+  })
+
+  it('lista, lee y responde', async () => {
+    const { api, calls } = client({
+      'GET /api/v1/support/tickets': { body: { data: [ticket] } },
+      'GET /api/v1/support/tickets/5': { body: { data: ticket } },
+      'POST /api/v1/support/tickets/5/messages': { body: { data: { ...ticket, status: 'open' } } },
+    })
+    expect(await api.supportTickets()).toHaveLength(1)
+    expect((await api.supportTicket(5)).subject).toBe('No carga el turno')
+    await api.replySupportTicket(5, ' Gracias ')
+    expect(JSON.parse((calls[2]?.init.body as string | undefined) ?? '{}')).toEqual({ body: 'Gracias' })
+  })
+
+  it('el 429 llega como ApiError con el mensaje del servidor', async () => {
+    const { api } = client({ 'POST /api/v1/support/tickets': { status: 429, body: { error: 'Enviaste muchos reportes en la última hora.' } } })
+    await expect(api.createSupportTicket({ message: 'No carga el turno.' })).rejects.toMatchObject({ status: 429, message: 'Enviaste muchos reportes en la última hora.' })
+  })
+})

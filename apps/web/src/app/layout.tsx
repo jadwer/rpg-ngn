@@ -3,6 +3,7 @@ import { Cinzel, Crimson_Pro } from 'next/font/google'
 import type { ReactNode } from 'react'
 import { LanguageProvider } from '../lib/i18n'
 import { NarratorProvider } from '../lib/narrator'
+import { BlessingGate } from '../components/BlessingGate'
 import { SessionProvider } from '../lib/session'
 import './globals.css'
 import './styles/portada.css'
@@ -10,6 +11,8 @@ import './styles/mapa.css'
 import './styles/hojas.css'
 import './styles/pase.css'
 import './styles/idioma.css'
+import './styles/soporte.css'
+import './styles/bendicion.css'
 
 const cinzel = Cinzel({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-cinzel', display: 'swap' })
 const crimson = Crimson_Pro({ subsets: ['latin'], weight: ['400', '600'], style: ['normal', 'italic'], variable: '--font-crimson', display: 'swap' })
@@ -38,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <SessionProvider>
           <LanguageProvider>
             <NarratorProvider>{children}</NarratorProvider>
+            <BlessingGate />
           </LanguageProvider>
         </SessionProvider>
       </body>

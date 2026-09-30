@@ -1,11 +1,12 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
-import { ApiError, type ApiClient, type DiscovererPass } from '@rpg-ngn/api-client'
+import { language, t } from '@rpg-ngn/i18n'
+import { ApiError, type ApiClient, type BlessingState, type DiscovererPass } from '@rpg-ngn/api-client'
 import { achievementProgress, chaptersLabel, nextRewardText, pathProgress, rewardStatus, seasonDaysLeft, streakText } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Panel } from '../../components/Panel'
+import { CatalogCheckout } from '../../components/payments/Checkout'
 import { RequireSession } from '../../components/RequireSession'
 import { AppShell } from '../../components/shell/AppShell'
 
@@ -101,6 +102,8 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
           </Panel>
         ))}
 
+        <BlessingOffer client={client} />
+
         <Panel title={t('seasonPage.logros')}>
           <ul className="pase-logros">
             {pass.achievements.map((a) => (
@@ -124,5 +127,44 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
         </Panel>
       </div>
     </div>
+  )
+}
+
+/**
+ * La Bendicion del bardo a la venta (30-09): 30 dias de turnos diarios.
+ * Con una activa se puede sumar otros 30 hasta el tope de 180.
+ */
+function BlessingOffer({ client }: { client: ApiClient }) {
+  const [state, setState] = useState<BlessingState | null>(null)
+  const [buying, setBuying] = useState(false)
+  const load = useCallback(async () => {
+    try {
+      setState(await client.blessing())
+    } catch {
+      setState(null)
+    }
+  }, [client])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  if (!state) return null
+  const price = `${(state.price.amount / 100).toFixed(2)} ${state.price.currency}`
+
+  return (
+    <Panel title={t('blessing.title')}>
+      <p className="premise">{t('blessing.cardText', { first: 10, daily: state.turnsPerDay })}</p>
+      {state.active && state.endsAt ? <p className="hint">{t('blessing.activeUntil', { date: new Date(state.endsAt).toLocaleDateString(language() === 'en' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'long' }) })}</p> : null}
+      {state.canBuy ? (
+        <button type="button" className="btn primary" onClick={() => setBuying(true)}>
+          {state.active ? t('blessing.extend', { price }) : t('blessing.buy', { price })}
+        </button>
+      ) : (
+        <p className="hint">{t('blessing.capReached')}</p>
+      )}
+      <p className="hint">{t('blessing.refundNote')}</p>
+      {buying ? <CatalogCheckout client={client} product={{ kind: 'bendicion', name: t('blessing.title') }} onClose={() => setBuying(false)} onDone={load} /> : null}
+    </Panel>
   )
 }

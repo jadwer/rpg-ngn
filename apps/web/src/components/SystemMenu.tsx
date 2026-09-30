@@ -13,6 +13,8 @@ interface Props {
   onLogout?: (() => void) | undefined
   /** `avatar`: la inicial y el nombre, como en la barra del marco comun (26-09). */
   variant?: 'burger' | 'avatar' | undefined
+  /** Dentro de la mesa: "Reportar un problema" abre el panel de soporte con la mesa adjunta. */
+  onReportProblem?: (() => void) | undefined
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * (fichas, mapa, jugadores) va en su propia barra. El saldo vive aqui y no
  * en la mesa (D-UX-4).
  */
-export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
+export function SystemMenu({ user, onLogout, variant = 'burger', onReportProblem }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const path = usePathname() ?? '/'
@@ -83,6 +85,18 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
               {t(item.label)}
             </Link>
           ))}
+          {onReportProblem ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false)
+                onReportProblem()
+              }}
+            >
+              {t('support.reportarUnProblema')}
+            </button>
+          ) : null}
           {onLogout ? (
             <button
               type="button"

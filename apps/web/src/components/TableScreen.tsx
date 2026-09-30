@@ -26,6 +26,7 @@ import { PlayersPanel } from './PlayersPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
 import { RecapOverlay } from './RecapOverlay'
+import { ReportProblem } from './ReportProblem'
 import { SystemMenu } from './SystemMenu'
 import { TtsBar } from './TtsBar'
 import { TurnPanel } from './TurnPanel'
@@ -89,6 +90,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [panel, setPanel] = useState<GamePanel | null>(null)
   const sheetsOpen = panel === 'sheets'
   const togglePanel = (next: GamePanel) => setPanel((current) => (current === next ? null : next))
+  // Reportar un problema desde el menu del sitio; no es panel del juego, asi que no entra al historial.
+  const [reporting, setReporting] = useState(false)
 
   // Los paneles entran en el historial del navegador: en el telefono "atras"
   // cierra el panel en vez de sacar de la mesa, y "adelante" lo reabre. Abrir
@@ -626,13 +629,20 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
   }
-  const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={togglePanel} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
+  const gameBar = (placement: 'bottom' | 'header') => <GameBar placement={placement} active={panel} onSelect={(next) => (setReporting(false), togglePanel(next))} hasMap={maps.length > 0} isHost={isHost} playersSummary={seatsLine} />
 
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
       <header className="table-header hide-on-screen">
-        <SystemMenu user={user} onLogout={onLogout} />
+        <SystemMenu
+          user={user}
+          onLogout={onLogout}
+          onReportProblem={() => {
+            setPanel(null)
+            setReporting(true)
+          }}
+        />
         <div className="titles">
           <div className="title">{table.name}</div>
           <div className="subtitle" title={subtitle}>
@@ -832,6 +842,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             </div>
           </Drawer>
         ) : null}
+        {reporting && !screen ? <ReportProblem client={client} table={{ tableId: table.id, turnId: turn?.id ?? null }} onClose={() => setReporting(false)} onUnauthorized={onUnauthorized} /> : null}
         {maps.length > 0 ? <MapPanel packId={table.packId} maps={maps} world={projections.world} party={table.members.map((m) => m.characterId).filter((id): id is string => !!id)} viewerCharacterId={viewer.characterId} nameOf={nameOf} portraitOf={portraitOf} open={panel === 'map' && !screen} onOpenChange={(v) => setPanel(v ? 'map' : null)} showLine={false} /> : null}
       </div>
 

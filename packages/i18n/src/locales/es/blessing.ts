@@ -1,0 +1,21 @@
+/** Bendicion del bardo: el aviso diario y la compra (30-09). */
+export const blessing = {
+  title: 'Bendición del bardo',
+  kicker: 'El bardo te bendice',
+  theme: 'Tema de la temporada: {{name}}',
+  todayTurns: '+{{n}} turnos para jugar',
+  daysLeftOne: 'Te queda 1 día por recoger',
+  daysLeftMany: 'Te quedan {{n}} días por recoger',
+  lastDay: 'Hoy es el último día de tu Bendición',
+  collect: 'Recoger',
+  collected: '{{n}} turnos ya están en tu reserva',
+  collectFailed: 'No se pudo recoger. Intenta de nuevo.',
+  cardText: '30 días. {{first}} turnos al comprarla y {{daily}} cada día desde las 3 am (hora del centro de México). El día que no recojas se pierde; lo recogido no caduca.',
+  refundNote: 'Reembolsable mientras hayas recogido a lo más dos días.',
+  buy: 'Comprar por {{price}}',
+  extend: 'Sumar 30 días por {{price}}',
+  activeUntil: 'Activa hasta el {{date}}',
+  capReached: 'Ya tienes el tope de 180 días acumulados.',
+  summary: 'Bendición del bardo: 30 días de turnos diarios. Pago único, no se renueva sola.',
+  purchased: 'El bardo afina su laúd: tus primeros {{n}} turnos ya están en tu reserva y cada mañana habrá más.',
+}

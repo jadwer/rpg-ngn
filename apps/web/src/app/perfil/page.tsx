@@ -2,10 +2,12 @@
 
 import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
+import Link from 'next/link'
 import { useState, type FormEvent } from 'react'
 import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
 import { OwnKeys } from '../../components/OwnKeys'
+import { ReportProblem } from '../../components/ReportProblem'
 import { PushToggle } from '../../components/PushToggle'
 import { RequireSession } from '../../components/RequireSession'
 import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
@@ -44,6 +46,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
   const [confirmation, setConfirmation] = useState('')
   const [passBusy, setPassBusy] = useState(false)
   const [passNotice, setPassNotice] = useState<{ ok: boolean; text: string } | null>(null)
+  const [reporting, setReporting] = useState(false)
 
   const fail = (caught: unknown, set: (n: { ok: boolean; text: string }) => void) => {
     if (caught instanceof ApiError && caught.isUnauthorized) unauthorized()
@@ -157,6 +160,22 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       <PushToggle client={client} onUnauthorized={() => unauthorized()} />
 
       <OwnKeys client={client} unauthorized={unauthorized} />
+
+      <div className="card stack" style={{ marginTop: 16 }}>
+        <div className="label" style={{ marginTop: 0 }}>
+          {t('support.soporte')}
+        </div>
+        <p className="hint">{t('support.soporteTexto')}</p>
+        <div className="row">
+          <button type="button" className="btn small" onClick={() => setReporting(true)}>
+            {t('support.reportarUnProblema')}
+          </button>
+          <Link href="/soporte" className="btn ghost small">
+            {t('support.misReportes')}
+          </Link>
+        </div>
+      </div>
+      {reporting ? <ReportProblem client={client} onClose={() => setReporting(false)} onUnauthorized={() => unauthorized()} /> : null}
 
       <DeleteAccount client={client} onDeleted={logout} />
     </div>

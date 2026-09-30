@@ -1,0 +1,85 @@
+/* Soporte (30-09): Mis reportes y la conversacion con el equipo. Con las
+   piezas de siempre (card, badge, hint); solo el orden y el tono de cada
+   mensaje. El texto largo (un enlace, un error pegado) parte la linea en vez
+   de empujar la pagina de lado en 390 px. */
+.soporte-lista,
+.soporte-mensajes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.soporte-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.soporte-item:hover {
+  border-color: var(--gold-dim);
+}
+
+.soporte-asunto,
+.soporte-titulo {
+  overflow-wrap: anywhere;
+}
+
+.soporte-asunto {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.soporte-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--ink-dim);
+  text-decoration: none;
+}
+
+.soporte-volver svg {
+  width: 16px;
+  height: 16px;
+}
+
+.soporte-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.soporte-msg.mio {
+  margin-left: 24px;
+}
+
+.soporte-msg.equipo {
+  margin-right: 24px;
+  border-color: var(--gold-dim);
+  background: var(--panel-2);
+}
+
+.soporte-autor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.soporte-cuerpo {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Fuera de la mesa (Mi cuenta, Mis reportes) el panel va sobre la cabecera y
+   la barra del marco comun (z-index 20), que si no le tapan el "Cerrar". En la
+   mesa queda igual por encima de su cabecera y bajo el menu del sitio. */
+.shell .aside.report-drawer {
+  z-index: 30;
+}

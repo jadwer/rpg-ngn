@@ -89,10 +89,10 @@ export function passView(offer: SeasonPassOffer | null): { price: string; priceL
 }
 
 /** La tarjeta dorada tras pagar el pase o un mundo, con el tono de la de los paquetes. */
-export function catalogBlessing(kind: 'pase' | 'mundo', name: string): { title: string; text: string; farewell: string } {
+export function catalogBlessing(kind: 'pase' | 'mundo' | 'bendicion', name: string, firstTurns = 10): { title: string; text: string; farewell: string } {
   return {
     title: t('account.credits.blessingTitle'),
-    text: kind === 'pase' ? t('worlds.blessingPass', { name }) : t('worlds.blessingWorld', { name }),
+    text: kind === 'bendicion' ? t('blessing.purchased', { n: firstTurns }) : kind === 'pase' ? t('worlds.blessingPass', { name }) : t('worlds.blessingWorld', { name }),
     farewell: t('account.credits.blessingFarewell'),
   }
 }

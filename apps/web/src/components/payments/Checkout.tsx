@@ -94,7 +94,7 @@ export function PayForm({
   )
 }
 
-export type CatalogProduct = { kind: 'pase'; name: string } | { kind: 'mundo'; id: string; name: string }
+export type CatalogProduct = { kind: 'pase'; name: string } | { kind: 'mundo'; id: string; name: string } | { kind: 'bendicion'; name: string }
 
 /**
  * Comprar el pase de temporada o un mundo (E9 3c y 3d) en una ventana sobre
@@ -117,7 +117,7 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
         const { publishableKey } = await client.listCredits()
         if (!publishableKey) throw new Error('sin clave')
         setStripe(stripeFor(publishableKey))
-        setPurchase(product.kind === 'pase' ? await client.buySeasonPass() : await client.buyWorld(product.id))
+        setPurchase(product.kind === 'pase' ? await client.buySeasonPass() : product.kind === 'bendicion' ? await client.buyBlessing() : await client.buyWorld(product.id))
       } catch (e) {
         setError(e instanceof ApiError ? e.message : t('play.paymentStartFailed'))
       }
@@ -144,7 +144,7 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
             {purchase && stripe ? (
               <Elements stripe={stripe} options={{ clientSecret: purchase.clientSecret, locale: language() }}>
                 <PayForm
-                  summary={product.kind === 'pase' ? t('play.oneTimeSeason') : t('play.oneTimeWorld')}
+                  summary={product.kind === 'pase' ? t('play.oneTimeSeason') : product.kind === 'bendicion' ? t('blessing.summary') : t('play.oneTimeWorld')}
                   payLabel={packCharge(purchase)}
                   pendingNote={t('checkout.pagoQuedoPendiente')}
                   onPaid={paidNow}
