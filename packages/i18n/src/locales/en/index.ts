@@ -33,6 +33,7 @@ import { myWorldsPage } from './myWorldsPage.js'
 import { newTable } from './newTable.js'
 import { ownKeys } from './ownKeys.js'
 import { packPreview } from './packPreview.js'
+import { packs } from './packs.js'
 import { personaPanel } from './personaPanel.js'
 import { play } from './play.js'
 import { playersPanel } from './playersPanel.js'
@@ -61,4 +62,4 @@ import { voicePage } from './voicePage.js'
 import { worldPage } from './worldPage.js'
 import { worlds } from './worlds.js'
 
-export const en: Messages<typeof es> = { account, auth, blessing, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, fortune, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, myWorldsPage, newTable, ownKeys, packPreview, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, shop, soonPage, spriteDie, support, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }
+export const en: Messages<typeof es> = { account, auth, blessing, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, fortune, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, myWorldsPage, newTable, ownKeys, packPreview, packs, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, shop, soonPage, spriteDie, support, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }

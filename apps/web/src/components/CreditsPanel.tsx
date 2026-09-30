@@ -2,7 +2,7 @@
 
 import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, bucketText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
+import { balanceText, bucketText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packDescription, packName, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
 import { Elements } from '@stripe/react-stripe-js'
 import { type Stripe } from '@stripe/stripe-js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -111,7 +111,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       {buying && stripePromise ? (
         <Elements stripe={stripePromise} options={{ clientSecret: buying.clientSecret, locale: language() }}>
           <PayForm
-            summary={t('creditsPanel.resumenCompra', { name: buying.pack.name, price: packPrice(buying.pack), turns: buying.pack.turns })}
+            summary={t('creditsPanel.resumenCompra', { name: packName(buying.pack), price: packPrice(buying.pack), turns: buying.pack.turns })}
             payLabel={packCharge(buying.pack)}
             pendingNote={t('creditsPanel.pagoQuedoPendiente')}
             onPaid={() => done(buying.pack.turns)}
@@ -124,9 +124,9 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
           {venta.map((pack) => (
             <div key={pack.id} className="row" style={{ justifyContent: 'space-between', alignItems: 'baseline', borderTop: '1px solid var(--line, #3a2f24)', paddingTop: 12 }}>
               <span>
-                <strong>{pack.name}</strong> <span className="hint">{packValue(pack)}</span>
+                <strong>{packName(pack)}</strong> <span className="hint">{packValue(pack)}</span>
                 <br />
-                <span className="hint">{pack.description}</span>
+                <span className="hint">{packDescription(pack)}</span>
               </span>
               <button type="button" className="btn primary" onClick={() => void start(pack)} disabled={busy}>
                 {packPrice(pack)}
@@ -142,7 +142,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
               {pronto.map((pack) => (
                 <div key={pack.id} className="row" style={{ justifyContent: 'space-between', alignItems: 'baseline', opacity: 0.6 }}>
                   <span>
-                    <strong>{pack.name}</strong> <span className="hint">{pack.description}</span>
+                    <strong>{packName(pack)}</strong> <span className="hint">{packDescription(pack)}</span>
                   </span>
                   <button type="button" className="btn" disabled>
                     {packPrice(pack)}

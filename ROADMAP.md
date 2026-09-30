@@ -695,7 +695,7 @@ El modelo completo (free, temporadas, pases, suscripciones, social) vive en el r
 - [x] El tope de jugadores lo pone la historia (29-09): `catalog.players.max`, con techo de 9 en packs oficiales y 6 en los de usuario; Los Nueve Viajeros pasa a 9
 - [x] **Bendicion del bardo** (30-09, API `f761f17`, web `ed86961`, desplegada): 30 dias acumulables hasta 180, 10 turnos al comprar y 4 al dia desde las 3 am (aviso a pantalla completa que solo se cierra con Recoger), reembolsable hasta la segunda recogida. Falta: el aviso en la app, el arte del tema de cada temporada y la clausula en los terminos
 - [x] **Tienda** (30-09, web `3f7dd7a`, desplegada): `/tienda` con la Bendicion (precio en pesos), el pase de temporada, los paquetes de turnos y los mundos en venta; acceso en la barra de arriba, el menu lateral y la barra inferior del telefono
-- [ ] Paquetes de turnos del modelo nuevo (0.99 a 99.99 USD, seccion 9 del modelo): la tienda todavia vende los de 2, 5, 10 y 15 USD y anuncia Plata, Oro y Diamante como "Pronto"
+- [x] Paquetes de turnos del modelo nuevo (30-09): 0.99 a 99.99 USD en seis escalones, nombres traducidos por id; Plata, Oro y Diamante anunciados con el precio del modelo. Es la prueba de precio con los beta testers
 - [ ] Rehacer la ultima accion (de paga)
 - [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
 - [ ] Colaboraciones con streamers: despues de ajustar el producto base

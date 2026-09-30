@@ -87,3 +87,16 @@ describe('credits', () => {
     expect(balanceText({ remainingTurns: 60, usedTurns: 0, ...bucket })).toContain('60 turnos de reserva')
   })
 })
+
+describe('nombre de los paquetes', () => {
+  it('sale traducido por id y, si no esta, como lo manda la API', async () => {
+    const { setLanguage } = await import('@rpg-ngn/i18n')
+    const { packName, packDescription } = await import('./credits.js')
+    setLanguage('en')
+    expect(packName({ id: 'turnos-60', name: 'Bolsa' })).toBe('Pouch')
+    expect(packDescription({ id: 'turnos-60', description: 'x' })).toBe('A night of play with your table.')
+    expect(packName({ id: 'prepago-raro', name: 'Viejo' })).toBe('Viejo')
+    setLanguage('es')
+    expect(packName({ id: 'turnos-1400', name: 'x' })).toBe('Botín del dragón')
+  })
+})

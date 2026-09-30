@@ -1,5 +1,5 @@
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
-import { balanceText, bucketText, buyablePacks, lowBalance, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
+import { balanceText, bucketText, buyablePacks, lowBalance, packName, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -62,7 +62,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
           <Text style={styles.hint}>Recargas desde la web, con la misma cuenta:</Text>
           {venta.map((pack) => (
             <Text key={pack.id} style={styles.pack}>
-              {pack.name}, {packPrice(pack)}: {packValue(pack)}
+              {packName(pack)}, {packPrice(pack)}: {packValue(pack)}
             </Text>
           ))}
         </>

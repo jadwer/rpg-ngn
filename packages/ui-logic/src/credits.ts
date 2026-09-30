@@ -1,4 +1,4 @@
-import { t } from '@rpg-ngn/i18n'
+import { t, type MessageKey } from '@rpg-ngn/i18n'
 import type { CreditBalance, CreditPack } from '@rpg-ngn/api-client'
 
 /**
@@ -128,4 +128,22 @@ export function purchaseBlessing(turns: number): { title: string; text: string; 
     text: t('account.credits.blessingTurns', { turns }),
     farewell: t('account.credits.blessingFarewell'),
   }
+}
+
+/**
+ * Nombre y descripcion de un paquete en el idioma de la interfaz, por su id
+ * (i18n `packs.<id>`); uno que no esta en las traducciones sale como lo
+ * manda la API.
+ */
+export function packName(pack: Pick<CreditPack, 'id' | 'name'>): string {
+  return translated(`packs.${pack.id}.name`, pack.name)
+}
+
+export function packDescription(pack: Pick<CreditPack, 'id' | 'description'>): string {
+  return translated(`packs.${pack.id}.description`, pack.description ?? '')
+}
+
+function translated(key: string, fallback: string): string {
+  const text = t(key as MessageKey)
+  return text === key ? fallback : text
 }
