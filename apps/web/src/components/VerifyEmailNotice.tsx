@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
 
@@ -32,7 +33,7 @@ export function VerifyEmailNotice({ client }: { client: ApiClient }) {
     try {
       setNotice({ ok: true, text: await client.resendVerification() })
     } catch (caught) {
-      const text = caught instanceof ApiError && caught.status === 429 ? 'Ya te lo enviamos hace un momento: espera un minuto y revisa también el correo no deseado.' : caught instanceof Error ? caught.message : String(caught)
+      const text = caught instanceof ApiError && caught.status === 429 ? t('play.verifyThrottled') : caught instanceof Error ? caught.message : String(caught)
       setNotice({ ok: false, text })
     } finally {
       setBusy(false)
@@ -42,9 +43,9 @@ export function VerifyEmailNotice({ client }: { client: ApiClient }) {
   return (
     <div className="card stack" style={{ marginBottom: 16 }}>
       <div className="label" style={{ marginTop: 0 }}>
-        Confirma tu correo
+        {t('verifyNotice.confirmaTuCorreo')}
       </div>
-      <p style={{ margin: 0 }}>Para crear mesas y ser anfitrión hace falta confirmar tu correo. Para entrar a la mesa de alguien, no.</p>
+      <p style={{ margin: 0 }}>{t('verifyNotice.paraCrearMesasY')}</p>
       {notice ? <div className={notice.ok ? 'ok' : 'error'}>{notice.text}</div> : null}
       <div className="row">
         <button type="button" className="btn primary" disabled={busy} onClick={() => void resend()}>

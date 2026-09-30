@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type DiscovererPass } from '@rpg-ngn/api-client'
 import { achievementProgress, chaptersLabel, nextRewardText, pathProgress, rewardStatus, seasonDaysLeft, streakText } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -40,12 +41,12 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
   }, [client, unauthorized])
 
   if (error) return <div className="page en-shell"><div className="error">{error}</div></div>
-  if (pass === undefined) return <div className="page en-shell"><p className="hint">Cargando…</p></div>
+  if (pass === undefined) return <div className="page en-shell"><p className="hint">{t('seasonPage.cargando')}</p></div>
   if (pass === null) {
     return (
       <div className="page en-shell">
-        <h1 className="pagina-titulo">Temporada</h1>
-        <p className="pagina-sub">Entre temporadas: la siguiente se anuncia pronto.</p>
+        <h1 className="pagina-titulo">{t('seasonPage.temporada')}</h1>
+        <p className="pagina-sub">{t('seasonPage.entreTemporadasLaSiguiente')}</p>
       </div>
     )
   }
@@ -61,7 +62,7 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
       </p>
 
       <div className="hojas">
-        <Panel title="Tu avance">
+        <Panel title={t('seasonPage.tuAvance')}>
           <div className="pase-resumen">
             <div className="pase-capitulos">
               <b>{pass.chapters}</b>
@@ -72,16 +73,16 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
               <p className={pass.streak > 0 && !pass.playedToday ? 'pase-aviso' : 'hint'}>{streakText(pass)}</p>
             </div>
           </div>
-          <div className="pase-barra" role="progressbar" aria-valuenow={avance} aria-valuemin={0} aria-valuemax={100} aria-label="Avance del camino">
+          <div className="pase-barra" role="progressbar" aria-valuenow={avance} aria-valuemin={0} aria-valuemax={100} aria-label={t('seasonPage.avanceDelCamino')}>
             <span style={{ width: `${avance}%` }} />
           </div>
           <p className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Cada turno que juegas es un capítulo. El primer turno del día da más, y más aún si juegas días seguidos. Los logros suman aparte.
+            {t('seasonPage.cadaTurnoQueJuegas')}
           </p>
         </Panel>
 
         {pass.blocks.map((block) => (
-          <Panel key={block.index} title={`Bloque ${block.index}`}>
+          <Panel key={block.index} title={t('play.block', { index: block.index })}>
             <ol className="pase-premios">
               {block.rewards.map((r) => (
                 <li key={r.position} className={`pase-premio ${r.kind}${r.earned ? ' ganado' : ''}`}>
@@ -91,7 +92,7 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
                   <em>{rewardStatus(r, pass.chapters)}</em>
                   {r.kind === 'world' && r.packId ? (
                     <Link href={`/mundos/explorar/${encodeURIComponent(r.packId)}`} className="pase-ver">
-                      Ver la historia
+                      {t('seasonPage.verLaHistoria')}
                     </Link>
                   ) : null}
                 </li>
@@ -100,7 +101,7 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
           </Panel>
         ))}
 
-        <Panel title="Logros">
+        <Panel title={t('seasonPage.logros')}>
           <ul className="pase-logros">
             {pass.achievements.map((a) => (
               <li key={a.code} className={a.done ? 'hecho' : ''}>
@@ -115,10 +116,10 @@ function SeasonPass({ client, unauthorized }: { client: ApiClient; unauthorized:
           </ul>
         </Panel>
 
-        <Panel title="Tu colección">
-          <p className="premise">Lo que ganas en el pase se queda contigo aunque la temporada termine.</p>
+        <Panel title={t('seasonPage.tuColeccion')}>
+          <p className="premise">{t('seasonPage.loQueGanasEn')}</p>
           <Link href="/coleccion" className="btn">
-            Ver mi colección
+            {t('seasonPage.verMiColeccion')}
           </Link>
         </Panel>
       </div>

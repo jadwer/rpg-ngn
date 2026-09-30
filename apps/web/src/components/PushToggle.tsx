@@ -1,15 +1,16 @@
 'use client'
 
+import { t, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
 import { disablePush, enablePush, pushState, type PushState } from '../lib/push'
 
-const HINTS: Record<PushState, string> = {
-  on: 'Este navegador te avisa cuando tu mesa tenga turno otra vez y cuando tus turnos gratuitos estén listos.',
-  off: 'Te avisamos cuando tu mesa tenga turno otra vez y cuando tus turnos gratuitos estén listos. Solo eso.',
-  blocked: 'Bloqueaste los avisos para este sitio. Actívalos en los permisos del navegador (el candado junto a la dirección) y vuelve aquí.',
-  'needs-install': 'En iPhone, primero agrega Ad Astra Mentis a tu pantalla de inicio (Compartir, "Agregar a inicio") y ábrelo desde ahí.',
-  unsupported: 'Este navegador no puede recibir avisos.',
+const HINTS: Record<PushState, MessageKey> = {
+  on: 'play.pushOn',
+  off: 'play.pushOff',
+  blocked: 'play.pushBlocked',
+  'needs-install': 'play.pushInstall',
+  unsupported: 'play.pushUnsupported',
 }
 
 /** Activar o quitar los avisos en este navegador (Mi cuenta). */
@@ -40,17 +41,17 @@ export function PushToggle({ client, onUnauthorized }: { client: ApiClient; onUn
   return (
     <div className="card stack" style={{ marginTop: 16 }}>
       <div className="label" style={{ marginTop: 0 }}>
-        Avisos
+        {t('pushToggle.avisos')}
       </div>
       <p className="hint" style={{ margin: 0, textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-        {HINTS[state]}
+        {t(HINTS[state])}
       </p>
       {error ? <div className="error">{error}</div> : null}
       {state === 'on' || state === 'off' ? (
         <div className="row">
           <button type="button" className={state === 'on' ? 'btn' : 'btn primary'} disabled={busy} onClick={() => void toggle()}>
             {busy ? <span className="spinner" aria-hidden /> : null}
-            {state === 'on' ? 'Dejar de avisarme aquí' : 'Avisarme en este navegador'}
+            {state === 'on' ? t('play.pushStop') : t('play.pushStart')}
           </button>
         </div>
       ) : null}

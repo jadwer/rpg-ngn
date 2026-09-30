@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { dialogue, narration, PITCH_MAX, PITCH_MIN, PITCH_STEP, RATE_MAX, RATE_MIN, RATE_STEP, READING_LANGUAGES, type ReadingLanguage } from '@rpg-ngn/ui-logic'
 import { useMemo } from 'react'
 import { RequireSession } from '../../components/RequireSession'
@@ -19,10 +20,11 @@ export default function SettingsPage() {
 }
 
 /** La prueba lee narracion, un dialogo de la party y uno de un NPC, para oir los tres tonos. */
-const SAMPLE = [
-  narration('sample-narration', 'La posada huele a estofado y a leña húmeda. Afuera, la campana del pueblo suena tres veces, aunque nadie la está tocando.'),
-  dialogue('sample-party', { ref: 'character:zahira', name: 'Zahira', portrait: null }, 'Yo voy a ver qué pasa con esa campana.'),
-  dialogue('sample-npc', { ref: 'npc:posadero', name: 'El posadero', portrait: null }, 'Yo que ustedes no saldría a estas horas.'),
+// Una funcion y no una constante: el texto sale en el idioma vigente (i18n).
+const sample = () => [
+  narration('sample-narration', t('play.sampleNarration')),
+  dialogue('sample-party', { ref: 'character:zahira', name: 'Zahira', portrait: null }, t('play.sampleParty')),
+  dialogue('sample-npc', { ref: 'npc:posadero', name: t('play.sampleNpcName'), portrait: null }, t('play.sampleNpc')),
 ]
 
 /**
@@ -32,22 +34,22 @@ const SAMPLE = [
  * creditos y la clave propia estan en /perfil (docs/18, D-UX-7).
  */
 function Settings() {
-  const blocks = useMemo(() => SAMPLE, [])
+  const blocks = useMemo(() => sample(), [])
   const tts = useTts(blocks)
   const speaking = tts.state.status === 'speaking'
 
   return (
     <div className="page en-shell narrow">
-      <h1 className="pagina-titulo">Voz</h1>
+      <h1 className="pagina-titulo">{t('voicePage.voz')}</h1>
 
       <section className="card stack">
         <div className="label" style={{ marginTop: 0 }}>
-          Voz de la narración
+          {t('voicePage.vozDeLaNarracion')}
         </div>
         {!tts.supported ? <p className="hint">Este navegador no tiene síntesis de voz; la mesa se juega leyendo.</p> : null}
 
         <label className="field">
-          <span>Idioma de lectura</span>
+          <span>{t('voicePage.idiomaDeLectura')}</span>
           <select className="select" name="idioma" value={tts.lang} onChange={(e) => tts.setLang(e.target.value as ReadingLanguage)}>
             {READING_LANGUAGES.map((l) => (
               <option key={l.code} value={l.code}>
@@ -61,9 +63,9 @@ function Settings() {
         </label>
 
         <label className="field">
-          <span>Voz por defecto</span>
+          <span>{t('voicePage.vozPorDefecto')}</span>
           <select className="select" name="voz" value={tts.voiceUri ?? ''} onChange={(e) => tts.setVoiceUri(e.target.value || null)} disabled={tts.voices.length === 0}>
-            {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? 'Sin voces en este idioma' : 'Cargando voces...'}</option> : null}
+            {tts.voices.length === 0 ? <option value="">{tts.voicesReady ? t('play.noVoices') : t('play.loadingVoices')}</option> : null}
             {tts.voices.map((voice) => (
               <option key={voice.uri} value={voice.uri}>
                 {voice.name} ({voice.lang}){voice.local ? '' : ', en línea'}
@@ -71,12 +73,12 @@ function Settings() {
             ))}
           </select>
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Se elige de oído: el navegador no dice si la voz es grave o aguda. En iPhone, Ajustes, Accesibilidad, Contenido leído, Voces, permite descargar más voces en español.
+            {t('voicePage.seEligeDeOido')}
           </span>
         </label>
 
         <label className="field">
-          <span>Velocidad</span>
+          <span>{t('voicePage.velocidad')}</span>
           <div className="row">
             <input type="range" min={RATE_MIN} max={RATE_MAX} step={RATE_STEP} value={tts.rate} onChange={(e) => tts.setRate(Number(e.target.value))} style={{ flex: 1 }} />
             <span className="muted">{tts.rate.toFixed(2)}x</span>
@@ -84,32 +86,32 @@ function Settings() {
         </label>
 
         <label className="field">
-          <span>Tono del narrador</span>
+          <span>{t('voicePage.tonoDelNarrador')}</span>
           <div className="row">
             <input type="range" min={PITCH_MIN} max={PITCH_MAX} step={PITCH_STEP} value={tts.narratorPitch} onChange={(e) => tts.setNarratorPitch(Number(e.target.value))} style={{ flex: 1 }} />
             <span className="muted">{tts.narratorPitch.toFixed(2)}</span>
           </div>
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Más bajo suena más grave. Los personajes de la party hablan con el tono normal y cada NPC lleva el suyo, siempre el mismo.
+            {t('voicePage.masBajoSuenaMas')}
           </span>
         </label>
 
         <label className="check">
           <input type="checkbox" checked={tts.autoRead} onChange={(e) => tts.setAutoRead(e.target.checked)} />
-          Leer lo nuevo en voz alta cuando el GM narra
+          {t('voicePage.leerLoNuevoEn')}
         </label>
 
         <div className="row">
           {!speaking ? (
             <button type="button" className="btn primary" onClick={() => tts.start()} disabled={!tts.supported}>
-              Escuchar una prueba
+              {t('voicePage.escucharUnaPrueba')}
             </button>
           ) : (
             <button type="button" className="btn" onClick={tts.stop}>
-              Parar
+              {t('voicePage.parar')}
             </button>
           )}
-          {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">Se guarda en este navegador.</span>}
+          {tts.error ? <span className="error">Voz: {tts.error}</span> : <span className="hint">{t('voicePage.seGuardaEnEste')}</span>}
         </div>
       </section>
     </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { FriendsPanel } from '../../components/FriendsPanel'
 import { Panel } from '../../components/Panel'
 import { RequireSession } from '../../components/RequireSession'
@@ -16,14 +17,14 @@ export default function CommunityPage() {
       {({ client, user, unauthorized, logout }) => (
         <AppShell user={user} onLogout={logout}>
           <div className="page en-shell">
-            <h1 className="pagina-titulo">Comunidad</h1>
-            <p className="pagina-sub">La gente con la que juegas</p>
+            <h1 className="pagina-titulo">{t('communityPage.comunidad')}</h1>
+            <p className="pagina-sub">{t('communityPage.laGenteConLa')}</p>
             <div className="hojas">
-              <Panel title="Amigos">
+              <Panel title={t('communityPage.amigos')}>
                 <FriendsPanel client={client} meId={user.id} onUnauthorized={unauthorized} />
               </Panel>
-              <Panel title="Pronto">
-                <p className="premise">Historias compartidas, creadores de mundos y mesas abiertas para unirse.</p>
+              <Panel title={t('communityPage.pronto')}>
+                <p className="premise">{t('communityPage.historiasCompartidasCreadoresDe')}</p>
               </Panel>
             </div>
           </div>

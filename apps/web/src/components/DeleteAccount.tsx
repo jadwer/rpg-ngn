@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -58,15 +59,15 @@ export function DeleteAccount({ client, onDeleted }: Props) {
     return (
       <div className="card stack" style={{ marginTop: 16 }}>
         <div className="label" style={{ marginTop: 0 }}>
-          Borrar mi cuenta
+          {t('deleteAccount.borrarMiCuenta')}
         </div>
         <p className="hint">
           Puedes borrar tu cuenta cuando quieras. Lo que escribiste en las partidas se conserva sin tu nombre, porque también es de quienes jugaron contigo. Lo explica el{' '}
-          <Link href="/privacidad">aviso de privacidad</Link>.
+          <Link href="/privacidad">{t('deleteAccount.avisoDePrivacidad')}</Link>.
         </p>
         <div className="row">
           <button type="button" className="btn ghost small" onClick={() => setOpen(true)}>
-            Quiero borrar mi cuenta
+            {t('deleteAccount.quieroBorrarMiCuenta')}
           </button>
         </div>
       </div>
@@ -78,14 +79,14 @@ export function DeleteAccount({ client, onDeleted }: Props) {
   return (
     <div className="card stack" style={{ marginTop: 16 }}>
       <div className="label" style={{ marginTop: 0 }}>
-        Borrar mi cuenta
+        {t('deleteAccount.borrarMiCuenta')}
       </div>
 
-      {preview === null ? <p className="hint">Comprobando...</p> : null}
+      {preview === null ? <p className="hint">{t('deleteAccount.comprobando')}</p> : null}
 
       {mesas.length > 0 ? (
         <>
-          <p className="hint">Antes tienes que retirar las mesas donde eres anfitrión, para no dejarlas sin quien abra las sesiones:</p>
+          <p className="hint">{t('deleteAccount.antesTienesQueRetirar')}</p>
           <ul className="hint">
             {mesas.map((m) => (
               <li key={m.id}>
@@ -100,10 +101,10 @@ export function DeleteAccount({ client, onDeleted }: Props) {
       {preview?.canDelete ? (
         <>
           <p className="hint">
-            <b>Esto no se puede deshacer.</b> Desaparecen tu nombre, tu correo y tus créditos sin usar. Lo que escribiste en tus partidas se queda, sin tu nombre.
+            <b>{t('deleteAccount.estoNoSePuede')}</b> {t('deleteAccount.desaparecenTuNombreTu')}
           </p>
           <label className="field">
-            <span>Escribe tu contraseña para confirmar</span>
+            <span>{t('deleteAccount.escribeTuContrasenaPara')}</span>
             <input className="input" type="password" name="confirmar_password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </label>
         </>
@@ -119,7 +120,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
           </button>
         ) : null}
         <button type="button" className="btn ghost small" disabled={busy} onClick={() => { setOpen(false); setPassword(''); setError(null) }}>
-          Cancelar
+          {t('deleteAccount.cancelar')}
         </button>
       </div>
     </div>

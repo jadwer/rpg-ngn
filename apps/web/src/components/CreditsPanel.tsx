@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
 import { balanceText, bucketText, buyablePacks, comingSoonPacks, lowBalance, packCharge, packPrice, packValue, purchaseBlessing } from '@rpg-ngn/ui-logic'
 import { Elements } from '@stripe/react-stripe-js'
@@ -39,7 +40,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       if (publishableKey) setStripePromise((actual) => actual ?? stripeFor(publishableKey))
     } catch (e) {
       if (e instanceof ApiError && e.isUnauthorized) return unauthorized()
-      setError('No se pudieron cargar los créditos.')
+      setError(t('play.creditsLoadFailed'))
     }
   }, [client, unauthorized])
 
@@ -61,7 +62,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
       setBuying({ pack, clientSecret: purchase.clientSecret })
     } catch (e) {
       if (e instanceof ApiError && e.isUnauthorized) return unauthorized()
-      setError(e instanceof ApiError ? e.message : 'No se pudo iniciar el pago.')
+      setError(e instanceof ApiError ? e.message : t('play.paymentStartFailed'))
     } finally {
       startingRef.current = false
       setBusy(false)
@@ -87,7 +88,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
   return (
     <section className="card stack" style={{ marginTop: 16 }}>
       <div className="label" style={{ marginTop: 0 }}>
-        Tus créditos
+        {t('creditsPanel.tusCreditos')}
       </div>
 
       {balance ? (
@@ -102,7 +103,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
           </p>
         </>
       ) : (
-        <p className="hint">Cargando…</p>
+        <p className="hint">{t('creditsPanel.cargando')}</p>
       )}
 
       {blessed !== null ? <Blessing {...purchaseBlessing(blessed)} onClose={() => setBlessed(null)} /> : null}
@@ -136,7 +137,7 @@ export function CreditsPanel({ client, unauthorized }: { client: ApiClient; unau
           {pronto.length > 0 ? (
             <>
               <div className="label" style={{ marginTop: 8 }}>
-                Más adelante
+                {t('creditsPanel.masAdelante')}
               </div>
               {pronto.map((pack) => (
                 <div key={pack.id} className="row" style={{ justifyContent: 'space-between', alignItems: 'baseline', opacity: 0.6 }}>

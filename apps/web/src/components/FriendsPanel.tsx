@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type AuthUser, type Friendship } from '@rpg-ngn/api-client'
 import { acceptedFriends, friendshipWith, pendingReceived } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
@@ -62,15 +63,15 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
       const value = email.trim().toLowerCase()
       if (!value) return
       const user = await client.lookupUser(value)
-      if (!user) setNotice({ ok: false, text: `No hay ninguna cuenta con el correo ${value}. Pídele que se registre en esta misma web.` })
-      else if (user.id === meId) setNotice({ ok: false, text: 'Ese correo es el tuyo.' })
+      if (!user) setNotice({ ok: false, text: t('play.noAccount', { email: value }) })
+      else if (user.id === meId) setNotice({ ok: false, text: t('play.ownEmail') })
       else setFound(user)
     })
 
   const request = (userId: string) =>
     act(async () => {
       await client.requestFriendship(userId)
-      setNotice({ ok: true, text: 'Solicitud enviada; cuando la acepte podrán invitarse a sus mesas.' })
+      setNotice({ ok: true, text: t('play.friendRequestSent') })
       setFound(null)
       setEmail('')
       await load()
@@ -88,9 +89,9 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
   const state = found ? friendshipWith(list, meId, found.id) : null
 
   return (
-    <section className="stack friends" aria-label="Amigos">
+    <section className="stack friends" aria-label={t('friendsPanel.amigos')}>
       <p className="hint" style={{ margin: 0 }}>
-        Con tus amigos, invitarlos a una mesa es elegirlos de la lista. Para sentar a alguien sin ser amigos, basta el enlace de invitación de la mesa.
+        {t('friendsPanel.conTusAmigosInvitarlos')}
       </p>
 
       {pending.length > 0 ? (
@@ -98,10 +99,10 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
           {pending.map((f) => (
             <div key={f.id} className="row">
               <span>
-                <b>{f.user.name}</b> <span className="muted">({f.user.email})</span> quiere ser tu amigo
+                <b>{f.user.name}</b> <span className="muted">({f.user.email})</span> {t('friendsPanel.quiereSerTuAmigo')}
               </span>
               <button type="button" className="btn small primary" onClick={() => void accept(f.id)} disabled={busy}>
-                Aceptar
+                {t('friendsPanel.aceptar')}
               </button>
             </div>
           ))}
@@ -115,9 +116,9 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
           void search()
         }}
       >
-        <input className="input" type="email" name="correo-amigo" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo del anfitrión o del jugador" style={{ flex: 1, minWidth: 200 }} disabled={busy} />
+        <input className="input" type="email" name="correo-amigo" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('friendsPanel.correoDelAnfitrionO')} style={{ flex: 1, minWidth: 200 }} disabled={busy} />
         <button type="submit" className="btn small" disabled={busy || !email.trim()}>
-          Buscar
+          {t('friendsPanel.buscar')}
         </button>
       </form>
 
@@ -128,16 +129,16 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
           </span>
           {state.kind === 'none' ? (
             <button type="button" className="btn small primary" onClick={() => void request(found.id)} disabled={busy}>
-              Enviar solicitud
+              {t('friendsPanel.enviarSolicitud')}
             </button>
           ) : null}
-          {state.kind === 'requested' ? <span className="chip">solicitud enviada, falta que acepte</span> : null}
+          {state.kind === 'requested' ? <span className="chip">{t('friendsPanel.solicitudEnviadaFaltaQue')}</span> : null}
           {state.kind === 'received' ? (
             <button type="button" className="btn small primary" onClick={() => void accept(state.friendship.id)} disabled={busy}>
-              Aceptar su solicitud
+              {t('friendsPanel.aceptarSuSolicitud')}
             </button>
           ) : null}
-          {state.kind === 'accepted' ? <span className="chip done">ya son amigos</span> : null}
+          {state.kind === 'accepted' ? <span className="chip done">{t('friendsPanel.yaSonAmigos')}</span> : null}
         </div>
       ) : null}
 
@@ -145,7 +146,7 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
 
       {friends.length > 0 ? (
         <div className="row">
-          <span className="hint">Tus amigos:</span>
+          <span className="hint">{t('friendsPanel.tusAmigos')}</span>
           {friends.map((u) => (
             <span key={u.id} className="chip done">
               {u.name}
@@ -154,7 +155,7 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
         </div>
       ) : friendships !== null && pending.length === 0 ? (
         <p className="hint" style={{ margin: 0 }}>
-          Todavía no tienes amigos aquí.
+          {t('friendsPanel.todaviaNoTienesAmigos')}
         </p>
       ) : null}
     </section>

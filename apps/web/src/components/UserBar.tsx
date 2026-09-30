@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import type { StoredUser } from '../lib/storage'
 import { SystemMenu } from './SystemMenu'
@@ -13,7 +14,7 @@ interface Props {
 }
 
 /** Barra superior de las pantallas con sesion: volver, titulo, y el menu del sitio (D-UX-6). */
-export function UserBar({ title, user, back = { href: '/mesas', label: 'Mesas' }, onLogout }: Props) {
+export function UserBar({ title, user, back = { href: '/mesas', label: t('play.tablesBack') }, onLogout }: Props) {
   return (
     <div className="topbar">
       {back ? (

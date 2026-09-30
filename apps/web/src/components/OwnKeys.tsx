@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type OwnKey } from '@rpg-ngn/api-client'
 import { keyConsole, ownKeyLabel, ownKeyProblem, ownKeyStatus, removeOwnKeyWarning } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
@@ -27,7 +28,7 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
       setKeys(await client.listOwnKeys())
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return unauthorized()
-      setError('No se pudieron cargar tus claves.')
+      setError(t('play.keysLoadFailed'))
     } finally {
       setLoading(false)
     }
@@ -61,7 +62,7 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
       setEditing(null)
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return unauthorized()
-      setError(e instanceof ApiError ? e.message : 'No se pudo guardar la clave.')
+      setError(e instanceof ApiError ? e.message : t('play.keySaveFailed'))
     } finally {
       setBusy(false)
     }
@@ -77,7 +78,7 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
       setNotice(message)
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return unauthorized()
-      setError('No se pudo borrar la clave.')
+      setError(t('play.keyDeleteFailed'))
     } finally {
       setBusy(false)
     }
@@ -86,14 +87,13 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
   return (
     <section className="card stack" style={{ marginTop: 16 }}>
       <div className="label" style={{ marginTop: 0 }}>
-        Tu propia clave de IA
+        {t('ownKeys.tuPropiaClaveDe')}
       </div>
       <p className="hint">
-        Si pones tu clave, tus mesas narran con ella y no gastan del cupo gratuito: le pagas los tokens directamente al proveedor. La clave se guarda cifrada y no vuelve a
-        mostrarse.
+        {t('ownKeys.siPonesTuClave')}
       </p>
 
-      {loading ? <p className="hint">Cargando…</p> : null}
+      {loading ? <p className="hint">{t('ownKeys.cargando')}</p> : null}
 
       {keys.map((key) => (
         <div key={key.preset} className="stack" style={{ borderTop: '1px solid var(--line, #3a2f24)', paddingTop: 12 }}>
@@ -101,7 +101,7 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
             <strong>{ownKeyLabel(key)}</strong>
             {key.configured ? (
               <button type="button" className="btn" onClick={() => void remove(key)} disabled={busy}>
-                Quitar
+                {t('ownKeys.quitar')}
               </button>
             ) : null}
           </div>
@@ -112,37 +112,37 @@ export function OwnKeys({ client, unauthorized }: { client: ApiClient; unauthori
           {editing === key.preset ? (
             <div className="stack">
               <label className="field">
-                <span>Clave</span>
+                <span>{t('ownKeys.clave')}</span>
                 <input
                   className="input"
                   type="password"
                   value={credential}
                   onChange={(e) => setCredential(e.target.value)}
-                  placeholder={keyConsole(key.preset) ? `La sacas en ${keyConsole(key.preset)}` : 'Tu clave'}
+                  placeholder={keyConsole(key.preset) ? t('play.keyFrom', { console: keyConsole(key.preset) ?? '' }) : t('play.yourKey')}
                   autoComplete="off"
                   spellCheck={false}
                 />
               </label>
               <label className="field">
                 <span>Modelo (opcional)</span>
-                <input className="input" value={model} onChange={(e) => setModel(e.target.value)} placeholder="El del proveedor por defecto" autoComplete="off" spellCheck={false} />
+                <input className="input" value={model} onChange={(e) => setModel(e.target.value)} placeholder={t('ownKeys.elDelProveedorPor')} autoComplete="off" spellCheck={false} />
               </label>
               <div className="row">
                 <button type="button" className="btn primary" onClick={() => void save(key.preset)} disabled={busy}>
-                  {busy ? 'Comprobando…' : 'Guardar y comprobar'}
+                  {busy ? t('play.checking') : t('play.saveAndCheck')}
                 </button>
                 <button type="button" className="btn" onClick={() => setEditing(null)} disabled={busy}>
-                  Cancelar
+                  {t('ownKeys.cancelar')}
                 </button>
               </div>
               <p className="hint" style={{ margin: 0 }}>
-                Antes de guardarla se prueba contra el proveedor, así no te enteras de que estaba mal a media partida.
+                {t('ownKeys.antesDeGuardarlaSe')}
               </p>
             </div>
           ) : (
             <div className="row">
               <button type="button" className="btn" onClick={() => open(key.preset)} disabled={busy}>
-                {key.configured ? 'Cambiar clave' : 'Poner mi clave'}
+                {key.configured ? t('play.changeKey') : t('play.addMyKey')}
               </button>
             </div>
           )}

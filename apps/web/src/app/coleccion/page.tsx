@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type Collection } from '@rpg-ngn/api-client'
 import { COLLECTION_GALLERIES, galleryLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -44,16 +45,16 @@ function CollectionView({ client, unauthorized }: { client: ApiClient; unauthori
 
   return (
     <div className="page en-shell pase-page">
-      <h1 className="pagina-titulo">Tu colección</h1>
-      <p className="pagina-sub">Lo que has ganado jugando</p>
+      <h1 className="pagina-titulo">{t('collectionPage.tuColeccion')}</h1>
+      <p className="pagina-sub">{t('collectionPage.loQueHasGanado')}</p>
       {error ? <div className="error">{error}</div> : null}
-      {items === null && !error ? <p className="hint">Cargando…</p> : null}
+      {items === null && !error ? <p className="hint">{t('collectionPage.cargando')}</p> : null}
       {empty ? (
         <div className="hojas">
           <Panel>
-            <p className="premise">Aún no tienes nada. Cada turno que juegas es un capítulo, y los capítulos abren los premios del pase.</p>
+            <p className="premise">{t('collectionPage.aunNoTienesNada')}</p>
             <Link href="/temporada" className="btn primary">
-              Ver el pase
+              {t('collectionPage.verElPase')}
             </Link>
           </Panel>
         </div>

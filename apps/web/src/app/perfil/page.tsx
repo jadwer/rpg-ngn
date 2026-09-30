@@ -60,7 +60,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       session.setUser({ id: updated.id, name: updated.name, email: updated.email })
       setNameNotice({
         ok: true,
-        text: emailChanged ? 'Guardado. Tu correo nuevo está sin verificar: entra con él la próxima vez.' : 'Guardado.',
+        text: emailChanged ? t('play.savedEmailUnverified') : t('play.saved'),
       })
     } catch (caught) {
       fail(caught, setNameNotice)
@@ -80,7 +80,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       setCurrent('')
       setPassword('')
       setConfirmation('')
-      setPassNotice({ ok: true, text: 'Contraseña cambiada.' })
+      setPassNotice({ ok: true, text: t('play.passwordChanged') })
     } catch (caught) {
       fail(caught, setPassNotice)
     } finally {
@@ -90,7 +90,7 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
 
   return (
     <div className="page en-shell narrow">
-      <h1 className="pagina-titulo">Mi cuenta</h1>
+      <h1 className="pagina-titulo">{t('profilePage.miCuenta')}</h1>
 
       <VerifyEmailNotice client={client} />
 
@@ -103,17 +103,17 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
 
       <form className="card stack" onSubmit={(e) => void saveName(e)}>
         <div className="label" style={{ marginTop: 0 }}>
-          Cuenta
+          {t('profilePage.cuenta')}
         </div>
         <label className="field">
-          <span>Nombre</span>
+          <span>{t('profilePage.nombre')}</span>
           <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={80} required />
         </label>
         <label className="field">
-          <span>Correo</span>
+          <span>{t('profilePage.correo')}</span>
           <input className="input" type="email" name="correo" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} required />
           <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-            Con él entras a la mesa. Si lo cambias, el nuevo empieza sin verificar.
+            {t('profilePage.conElEntrasA')}
           </span>
         </label>
         {nameNotice ? <div className={nameNotice.ok ? 'ok' : 'error'}>{nameNotice.text}</div> : null}
@@ -127,28 +127,28 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
 
       <form className="card stack" style={{ marginTop: 16 }} onSubmit={(e) => void savePassword(e)}>
         <div className="label" style={{ marginTop: 0 }}>
-          Contraseña
+          {t('profilePage.contrasena')}
         </div>
         <label className="field">
-          <span>Contraseña actual</span>
+          <span>{t('profilePage.contrasenaActual')}</span>
           <input className="input" type="password" name="actual" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
         </label>
         <label className="field">
-          <span>Nueva contraseña</span>
+          <span>{t('profilePage.nuevaContrasena')}</span>
           <input className="input" type="password" name="nueva" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
         </label>
         <label className="field">
-          <span>Repite la nueva</span>
+          <span>{t('profilePage.repiteLaNueva')}</span>
           <input className="input" type="password" name="nueva_confirmacion" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
         </label>
-        {mismatch ? <div className="error">Las contraseñas no coinciden.</div> : null}
+        {mismatch ? <div className="error">{t('profilePage.lasContrasenasNoCoinciden')}</div> : null}
         {passNotice ? <div className={passNotice.ok ? 'ok' : 'error'}>{passNotice.text}</div> : null}
         <div className="row">
           <button type="submit" className="btn primary" disabled={passBusy || !current || password.length < 8 || mismatch || !confirmation}>
             {passBusy ? <span className="spinner" aria-hidden /> : null}
             Cambiar contraseña
           </button>
-          <span className="hint">Al menos 8 caracteres.</span>
+          <span className="hint">{t('profilePage.alMenos8Caracteres')}</span>
         </div>
       </form>
 

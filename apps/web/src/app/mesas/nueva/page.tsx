@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -123,7 +123,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       // siempre el del piloto y una mesa de intriga nacia con reglas de combate
       // (VAM del 19-09, motor A1). Sin version: el motor resuelve la unica que
       // tiene; la API rechaza con 422 un ruleset distinto al del pack (R2).
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, settings: { ...(provider ? withProvider({}, provider) : {}), language: language() } })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {

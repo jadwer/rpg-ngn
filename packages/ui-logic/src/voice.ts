@@ -1,4 +1,4 @@
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import type { TtsItem } from './tts.js'
 
 /**
@@ -90,7 +90,10 @@ export function parseVoiceSettings(raw: { voiceId?: unknown; rate?: unknown; nar
   const voiceId = typeof raw?.voiceId === 'string' && raw.voiceId.trim() ? raw.voiceId : null
   const rate = typeof raw?.rate === 'number' ? clampRate(raw.rate) : DEFAULT_VOICE_SETTINGS.rate
   const narratorPitch = typeof raw?.narratorPitch === 'number' ? clampPitch(raw.narratorPitch) : DEFAULT_VOICE_SETTINGS.narratorPitch
-  const lang = isReadingLanguage(raw?.lang) ? raw.lang : DEFAULT_READING_LANGUAGE
+  // Sin eleccion guardada, se lee en el idioma de la interfaz (i18n): una mesa
+  // en ingles leida con voz en español no se entiende.
+  const ui = language()
+  const lang = isReadingLanguage(raw?.lang) ? raw.lang : isReadingLanguage(ui) ? ui : DEFAULT_READING_LANGUAGE
   return { voiceId, rate, narratorPitch, lang }
 }
 
