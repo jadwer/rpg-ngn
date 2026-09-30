@@ -28,6 +28,8 @@ interface Props {
   onDeleted: () => void
   /** Cerrar sesion en este telefono (antes estaba en la lista de mesas). */
   onLogout: () => void
+  /** El pase de descubridor y la coleccion. */
+  onSeason: () => void
 }
 
 /**
@@ -36,7 +38,7 @@ interface Props {
  * pide la actual). El correo se muestra pero no se edita (cambiarlo exige
  * verificarlo).
  */
-export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout }: Props) {
+export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout, onSeason }: Props) {
   const [name, setName] = useState(user.name)
   const [support, setSupport] = useState<SupportView | null>(null)
   const [email, setEmail] = useState(user.email)
@@ -137,6 +139,14 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
           {passNotice ? <Text style={[styles.notice, passNotice.ok ? styles.ok : styles.error]}>{passNotice.text}</Text> : null}
           <View style={styles.actions}>
             <Button label="Cambiar contraseña" primary busy={passBusy} disabled={!canChange} onPress={() => void savePassword()} />
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <SectionTitle>{t('seasonPage.temporada')}</SectionTitle>
+          <Text style={styles.cardText}>{t('seasonPage.loQueGanasEn')}</Text>
+          <View style={styles.actions}>
+            <Button label={t('seasonPage.paseDeDescubridor')} onPress={onSeason} />
           </View>
         </View>
 

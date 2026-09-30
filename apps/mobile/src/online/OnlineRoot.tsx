@@ -9,6 +9,7 @@ import { NewTableScreen } from '../screens/online/NewTableScreen'
 import { ProfileScreen } from '../screens/online/ProfileScreen'
 import { CommunityScreen } from '../screens/online/CommunityScreen'
 import { RegisterScreen } from '../screens/online/RegisterScreen'
+import { SeasonScreen } from '../screens/online/SeasonScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
@@ -34,6 +35,7 @@ type Stage =
   | { name: 'worlds' }
   | { name: 'explore' }
   | { name: 'pronto' }
+  | { name: 'season'; from: 'explore' | 'profile' }
   | { name: 'new-table'; packId?: string }
   | { name: 'table'; table: TableSummary }
 
@@ -302,7 +304,12 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     }
 
     if (stage.name === 'explore') {
-      return <ExploreScreen client={session.client} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
+      return <ExploreScreen client={session.client} onSeason={() => setStage({ name: 'season', from: 'explore' })} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
+    }
+
+    if (stage.name === 'season') {
+      const from = stage.from
+      return <SeasonScreen client={session.client} back={from === 'profile' ? 'Perfil' : 'Mundos'} onBack={() => setStage(from === 'profile' ? { name: 'profile' } : { name: 'explore' })} onUnauthorized={() => unauthorized()} />
     }
 
     if (stage.name === 'pronto') {
@@ -326,6 +333,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
           user={session.user}
           serverUrl={serverUrl}
           onUserChanged={setUser}
+          onSeason={() => setStage({ name: 'season', from: 'profile' })}
           onBack={() => setStage({ name: 'tables' })}
           onUnauthorized={() => unauthorized()}
           // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
@@ -18,6 +19,8 @@ interface Props {
   /** Mis mundos: subir, revisar y los añadidos. */
   onMine: () => void
   onTab: (tab: BottomTab) => void
+  /** El pase de descubridor y la coleccion. */
+  onSeason: () => void
   onUnauthorized: () => void
 }
 
@@ -26,7 +29,7 @@ interface Props {
  * 26-09): buscador, generos en chips y una tarjeta por mundo con su estado;
  * tocar una abre el detalle con personajes y lo que incluye.
  */
-export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }: Props) {
+export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnauthorized }: Props) {
   const topInset = useTopInset()
   // En tablet, tres columnas y el contenido centrado.
   const wide = useWindowDimensions().width >= 700
@@ -194,6 +197,9 @@ export function ExploreScreen({ client, onPlay, onMine, onTab, onUnauthorized }:
               <View style={[styles.barFill, { width: `${Math.round(seasonProgress(season).progress * 100)}%` }]} />
             </View>
             <Text style={styles.meta}>{seasonPathLine(season.worlds, names)}</Text>
+            <Pressable onPress={onSeason} accessibilityRole="button" hitSlop={8}>
+              <Text style={styles.link}>{t('seasonPage.paseDeDescubridor')} ›</Text>
+            </Pressable>
             {offer ? (
               <View style={styles.pass}>
                 <Text style={styles.passTitle}>Pase de temporada</Text>
