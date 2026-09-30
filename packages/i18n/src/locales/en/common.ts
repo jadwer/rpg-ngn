@@ -10,5 +10,7 @@ export const common: Messages<typeof es> = {
   back: 'Back',
   retry: 'Try again',
   language: 'Language',
+  browser: 'Browser',
+  pushNotEnabled: 'The server does not have notifications turned on yet.',
   languages: { es: 'Español', en: 'English' },
 }

@@ -8,5 +8,7 @@ export const common = {
   back: 'Volver',
   retry: 'Reintentar',
   language: 'Idioma',
+  browser: 'Navegador',
+  pushNotEnabled: 'El servidor todavía no tiene los avisos activados.',
   languages: { es: 'Español', en: 'English' },
 }

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const password = typeof payload.password === 'string' ? payload.password : ''
   if (!email || !password) return NextResponse.json({ error: 'Correo y contraseña son obligatorios.' }, { status: 422 })
 
-  const api = createApiClient({ baseUrl: apiTarget(), tokenProvider: () => null })
+  const api = createApiClient({ baseUrl: apiTarget(), tokenProvider: () => null, locale: () => request.headers.get('x-locale') })
   try {
     const result = await api.login(email, password, DEVICE_NAME)
     const response = NextResponse.json({ user: result.user, expiresAt: result.expiresAt })

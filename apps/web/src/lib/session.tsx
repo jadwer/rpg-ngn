@@ -1,6 +1,6 @@
 'use client'
 
-import { language } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, normalizeBaseUrl, type ApiClient, type FetchLike, type RegisterInput } from '@rpg-ngn/api-client'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { storage, type StoredUser } from './storage'
@@ -59,7 +59,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   // servidor: un 401 transitorio (PHP-FPM reiniciando en un despliegue) no
   // debe cerrar diez sesiones sanas. Revocar es cosa de `logout`, que es un
   // acto del usuario. (VAM del 19-09, web A8.)
-  const unauthorized = useCallback((notice = 'La sesión caducó. Vuelve a entrar.') => {
+  const unauthorized = useCallback((notice: string = t('auth.sessionExpired')) => {
     tokenRef.current = null
     storage.clearSession()
     setClient(null)
@@ -100,11 +100,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       (caught: unknown) => {
         if (!alive) return
         if (caught instanceof ApiError && caught.status > 0) {
-          unauthorized(caught.isUnauthorized ? (stored ? 'La sesión caducó. Vuelve a entrar.' : null) ?? undefined : caught.message)
+          unauthorized(caught.isUnauthorized ? (stored ? t('auth.sessionExpired') : null) ?? undefined : caught.message)
           return
         }
         // Sin respuesta: se conserva lo guardado por si la API vuelve, pero se pide entrar de nuevo.
-        setStage({ name: 'anonymous', notice: `No se pudo conectar con ${url || 'la API'}. Revisa que esté levantada.` })
+        setStage({ name: 'anonymous', notice: t('auth.cannotConnect', { url: url || t('auth.theApi') }) })
       },
     )
     return () => {
@@ -117,9 +117,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const base = normalizeBaseUrl(url)
       try {
         if (!base) {
-          const response = await fetch('/auth/session', { method: 'POST', headers: { ...WEB_HEADER, 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ email: email.trim(), password }) })
+          const response = await fetch('/auth/session', { method: 'POST', headers: { ...WEB_HEADER, 'Content-Type': 'application/json', 'X-Locale': language() }, credentials: 'same-origin', body: JSON.stringify({ email: email.trim(), password }) })
           const body = (await response.json().catch(() => ({}))) as { user?: StoredUser; error?: string }
-          if (!response.ok || !body.user) return body.error ?? `No se pudo entrar (${response.status}).`
+          if (!response.ok || !body.user) return body.error ?? t('auth.cannotSignIn', { status: response.status })
           enter(makeClient(''), '', body.user)
           return null
         }
@@ -141,11 +141,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const base = normalizeBaseUrl(url)
       try {
         if (!base) {
-          const response = await fetch('/auth/register', { method: 'POST', headers: { ...WEB_HEADER, 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(input) })
+          const response = await fetch('/auth/register', { method: 'POST', headers: { ...WEB_HEADER, 'Content-Type': 'application/json', 'X-Locale': language() }, credentials: 'same-origin', body: JSON.stringify(input) })
           const body = (await response.json().catch(() => ({}))) as { user?: StoredUser; pendingVerification?: boolean; message?: string; error?: string; errors?: Record<string, string[]> }
-          if (!response.ok) return { ok: false, error: firstError(body) ?? `No se pudo crear la cuenta (${response.status}).` }
-          if (body.pendingVerification) return { ok: true, pendingVerification: true, message: body.message ?? 'Revisa tu correo para verificar la cuenta.' }
-          if (!body.user) return { ok: false, error: 'La API no devolvió el usuario.' }
+          if (!response.ok) return { ok: false, error: firstError(body) ?? t('auth.cannotRegister', { status: response.status }) }
+          if (body.pendingVerification) return { ok: true, pendingVerification: true, message: body.message ?? t('auth.checkEmail') }
+          if (!body.user) return { ok: false, error: t('auth.noUser') }
           enter(makeClient(''), '', body.user)
           return { ok: true, pendingVerification: false }
         }

@@ -50,7 +50,8 @@ export function csrfOk(request: NextRequest): boolean {
 }
 
 /** Cabeceras que viajan tal cual del navegador a la API. */
-const FORWARDED = ['accept', 'content-type', 'idempotency-key', 'accept-language']
+// x-locale: el idioma que eligio la persona (i18n); sin el, la API solo veria el del navegador.
+const FORWARDED = ['accept', 'content-type', 'idempotency-key', 'accept-language', 'x-locale']
 
 /**
  * Reenvia una peticion a la API con el token de la cookie (si hay) como

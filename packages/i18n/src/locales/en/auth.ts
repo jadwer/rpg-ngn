@@ -46,6 +46,13 @@ export const auth: Messages<typeof es> = {
   repeatIt: 'Repeat it',
   twoDiffer: 'The two do not match.',
   savePassword: 'Save password',
+  sessionExpired: 'Your session expired. Sign in again.',
+  cannotConnect: 'Could not connect to {{url}}. Check that it is running.',
+  theApi: 'the API',
+  cannotSignIn: 'Could not sign in ({{status}}).',
+  cannotRegister: 'Could not create the account ({{status}}).',
+  checkEmail: 'Check your email to verify the account.',
+  noUser: 'The API did not return the user.',
   server: {
     sameOrigin: 'Connected to this website’s API.',
     direct: 'Direct API: {{url}}.',

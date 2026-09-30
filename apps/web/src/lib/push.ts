@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient } from '@rpg-ngn/api-client'
 
 /**
@@ -35,7 +36,7 @@ function keyBytes(base64url: string): ArrayBuffer {
 
 function deviceLabel(): string {
   const ua = navigator.userAgent
-  const browser = /edg/i.test(ua) ? 'Edge' : /firefox/i.test(ua) ? 'Firefox' : /chrome|crios/i.test(ua) ? 'Chrome' : /safari/i.test(ua) ? 'Safari' : 'Navegador'
+  const browser = /edg/i.test(ua) ? 'Edge' : /firefox/i.test(ua) ? 'Firefox' : /chrome|crios/i.test(ua) ? 'Chrome' : /safari/i.test(ua) ? 'Safari' : t('common.browser')
   const os = /android/i.test(ua) ? 'Android' : /iphone|ipad/i.test(ua) ? 'iPhone' : /windows/i.test(ua) ? 'Windows' : /mac/i.test(ua) ? 'Mac' : /linux/i.test(ua) ? 'Linux' : ''
   return os ? `${browser} en ${os}` : browser
 }
@@ -43,7 +44,7 @@ function deviceLabel(): string {
 /** Pide permiso, suscribe este navegador y lo registra en la API. */
 export async function enablePush(client: ApiClient): Promise<PushState> {
   const { vapidPublicKey } = await client.pushConfig()
-  if (!vapidPublicKey) throw new Error('El servidor todavía no tiene los avisos activados.')
+  if (!vapidPublicKey) throw new Error(t('common.pushNotEnabled'))
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') return permission === 'denied' ? 'blocked' : 'off'
 

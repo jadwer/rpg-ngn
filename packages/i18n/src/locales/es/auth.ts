@@ -44,6 +44,13 @@ export const auth = {
   repeatIt: 'Repítela',
   twoDiffer: 'Las dos no coinciden.',
   savePassword: 'Guardar contraseña',
+  sessionExpired: 'La sesión caducó. Vuelve a entrar.',
+  cannotConnect: 'No se pudo conectar con {{url}}. Revisa que esté levantada.',
+  theApi: 'la API',
+  cannotSignIn: 'No se pudo entrar ({{status}}).',
+  cannotRegister: 'No se pudo crear la cuenta ({{status}}).',
+  checkEmail: 'Revisa tu correo para verificar la cuenta.',
+  noUser: 'La API no devolvió el usuario.',
   server: {
     sameOrigin: 'Conectado a la API de esta misma web.',
     direct: 'API directa: {{url}}.',

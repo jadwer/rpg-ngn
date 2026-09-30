@@ -24,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const text = (key: string) => (typeof payload[key] === 'string' ? (payload[key] as string) : '')
 
-  const api = createApiClient({ baseUrl: apiTarget(), tokenProvider: () => null })
+  const api = createApiClient({ baseUrl: apiTarget(), tokenProvider: () => null, locale: () => request.headers.get('x-locale') })
   try {
     const result = await api.register({ name: text('name'), email: text('email'), password: text('password'), passwordConfirmation: text('passwordConfirmation'), ageConfirmed: payload['ageConfirmed'] === true }, DEVICE_NAME)
     if (result.kind === 'verify') return NextResponse.json({ pendingVerification: true, message: result.message }, { status: 201 })
