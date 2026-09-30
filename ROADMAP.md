@@ -693,9 +693,10 @@ Para prospectos de Estados Unidos y streamers: una demo jugable en ingles sin ro
 - [x] Web: toda la interfaz, globo de idioma arriba a la derecha y `?lang=` en la URL (web `d69603f`, API `e15c10d`)
 - [x] Los Nueve Viajeros en ingles con la capa `i18n/en/` (docs/05)
 - [x] Packs multilingues (30-09, web `8922bbe`, API `cf1718d`): el manifiesto declara `language` y `translations`; solo esas se aplican y se validan (tambien al subir); el catalogo muestra y filtra por idioma; la mesa solo nace o cambia a un idioma que su mundo trae (Ajustes de la mesa)
-- [ ] Jugar un turno real en ingles en produccion y revisar la narracion
+- [x] Turno real en ingles en produccion (mesa 41, 30-09): Gabino lo aprobo
 - [ ] App movil en ingles
-- [ ] La Mascarada y la boticaria en ingles, si entran a la demo
+- [x] La Mascarada (The Masquerade) y la boticaria (The Tea No One Tasted) en ingles, en sus repos privados (30-09); tramos de Fortuna traducibles (`bb50ee6`) y `pnpm validate` carga cada traduccion
+- [ ] Incoherencias de los originales que salieron al traducir: boticaria (cuatro contra cinco personajes, Maomao en palacio o en la celda, Lakan con una faccion como lugar, dos palabras clave de secretos que estan en texto publico) y Mascarada (boda antes o despues del verano, cuatro contra cinco actos, "DM" en notas, Seduccion sin personaje que la tenga)
 - [ ] Legales: version oficial en ingles con el abogado; faltan terceros en el aviso (Google Gemini y OpenAI por las imagenes, servicios push de Google y Apple), el estado del INAI y la frase "no es una suscripcion" frente a las suscripciones futuras
 - [ ] En el pack en español (rama `legacy`): "El DM interpreta" en las reglas de las sesiones, y las incoherencias de Bren, Tomas y Mera que salieron al traducir
 
