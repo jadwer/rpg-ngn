@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
@@ -11,18 +12,18 @@ import { isActive, SITE_SECTIONS, type NavItem } from './nav'
 
 /** La navegacion del tablero de Gabino (`img/design_ui_ux/mesas_ux.png`, 26-09). */
 const TOP: readonly NavItem[] = [
-  { href: '/', label: 'Historias', icon: 'inicio' },
-  { href: '/mundos/explorar', label: 'Mundos', icon: 'mundos', match: ['/mundos'] },
-  { href: '/mesas', label: 'Mesas', icon: 'mesas' },
-  { href: '/comunidad', label: 'Comunidad', icon: 'comunidad' },
+  { href: '/', label: 'shell.nav.stories', icon: 'inicio' },
+  { href: '/mundos/explorar', label: 'shell.nav.worlds', icon: 'mundos', match: ['/mundos'] },
+  { href: '/mesas', label: 'shell.nav.tables', icon: 'mesas' },
+  { href: '/comunidad', label: 'shell.nav.community', icon: 'comunidad' },
 ]
 
 /** En el telefono, abajo: las cuatro de siempre al alcance del pulgar. */
 const BOTTOM: readonly NavItem[] = [
-  { href: '/', label: 'Inicio', icon: 'inicio' },
-  { href: '/mundos/explorar', label: 'Mundos', icon: 'mundos', match: ['/mundos'] },
-  { href: '/mesas', label: 'Mesas', icon: 'mesas' },
-  { href: '/comunidad', label: 'Comunidad', icon: 'comunidad' },
+  { href: '/', label: 'shell.nav.home', icon: 'inicio' },
+  { href: '/mundos/explorar', label: 'shell.nav.worlds', icon: 'mundos', match: ['/mundos'] },
+  { href: '/mesas', label: 'shell.nav.tables', icon: 'mesas' },
+  { href: '/comunidad', label: 'shell.nav.community', icon: 'comunidad' },
 ]
 
 interface Props {
@@ -43,21 +44,21 @@ export function AppShell({ user, onLogout, children, background = 'mesas' }: Pro
   return (
     <div className={`shell${background ? ` fondo-${background}` : ''}`}>
       <header className="shell-top">
-        <Link href="/" className="shell-logo" aria-label="Ad Astra Mentis, inicio">
+        <Link href="/" className="shell-logo" aria-label={t('shell.aria.home')}>
           <LogoHorizontal height={34} />
         </Link>
-        <nav className="shell-nav" aria-label="Principal">
+        <nav className="shell-nav" aria-label={t('shell.aria.main')}>
           {TOP.map((item) => (
             <Link key={item.href} href={item.href} className={isActive(item, path) ? 'active' : undefined} aria-current={isActive(item, path) ? 'page' : undefined}>
-              {item.label}
+              {t(item.label)}
             </Link>
           ))}
         </nav>
         <div className="shell-actions">
-          <Link href="/mundos/explorar" className="shell-iconbtn" aria-label="Buscar mundos">
+          <Link href="/mundos/explorar" className="shell-iconbtn" aria-label={t('shell.aria.searchWorlds')}>
             <ShellIcon name="buscar" />
           </Link>
-          <Link href="/pronto/avisos" className="shell-iconbtn" aria-label="Avisos">
+          <Link href="/pronto/avisos" className="shell-iconbtn" aria-label={t('shell.aria.notices')}>
             <ShellIcon name="avisos" />
           </Link>
           <SystemMenu user={user} onLogout={onLogout} variant="avatar" />
@@ -65,28 +66,28 @@ export function AppShell({ user, onLogout, children, background = 'mesas' }: Pro
       </header>
 
       <div className="shell-body">
-        <aside className="shell-side" aria-label="Secciones">
+        <aside className="shell-side" aria-label={t('shell.aria.sections')}>
           <nav>
             {SITE_SECTIONS.map((item) => (
               <Link key={item.href} href={item.href} className={isActive(item, path) ? 'active' : undefined}>
                 <ShellIcon name={item.icon} />
-                {item.label}
+                {t(item.label)}
               </Link>
             ))}
           </nav>
           <Link href="/perfil" className={`ajustes${path === '/perfil' ? ' active' : ''}`}>
             <ShellIcon name="ajustes" />
-            Configuración
+            {t('shell.nav.settings')}
           </Link>
         </aside>
         <main className="shell-main">{children}</main>
       </div>
 
-      <nav className="shell-bottom" aria-label="Principal">
+      <nav className="shell-bottom" aria-label={t('shell.aria.main')}>
         {BOTTOM.map((item) => (
           <Link key={item.href} href={item.href} className={isActive(item, path) ? 'active' : undefined}>
             <ShellIcon name={item.icon} />
-            <span>{item.label}</span>
+            <span>{t(item.label)}</span>
           </Link>
         ))}
       </nav>

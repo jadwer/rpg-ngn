@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
@@ -49,49 +50,49 @@ function AccessPageForm() {
   return (
     <main className="page narrow">
       <header className="hero">
-        <p className="motto">&ldquo;Extraños hoy, quizás una leyenda mañana.&rdquo;</p>
+        <p className="motto">{t('auth.motto')}</p>
         <h1>
           <Link href="/" className="plain">
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Entrar a la mesa</p>
+        <p className="tagline">{t('auth.signInTitle')}</p>
       </header>
       <hr className="rule" />
 
       {session.stage.name === 'booting' ? (
         <p className="hint" style={{ textAlign: 'center' }}>
-          <span className="spinner" aria-hidden /> Buscando tu sesión...
+          <span className="spinner" aria-hidden /> {t('auth.findingSession')}
         </p>
       ) : (
         <form className="card stack" onSubmit={(e) => void submit(e)}>
           {notice ? <div className="error">{notice}</div> : null}
           <label className="field">
-            <span>Correo</span>
+            <span>{t('auth.email')}</span>
             <input className="input" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required autoFocus />
           </label>
           <label className="field">
-            <span>Contraseña</span>
+            <span>{t('auth.password')}</span>
             <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
           </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
             <button type="submit" className="btn primary" disabled={busy || !email || !password}>
               {busy ? <span className="spinner" aria-hidden /> : null}
-              Entrar
+              {t('auth.signIn')}
             </button>
             <Link href="/recuperar" className="hint">
-              ¿Olvidaste tu contraseña?
+              {t('auth.forgot')}
             </Link>
           </div>
           <p className="hint">
-            ¿Todavía no tienes cuenta? <Link href={`/crear-cuenta?volver=${encodeURIComponent(destino)}`}>Créala aquí</Link>, toma un minuto.
+            {t('auth.noAccount')} <Link href={`/crear-cuenta?volver=${encodeURIComponent(destino)}`}>{t('auth.createHere')}</Link>{t('auth.takesAMinute')}
           </p>
           <ServerField value={server} onChange={setServer} />
         </form>
       )}
       <footer className="hint" style={{ textAlign: 'center', marginTop: 28, fontVariant: 'small-caps', letterSpacing: '0.1em', fontStyle: 'normal' }}>
-        El mundo es más grande cuando se comparte
+        {t('auth.footer')}
       </footer>
     </main>
   )

@@ -1,5 +1,6 @@
 'use client'
 
+import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -39,13 +40,14 @@ function VerifyEmail() {
       baseUrl: normalizeBaseUrl(session.serverUrl),
       tokenProvider: () => null,
       fetch: (url, init) => fetch(url, { ...init, headers: { ...init.headers, ...WEB_HEADER }, credentials: 'same-origin' }),
+      locale: () => language(),
     })
     api
       .verifyEmail(link)
       .then((message) => alive && setEstado({ kind: 'done', message }))
       .catch(() =>
         alive &&
-        setEstado({ kind: 'failed', message: 'Este enlace ya no sirve: caducó o llegó incompleto. Pide otro en Mi cuenta y ábrelo tal cual viene en el correo.' }),
+        setEstado({ kind: 'failed', message: t('auth.verify.failed') }),
       )
     return () => {
       alive = false
@@ -61,25 +63,25 @@ function VerifyEmail() {
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Confirmar tu correo</p>
+        <p className="tagline">{t('auth.verify.title')}</p>
       </header>
       <hr className="rule" />
 
       <div className="card stack">
-        {estado.kind === 'working' ? <p>Confirmando tu correo…</p> : null}
+        {estado.kind === 'working' ? <p>{t('auth.verify.working')}</p> : null}
         {estado.kind === 'done' ? (
           <>
-            <p>Listo: tu correo quedó confirmado. Ya puedes crear mesas y ser anfitrión.</p>
+            <p>{t('auth.verify.done')}</p>
             <Link href="/mesas" className="btn">
-              Ir a mis mesas
+              {t('auth.verify.goTables')}
             </Link>
           </>
         ) : null}
         {estado.kind === 'failed' || estado.kind === 'incomplete' ? (
           <>
-            <p>{estado.kind === 'failed' ? estado.message : 'Este enlace está incompleto. Ábrelo tal cual viene en el correo, sin recortarlo.'}</p>
+            <p>{estado.kind === 'failed' ? estado.message : t('auth.verify.incomplete')}</p>
             <Link href="/perfil" className="btn">
-              Pedir otro enlace
+              {t('auth.askAnotherLink')}
             </Link>
           </>
         ) : null}

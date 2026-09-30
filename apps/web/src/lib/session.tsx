@@ -1,5 +1,6 @@
 'use client'
 
+import { language } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, normalizeBaseUrl, type ApiClient, type FetchLike, type RegisterInput } from '@rpg-ngn/api-client'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { storage, type StoredUser } from './storage'
@@ -52,7 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [serverUrl, setServerUrl] = useState('')
 
   /** Proxy: base vacia (mismo origen) y sin token; directo: base y token en memoria. */
-  const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => (baseUrl ? tokenRef.current : null), fetch: browserFetch }), [])
+  const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => (baseUrl ? tokenRef.current : null), fetch: browserFetch, locale: () => language() }), [])
 
   // Un 401 limpia lo local y manda a entrar, pero NO revoca el token en el
   // servidor: un 401 transitorio (PHP-FPM reiniciando en un despliegue) no

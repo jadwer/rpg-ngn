@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -44,7 +45,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
   return (
     <div className="sysmenu" ref={ref}>
       {variant === 'avatar' ? (
-        <button type="button" className="sysmenu-avatar" aria-label="Menú de tu cuenta" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <button type="button" className="sysmenu-avatar" aria-label={t('shell.aria.accountMenu')} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <span className="inicial" aria-hidden>
             {(user.name.trim()[0] ?? '?').toUpperCase()}
           </span>
@@ -54,7 +55,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
           </span>
         </button>
       ) : (
-        <button type="button" className="sysmenu-btn" aria-label="Menú del sitio" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <button type="button" className="sysmenu-btn" aria-label={t('shell.aria.siteMenu')} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <span className="bars" aria-hidden>
             <i />
             <i />
@@ -63,7 +64,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
         </button>
       )}
       {open ? (
-        <nav className="sysmenu-panel" role="menu" aria-label="Sitio">
+        <nav className="sysmenu-panel" role="menu" aria-label={t('shell.aria.site')}>
           <div className="who">{user.name}</div>
           {/* Las mismas secciones que la barra lateral del sitio; en el menu del
               avatar no se repiten, porque ahi ya estan a la vista. */}
@@ -71,7 +72,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
             ? SITE_SECTIONS.map((item) => (
                 <Link key={item.href} role="menuitem" href={item.href} className={isActive(item, path) ? 'active' : undefined} onClick={() => setOpen(false)}>
                   <ShellIcon name={item.icon} />
-                  {item.label}
+                  {t(item.label)}
                 </Link>
               ))
             : null}
@@ -79,7 +80,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
           {ACCOUNT_ITEMS.map((item) => (
             <Link key={item.href} role="menuitem" href={item.href} className={isActive(item, path) ? 'active' : undefined} onClick={() => setOpen(false)}>
               <ShellIcon name={item.icon} />
-              {item.label}
+              {t(item.label)}
             </Link>
           ))}
           {onLogout ? (
@@ -91,7 +92,7 @@ export function SystemMenu({ user, onLogout, variant = 'burger' }: Props) {
                 onLogout()
               }}
             >
-              Salir
+              {t('shell.logout')}
             </button>
           ) : null}
         </nav>

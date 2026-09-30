@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { useState } from 'react'
 
 /**
@@ -15,9 +16,9 @@ export function ServerField({ value, onChange }: { value: string; onChange: (val
   if (!open) {
     return (
       <p className="hint" style={{ margin: 0 }}>
-        {sameOrigin || !value ? 'Conectado a la API de esta misma web.' : `API directa: ${value}.`}{' '}
+        {sameOrigin || !value ? t('auth.server.sameOrigin') : t('auth.server.direct', { url: value })}{' '}
         <button type="button" className="linklike" onClick={() => setOpen(true)}>
-          Cambiar servidor
+          {t('auth.server.change')}
         </button>
       </p>
     )
@@ -25,10 +26,10 @@ export function ServerField({ value, onChange }: { value: string; onChange: (val
 
   return (
     <label className="field">
-      <span>Servidor de la API</span>
+      <span>{t('auth.server.label')}</span>
       <input className="input" name="servidor" value={value} onChange={(e) => onChange(e.target.value)} placeholder="http://192.168.100.11:8010" autoComplete="url" inputMode="url" />
       <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-        Con la dirección de esta misma web no hace falta CORS y la sesión va en una cookie segura. Otra URL habla directo con esa API.
+        {t('auth.server.help')}
       </span>
     </label>
   )

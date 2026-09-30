@@ -18,6 +18,7 @@
     "@rpg-ngn/api-client": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
     "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/i18n": "workspace:*",
     "@rpg-ngn/rules": "workspace:*",
     "@rpg-ngn/ui-logic": "workspace:*",
     "@stripe/react-stripe-js": "^6.10.0",

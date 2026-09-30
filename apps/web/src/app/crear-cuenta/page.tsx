@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
@@ -62,59 +63,59 @@ function RegisterPageForm() {
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Crear cuenta</p>
+        <p className="tagline">{t('auth.signUpTitle')}</p>
       </header>
       <hr className="rule" />
 
       {pending ? (
         <div className="card stack">
           <p>{pending}</p>
-          <p className="hint">Cuando hayas verificado el correo, entra con tu contraseña.</p>
+          <p className="hint">{t('auth.afterVerify')}</p>
           <Link href="/entrar" className="btn primary">
-            Ir a entrar
+            {t('auth.goSignIn')}
           </Link>
         </div>
       ) : (
         <form className="card stack" onSubmit={(e) => void submit(e)}>
           <label className="field">
-            <span>Tu nombre</span>
-            <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder="Como te verán en la mesa" maxLength={80} required autoFocus />
+            <span>{t('auth.yourName')}</span>
+            <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder={t('auth.namePlaceholder')} maxLength={80} required autoFocus />
           </label>
           <label className="field">
-            <span>Correo</span>
+            <span>{t('auth.email')}</span>
             <input className="input" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" required />
           </label>
           <label className="field">
-            <span>Contraseña</span>
+            <span>{t('auth.password')}</span>
             <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
             <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-              Al menos 8 caracteres.
+              {t('auth.atLeast8')}
             </span>
           </label>
           <label className="field">
-            <span>Repite la contraseña</span>
+            <span>{t('auth.repeatPassword')}</span>
             <input className="input" type="password" name="password_confirmation" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
           </label>
-          {tooShort ? <div className="error">La contraseña necesita al menos 8 caracteres.</div> : null}
-          {mismatch ? <div className="error">Las contraseñas no coinciden.</div> : null}
+          {tooShort ? <div className="error">{t('auth.tooShort')}</div> : null}
+          {mismatch ? <div className="error">{t('auth.mismatch')}</div> : null}
           <label className="check">
             <input type="checkbox" name="age_confirmed" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
-            Tengo 18 años o más.
+            {t('auth.adult')}
           </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
             <button type="submit" className="btn primary" disabled={busy || !name.trim() || !email || !password || !confirmation || mismatch || tooShort || !adult}>
               {busy ? <span className="spinner" aria-hidden /> : null}
-              Crear cuenta
+              {t('auth.createAccount')}
             </button>
-            <span className="hint">Entras directo a tus mesas.</span>
+            <span className="hint">{t('auth.straightToTables')}</span>
           </div>
           <p className="hint">
-            Al crear la cuenta aceptas los <Link href="/terminos">términos y condiciones</Link> y el{' '}
-            <Link href="/privacidad">aviso de privacidad</Link>.
+            {t('auth.acceptPrefix')} <Link href="/terminos">{t('auth.terms')}</Link> {t('auth.andThe')}{' '}
+            <Link href="/privacidad">{t('auth.privacy')}</Link>.
           </p>
           <p className="hint">
-            ¿Ya tienes cuenta? <Link href={`/entrar?volver=${encodeURIComponent(destino)}`}>Entra aquí</Link>.
+            {t('auth.haveAccount')} <Link href={`/entrar?volver=${encodeURIComponent(destino)}`}>{t('auth.signInHere')}</Link>.
           </p>
           <ServerField value={server} onChange={setServer} />
         </form>

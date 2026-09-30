@@ -24,6 +24,7 @@
     "@rpg-ngn/campaign": "workspace:*",
     "@rpg-ngn/content": "workspace:*",
     "@rpg-ngn/core": "workspace:*",
+    "@rpg-ngn/i18n": "workspace:*",
     "@rpg-ngn/rules": "workspace:*",
     "@rpg-ngn/ui-logic": "workspace:*",
     "expo": "~57.0.25",

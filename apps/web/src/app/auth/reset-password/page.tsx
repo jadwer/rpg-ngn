@@ -1,5 +1,6 @@
 'use client'
 
+import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -51,6 +52,7 @@ function ResetPasswordForm() {
         baseUrl: normalizeBaseUrl(session.serverUrl),
         tokenProvider: () => null,
         fetch: (url, init) => fetch(url, { ...init, headers: { ...init.headers, ...WEB_HEADER }, credentials: 'same-origin' }),
+        locale: () => language(),
       })
       setDone(await api.resetPassword({ token, email, password, passwordConfirmation: repeat }))
     } catch (caught) {
@@ -68,49 +70,49 @@ function ResetPasswordForm() {
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Contraseña nueva</p>
+        <p className="tagline">{t('auth.resetTitle')}</p>
       </header>
       <hr className="rule" />
 
       {!token || !email ? (
         <div className="card stack">
-          <p>Este enlace está incompleto.</p>
-          <p className="hint">Ábrelo tal cual viene en el correo, sin recortarlo. Si ya lo usaste o pasó más de una hora, pide otro.</p>
+          <p>{t('auth.linkIncomplete')}</p>
+          <p className="hint">{t('auth.resetLinkHelp')}</p>
           <Link href="/recuperar" className="btn">
-            Pedir otro enlace
+            {t('auth.askAnotherLink')}
           </Link>
         </div>
       ) : done ? (
         <div className="card stack">
           <p>{done}</p>
-          <p className="hint">Se cerraron tus sesiones en otros dispositivos, así que tendrás que entrar de nuevo en ellos.</p>
+          <p className="hint">{t('auth.otherSessionsClosed')}</p>
           <Link href="/entrar" className="btn primary">
-            Entrar
+            {t('auth.signIn')}
           </Link>
         </div>
       ) : (
         <form className="card stack" onSubmit={(e) => void submit(e)}>
           <p className="hint">
-            Estás cambiando la contraseña de <strong>{email}</strong>.
+            {t('auth.changingFor')} <strong>{email}</strong>.
           </p>
           <label className="field">
-            <span>Contraseña nueva</span>
+            <span>{t('auth.newPassword')}</span>
             <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required autoFocus minLength={8} />
           </label>
           <label className="field">
-            <span>Repítela</span>
+            <span>{t('auth.repeatIt')}</span>
             <input className="input" type="password" name="password_confirmation" value={repeat} onChange={(e) => setRepeat(e.target.value)} autoComplete="new-password" required minLength={8} />
           </label>
-          {corta ? <p className="hint">Al menos 8 caracteres.</p> : null}
-          {distintas ? <p className="hint">Las dos no coinciden.</p> : null}
+          {corta ? <p className="hint">{t('auth.atLeast8')}</p> : null}
+          {distintas ? <p className="hint">{t('auth.twoDiffer')}</p> : null}
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
             <button type="submit" className="btn primary" disabled={!puede}>
               {busy ? <span className="spinner" aria-hidden /> : null}
-              Guardar contraseña
+              {t('auth.savePassword')}
             </button>
             <Link href="/recuperar" className="hint">
-              Pedir otro enlace
+              {t('auth.askAnotherLink')}
             </Link>
           </div>
         </form>

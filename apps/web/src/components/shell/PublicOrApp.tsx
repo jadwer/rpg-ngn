@@ -1,5 +1,6 @@
 'use client'
 
+import { language } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type ApiClient } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useMemo, type ReactNode } from 'react'
@@ -20,6 +21,7 @@ export function PublicOrApp({ children }: { children: (client: ApiClient, signed
         baseUrl: normalizeBaseUrl(session.serverUrl),
         tokenProvider: () => null,
         fetch: (url, init) => fetch(url, { ...init, headers: { ...init.headers, ...WEB_HEADER }, credentials: 'omit' }),
+        locale: () => language(),
       }),
     [session.serverUrl],
   )

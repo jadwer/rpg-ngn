@@ -1,0 +1,33 @@
+/** El marco de las pantallas con sesion: navegacion, menus, cuenta. */
+export const shell = {
+  nav: {
+    stories: 'Historias',
+    home: 'Inicio',
+    worlds: 'Mundos',
+    tables: 'Mesas',
+    community: 'Comunidad',
+    exploreWorlds: 'Explorar mundos',
+    myWorlds: 'Mis mundos',
+    myTables: 'Mis mesas',
+    campaigns: 'Campañas',
+    characters: 'Personajes',
+    friends: 'Amigos',
+    account: 'Mi cuenta y créditos',
+    voice: 'Voz',
+    hostGuide: 'Guía del anfitrión',
+    settings: 'Configuración',
+  },
+  aria: {
+    home: 'Ad Astra Mentis, inicio',
+    main: 'Principal',
+    sections: 'Secciones',
+    searchWorlds: 'Buscar mundos',
+    notices: 'Avisos',
+    accountMenu: 'Menú de tu cuenta',
+    siteMenu: 'Menú del sitio',
+    site: 'Sitio',
+  },
+  logout: 'Salir',
+  signIn: 'Entrar',
+  signUp: 'Crear cuenta',
+}

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Cinzel, Crimson_Pro } from 'next/font/google'
 import type { ReactNode } from 'react'
+import { LanguageProvider } from '../lib/i18n'
 import { NarratorProvider } from '../lib/narrator'
 import { SessionProvider } from '../lib/session'
 import './globals.css'
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="es" className={`${cinzel.variable} ${crimson.variable}`}>
       <body>
         <SessionProvider>
-          <NarratorProvider>{children}</NarratorProvider>
+          <LanguageProvider>
+            <NarratorProvider>{children}</NarratorProvider>
+          </LanguageProvider>
         </SessionProvider>
       </body>
     </html>

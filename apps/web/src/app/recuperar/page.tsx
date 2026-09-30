@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useState, type FormEvent } from 'react'
@@ -40,32 +41,32 @@ export default function ForgotPasswordPage() {
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Recuperar contraseña</p>
+        <p className="tagline">{t('auth.recoverTitle')}</p>
       </header>
       <hr className="rule" />
       {done ? (
         <div className="card stack">
           <p>{done}</p>
-          <p className="hint">Si no te llega en unos minutos, escríbele al anfitrión de tu mesa: él puede ayudarte a entrar.</p>
+          <p className="hint">{t('auth.recoverNoMail')}</p>
           <Link href="/entrar" className="btn">
-            Volver a entrar
+            {t('auth.backToSignIn')}
           </Link>
         </div>
       ) : (
         <form className="card stack" onSubmit={(e) => void submit(e)}>
-          <p className="hint">Escribe tu correo y te llegará un enlace para poner una contraseña nueva.</p>
+          <p className="hint">{t('auth.recoverHint')}</p>
           <label className="field">
-            <span>Correo</span>
+            <span>{t('auth.email')}</span>
             <input className="input" type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required autoFocus />
           </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
             <button type="submit" className="btn primary" disabled={busy || !email}>
               {busy ? <span className="spinner" aria-hidden /> : null}
-              Enviar enlace
+              {t('auth.sendLink')}
             </button>
             <Link href="/entrar" className="hint">
-              Volver a entrar
+              {t('auth.backToSignIn')}
             </Link>
           </div>
         </form>

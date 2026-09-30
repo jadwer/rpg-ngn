@@ -1,8 +1,10 @@
+import type { MessageKey } from '@rpg-ngn/i18n'
 import type { ShellIconName } from './icons'
 
 export interface NavItem {
   href: string
-  label: string
+  /** Clave del texto (i18n): se pinta con t() en el idioma vigente. */
+  label: MessageKey
   icon: ShellIconName
   /** Rutas que tambien marcan esta entrada como activa. */
   match?: readonly string[]
@@ -14,20 +16,20 @@ export interface NavItem {
  * menu es el mismo en todas partes.
  */
 export const SITE_SECTIONS: readonly NavItem[] = [
-  { href: '/', label: 'Inicio', icon: 'inicio' },
-  { href: '/mundos/explorar', label: 'Explorar mundos', icon: 'mundos' },
-  { href: '/mundos', label: 'Mis mundos', icon: 'misMundos' },
-  { href: '/mesas', label: 'Mis mesas', icon: 'mesas' },
-  { href: '/pronto/campanas', label: 'Campañas', icon: 'campanas' },
-  { href: '/pronto/personajes', label: 'Personajes', icon: 'personajes' },
-  { href: '/comunidad', label: 'Amigos', icon: 'amigos' },
+  { href: '/', label: 'shell.nav.home', icon: 'inicio' },
+  { href: '/mundos/explorar', label: 'shell.nav.exploreWorlds', icon: 'mundos' },
+  { href: '/mundos', label: 'shell.nav.myWorlds', icon: 'misMundos' },
+  { href: '/mesas', label: 'shell.nav.myTables', icon: 'mesas' },
+  { href: '/pronto/campanas', label: 'shell.nav.campaigns', icon: 'campanas' },
+  { href: '/pronto/personajes', label: 'shell.nav.characters', icon: 'personajes' },
+  { href: '/comunidad', label: 'shell.nav.friends', icon: 'amigos' },
 ]
 
 /** Lo de la cuenta: va en el menu del avatar y al pie de la hamburguesa. */
 export const ACCOUNT_ITEMS: readonly NavItem[] = [
-  { href: '/perfil', label: 'Mi cuenta y créditos', icon: 'ajustes' },
-  { href: '/ajustes', label: 'Voz', icon: 'avisos' },
-  { href: '/guia', label: 'Guía del anfitrión', icon: 'misMundos' },
+  { href: '/perfil', label: 'shell.nav.account', icon: 'ajustes' },
+  { href: '/ajustes', label: 'shell.nav.voice', icon: 'avisos' },
+  { href: '/guia', label: 'shell.nav.hostGuide', icon: 'misMundos' },
 ]
 
 export function isActive(item: NavItem, path: string): boolean {
