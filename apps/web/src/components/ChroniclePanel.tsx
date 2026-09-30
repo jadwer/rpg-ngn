@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient, ChronicleShare } from '@rpg-ngn/api-client'
 import { chronicleStatus, chronicleUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
@@ -46,7 +47,7 @@ export function ChroniclePanel({ client, tableId }: Props) {
     }
   }
 
-  if (!loaded) return <p className="hint">Cargando...</p>
+  if (!loaded) return <p className="hint">{t('chroniclePanel.cargando')}</p>
   const status = chronicleStatus(share)
   const url = share ? chronicleUrl(window.location.origin, share.token) : null
 
@@ -56,21 +57,21 @@ export function ChroniclePanel({ client, tableId }: Props) {
       {status.state === 'none' ? (
         <>
           <label className="check">
-            <input type="checkbox" checked={anonymize} onChange={(e) => setAnonymize(e.target.checked)} /> Sin los nombres de quienes jugamos
+            <input type="checkbox" checked={anonymize} onChange={(e) => setAnonymize(e.target.checked)} /> {t('chroniclePanel.sinLosNombresDe')}
           </label>
           <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize }))}>
-            Pedir compartir la historia
+            {t('chroniclePanel.pedirCompartirLaHistoria')}
           </button>
         </>
       ) : null}
       {share && status.canConsent ? (
         <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.consentChronicle(tableId))}>
-          Acepto que se comparta
+          {t('chroniclePanel.aceptoQueSeComparta')}
         </button>
       ) : null}
       {share && url ? (
         <div className="row">
-          <input className="input" readOnly value={url} aria-label="Enlace a la historia" onFocus={(e) => e.currentTarget.select()} />
+          <input className="input" readOnly value={url} aria-label={t('chroniclePanel.enlaceALaHistoria')} onFocus={(e) => e.currentTarget.select()} />
           <button
             type="button"
             className="btn ghost small"
@@ -78,7 +79,7 @@ export function ChroniclePanel({ client, tableId }: Props) {
               void navigator.clipboard?.writeText(url).then(() => setCopied(true))
             }}
           >
-            {copied ? 'Copiado' : 'Copiar'}
+            {copied ? t('play.copied') : t('play.copy')}
           </button>
         </div>
       ) : null}
@@ -92,7 +93,7 @@ export function ChroniclePanel({ client, tableId }: Props) {
             return null
           })}
         >
-          Retirar el enlace
+          {t('chroniclePanel.retirarElEnlace')}
         </button>
       ) : null}
       {error ? <p className="error">{error}</p> : null}

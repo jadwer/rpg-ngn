@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type Chronicle } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -45,10 +46,10 @@ export default function CronicaPage() {
   if (missing) {
     return (
       <main className="page narrow cronica">
-        <h1>Esta historia no se comparte</h1>
-        <p className="hint">El enlace no existe, alguien de la mesa lo retiró o todavía no aceptaron todos.</p>
+        <h1>{t('chroniclePage.estaHistoriaNoSe')}</h1>
+        <p className="hint">{t('chroniclePage.elEnlaceNoExiste')}</p>
         <Link href="/" className="btn">
-          Conocer Ad Astra Mentis
+          {t('chroniclePage.conocerAdAstraMentis')}
         </Link>
       </main>
     )
@@ -56,7 +57,7 @@ export default function CronicaPage() {
   if (!chronicle) {
     return (
       <main className="page narrow cronica">
-        <p className="hint">Cargando la historia...</p>
+        <p className="hint">{t('chroniclePage.cargandoLaHistoria')}</p>
       </main>
     )
   }
@@ -64,7 +65,7 @@ export default function CronicaPage() {
   return (
     <main className="page narrow cronica">
       <header className="cronica-head">
-        <p className="kicker">{chronicle.pack.name ?? 'Una historia'} · Ad Astra Mentis</p>
+        <p className="kicker">{chronicle.pack.name ?? t('play.aStory')} · Ad Astra Mentis</p>
         <h1>{chronicle.title}</h1>
         {chronicle.players ? (
           <p className="hint">
@@ -78,7 +79,7 @@ export default function CronicaPage() {
         ) : null}
       </header>
 
-      {chronicle.sessions.length === 0 ? <p className="hint">Esta mesa todavía no ha jugado ningún turno.</p> : null}
+      {chronicle.sessions.length === 0 ? <p className="hint">{t('chroniclePage.estaMesaTodaviaNo')}</p> : null}
 
       {chronicle.sessions.map((s) => (
         <section key={s.code} className="cronica-session">
@@ -119,9 +120,9 @@ export default function CronicaPage() {
       ))}
 
       <footer className="cronica-foot">
-        <p>Una historia jugada en Ad Astra Mentis, donde tú decides qué pasa: tu novela ligera o tu campaña de rol, con un director de juego que no se cansa.</p>
+        <p>{t('chroniclePage.unaHistoriaJugadaEn')}</p>
         <Link href="/crear-cuenta" className="btn">
-          Jugar la tuya
+          {t('chroniclePage.jugarLaTuya')}
         </Link>
       </footer>
     </main>

@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type PackIssue, type PackOption } from '@rpg-ngn/api-client'
 import { packOriginText, packStatusText } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -106,27 +107,27 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
   // en los tuyos y en el catalogo a la vez.
   const previewToggle = (key: string) => (
     <button type="button" className="btn ghost small" onClick={() => setPreviewing((cur) => (cur === key ? null : key))}>
-      {previewing === key ? 'Ocultar personajes' : 'Ver personajes'}
+      {previewing === key ? t('play.hideCharacters') : t('play.showCharacters')}
     </button>
   )
 
   return (
     <div className="page en-shell narrow mundos">
-      <h1 className="pagina-titulo">Mis mundos</h1>
+      <h1 className="pagina-titulo">{t('myWorldsPage.misMundos')}</h1>
 
       <section className="card stack">
         <div className="label" style={{ marginTop: 0 }}>
-          Subir un mundo
+          {t('myWorldsPage.subirUnMundo')}
         </div>
         <p className="hint">
-          Un mundo es un <b>.rpgpack</b>: un zip con la estructura de la{' '}
+          {t('myWorldsPage.unMundoEsUn')} <b>{t('myWorldsPage.rpgpack')}</b>: un zip con la estructura de la{' '}
           <a href={SPEC} target="_blank" rel="noreferrer">
-            especificación pública
+            {t('myWorldsPage.especificacionPublica')}
           </a>{' '}
           (personajes, lugares, secretos, sesiones, retratos y mapas). Se revisa al momento y queda listo para tus mesas. Las imágenes se convierten a WebP; nada de SVG.
         </p>
         <label className="field">
-          <span>Archivo</span>
+          <span>{t('myWorldsPage.archivo')}</span>
           <input ref={fileInput} className="input" type="file" name="pack" accept=".rpgpack,.zip,application/zip" onChange={(e) => setFile(e.target.files?.[0] ?? null)} disabled={busy} />
         </label>
         <label className="check">
@@ -164,9 +165,9 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
 
       {review ? (
         <section className="stack" style={{ marginTop: 20 }}>
-          <div className="label">Revisión del catálogo</div>
-          <p className="hint">Se mira en este orden: procedencia, contenido sexual o de odio, menores y datos personales de terceros. Un rechazo lleva motivo: el autor lo lee para corregir.</p>
-          {review.length === 0 ? <p className="hint">Nada en la cola.</p> : null}
+          <div className="label">{t('myWorldsPage.revisionDelCatalogo')}</div>
+          <p className="hint">{t('myWorldsPage.seMiraEnEste')}</p>
+          {review.length === 0 ? <p className="hint">{t('myWorldsPage.nadaEnLaCola')}</p> : null}
           {review.map((p) => (
             <article key={p.packId} className="card mundo-propio">
               <div className="top">
@@ -184,7 +185,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
               <div className="row">
                 {previewToggle(`review:${p.id}`)}
                 <button type="button" className="btn primary small" disabled={busy} onClick={() => void act(() => client.reviewPack(p.packId!, 'approve'))}>
-                  Publicar
+                  {t('myWorldsPage.publicar')}
                 </button>
                 <button
                   type="button"
@@ -195,7 +196,7 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                     if (note && note.trim()) void act(() => client.reviewPack(p.packId!, 'reject', note.trim()))
                   }}
                 >
-                  Rechazar
+                  {t('myWorldsPage.rechazar')}
                 </button>
               </div>
             </article>
@@ -204,8 +205,8 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
       ) : null}
 
       <section className="stack" style={{ marginTop: 20 }}>
-        <div className="label">Mis mundos</div>
-        {mine === null ? <p className="hint">Cargando...</p> : mine.packs.length === 0 ? <p className="hint">Todavía no has subido ninguno.</p> : null}
+        <div className="label">{t('myWorldsPage.misMundos')}</div>
+        {mine === null ? <p className="hint">{t('myWorldsPage.cargando')}</p> : mine.packs.length === 0 ? <p className="hint">{t('myWorldsPage.todaviaNoHasSubido')}</p> : null}
         {mine?.packs.map((p) => (
           <article key={p.packId} className="card mundo-propio">
             <div className="top">
@@ -219,21 +220,21 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
             </div>
             {p.tagline ? <p className="tagline">{p.tagline}</p> : null}
             <p className="hint">
-              {p.characters} personajes, {p.sessions} sesiones. {p.tables ? `${p.tables} ${p.tables === 1 ? 'mesa lo juega' : 'mesas lo juegan'}.` : 'Ninguna mesa todavía.'}
+              {t('play.packCounts', { characters: p.characters, sessions: p.sessions })} {p.tables ? t(p.tables === 1 ? 'play.tablesPlayOne' : 'play.tablesPlayMany', { count: p.tables }) : t('play.noTableYet')}
             </p>
             {p.status === 'rejected' && p.reviewNote ? <div className="error">No se publicó: {p.reviewNote}</div> : null}
-            {p.status === 'pending' ? <p className="hint">En la cola de revisión: cuando pase, aparece en el catálogo con tu nombre.</p> : null}
+            {p.status === 'pending' ? <p className="hint">{t('myWorldsPage.enLaColaDe')}</p> : null}
             {previewing === `mine:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
             <div className="row">
               {previewToggle(`mine:${p.id}`)}
               {p.status === 'private' || p.status === 'rejected' ? (
                 <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.publishPack(p.packId!))}>
-                  Pedir publicación
+                  {t('myWorldsPage.pedirPublicacion')}
                 </button>
               ) : null}
               {p.status === 'pending' || p.status === 'published' ? (
                 <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.unpublishPack(p.packId!))}>
-                  {p.status === 'published' ? 'Retirar del catálogo' : 'Cancelar la revisión'}
+                  {p.status === 'published' ? t('play.unpublish') : t('play.cancelReview')}
                 </button>
               ) : null}
               <button
@@ -241,10 +242,10 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                 className="btn ghost small"
                 disabled={busy}
                 onClick={() => {
-                  if (window.confirm(p.tables ? 'Hay mesas jugando este mundo: se retira de tu lista y esas mesas siguen. ¿Retirar?' : '¿Borrar este mundo? No se puede deshacer.')) void act(() => client.deletePack(p.packId!))
+                  if (window.confirm(p.tables ? t('play.confirmRetire') : t('play.confirmDelete'))) void act(() => client.deletePack(p.packId!))
                 }}
               >
-                {p.tables ? 'Retirar' : 'Borrar'}
+                {p.tables ? t('play.retireShort') : t('play.delete')}
               </button>
             </div>
           </article>
@@ -252,9 +253,9 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
       </section>
 
       <section className="stack" style={{ marginTop: 20 }}>
-        <div className="label">Catálogo</div>
-        <p className="hint">Mundos que otros publicaron y pasaron revisión. Añadirlos a tus mundos no copia nada: al crear una mesa los ves como opción.</p>
-        {catalog === null ? <p className="hint">Cargando...</p> : catalog.length === 0 ? <p className="hint">Todavía no hay mundos publicados. El tuyo puede ser el primero.</p> : null}
+        <div className="label">{t('myWorldsPage.catalogo')}</div>
+        <p className="hint">{t('myWorldsPage.mundosQueOtrosPublicaron')}</p>
+        {catalog === null ? <p className="hint">{t('myWorldsPage.cargando')}</p> : catalog.length === 0 ? <p className="hint">{t('myWorldsPage.todaviaNoHayMundos')}</p> : null}
         {catalog?.map((p) => (
           <article key={p.packId} className="card mundo-propio">
             <div className="top">
@@ -264,11 +265,11 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                   {packOriginText({ origin: 'catalog', author: p.author ?? null })} · versión {p.version} · {p.system}
                 </span>
               </div>
-              {p.mine ? <span className="chip">tuyo</span> : p.activated ? <span className="chip done">en tus mundos</span> : null}
+              {p.mine ? <span className="chip">{t('myWorldsPage.tuyo')}</span> : p.activated ? <span className="chip done">{t('myWorldsPage.enTusMundos')}</span> : null}
             </div>
             {p.tagline ? <p className="tagline">{p.tagline}</p> : null}
             <p className="hint">
-              {p.characters} personajes, {p.sessions} sesiones.
+              {t('play.packCounts', { characters: p.characters, sessions: p.sessions })}
             </p>
             {previewing === `catalog:${p.id}` ? <PackPreview client={client} packId={p.id} version={p.version} /> : null}
             {!p.mine ? (
@@ -276,11 +277,11 @@ function Worlds({ client, unauthorized }: { client: ApiClient; unauthorized: (no
                 {previewToggle(`catalog:${p.id}`)}
                 {p.activated ? (
                   <button type="button" className="btn ghost small" disabled={busy} onClick={() => void act(() => client.deactivatePack(p.packId!))}>
-                    Quitar de mis mundos
+                    {t('myWorldsPage.quitarDeMisMundos')}
                   </button>
                 ) : (
                   <button type="button" className="btn primary small" disabled={busy} onClick={() => void act(() => client.activatePack(p.packId!))}>
-                    Añadir a mis mundos
+                    {t('myWorldsPage.anadirAMisMundos')}
                   </button>
                 )}
               </div>

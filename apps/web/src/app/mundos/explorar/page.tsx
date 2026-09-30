@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, durationLabel, passView, playersTag, seasonProgress, stopLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -42,7 +43,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
       if (result.genres.length) setGenres((actual) => (actual.length ? actual : result.genres))
       setError(null)
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'No se pudo cargar el catálogo.')
+      setError(e instanceof ApiError ? e.message : t('play.catalogLoadFailed'))
     }
   }, [client, filters, q])
 
@@ -67,7 +68,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
         await client.activatePack(world.packId)
         await load()
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : 'No se pudo añadir el mundo.')
+        setError(e instanceof ApiError ? e.message : t('play.worldAddFailed'))
       } finally {
         setBusy(null)
       }
@@ -90,17 +91,17 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
     <div className="explorar">
       <section className="explorar-hero">
         <h1>
-          Historias que existen
+          {t('explorePage.historiasQueExisten')}
           <br />
-          porque tú las viviste
+          {t('explorePage.porqueTuLasViviste')}
         </h1>
-        <p>Vive una historia donde tú decides qué pasa, con un director de juego que no se cansa.</p>
+        <p>{t('explorePage.viveUnaHistoriaDonde')}</p>
         <div className="acciones">
           <a href="#mundos" className="btn primary grande">
-            Explorar historias
+            {t('explorePage.explorarHistorias')}
           </a>
           <button type="button" className="btn grande" onClick={() => set({ origin: undefined, duration: 'larga' })}>
-            Descubrir campañas
+            {t('explorePage.descubrirCampanas')}
           </button>
         </div>
       </section>
@@ -111,47 +112,47 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
       <div className="explorar-filtros" id="mundos">
         <label className="buscar">
           <ShellIcon name="buscar" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar mundos…" aria-label="Buscar mundos" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('explorePage.buscarMundos')} aria-label={t('explorePage.buscarMundos2')} />
         </label>
-        <select value={filters.genre ?? ''} onChange={(e) => set({ genre: e.target.value || undefined })} aria-label="Género">
-          <option value="">Género</option>
+        <select value={filters.genre ?? ''} onChange={(e) => set({ genre: e.target.value || undefined })} aria-label={t('explorePage.genero')}>
+          <option value="">{t('explorePage.genero')}</option>
           {genres.map((g) => (
             <option key={g}>{g}</option>
           ))}
         </select>
-        <select value={filters.tone ?? ''} onChange={(e) => set({ tone: e.target.value || undefined })} aria-label="Tono">
-          <option value="">Tono</option>
+        <select value={filters.tone ?? ''} onChange={(e) => set({ tone: e.target.value || undefined })} aria-label={t('explorePage.tono')}>
+          <option value="">{t('explorePage.tono')}</option>
           {tones.map((t) => (
             <option key={t}>{t}</option>
           ))}
         </select>
-        <select value={filters.players ?? ''} onChange={(e) => set({ players: e.target.value ? Number(e.target.value) : undefined })} aria-label="Jugadores">
-          <option value="">Jugadores</option>
+        <select value={filters.players ?? ''} onChange={(e) => set({ players: e.target.value ? Number(e.target.value) : undefined })} aria-label={t('explorePage.jugadores')}>
+          <option value="">{t('explorePage.jugadores')}</option>
           {[1, 2, 3, 4, 5, 6].map((n) => (
             <option key={n} value={n}>
-              {n === 1 ? 'Sola o solo' : `${n} jugadores`}
+              {n === 1 ? t('play.solo') : t('play.playersN', { count: n })}
             </option>
           ))}
         </select>
-        <select value={filters.duration ?? ''} onChange={(e) => set({ duration: (e.target.value || undefined) as CatalogFilters['duration'] })} aria-label="Duración">
-          <option value="">Duración</option>
-          <option value="corta">Corta</option>
-          <option value="media">Media</option>
-          <option value="larga">Larga</option>
+        <select value={filters.duration ?? ''} onChange={(e) => set({ duration: (e.target.value || undefined) as CatalogFilters['duration'] })} aria-label={t('explorePage.duracion')}>
+          <option value="">{t('explorePage.duracion')}</option>
+          <option value="corta">{t('explorePage.corta')}</option>
+          <option value="media">{t('explorePage.media')}</option>
+          <option value="larga">{t('explorePage.larga')}</option>
         </select>
-        <div className="origen" role="group" aria-label="Origen">
+        <div className="origen" role="group" aria-label={t('explorePage.origen')}>
           <button type="button" aria-pressed={filters.origin !== 'comunidad'} onClick={() => set({ origin: filters.origin === 'oficial' ? undefined : 'oficial' })}>
-            Oficiales
+            {t('explorePage.oficiales')}
           </button>
           <button type="button" aria-pressed={filters.origin !== 'oficial'} onClick={() => set({ origin: filters.origin === 'comunidad' ? undefined : 'comunidad' })}>
-            Comunidad
+            {t('explorePage.comunidad')}
           </button>
         </div>
       </div>
 
       {error ? <div className="error">{error}</div> : null}
-      {worlds === null ? <p className="hint">Abriendo el catálogo…</p> : null}
-      {worlds?.length === 0 ? <p className="hint">Ningún mundo coincide con esos filtros.</p> : null}
+      {worlds === null ? <p className="hint">{t('explorePage.abriendoElCatalogo')}</p> : null}
+      {worlds?.length === 0 ? <p className="hint">{t('explorePage.ningunMundoCoincideCon')}</p> : null}
 
       <div className="mundo-grid">
         {worlds?.map((world) => {
@@ -163,7 +164,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
                 {cover ? <img src={cover} alt="" loading="lazy" /> : null}
                 {view.badge ? <span className="sello">{view.badge}</span> : null}
                 {view.action === 'bloqueado' ? (
-                  <span className="candado" aria-label="Bloqueado">
+                  <span className="candado" aria-label={t('explorePage.bloqueado')}>
                     <ShellIcon name="candado" />
                   </span>
                 ) : null}
@@ -203,10 +204,10 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
   const { progress, stops } = seasonProgress(season)
   const offer = passView(pass)
   return (
-    <section className="temporada" aria-label="Temporada actual">
+    <section className="temporada" aria-label={t('explorePage.temporadaActual')}>
       <div className="cabeza">
         <h2>
-          {season.name} <span>· Caminos que se abren jugando</span>
+          {season.name} <span>{t('explorePage.caminosQueSeAbren')}</span>
         </h2>
       </div>
       <div className="cuerpo">
@@ -217,11 +218,11 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
               <span>{season.chapters === 1 ? 'capítulo' : 'capítulos'}</span>
               <small>Has avanzado un {Math.round(progress * 100)}%</small>
               <Link href="/temporada" className="pase-ver">
-                Ver el pase
+                {t('explorePage.verElPase')}
               </Link>
             </>
           ) : (
-            <small>Cada turno que juegas es un capítulo. Entra para ver tu avance.</small>
+            <small>{t('explorePage.cadaTurnoQueJuegas')}</small>
           )}
         </div>
         <div className="camino">
@@ -250,8 +251,8 @@ function SeasonBlock({ season, known, signedIn, pass, onBuyPass }: { season: Sea
           </ol>
         </div>
         {offer ? (
-          <aside className={`pase${offer.owned ? ' activo' : ''}`} aria-label="Pase de temporada">
-            <h3>Pase de temporada</h3>
+          <aside className={`pase${offer.owned ? ' activo' : ''}`} aria-label={t('explorePage.paseDeTemporada')}>
+            <h3>{t('explorePage.paseDeTemporada')}</h3>
             <ul>
               {offer.perks.map((perk) => (
                 <li key={perk}>{perk}</li>

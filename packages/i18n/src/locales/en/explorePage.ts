@@ -1,0 +1,30 @@
+import type { Messages } from '../../types.js'
+import type { explorePage as es } from '../es/explorePage.js'
+
+export const explorePage: Messages<typeof es> = {
+  historiasQueExisten: 'Stories that exist',
+  porqueTuLasViviste: 'because you lived them',
+  viveUnaHistoriaDonde: 'Live a story where you decide what happens, with a game master who never gets tired.',
+  explorarHistorias: 'Explore stories',
+  descubrirCampanas: 'Discover campaigns',
+  genero: 'Genre',
+  tono: 'Tone',
+  jugadores: 'Players',
+  duracion: 'Length',
+  corta: 'Short',
+  media: 'Medium',
+  larga: 'Long',
+  oficiales: 'Official',
+  comunidad: 'Community',
+  abriendoElCatalogo: 'Opening the catalog…',
+  ningunMundoCoincideCon: 'No world matches those filters.',
+  caminosQueSeAbren: '· Paths that open as you play',
+  verElPase: 'See the pass',
+  cadaTurnoQueJuegas: 'Every turn you play is a chapter. Sign in to see your progress.',
+  paseDeTemporada: 'Season pass',
+  buscarMundos: 'Search worlds…',
+  buscarMundos2: 'Search worlds',
+  origen: 'Origin',
+  bloqueado: 'Locked',
+  temporadaActual: 'Current season',
+}

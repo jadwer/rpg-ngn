@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type CatalogPurchase } from '@rpg-ngn/api-client'
 import { catalogBlessing, packCharge } from '@rpg-ngn/ui-logic'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
@@ -27,7 +28,7 @@ export function Blessing({ title, text, farewell, onClose }: { title: string; te
       <p className="texto">{text}</p>
       <p className="despedida">{farewell}</p>
       <button type="button" className="btn primary" onClick={onClose}>
-        Continuar la aventura
+        {t('checkout.continuarLaAventura')}
       </button>
     </div>
   )
@@ -65,7 +66,7 @@ export function PayForm({
     setBusy(false)
 
     if (error) {
-      onError(error.message ?? 'El pago no se pudo completar.')
+      onError(error.message ?? t('play.paymentIncomplete'))
       return
     }
     if (paymentIntent?.status === 'succeeded') {
@@ -83,10 +84,10 @@ export function PayForm({
       <PaymentElement />
       <div className="row">
         <button type="submit" className="btn primary" disabled={!stripe || busy}>
-          {busy ? 'Pagando…' : `Pagar ${payLabel}`}
+          {busy ? t('play.paying') : t('play.pay', { amount: payLabel })}
         </button>
         <button type="button" className="btn" onClick={onCancel} disabled={busy}>
-          Cancelar
+          {t('checkout.cancelar')}
         </button>
       </div>
     </form>
@@ -118,7 +119,7 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
         setStripe(stripeFor(publishableKey))
         setPurchase(product.kind === 'pase' ? await client.buySeasonPass() : await client.buyWorld(product.id))
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : 'No se pudo iniciar el pago.')
+        setError(e instanceof ApiError ? e.message : t('play.paymentStartFailed'))
       }
     })()
   }, [client, product])
@@ -133,17 +134,17 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
 
   const blessing = catalogBlessing(product.kind, product.name)
   return (
-    <div className="recap-overlay" role="dialog" aria-modal="true" aria-label={product.kind === 'pase' ? 'Comprar el pase' : `Comprar ${product.name}`}>
+    <div className="recap-overlay" role="dialog" aria-modal="true" aria-label={product.kind === 'pase' ? t('play.buyPass') : t('play.buyItem', { name: product.name })}>
       <div className="recap-card checkout-card">
         {paid ? (
           <Blessing {...blessing} onClose={onClose} />
         ) : (
           <>
-            <h2>{product.kind === 'pase' ? `Pase de ${product.name}` : product.name}</h2>
+            <h2>{product.kind === 'pase' ? t('play.passOf', { name: product.name }) : product.name}</h2>
             {purchase && stripe ? (
               <Elements stripe={stripe} options={{ clientSecret: purchase.clientSecret, locale: 'es' }}>
                 <PayForm
-                  summary={product.kind === 'pase' ? 'Pago único para toda la temporada.' : 'Pago único; el mundo queda en tu cuenta.'}
+                  summary={product.kind === 'pase' ? t('play.oneTimeSeason') : t('play.oneTimeWorld')}
                   payLabel={packCharge(purchase)}
                   pendingNote="El pago quedó pendiente. Si se completa, lo verás en tu cuenta solo."
                   onPaid={paidNow}
@@ -152,14 +153,14 @@ export function CatalogCheckout({ client, product, onClose, onDone }: { client: 
                 />
               </Elements>
             ) : !error ? (
-              <p className="hint">Preparando el pago…</p>
+              <p className="hint">{t('checkout.preparandoElPago')}</p>
             ) : null}
             {error ? (
               <>
                 <p className="error">{error}</p>
                 {!purchase ? (
                   <button type="button" className="btn" onClick={onClose}>
-                    Cerrar
+                    {t('checkout.cerrar')}
                   </button>
                 ) : null}
               </>

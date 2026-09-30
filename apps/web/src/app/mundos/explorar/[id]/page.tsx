@@ -1,5 +1,6 @@
 'use client'
 
+import { t, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldDetail } from '@rpg-ngn/api-client'
 import { cardView, durationLabel, playersTag } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -14,10 +15,10 @@ export default function MundoPage() {
   return <PublicOrApp>{(client, signedIn) => <Mundo client={client} signedIn={signedIn} />}</PublicOrApp>
 }
 
-const PROCEDENCIA: Record<string, string> = {
-  original: 'Original',
-  licensed: 'Con licencia',
-  'user-provided': 'Aportado por su autor',
+const PROCEDENCIA: Record<string, MessageKey> = {
+  original: 'play.provOriginal',
+  licensed: 'play.provLicensed',
+  'user-provided': 'play.provUser',
 }
 
 /** El detalle de un mundo (tablero B): portada, sinopsis, galeria, personajes y lo que incluye. */
@@ -33,7 +34,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
     let alive = true
     void client.catalogWorld(id).then(
       (w) => alive && setWorld(w),
-      (e: unknown) => alive && setError(e instanceof ApiError ? e.message : 'No se pudo abrir este mundo.'),
+      (e: unknown) => alive && setError(e instanceof ApiError ? e.message : t('play.worldOpenFailed')),
     )
     return () => {
       alive = false
@@ -44,13 +45,13 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
     return (
       <div className="mundo-detalle">
         <Link href="/mundos/explorar" className="migas">
-          <ShellIcon name="volver" /> Explorar mundos
+          <ShellIcon name="volver" /> {t('worldPage.explorarMundos')}
         </Link>
         <div className="error">{error}</div>
       </div>
     )
   }
-  if (!world) return <p className="hint">Abriendo el mundo…</p>
+  if (!world) return <p className="hint">{t('worldPage.abriendoElMundo')}</p>
 
   const view = cardView(world)
   const cover = packArtUrl(world.id, world.catalog.cover)
@@ -73,7 +74,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
         await client.activatePack(world.packId)
         setWorld(await client.catalogWorld(world.id))
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : 'No se pudo añadir el mundo.')
+        setError(e instanceof ApiError ? e.message : t('play.worldAddFailed'))
       } finally {
         setBusy(false)
       }
@@ -119,7 +120,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
       </section>
 
       {gallery.length > 0 ? (
-        <section className="galeria" aria-label="Imágenes del mundo">
+        <section className="galeria" aria-label={t('worldPage.imagenesDelMundo')}>
           {gallery.slice(0, 5).map((src) => (
             <img key={src} src={src} alt="" loading="lazy" />
           ))}
@@ -128,7 +129,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
 
       {world.playable.length > 0 ? (
         <section className="jugables">
-          <h2>Personajes jugables</h2>
+          <h2>{t('worldPage.personajesJugables')}</h2>
           <div className="lista">
             {world.playable.map((c) => (
               <div key={c.id} className="pj">
@@ -143,36 +144,36 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
 
       <section className="fichas">
         <div className="sobre">
-          <h2>Sobre este mundo</h2>
+          <h2>{t('worldPage.sobreEsteMundo')}</h2>
           <dl>
-            <dt>Género</dt>
+            <dt>{t('worldPage.genero')}</dt>
             <dd>{world.catalog.genre}</dd>
             {world.catalog.tags.length ? (
               <>
-                <dt>Tono</dt>
+                <dt>{t('worldPage.tono')}</dt>
                 <dd>{world.catalog.tags.join(', ')}</dd>
               </>
             ) : null}
-            <dt>Jugadores</dt>
+            <dt>{t('worldPage.jugadores')}</dt>
             <dd>{playersTag(world.catalog.players)}</dd>
-            <dt>Duración estimada</dt>
+            <dt>{t('worldPage.duracionEstimada')}</dt>
             <dd>{world.catalog.hours ?? durationLabel(world.catalog.duration)}</dd>
-            <dt>Autor</dt>
+            <dt>{t('worldPage.autor')}</dt>
             <dd>{world.catalog.author}</dd>
-            <dt>Procedencia</dt>
-            <dd>{PROCEDENCIA[world.catalog.provenance] ?? world.catalog.provenance}</dd>
+            <dt>{t('worldPage.procedencia')}</dt>
+            <dd>{PROCEDENCIA[world.catalog.provenance] ? t(PROCEDENCIA[world.catalog.provenance]!) : world.catalog.provenance}</dd>
           </dl>
         </div>
         <div className="incluye">
-          <h2>Qué incluye</h2>
+          <h2>{t('worldPage.queIncluye')}</h2>
           <ul>
-            <li>Escenario completo</li>
+            <li>{t('worldPage.escenarioCompleto')}</li>
             <li>
               {world.characters} {world.characters === 1 ? 'personaje jugable' : 'personajes jugables'} con trasfondo
             </li>
-            {world.maps.length ? <li>{world.maps.length === 1 ? `Mapa de ${world.maps[0]!.name}` : `${world.maps.length} mapas`}</li> : null}
-            <li>{world.sessions === 1 ? 'Una sesión con su misión' : `${world.sessions} sesiones y misiones`}</li>
-            <li>Director de juego por IA</li>
+            {world.maps.length ? <li>{world.maps.length === 1 ? t('play.mapOf', { name: world.maps[0]!.name }) : t('play.mapsN', { count: world.maps.length })}</li> : null}
+            <li>{world.sessions === 1 ? t('play.oneSession') : t('play.sessionsN', { count: world.sessions })}</li>
+            <li>{t('worldPage.directorDeJuegoPor')}</li>
           </ul>
         </div>
       </section>
