@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Bilingual, ConvenienceNote } from '../../components/Bilingual'
 
 /**
  * Aviso de privacidad. El texto completo, con su razonamiento y las preguntas
@@ -16,8 +17,9 @@ export const metadata: Metadata = {
 }
 
 const ACTUALIZADO = '22 de septiembre de 2026'
+const ACTUALIZADO_EN = 'September 22, 2026'
 
-export default function PrivacidadPage() {
+function PrivacyEs() {
   return (
     <main className="page narrow legal">
       <header className="hero">
@@ -192,6 +194,187 @@ export default function PrivacidadPage() {
       <hr className="rule" />
       <p className="hint">
         <Link href="/terminos">Términos y condiciones</Link> &middot; <Link href="/">Inicio</Link>
+      </p>
+    </main>
+  )
+}
+
+export default function PrivacidadPage() {
+  return <Bilingual es={<PrivacyEs />} en={<PrivacyEn />} />
+}
+
+/** Traduccion de cortesia al ingles. Manda la version en español; revisar con el abogado (docs/19). */
+function PrivacyEn() {
+  return (
+    <main className="page narrow legal">
+      <header className="hero">
+        <h1>
+          <Link href="/" className="plain">
+            Ad Astra Mentis
+          </Link>
+        </h1>
+        <p className="tagline">Privacy notice</p>
+      </header>
+      <hr className="rule" />
+
+      <ConvenienceNote>This English version is a courtesy translation. The Spanish version is the one that governs; if they differ, the Spanish text prevails.</ConvenienceNote>
+      <p className="hint">Last updated: {ACTUALIZADO_EN}.</p>
+
+      <h2>1. Who is responsible for your data</h2>
+      <p>
+        Gabino Ramírez, an individual with business activity, is responsible for processing the personal data you give us when using Ad Astra Mentis, formerly rpg-worlds
+        (https://adastramentis.com), hereinafter &quot;the Service&quot;.
+      </p>
+      <p>This notice is issued under Mexico’s Federal Law on the Protection of Personal Data Held by Private Parties and its Regulations.</p>
+      <p>
+        For anything related to your data, write to us at <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>.
+      </p>
+
+      <h2>2. What data we collect</h2>
+      <p>
+        <b>What you give us when creating your account:</b> name and email address.
+      </p>
+      <p>
+        <b>What you generate when playing:</b> the text you write in your games, the description you give of your character and the history of the tables you take part in.
+      </p>
+      <p>
+        <b>What your activity generates:</b> date and time of your sign-ins, your turn balance and your purchase history.
+      </p>
+      <p>
+        <b>If you buy credits:</b> your card brand and its last four digits. <b>We never receive or store your full card number, its expiration date or its security code</b>: that data is captured
+        directly by our payment processor in your browser and does not go through our servers.
+      </p>
+      <p>
+        <b>If you use your own key</b> from an artificial intelligence provider: that credential, which we store encrypted and never show you in full again.
+      </p>
+      <p>Your password is stored transformed with an irreversible hashing algorithm. Nobody, including the data controller, can read it.</p>
+      <p>We do not collect sensitive personal data.</p>
+
+      <h2>3. What we use it for</h2>
+      <p>We use your data for the following purposes, all needed to provide the Service:</p>
+      <ul>
+        <li>Creating and keeping your account, and letting you sign in.</li>
+        <li>Running the games: showing the other players at your table what happens in the fiction and generating the narration.</li>
+        <li>Charging you for the credits you buy and keeping your balance.</li>
+        <li>Sending you essential emails: password recovery and sign-up confirmation.</li>
+        <li>Handling your requests and complying with legal obligations, including tax ones.</li>
+      </ul>
+      <p>
+        <b>Additional purpose, which you may refuse</b> without affecting your use of the Service: sending you notices about your tables (for example, that it is your turn). You can object by writing to{' '}
+        <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a>.
+      </p>
+      <p>
+        <b>We do not sell your data, we do not share it for advertising and we do not build commercial profiles of you.</b>
+      </p>
+
+      <h2>4. Who we share it with</h2>
+      <p>For the Service to work, some data is sent to providers acting on our behalf:</p>
+      <div className="tabla-legal">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>What it receives</th>
+              <th>What for</th>
+              <th>Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Anthropic PBC</td>
+              <td>the text of your game and the character sheets</td>
+              <td>generating the narration</td>
+              <td>United States</td>
+            </tr>
+            <tr>
+              <td>Stripe, Inc.</td>
+              <td>your email and the payment data</td>
+              <td>processing the payment</td>
+              <td>United States</td>
+            </tr>
+            <tr>
+              <td>Resend, Inc.</td>
+              <td>your email and the content of the message</td>
+              <td>sending you emails</td>
+              <td>United States</td>
+            </tr>
+            <tr>
+              <td>Hetzner Online GmbH</td>
+              <td>hosting of the information</td>
+              <td>servers</td>
+              <td>Germany</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <b>This involves international data transfers.</b> By using the Service you consent to those transfers, which are made only for the purposes described in this notice.
+      </p>
+      <p>
+        <b>About the artificial intelligence that runs your games:</b> the text you write is sent to the model provider solely to generate that turn’s response.{' '}
+        <b>That content is not used to train artificial intelligence models.</b> If you prefer to use your own account with a provider, you can, and in that case the relationship with that provider is
+        yours and is governed by its terms.
+      </p>
+      <p>We do not share your data with any other person or company, except when required by a competent authority.</p>
+
+      <h2>5. Your rights</h2>
+      <p>
+        You have the right to <b>access</b> your data, <b>rectify</b> it if it is inaccurate, <b>cancel</b> it when you consider it is not necessary and <b>object</b> to a specific use. You can also
+        revoke your consent at any time.
+      </p>
+      <p>
+        To exercise them, write to <a href="mailto:privacidad@adastramentis.com">privacidad@adastramentis.com</a> from your account’s email, stating what you request and providing a document that proves
+        your identity. <b>We will answer within a maximum of 20 business days</b>, and if it applies, it will take effect within the following 15 business days.
+      </p>
+      <p>
+        <b>How cancellation works, specifically:</b> when you cancel your account we delete your name, your email and your credentials. The record of the games you played is kept{' '}
+        <b>dissociated from your identity</b>, because a game is a collective work and deleting it would affect the other players at that table. From that moment on, that record can no longer identify you.
+      </p>
+      <p>
+        <b>What we keep even if you cancel:</b> the receipts of the purchases you made, for the period required by tax law.
+      </p>
+
+      <h2>6. How long we keep it</h2>
+      <ul>
+        <li>
+          <b>Account data:</b> while the account exists.
+        </li>
+        <li>
+          <b>Games:</b> while they exist, or dissociated if you cancel your account.
+        </li>
+        <li>
+          <b>Billing data:</b> the period required by the applicable tax law.
+        </li>
+        <li>
+          <b>Access logs:</b> those needed for the security of the Service.
+        </li>
+      </ul>
+
+      <h2>7. How we protect it</h2>
+      <p>
+        Information travels encrypted between your device and our servers. Passwords are stored with irreversible hashing and credentials for external providers are stored encrypted. Access to the servers
+        is restricted and periodic backups are made.
+      </p>
+      <p>No system is invulnerable. If a breach occurred that significantly affected your data, we would let you know.</p>
+
+      <h2>8. Minimum age</h2>
+      <p>
+        <b>The Service is intended only for people 18 or older.</b> We do not knowingly collect data from minors. If we detect an account belonging to a minor, we will cancel it and delete its data.
+      </p>
+
+      <h2>9. Changes to this notice</h2>
+      <p>
+        If we change this notice, we will publish the new version at this same address and update the date. If the change substantially affects how we use your data, we will notify you by email.
+      </p>
+
+      <h2>10. Authority</h2>
+      <p>
+        If you believe your right to data protection has been violated, you may turn to Mexico’s data protection authority (INAI): <a href="https://www.inai.org.mx">www.inai.org.mx</a>.
+      </p>
+
+      <hr className="rule" />
+      <p className="hint">
+        <Link href="/terminos">Terms and conditions</Link> &middot; <Link href="/">Home</Link>
       </p>
     </main>
   )
