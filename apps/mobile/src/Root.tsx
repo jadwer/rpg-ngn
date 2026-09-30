@@ -10,6 +10,7 @@ import { loadBundledPack, loadOfflineCampaign, type OfflineCampaign } from './pa
 import { ModePicker } from './screens/ModePicker'
 import { SessionPicker } from './screens/SessionPicker'
 import { SessionScreen } from './screens/SessionScreen'
+import { LanguageProvider, useLanguage } from './state/language'
 import { NarratorProvider } from './state/narrator'
 import { FONT_ASSETS, SYSTEM_SERIF, theme } from './theme'
 
@@ -25,6 +26,16 @@ type Screen = { name: 'mode' } | { name: 'online'; tab?: 'mundos' | 'mesas' | 'c
  * spike pnpm + Expo (docs/10, IA2) y unas pocas pantallas no la necesitan.
  */
 export function Root() {
+  return (
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  )
+}
+
+function App() {
+  // Repintarse al cambiar de idioma repinta toda la app con los textos nuevos.
+  const { ready: languageReady } = useLanguage()
   const [fontsLoaded, fontsError] = useFonts(FONT_ASSETS)
   const [pack, setPack] = useState<LoadedPack | null>(null)
   const [campaign, setCampaign] = useState<OfflineCampaign | null>(null)
@@ -49,7 +60,7 @@ export function Root() {
         <Text style={styles.error}>{`No se pudo cargar la campaña.\n${error}`}</Text>
       </View>
     )
-  } else if (!fontsReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
+  } else if (!fontsReady || !languageReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {
     body = (
       <View style={styles.center}>
         <Isotipo height={96} color={theme.colors.ink} />

@@ -1,3 +1,4 @@
+import { language } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type PackCharacter, type PackOption, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -68,7 +69,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
   const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
   const [remoteCharacters, setRemoteCharacters] = useState<Record<string, PackCharacter[]>>({})
 
-  const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => tokenRef.current }), [])
+  const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => tokenRef.current, locale: () => language() }), [])
 
   const unauthorized = useCallback((notice = 'La sesión caducó. Vuelve a entrar.') => {
     tokenRef.current = null

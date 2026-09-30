@@ -41,7 +41,7 @@ export function metroServerUrl(): string | null {
 
 export const DEFAULT_SERVER_URL = defaultServerUrl()
 
-const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user', voice: 'rpg.voice', autoRead: 'rpg.autoread', voiceNotice: 'rpg.voice-notice' } as const
+const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user', voice: 'rpg.voice', autoRead: 'rpg.autoread', voiceNotice: 'rpg.voice-notice', language: 'rpg.lang' } as const
 
 export interface StoredUser {
   id: string
@@ -115,4 +115,8 @@ export const storage = {
   /** El aviso de "sin voz en español" se muestra una vez por telefono. */
   voiceNoticeSeen: async () => (await read(KEYS.voiceNotice)) === '1',
   setVoiceNoticeSeen: () => write(KEYS.voiceNotice, '1'),
+
+  /** El idioma de la interfaz que se eligio en este telefono; null si nunca se eligio. */
+  language: () => read(KEYS.language),
+  setLanguage: (lang: string) => write(KEYS.language, lang),
 }

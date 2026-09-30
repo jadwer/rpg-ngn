@@ -1,4 +1,4 @@
-import { t } from '@rpg-ngn/i18n'
+import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -14,6 +14,8 @@ import { theme } from '../../theme'
 import { SectionTitle } from '../../components/Panel'
 import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
 import { SupportSheet, type SupportView } from '../../components/SupportSheet'
+import { RadioRow } from '../../components/RadioRow'
+import { useLanguage } from '../../state/language'
 
 interface Props {
   client: ApiClient
@@ -41,6 +43,13 @@ interface Props {
 export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout, onSeason }: Props) {
   const [name, setName] = useState(user.name)
   const [support, setSupport] = useState<SupportView | null>(null)
+  const { lang, choose, languages } = useLanguage()
+  const pickLanguage = (l: Language) => {
+    if (l === lang) return
+    // La cuenta guarda la preferencia para los correos; si falla, el telefono ya la recuerda.
+    client.updateProfile({ locale: l }).catch(() => undefined)
+    choose(l)
+  }
   const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
   const [nameNotice, setNameNotice] = useState<{ ok: boolean; text: string } | null>(null)
@@ -128,6 +137,13 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
           <View style={styles.actions}>
             <Button label="Guardar cuenta" primary busy={nameBusy} disabled={!name.trim() || !email.trim() || (name.trim() === user.name && email.trim() === user.email)} onPress={() => void saveName()} />
           </View>
+        </View>
+
+        <View style={styles.card}>
+          <SectionTitle>{t('common.language')}</SectionTitle>
+          {languages.map((l) => (
+            <RadioRow key={l} label={t(`common.languages.${l}`)} selected={lang === l} onSelect={() => pickLanguage(l)} />
+          ))}
         </View>
 
         <View style={styles.card}>
