@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient, TableInvite } from '@rpg-ngn/api-client'
 import { useCallback, useEffect, useState } from 'react'
 import { Panel } from './Panel'
@@ -66,22 +67,22 @@ export function InviteLink({ client, tableId }: Props) {
     if (!enlace) return
     void navigator.clipboard.writeText(enlace).then(
       () => setCopiado(true),
-      () => setError('No se pudo copiar. Selecciona el enlace y cópialo a mano.'),
+      () => setError(t('play.copyFailed')),
     )
   }
 
   return (
-    <Panel title="Invitar con un enlace" className="invitar-enlace">
+    <Panel title={t('inviteLink.invitarConUnEnlace')} className="invitar-enlace">
 
       {enlace ? (
         <>
-          <p className="hint">Mándaselo por donde quieras. Quien lo abra entra a la mesa y elige personaje.</p>
-          <input className="input enlace" readOnly value={enlace} onFocus={(e) => e.currentTarget.select()} aria-label="Enlace de la mesa" />
+          <p className="hint">{t('inviteLink.mandaseloPorDondeQuieras')}</p>
+          <input className="input enlace" readOnly value={enlace} onFocus={(e) => e.currentTarget.select()} aria-label={t('inviteLink.enlaceDeLaMesa')} />
           <div className="row">
             <button type="button" className="btn primary small" onClick={copiar}>
-              {copiado ? 'Copiado' : 'Copiar enlace'}
+              {copiado ? t('play.copied') : t('play.copyLink')}
             </button>
-            <span className="hint">Guárdalo: por seguridad no se vuelve a mostrar.</span>
+            <span className="hint">{t('inviteLink.guardaloPorSeguridadNo')}</span>
           </div>
         </>
       ) : invite ? (
@@ -91,22 +92,22 @@ export function InviteLink({ client, tableId }: Props) {
           </p>
           <div className="row">
             <button type="button" className="btn small" disabled={busy} onClick={() => void crear()}>
-              Crear uno nuevo
+              {t('inviteLink.crearUnoNuevo')}
             </button>
             <button type="button" className="btn ghost small" disabled={busy} onClick={() => void cortar()}>
-              Desactivar
+              {t('inviteLink.desactivar')}
             </button>
           </div>
         </>
       ) : (
         <>
-          <p className="hint">Crea un enlace y pásaselo a quien quieras. No hace falta que sean tus amigos aquí ni que te den su correo.</p>
+          <p className="hint">{t('inviteLink.creaUnEnlaceY')}</p>
           <div className="row">
             <button type="button" className="btn primary small" disabled={busy} onClick={() => void crear()}>
               {busy ? <span className="spinner" aria-hidden /> : null}
               Crear enlace
             </button>
-            <span className="hint">Vale para 5 personas y caduca en una semana.</span>
+            <span className="hint">{t('inviteLink.valeParaLasPlazas')}</span>
           </div>
         </>
       )}

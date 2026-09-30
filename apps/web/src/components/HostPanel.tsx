@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
@@ -63,13 +64,13 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
   }, [loaded, session])
 
   return (
-    <section className={`host${embedded ? ' embedded' : ''}`} aria-label="Mando del anfitrión">
+    <section className={`host${embedded ? ' embedded' : ''}`} aria-label={t('hostPanel.mandoDelAnfitrion')}>
       {embedded ? (
-        <p className="hint">{session ? `Sesión ${session.code} abierta.` : 'Sin sesión abierta.'}</p>
+        <p className="hint">{session ? t('play.sessionOpenDot', { code: session.code }) : t('play.noSessionDot')}</p>
       ) : (
         <button type="button" className="head" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
-          <span className="t">Anfitrión</span>
-          <span className="s">{session ? `Sesión ${session.code} abierta` : 'Sin sesión abierta'}</span>
+          <span className="t">{t('hostPanel.anfitrion')}</span>
+          <span className="s">{session ? t('play.sessionOpen', { code: session.code }) : t('play.noSession')}</span>
           <span className="muted">{expanded ? 'ocultar' : 'mostrar'}</span>
         </button>
       )}
@@ -77,19 +78,19 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
         <div className="body">
           <div className="segmented" style={{ alignSelf: 'flex-start' }}>
             <button type="button" aria-pressed={tab === 'session'} onClick={() => setTab('session')}>
-              Sesión
+              {t('hostPanel.sesion')}
             </button>
             <button type="button" aria-pressed={tab === 'settings'} onClick={() => setTab('settings')}>
-              Ajustes de la mesa
+              {t('hostPanel.ajustesDeLaMesa')}
             </button>
           </div>
 
           {tab === 'session' && !session ? (
-            <Panel title="Abrir sesión">
+            <Panel title={t('hostPanel.abrirSesion')}>
               <div className="row">
                 {opciones.length > 0 ? (
                   <label className="field" style={{ minWidth: 260 }}>
-                    <span>Qué sesión juegan</span>
+                    <span>{t('hostPanel.queSesionJuegan')}</span>
                     <select className="select" name="sesion" value={code} onChange={(e) => setCode(e.target.value)}>
                       {opciones.map((o) => (
                         <option key={o.code} value={o.code}>
@@ -100,34 +101,34 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                   </label>
                 ) : (
                   <label className="field">
-                    <span>Código</span>
+                    <span>{t('hostPanel.codigo')}</span>
                     <input className="input code" name="codigo" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 3))} inputMode="numeric" placeholder="001" />
                   </label>
                 )}
                 <label className="field" style={{ flex: 1, minWidth: 220 }}>
-                  <span>Nota de la sesión</span>
+                  <span>{t('hostPanel.notaDeLaSesion')}</span>
                   <input className="input" name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Momento del mundo o lo que pasa hoy; el GM la recibe" maxLength={120} />
                 </label>
               </div>
               <div className="row">
                 <button type="button" className="btn primary" onClick={() => onOpenSession(code, note.trim() || null)} disabled={busy || !isValidSessionCode(code)}>
-                  Abrir sesión
+                  {t('hostPanel.abrirSesion')}
                 </button>
-                <span className="hint">{elegida ? elegida.summary : 'Abre el turno 1 e interpela a la party.'}</span>
+                <span className="hint">{elegida ? elegida.summary : t('play.openTurnOne')}</span>
               </div>
             </Panel>
           ) : null}
 
           {tab === 'session' && session ? (
-            <Panel title={`Sesión ${session.code}`}>
+            <Panel title={t('play.session', { code: session.code })}>
               <label className="field">
-                <span>Cliffhanger para la próxima</span>
-                <input className="input" name="cliffhanger" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder="Opcional: con qué se queda la mesa" />
+                <span>{t('hostPanel.cliffhangerParaLaProxima')}</span>
+                <input className="input" name="cliffhanger" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder={t('hostPanel.opcionalConQueSe')} />
               </label>
               <div className="row">
                 {!confirmClose ? (
                   <button type="button" className="btn" onClick={() => setConfirmClose(true)} disabled={busy}>
-                    Cerrar sesión
+                    {t('hostPanel.cerrarSesion')}
                   </button>
                 ) : (
                   <>
@@ -140,10 +141,10 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
                       }}
                       disabled={busy}
                     >
-                      Sí, cerrar y congelar el estado
+                      {t('hostPanel.siCerrarYCongelar')}
                     </button>
                     <button type="button" className="btn ghost" onClick={() => setConfirmClose(false)}>
-                      No, seguir jugando
+                      {t('hostPanel.noSeguirJugando')}
                     </button>
                   </>
                 )}
@@ -152,17 +153,17 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
           ) : null}
 
           {tab === 'session' && table.premise ? (
-            <Panel title="Premisa">
+            <Panel title={t('hostPanel.premisa')}>
               <p className="premise">{table.premise}</p>
             </Panel>
           ) : null}
 
           {tab === 'settings' ? (
             <div className="hojas">
-              <Panel title="Reglas de la mesa">
+              <Panel title={t('hostPanel.reglasDeLaMesa')}>
                 <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
               </Panel>
-              <Panel title="Director de juego">
+              <Panel title={t('hostPanel.directorDeJuego')}>
                 <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
               </Panel>
             </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { SEAT_LABELS, type Seat } from '@rpg-ngn/ui-logic'
 import type { ReactNode } from 'react'
 import { Drawer } from './Drawer'
@@ -30,9 +31,9 @@ interface Props {
  */
 export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTogglePresence, onPresence, invite, onClose }: Props) {
   return (
-    <Drawer title="Jugadores" onClose={onClose} className="seats-panel">
+    <Drawer title={t('playersPanel.jugadores')} onClose={onClose} className="seats-panel">
       <div className="hojas">
-      <Panel title="En la mesa">
+      <Panel title={t('playersPanel.enLaMesa')}>
       <ul className="seats">
         {seats.map((seat) => {
           const away = seat.state === 'away'
@@ -41,8 +42,8 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
               <Portrait path={null} uri={seat.characterId ? portraitOf(seat.characterId) : null} name={seat.name} size={44} muted={away} />
               <div className="n">
                 <span className="name">{seat.name}</span>
-                {seat.role === 'host' ? <span className="tag">anfitrión</span> : null}
-                {seat.mine ? <span className="tag">tú</span> : null}
+                {seat.role === 'host' ? <span className="tag">{t('playersPanel.anfitrion')}</span> : null}
+                {seat.mine ? <span className="tag">{t('playersPanel.tu')}</span> : null}
               </div>
               <div className="right">
                 <span className="state">
@@ -50,13 +51,13 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
                   {SEAT_LABELS[seat.state]}
                 </span>
                 {seat.mine && ownPresent !== null ? (
-                  <button type="button" className="btn ghost small" disabled={busy} onClick={onTogglePresence} title={ownPresent ? 'El GM aparta a tu personaje sin matarlo y la mesa no te espera para cerrar el turno' : 'Vuelves a contar para el turno y el GM te devuelve la palabra'}>
-                    {ownPresent ? 'Me tengo que ir' : 'He vuelto'}
+                  <button type="button" className="btn ghost small" disabled={busy} onClick={onTogglePresence} title={ownPresent ? t('play.leaveTitle') : t('play.backTitle')}>
+                    {ownPresent ? t('play.leave') : t('play.back')}
                   </button>
                 ) : null}
                 {!seat.mine && isHost && seat.characterId ? (
-                  <button type="button" className="btn ghost small" disabled={busy} onClick={() => onPresence(seat.memberId, away)} title={away ? 'Vuelve a contar para el turno' : 'Si se fue sin avisar: la mesa no lo espera y el GM lo aparta sin matarlo'}>
-                    {away ? 'Marcar presente' : 'Marcar ausente'}
+                  <button type="button" className="btn ghost small" disabled={busy} onClick={() => onPresence(seat.memberId, away)} title={away ? t('play.presentTitle') : t('play.awayTitle')}>
+                    {away ? t('play.markPresent') : t('play.markAway')}
                   </button>
                 ) : null}
               </div>

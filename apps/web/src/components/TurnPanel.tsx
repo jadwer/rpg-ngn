@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { TableState, TurnView } from '@rpg-ngn/api-client'
 import { appendRoll, countdownLine, moreIdeasButton, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -89,7 +90,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       setFreshIdeas(await onMoreIdeas())
       setShowIdeas(true)
     } catch (error) {
-      setIdeasError(error instanceof Error ? error.message : 'No se pudieron pedir más ideas.')
+      setIdeasError(error instanceof Error ? error.message : t('play.ideasFailed'))
     } finally {
       setAskingIdeas(false)
     }
@@ -158,7 +159,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {progress.narrating ? (
         <div className="waiting" role="status">
           <span className="spinner" aria-hidden />
-          <span className="phrase">{waiting ?? 'El director narra...'}</span>
+          <span className="phrase">{waiting ?? t('play.narrating')}</span>
         </div>
       ) : countdown.active ? (
         <div className="countdown" role="status">
@@ -166,18 +167,18 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             {countdown.remaining}
           </span>
           <span className="text">{countdownLine(countdown)}</span>
-          <button type="button" className="btn small" disabled={busy} onClick={() => onHold(true)} title="Un momento: la mesa espera hasta que alguien cierre">
-            Cancelar
+          <button type="button" className="btn small" disabled={busy} onClick={() => onHold(true)} title={t('turnPanel.unMomentoLaMesa')}>
+            {t('turnPanel.cancelar')}
           </button>
         </div>
       ) : countdown.held ? (
         <div className="countdown held" role="status">
           <span className="text">{countdownLine(countdown)}</span>
           <button type="button" className="btn small primary" disabled={busy} onClick={() => onClose(false)}>
-            Cerrar y narrar
+            {t('turnPanel.cerrarYNarrar')}
           </button>
           <button type="button" className="btn ghost small" disabled={busy} onClick={() => onHold(false)}>
-            Reanudar
+            {t('turnPanel.reanudar')}
           </button>
         </div>
       ) : (
@@ -186,13 +187,13 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
 
       {outOfTurns ? (
         <div className="error">
-          La mesa se quedó sin turnos.{outOfTurns.next ? ` ${outOfTurns.next}` : ''}{' '}
+          {t('table.bucket.outOfTurns')}{outOfTurns.next ? ` ${outOfTurns.next}` : ''}{' '}
           {outOfTurns.host ? (
             <>
-              Para no esperar, <Link href="/perfil">recarga en Mi cuenta y créditos</Link> o usa tu propia clave en los ajustes del director.
+              {t('turnPanel.paraNoEsperar')} <Link href="/perfil">{t('turnPanel.recargaEnMiCuenta')}</Link> {t('turnPanel.oUsaTuPropia')}
             </>
           ) : (
-            'Quien creó la mesa puede recargar para no esperar.'
+            t('table.bucket.playerRecharge')
           )}
         </div>
       ) : null}
@@ -202,7 +203,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
           no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
       {open && hasCharacter && activeRoll ? (
-        <div className="roll-card" role="group" aria-label="Te toca tirar">
+        <div className="roll-card" role="group" aria-label={t('turnPanel.teTocaTirar')}>
           <DiceRoller
             die={activeRoll.die}
             label={rollLabel(activeRoll)}
@@ -217,16 +218,16 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               setLanded({ die: activeRoll.die, outcome })
               onRolled()
             }}
-            onFailed={(error) => setRollError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+            onFailed={(error) => setRollError(error instanceof Error ? error.message : t('play.rollFailed'))}
           />
           <span className="text">
             {landed ? (
               <>
-                <b>Sacaste {landed.outcome.result}.</b> El director narra lo que pasa cuando cierre el turno.
+                <b>Sacaste {landed.outcome.result}.</b> {t('turnPanel.elDirectorNarraLo')}
               </>
             ) : (
               <>
-                <b>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : 'El director te pide una tirada.'}</b> Tira {rollLabel(activeRoll)}: mantén presionado el dado y suéltalo.
+                <b>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : t('play.askedRoll')}</b> {t('play.rollHow', { roll: rollLabel(activeRoll) })}
               </>
             )}
           </span>
@@ -237,7 +238,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {/* La Fortuna la tira cada jugador con su dado; el numero lo saca el
           servidor, asi que no hay texto que editar ni dado fisico que creer. */}
       {open && hasCharacter && fortunePending && !fortuneLanded && composing ? (
-        <div className="fortune" role="group" aria-label="Tu Fortuna de esta sesión">
+        <div className="fortune" role="group" aria-label={t('turnPanel.tuFortunaDeEsta')}>
           <DiceRoller
             die="1d20"
             label="Fortuna"
@@ -248,10 +249,10 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               setFortuneError(null)
               setTimeout(() => setFortuneLanded(true), 1500)
             }}
-            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : t('play.rollFailed'))}
           />
           <span className="text">
-            <b>Tira tu Fortuna.</b> Mantén presionado el dado y suéltalo. No se te dice para qué sirve.
+            <b>{t('turnPanel.tiraTuFortuna')}</b> {t('turnPanel.mantenPresionadoElDado')}
           </span>
           {fortuneError ? <span className="error">{fortuneError}</span> : null}
         </div>
@@ -266,8 +267,8 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             setOpened(true)
           }}
         >
-          <span>¿Qué hace tu personaje?</span>
-          {fortunePending && !fortuneLanded ? <span className="count">Tira tu Fortuna</span> : shownIdeas.length > 0 ? <span className="count">{shownIdeas.length} ideas</span> : null}
+          <span>{t('turnPanel.queHaceTuPersonaje')}</span>
+          {fortunePending && !fortuneLanded ? <span className="count">{t('turnPanel.tiraTuFortuna2')}</span> : shownIdeas.length > 0 ? <span className="count">{shownIdeas.length} ideas</span> : null}
         </button>
       ) : null}
       {progress.canRespond && composing ? (
@@ -280,14 +281,14 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               setFolded(true)
             }}
           >
-            Ocultar
+            {t('turnPanel.ocultar')}
           </button>
           {/* Ideas del GM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {shownIdeas.length > 0 || moreButton ? (
             showIdeas ? (
-              <div className="ideas" role="group" aria-label="Ideas para tu personaje">
-                <span className="label">Ideas</span>
+              <div className="ideas" role="group" aria-label={t('turnPanel.ideasParaTuPersonaje')}>
+                <span className="label">{t('turnPanel.ideas')}</span>
                 {shownIdeas.map((idea) => (
                   <button key={idea} type="button" className="idea" disabled={busy} onClick={() => setText(idea)}>
                     {idea}
@@ -303,12 +304,12 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
                 {moreButton && !moreButton.enabled ? <span className="ideas-hint">{moreButton.hint}</span> : null}
                 {ideasError ? <span className="ideas-hint error">{ideasError}</span> : null}
                 <button type="button" className="ideas-toggle" onClick={() => toggleIdeas(false)}>
-                  Ocultar ideas
+                  {t('turnPanel.ocultarIdeas')}
                 </button>
               </div>
             ) : (
               <button type="button" className="ideas-toggle" onClick={() => toggleIdeas(true)}>
-                Ver ideas
+                {t('turnPanel.verIdeas')}
               </button>
             )
           ) : null}
@@ -324,7 +325,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               if (text.trim().length === 0) onTyping(false)
             }}
             onKeyDown={onKey}
-            placeholder="¿Qué haces? Escribe tu acción o di que no haces nada."
+            placeholder={t('turnPanel.queHacesEscribeTu')}
             disabled={busy}
             rows={3}
           />
@@ -337,30 +338,30 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
                 texto y cuenta. Con el servidor tirando (engine, dice) se
                 ignoraria. */}
             {diceMode !== 'table' ? null : (
-              <span className="dice-row" aria-label="Dados: mantén presionado y suelta">
+              <span className="dice-row" aria-label={t('turnPanel.dadosMantenPresionadoY')}>
                 {QUICK_DICE.map((d) => (
                   <HoldDie key={d} die={d} disabled={busy} onRolled={(roll) => setText((current) => appendRoll(current, roll))} />
                 ))}
               </span>
             )}
-            <span className="hint">Ctrl+Enter también envía.</span>
+            <span className="hint">{t('turnPanel.ctrlEnterTambienEnvia')}</span>
           </div>
         </>
       ) : null}
-      {open && !hasCharacter ? <div className="hint">Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</div> : null}
-      {open && progress.hasResponded && !countdown.active && !countdown.held ? <div className="sent">Tu respuesta está enviada.</div> : null}
+      {open && !hasCharacter ? <div className="hint">{t('turnPanel.mirasLaMesaSin')}</div> : null}
+      {open && progress.hasResponded && !countdown.active && !countdown.held ? <div className="sent">{t('turnPanel.tuRespuestaEstaEnviada')}</div> : null}
 
       {/* Sin cuenta atras (falta gente, o la API no manda completedAt): el cierre a mano de siempre. */}
       {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
         <div className="actions">
           {progress.canClose ? (
             <button type="button" className="btn" onClick={() => onClose(false)} disabled={busy}>
-              Cerrar turno y narrar
+              {t('turnPanel.cerrarTurnoYNarrar')}
             </button>
           ) : null}
           {progress.canForceClose ? (
-            <button type="button" className="btn ghost small force-close" onClick={() => onClose(true)} disabled={busy} title="Solo el anfitrión: cierra aunque falte alguien">
-              Forzar cierre
+            <button type="button" className="btn ghost small force-close" onClick={() => onClose(true)} disabled={busy} title={t('turnPanel.soloElAnfitrionCierra')}>
+              {t('turnPanel.forzarCierre')}
             </button>
           ) : null}
         </div>

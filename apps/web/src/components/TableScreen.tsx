@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
@@ -305,13 +306,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const rollTurnId = turn?.id ?? null
   // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
   const moreIdeas = useCallback(async () => {
-    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    if (rollTurnId === null) throw new Error(t('play.noTurn'))
     const { options } = await client.moreIdeas(rollTurnId)
     refresh()
     return options
   }, [client, rollTurnId, refresh])
   const rollRequested = useCallback(async () => {
-    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    if (rollTurnId === null) throw new Error(t('play.noTurn'))
     const receipt = await client.rollRequested(rollTurnId)
     return { result: receipt.result, rolls: receipt.rolls }
   }, [client, rollTurnId])
@@ -543,13 +544,13 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     }
   }
 
-  const respond = (text: string) => (turn ? act(() => client.respond(turn.id, text, idempotencyKey).then(() => undefined), 'No se pudo enviar la respuesta.') : Promise.resolve(false))
+  const respond = (text: string) => (turn ? act(() => client.respond(turn.id, text, idempotencyKey).then(() => undefined), t('play.sendFailed')) : Promise.resolve(false))
   const closeTurn = (force: boolean) => {
-    if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), 'No se pudo cerrar el turno.')
+    if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), t('play.closeFailed'))
   }
   closeTurnRef.current = closeTurn
   const holdTurn = (held: boolean) => {
-    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), 'No se pudo cambiar la espera.')
+    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), t('play.holdFailed'))
   }
   const togglePresence = () => {
     if (!ownMember) return
@@ -557,7 +558,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       await client.setPresence(table.id, ownMember.id, ownMember.present === false)
       onTableChanged()
       refresh()
-    }, 'No se pudo cambiar tu presencia.')
+    }, t('play.presenceOwnFailed'))
   }
   /** El anfitrion marca ausente (o presente) a quien se fue sin avisar. */
   const setMemberPresence = (memberId: string, present: boolean) => {
@@ -565,15 +566,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       await client.setPresence(table.id, memberId, present)
       onTableChanged()
       refresh()
-    }, 'No se pudo cambiar la presencia.')
+    }, t('play.presenceFailed'))
   }
   const openSession = (code: string, note: string | null) => {
-    if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), 'No se pudo abrir la sesión.')
+    if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), t('play.openSessionFailed'))
   }
   const closeSession = (cliffhanger: string | null) => {
     const session = snapshot?.session
     if (!session) return
-    void act(() => client.closeSession(session.id, cliffhanger ?? undefined).then(() => undefined), 'No se pudo cerrar la sesión.')
+    void act(() => client.closeSession(session.id, cliffhanger ?? undefined).then(() => undefined), t('play.closeSessionFailed'))
   }
 
   const entries = useMemo(
@@ -582,8 +583,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   )
   const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingCodes), [pack, existingCodes])
 
-  const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? `Sesión ${snapshot.session.code}`) : null
-  const connectionNotice = connection === 'offline' ? 'Sin conexión con el servidor; reintentando...' : error
+  const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
+  const connectionNotice = connection === 'offline' ? t('play.offline') : error
   const showVoiceNotice = tts.supported && tts.voicesReady && tts.voices.length === 0 && !voiceNoticeDismissed
   const line = turnLine(turn, progress, nameOf)
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
@@ -643,8 +644,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             else if (tts.state.status === 'paused') tts.resume()
             else tts.start(latestNarrationStart(blocks) ?? undefined)
           }}
-          aria-label={tts.state.status === 'speaking' ? 'Pausar la narración' : tts.state.status === 'paused' ? 'Seguir la narración' : 'Escuchar la narración'}
-          title={tts.state.status === 'speaking' ? 'Pausar' : tts.state.status === 'paused' ? 'Seguir' : 'Escuchar la narración'}
+          aria-label={tts.state.status === 'speaking' ? t('play.pauseNarration') : tts.state.status === 'paused' ? t('play.resumeNarration') : t('play.listen')}
+          title={tts.state.status === 'speaking' ? t('play.pause') : tts.state.status === 'paused' ? t('play.resume') : t('play.listen')}
         >
           <svg viewBox="0 0 24 24" aria-hidden>
             <path d={tts.state.status === 'speaking' ? 'M8 5v14M16 5v14' : tts.state.status === 'paused' ? 'M7 5l12 7-12 7z' : 'M4 10v4h3l4 4V6L7 10zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11'} />
@@ -658,7 +659,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       <div className="table-body" ref={bodyRef} style={veilTop !== null ? ({ '--veil-top': `${veilTop}px` } as CSSProperties) : undefined}>
         {sceneUrl ? (
           <>
-            <div key={sceneUrl} className="scene-backdrop" style={{ backgroundImage: `url("${sceneUrl}")` }} role="img" aria-label={sceneImage?.alt ?? 'Escena'} />
+            <div key={sceneUrl} className="scene-backdrop" style={{ backgroundImage: `url("${sceneUrl}")` }} role="img" aria-label={sceneImage?.alt ?? t('play.scene')} />
             <div className="scene-caption hide-on-screen">
               {turn ? (
                 <span className="pill">
@@ -673,7 +674,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             className="veil-grip"
             role="separator"
             aria-orientation="horizontal"
-            aria-label="Arrastra para ver más escena o más texto"
+            aria-label={t('tableScreen.arrastraParaVerMas')}
             onPointerDown={startVeilDrag}
           >
             <span />
@@ -681,20 +682,20 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         <div className="scroll" ref={scrollRef} onScroll={onScroll} onWheel={markUserScroll} onTouchMove={markUserScroll}>
           <div className="blocks">
-            <section className="scene-hero hide-on-screen" style={heroStyle} aria-label="Escena">
+            <section className="scene-hero hide-on-screen" style={heroStyle} aria-label={t('tableScreen.escena')}>
               {turn ? (
                 <span className="pill">
                   <b>Turno {turn.number}</b> {progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}
                 </span>
               ) : null}
               <div className="kicker">{packName ?? table.name}</div>
-              <h2>{sessionTitle ?? (snapshot?.session ? table.name : 'Sin sesión abierta')}</h2>
+              <h2>{sessionTitle ?? (snapshot?.session ? table.name : t('play.noSession'))}</h2>
               {worldTime ? <p className="when">{worldTime}</p> : null}
             </section>
             {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
             <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
             {start ? (
-              <section className="start-card hide-on-screen" aria-label="Inicio de la partida">
+              <section className="start-card hide-on-screen" aria-label={t('tableScreen.inicioDeLaPartida')}>
                 <h2>{start.title}</h2>
                 <p>{start.text}</p>
                 <ol>
@@ -707,26 +708,26 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     {start.action}
                   </button>
                 ) : null}
-                {start.action ? <p className="hint">Para elegir otro código o dejarle una nota al GM, abre Anfitrión en la barra del juego.</p> : null}
+                {start.action ? <p className="hint">{t('tableScreen.paraElegirOtroCodigo')}</p> : null}
               </section>
             ) : null}
             {/* La espera se ve en el pie, que siempre esta a la vista; aqui solo el modo pantalla, que no tiene pie. */}
             {progress.narrating && screen ? (
               <div className="narrating">
-                <span className="spinner" aria-hidden /> {waiting ?? 'El director narra...'}
+                <span className="spinner" aria-hidden /> {waiting ?? t('play.narrating')}
               </div>
             ) : null}
           </div>
         </div>
         {behind ? (
           <button type="button" className="btn primary small jump" onClick={() => scrollToEnd(true)}>
-            Bajar a lo nuevo
+            {t('tableScreen.bajarALoNuevo')}
           </button>
         ) : null}
         {sheetsOpen && !screen ? (
           <SheetsPanel
             entries={entries}
-            footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'}
+            footer={projections.seq !== null ? t('play.liveState', { seq: projections.seq }) : t('play.packSheets')}
             portraitUriOf={pack ? undefined : (path) => packPortraitUrl(table.packId, path)}
             persona={
               wantsPersona && viewer.characterId !== null && snapshot !== null ? (
@@ -738,7 +739,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     act(async () => {
                       await client.setPersona(table.id, viewer.memberId, persona)
                       refresh()
-                    }, 'No se pudo guardar la personalidad.')
+                    }, t('play.personaFailed'))
                   }
                 />
               ) : undefined
@@ -770,24 +771,24 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
           />
         ) : null}
         {panel === 'host' && isHost && !screen ? (
-          <Drawer title="Anfitrión" onClose={() => setPanel(null)} className="host-drawer">
+          <Drawer title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)} className="host-drawer">
             <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Drawer>
         ) : null}
         {panel === 'more' && !screen ? (
-          <Drawer title="Lectura" onClose={() => setPanel(null)} className="more-drawer">
+          <Drawer title={t('tableScreen.lectura')} onClose={() => setPanel(null)} className="more-drawer">
             <div className="hojas">
-              <Panel title="Vista">
-              <div className="segmented" role="group" aria-label="Vista" style={{ alignSelf: 'flex-start' }}>
+              <Panel title={t('tableScreen.vista')}>
+              <div className="segmented" role="group" aria-label={t('tableScreen.vista')} style={{ alignSelf: 'flex-start' }}>
                 <button type="button" aria-pressed={mode === 'narrative'} onClick={() => setMode('narrative')}>
-                  Narrativa
+                  {t('tableScreen.narrativa')}
                 </button>
                 <button type="button" aria-pressed={mode === 'dialogue'} onClick={() => setMode('dialogue')}>
-                  Diálogo
+                  {t('tableScreen.dialogo')}
                 </button>
               </div>
               </Panel>
-              <Panel title="Voz">
+              <Panel title={t('tableScreen.voz')}>
               <TtsBar tts={tts} />
               {showVoiceNotice ? (
                 <p className="hint">
@@ -800,15 +801,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                       setVoiceNoticeDismissed(true)
                     }}
                   >
-                    Entendido
+                    {t('tableScreen.entendido')}
                   </button>
                 </p>
               ) : null}
               </Panel>
-              <Panel title="Compartir la historia">
+              <Panel title={t('tableScreen.compartirLaHistoria')}>
               <ChroniclePanel client={client} tableId={table.id} />
               </Panel>
-              <Panel title="Pantalla">
+              <Panel title={t('tableScreen.pantalla')}>
               <div className="row">
                 <button
                   type="button"
@@ -818,7 +819,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     setScreen(true)
                   }}
                 >
-                  Modo pantalla
+                  {t('tableScreen.modoPantalla')}
                 </button>
                 <span className="hint">Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).</span>
               </div>
@@ -831,33 +832,33 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
 
       <footer className="screen-foot">
         <span>{line}</span>
-        <span className="escala" role="group" aria-label="Tamaño del texto">
-          <button type="button" className="btn ghost small" onClick={() => scaleScreen(-0.1)} aria-label="Texto más pequeño" disabled={screenScale <= 0.6}>
+        <span className="escala" role="group" aria-label={t('tableScreen.tamanoDelTexto')}>
+          <button type="button" className="btn ghost small" onClick={() => scaleScreen(-0.1)} aria-label={t('tableScreen.textoMasPequeno')} disabled={screenScale <= 0.6}>
             A−
           </button>
           <span className="valor">{Math.round(screenScale * 100)}%</span>
-          <button type="button" className="btn ghost small" onClick={() => scaleScreen(0.1)} aria-label="Texto más grande" disabled={screenScale >= 2}>
+          <button type="button" className="btn ghost small" onClick={() => scaleScreen(0.1)} aria-label={t('tableScreen.textoMasGrande')} disabled={screenScale >= 2}>
             A+
           </button>
         </span>
         <button type="button" className="btn ghost small" onClick={() => setScreen(false)}>
-          Salir de pantalla <span className="k">F</span>
+          {t('tableScreen.salirDePantalla')} <span className="k">F</span>
         </button>
       </footer>
 
       <div className="table-footer hide-on-screen">
         {viewer.characterId === null && snapshot !== null ? (
-          <section className="card stack" aria-label="Elige tu personaje">
+          <section className="card stack" aria-label={t('tableScreen.eligeTuPersonaje')}>
             <div className="label" style={{ marginTop: 0 }}>
-              Elige tu personaje
+              {t('tableScreen.eligeTuPersonaje')}
             </div>
-            <p className="hint">Los que ya juega alguien no se pueden elegir: el primero que llega se lo queda. Sin personaje puedes leer, pero no responder.</p>
+            <p className="hint">{t('tableScreen.losQueYaJuega')}</p>
             {pack ? (
               <CharacterPicker characters={freeCharacters(pack, table.members)} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} />
             ) : remote.length > 0 ? (
               <RemoteCharacterPicker packId={table.packId} characters={freeRemoteCharacters(remote, table.members)} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} />
             ) : (
-              <p className="hint">Cargando los personajes del pack...</p>
+              <p className="hint">{t('tableScreen.cargandoLosPersonajesDel')}</p>
             )}
             <div className="row">
               <button
@@ -870,10 +871,10 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                     await client.setOwnerCharacter(table.id, user.id, choosing)
                     onTableChanged()
                     refresh()
-                  }, 'No se pudo elegir el personaje.')
+                  }, t('play.pickFailed'))
                 }}
               >
-                Jugar con este personaje
+                {t('tableScreen.jugarConEstePersonaje')}
               </button>
             </div>
           </section>

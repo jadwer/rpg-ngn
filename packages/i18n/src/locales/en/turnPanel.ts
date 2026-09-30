@@ -1,0 +1,32 @@
+import type { Messages } from '../../types.js'
+import type { turnPanel as es } from '../es/turnPanel.js'
+
+export const turnPanel: Messages<typeof es> = {
+  cancelar: 'Cancel',
+  cerrarYNarrar: 'Close and narrate',
+  reanudar: 'Resume',
+  paraNoEsperar: 'To skip the wait,',
+  recargaEnMiCuenta: 'top up in My account and credits',
+  oUsaTuPropia: 'or use your own key in the game master settings.',
+  elDirectorNarraLo: 'The game master narrates what happens when the turn closes.',
+  tiraTuFortuna: 'Roll your Fortune.',
+  mantenPresionadoElDado: 'Press and hold the die, then let go. You are not told what it is for.',
+  queHaceTuPersonaje: 'What does your character do?',
+  tiraTuFortuna2: 'Roll your Fortune',
+  ocultar: 'Hide',
+  ideas: 'Ideas',
+  ocultarIdeas: 'Hide ideas',
+  verIdeas: 'See ideas',
+  ctrlEnterTambienEnvia: 'Ctrl+Enter also sends.',
+  mirasLaMesaSin: 'You watch the table without a character: you can read and close the turn, but not answer.',
+  tuRespuestaEstaEnviada: 'Your answer is sent.',
+  cerrarTurnoYNarrar: 'Close turn and narrate',
+  forzarCierre: 'Force close',
+  unMomentoLaMesa: 'One moment: the table waits until someone closes',
+  teTocaTirar: 'Your turn to roll',
+  tuFortunaDeEsta: 'Your Fortune for this session',
+  ideasParaTuPersonaje: 'Ideas for your character',
+  queHacesEscribeTu: 'What do you do? Write your action or say you do nothing.',
+  dadosMantenPresionadoY: 'Dice: press, hold and let go',
+  soloElAnfitrionCierra: 'Host only: close even if someone is missing',
+}

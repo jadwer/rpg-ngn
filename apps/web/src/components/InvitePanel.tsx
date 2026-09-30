@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
@@ -96,13 +97,13 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
       try {
         // Lookup por correo exacto, abierto a cualquier cuenta (entrega 5b).
         const user = await client.lookupUser(value)
-        if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}. Pídele que se registre en esta misma web.`)
-        else if (user.id === meId) setNotice('Ese correo es el tuyo.')
+        if (!user) setNotice(t('play.noAccount', { email: value }))
+        else if (user.id === meId) setNotice(t('play.ownEmail'))
         else setFound(user)
       } catch (caught) {
         if (caught instanceof ApiError && caught.isForbidden) {
           setSearchDenied(true)
-          setNotice('Tu cuenta no puede buscar usuarios por correo. Pídele al otro que te mande la solicitud de amistad y acéptala aquí.')
+          setNotice(t('play.cannotSearch'))
           return
         }
         throw caught
@@ -132,7 +133,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
     <div className="invite stack">
       {pending.length > 0 ? (
         <div>
-          <div className="label">Solicitudes de amistad pendientes</div>
+          <div className="label">{t('invitePanel.solicitudesDeAmistadPendientes')}</div>
           <div className="stack">
             {pending.map((f) => (
               <div key={f.id} className="row">
@@ -140,7 +141,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
                   {f.user.name} <span className="muted">({f.user.email})</span>
                 </span>
                 <button type="button" className="btn small" onClick={() => void accept(f.id)} disabled={busy}>
-                  Aceptar
+                  {t('invitePanel.aceptar')}
                 </button>
               </div>
             ))}
@@ -150,7 +151,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
       <div>
         <div className="label" style={{ marginTop: pending.length > 0 ? undefined : 0 }}>
-          Invitar por correo
+          {t('invitePanel.invitarPorCorreo')}
         </div>
         <form
           className="row"
@@ -159,14 +160,14 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
             void search()
           }}
         >
-          <input className="input" type="email" name="correo" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com" style={{ flex: 1, minWidth: 200 }} disabled={busy} />
+          <input className="input" type="email" name="correo" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('invitePanel.correoEjemploCom')} style={{ flex: 1, minWidth: 200 }} disabled={busy} />
           <button type="submit" className="btn" disabled={busy || !email.trim()}>
-            Buscar
+            {t('invitePanel.buscar')}
           </button>
         </form>
         {friends.length > 0 ? (
           <div className="row" style={{ marginTop: 8 }}>
-            <span className="hint">Amigos:</span>
+            <span className="hint">{t('invitePanel.amigos')}</span>
             {friends.map((u) => (
               <button
                 key={u.id}
@@ -183,7 +184,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
             ))}
           </div>
         ) : null}
-        {searchDenied && friends.length === 0 && pending.length === 0 ? <p className="hint">Cuando alguien te mande una solicitud de amistad aparece aquí para aceptarla.</p> : null}
+        {searchDenied && friends.length === 0 && pending.length === 0 ? <p className="hint">{t('invitePanel.cuandoAlguienTeMande')}</p> : null}
       </div>
 
       {notice ? <div className="error">{notice}</div> : null}
@@ -194,19 +195,19 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
             {found.name}
             <small>{found.email}</small>
           </div>
-          {alreadyMember ? <span className="chip done">ya está en la mesa</span> : null}
+          {alreadyMember ? <span className="chip done">{t('invitePanel.yaEstaEnLa')}</span> : null}
           {!alreadyMember && state.kind === 'none' ? (
             <button type="button" className="btn primary" onClick={() => void request(found.id)} disabled={busy}>
-              Enviar solicitud de amistad
+              {t('invitePanel.enviarSolicitudDeAmistad')}
             </button>
           ) : null}
-          {!alreadyMember && state.kind === 'requested' ? <span className="chip">solicitud enviada, falta que acepte</span> : null}
+          {!alreadyMember && state.kind === 'requested' ? <span className="chip">{t('invitePanel.solicitudEnviadaFaltaQue')}</span> : null}
           {!alreadyMember && state.kind === 'received' ? (
             <button type="button" className="btn primary" onClick={() => void accept(state.friendship.id)} disabled={busy}>
-              Aceptar su solicitud
+              {t('invitePanel.aceptarSuSolicitud')}
             </button>
           ) : null}
-          {!alreadyMember && state.kind === 'accepted' ? <span className="chip done">amigos</span> : null}
+          {!alreadyMember && state.kind === 'accepted' ? <span className="chip done">{t('invitePanel.amigos2')}</span> : null}
         </div>
       ) : null}
 
@@ -218,14 +219,14 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
           ) : remote.length > 0 ? (
             <RemoteCharacterPicker packId={table.packId} characters={freeRemote} taken={taken} value={characterId} onChange={setCharacterId} allowNone noneContext="invite" />
           ) : (
-            <p className="hint">Cargando los personajes del pack...</p>
+            <p className="hint">{t('invitePanel.cargandoLosPersonajesDel')}</p>
           )}
           <div className="row">
             <button type="button" className="btn primary" onClick={() => void invite()} disabled={busy}>
               {busy ? <span className="spinner" aria-hidden /> : null}
               Invitar a la mesa
             </button>
-            <span className="hint">{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: lo elige al entrar a la mesa, entre los que queden libres.'}</span>
+            <span className="hint">{characterId ? t('play.willPlay', { name: nameOf(characterId) }) : t('play.picksOnJoin')}</span>
           </div>
         </div>
       ) : null}

@@ -1,0 +1,20 @@
+/** Textos de components/ de la mesa (web). */
+export const ttsBar = {
+  esteNavegadorNoTiene: 'Este navegador no tiene voz. La mesa se juega leyendo.',
+  leer: 'Leer',
+  pausa: 'Pausa',
+  seguir: 'Seguir',
+  siguiente: 'Siguiente',
+  parar: 'Parar',
+  voz: 'Voz',
+  velocidad: 'Velocidad',
+  leerLoNuevo: 'Leer lo nuevo',
+  jugamosLeyendo: 'Jugamos leyendo',
+  avisarSiNadieNarra: 'Avisar si nadie narra',
+  ajustes: 'Ajustes',
+  vozDelNavegadorEn: 'Voz del navegador en el idioma de lectura',
+  velocidadDeLectura: 'Velocidad de lectura',
+  quitarElAvisoDe: 'Quitar el aviso de que nadie narra',
+  volverAAvisarSi: 'Volver a avisar si nadie narra',
+  vozPorDefectoIdioma: 'Voz por defecto, idioma, velocidad y tono',
+}

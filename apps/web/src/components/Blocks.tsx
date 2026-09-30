@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ImageGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
@@ -65,7 +66,7 @@ function Prose({ group, currentBlockId, onPressBlock }: GroupProps<ProseGroup>) 
       ))}
       {group.compressed ? (
         <button type="button" className="btn ghost small fold" onClick={() => setExpanded(false)}>
-          Comprimir
+          {t('blocksUi.comprimir')}
         </button>
       ) : null}
     </div>
@@ -128,7 +129,7 @@ function System({ group, currentBlockId, onPressBlock }: GroupProps<SystemGroup>
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onPressBlock?.(block.id)}
     >
-      {block.audience === 'host' ? <div className="host-tag">Solo para ti, anfitrión</div> : null}
+      {block.audience === 'host' ? <div className="host-tag">{t('blocksUi.soloParaTiAnfitrion')}</div> : null}
       {block.title ? <div className="title">{block.title}</div> : null}
       {block.text ? <p>{block.text}</p> : null}
       {block.detail ? <p className="detail">{block.detail}</p> : null}

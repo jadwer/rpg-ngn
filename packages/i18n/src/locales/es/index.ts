@@ -1,12 +1,21 @@
 import { account } from './account.js'
 import { auth } from './auth.js'
+import { blocksUi } from './blocksUi.js'
 import { catalogHome } from './catalogHome.js'
 import { common } from './common.js'
 import { cta } from './cta.js'
 import { home } from './home.js'
+import { hostPanel } from './hostPanel.js'
+import { inviteLink } from './inviteLink.js'
+import { invitePanel } from './invitePanel.js'
+import { play } from './play.js'
+import { playersPanel } from './playersPanel.js'
 import { shell } from './shell.js'
 import { table } from './table.js'
+import { tableScreen } from './tableScreen.js'
+import { ttsBar } from './ttsBar.js'
+import { turnPanel } from './turnPanel.js'
 import { worlds } from './worlds.js'
 
 /** El español es el original: cada clave nueva nace aqui y el ingles la sigue. */
-export const es = { account, auth, catalogHome, common, cta, home, shell, table, worlds }
+export const es = { account, auth, blocksUi, catalogHome, common, cta, home, hostPanel, inviteLink, invitePanel, play, playersPanel, shell, table, tableScreen, ttsBar, turnPanel, worlds }
