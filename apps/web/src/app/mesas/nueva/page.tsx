@@ -80,7 +80,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       return
     }
     let alive = true
-    void client.listPackCharacters(option.id, option.version).then(
+    void client.listPackCharacters(option.id, option.version, language()).then(
       (result) => {
         if (alive) setRemoteCharacters(result)
       },

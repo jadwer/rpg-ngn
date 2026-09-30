@@ -1,0 +1,32 @@
+{
+  "title": "Session 3: The Third Level",
+  "briefing": "You went down into the Valdoria mine days ago and never came back up. You don't remember how long you've been down here, or why the air smells of wet stone, or why it's so hard to remember your own name. Up in the village, no one remembers you. But someone is looking for you.",
+  "howToPlay": [
+    "Say what your character tries to do, in your own words. There's no list of allowed actions.",
+    "When something is risky, you roll a d20. The GM interprets the result; they'll never tell you the number you needed.",
+    "Your sheet says what you're good at. Use it: the world reacts differently depending on who tries.",
+    "At the start you roll 1d20 for Fortune. You won't be told what it was for. You'll find out.",
+    "Down here, memory is a resource. Whatever you remember, say it out loud: tomorrow it might be gone."
+  ],
+  "fortune": [
+    {
+      "label": "Bad luck"
+    },
+    {
+      "label": "Awkward"
+    },
+    {
+      "label": "Normal"
+    },
+    {
+      "label": "Lucky star"
+    },
+    {
+      "label": "Fortunate"
+    },
+    {
+      "label": "Destiny"
+    }
+  ],
+  "notes": "A session for new players. Choose from the six travelers still in the mine. You don't need to have played the earlier sessions: your character doesn't remember anything either. Anyone who has already played keeps their Fortune; anyone joining today rolls their own."
+}

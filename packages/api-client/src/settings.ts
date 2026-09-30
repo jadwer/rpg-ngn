@@ -284,11 +284,11 @@ export interface SettingsApi {
   buySeasonPass(): Promise<CatalogPurchase>
   buyWorld(id: string): Promise<CatalogPurchase>
   /** Personajes de un pack del servidor; la web solo lleva empaquetado el piloto. */
-  listPackCharacters(packId: string, version: string): Promise<PackCharacter[]>
+  listPackCharacters(packId: string, version: string, lang?: string): Promise<PackCharacter[]>
   /** Los NPC de un pack, para ponerles cara en el dialogo cuando el cliente no lleva el pack. */
-  listPackNpcs(packId: string, version: string): Promise<PackNpc[]>
+  listPackNpcs(packId: string, version: string, lang?: string): Promise<PackNpc[]>
   /** Fichas completas y sesiones de un pack del servidor, para el panel de fichas sin llevar el pack (E3). */
-  listPackSheets(packId: string, version: string): Promise<PackSheets>
+  listPackSheets(packId: string, version: string, lang?: string): Promise<PackSheets>
   /** Mis mundos (entrega 8): los subidos por esta cuenta, con el cupo gratuito. */
   listMyPacks(): Promise<{ packs: PackOption[]; freeLimit: number; used: number }>
   /** Sube un .rpgpack. Si el motor lo rechaza, el ApiError trae `issues` en `body`. */
@@ -308,7 +308,7 @@ export interface SettingsApi {
   activatePack(packId: number): Promise<PackOption>
   deactivatePack(packId: number): Promise<PackOption>
   /** Los mapas de un pack, con los lugares ya posados sobre la imagen. */
-  listPackMaps(packId: string, version: string): Promise<PackMapView[]>
+  listPackMaps(packId: string, version: string, lang?: string): Promise<PackMapView[]>
   /** Paquetes, saldo y la clave publicable de Stripe (publica por diseño). */
   listCredits(): Promise<{ packs: CreditPack[]; balance: CreditBalance; publishableKey: string }>
   /** Arranca la compra: devuelve el clientSecret para confirmar contra Stripe. Los turnos los suma el webhook. */
@@ -371,8 +371,8 @@ export function settingsApi(request: Request): SettingsApi {
       return data.data
     },
 
-    async listPackSheets(packId, version) {
-      const { data } = await request<{ data: PackSheets }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/sheets`)
+    async listPackSheets(packId, version, lang) {
+      const { data } = await request<{ data: PackSheets }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/sheets${langQuery(lang)}`)
       return data.data
     },
 
@@ -435,18 +435,18 @@ export function settingsApi(request: Request): SettingsApi {
       return data.data
     },
 
-    async listPackNpcs(packId, version) {
-      const { data } = await request<{ data: PackNpc[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/npcs`)
+    async listPackNpcs(packId, version, lang) {
+      const { data } = await request<{ data: PackNpc[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/npcs${langQuery(lang)}`)
       return data.data
     },
 
-    async listPackCharacters(packId, version) {
-      const { data } = await request<{ data: PackCharacter[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/characters`)
+    async listPackCharacters(packId, version, lang) {
+      const { data } = await request<{ data: PackCharacter[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/characters${langQuery(lang)}`)
       return data.data
     },
 
-    async listPackMaps(packId, version) {
-      const { data } = await request<{ data: PackMapView[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/maps`)
+    async listPackMaps(packId, version, lang) {
+      const { data } = await request<{ data: PackMapView[] }>(`/api/v1/packs/${encodeURIComponent(packId)}/${encodeURIComponent(version)}/maps${langQuery(lang)}`)
       return data.data
     },
 
@@ -546,4 +546,9 @@ export function packPortraitUrl(packId: string, portrait: string | null | undefi
   const file = portrait.split('/').pop()
   if (!file) return null
   return `/api/v1/packs/${encodeURIComponent(packId)}/portraits/${encodeURIComponent(file)}`
+}
+
+/** `?lang=en` para pedir los textos de un pack en el idioma de la mesa (i18n); nada si no hay idioma. */
+function langQuery(lang: string | undefined): string {
+  return lang ? `?lang=${encodeURIComponent(lang)}` : ''
 }

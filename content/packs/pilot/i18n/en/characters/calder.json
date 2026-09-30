@@ -1,0 +1,57 @@
+{
+  "race": "Human",
+  "class": "Wizard",
+  "age": "52 years old",
+  "quote": "Knowledge is the true power.",
+  "bio": "Calder has devoted his life to the mysteries of the world. His mind is his greatest weapon, though his allies are his greatest strength.",
+  "attacks": [
+    {
+      "id": "baston",
+      "name": "Quarterstaff",
+      "damageType": "bludgeoning",
+      "range": "melee"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "descarga-arcana",
+      "name": "Arcane Bolt",
+      "damageType": "force",
+      "range": "long",
+      "effect": "A bolt of pure force. Unlimited uses."
+    },
+    {
+      "id": "prestidigitacion",
+      "name": "Prestidigitation",
+      "effect": "Minor effects at a distance: move light objects, light or snuff a flame, clean, mark. No damage."
+    },
+    {
+      "id": "contencion",
+      "name": "Containment",
+      "per": "long rest",
+      "effect": "Holds a creature or shape in place for a few moments. It doesn't harm it. Objects and presences with no will of their own take on a definite form while contained."
+    },
+    {
+      "id": "escudo-arcano",
+      "name": "Arcane Shield",
+      "per": "long rest",
+      "effect": "Reaction: +5 to armor against a blow that's already on its way."
+    },
+    {
+      "id": "saber-arcano",
+      "name": "Arcane Lore",
+      "effect": "Can identify magic, creatures, and arcane phenomena with an Arcana check."
+    }
+  ],
+  "skills": [
+    "Arcana",
+    "Investigation",
+    "History",
+    "Perception"
+  ],
+  "roles": [
+    "Magic damage",
+    "Control"
+  ],
+  "goal": "Answer a question that has gone unanswered for twenty years."
+}

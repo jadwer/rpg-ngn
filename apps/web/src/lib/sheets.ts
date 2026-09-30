@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { onlineSheetEntries, type OnlineSheetEntry, type OnlineSheetsInput } from '@rpg-ngn/ui-logic'
 
 /**
@@ -14,4 +15,6 @@ export function sheetEntries(input: SheetsInput): SheetEntry[] {
 }
 
 /** Aviso que sustituye a la cita cuando la ficha esta velada (misma frase que apps/sheets). */
-export const VEIL_NOTE = 'Tu personaje no recuerda quién es. Elige por lo que ves: raza, clase y de qué es capaz. Lo demás lo descubres jugando.'
+export function veilNote(): string {
+  return t('sheetUi.veilNote')
+}

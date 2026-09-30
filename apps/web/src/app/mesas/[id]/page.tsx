@@ -2,6 +2,7 @@
 
 import { t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { tableLanguageOf } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -17,8 +18,9 @@ export default function TablePage() {
 
 /** Carga la mesa (miembros, premisa, campaña) y entra; el estado vivo lo lleva TableScreen por polling. */
 function TableLoader({ client, user, tableId, unauthorized, logout }: { client: ApiClient; user: StoredUser; tableId: string; unauthorized: (notice?: string) => void; logout: () => void }) {
-  const { pack } = usePack()
   const [table, setTable] = useState<TableSummary | null>(null)
+  // La mesa se lee en su idioma (i18n), no en el de quien la abre.
+  const { pack } = usePack(table ? tableLanguageOf(table.settings) : undefined)
   // Nombres de personaje de un pack que esta web no lleva dentro, para que la
   // mesa no hable de "shiho" cuando el personaje se llama Shiho.
   const [remoteNames, setRemoteNames] = useState<Record<string, string>>({})
@@ -41,7 +43,7 @@ function TableLoader({ client, user, tableId, unauthorized, logout }: { client: 
   useEffect(() => {
     if (!ajeno) return
     let alive = true
-    void client.listPackCharacters(ajeno.packId, ajeno.packVersion).then(
+    void client.listPackCharacters(ajeno.packId, ajeno.packVersion, tableLanguageOf(ajeno.settings)).then(
       (personajes) => {
         if (!alive) return
         setRemoteNames(Object.fromEntries(personajes.map((c) => [c.id, c.name])))

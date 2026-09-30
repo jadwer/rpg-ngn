@@ -1,0 +1,39 @@
+{
+  "title": "Session 1: The Road to Valdoria",
+  "briefing": "Each of you was traveling south alone when the flooding Halden River swept away the bridge at Red Ford. The only route left runs through Valdoria, a mining village in the hills. You've spent two days sharing the road, the fire, and the silences.",
+  "howToPlay": [
+    "Say what your character tries to do, in your own words. There's no list of allowed actions.",
+    "When something is risky, you roll a d20. The GM interprets the result; they'll never tell you the number you needed.",
+    "Your sheet says what you're good at. Use it: the world reacts differently depending on who tries.",
+    "At the start you roll 1d20 for Fortune. You won't be told what it was for. You'll find out."
+  ],
+  "fortune": [
+    {
+      "label": "Bad luck"
+    },
+    {
+      "label": "Awkward"
+    },
+    {
+      "label": "Normal"
+    },
+    {
+      "label": "Lucky star"
+    },
+    {
+      "label": "Fortunate"
+    },
+    {
+      "label": "Destiny"
+    }
+  ],
+  "recap": "Calder and Narivyl reached Valdoria in the rain. The guard let them in without asking their names. In the guest ledger of The Crooked Lantern they found their own entry, in their own handwriting from nine days earlier, alongside seven other names and a note about a large room paid in advance. A miner named Tomás was the only person in the village who recognized them: according to him, the group arrived nine days ago, looked into the disappearing miners, went down into the mine, and never came back up. That night a figure of gray mist entered the inn and named itself Orion, one of the names in the ledger. Before it came apart, it told them where to look for answers and left an open question about how the two of them got out.",
+  "openThreads": [
+    "Osric the foreman has been shut in for eight days with the light on all night, and he sees no one.",
+    "There's a third level in the mine that doesn't appear on the plans.",
+    "The large room at The Crooked Lantern is still rented and paid for, and Mera doesn't know by whom.",
+    "There isn't a single animal left in Valdoria: they all left on the same night.",
+    "Bren, the guard, has distrusted the party ever since the gate register burned.",
+    "A note in Calder's handwriting warns about a bell and about someone whose name starts with O."
+  ]
+}

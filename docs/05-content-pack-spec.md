@@ -203,6 +203,29 @@ En un repo publico como este, "secreto" significa oculto a los jugadores por sof
 al mundo: quien quiera secretos que nadie pueda leer los mantiene en un pack privado. Los dos del
 pack piloto (`osric-esta-abajo`, `brorg-pago-por-zahira`) salen de las notas de la sesion 003.
 
+## Traducciones: `i18n/<idioma>/`
+
+Un pack se escribe en un idioma y se traduce con una capa encima (29-09). `i18n/en/` repite la
+ruta de cada archivo que traduce (`i18n/en/characters/zahira.json`) y trae solo los textos:
+
+- Objetos: solo las claves con texto que lee alguien (nombre de un ataque, biografia, briefing,
+  palabras clave de un secreto). Una clave que el original no tiene se avisa y se ignora.
+- Listas de objetos con `id` (ataques, habilidades): cada elemento con su `id` y sus textos; se
+  casan por `id`. Sin `id` (la tabla de Fortuna), la lista completa y en el mismo orden.
+- Listas de textos (habilidades, `howToPlay`, `keywords`): la lista traducida entera.
+- Nunca se traducen `id`, referencias (`character:zahira`), rutas de archivo, numeros ni enums;
+  el loader los deja como en el original aunque la capa los traiga.
+
+`loadPack(source, { language: 'en' })` mezcla la capa antes de validar, asi que el pack traducido
+pasa por los mismos schemas y una campaña sigue siendo la misma en los dos idiomas: los eventos
+guardan ids, no textos. Lo que no este traducido sale en el original. El engine carga el pack en
+el idioma de la mesa (`language` en `ResolveTurnRequest`, `?lang=` en las lecturas del pack) y
+cachea cada idioma aparte.
+
+Las `keywords` de los secretos se traducen a como las diria un narrador en ese idioma: el lint
+de conocimiento compara la narracion con ellas, y en ingles no encontraria frases en español.
+`bundle-pack` omite tambien `i18n/<idioma>/secrets/`.
+
 ## Log de eventos de campaña
 
 `campaigns/<id>/events.jsonl` no forma parte del pack, pero se valida contra el pack

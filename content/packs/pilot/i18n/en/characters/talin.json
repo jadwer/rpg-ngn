@@ -1,0 +1,51 @@
+{
+  "race": "Halfling",
+  "class": "Rogue",
+  "age": "26 years old",
+  "quote": "If there's a lock, there's a way.",
+  "bio": "Talin always has a plan (and a plan B). Curious, bold, and with a smile that opens more doors than a key.",
+  "attacks": [
+    {
+      "id": "daga",
+      "name": "Dagger",
+      "damageType": "piercing",
+      "range": "melee or thrown"
+    },
+    {
+      "id": "ballesta-mano",
+      "name": "Hand Crossbow",
+      "damageType": "piercing",
+      "range": "medium"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "ataque-furtivo",
+      "name": "Sneak Attack",
+      "damageType": "per weapon",
+      "effect": "Extra damage once per turn if she has advantage or an ally is engaged with the target."
+    },
+    {
+      "id": "manos-habiles",
+      "name": "Nimble Fingers",
+      "effect": "Picking locks, disarming traps, and picking pockets are Sleight of Hand checks with advantage."
+    },
+    {
+      "id": "escapista",
+      "name": "Escape Artist",
+      "effect": "Can disengage or hide as part of the same move, without spending her action."
+    }
+  ],
+  "skills": [
+    "Stealth",
+    "Sleight of Hand",
+    "Perception",
+    "Deception"
+  ],
+  "roles": [
+    "Stealth",
+    "Control",
+    "Utility"
+  ],
+  "goal": "Find the treasure her grandmother used to talk about, if it even exists."
+}

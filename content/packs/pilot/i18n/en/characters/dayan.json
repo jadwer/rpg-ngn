@@ -1,0 +1,51 @@
+{
+  "race": "Dark Elf",
+  "class": "Archer",
+  "age": "72 years old (young)",
+  "quote": "Shadow can be a home too.",
+  "bio": "Born in the depths, Dayan prefers forests and freedom. Her arrows always find their mark.",
+  "attacks": [
+    {
+      "id": "arco-largo",
+      "name": "Longbow",
+      "damageType": "piercing",
+      "range": "long"
+    },
+    {
+      "id": "daga",
+      "name": "Dagger",
+      "damageType": "piercing",
+      "range": "melee"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "disparo-certero",
+      "name": "Sure Shot",
+      "per": "short rest",
+      "effect": "Adds 1d6 to the damage of a shot, declared before rolling."
+    },
+    {
+      "id": "vision-oscura",
+      "name": "Darkvision",
+      "effect": "Sees in dim light and natural darkness without a light source, out to medium range. Magical darkness blinds her all the same."
+    },
+    {
+      "id": "paso-sombrio",
+      "name": "Shadow Step",
+      "per": "long rest",
+      "effect": "Melts into one shadow and reappears in another within sight, at medium range."
+    }
+  ],
+  "skills": [
+    "Archery",
+    "Stealth",
+    "Perception",
+    "Survival"
+  ],
+  "roles": [
+    "Ranged damage",
+    "Scouting"
+  ],
+  "goal": "Prove that where she comes from doesn't decide where she's going."
+}

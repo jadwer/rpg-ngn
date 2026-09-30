@@ -1,0 +1,66 @@
+{
+  "race": "Tiefling",
+  "class": "Druid",
+  "age": "31 years old",
+  "quote": "Nature doesn't judge; it simply is.",
+  "bio": "Narivyl walks between two worlds: infernal blood and the living wild. They find balance where others see only conflict.",
+  "attacks": [
+    {
+      "id": "hoz",
+      "name": "Sickle",
+      "damageType": "slashing",
+      "range": "melee"
+    },
+    {
+      "id": "honda",
+      "name": "Sling",
+      "damageType": "bludgeoning",
+      "range": "medium"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "llama-producida",
+      "name": "Produce Flame",
+      "damageType": "fire",
+      "range": "short",
+      "effect": "A flame in the palm that gives light like a torch and can be thrown. It only sets things alight with sustained contact."
+    },
+    {
+      "id": "escarcha",
+      "name": "Frostbite",
+      "damageType": "cold",
+      "range": "short",
+      "effect": "On a hit, the target moves at half speed until its next action."
+    },
+    {
+      "id": "hablar-con-animales",
+      "name": "Speak with Beasts",
+      "per": "long rest",
+      "effect": "Talks with an animal. It answers with what an animal could know and cares about."
+    },
+    {
+      "id": "enredar",
+      "name": "Entangle",
+      "per": "long rest",
+      "effect": "Roots and vines burst from the ground and hold anyone who steps into the area. Requires earth or living matter."
+    },
+    {
+      "id": "resistencia-infernal",
+      "name": "Infernal Blood",
+      "effect": "Resistance to fire. Sees in natural darkness out to medium range."
+    }
+  ],
+  "skills": [
+    "Nature",
+    "Survival",
+    "Medicine",
+    "Animal Handling"
+  ],
+  "roles": [
+    "Control",
+    "Support",
+    "Summoning"
+  ],
+  "goal": "Prove that blood doesn't decide whom the forest serves."
+}

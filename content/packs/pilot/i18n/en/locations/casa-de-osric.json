@@ -1,0 +1,8 @@
+{
+  "name": "Osric's House",
+  "description": "The mine foreman's house. For eight days the light has been on and the door has stayed shut.",
+  "newcomerView": "A stone house with the shutters closed. Light shows through the cracks, day and night.",
+  "tags": [
+    "closed"
+  ]
+}

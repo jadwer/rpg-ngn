@@ -9,17 +9,20 @@ import { PACK_ID, PACK_VERSION, packBinaries, packFiles } from '../generated/pil
  * React para poder probarlo con vitest en node.
  */
 
-let cached: Promise<LoadedPack> | null = null
+const cached = new Map<string, Promise<LoadedPack>>()
 
-export function loadBundledPack(): Promise<LoadedPack> {
-  if (!cached) {
+/** El pack en un idioma (i18n): con `en` salen los textos de `i18n/en/`, lo no traducido queda en español. */
+export function loadBundledPack(language = 'es'): Promise<LoadedPack> {
+  let pending = cached.get(language)
+  if (!pending) {
     const binaries = Object.fromEntries(packBinaries.map((path) => [path, '']))
-    cached = loadPack(memorySource({ ...packFiles, ...binaries })).then(({ pack, issues }) => {
+    pending = loadPack(memorySource({ ...packFiles, ...binaries }), { language }).then(({ pack, issues }) => {
       if (!pack) throw new Error(`el pack ${PACK_ID} no carga: ${issues.map((i) => `${i.path}: ${i.message}`).join('; ')}`)
       return pack
     })
+    cached.set(language, pending)
   }
-  return cached
+  return pending
 }
 
 /** URL publica de un retrato del pack (`portraits/zahira.webp`), o null si no hay. */

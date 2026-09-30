@@ -27,7 +27,7 @@ export class PackStore {
    * en vez de que el cliente lleve la lista escrita a mano. Un pack que no
    * carga se omite en vez de tumbar el catalogo: el resto sigue siendo jugable.
    */
-  async catalog(): Promise<PackSummary[]> {
+  async catalog(language?: string): Promise<PackSummary[]> {
     // `withFileTypes` da false en `isDirectory()` para un enlace simbolico,
     // y los packs privados se enlazan desde su propio repo. `stat` sigue el
     // enlace, que es lo que interesa: importa que haya un pack detras.
@@ -43,7 +43,7 @@ export class PackStore {
 
     const packs: PackSummary[] = []
     for (const id of dirs.sort()) {
-      const { pack } = await loadPack(fsSource(join(this.root, id)))
+      const { pack } = await loadPack(fsSource(join(this.root, id)), { language })
       if (!pack) continue
       packs.push(summaryOf(pack))
     }
@@ -66,8 +66,8 @@ export class PackStore {
   }
 
   /** Los NPC con nombre y retrato: lo justo para el dialogo de un cliente que no lleva el pack. */
-  async npcs(ref: PackRef): Promise<PackNpc[]> {
-    const pack = await this.get(ref)
+  async npcs(ref: PackRef, language?: string): Promise<PackNpc[]> {
+    const pack = await this.get(ref, language)
     return [...pack.npcs.values()].map((n) => ({ id: n.id, name: n.name, portrait: n.portrait ?? null }))
   }
 
@@ -76,8 +76,8 @@ export class PackStore {
    * empaquetado, pero de los demas no sabe nada: sin esto, quien crea una
    * mesa con otro pack no puede elegir personaje.
    */
-  async characters(ref: PackRef): Promise<PackCharacter[]> {
-    const pack = await this.get(ref)
+  async characters(ref: PackRef, language?: string): Promise<PackCharacter[]> {
+    const pack = await this.get(ref, language)
     return [...pack.characters.values()].map((c) => ({
       id: c.id,
       name: c.name,
@@ -111,8 +111,8 @@ export class PackStore {
    * Las fichas completas y las sesiones de un pack, para el panel de fichas
    * de un cliente que no lo lleva empaquetado (E3). En el orden del manifiesto.
    */
-  async sheets(ref: PackRef): Promise<PackSheets> {
-    const pack = await this.get(ref)
+  async sheets(ref: PackRef, language?: string): Promise<PackSheets> {
+    const pack = await this.get(ref, language)
     return {
       characters: pack.manifest.characters.map((id) => pack.characters.get(id)).filter((c): c is NonNullable<typeof c> => !!c),
       sessions: pack.manifest.sessions.map((id) => pack.sessions.get(id)).filter((s): s is NonNullable<typeof s> => !!s),
@@ -120,8 +120,8 @@ export class PackStore {
   }
 
   /** Los mapas de un pack con sus lugares ya posados, para pintarlos. */
-  async maps(ref: PackRef): Promise<PackMapView[]> {
-    const pack = await this.get(ref)
+  async maps(ref: PackRef, language?: string): Promise<PackMapView[]> {
+    const pack = await this.get(ref, language)
     return [...pack.maps.values()].map((map) => ({
       id: map.id,
       name: map.name,
@@ -133,11 +133,17 @@ export class PackStore {
     }))
   }
 
-  get(ref: PackRef): Promise<LoadedPack> {
-    const key = `${ref.id}@${ref.version}`
+  /**
+   * El pack cargado, en su idioma (i18n) si se pide uno y el pack lo trae
+   * traducido. Cada idioma se cachea aparte: las mesas en ingles y en
+   * español comparten proceso.
+   */
+  get(ref: PackRef, language?: string): Promise<LoadedPack> {
+    const lang = language && /^[a-z]{2}$/.test(language) ? language : ''
+    const key = `${ref.id}@${ref.version}${lang ? `:${lang}` : ''}`
     let pending = this.cache.get(key)
     if (!pending) {
-      pending = this.load(ref)
+      pending = this.load(ref, lang || undefined)
       this.cache.set(key, pending)
       pending.catch(() => this.cache.delete(key))
     }
@@ -163,10 +169,10 @@ export class PackStore {
     return null
   }
 
-  private async load(ref: PackRef): Promise<LoadedPack> {
+  private async load(ref: PackRef, language?: string): Promise<LoadedPack> {
     const dir = await this.dirOf(ref.id)
     if (!dir) throw new Error(`pack ${ref.id} no existe en este servidor`)
-    const { pack, issues } = await loadPack(fsSource(dir))
+    const { pack, issues } = await loadPack(fsSource(dir), { language })
     if (!pack) {
       throw new Error(`pack ${ref.id} no carga: ${issues.map((i) => `${i.path}: ${i.message}`).join('; ')}`)
     }

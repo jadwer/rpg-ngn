@@ -1,0 +1,56 @@
+{
+  "race": "Dwarf",
+  "class": "Fighter",
+  "age": "88 years old",
+  "quote": "Small in stature, big in deeds.",
+  "bio": "Zahira is as tough as the mountains of her homeland. Blunt, loyal, and with a sense of humor as sharp as her axe.",
+  "attacks": [
+    {
+      "id": "hacha-de-guerra",
+      "name": "Battleaxe",
+      "damageType": "slashing",
+      "range": "melee"
+    },
+    {
+      "id": "martillo-arrojadizo",
+      "name": "Throwing Hammer",
+      "damageType": "bludgeoning",
+      "range": "thrown, short"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "segundo-aliento",
+      "name": "Second Wind",
+      "per": "short rest",
+      "effect": "Regains 1d10+1 hit points without anyone's help."
+    },
+    {
+      "id": "acometida",
+      "name": "Action Surge",
+      "per": "short rest",
+      "effect": "Attacks twice in the same turn."
+    },
+    {
+      "id": "resistencia-enana",
+      "name": "Dwarven Resilience",
+      "effect": "Advantage against poison and against exhaustion from marching, cold, or lack of sleep."
+    },
+    {
+      "id": "ojo-de-piedra",
+      "name": "Stonecunning",
+      "effect": "Recognizes stonework, tunnels, and galleries: if something was dug out or altered, she notices."
+    }
+  ],
+  "skills": [
+    "Athletics",
+    "Endurance",
+    "History",
+    "Crafting"
+  ],
+  "roles": [
+    "Tank",
+    "Melee combat"
+  ],
+  "goal": "Earn a name of her own, far from the clan."
+}

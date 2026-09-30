@@ -8,7 +8,8 @@ import { illustrationFor } from './illustrate.js'
 import { projectionsOf, rebuildState } from './state.js'
 
 export interface ResolveDeps {
-  loadPack(ref: ResolveTurnRequest['pack']): Promise<LoadedPack>
+  /** El pack en el idioma de la mesa (i18n), si lo trae traducido. */
+  loadPack(ref: ResolveTurnRequest['pack'], language?: string): Promise<LoadedPack>
   now(): Date
   provider?: GMProvider
   providers?: ProviderDeps
@@ -33,7 +34,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let recentEvents: CampaignEvent[]
 
   try {
-    pack = await deps.loadPack(request.pack)
+    pack = await deps.loadPack(request.pack, request.language)
     ruleset = resolveRuleset(request.ruleset)
     ;({ state, events: recentEvents } = rebuildState(pack, ruleset, request.snapshot, request.events))
   } catch (error) {
@@ -208,7 +209,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 export async function suggestMore(request: SuggestRequest, deps: ResolveDeps): Promise<SuggestResponse> {
   const credential = request.provider.kind === 'scripted' ? undefined : request.provider.credential
   try {
-    const pack = await deps.loadPack(request.pack)
+    const pack = await deps.loadPack(request.pack, request.language)
     const ruleset = resolveRuleset(request.ruleset)
     const { state, events: recentEvents } = rebuildState(pack, ruleset, request.snapshot, request.events)
     const session = state.meta.sessions[request.turn.sessionId]

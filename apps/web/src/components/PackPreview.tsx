@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { packPortraitUrl, type ApiClient, type PackSheets } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
 import { Portrait } from './Portrait'
@@ -22,7 +22,7 @@ export function PackPreview({ client, packId, version }: Props) {
 
   useEffect(() => {
     let alive = true
-    void client.listPackSheets(packId, version).then(
+    void client.listPackSheets(packId, version, language()).then(
       (s) => {
         if (alive) setSheets(s)
       },

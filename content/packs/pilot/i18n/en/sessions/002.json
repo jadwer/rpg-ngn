@@ -1,0 +1,43 @@
+{
+  "title": "Session 2: The Bell",
+  "briefing": "Valdoria has forgotten the Nine Travelers, but the village still holds their traces: a guest ledger with their names, a room paid for six days, and a mine sealed by a cave-in nobody saw. Osric the foreman has been shut in for eight days with the light on. Someone mentioned a bell.",
+  "howToPlay": [
+    "Say what your character tries to do, in your own words. There's no list of allowed actions.",
+    "When something is risky, you roll a d20. The GM interprets the result; they'll never tell you the number you needed.",
+    "Your sheet says what you're good at. Use it: the world reacts differently depending on who tries.",
+    "If you're joining now, you roll 1d20 for Fortune. You won't be told what it was for. You'll find out."
+  ],
+  "fortune": [
+    {
+      "label": "Bad luck"
+    },
+    {
+      "label": "Awkward"
+    },
+    {
+      "label": "Normal"
+    },
+    {
+      "label": "Lucky star"
+    },
+    {
+      "label": "Fortunate"
+    },
+    {
+      "label": "Destiny"
+    }
+  ],
+  "notes": "Fortune is rolled once per campaign, not once per session. Anyone who rolled in session 1 keeps their result.",
+  "recap": "Osric opened the door a hand's width when Calder told him about his own loss and Narivyl promised to leave him in peace. Inside: hundreds of names written in charcoal on the walls and dozens of candles burning in broad daylight. Osric confessed that thirty years ago he went down with ten others and came up alone, because someone paid for him, and he never learned who. He told them where the bronze bell is and warned that every time it rings, something down below knows where you are. Meanwhile Zahira woke up alone on the second level, with no memory of nine days, and made her own way to the boarded-up entrance, where Tomás found her. The three of them met without recognizing each other, the same mud from the north road on their boots. As she slept, Zahira remembered a hand ringing a bell and pushing her upward. With Tomás as their guide, they went down to the miners' chapel: the bell was there, and so was the emptied pack of Tomás's brother. When they took the bell down, something answered from the third level. Back in the village, Osric's house was dark for the first time in eight days.",
+  "openThreads": [
+    "Osric has vanished from his house. The candles hadn't been out long and the door was left ajar.",
+    "On the wall of names there's a new one, in fresh charcoal and not crossed out: Narivyl.",
+    "Someone is ringing the bell on the third level, and there hasn't been a bell in Valdoria for thirty years.",
+    "Zahira remembers a greenish hand, with a scar across the knuckles, that pushed her upward.",
+    "Tomás's brother left his pack neatly arranged in the chapel and went down to the third level on his own.",
+    "On the road there are fresh chalk marks that no one in the group made, and a tally: five closed groups and two started.",
+    "Calder carries a small iron key and doesn't know of any lock it opens.",
+    "Nine lamp hooks on the second level, six lamps hanging and three empty.",
+    "Tomás is keeping the bell. He said that if they don't come up in three days, he'll ring it."
+  ]
+}

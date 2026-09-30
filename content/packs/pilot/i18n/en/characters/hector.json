@@ -1,0 +1,53 @@
+{
+  "race": "Human",
+  "class": "Paladin",
+  "age": "34 years old",
+  "quote": "Justice isn't asked for; it's done.",
+  "bio": "Héctor believes in a better world and is ready to fight for it. His faith is his shield and his sword, and his allies are his family.",
+  "attacks": [
+    {
+      "id": "espada-larga",
+      "name": "Longsword",
+      "damageType": "slashing",
+      "range": "melee"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "golpe-sagrado",
+      "name": "Divine Smite",
+      "per": "long rest",
+      "damageType": "radiant",
+      "effect": "Adds radiant damage to a blow that has already landed. Declare it after the hit."
+    },
+    {
+      "id": "imposicion-manos",
+      "name": "Lay on Hands",
+      "per": "long rest",
+      "effect": "Restores 5 hit points by touch, which can be split up. It can also cure a poison or a disease."
+    },
+    {
+      "id": "aura-de-valor",
+      "name": "Aura of Courage",
+      "effect": "Allies at his side have advantage against fear."
+    },
+    {
+      "id": "sentir-el-mal",
+      "name": "Sense Corruption",
+      "per": "long rest",
+      "effect": "Senses unnatural presences nearby, without pinpointing where they are."
+    }
+  ],
+  "skills": [
+    "Persuasion",
+    "Religion",
+    "Medicine",
+    "Intimidation"
+  ],
+  "roles": [
+    "Tank",
+    "Support",
+    "Leader"
+  ],
+  "goal": "Protect those who can't protect themselves."
+}

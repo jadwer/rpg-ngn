@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, inviteTokenFrom, pendingReceived, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -88,7 +88,7 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
         const usados = new Set(packIds.split(','))
         const personajes: Record<string, PackCharacter[]> = {}
         for (const p of catalogo.filter((p) => p.id !== PACK_ID && usados.has(p.id))) {
-          personajes[p.id] = await client.listPackCharacters(p.id, p.version).catch(() => [])
+          personajes[p.id] = await client.listPackCharacters(p.id, p.version, language()).catch(() => [])
         }
         if (alive) setRemote((actual) => ({ ...actual, ...personajes }))
       },

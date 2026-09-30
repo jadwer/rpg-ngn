@@ -1,0 +1,12 @@
+{
+  "description": "The inn's serving boy, young and hollow-eyed from lack of sleep. He watches the door more than he waits tables, and he recognizes the Nine even though the village has forgotten them.",
+  "goals": [
+    "Get someone to believe him without having to explain everything",
+    "Keep the Nine from going back down"
+  ],
+  "relationships": [
+    {
+      "kind": "works for"
+    }
+  ]
+}

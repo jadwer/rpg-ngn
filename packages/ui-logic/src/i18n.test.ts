@@ -4,6 +4,7 @@ import { countdownLine, seatsSummary } from './table-presence.js'
 import { relativeTime } from './table-list.js'
 import { streakText } from './discoverer-pass.js'
 import { STAT_LABELS } from './sheet.js'
+import { tableLanguageOf } from './table-language.js'
 
 afterEach(() => setLanguage('es'))
 
@@ -18,5 +19,14 @@ describe('i18n de ui-logic', () => {
     expect(countdownLine({ active: true, held: false, heldByName: null, remaining: 7, total: 10 } as never)).toBe('The game master narrates in 7 s')
     expect(streakText({ streak: 3, playedToday: false })).toBe('Streak of 3 days in a row. Play today or you lose it.')
     expect(STAT_LABELS.sab).toBe('WIS')
+  })
+})
+
+describe('tableLanguageOf', () => {
+  it('lee el idioma de la mesa y cae al español si no hay o no se conoce', () => {
+    expect(tableLanguageOf({ language: 'en' })).toBe('en')
+    expect(tableLanguageOf({ language: 'fr' })).toBe('es')
+    expect(tableLanguageOf({})).toBe('es')
+    expect(tableLanguageOf(null)).toBe('es')
   })
 })

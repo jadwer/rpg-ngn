@@ -155,6 +155,14 @@ describe('apps/engine', () => {
     expect((await app.request('/v1/packs/nope/1.0.0/sheets', { headers })).status).toBe(404)
   })
 
+  it('con ?lang=en las fichas salen traducidas y el español sigue igual (i18n)', async () => {
+    type Sheets = { characters: Array<{ id: string; race: string }> }
+    const en = (await (await app.request('/v1/packs/pilot/0.4.0/sheets?lang=en', { headers })).json()) as Sheets
+    const es = (await (await app.request('/v1/packs/pilot/0.4.0/sheets', { headers })).json()) as Sheets
+    expect(en.characters.find((c) => c.id === 'zahira')?.race).toBe('Dwarf')
+    expect(es.characters.find((c) => c.id === 'zahira')?.race).toBe('Enana')
+  })
+
   it('falla limpio si la sesion no esta abierta o el pack no existe', async () => {
     const snapshot = await pilotSnapshot()
     const base = {

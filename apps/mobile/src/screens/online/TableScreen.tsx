@@ -1,7 +1,7 @@
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -76,10 +76,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const envelopes = snapshot?.envelopes ?? EMPTY
   // Los personajes y NPC de un pack que la app no lleva dentro: nombres y caras.
   const [remote, setRemote] = useState<PackCharacter[]>([])
+  // Los textos del pack se piden en el idioma de la mesa (i18n).
+  const tableLang = tableLanguageOf(table.settings)
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackCharacters(table.packId, table.packVersion).then(
+    void client.listPackCharacters(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemote(result)
       },
@@ -88,12 +90,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   const [remoteNpcs, setRemoteNpcs] = useState<PackNpc[]>([])
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackNpcs(table.packId, table.packVersion).then(
+    void client.listPackNpcs(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemoteNpcs(result)
       },
@@ -102,7 +104,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   // Con el pack empaquetado, nombres y caras salen de el; si no, de la API.
   const resolver = useMemo(() => {
     const uriOf = (path: string) => {
@@ -262,7 +264,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   // Los mapas del pack, si trae alguno. Sin mapa no se pinta nada.
   useEffect(() => {
     let alive = true
-    void client.listPackMaps(table.packId, table.packVersion).then(
+    void client.listPackMaps(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setMaps(result)
       },
@@ -271,7 +273,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     return () => {
       alive = false
     }
-  }, [client, table.packId, table.packVersion])
+  }, [client, table.packId, table.packVersion, tableLang])
 
 
   const freeToPick = useMemo(() => {
@@ -504,7 +506,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackSheets(table.packId, table.packVersion).then(
+    void client.listPackSheets(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemoteSheets(result)
       },
@@ -513,7 +515,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   const sheetSource = useMemo(() => (pack ? sheetSourceOf(pack) : remoteSheets ? sheetSourceFrom(remoteSheets) : null), [pack, remoteSheets])
   const entries = useMemo(
     () => (sheetSource ? onlineSheetEntries({ source: sheetSource, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),

@@ -1,0 +1,50 @@
+{
+  "race": "Wood Elf",
+  "class": "Ranger",
+  "age": "117 years old",
+  "quote": "The world always has more to show.",
+  "bio": "Orion knows paths others can't even imagine. Patient, observant, and always one step ahead.",
+  "attacks": [
+    {
+      "id": "arco-largo",
+      "name": "Longbow",
+      "damageType": "piercing",
+      "range": "long"
+    },
+    {
+      "id": "espada-corta",
+      "name": "Shortsword",
+      "damageType": "piercing",
+      "range": "melee"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "marcar-presa",
+      "name": "Mark Quarry",
+      "effect": "Marks a target in sight: while he hunts it, +1d4 damage against it and advantage to track it."
+    },
+    {
+      "id": "explorador-natural",
+      "name": "Natural Explorer",
+      "effect": "Can't get lost by nonmagical means, moves at normal pace through difficult terrain, and spots things at twice the distance while exploring."
+    },
+    {
+      "id": "sentido-primigenio",
+      "name": "Primeval Sense",
+      "effect": "Advantage on Perception and Tracking outdoors and in natural passages."
+    }
+  ],
+  "skills": [
+    "Survival",
+    "Tracking",
+    "Perception",
+    "Animal Handling"
+  ],
+  "roles": [
+    "Scouting",
+    "Support",
+    "Ranged damage"
+  ],
+  "goal": "Map what no map has dared to name."
+}

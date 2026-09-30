@@ -1,6 +1,6 @@
 import { t } from '@rpg-ngn/i18n'
 import { abilityUsage, humanizeId, type SheetView } from '@rpg-ngn/ui-logic'
-import { VEIL_NOTE } from '../lib/sheets'
+import { veilNote } from '../lib/sheets'
 import { Portrait } from './Portrait'
 
 /** Ficha completa a partir del modelo de vista de ui-logic, ya velado; mismo acabado que apps/sheets. */
@@ -18,7 +18,7 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
       </div>
 
       {sheet.quote ? <p className="quote">&ldquo;{sheet.quote}&rdquo;</p> : null}
-      {sheet.veiled ? <p className="veil">{VEIL_NOTE}</p> : null}
+      {sheet.veiled ? <p className="veil">{veilNote()}</p> : null}
 
       <div className="vitals">
         <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label="Vida" />

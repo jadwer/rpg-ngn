@@ -1,0 +1,45 @@
+{
+  "race": "Half-Orc",
+  "class": "Barbarian",
+  "age": "24 years old",
+  "quote": "Stronger!",
+  "bio": "Brorg doesn't say much, but his actions speak volumes. In battle he finds his peace, and in his companions, his true home.",
+  "attacks": [
+    {
+      "id": "hacha-grande",
+      "name": "Greataxe",
+      "damageType": "slashing",
+      "range": "melee"
+    },
+    {
+      "id": "jabalina",
+      "name": "Javelin",
+      "damageType": "piercing",
+      "range": "thrown, medium"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "furia",
+      "name": "Rage",
+      "per": "long rest",
+      "effect": "While it lasts: advantage on Strength checks, +2 to melee damage, and resistance to physical blows. He can't cast magic."
+    },
+    {
+      "id": "sin-armadura",
+      "name": "Unarmored Defense",
+      "effect": "His armor already accounts for his natural toughness: heavy armor doesn't improve it."
+    }
+  ],
+  "skills": [
+    "Athletics",
+    "Intimidation",
+    "Survival",
+    "Endurance"
+  ],
+  "roles": [
+    "Melee damage",
+    "Tank"
+  ],
+  "goal": "Find a place (or a people) to belong to."
+}

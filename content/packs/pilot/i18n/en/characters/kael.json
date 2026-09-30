@@ -1,0 +1,54 @@
+{
+  "race": "Half-Elf",
+  "class": "Bard",
+  "age": "29 years old",
+  "quote": "Life sounds better with company.",
+  "bio": "Kael turns stories into magic and strangers into friends. Where others see trouble, he sees a good song.",
+  "attacks": [
+    {
+      "id": "estoque",
+      "name": "Rapier",
+      "damageType": "piercing",
+      "range": "melee"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "burla-cruel",
+      "name": "Vicious Mockery",
+      "damageType": "psychic",
+      "range": "medium",
+      "effect": "A well-placed word. On a hit, the target also has disadvantage on its next action."
+    },
+    {
+      "id": "inspiracion",
+      "name": "Inspiration",
+      "per": "long rest",
+      "effect": "Gives an ally a 1d6 they can add to any roll, even after seeing the result."
+    },
+    {
+      "id": "encantar",
+      "name": "Charm",
+      "per": "long rest",
+      "effect": "A creature that understands him treats him like a trusted friend for a while. It breaks if he harms them. They remember being charmed."
+    },
+    {
+      "id": "curar-heridas",
+      "name": "Soothing Song",
+      "per": "long rest",
+      "effect": "Restores 1d8+3 hit points by touch."
+    }
+  ],
+  "skills": [
+    "Performance",
+    "Persuasion",
+    "Inspiration",
+    "Deception"
+  ],
+  "roles": [
+    "Support",
+    "Control",
+    "Social"
+  ],
+  "goal": "Live a story worth singing about."
+}

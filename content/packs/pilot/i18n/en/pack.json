@@ -1,0 +1,16 @@
+{
+  "name": "The Nine Travelers",
+  "tagline": "Different roads, one destination",
+  "motto": "Strangers today, maybe a legend tomorrow.",
+  "artStyle": "semi-realistic digital fantasy painting, cold blue shadows, warm lantern and candlelight, rainy mining village among the hills, an air of mystery",
+  "catalog": {
+    "genre": "Classic fantasy",
+    "tags": [
+      "adventure",
+      "mystery"
+    ],
+    "hours": "10-15 hours",
+    "synopsis": "Nine strangers, each traveling alone, find themselves stranded in Valdoria, a mining village in the hills, when the flood sweeps away the only bridge. The mine has been silent for days, and the village keeps more to itself than it lets on. A story about bonds, choices, and the price of protecting what matters.",
+    "author": "Ad Astra Mentis Team"
+  }
+}

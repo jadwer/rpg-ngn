@@ -40,12 +40,12 @@ export function createEngine(options: EngineOptions): Hono {
   })
 
   /** Los packs que este servidor puede jugar, para que la mesa se cree con uno de verdad. */
-  app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog() }))
+  app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog(c.req.query('lang')) }))
 
   /** Personajes jugables de un pack, para elegir al crear mesa o invitar. */
   app.get('/v1/packs/:id/:version/characters', async (c) => {
     try {
-      return c.json({ characters: await options.packs.characters({ id: c.req.param('id'), version: c.req.param('version') }) })
+      return c.json({ characters: await options.packs.characters({ id: c.req.param('id'), version: c.req.param('version') }, c.req.query('lang')) })
     } catch (error) {
       return c.json({ error: error instanceof Error ? error.message : String(error) }, 404)
     }
@@ -54,7 +54,7 @@ export function createEngine(options: EngineOptions): Hono {
   /** Fichas completas y sesiones de un pack, para el panel de fichas de un cliente sin el pack (E3). */
   app.get('/v1/packs/:id/:version/sheets', async (c) => {
     try {
-      return c.json(await options.packs.sheets({ id: c.req.param('id'), version: c.req.param('version') }))
+      return c.json(await options.packs.sheets({ id: c.req.param('id'), version: c.req.param('version') }, c.req.query('lang')))
     } catch (error) {
       return c.json({ error: error instanceof Error ? error.message : String(error) }, 404)
     }
@@ -94,14 +94,14 @@ export function createEngine(options: EngineOptions): Hono {
 
   app.get('/v1/packs/:id/:version/npcs', async (c) => {
     try {
-      return c.json({ npcs: await options.packs.npcs({ id: c.req.param('id'), version: c.req.param('version') }) })
+      return c.json({ npcs: await options.packs.npcs({ id: c.req.param('id'), version: c.req.param('version') }, c.req.query('lang')) })
     } catch (error) {
       return c.json({ error: (error as Error).message }, 404)
     }
   })
 
   app.get('/v1/packs/:id/:version/maps', async (c) => {
-    const maps = await options.packs.maps({ id: c.req.param('id'), version: c.req.param('version') })
+    const maps = await options.packs.maps({ id: c.req.param('id'), version: c.req.param('version') }, c.req.query('lang'))
     return c.json({ maps })
   })
 
@@ -138,7 +138,7 @@ export function createEngine(options: EngineOptions): Hono {
 
     c.header('Content-Type', 'application/x-ndjson; charset=utf-8')
     return stream(c, async (out) => {
-      for await (const line of resolveTurn(parsed.data, { loadPack: (ref) => options.packs.get(ref), now, providers, lintMode: options.lintMode })) {
+      for await (const line of resolveTurn(parsed.data, { loadPack: (ref, language) => options.packs.get(ref, language), now, providers, lintMode: options.lintMode })) {
         if (line.kind === 'result' && line.lint?.length) {
           // El motivo de cada corte queda en el log del engine; la mesa solo ve el aviso system.
           for (const finding of line.lint) console.warn(`lint ${finding.level} turno ${parsed.data.turn.id}: ${finding.message}`)
@@ -155,7 +155,7 @@ export function createEngine(options: EngineOptions): Hono {
       return c.json({ error: 'peticion invalida', issues: parsed.error.issues }, 422)
     }
     try {
-      return c.json(await suggestMore(parsed.data, { loadPack: (ref) => options.packs.get(ref), now, providers, lintMode: options.lintMode }))
+      return c.json(await suggestMore(parsed.data, { loadPack: (ref, language) => options.packs.get(ref, language), now, providers, lintMode: options.lintMode }))
     } catch (error) {
       return c.json({ error: error instanceof Error ? error.message : String(error) }, 502)
     }

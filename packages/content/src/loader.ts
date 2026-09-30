@@ -5,6 +5,7 @@ import { hasErrors, zodIssues, type Issue } from './issues.js'
 import { Location } from './location.js'
 import { PackMap } from './map.js'
 import { Npc } from './npc.js'
+import { applyOverlay } from './overlay.js'
 import { PackManifest } from './pack.js'
 import { Quest } from './quest.js'
 import { Session } from './session.js'
@@ -47,12 +48,22 @@ const collections = [
 
 type CollectionKey = (typeof collections)[number]['key']
 
-export async function loadPack(source: FileSource): Promise<LoadPackResult> {
+export interface LoadPackOptions {
+  /**
+   * Idioma en que se quiere el pack (i18n). Si el pack trae `i18n/<idioma>/`,
+   * sus textos sustituyen a los del original; lo que no este traducido se
+   * queda como en el original. Sin idioma, el pack tal cual.
+   */
+  language?: string | undefined
+}
+
+export async function loadPack(source: FileSource, options: LoadPackOptions = {}): Promise<LoadPackResult> {
   const issues: Issue[] = []
+  const language = options.language && /^[a-z]{2}$/.test(options.language) ? options.language : null
 
   let rawManifest: unknown
   try {
-    rawManifest = await readJson(source, 'pack.json')
+    rawManifest = await readTranslated(source, 'pack.json', language, issues)
   } catch (error) {
     return { pack: null, issues: [{ level: 'error', path: 'pack.json', message: (error as Error).message }] }
   }
@@ -77,7 +88,7 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
     const ids = manifest[collection.key]
     for (const id of ids) {
       const path = `${collection.dir}/${id}.json`
-      const entity = (await loadEntity(source, path, collection.schema, issues)) as { id: string } | null
+      const entity = (await loadEntity(source, path, collection.schema, issues, language)) as { id: string } | null
       if (!entity) continue
       if (entity.id !== id) {
         issues.push({ level: 'error', path, message: `el id interno (${entity.id}) no coincide con el nombre del archivo` })
@@ -192,10 +203,10 @@ export async function loadPack(source: FileSource): Promise<LoadPackResult> {
   }
 }
 
-async function loadEntity(source: FileSource, path: string, schema: ZodType, issues: Issue[]): Promise<unknown> {
+async function loadEntity(source: FileSource, path: string, schema: ZodType, issues: Issue[], language: string | null): Promise<unknown> {
   let raw: unknown
   try {
-    raw = await readJson(source, path)
+    raw = await readTranslated(source, path, language, issues)
   } catch (error) {
     issues.push({ level: 'error', path, message: (error as Error).message })
     return null
@@ -208,4 +219,20 @@ async function loadEntity(source: FileSource, path: string, schema: ZodType, iss
   }
 
   return result.data
+}
+
+/** El archivo del pack con su traduccion encima, si la hay. */
+async function readTranslated(source: FileSource, path: string, language: string | null, issues: Issue[]): Promise<unknown> {
+  const raw = await readJson(source, path)
+  if (!language) return raw
+  const overlayPath = `i18n/${language}/${path}`
+  if (!(await source.exists(overlayPath))) return raw
+  let patch: unknown
+  try {
+    patch = await readJson(source, overlayPath)
+  } catch (error) {
+    issues.push({ level: 'warning', path: overlayPath, message: `${(error as Error).message}; se usa el original` })
+    return raw
+  }
+  return applyOverlay(raw, patch, overlayPath, issues)
 }

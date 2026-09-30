@@ -3,7 +3,7 @@
 import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
+import { acceptedFriends, tableLanguageOf, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, pendingReceived, remoteCharacterNames, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CharacterPicker } from './CharacterPicker'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
@@ -40,7 +40,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackCharacters(table.packId, table.packVersion).then(
+    void client.listPackCharacters(table.packId, table.packVersion, tableLanguageOf(table.settings)).then(
       (result) => {
         if (alive) setRemote(result)
       },

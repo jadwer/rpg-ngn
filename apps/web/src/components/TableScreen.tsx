@@ -4,7 +4,7 @@ import { t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -124,10 +124,12 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [remote, setRemote] = useState<PackCharacter[]>([])
   // Los NPC del pack remoto, para que hablen con cara: la web solo lleva el piloto.
   const [remoteNpcs, setRemoteNpcs] = useState<PackNpc[]>([])
+  // Los textos del pack se piden en el idioma de la mesa (i18n).
+  const tableLang = tableLanguageOf(table.settings)
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackCharacters(table.packId, table.packVersion).then(
+    void client.listPackCharacters(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemote(result)
       },
@@ -136,14 +138,14 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   const remoteNamesAll = useMemo(() => ({ ...remoteNames, ...remoteCharacterNames(remote) }), [remoteNames, remote])
 
   // El mapa del pack, si trae alguno: la imagen y los lugares posados.
   const [maps, setMaps] = useState<PackMapView[]>([])
   useEffect(() => {
     let alive = true
-    void client.listPackMaps(table.packId, table.packVersion).then(
+    void client.listPackMaps(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setMaps(result)
       },
@@ -152,7 +154,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     return () => {
       alive = false
     }
-  }, [client, table.packId, table.packVersion])
+  }, [client, table.packId, table.packVersion, tableLang])
 
   // Si el pack de esta mesa pide personalidad escrita por el jugador (La
   // Mascarada). No todos: en el piloto la ficha ya trae bio y meta, y pedir
@@ -179,7 +181,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackNpcs(table.packId, table.packVersion).then(
+    void client.listPackNpcs(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemoteNpcs(result)
       },
@@ -188,7 +190,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   // Fichas completas y sesiones de un pack que la web no lleva dentro (E3):
   // con esto el panel de fichas es el mismo para cualquier mundo, subido o
   // privado del servidor. Antes, en esos packs, el panel salia vacio.
@@ -196,7 +198,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   useEffect(() => {
     if (pack) return
     let alive = true
-    void client.listPackSheets(table.packId, table.packVersion).then(
+    void client.listPackSheets(table.packId, table.packVersion, tableLang).then(
       (result) => {
         if (alive) setRemoteSheets(result)
       },
@@ -205,7 +207,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     return () => {
       alive = false
     }
-  }, [client, pack, table.packId, table.packVersion])
+  }, [client, pack, table.packId, table.packVersion, tableLang])
   const sheetSource = useMemo(() => (pack ? sheetSourceOf(pack) : remoteSheets ? sheetSourceFrom(remoteSheets) : null), [pack, remoteSheets])
 
   const resolver = useMemo(

@@ -1,0 +1,12 @@
+{
+  "description": "Runs the inn and keeps the guest ledger. Writes everything down and shows nothing; polite with strangers until suddenly they aren't.",
+  "goals": [
+    "Keep the ledger behind the counter",
+    "Keep the village the way it is"
+  ],
+  "relationships": [
+    {
+      "kind": "fears"
+    }
+  ]
+}

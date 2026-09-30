@@ -42,7 +42,8 @@ const files = walk(packDir)
 const manifest = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) as { id: string; version: string }
 
 // La capa gm del pack (secrets/) nunca viaja al telefono: el manifiesto empaquetado la declara vacia.
-const isSecret = (f: string): boolean => relPosix(f).startsWith('secrets/')
+// Tambien las traducciones de los secretos (i18n/<idioma>/secrets/).
+const isSecret = (f: string): boolean => /(^|\/)secrets\//.test(relPosix(f))
 const textFiles = files.filter((f) => TEXT.test(f) && !isSecret(f))
 const imageFiles = files.filter((f) => IMAGE.test(f))
 const skipped = files.filter((f) => !TEXT.test(f) && !IMAGE.test(f))

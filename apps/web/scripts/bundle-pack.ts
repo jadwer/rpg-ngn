@@ -40,7 +40,8 @@ const files = walk(packDir)
 const manifest = JSON.parse(readFileSync(join(packDir, 'pack.json'), 'utf8')) as { id: string; version: string }
 
 // La capa gm del pack (secrets/) nunca llega al navegador: el manifiesto empaquetado la declara vacia.
-const isSecret = (f: string): boolean => relPosix(f).startsWith('secrets/')
+// Tambien las traducciones de los secretos (i18n/<idioma>/secrets/).
+const isSecret = (f: string): boolean => /(^|\/)secrets\//.test(relPosix(f))
 const textFiles = files.filter((f) => TEXT.test(f) && !isSecret(f))
 const imageFiles = files.filter((f) => IMAGE.test(f))
 for (const file of files.filter((f) => !TEXT.test(f) && !IMAGE.test(f))) console.warn(`omitido (ni texto ni imagen): ${relPosix(file)}`)

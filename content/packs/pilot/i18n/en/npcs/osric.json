@@ -1,0 +1,12 @@
+{
+  "description": "The mine foreman. He has been shut inside his house for eight days with the light on, and he opens the door to no one. Thirty years ago he went down the shaft with a bronze bell and came back up alone.",
+  "goals": [
+    "Make sure no one ever goes down the shaft again",
+    "Never have to tell what he did"
+  ],
+  "relationships": [
+    {
+      "kind": "owes silence to"
+    }
+  ]
+}
