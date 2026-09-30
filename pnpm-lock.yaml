@@ -50,6 +50,9 @@ importers:
       '@rpg-ngn/engine-contract':
         specifier: workspace:*
         version: link:../../packages/engine-contract
+      '@rpg-ngn/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@rpg-ngn/narrative':
         specifier: workspace:*
         version: link:../../packages/narrative
@@ -371,6 +374,9 @@ importers:
       '@rpg-ngn/engine-contract':
         specifier: workspace:*
         version: link:../engine-contract
+      '@rpg-ngn/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       openai:
         specifier: ^7.15.0
         version: 7.15.0(ws@8.21.3)(zod@4.5.4)

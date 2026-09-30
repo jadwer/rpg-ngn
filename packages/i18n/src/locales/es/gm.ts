@@ -1,0 +1,22 @@
+/** Bloques de sistema que genera el motor, en el idioma de la mesa. */
+export const gm = {
+  lintCut: 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.',
+  lintCutDetailOne: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.',
+  lintCutDetailMany: 'El lint de conocimiento cortó {{n}} bloques. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.',
+  whatDoYouDo: '¿Qué haces, {{name}}?',
+  whatDoYouAllDo: '¿Qué hacen?',
+  cutShort: 'La narración se cortó a medias: el GM llegó a su límite de escritura.',
+  cutShortDetail: 'El modelo agotó maxOutputTokens. Cierra otro turno para que siga, o sube el presupuesto de salida.',
+  ignoredOne: 'El GM propuso 1 línea que no se pudo aplicar y se ignoró.',
+  ignoredMany: 'El GM propuso {{n}} líneas que no se pudieron aplicar y se ignoraron.',
+  ignoredDetail: 'Suele ser un evento con un personaje que no está en la sesión, un objeto que nadie tiene o una tirada mal formada. La narración que leyó la mesa no cambia y no hay nada que hacer.',
+  previously: 'Anteriormente...',
+  roll: '{{name}} tira {{die}}{{skill}}{{origin}}: {{result}}{{dice}}',
+  withOwnDie: ' con su dado',
+  noDeclarations: 'El turno se cerró sin declaraciones. El GM espera.',
+  listening: 'Turno {{n}}: el GM escucha a la mesa.',
+  notedOne: 'El GM toma nota de lo que {{names}} declara. La escena sigue abierta y la mesa tiene la palabra.',
+  notedMany: 'El GM toma nota de lo que {{names}} declaran. La escena sigue abierta y la mesa tiene la palabra.',
+  and: 'y',
+  sessionStarts: 'La sesión arranca en {{place}}.',
+}

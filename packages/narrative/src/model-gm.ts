@@ -1,6 +1,7 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId, refKind } from '@rpg-ngn/content'
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
+import { tFor } from '@rpg-ngn/i18n'
 import { z } from 'zod'
 import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
@@ -8,8 +9,6 @@ import { systemPromptFor } from './prompt.js'
 import type { GMOutput, GMProbe, GMProvider, GMSuggestion, GMTurnContext, ProposedEvent } from './provider.js'
 import { GMProviderError, errorMessage, redact } from './redact.js'
 
-/** Lo que ve la mesa cuando el lint corta un bloque. No dice cual era el secreto. */
-export const LINT_SYSTEM_TEXT = 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.'
 /** Los avisos de calidad del turno son para el anfitrion: un jugador no puede hacer nada con ellos. */
 const HOST_NOTICE = { audience: 'host', tone: 'info' } as const
 
@@ -291,6 +290,8 @@ export class ModelGMProvider implements GMProvider {
 
   async *narrate(ctx: GMTurnContext): AsyncIterable<GMOutput> {
     const compact = this.options.contextProfile === 'compact'
+    // Los bloques de sistema salen en el idioma de la mesa (i18n).
+    const tr = tFor(ctx.language ?? 'es')
     const random = this.options.random ?? webCryptoRandom()
     // Sin modo, tira el servidor: aceptar numeros escritos es una eleccion
     // explicita para la mesa presencial, nunca lo que pasa por omision.
@@ -371,19 +372,19 @@ export class ModelGMProvider implements GMProvider {
     }
 
     if (interpreter.cuts > 0) {
-      yield { kind: 'block', block: { type: 'system', text: LINT_SYSTEM_TEXT, ...HOST_NOTICE, detail: `El lint de conocimiento cortó ${interpreter.cuts === 1 ? 'un bloque' : `${interpreter.cuts} bloques`}. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.` } }
+      yield { kind: 'block', block: { type: 'system', text: tr('gm.lintCut'), ...HOST_NOTICE, detail: interpreter.cuts === 1 ? tr('gm.lintCutDetailOne') : tr('gm.lintCutDetailMany', { n: interpreter.cuts }) } }
     }
     // Cada turno devuelve la palabra (docs/03), y el modelo suele hacerlo en
     // su ultimo bloque. Si el lint corto justo ese, la mesa se quedaba sin
     // pregunta y a la deriva (mesa 33, turno 5): el motor la devuelve.
     if (reply.finish !== 'length' && interpreter.lastWasCut) {
-      const text = party.length === 1 ? `¿Qué haces, ${ctx.pack.characters.get(party[0]!)?.name ?? party[0]}?` : '¿Qué hacen?'
+      const text = party.length === 1 ? tr('gm.whatDoYouDo', { name: ctx.pack.characters.get(party[0]!)?.name ?? party[0]! }) : tr('gm.whatDoYouAllDo')
       yield { kind: 'block', block: { type: 'narration', text } }
       yield { kind: 'event', event: { type: 'narration', payload: { text }, visibility: { layer: 'campaign', witnesses } } }
     }
 
     if (reply.finish === 'length') {
-      yield { kind: 'block', block: { type: 'system', text: 'La narración se cortó a medias: el GM llegó a su límite de escritura.', audience: 'table', tone: 'action', detail: 'El modelo agotó maxOutputTokens. Cierra otro turno para que siga, o sube el presupuesto de salida.' } }
+      yield { kind: 'block', block: { type: 'system', text: tr('gm.cutShort'), audience: 'table', tone: 'action', detail: tr('gm.cutShortDetail') } }
     }
     if (interpreter.ignored > 0) {
       // Ruido tecnico: el modelo propuso un evento que el motor no pudo aplicar. La narracion esta intacta.
@@ -391,11 +392,11 @@ export class ModelGMProvider implements GMProvider {
         kind: 'block',
         block: {
           type: 'system',
-          text: `El GM propuso ${interpreter.ignored} ${interpreter.ignored === 1 ? 'línea que no se pudo aplicar y se ignoró' : 'líneas que no se pudieron aplicar y se ignoraron'}.`,
+          text: interpreter.ignored === 1 ? tr('gm.ignoredOne') : tr('gm.ignoredMany', { n: interpreter.ignored }),
           ...HOST_NOTICE,
           // Cuales fueron, recortadas: sin esto no habia forma de saber que se
           // rechazaba (mesa 39, 25-09). Solo lo ve el anfitrion.
-          detail: `Suele ser un evento con un personaje que no está en la sesión, un objeto que nadie tiene o una tirada mal formada. La narración que leyó la mesa no cambia y no hay nada que hacer.${interpreter.ignoredLines.length ? `\n\n${interpreter.ignoredLines.join('\n')}` : ''}`,
+          detail: `${tr('gm.ignoredDetail')}${interpreter.ignoredLines.length ? `\n\n${interpreter.ignoredLines.join('\n')}` : ''}`,
         },
       }
     }
@@ -797,7 +798,7 @@ class LineInterpreter {
         const cut = yield* this.lint(text)
         if (cut) return
         this.blocks++
-        yield { kind: 'block', block: { type: 'system', title: 'Anteriormente...', text, audience: 'table', tone: 'info', recap: true } }
+        yield { kind: 'block', block: { type: 'system', title: tFor(this.ctx.language ?? 'es')('gm.previously'), text, audience: 'table', tone: 'info', recap: true } }
         return
       }
       case 'ask_roll': {
@@ -892,12 +893,13 @@ class LineInterpreter {
       const name = this.ctx.pack.characters.get(refId(actor))?.name ?? refId(actor)
       const detail = resolved.skill ? ` (${resolved.skill})` : ''
       const dice = resolved.rolls && resolved.rolls.length > 1 ? ` [${resolved.rolls.join(', ')}]` : ''
-      const origin = resolved.source === 'physical' ? ' con su dado' : ''
+      const tr = tFor(this.ctx.language ?? 'es')
+      const origin = resolved.source === 'physical' ? tr('gm.withOwnDie') : ''
       yield {
         kind: 'block',
         block: {
           type: 'roll',
-          text: `${name} tira ${resolved.die}${detail}${origin}: ${resolved.result}${dice}`,
+          text: tr('gm.roll', { name, die: resolved.die, skill: detail, origin, result: resolved.result, dice }),
           actor,
           die: resolved.die,
           result: resolved.result,

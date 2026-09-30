@@ -1,5 +1,6 @@
 import { refId } from '@rpg-ngn/content'
 import type { ScriptedScene } from '@rpg-ngn/engine-contract'
+import { tFor } from '@rpg-ngn/i18n'
 import type { GMOutput, GMProvider, GMTurnContext } from './provider.js'
 
 /**
@@ -20,6 +21,7 @@ export class ScriptedGMProvider implements GMProvider {
 
   async *narrate(context: GMTurnContext): AsyncIterable<GMOutput> {
     const { turn, pack, state } = context
+    const tr = tFor(context.language ?? 'es')
     const party = state.meta.sessions[turn.sessionId]?.party ?? []
     const addressed = party.map((id) => refId(`character:${id}`))
     const scripted = this.script?.turns?.find((t) => t.turn === turn.number)
@@ -30,12 +32,12 @@ export class ScriptedGMProvider implements GMProvider {
         yield { kind: 'addressed', characterIds: addressed }
         return
       }
-      yield { kind: 'block', block: { type: 'system', text: 'El turno se cerró sin declaraciones. El GM espera.', audience: 'table', tone: 'action' } }
+      yield { kind: 'block', block: { type: 'system', text: tr('gm.noDeclarations'), audience: 'table', tone: 'action' } }
       yield { kind: 'addressed', characterIds: party }
       return
     }
 
-    if (!scripted) yield { kind: 'block', block: { type: 'system', text: `Turno ${turn.number}: el GM escucha a la mesa.` } }
+    if (!scripted) yield { kind: 'block', block: { type: 'system', text: tr('gm.listening', { n: turn.number }) } }
 
     for (const response of turn.responses) {
       const name = pack.characters.get(response.characterId)?.name ?? response.characterId
@@ -61,7 +63,7 @@ export class ScriptedGMProvider implements GMProvider {
       yield* narrate(scripted.narration)
     } else {
       const names = turn.responses.map((r) => pack.characters.get(r.characterId)?.name ?? r.characterId)
-      yield* narrate(`El GM toma nota de lo que ${listNames(names)} ${names.length === 1 ? 'declara' : 'declaran'}. La escena sigue abierta y la mesa tiene la palabra.`)
+      yield* narrate(tr(names.length === 1 ? 'gm.notedOne' : 'gm.notedMany', { names: listNames(names, tr('gm.and')) }))
     }
     yield { kind: 'addressed', characterIds: addressed }
   }
@@ -77,7 +79,7 @@ async function* narrate(text: string): AsyncIterable<GMOutput> {
   yield { kind: 'event', event: { type: 'narration', payload: { text } } }
 }
 
-function listNames(names: string[]): string {
-  if (names.length <= 1) return names[0] ?? 'nadie'
-  return `${names.slice(0, -1).join(', ')} y ${names.at(-1)}`
+function listNames(names: string[], and: string): string {
+  if (names.length <= 1) return names[0] ?? ''
+  return `${names.slice(0, -1).join(', ')} ${and} ${names.at(-1)}`
 }

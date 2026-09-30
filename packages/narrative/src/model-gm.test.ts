@@ -112,6 +112,15 @@ describe('ModelGMProvider', () => {
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira', 'calder'] })
   })
 
+  it('en una mesa en ingles, los bloques del motor salen en ingles (i18n)', async () => {
+    const base = await openSession003()
+    const provider = new ModelGMProvider(new FakeTransport(goodTurn, { finish: 'length' }), KEY)
+    const outputs = await collect(provider.narrate(contextFor(base, turn(1, [response('zahira', 'I look at the bell. 14 on History.')]), { dice: 'table', language: 'en' })))
+    const blocks = outputs.flatMap((o) => (o.kind === 'block' ? [o.block] : []))
+    expect(blocks.find((b) => b.type === 'roll')?.text).toBe('Zahira rolls 1d20 (Historia) with their own die: 14')
+    expect(blocks.some((b) => b.type === 'system' && b.text === 'The narration was cut short: the GM reached its writing limit.')).toBe(true)
+  })
+
   it('rescata un array JSON con fences y avisa si la salida se corto por presupuesto', async () => {
     const base = await openSession003()
     const text = '```json\n[\n  {"kind":"block","block":{"type":"narration","text":"Todo en una sola estructura."}},\n  {"kind":"addressed","characterIds":["calder"]}\n]\n```'

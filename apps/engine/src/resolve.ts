@@ -1,6 +1,7 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
 import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse } from '@rpg-ngn/engine-contract'
+import { tFor } from '@rpg-ngn/i18n'
 import { createProvider, redact, type GMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
@@ -108,7 +109,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         const parsed = seal({
           type: 'world_event',
           location: start,
-          payload: { note: `La sesion arranca en ${pack.locations.get(start)?.name ?? start}.` },
+          payload: { note: tFor(request.language ?? 'es')('gm.sessionStarts', { place: pack.locations.get(start)?.name ?? start }) },
           effects: sinUbicar.map((id) => ({ op: 'move', who: `character:${id}`, to: start })),
         })
         if (parsed.success) {

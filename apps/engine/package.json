@@ -18,6 +18,7 @@
     "@rpg-ngn/content": "workspace:*",
     "@rpg-ngn/core": "workspace:*",
     "@rpg-ngn/engine-contract": "workspace:*",
+    "@rpg-ngn/i18n": "workspace:*",
     "@rpg-ngn/narrative": "workspace:*",
     "@rpg-ngn/rules": "workspace:*",
     "hono": "^4.9.0"

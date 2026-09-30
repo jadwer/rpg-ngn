@@ -59,3 +59,12 @@ export function onLanguageChange(listener: (l: Language) => void): () => void {
   instance.on('languageChanged', handler)
   return () => instance.off('languageChanged', handler)
 }
+
+/**
+ * Traductor fijo a un idioma, sin tocar el global. Para el motor, que atiende
+ * mesas de idiomas distintos a la vez y no puede depender del idioma vigente.
+ */
+export function tFor(lng: Language): (key: MessageKey, vars?: Record<string, string | number>) => string {
+  const fixed = instance.getFixedT(lng)
+  return (key, vars) => fixed(key, vars ?? {}) as string
+}
