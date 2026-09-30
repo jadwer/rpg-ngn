@@ -1,4 +1,5 @@
 import { ApiError, type ApiClient, type AuthUser, type Friendship } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { acceptedFriends, friendshipWith, pendingReceived } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
@@ -62,15 +63,15 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
       const value = email.trim().toLowerCase()
       if (!value) return
       const user = await client.lookupUser(value)
-      if (!user) setNotice({ ok: false, text: `No hay ninguna cuenta con el correo ${value}. Pídele que se registre desde la app o la web.` })
-      else if (user.id === meId) setNotice({ ok: false, text: 'Ese correo es el tuyo.' })
+      if (!user) setNotice({ ok: false, text: t('mobile.friendsPanel.noAccountWithEmail', { email: value }) })
+      else if (user.id === meId) setNotice({ ok: false, text: t('play.ownEmail') })
       else setFound(user)
     })
 
   const request = (userId: string) =>
     act(async () => {
       await client.requestFriendship(userId)
-      setNotice({ ok: true, text: 'Solicitud enviada; cuando la acepte podrán invitarse a sus mesas.' })
+      setNotice({ ok: true, text: t('play.friendRequestSent') })
       setFound(null)
       setEmail('')
       await load()
@@ -89,28 +90,28 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.hint}>Con tus amigos, invitarlos a una mesa es elegirlos de la lista. Para sentar a alguien sin ser amigos, basta el enlace de invitación de la mesa.</Text>
+      <Text style={styles.hint}>{t('friendsPanel.conTusAmigosInvitarlos')}</Text>
 
       {pending.map((f) => (
         <View key={f.id} style={styles.row}>
-          <Text style={styles.rowText}>{`${f.user.name} (${f.user.email}) quiere ser tu amigo`}</Text>
-          <Button label="Aceptar" small primary busy={busy} onPress={() => void accept(f.id)} />
+          <Text style={styles.rowText}>{t('mobile.friendsPanel.wantsToBeYourFriend', { name: f.user.name, email: f.user.email })}</Text>
+          <Button label={t('friendsPanel.aceptar')} small primary busy={busy} onPress={() => void accept(f.id)} />
         </View>
       ))}
 
       <View style={styles.row}>
-        <TextInput value={email} onChangeText={setEmail} placeholder="correo del anfitrión o del jugador" placeholderTextColor={theme.colors.inkFaint} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" editable={!busy} onSubmitEditing={() => void search()} returnKeyType="search" style={styles.input} />
-        <Button label="Buscar" small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
+        <TextInput value={email} onChangeText={setEmail} placeholder={t('friendsPanel.correoDelAnfitrionO')} placeholderTextColor={theme.colors.inkFaint} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" editable={!busy} onSubmitEditing={() => void search()} returnKeyType="search" style={styles.input} />
+        <Button label={t('friendsPanel.buscar')} small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
       </View>
 
       {found && state ? (
         <View style={styles.found}>
           <Text style={styles.foundName}>{found.name}</Text>
           <Text style={styles.foundEmail}>{found.email}</Text>
-          {state.kind === 'none' ? <Button label="Enviar solicitud" primary busy={busy} onPress={() => void request(found.id)} /> : null}
-          {state.kind === 'requested' ? <Text style={styles.state}>Solicitud enviada; falta que acepte.</Text> : null}
-          {state.kind === 'received' ? <Button label="Aceptar su solicitud" primary busy={busy} onPress={() => void accept(state.friendship.id)} /> : null}
-          {state.kind === 'accepted' ? <Text style={styles.state}>Ya son amigos.</Text> : null}
+          {state.kind === 'none' ? <Button label={t('friendsPanel.enviarSolicitud')} primary busy={busy} onPress={() => void request(found.id)} /> : null}
+          {state.kind === 'requested' ? <Text style={styles.state}>{t('mobile.friendsPanel.requestSentWaiting')}</Text> : null}
+          {state.kind === 'received' ? <Button label={t('friendsPanel.aceptarSuSolicitud')} primary busy={busy} onPress={() => void accept(state.friendship.id)} /> : null}
+          {state.kind === 'accepted' ? <Text style={styles.state}>{t('mobile.friendsPanel.alreadyFriends')}</Text> : null}
         </View>
       ) : null}
 
@@ -130,7 +131,7 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
           ))}
         </View>
       ) : friendships !== null && pending.length === 0 ? (
-        <Text style={styles.hint}>Todavía no tienes amigos aquí.</Text>
+        <Text style={styles.hint}>{t('friendsPanel.todaviaNoTienesAmigos')}</Text>
       ) : null}
     </View>
   )

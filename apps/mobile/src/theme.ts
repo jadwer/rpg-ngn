@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { Cinzel_400Regular } from '@expo-google-fonts/cinzel/400Regular'
 import { Cinzel_700Bold } from '@expo-google-fonts/cinzel/700Bold'
 import { CrimsonPro_400Regular } from '@expo-google-fonts/crimson-pro/400Regular'
@@ -89,4 +90,6 @@ export const theme = {
 } as const
 
 /** Aviso que sustituye a la cita cuando la ficha esta velada (misma frase que apps/sheets en legacy). */
-export const VEIL_NOTE = 'Tu personaje no recuerda quién es. Elige por lo que ves: raza, clase y de qué es capaz. Lo demás lo descubres jugando.'
+export function veilNote(): string {
+  return t('sheetUi.veilNote')
+}

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, packPortraitUrl, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
@@ -142,7 +143,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
-      <PageHeader back="Mesas" onBack={onBack} />
+      <PageHeader back={t('play.tablesBack')} onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* El marco de Mesas: su fondo y un titulo grande (27-09). */}
@@ -150,30 +151,30 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
         <View style={styles.column}>
           <View style={styles.hero}>
             <Text style={styles.title} numberOfLines={2}>
-              {created ? created.name : 'Nueva mesa'}
+              {created ? created.name : t('newTable.nuevaMesa')}
             </Text>
-            <Text style={styles.subtitle}>{created ? 'La mesa ya existe' : 'Una historia nueva para tu grupo'}</Text>
+            <Text style={styles.subtitle}>{created ? t('mobile.newTableScreen.laMesaYaExiste') : t('mobile.newTableScreen.unaHistoriaNuevaPara')}</Text>
           </View>
 
           {created ? (
             <>
-              <Text style={styles.hint}>Invita a tus amigos ahora o después desde el mando del anfitrión; cuando quieras, entra y abre la sesión.</Text>
+              <Text style={styles.hint}>{t('mobile.newTableScreen.invitaATusAmigos')}</Text>
               <Panel>
                 <InvitePanel client={client} table={created} meId={user.id} pack={created.packId === pack.manifest.id ? pack : null} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
               </Panel>
-              <Panel title="Director de juego">
+              <Panel title={t('newTable.directorDeJuego')}>
                 <GmSettingsPanel client={client} table={created} onChanged={reloadCreated} onUnauthorized={onUnauthorized} />
               </Panel>
               <View style={styles.actions}>
-                <Button label="Ir a la mesa" primary onPress={() => onOpen(created)} />
+                <Button label={t('newTable.irALaMesa')} primary onPress={() => onOpen(created)} />
               </View>
             </>
           ) : (
             <>
-              <Panel title="La mesa">
-                <Field label="Nombre" value={name} onChangeText={setName} placeholder={tableNamePlaceholder(option)} maxLength={120} autoFocus />
+              <Panel title={t('newTable.laMesa')}>
+                <Field label={t('newTable.nombre')} value={name} onChangeText={setName} placeholder={tableNamePlaceholder(option)} maxLength={120} autoFocus />
               </Panel>
-              <Panel title="Qué van a jugar">
+              <Panel title={t('newTable.queVanAJugar')}>
                 {packs.length > 1 ? (
                   packs.map((p) => <WorldOption key={`${p.id}@${p.version}`} world={p} baseUrl={client.baseUrl} selected={packId === p.id} onSelect={() => setPackId(p.id)} />)
                 ) : (
@@ -181,32 +182,32 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
                 )}
                 {option?.tagline ? <Text style={styles.tagline}>{option.tagline}</Text> : packSummaryText(option) ? <Text style={styles.hint}>{packSummaryText(option)}</Text> : null}
               </Panel>
-              <Panel title="Tu personaje">
+              <Panel title={t('newTable.tuPersonaje')}>
                 {bundled ? (
                   <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
                 ) : remotePickables.length > 0 ? (
                   <CharacterPicker characters={remotePickables} value={characterId} onChange={setCharacterId} allowNone />
                 ) : (
-                  <Text style={styles.hint}>Cargando los personajes del pack...</Text>
+                  <Text style={styles.hint}>{t('newTable.cargandoLosPersonajesDel')}</Text>
                 )}
               </Panel>
               {presets.length > 0 ? (
-                <Panel title="Director de juego">
+                <Panel title={t('newTable.directorDeJuego')}>
                   {presets.map((p) => {
                     const parts = presetOptionParts(p, ownKeys.includes(p.name))
                     return <RadioRow key={p.name} label={parts.title} sub={parts.detail} selected={preset === p.name} onSelect={() => setPreset(p.name)} />
                   })}
-                  <Text style={styles.hint}>Se puede cambiar y probar después desde el mando del anfitrión.</Text>
+                  <Text style={styles.hint}>{t('newTable.sePuedeCambiarY')}</Text>
                 </Panel>
               ) : null}
-              <Panel title="Premisa">
+              <Panel title={t('newTable.premisa')}>
                 <TextInput value={premise} onChangeText={setPremise} placeholder={premisePlaceholder(option)} placeholderTextColor={theme.colors.inkFaint} multiline maxLength={2000} style={styles.premise} />
-                <Text style={styles.hint}>Opcional: el director de juego la usa como punto de partida.</Text>
+                <Text style={styles.hint}>{t('newTable.opcionalElDirectorDe')}</Text>
               </Panel>
               {error ? <Text style={styles.error}>{error}</Text> : null}
               <View style={styles.actions}>
-                <Button label="Crear mesa" primary busy={busy} disabled={!cleanName} onPress={() => void submit()} />
-                <Text style={styles.hint}>Después podrás probar el GM e invitar a tus amigos.</Text>
+                <Button label={t('mobile.newTableScreen.crearMesa')} primary busy={busy} disabled={!cleanName} onPress={() => void submit()} />
+                <Text style={styles.hint}>{t('mobile.newTableScreen.despuesPodrasProbarEl')}</Text>
               </View>
             </>
           )}

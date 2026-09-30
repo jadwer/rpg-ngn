@@ -1,4 +1,5 @@
 import { ApiError, type ApiClient, type CreditBalance, type CreditPack } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { balanceText, bucketText, buyablePacks, lowBalance, packName, packPrice, packValue, topUpUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Linking, StyleSheet, Text, View } from 'react-native'
@@ -40,7 +41,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
       },
       (caught: unknown) => {
         if (caught instanceof ApiError && caught.isUnauthorized) onUnauthorized()
-        else setError('No se pudo leer tu saldo.')
+        else setError(t('mobile.creditsPanel.balanceError'))
       },
     )
   }, [client, onUnauthorized])
@@ -52,14 +53,14 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
   return (
     <View style={styles.card}>
-      <SectionTitle>Tus créditos</SectionTitle>
+      <SectionTitle>{t('creditsPanel.tusCreditos')}</SectionTitle>
 
       {balance && !ownKey && bucketText(balance) ? <Text style={styles.hint}>{bucketText(balance)}</Text> : null}
-      {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>Cargando…</Text>}
+      {balance ? <Text style={lowBalance(balance, ownKey) ? styles.warn : styles.hint}>{balanceText(balance, ownKey)}</Text> : <Text style={styles.hint}>{t('creditsPanel.cargando')}</Text>}
 
       {venta.length > 0 ? (
         <>
-          <Text style={styles.hint}>Recargas desde la web, con la misma cuenta:</Text>
+          <Text style={styles.hint}>{t('mobile.creditsPanel.topUpFromWeb')}</Text>
           {venta.map((pack) => (
             <Text key={pack.id} style={styles.pack}>
               {packName(pack)}, {packPrice(pack)}: {packValue(pack)}
@@ -70,7 +71,7 @@ export function CreditsPanel({ client, serverUrl, onUnauthorized }: Props) {
 
       {url ? (
         <View style={styles.actions}>
-          <Button label="Recargar en la web" primary onPress={() => void Linking.openURL(url)} />
+          <Button label={t('mobile.creditsPanel.topUpOnWeb')} primary onPress={() => void Linking.openURL(url)} />
         </View>
       ) : null}
 

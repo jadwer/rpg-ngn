@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 
@@ -22,7 +23,7 @@ export function SheetHeader({ title, onClose, back }: { title: string; onClose?:
       <View style={[styles.side, styles.right]}>
         {onClose ? (
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button">
-            <Text style={styles.link}>Cerrar</Text>
+            <Text style={styles.link}>{t('common.close')}</Text>
           </Pressable>
         ) : null}
       </View>

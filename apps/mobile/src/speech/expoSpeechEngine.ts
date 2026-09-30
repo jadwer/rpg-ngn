@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { pitchFor, utteranceLanguage, voiceSample, type SpeechEngine, type VoiceSettings } from '@rpg-ngn/ui-logic'
 import * as Speech from 'expo-speech'
 import { Platform } from 'react-native'
@@ -29,7 +30,7 @@ export function createExpoSpeechEngine(options: ExpoSpeechOptions): SpeechEngine
         rate: settings.rate,
         pitch: pitchFor(item, settings),
         onDone,
-        onError: (error) => options.onError?.(error.message || 'el motor de voz falló'),
+        onError: (error) => options.onError?.(error.message || t('mobile.expoSpeechEngine.elMotorDeVoz')),
       })
     },
     stop() {

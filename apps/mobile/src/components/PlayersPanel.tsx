@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { SEAT_LABELS, type Seat } from '@rpg-ngn/ui-logic'
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
@@ -39,11 +40,11 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
   const ready = withCharacter.filter((s) => s.state === 'ready').length
   return (
     <>
-      <Panel title="En la mesa">
+      <Panel title={t('playersPanel.enLaMesa')}>
         {withCharacter.length > 0 ? (
           <View style={styles.summary}>
             <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
-            <Text style={styles.summaryText}>{`${ready}/${withCharacter.length} listos`}</Text>
+            <Text style={styles.summaryText}>{t('mobile.playersPanel.readyOfTotal', { ready, total: withCharacter.length })}</Text>
           </View>
         ) : null}
         {seats.map((seat, i) => {
@@ -56,8 +57,8 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
                   <Text style={styles.name} numberOfLines={1}>
                     {seat.name}
                   </Text>
-                  {seat.mine ? <Text style={styles.pill}>Tú</Text> : null}
-                  {seat.role === 'host' ? <Text style={styles.pill}>Anfitrión</Text> : null}
+                  {seat.mine ? <Text style={styles.pill}>{t('support.tu')}</Text> : null}
+                  {seat.role === 'host' ? <Text style={styles.pill}>{t('hostPanel.anfitrion')}</Text> : null}
                 </View>
                 <View style={styles.stateRow}>
                   <View style={[styles.dot, { backgroundColor: DOT[seat.state] }]} />
@@ -65,12 +66,12 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
                 </View>
                 {seat.mine && ownPresent !== null ? (
                   <Pressable onPress={onTogglePresence} disabled={busy} hitSlop={6}>
-                    <Text style={styles.action}>{ownPresent ? 'Me tengo que ir' : 'He vuelto'}</Text>
+                    <Text style={styles.action}>{ownPresent ? t('play.leave') : t('play.back')}</Text>
                   </Pressable>
                 ) : null}
                 {!seat.mine && isHost && seat.characterId ? (
                   <Pressable onPress={() => onPresence(seat.memberId, away)} disabled={busy} hitSlop={6}>
-                    <Text style={styles.action}>{away ? 'Marcar presente' : 'Marcar ausente'}</Text>
+                    <Text style={styles.action}>{away ? t('play.markPresent') : t('play.markAway')}</Text>
                   </Pressable>
                 ) : null}
               </View>

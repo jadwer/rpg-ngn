@@ -1,4 +1,5 @@
 import type { LoadedPack } from '@rpg-ngn/content'
+import { t } from '@rpg-ngn/i18n'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
@@ -57,7 +58,7 @@ function App() {
   if (error) {
     body = (
       <View style={styles.center}>
-        <Text style={styles.error}>{`No se pudo cargar la campaña.\n${error}`}</Text>
+        <Text style={styles.error}>{`${t('mobile.root.loadError')}\n${error}`}</Text>
       </View>
     )
   } else if (!fontsReady || !languageReady || !pack || (screen.name !== 'mode' && screen.name !== 'online' && !campaign)) {

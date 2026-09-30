@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { diceFaces, droppedFace, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
@@ -88,7 +89,7 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
       disabled={disabled}
       style={({ pressed }) => [styles.die, rolling && styles.rolling, disabled && styles.off, pressed && !rolling && styles.pressed]}
       accessibilityRole="button"
-      accessibilityLabel={`Tirar ${die}: mantén presionado y suelta`}
+      accessibilityLabel={t('play.rollAria', { die })}
     >
       <View style={styles.faces}>
         {faces.length > 0 ? (

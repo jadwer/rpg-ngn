@@ -57,7 +57,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
       setError(null)
     } catch (e) {
       if (e instanceof ApiError && e.isUnauthorized) return onUnauthorized()
-      setError(e instanceof ApiError ? e.message : 'No se pudo cargar el catálogo.')
+      setError(e instanceof ApiError ? e.message : t('play.catalogLoadFailed'))
     }
   }, [client, genre, q, onUnauthorized])
 
@@ -71,7 +71,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
     try {
       setDetail(await client.catalogWorld(world.id))
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'No se pudo abrir este mundo.')
+      setError(e instanceof ApiError ? e.message : t('play.worldOpenFailed'))
     } finally {
       setBusy(null)
     }
@@ -89,7 +89,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
         await load()
         if (detail?.id === world.id) setDetail(await client.catalogWorld(world.id))
       } catch (e) {
-        setError(e instanceof ApiError ? e.message : 'No se pudo añadir el mundo.')
+        setError(e instanceof ApiError ? e.message : t('play.worldAddFailed'))
       } finally {
         setBusy(null)
       }
@@ -106,7 +106,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
         <View style={[styles.header, { paddingTop: topInset + 8 }]}>
           <Pressable onPress={() => setDetail(null)} hitSlop={10} style={styles.back}>
             <Icon d={ICON.back} size={20} color={theme.colors.nebula} />
-            <Text style={styles.link}>Explorar</Text>
+            <Text style={styles.link}>{t('home.explorar')}</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.scroll}>
@@ -115,7 +115,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           {cover ? <Image source={{ uri: cover }} style={styles.detailCover} resizeMode="cover" /> : null}
           <Text style={styles.detailTitle}>{detail.name}</Text>
           <View style={styles.chips}>
-            {[detail.catalog.genre, `${playersTag(detail.catalog.players)} jugadores`, durationLabel(detail.catalog.duration)].map((c) => (
+            {[detail.catalog.genre, `${playersTag(detail.catalog.players)} ${t('explorePage.jugadores').toLowerCase()}`, durationLabel(detail.catalog.duration)].map((c) => (
               <Text key={c} style={styles.chip}>
                 {c}
               </Text>
@@ -125,7 +125,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           <View style={styles.row}>
             {view.action === 'jugar' || view.action === 'anadir' || view.action === 'comprar' ? (
               <Pressable onPress={() => void act(detail)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
-                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.action === 'comprar' ? 'Comprar en la web' : view.label}</Text>}
+                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.action === 'comprar' ? t('mobile.exploreScreen.comprarEnLaWeb') : view.label}</Text>}
               </Pressable>
             ) : null}
             {view.price ? <Text style={styles.price}>{view.price}</Text> : null}
@@ -144,7 +144,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
 
           {detail.playable.length ? (
             <>
-              <Text style={styles.h2}>Personajes jugables</Text>
+              <Text style={styles.h2}>{t('worldPage.personajesJugables')}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
                 {detail.playable.map((c) => (
                   <View key={c.id} style={styles.pj}>
@@ -158,13 +158,13 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           ) : null}
 
           <View style={styles.box}>
-            <Text style={styles.h2}>Qué incluye</Text>
-            <Text style={styles.item}>Escenario completo</Text>
-            <Text style={styles.item}>{`${detail.characters} personajes jugables con trasfondo`}</Text>
-            {detail.maps.length ? <Text style={styles.item}>{detail.maps.length === 1 ? `Mapa de ${detail.maps[0]!.name}` : `${detail.maps.length} mapas`}</Text> : null}
-            <Text style={styles.item}>{detail.sessions === 1 ? 'Una sesión con su misión' : `${detail.sessions} sesiones y misiones`}</Text>
-            <Text style={styles.item}>Director de juego por IA</Text>
-            <Text style={styles.meta}>{`Autor: ${detail.catalog.author}`}</Text>
+            <Text style={styles.h2}>{t('worldPage.queIncluye')}</Text>
+            <Text style={styles.item}>{t('worldPage.escenarioCompleto')}</Text>
+            <Text style={styles.item}>{t('mobile.exploreScreen.personajesJugablesConTrasfondo', { count: detail.characters })}</Text>
+            {detail.maps.length ? <Text style={styles.item}>{detail.maps.length === 1 ? t('mobile.exploreScreen.mapaDe', { name: detail.maps[0]!.name }) : t('mobile.exploreScreen.nMapas', { count: detail.maps.length })}</Text> : null}
+            <Text style={styles.item}>{detail.sessions === 1 ? t('play.oneSession') : t('play.sessionsN', { count: detail.sessions })}</Text>
+            <Text style={styles.item}>{t('worldPage.directorDeJuegoPor')}</Text>
+            <Text style={styles.meta}>{t('mobile.exploreScreen.autorNombre', { author: detail.catalog.author })}</Text>
           </View>
           </View>
         </ScrollView>
@@ -178,20 +178,20 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
         <LogoHorizontal height={28} color={theme.colors.ink} />
         <Pressable onPress={onMine} hitSlop={10} accessibilityRole="button">
-          <Text style={styles.link}>Mis mundos</Text>
+          <Text style={styles.link}>{t('myWorldsPage.misMundos')}</Text>
         </Pressable>
       </View>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* El mismo fondo que Mesas (Gabino, 26-09). */}
         <Backdrop />
         <View style={styles.list}>
-        <Text style={styles.title}>Mundos</Text>
-        <Text style={styles.subtitle}>Historias que existen porque tú las viviste</Text>
+        <Text style={styles.title}>{t('shell.nav.worlds')}</Text>
+        <Text style={styles.subtitle}>{`${t('explorePage.historiasQueExisten')} ${t('explorePage.porqueTuLasViviste')}`}</Text>
         {season && season.worlds.length > 0 ? (
           <View style={styles.season}>
             <View style={styles.seasonHead}>
               <Text style={styles.seasonName}>{season.name}</Text>
-              <Text style={styles.seasonChapters}>{`${season.chapters} ${season.chapters === 1 ? 'capítulo' : 'capítulos'}`}</Text>
+              <Text style={styles.seasonChapters}>{season.chapters === 1 ? t('worlds.chapterOne') : t('worlds.chapterMany', { count: season.chapters })}</Text>
             </View>
             <View style={styles.bar}>
               <View style={[styles.barFill, { width: `${Math.round(seasonProgress(season).progress * 100)}%` }]} />
@@ -202,7 +202,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
             </Pressable>
             {offer ? (
               <View style={styles.pass}>
-                <Text style={styles.passTitle}>Pase de temporada</Text>
+                <Text style={styles.passTitle}>{t('explorePage.paseDeTemporada')}</Text>
                 <Text style={styles.meta}>{offer.perks.join('  ·  ')}</Text>
                 {offer.owned ? (
                   <Text style={styles.seasonChapters}>{offer.label}</Text>
@@ -210,7 +210,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
                   <>
                     <Text style={styles.passPrice}>{offer.priceLine}</Text>
                     <Pressable onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar`)} accessibilityRole="button">
-                      <Text style={styles.link}>Comprar en la web</Text>
+                      <Text style={styles.link}>{t('mobile.exploreScreen.comprarEnLaWeb')}</Text>
                     </Pressable>
                   </>
                 )}
@@ -220,19 +220,19 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
         ) : null}
         <View style={styles.search}>
           <Icon d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm9 3-4-4" size={18} color={theme.colors.inkDim} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar mundos…" placeholderTextColor={theme.colors.inkFaint} style={styles.searchInput} />
+          <TextInput value={q} onChangeText={setQ} placeholder={t('explorePage.buscarMundos')} placeholderTextColor={theme.colors.inkFaint} style={styles.searchInput} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
           {[null, ...genres].map((g) => (
             <Pressable key={g ?? 'todos'} onPress={() => setGenre(g)} style={[styles.filter, genre === g && styles.filterOn]}>
-              <Text style={[styles.filterText, genre === g && styles.filterTextOn]}>{g ?? 'Todos'}</Text>
+              <Text style={[styles.filterText, genre === g && styles.filterTextOn]}>{g ?? t('mobile.exploreScreen.todos')}</Text>
             </Pressable>
           ))}
         </ScrollView>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {worlds === null ? <ActivityIndicator color={theme.colors.accentBright} /> : null}
-        {worlds?.length === 0 ? <Text style={styles.meta}>Ningún mundo coincide.</Text> : null}
+        {worlds?.length === 0 ? <Text style={styles.meta}>{t('mobile.exploreScreen.ningunMundoCoincide')}</Text> : null}
 
         <View style={styles.grid}>
           {worlds?.map((world) => {

@@ -1,4 +1,5 @@
 import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { retirementText, tableRetirement } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
@@ -49,7 +50,7 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
   if (!open) {
     return (
       <Pressable onPress={() => setOpen(true)} hitSlop={8} style={styles.abrir}>
-        <Text style={styles.abrirTexto}>{retirement.archived ? 'Recuperar' : 'Retirar'}</Text>
+        <Text style={styles.abrirTexto}>{retirement.archived ? t('play.restore') : t('play.retire')}</Text>
       </Pressable>
     )
   }
@@ -61,9 +62,9 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
 
       <View style={styles.row}>
         {retirement.canArchive ? <Button label={texto.archive} small busy={busy} onPress={() => void act(() => client.archiveTable(table.id, !retirement.archived))} /> : null}
-        {retirement.canLeave ? <Button label="Salir de la mesa" small busy={busy} onPress={() => void act(() => client.leaveTable(table.id))} /> : null}
+        {retirement.canLeave ? <Button label={t('retireTable.salirDeLaMesa')} small busy={busy} onPress={() => void act(() => client.leaveTable(table.id))} /> : null}
         <Button
-          label="Cancelar"
+          label={t('retireTable.cancelar')}
           small
           disabled={busy}
           onPress={() => {
@@ -78,11 +79,11 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
           {confirmando ? (
             <>
               <Text style={styles.hint}>{retirement.deleteWarning}</Text>
-              <Button label="Sí, borrar" small busy={busy} onPress={() => void act(() => client.deleteTable(table.id))} />
+              <Button label={t('retireTable.siBorrar')} small busy={busy} onPress={() => void act(() => client.deleteTable(table.id))} />
             </>
           ) : (
             <Pressable onPress={() => setConfirmando(true)} hitSlop={8} disabled={busy}>
-              <Text style={styles.borrarTexto}>Borrar del todo</Text>
+              <Text style={styles.borrarTexto}>{t('retireTable.borrarDelTodo')}</Text>
             </Pressable>
           )}
         </View>

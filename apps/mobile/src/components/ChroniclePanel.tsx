@@ -1,4 +1,5 @@
 import type { ApiClient, ChronicleShare } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { chronicleStatus, chronicleUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { Share, StyleSheet, Switch, Text, View } from 'react-native'
@@ -47,7 +48,7 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
     }
   }
 
-  if (!loaded) return <Text style={styles.hint}>Cargando...</Text>
+  if (!loaded) return <Text style={styles.hint}>{t('chroniclePanel.cargando')}</Text>
   const status = chronicleStatus(share)
   const url = share ? chronicleUrl(webOrigin, share.token) : null
 
@@ -58,16 +59,16 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
         <>
           <View style={styles.row}>
             <Switch value={anonymize} onValueChange={setAnonymize} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} />
-            <Text style={styles.text}>Sin los nombres de quienes jugamos</Text>
+            <Text style={styles.text}>{t('chroniclePanel.sinLosNombresDe')}</Text>
           </View>
-          <Button label="Pedir compartir la historia" small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize }))} />
+          <Button label={t('chroniclePanel.pedirCompartirLaHistoria')} small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize }))} />
         </>
       ) : null}
-      {share && status.canConsent ? <Button label="Acepto que se comparta" small primary busy={busy} onPress={() => void act(() => client.consentChronicle(tableId))} /> : null}
-      {share && url ? <Button label="Compartir el enlace" small onPress={() => void Share.share({ message: url })} /> : null}
+      {share && status.canConsent ? <Button label={t('chroniclePanel.aceptoQueSeComparta')} small primary busy={busy} onPress={() => void act(() => client.consentChronicle(tableId))} /> : null}
+      {share && url ? <Button label={t('mobile.chroniclePanel.shareLink')} small onPress={() => void Share.share({ message: url })} /> : null}
       {share ? (
         <Button
-          label="Retirar el enlace"
+          label={t('chroniclePanel.retirarElEnlace')}
           small
           danger
           busy={busy}

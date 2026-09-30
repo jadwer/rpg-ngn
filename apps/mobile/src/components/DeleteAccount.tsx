@@ -1,4 +1,5 @@
 import type { ApiClient } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -57,26 +58,26 @@ export function DeleteAccount({ client, onDeleted }: Props) {
 
   return (
     <View style={styles.card}>
-      <SectionTitle>Borrar mi cuenta</SectionTitle>
+      <SectionTitle>{t('deleteAccount.borrarMiCuenta')}</SectionTitle>
 
       {!open ? (
         <>
-          <Text style={styles.hint}>Puedes borrar tu cuenta cuando quieras. Lo que escribiste en las partidas se conserva sin tu nombre, porque también es de quienes jugaron contigo.</Text>
+          <Text style={styles.hint}>{t('mobile.deleteAccount.canDeleteAnytime')}</Text>
           <View style={styles.actions}>
-            <Button label="Quiero borrar mi cuenta" small onPress={() => setOpen(true)} />
+            <Button label={t('deleteAccount.quieroBorrarMiCuenta')} small onPress={() => setOpen(true)} />
           </View>
         </>
       ) : (
         <>
-          {preview === null ? <Text style={styles.hint}>Comprobando...</Text> : null}
+          {preview === null ? <Text style={styles.hint}>{t('deleteAccount.comprobando')}</Text> : null}
 
           {mesas.length > 0 ? (
             <>
-              <Text style={styles.hint}>Antes tienes que retirar las mesas donde eres anfitrión, para no dejarlas sin quien abra las sesiones:</Text>
+              <Text style={styles.hint}>{t('deleteAccount.antesTienesQueRetirar')}</Text>
               {mesas.map((m) => (
                 <Text key={m.id} style={styles.mesa}>
                   {m.name}
-                  {m.played ? ' (jugada: archívala)' : ' (sin jugar: puedes borrarla)'}
+                  {m.played ? t('deleteAccount.jugadaArchivala') : t('deleteAccount.sinJugarPuedesBorrarla')}
                 </Text>
               ))}
             </>
@@ -84,17 +85,17 @@ export function DeleteAccount({ client, onDeleted }: Props) {
 
           {preview?.canDelete ? (
             <>
-              <Text style={styles.aviso}>Esto no se puede deshacer. Desaparecen tu nombre, tu correo y tus créditos sin usar. Lo que escribiste en tus partidas se queda, sin tu nombre.</Text>
-              <Field label="Escribe tu contraseña para confirmar" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" />
+              <Text style={styles.aviso}>{`${t('deleteAccount.estoNoSePuede')} ${t('deleteAccount.desaparecenTuNombreTu')}`}</Text>
+              <Field label={t('deleteAccount.escribeTuContrasenaPara')} value={password} onChangeText={setPassword} secureTextEntry textContentType="password" />
             </>
           ) : null}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <View style={styles.row}>
-            {preview?.canDelete ? <Button label="Borrar mi cuenta para siempre" primary busy={busy} disabled={password.length === 0} onPress={() => void submit()} /> : null}
+            {preview?.canDelete ? <Button label={t('mobile.deleteAccount.deleteForever')} primary busy={busy} disabled={password.length === 0} onPress={() => void submit()} /> : null}
             <Button
-              label="Cancelar"
+              label={t('deleteAccount.cancelar')}
               small
               disabled={busy}
               onPress={() => {

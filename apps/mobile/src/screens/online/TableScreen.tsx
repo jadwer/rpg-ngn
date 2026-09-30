@@ -242,13 +242,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const rollTurnId = turn?.id ?? null
   // "Otras" ideas: las nuevas sustituyen a las del turno en el servidor; el sondeo las confirma.
   const moreIdeas = useCallback(async () => {
-    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    if (rollTurnId === null) throw new Error(t('table.turn.none'))
     const { options } = await client.moreIdeas(rollTurnId)
     refresh()
     return options
   }, [client, rollTurnId, refresh])
   const rollRequested = useCallback(async () => {
-    if (rollTurnId === null) throw new Error('No hay turno abierto.')
+    if (rollTurnId === null) throw new Error(t('table.turn.none'))
     const receipt = await client.rollRequested(rollTurnId)
     return { result: receipt.result, rolls: receipt.rolls }
   }, [client, rollTurnId])
@@ -392,7 +392,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   useEffect(() => {
     const current = narratorRef.current
     current.setSomeoneNarrating(narratorsToFlag(narrators, ownMemberId, current.flag).someoneNarrating)
-    current.setLabel(narratorLabel(narrators, ownMemberId, nameOf, 'teléfono'))
+    current.setLabel(narratorLabel(narrators, ownMemberId, nameOf, t('table.voice.phone')))
   }, [narrators, ownMemberId, nameOf])
 
   // El momento del mundo vive en la proyeccion world; se refresca cuando avanza la campaña.
@@ -457,12 +457,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     }
   }
 
-  const respond = (text: string) => (turn ? act(() => client.respond(turn.id, text, idempotencyKey).then(() => undefined), 'No se pudo enviar la respuesta.') : Promise.resolve(false))
+  const respond = (text: string) => (turn ? act(() => client.respond(turn.id, text, idempotencyKey).then(() => undefined), t('play.sendFailed')) : Promise.resolve(false))
   const closeTurn = (force: boolean) => {
-    if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), 'No se pudo cerrar el turno.')
+    if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), t('play.closeFailed'))
   }
   const holdTurn = (held: boolean) => {
-    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), 'No se pudo cambiar la espera.')
+    if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), t('play.holdFailed'))
   }
   // Al llegar a cero se cierra una vez; si otro cliente llego antes, el 409 refresca.
   const autoClosedRef = useRef<number | null>(null)
@@ -475,12 +475,12 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     closeTurnRef.current(false)
   }, [cd.active, cd.remaining, turn, busy])
   const openSession = (code: string, note: string | null) => {
-    if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), 'No se pudo abrir la sesión.')
+    if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), t('play.openSessionFailed'))
   }
   const closeSession = (cliffhanger: string | null) => {
     const session = snapshot?.session
     if (!session) return
-    void act(() => client.closeSession(session.id, cliffhanger ?? undefined).then(() => undefined), 'No se pudo cerrar la sesión.')
+    void act(() => client.closeSession(session.id, cliffhanger ?? undefined).then(() => undefined), t('play.closeSessionFailed'))
   }
 
   /** Estado vivo: la ficha propia desde player:<id>, las ajenas desde world. */
@@ -526,8 +526,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   )
 
   const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingSessions), [pack, existingSessions])
-  const connectionNotice = connection === 'offline' ? 'Sin conexión con el servidor; reintentando...' : error
-  const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? `Sesión ${snapshot.session.code}`) : null
+  const connectionNotice = connection === 'offline' ? t('play.offline') : error
+  const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
   const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
   const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingSessions.length === 0, dice: diceModeOf(table.settings) }) : null
@@ -552,7 +552,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       await client.setPresence(table.id, memberId, present)
       onTableChanged()
       refresh()
-    }, 'No se pudo cambiar la presencia.')
+    }, t('play.presenceFailed'))
   }
   const heroPath = maps[0] ? packMapUrl(table.packId, maps[0].image) : null
   const heroImage = heroPath ? `${client.baseUrl}${heroPath}` : null
@@ -561,7 +561,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <View style={[styles.header, screen && styles.hidden]}>
-        <Pressable onPress={onBack} hitSlop={12} style={styles.headerSide} accessibilityRole="button" accessibilityLabel="Volver a tus mesas">
+        <Pressable onPress={onBack} hitSlop={12} style={styles.headerSide} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.volverATusMesas')}>
           <Icon d={ICON.back} size={22} color={theme.colors.inkDim} />
         </Pressable>
         <View style={styles.titles}>
@@ -570,10 +570,10 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           </View>
           <View style={styles.titleText}>
             <Text style={styles.title} numberOfLines={1}>
-              {turn ? `Turno ${turn.number}` : table.name}
+              {turn ? t('mobile.tableScreen.turnoNumero', { number: turn.number }) : table.name}
             </Text>
             <Text style={styles.subtitle} numberOfLines={1}>
-              {turn ? (progress.narrating ? 'El director narra' : progress.complete ? 'Todos respondieron' : 'Fase de acciones') : subtitle}
+              {turn ? (progress.narrating ? t('mobile.tableScreen.elDirectorNarraCap') : progress.complete ? t('mobile.tableScreen.todosRespondieronCap') : t('mobile.tableScreen.faseDeAccionesCap')) : subtitle}
             </Text>
           </View>
         </View>
@@ -587,7 +587,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           hitSlop={12}
           style={[styles.headerSide, styles.headerRight]}
           accessibilityRole="button"
-          accessibilityLabel={tts.state.status === 'speaking' ? 'Pausar la narración' : tts.state.status === 'paused' ? 'Seguir la narración' : 'Escuchar la narración'}
+          accessibilityLabel={tts.state.status === 'speaking' ? t('play.pauseNarration') : tts.state.status === 'paused' ? t('play.resumeNarration') : t('play.listen')}
         >
           <Icon d={tts.state.status === 'speaking' ? ICON.pause : tts.state.status === 'paused' ? ICON.play : ICON.speak} size={22} color={tts.state.status === 'speaking' || tts.state.status === 'paused' ? theme.colors.nebula : theme.colors.inkDim} />
         </Pressable>
@@ -599,16 +599,16 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       <View style={styles.body}>
         {sceneUri ? (
           <>
-            <Image source={{ uri: sceneUri }} style={styles.sceneBackdrop} resizeMode="cover" accessibilityLabel={sceneImage?.alt ?? 'Escena'} />
+            <Image source={{ uri: sceneUri }} style={styles.sceneBackdrop} resizeMode="cover" accessibilityLabel={sceneImage?.alt ?? t('tableScreen.escena')} />
             {turn ? (
               <View style={styles.scenePill}>
-                <Text style={styles.scenePillText}>{`Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}`}</Text>
+                <Text style={styles.scenePillText}>{`${t('mobile.tableScreen.turnoNumero', { number: turn.number })} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}`}</Text>
               </View>
             ) : null}
           </>
         ) : null}
         {sceneUri ? (
-          <View {...veilDrag.panHandlers} style={[styles.veilHandle, { top: veilTop - 20 }]} accessibilityLabel="Arrastra para ver más escena o más texto" accessibilityRole="adjustable">
+          <View {...veilDrag.panHandlers} style={[styles.veilHandle, { top: veilTop - 20 }]} accessibilityLabel={t('tableScreen.arrastraParaVerMas')} accessibilityRole="adjustable">
             <View style={styles.veilGrip} />
           </View>
         ) : null}
@@ -628,9 +628,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           {sceneUri ? null : <SceneHero
             image={heroImage}
             kicker={packName ?? table.name}
-            title={sessionTitle ?? (snapshot?.session ? table.name : 'Sin sesión abierta')}
+            title={sessionTitle ?? (snapshot?.session ? table.name : t('play.noSession'))}
             when={worldTime}
-            pill={turn ? `Turno ${turn.number} · ${progress.narrating ? 'el director narra' : progress.complete ? 'todos respondieron' : 'fase de acciones'}` : null}
+            pill={turn ? `${t('mobile.tableScreen.turnoNumero', { number: turn.number })} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}` : null}
           />}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} />
@@ -642,35 +642,35 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
                 <Text key={step} style={styles.startStep}>{`${i + 1}. ${step}`}</Text>
               ))}
               {start.action ? <Button label={start.action} primary busy={busy} onPress={() => openSession(suggestedCode, null)} /> : null}
-              {start.action ? <Text style={styles.startHint}>Para otro código o una nota al GM, usa el mando del anfitrión de abajo.</Text> : null}
+              {start.action ? <Text style={styles.startHint}>{t('mobile.tableScreen.paraOtroCodigo')}</Text> : null}
             </View>
           ) : null}
           {progress.narrating ? (
             <View style={styles.narrating}>
-              <Text style={styles.narratingKicker}>EL DESTINO SE PREPARA</Text>
+              <Text style={styles.narratingKicker}>{t('mobile.tableScreen.elDestinoSePrepara')}</Text>
               <View style={styles.dots}>
                 {[0, 1, 2].map((i) => (
                   <View key={i} style={[styles.dot, { opacity: (Math.floor(now / 400) % 3) === i ? 1 : 0.35 }]} />
                 ))}
               </View>
-              <Text style={styles.narratingText}>{waiting ?? 'La mesa está jugando.'}</Text>
+              <Text style={styles.narratingText}>{waiting ?? t('mobile.tableScreen.laMesaEstaJugando')}</Text>
             </View>
           ) : null}
         </ScrollView>
         {behind ? (
           <View style={styles.jump}>
-            <Button label="Bajar a lo nuevo" primary small onPress={scrollToEnd} />
+            <Button label={t('tableScreen.bajarALoNuevo')} primary small onPress={scrollToEnd} />
           </View>
         ) : null}
       </View>
 
       {viewer.characterId === null && snapshot !== null ? (
         <View style={styles.choose}>
-          <Text style={styles.chooseLabel}>Elige tu personaje</Text>
-          <Text style={styles.chooseHint}>Los que ya juega alguien no se pueden elegir: el primero que llega se lo queda. Sin personaje puedes leer, pero no responder.</Text>
-          {pack || remote.length > 0 ? <CharacterPicker characters={freeToPick} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} /> : <Text style={styles.chooseHint}>Cargando los personajes del pack...</Text>}
+          <Text style={styles.chooseLabel}>{t('tableScreen.eligeTuPersonaje')}</Text>
+          <Text style={styles.chooseHint}>{t('tableScreen.losQueYaJuega')}</Text>
+          {pack || remote.length > 0 ? <CharacterPicker characters={freeToPick} taken={takenCharacters(table.members)} value={choosing} onChange={setChoosing} /> : <Text style={styles.chooseHint}>{t('tableScreen.cargandoLosPersonajesDel')}</Text>}
           <Button
-            label="Jugar con este personaje"
+            label={t('tableScreen.jugarConEstePersonaje')}
             primary
             busy={busy}
             disabled={!choosing}
@@ -680,15 +680,15 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
                 await client.setOwnerCharacter(table.id, user.id, choosing)
                 onTableChanged()
                 refresh()
-              }, 'No se pudo elegir el personaje.')
+              }, t('play.pickFailed'))
             }}
           />
         </View>
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       {screen ? (
-        <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel="Salir de la pantalla de lectura">
-          <Text style={styles.screenExitText}>Salir de pantalla</Text>
+        <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
+          <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>
         </Pressable>
       ) : null}
       {screen ? null : <TurnPanel turn={turn} progress={progress} nameOf={nameOf} busy={busy} notice={notice} outOfTurns={outOfTurnsText(snapshot?.quota ?? null, isHost)} hasCharacter={viewer.characterId !== null} diceMode={diceModeOf(table.settings)} countdown={cd} seatsLine={seatsLine} onRespond={respond} onClose={closeTurn} onHold={holdTurn} onTyping={notifyTyping} onFocusInput={scrollToEnd} fortunePending={snapshot?.fortune?.pending ?? false} onFortune={rollFortune} onRoll={rollRequested} onRolled={refresh} suggestions={snapshot?.suggestions ?? EMPTY_IDEAS} ideas={snapshot?.ideas ?? NO_IDEAS} onMoreIdeas={moreIdeas} autoOpen={readToEnd && !progress.narrating && tts.state.status !== 'speaking'} onComposingChange={setComposing} />}
@@ -712,7 +712,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           }}
         />
       ) : null}
-      <GameSheet visible={panel === 'players'} title="Jugadores" onClose={() => setPanel(null)}>
+      <GameSheet visible={panel === 'players'} title={t('play.barPlayers')} onClose={() => setPanel(null)}>
         <PlayersPanel
           seats={seatList}
           portraitOf={portraitOf}
@@ -734,33 +734,33 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         />
       </GameSheet>
       {isHost ? (
-        <GameSheet visible={panel === 'host'} title="Anfitrión" onClose={() => setPanel(null)}>
+        <GameSheet visible={panel === 'host'} title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)}>
                 <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
         </GameSheet>
       ) : null}
-      <GameSheet visible={panel === 'reading'} title="Lectura" onClose={() => setPanel(null)}>
-        <Panel title="Vista">
+      <GameSheet visible={panel === 'reading'} title={t('tableScreen.lectura')} onClose={() => setPanel(null)}>
+        <Panel title={t('tableScreen.vista')}>
           <View style={styles.segmented}>
-            <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
-            <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
+            <Segment label={t('tableScreen.narrativa')} active={mode === 'narrative'} onPress={() => setMode('narrative')} />
+            <Segment label={t('tableScreen.dialogo')} active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
           </View>
         </Panel>
-        <Panel title="Voz">
+        <Panel title={t('tableScreen.voz')}>
           <TtsBar tts={tts} autoRead collapsible={false} />
         </Panel>
-        <Panel title="Compartir la historia">
+        <Panel title={t('tableScreen.compartirLaHistoria')}>
           <ChroniclePanel client={client} tableId={table.id} webOrigin={webOriginOf(client.baseUrl)} />
         </Panel>
-        <Panel title="Pantalla">
+        <Panel title={t('tableScreen.pantalla')}>
           <Button
-            label="Pantalla de lectura"
+            label={t('mobile.tableScreen.pantallaDeLectura')}
             small
             onPress={() => {
               setPanel(null)
               setScreen(true)
             }}
           />
-          <Text style={styles.screenHint}>Solo la historia, en grande, sin controles: para leer de lejos o proyectar.</Text>
+          <Text style={styles.screenHint}>{t('mobile.tableScreen.soloLaHistoriaSinControles')}</Text>
         </Panel>
         <Panel title={t('support.soporte')}>
           <Button
@@ -775,7 +775,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       </GameSheet>
       <SupportSheet client={client} view={support} onView={setSupport} table={{ tableId: table.id, turnId }} screen={`/mesas/${table.id}`} onUnauthorized={onUnauthorized} />
 
-      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : absolutePortrait}
+      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? t('play.liveState', { seq: projections.seq }) : t('play.packSheets')} portraitUriOf={pack ? undefined : absolutePortrait}
         persona={
           wantsPersona && viewer.characterId !== null && snapshot !== null ? (
             <PersonaPanel
@@ -786,7 +786,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             act(async () => {
               await client.setPersona(table.id, ownMember.id, persona)
               refresh()
-            }, 'No se pudo guardar la personalidad.')
+            }, t('play.personaFailed'))
           }
         />
           ) : undefined

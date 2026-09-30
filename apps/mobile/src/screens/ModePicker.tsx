@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
+import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -61,11 +62,13 @@ function useCatalog(): Live | null {
 
 const HERO: ImageSourcePropType = require('../../assets/hero-movil.webp')
 // Respaldo sin conexion (el Inicio tambien es la puerta a leer sin red).
-const WORLDS: Array<{ image: ImageSourcePropType; title: string; tags: string[] }> = [
-  { image: require('../../assets/mundo-valdoria.webp'), title: 'Fantasía medieval', tags: ['Aventura', 'Dados'] },
-  { image: require('../../assets/mundo-boticaria.webp'), title: 'China antigua', tags: ['Intriga', 'Misterio'] },
-  { image: require('../../assets/mundo-mascarada.webp'), title: 'Romance', tags: ['Drama', 'Social'] },
-]
+function offlineWorlds(): Array<{ image: ImageSourcePropType; title: string; tags: string[] }> {
+  return [
+    { image: require('../../assets/mundo-valdoria.webp'), title: t('mobile.modePicker.fantasiaMedieval'), tags: [t('mobile.modePicker.aventura'), t('mobile.modePicker.dados')] },
+    { image: require('../../assets/mundo-boticaria.webp'), title: t('mobile.modePicker.chinaAntigua'), tags: [t('mobile.modePicker.intriga'), t('mobile.modePicker.misterio')] },
+    { image: require('../../assets/mundo-mascarada.webp'), title: t('mobile.modePicker.romance'), tags: [t('mobile.modePicker.drama'), t('mobile.modePicker.social')] },
+  ]
+}
 
 /** Degradado de las tarjetas: transparente arriba, casi negro donde va el texto. */
 const VELO = ['rgba(11, 15, 20, 0)', 'rgba(11, 15, 20, 0.55)', 'rgba(11, 15, 20, 0.92)'] as const
@@ -87,6 +90,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
   const destacados = (live?.worlds ?? []).slice(0, FILA)
   const pase = passView(live?.pass ?? null)
   const names = Object.fromEntries((live?.worlds ?? []).map((w) => [w.id, w.name]))
+  const worlds = offlineWorlds()
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -101,31 +105,31 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             <LogoVertical height={190} color="#f1f0fb" />
             <Text style={styles.motto}>WORLDS BORN FROM IMAGINATION</Text>
           </View>
-          <Text style={styles.phrase}>Tu imaginación también es un mundo.</Text>
+          <Text style={styles.phrase}>{t('home.tuImaginacionTambienEs')}</Text>
           <Pressable onPress={onOnline} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
-            <Text style={styles.ctaText}>COMIENZA TU HISTORIA →</Text>
+            <Text style={styles.ctaText}>{t('mobile.modePicker.comienzaTuHistoria')}</Text>
           </Pressable>
         </ImageBackground>
 
         {/* En tablet el contenido se centra con un ancho maximo; el hero y el carrusel van a todo lo ancho. */}
         <View style={styles.column}>
           <View style={styles.section}>
-            <Text style={styles.h2}>Un motor.{'\n'}Infinitos mundos.</Text>
-            <Text style={styles.body}>Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un director de juego que no se cansa. Tú decides el mundo.</Text>
+            <Text style={styles.h2}>{t('mobile.modePicker.unMotor')}{'\n'}{t('mobile.modePicker.infinitosMundos')}</Text>
+            <Text style={styles.body}>{t('mobile.modePicker.exploraCreaYVive')}</Text>
             <View style={styles.row}>
               <Pressable onPress={onOnline} style={({ pressed }) => [styles.btnPrimary, pressed && styles.pressed]} accessibilityRole="button">
-                <Text style={styles.btnPrimaryText}>Explorar mundos</Text>
+                <Text style={styles.btnPrimaryText}>{t('shell.nav.exploreWorlds')}</Text>
               </Pressable>
               <Pressable onPress={onOffline} style={({ pressed }) => [styles.btnOutline, pressed && styles.pressed]} accessibilityRole="button">
-                <Text style={styles.btnOutlineText}>Leer sin conexión</Text>
+                <Text style={styles.btnOutlineText}>{t('mobile.modePicker.leerSinConexion')}</Text>
               </Pressable>
             </View>
           </View>
 
           <View style={styles.sectionHead}>
-            <Text style={styles.h3}>MUNDOS DESTACADOS</Text>
+            <Text style={styles.h3}>{t('mobile.modePicker.mundosDestacadosMayus')}</Text>
             <Pressable onPress={() => onTab('mundos')} hitSlop={8}>
-              <Text style={styles.seeAll}>Ver todos →</Text>
+              <Text style={styles.seeAll}>{t('mobile.modePicker.verTodos')}</Text>
             </Pressable>
           </View>
         </View>
@@ -137,7 +141,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
                 const cover = packArtUrl(w.id, w.catalog.cover)
                 return (
                   <Pressable key={w.id} onPress={() => onTab('mundos')} style={styles.world} accessibilityRole="button" accessibilityLabel={w.name}>
-                    <ImageBackground source={cover ? { uri: `${live.base}${cover}` } : WORLDS[0]!.image} style={styles.worldImage} resizeMode="cover">
+                    <ImageBackground source={cover ? { uri: `${live.base}${cover}` } : worlds[0]!.image} style={styles.worldImage} resizeMode="cover">
                       {/* Degradado real abajo: el texto sobre la portada se perdia y el velo por escalones marcaba una linea (Gabino, 26-09). */}
                       <LinearGradient colors={VELO} locations={[0.3, 0.55, 0.85]} style={styles.worldLive}>
                         <Text style={styles.worldKicker}>{w.catalog.genre}</Text>
@@ -148,7 +152,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
                   </Pressable>
                 )
               })
-            : WORLDS.map((w) => (
+            : worlds.map((w) => (
                 <Pressable key={w.title} onPress={onOnline} style={styles.world} accessibilityRole="button">
                   <ImageBackground source={w.image} style={styles.worldImage} resizeMode="cover">
                     <LinearGradient colors={VELO} locations={[0.3, 0.55, 0.85]} style={styles.worldLive}>
@@ -167,8 +171,8 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
           {live && destacados.length < FILA ? (
             <View style={[styles.world, styles.proximo]}>
               <Isotipo height={40} color={theme.colors.inkFaint} />
-              <Text style={styles.worldKicker}>Próximamente</Text>
-              <Text style={styles.proximoText}>Un mundo nuevo se está escribiendo.</Text>
+              <Text style={styles.worldKicker}>{t('catalogHome.proximamente')}</Text>
+              <Text style={styles.proximoText}>{t('mobile.modePicker.unMundoNuevoSeEsta')}</Text>
             </View>
           ) : null}
         </ScrollView>
@@ -178,23 +182,23 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
             <Pressable onPress={() => onTab('mundos')} style={styles.season} accessibilityRole="button">
               <View style={styles.seasonHead}>
                 <Text style={styles.seasonKicker}>{live.season.name}</Text>
-                {live.season.chapters > 0 ? <Text style={styles.seasonChapters}>{`${live.season.chapters} ${live.season.chapters === 1 ? 'capítulo' : 'capítulos'}`}</Text> : null}
+                {live.season.chapters > 0 ? <Text style={styles.seasonChapters}>{live.season.chapters === 1 ? t('worlds.chapterOne') : t('worlds.chapterMany', { count: live.season.chapters })}</Text> : null}
               </View>
-              <Text style={styles.seasonTitle}>Caminos que se abren jugando</Text>
-              <Text style={styles.body}>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</Text>
+              <Text style={styles.seasonTitle}>{t('mobile.modePicker.caminosQueSeAbrenJugando')}</Text>
+              <Text style={styles.body}>{t('catalogHome.cadaTurnoQueJuegas')}</Text>
               <Text style={styles.seasonPath}>
                 {seasonPathLine(live.season.worlds, names)}
               </Text>
               {pase ? (
                 <View style={styles.pass}>
-                  <Text style={styles.passTitle}>Pase de temporada · Capítulos x2</Text>
+                  <Text style={styles.passTitle}>{`${t('catalogHome.paseDeTemporada')} · ${t('catalogHome.capitulosX2')}`}</Text>
                   <Text style={styles.passPrice}>{pase.priceLine}</Text>
                 </View>
               ) : null}
             </Pressable>
           ) : null}
 
-          <Text style={styles.offline}>{`Sin conexión puedes leer ${packName}: sus sesiones, fichas y reglas.`}</Text>
+          <Text style={styles.offline}>{t('mobile.modePicker.sinConexionPuedesLeer', { packName })}</Text>
         </View>
       </ScrollView>
       <BottomNav active="inicio" onSelect={onTab} />

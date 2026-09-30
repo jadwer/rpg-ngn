@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { cleanPersona, PERSONA_MAX, personaTemplate } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -33,13 +34,13 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
   return (
     <View style={styles.wrap}>
       <Pressable onPress={() => setExpanded((v) => !v)} style={styles.head} accessibilityRole="button" accessibilityState={{ expanded }}>
-        <Text style={styles.title}>{`Tu personaje: ${characterName}`}</Text>
-        <Text style={styles.state}>{saved ? 'Personalidad escrita' : 'Escribe cómo es'}</Text>
-        <Text style={styles.toggle}>{expanded ? 'ocultar' : 'mostrar'}</Text>
+        <Text style={styles.title}>{t('personaPanel.tuPersonajeNombre', { name: characterName })}</Text>
+        <Text style={styles.state}>{saved ? t('play.personaWritten') : t('play.personaWrite')}</Text>
+        <Text style={styles.toggle}>{expanded ? t('personaPanel.ocultar') : t('personaPanel.mostrar')}</Text>
       </Pressable>
       {expanded ? (
         <View style={styles.body}>
-          <Text style={styles.hint}>El pack pone el arquetipo; quién es lo decides tú. Solo lo ven tú y el GM. Responde a lo que quieras de esto:</Text>
+          <Text style={styles.hint}>{t('mobile.personaPanel.elPackPoneElArquetipo')}</Text>
           <TextInput
             value={text}
             onChangeText={(v) => {
@@ -56,7 +57,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
           />
           <View style={styles.row}>
             <Button
-              label="Guardar"
+              label={t('personaPanel.guardar')}
               primary
               small
               busy={busy}
@@ -70,7 +71,7 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
                 void onSave(cleaned.persona).then((ok) => setDone(ok))
               }}
             />
-            <Text style={[styles.hint, styles.counter]}>{error ?? (done ? 'Guardado: el GM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}</Text>
+            <Text style={[styles.hint, styles.counter]}>{error ?? (done ? t('play.personaSaved') : `${text.trim().length}/${PERSONA_MAX}`)}</Text>
           </View>
         </View>
       ) : null}

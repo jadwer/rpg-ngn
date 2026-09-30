@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { SystemBlock } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
@@ -36,7 +37,7 @@ export function RecapModal({ recap, enabled }: Props) {
       <StatusBar hidden />
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Text style={styles.title}>Anteriormente...</Text>
+          <Text style={styles.title}>{t('recap.anteriormente')}</Text>
           <ScrollView style={styles.body}>
             {(recap.text ?? '').split(/\n\s*\n/).map((paragraph, i) => (
               <Text key={i} style={styles.paragraph}>
@@ -44,7 +45,7 @@ export function RecapModal({ recap, enabled }: Props) {
               </Text>
             ))}
           </ScrollView>
-          <Button label="Continuar" primary onPress={close} />
+          <Button label={t('recap.continuar')} primary onPress={close} />
         </View>
       </View>
     </Modal>

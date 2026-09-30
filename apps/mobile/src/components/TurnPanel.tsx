@@ -1,4 +1,5 @@
 import type { TableState, TurnView } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { appendRoll, countdownLine, moreIdeasButton, QUICK_DICE, rollLabel, turnLine, type Countdown, type DiceMode, type TurnProgress } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -77,7 +78,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
       setFreshIdeas(await onMoreIdeas())
       setShowIdeas(true)
     } catch (error) {
-      setIdeasError(error instanceof Error ? error.message : 'No se pudieron pedir más ideas.')
+      setIdeasError(error instanceof Error ? error.message : t('play.ideasFailed'))
     } finally {
       setAskingIdeas(false)
     }
@@ -149,19 +150,19 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
         <View style={styles.countdown}>
           <Text style={styles.countdownNumber}>{countdown.remaining}</Text>
           <Text style={styles.countdownText}>{countdownLine(countdown)}</Text>
-          <Button label="Un momento" small busy={busy} onPress={() => onHold(true)} />
+          <Button label={t('mobile.turnPanel.unMomento')} small busy={busy} onPress={() => onHold(true)} />
         </View>
       ) : countdown.held ? (
         <View style={styles.countdown}>
           <Text style={styles.countdownText}>{countdownLine(countdown)}</Text>
-          <Button label="Seguir" small busy={busy} onPress={() => onHold(false)} />
+          <Button label={t('ttsBar.seguir')} small busy={busy} onPress={() => onHold(false)} />
         </View>
       ) : null}
       {seatsLine && !focused ? <Text style={styles.seats}>{seatsLine}</Text> : null}
 
 
       {outOfTurns ? <Text style={styles.error}>{outOfTurns}</Text> : null}
-      {turn?.error ? <Text style={styles.error}>{`El GM tuvo un problema y el turno se reabrió: ${turn.error}`}</Text> : null}
+      {turn?.error ? <Text style={styles.error}>{t('turnPanel.elGmTuvoUnProblema', { error: turn.error })}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
 
       {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
@@ -182,18 +183,18 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
               setLanded({ die: activeRoll.die, outcome })
               onRolled()
             }}
-            onFailed={(error) => setRollError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+            onFailed={(error) => setRollError(error instanceof Error ? error.message : t('play.rollFailed'))}
           />
           <View style={styles.fortuneText}>
             {landed ? (
               <>
-                <Text style={styles.fortuneTitle}>{`Sacaste ${landed.outcome.result}.`}</Text>
-                <Text style={styles.fortuneHint}>El director narra lo que pasa cuando cierre el turno.</Text>
+                <Text style={styles.fortuneTitle}>{t('mobile.turnPanel.sacaste', { result: landed.outcome.result })}</Text>
+                <Text style={styles.fortuneHint}>{t('turnPanel.elDirectorNarraLo')}</Text>
               </>
             ) : (
               <>
-                <Text style={styles.fortuneTitle}>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : 'El director te pide una tirada.'}</Text>
-                <Text style={styles.fortuneHint}>{`Tira ${rollLabel(activeRoll)}: mantén presionado el dado y suéltalo.`}</Text>
+                <Text style={styles.fortuneTitle}>{activeRoll.reason ? `${activeRoll.reason.charAt(0).toUpperCase()}${activeRoll.reason.slice(1)}.` : t('play.askedRoll')}</Text>
+                <Text style={styles.fortuneHint}>{t('play.rollHow', { roll: rollLabel(activeRoll) })}</Text>
               </>
             )}
             {rollError ? <Text style={styles.error}>{rollError}</Text> : null}
@@ -206,7 +207,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
         <View style={styles.fortune}>
           <DiceRoller
             die="1d20"
-            label="Fortuna"
+            label={t('play.fortune')}
             large
             disabled={busy}
             resolve={() => onFortune().then((result) => ({ result }))}
@@ -214,11 +215,11 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
               setFortuneError(null)
               setTimeout(() => setFortuneLanded(true), 1500)
             }}
-            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : 'No se pudo tirar; prueba otra vez.')}
+            onFailed={(error) => setFortuneError(error instanceof Error ? error.message : t('play.rollFailed'))}
           />
           <View style={styles.fortuneText}>
-            <Text style={styles.fortuneTitle}>Tira tu Fortuna.</Text>
-            <Text style={styles.fortuneHint}>Mantén presionado el dado y suéltalo. No se te dice para qué sirve.</Text>
+            <Text style={styles.fortuneTitle}>{t('turnPanel.tiraTuFortuna')}</Text>
+            <Text style={styles.fortuneHint}>{t('turnPanel.mantenPresionadoElDado')}</Text>
             {fortuneError ? <Text style={styles.error}>{fortuneError}</Text> : null}
           </View>
         </View>
@@ -233,8 +234,8 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
           }}
           accessibilityRole="button"
         >
-          <Text style={styles.composeBarText}>¿Qué hace tu personaje?</Text>
-          {fortunePending && !fortuneLanded ? <Text style={styles.ideasToggle}>Tira tu Fortuna</Text> : shownIdeas.length > 0 ? <Text style={styles.ideasToggle}>{`${shownIdeas.length} ideas`}</Text> : null}
+          <Text style={styles.composeBarText}>{t('turnPanel.queHaceTuPersonaje')}</Text>
+          {fortunePending && !fortuneLanded ? <Text style={styles.ideasToggle}>{t('turnPanel.tiraTuFortuna2')}</Text> : shownIdeas.length > 0 ? <Text style={styles.ideasToggle}>{t('mobile.turnPanel.nIdeas', { count: shownIdeas.length })}</Text> : null}
         </Pressable>
       ) : null}
       {progress.canRespond && composing ? (
@@ -247,9 +248,9 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
               setFolded(true)
             }}
           >
-            <Text style={styles.hideText}>Ocultar</Text>
+            <Text style={styles.hideText}>{t('turnPanel.ocultar')}</Text>
           </Pressable>
-          {!focused ? <Text style={styles.ask}>¿Qué hace tu personaje?</Text> : null}
+          {!focused ? <Text style={styles.ask}>{t('turnPanel.queHaceTuPersonaje')}</Text> : null}
           {/* Ideas del GM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
           {(shownIdeas.length > 0 || moreButton) && !focused ? (
             showIdeas ? (
@@ -269,12 +270,12 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
                 {moreButton && !moreButton.enabled ? <Text style={styles.diceNotice}>{moreButton.hint}</Text> : null}
                 {ideasError ? <Text style={styles.notice}>{ideasError}</Text> : null}
                 <Pressable onPress={() => setShowIdeas(false)} hitSlop={8}>
-                  <Text style={styles.ideasToggle}>Ocultar ideas</Text>
+                  <Text style={styles.ideasToggle}>{t('turnPanel.ocultarIdeas')}</Text>
                 </Pressable>
               </View>
             ) : (
               <Pressable onPress={() => setShowIdeas(true)} hitSlop={8}>
-                <Text style={styles.ideasToggle}>Ver ideas</Text>
+                <Text style={styles.ideasToggle}>{t('turnPanel.verIdeas')}</Text>
               </Pressable>
             )
           ) : null}
@@ -286,7 +287,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
             }}
             multiline
             maxLength={1000}
-            placeholder="Describe tu acción, o di que no haces nada."
+            placeholder={t('mobile.turnPanel.describeTuAccionO')}
             placeholderTextColor={theme.colors.inkFaint}
             style={[styles.input, focused && styles.inputFocused]}
             editable={!busy}
@@ -301,7 +302,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
               texto y cuenta. Con el servidor tirando (engine, dice) se
               ignoraria. */}
           {diceMode !== 'table' ? (
-            diceMode === 'engine' ? <Text style={styles.diceNotice}>En esta mesa los dados los tira el servidor.</Text> : null
+            diceMode === 'engine' ? <Text style={styles.diceNotice}>{t('mobile.turnPanel.enEstaMesaLos')}</Text> : null
           ) : (
             <View style={styles.dice}>
               {QUICK_DICE.map((die) => (
@@ -311,17 +312,17 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
           )}
           <Pressable onPress={() => void send()} disabled={busy || text.trim().length === 0} style={({ pressed }) => [styles.sendButton, (busy || text.trim().length === 0) && styles.sendOff, pressed && styles.sendPressed]} accessibilityRole="button">
             <Icon d={ICON.send} size={18} color="#ffffff" />
-            <Text style={styles.sendText}>Enviar acción</Text>
+            <Text style={styles.sendText}>{t('mobile.turnPanel.enviarAccion')}</Text>
           </Pressable>
         </View>
       ) : null}
-      {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.</Text> : null}
-      {turn && progress.hasResponded && turn.status === 'open' && !countdown.active && !countdown.held ? <Text style={styles.sent}>Tu respuesta está enviada.</Text> : null}
+      {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>{t('turnPanel.mirasLaMesaSin')}</Text> : null}
+      {turn && progress.hasResponded && turn.status === 'open' && !countdown.active && !countdown.held ? <Text style={styles.sent}>{t('turnPanel.tuRespuestaEstaEnviada')}</Text> : null}
 
       {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
         <View style={styles.actions}>
-          {progress.canClose ? <Button label="Cerrar turno y narrar" onPress={() => onClose(false)} busy={busy} /> : null}
-          {progress.canForceClose ? <Button label="Forzar cierre (anfitrión)" small onPress={() => onClose(true)} busy={busy} /> : null}
+          {progress.canClose ? <Button label={t('turnPanel.cerrarTurnoYNarrar')} onPress={() => onClose(false)} busy={busy} /> : null}
+          {progress.canForceClose ? <Button label={t('mobile.turnPanel.forzarCierreAnfitrion')} small onPress={() => onClose(true)} busy={busy} /> : null}
         </View>
       ) : null}
     </View>

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
@@ -67,7 +68,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
         <LogoHorizontal height={28} color={theme.colors.ink} />
-        <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel="Tu cuenta" style={styles.avatar}>
+        <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('mobile.tablesScreen.tuCuenta')} style={styles.avatar}>
           <Text style={styles.avatarText}>{(user.name.trim()[0] ?? '?').toUpperCase()}</Text>
         </Pressable>
       </View>
@@ -81,16 +82,16 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
         <Backdrop />
         <View style={styles.hero}>
           <View style={[styles.column, styles.heroInner]}>
-            <Text style={styles.title}>Tus mesas</Text>
-            <Text style={styles.subtitle}>Historias en las que estás jugando</Text>
+            <Text style={styles.title}>{t('tablesPage.tusMesas')}</Text>
+            <Text style={styles.subtitle}>{t('tablesPage.historiasEnLasQue')}</Text>
             <View style={[styles.actions, wide && styles.actionsWide]}>
               <Pressable onPress={onCreate} style={({ pressed }) => [styles.bigBtn, styles.primary, wide && styles.bigBtnWide, pressed && styles.pressed]} accessibilityRole="button">
                 <Icon d={ICON.plus} size={18} color="#ffffff" />
-                <Text style={styles.bigBtnText}>Crear mesa</Text>
+                <Text style={styles.bigBtnText}>{t('tablesPage.crearMesa')}</Text>
               </Pressable>
               <Pressable onPress={() => setJoining((v) => !v)} style={({ pressed }) => [styles.bigBtn, styles.outline, wide && styles.bigBtnWide, pressed && styles.pressed]} accessibilityRole="button">
                 <Icon d={ICON.link} size={18} color={theme.colors.ink} />
-                <Text style={styles.bigBtnText}>Unirme con enlace</Text>
+                <Text style={styles.bigBtnText}>{t('tablesPage.unirmeConEnlace')}</Text>
               </Pressable>
             </View>
           </View>
@@ -114,10 +115,10 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
           {tables === null && loading ? (
             <View style={styles.center}>
               <ActivityIndicator color={theme.colors.accentBright} />
-              <Text style={styles.hint}>Buscando tus mesas...</Text>
+              <Text style={styles.hint}>{t('tablesPage.buscandoTusMesas')}</Text>
             </View>
           ) : null}
-          {tables !== null && shown.length === 0 ? <Text style={styles.hint}>{filter === 'todas' ? 'No estás en ninguna mesa todavía. Crea una o pide al anfitrión que te invite.' : 'No hay mesas aquí.'}</Text> : null}
+          {tables !== null && shown.length === 0 ? <Text style={styles.hint}>{filter === 'todas' ? t('play.noTablesYet') : t('play.noTablesHere')}</Text> : null}
 
           {shown.map((table) => {
             const me = memberOf(table, user.id)
@@ -181,9 +182,9 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                   {wide ? null : avatars}
                   <Pressable onPress={() => onOpen(table)} style={({ pressed }) => [styles.continue, pressed && styles.pressed]} accessibilityRole="button">
                     <Icon d={ICON.play} size={14} color="#ffffff" />
-                    <Text style={styles.continueText}>Continuar</Text>
+                    <Text style={styles.continueText}>{t('tablesPage.continuar')}</Text>
                   </Pressable>
-                  <Pressable onPress={() => setOptions((v) => (v === table.id ? null : table.id))} style={({ pressed }) => [styles.dots, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel="Opciones de la mesa">
+                  <Pressable onPress={() => setOptions((v) => (v === table.id ? null : table.id))} style={({ pressed }) => [styles.dots, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={t('mobile.tablesScreen.opcionesDeLaMesa')}>
                     <Icon d={ICON.dots} size={20} color={theme.colors.ink} strokeWidth={3} />
                   </Pressable>
                 </View>
@@ -192,7 +193,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                     <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={onRefresh} />
                   </View>
                 ) : null}
-                {!table.campaignId ? <Text style={styles.warn}>Esta mesa no tiene campaña todavía.</Text> : null}
+                {!table.campaignId ? <Text style={styles.warn}>{t('tablesPage.estaMesaNoTiene')}</Text> : null}
               </View>
             )
           })}

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl } from '@rpg-ngn/api-client'
 import { useState } from 'react'
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text } from 'react-native'
@@ -42,21 +43,21 @@ export function ForgotPasswordScreen({ initialUrl, onBack }: Props) {
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
-      <SheetHeader title="Recuperar contraseña" back={{ label: 'Entrar', onPress: onBack }} />
+      <SheetHeader title={t('auth.recoverTitle')} back={{ label: t('auth.signIn'), onPress: onBack }} />
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         {done ? (
           <>
             <Text style={styles.body}>{done}</Text>
-            <Text style={styles.hint}>Si no te llega en unos minutos, escríbele al anfitrión de tu mesa: él puede ayudarte a entrar.</Text>
-            <Button label="Volver a entrar" onPress={onBack} />
+            <Text style={styles.hint}>{t('auth.recoverNoMail')}</Text>
+            <Button label={t('auth.backToSignIn')} onPress={onBack} />
           </>
         ) : (
           <>
-            <Text style={styles.hint}>Escribe tu correo y te llegará un enlace para poner una contraseña nueva.</Text>
-            <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
-            <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoFocus onSubmitEditing={() => void submit()} />
+            <Text style={styles.hint}>{t('auth.recoverHint')}</Text>
+            <Field label={t('mobile.connect.server')} value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
+            <Field label={t('auth.email')} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" autoFocus onSubmitEditing={() => void submit()} />
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Button label="Enviar enlace" primary busy={busy} disabled={!canSubmit} onPress={() => void submit()} />
+            <Button label={t('auth.sendLink')} primary busy={busy} disabled={!canSubmit} onPress={() => void submit()} />
           </>
         )}
       </ScrollView>

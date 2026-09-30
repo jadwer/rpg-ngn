@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Backdrop } from '../../components/Backdrop'
@@ -29,7 +30,7 @@ export function CommunityScreen({ client, user, onTab, onProfile, onUnauthorized
       {/* La misma cabecera que Mesas. */}
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
         <LogoHorizontal height={28} color={theme.colors.ink} />
-        <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel="Tu cuenta" style={styles.avatar}>
+        <Pressable onPress={onProfile} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('mobile.tablesScreen.tuCuenta')} style={styles.avatar}>
           <Text style={styles.avatarText}>{(user.name.trim()[0] ?? '?').toUpperCase()}</Text>
         </Pressable>
       </View>
@@ -37,14 +38,14 @@ export function CommunityScreen({ client, user, onTab, onProfile, onUnauthorized
         <Backdrop />
         <View style={styles.column}>
           <View style={styles.hero}>
-            <Text style={styles.title}>Comunidad</Text>
-            <Text style={styles.subtitle}>La gente con la que juegas</Text>
+            <Text style={styles.title}>{t('communityPage.comunidad')}</Text>
+            <Text style={styles.subtitle}>{t('communityPage.laGenteConLa')}</Text>
           </View>
-          <Panel title="Amigos">
+          <Panel title={t('shell.nav.friends')}>
             <FriendsPanel client={client} meId={user.id} onUnauthorized={onUnauthorized} />
           </Panel>
-          <Panel title="Pronto">
-            <Text style={styles.text}>Historias compartidas, creadores de mundos y mesas abiertas para unirse.</Text>
+          <Panel title={t('communityPage.pronto')}>
+            <Text style={styles.text}>{t('communityPage.historiasCompartidasCreadoresDe')}</Text>
           </Panel>
         </View>
       </ScrollView>

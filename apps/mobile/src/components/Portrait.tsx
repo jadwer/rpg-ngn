@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { Image, StyleSheet, Text, View } from 'react-native'
 import { portraitSource } from '../pack/portraits'
 import { theme } from '../theme'
@@ -20,7 +21,7 @@ export function Portrait({ path, uri, name, size = 48, muted = false, round = fa
   const source = uri ? { uri } : portraitSource(path)
   const box = { width: size, height: size, borderRadius: round ? size / 2 : Math.round(size / 5) }
   if (source) {
-    return <Image source={source} style={[styles.image, box, ring && styles.ring, muted && styles.muted]} accessibilityLabel={`Retrato de ${name}`} />
+    return <Image source={source} style={[styles.image, box, ring && styles.ring, muted && styles.muted]} accessibilityLabel={t('play.portrait', { name })} />
   }
   return (
     <View style={[styles.placeholder, box, ring && styles.ring]}>

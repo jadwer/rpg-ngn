@@ -1,16 +1,9 @@
+import { t } from '@rpg-ngn/i18n'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { theme } from '../theme'
 
 export type GamePanel = 'sheets' | 'map' | 'players' | 'host' | 'reading'
-
-const LABELS: Record<GamePanel, string> = {
-  sheets: 'Fichas',
-  map: 'Mapa',
-  players: 'Jugadores',
-  host: 'Anfitrión',
-  reading: 'Lectura',
-}
 
 // Los mismos trazos que la barra de la web (apps/web/src/components/GameBar.tsx).
 const ICONS: Record<GamePanel, string> = {
@@ -36,6 +29,15 @@ interface Props {
  * arriba, aparte.
  */
 export function GameBar({ panels, badges = {}, active = null, onOpen }: Props) {
+  // Dentro del componente: t() fijaria el idioma al importar el modulo si viviera a nivel de modulo.
+  // Mismas claves que la web (apps/web/src/components/GameBar.tsx).
+  const LABELS: Record<GamePanel, string> = {
+    sheets: t('play.barSheets'),
+    map: t('play.barMap'),
+    players: t('play.barPlayers'),
+    host: t('play.barHost'),
+    reading: t('play.barReading'),
+  }
   return (
     <View style={styles.bar} accessibilityRole="tablist">
       {panels.map((panel) => (

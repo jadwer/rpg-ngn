@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { groupBlocks, sessionBlocks, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -31,20 +32,20 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Sesiones</Text>
+          <Text style={styles.link}>‹ {t('mobile.sessionScreen.sesiones')}</Text>
         </Pressable>
         <Text style={styles.title} numberOfLines={1}>
           {session.title}
         </Text>
         <Pressable onPress={() => setSheetsOpen(true)} hitSlop={10} style={styles.sheetsButton}>
-          <Text style={styles.sheetsText}>Fichas</Text>
+          <Text style={styles.sheetsText}>{t('sheetsPanel.fichas')}</Text>
         </Pressable>
       </View>
 
       <View style={styles.toolbar}>
         <View style={styles.segmented}>
-          <Segment label="Narrativa" active={mode === 'narrative'} onPress={() => setMode('narrative')} />
-          <Segment label="Diálogo" active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
+          <Segment label={t('tableScreen.narrativa')} active={mode === 'narrative'} onPress={() => setMode('narrative')} />
+          <Segment label={t('tableScreen.dialogo')} active={mode === 'dialogue'} onPress={() => setMode('dialogue')} />
         </View>
         <TtsBar tts={tts} />
       </View>
@@ -53,7 +54,7 @@ export function SessionScreen({ campaign, sessionId, onBack }: Props) {
         <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
       </ScrollView>
 
-      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={`Estado tras ${campaign.events.length} eventos del log, sin conexión`} />
+      <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={t('mobile.sessionScreen.estadoTrasEventos', { count: campaign.events.length })} />
     </View>
   )
 }

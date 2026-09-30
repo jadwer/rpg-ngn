@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { holdReleaseMs, quickRoll, settleSchedule, type QuickRoll } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Pressable, StyleSheet, Text } from 'react-native'
@@ -100,7 +101,7 @@ export function HoldDie({ die, disabled = false, onRolled, serverRoll, onFailed,
       disabled={disabled}
       style={({ pressed }) => [styles.die, large && styles.large, rolling && styles.rolling, disabled && styles.off, pressed && !rolling && styles.pressed]}
       accessibilityRole="button"
-      accessibilityLabel={`Tirar ${die}: mantén presionado y suelta`}
+      accessibilityLabel={t('play.rollAria', { die })}
     >
       {rolling ? <Text style={styles.face}>{face ?? ''}</Text> : <Icon d={ICON.dice} size={15} color={theme.colors.inkDim} />}
       <Text style={styles.label}>{label ?? die}</Text>

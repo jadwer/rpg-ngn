@@ -1,4 +1,5 @@
 import { ApiError, type ApiClient, type OwnKey } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { keyConsole, ownKeyLabel, ownKeyProblem, ownKeyStatus, removeOwnKeyWarning } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
@@ -56,10 +57,10 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
   }
 
   const remove = (key: OwnKey) => {
-    Alert.alert('Quitar la clave', removeOwnKeyWarning(key), [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(t('mobile.ownKeysPanel.quitarLaClave'), removeOwnKeyWarning(key), [
+      { text: t('ownKeys.cancelar'), style: 'cancel' },
       {
-        text: 'Quitar',
+        text: t('ownKeys.quitar'),
         style: 'destructive',
         onPress: () => {
           setBusy(true)
@@ -71,7 +72,7 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
             },
             (caught: unknown) => {
               if (caught instanceof ApiError && caught.isUnauthorized) onUnauthorized()
-              else setNotice({ ok: false, text: 'No se pudo borrar la clave.' })
+              else setNotice({ ok: false, text: t('play.keyDeleteFailed') })
               setBusy(false)
             },
           )
@@ -82,54 +83,57 @@ export function OwnKeysPanel({ client, onUnauthorized }: Props) {
 
   return (
     <View style={styles.card}>
-      <SectionTitle>Tu propia clave de IA</SectionTitle>
-      <Text style={styles.hint}>Si pones tu clave, tus mesas narran con ella y no gastan del cupo gratuito: le pagas los tokens directamente al proveedor. Se guarda cifrada y no vuelve a mostrarse.</Text>
+      <SectionTitle>{t('ownKeys.tuPropiaClaveDe')}</SectionTitle>
+      <Text style={styles.hint}>{t('mobile.ownKeysPanel.siPonesTuClave')}</Text>
 
-      {keys.map((key) => (
-        <View key={key.preset} style={styles.row}>
-          <Text style={styles.provider}>{ownKeyLabel(key)}</Text>
-          <Text style={styles.status}>{ownKeyStatus(key)}</Text>
+      {keys.map((key) => {
+        const console = keyConsole(key.preset)
+        return (
+          <View key={key.preset} style={styles.row}>
+            <Text style={styles.provider}>{ownKeyLabel(key)}</Text>
+            <Text style={styles.status}>{ownKeyStatus(key)}</Text>
 
-          {editing === key.preset ? (
-            <>
-              <Field
-                label="Clave"
-                value={credential}
-                onChangeText={setCredential}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                hint={keyConsole(key.preset) ? `La sacas en ${keyConsole(key.preset)}` : undefined}
-                onSubmitEditing={() => void save(key.preset)}
-              />
+            {editing === key.preset ? (
+              <>
+                <Field
+                  label={t('ownKeys.clave')}
+                  value={credential}
+                  onChangeText={setCredential}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  hint={console ? t('play.keyFrom', { console }) : undefined}
+                  onSubmitEditing={() => void save(key.preset)}
+                />
+                <View style={styles.actions}>
+                  <Button label={busy ? t('mobile.ownKeysPanel.comprobando') : t('common.save')} primary busy={busy} onPress={() => void save(key.preset)} />
+                  <Button
+                    label={t('ownKeys.cancelar')}
+                    disabled={busy}
+                    onPress={() => {
+                      setEditing(null)
+                      setCredential('')
+                    }}
+                  />
+                </View>
+              </>
+            ) : (
               <View style={styles.actions}>
-                <Button label={busy ? 'Comprobando' : 'Guardar'} primary busy={busy} onPress={() => void save(key.preset)} />
                 <Button
-                  label="Cancelar"
+                  label={key.configured ? t('play.changeKey') : t('play.addMyKey')}
                   disabled={busy}
                   onPress={() => {
-                    setEditing(null)
+                    setEditing(key.preset)
                     setCredential('')
+                    setNotice(null)
                   }}
                 />
+                {key.configured ? <Button label={t('ownKeys.quitar')} disabled={busy} onPress={() => remove(key)} /> : null}
               </View>
-            </>
-          ) : (
-            <View style={styles.actions}>
-              <Button
-                label={key.configured ? 'Cambiar clave' : 'Poner mi clave'}
-                disabled={busy}
-                onPress={() => {
-                  setEditing(key.preset)
-                  setCredential('')
-                  setNotice(null)
-                }}
-              />
-              {key.configured ? <Button label="Quitar" disabled={busy} onPress={() => remove(key)} /> : null}
-            </View>
-          )}
-        </View>
-      ))}
+            )}
+          </View>
+        )
+      })}
 
       {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
     </View>

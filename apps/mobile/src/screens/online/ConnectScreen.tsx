@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { ImageBackground, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { t, type Language } from '@rpg-ngn/i18n'
 import { useTopInset } from '../../hooks/useTopInset'
 import { Button } from '../../components/Button'
 import { Field } from '../../components/Field'
 import { PUBLIC_SERVER_URL } from '../../online/storage'
 import { LogoVertical } from '../../components/Brand'
+import { useLanguage } from '../../state/language'
 import { theme } from '../../theme'
 
 interface Props {
@@ -38,6 +40,7 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
   const canSubmit = serverUrl.trim().length > 0 && email.trim().length > 0 && password.length > 0 && !busy
   const insets = useSafeAreaInsets()
   const topInset = useTopInset()
+  const { lang, choose, languages } = useLanguage()
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
@@ -46,8 +49,23 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
       </ImageBackground>
       <View style={[styles.header, { paddingTop: topInset + 6 }]}>
         <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Inicio</Text>
+          <Text style={styles.link}>‹ {t('shell.nav.home')}</Text>
         </Pressable>
+        <View style={styles.langRow} accessibilityLabel={t('common.language')}>
+          {languages.map((l: Language) => (
+            <Pressable
+              key={l}
+              onPress={() => choose(l)}
+              hitSlop={6}
+              style={[styles.langChip, lang === l && styles.langChipActive]}
+              accessibilityRole="button"
+              accessibilityLabel={t(`common.languages.${l}`)}
+              accessibilityState={{ selected: lang === l }}
+            >
+              <Text style={[styles.langChipText, lang === l && styles.langChipTextActive]}>{l.toUpperCase()}</Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
       <ScrollView contentContainerStyle={[styles.form, { paddingBottom: insets.bottom + 28 }]} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
@@ -55,42 +73,42 @@ export function ConnectScreen({ initialUrl, busy, notice, onLogin, onRegister, o
           <Text style={styles.motto}>WORLDS BORN FROM IMAGINATION</Text>
         </View>
         <View style={styles.panel}>
-          <Text style={styles.title}>Entrar a la mesa</Text>
+          <Text style={styles.title}>{t('auth.signInTitle')}</Text>
           {showServer ? (
             <Field
-              label="Servidor"
+              label={t('mobile.connect.server')}
               value={serverUrl}
               onChangeText={setServerUrl}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
               placeholder={PUBLIC_SERVER_URL}
-              hint="Déjalo como está salvo que juegues contra otro servidor."
+              hint={t('mobile.connect.serverHint')}
             />
           ) : null}
-          <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" placeholder="tu@correo.com" />
-          <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={() => canSubmit && onLogin(serverUrl, email, password)} />
+          <Field label={t('auth.email')} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" placeholder={t('mobile.connect.emailPlaceholder')} />
+          <Field label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={() => canSubmit && onLogin(serverUrl, email, password)} />
           {notice ? <Text style={styles.notice}>{notice}</Text> : null}
-          <Button label="Entrar" primary busy={busy} disabled={!canSubmit} onPress={() => onLogin(serverUrl, email, password)} />
+          <Button label={t('auth.signIn')} primary busy={busy} disabled={!canSubmit} onPress={() => onLogin(serverUrl, email, password)} />
           <View style={styles.links}>
             <Pressable onPress={() => onForgot(serverUrl)} hitSlop={6} disabled={busy}>
-              <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
+              <Text style={styles.linkText}>{t('auth.forgot')}</Text>
             </Pressable>
             {!showServer ? (
               <Pressable onPress={() => setShowServer(true)} hitSlop={6} disabled={busy}>
-                <Text style={styles.linkText}>Cambiar servidor</Text>
+                <Text style={styles.linkText}>{t('auth.server.change')}</Text>
               </Pressable>
             ) : null}
             <Text style={styles.foot}>
-              ¿Todavía no tienes cuenta?{' '}
+              {t('auth.noAccount')}{' '}
               <Text style={styles.linkText} onPress={() => onRegister(serverUrl)}>
-                Créala aquí
+                {t('auth.createHere')}
               </Text>
-              , toma un minuto.
+              {t('auth.takesAMinute')}
             </Text>
           </View>
         </View>
-        <Text style={styles.foot}>Tu sesión queda guardada en el almacén seguro del teléfono, así no tienes que entrar cada vez.</Text>
+        <Text style={styles.foot}>{t('mobile.connect.sessionStored')}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -110,6 +128,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 4,
   },
@@ -120,6 +139,32 @@ const styles = StyleSheet.create({
     minWidth: 64,
     textShadowColor: 'rgba(0,0,0,0.8)',
     textShadowRadius: 4,
+  },
+  langRow: {
+    flexDirection: 'row',
+    gap: 4,
+    padding: 3,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.45)',
+    backgroundColor: 'rgba(15, 18, 30, 0.6)',
+  },
+  langChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  langChipActive: {
+    backgroundColor: theme.colors.nebula,
+  },
+  langChipText: {
+    fontFamily: theme.fonts.ui,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#f1f0fb',
+  },
+  langChipTextActive: {
+    color: theme.colors.bg,
   },
   panel: {
     gap: 16,

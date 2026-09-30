@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, packPortraitUrl, type ApiClient, type PackOption, type PackSheets } from '@rpg-ngn/api-client'
 import { packOriginText, packStatusText } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
@@ -72,30 +73,30 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
 
   return (
     <View style={styles.screen}>
-      <PageHeader back="Explorar" onBack={onBack} />
+      <PageHeader back={t('home.explorar')} onBack={onBack} />
       <ScrollView contentContainerStyle={styles.scroll} refreshControl={<RefreshControl refreshing={false} onRefresh={() => void load()} tintColor={theme.colors.accentBright} />}>
         <Backdrop />
         <View style={styles.list}>
-        <Text style={styles.pageTitle}>Mis mundos</Text>
-        <Text style={styles.subtitle}>Los que subes, los que revisas y los de la comunidad que añadiste</Text>
+        <Text style={styles.pageTitle}>{t('myWorldsPage.misMundos')}</Text>
+        <Text style={styles.subtitle}>{t('mobile.worldsScreen.losQueSubesLos')}</Text>
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         {/* Cada seccion en su panel: el texto suelto sobre el fondo no se leia (Gabino, 26-09). */}
         {review ? (
           <View style={styles.panel}>
-            <SectionTitle>Revisión del catálogo</SectionTitle>
-            {review.length === 0 ? <Text style={styles.hint}>Nada en la cola.</Text> : null}
+            <SectionTitle>{t('myWorldsPage.revisionDelCatalogo')}</SectionTitle>
+            {review.length === 0 ? <Text style={styles.hint}>{t('myWorldsPage.nadaEnLaCola')}</Text> : null}
             {review.map((p) => (
               <View key={`r${p.packId}`} style={styles.card}>
                 <Text style={styles.name}>{p.name}</Text>
-                <Text style={styles.hint}>{`${packOriginText({ origin: 'catalog', author: p.author ?? null })} · procedencia ${String(p.provenance?.['class'] ?? '?')} · ${String(p.provenance?.['license'] ?? '?')}`}</Text>
+                <Text style={styles.hint}>{`${packOriginText({ origin: 'catalog', author: p.author ?? null })} · ${t('mobile.worldsScreen.procedenciaCorta', { provenanceClass: String(p.provenance?.['class'] ?? '?'), license: String(p.provenance?.['license'] ?? '?') })}`}</Text>
                 {previewing === `review:${p.id}` ? <Preview client={client} pack={p} /> : null}
                 {rejecting && rejecting.packId === p.packId ? (
                   <>
-                    <TextInput value={rejecting.note} onChangeText={(note) => setRejecting({ packId: p.packId!, note })} placeholder="Motivo del rechazo (lo lee el autor)" placeholderTextColor={theme.colors.inkFaint} multiline style={styles.input} />
+                    <TextInput value={rejecting.note} onChangeText={(note) => setRejecting({ packId: p.packId!, note })} placeholder={t('myWorldsPage.motivoDelRechazo')} placeholderTextColor={theme.colors.inkFaint} multiline style={styles.input} />
                     <View style={styles.row}>
                       <Button
-                        label="Enviar rechazo"
+                        label={t('mobile.worldsScreen.enviarRechazo')}
                         small
                         primary
                         busy={busy}
@@ -106,14 +107,14 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
                           void act(() => client.reviewPack(p.packId!, 'reject', note))
                         }}
                       />
-                      <Button label="Cancelar" small onPress={() => setRejecting(null)} />
+                      <Button label={t('common.cancel')} small onPress={() => setRejecting(null)} />
                     </View>
                   </>
                 ) : null}
                 <View style={styles.row}>
-                  <Button label={previewing === `review:${p.id}` ? 'Ocultar' : 'Ver personajes'} small onPress={() => toggle(`review:${p.id}`)} />
-                  <Button label="Publicar" small primary busy={busy} onPress={() => void act(() => client.reviewPack(p.packId!, 'approve'))} />
-                  <Button label="Rechazar" small busy={busy} onPress={() => setRejecting({ packId: p.packId!, note: '' })} />
+                  <Button label={previewing === `review:${p.id}` ? t('mobile.worldsScreen.ocultar') : t('mobile.worldsScreen.verPersonajes')} small onPress={() => toggle(`review:${p.id}`)} />
+                  <Button label={t('myWorldsPage.publicar')} small primary busy={busy} onPress={() => void act(() => client.reviewPack(p.packId!, 'approve'))} />
+                  <Button label={t('myWorldsPage.rechazar')} small busy={busy} onPress={() => setRejecting({ packId: p.packId!, note: '' })} />
                 </View>
               </View>
             ))}
@@ -121,38 +122,38 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
         ) : null}
 
         <View style={styles.panel}>
-        <SectionTitle>Tus mundos</SectionTitle>
+        <SectionTitle>{t('mobile.worldsScreen.tusMundos')}</SectionTitle>
         <Text style={styles.hint}>
-          {mine ? `${mine.used} de ${mine.freeLimit} mundos propios. ` : ''}
-          Para subir uno nuevo (un .rpgpack), entra a la web.
+          {mine ? t('myWorldsPage.usadosDeLimite', { used: mine.used, freeLimit: mine.freeLimit }) + '. ' : ''}
+          {t('mobile.worldsScreen.paraSubirUnoNuevo')}
         </Text>
-        <Button label="Subir un mundo en la web" small onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos`)} />
+        <Button label={t('mobile.worldsScreen.subirUnMundoEnLa')} small onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos`)} />
         {mine?.packs.map((p) => (
           <View key={`m${p.packId}`} style={styles.card}>
             <View style={styles.row}>
               <Text style={[styles.name, { flex: 1 }]}>{p.name}</Text>
               <Text style={styles.chip}>{packStatusText(p.status)}</Text>
             </View>
-            <Text style={styles.hint}>{`${p.characters} personajes, ${p.sessions} sesiones.`}</Text>
-            {p.status === 'rejected' && p.reviewNote ? <Text style={styles.error}>{`No se publicó: ${p.reviewNote}`}</Text> : null}
+            <Text style={styles.hint}>{`${p.characters} ${p.characters === 1 ? t('mobile.worldsScreen.personajeUno') : t('mobile.worldsScreen.personajesVarios')}, ${p.sessions} ${p.sessions === 1 ? t('mobile.worldsScreen.sesionUna') : t('mobile.worldsScreen.sesionesVarias')}.`}</Text>
+            {p.status === 'rejected' && p.reviewNote ? <Text style={styles.error}>{t('myWorldsPage.noSePublico', { reason: p.reviewNote })}</Text> : null}
             {previewing === `mine:${p.id}` ? <Preview client={client} pack={p} /> : null}
             <View style={styles.row}>
-              <Button label={previewing === `mine:${p.id}` ? 'Ocultar' : 'Ver personajes'} small onPress={() => toggle(`mine:${p.id}`)} />
-              {p.status === 'private' || p.status === 'rejected' ? <Button label="Pedir publicación" small busy={busy} onPress={() => void act(() => client.publishPack(p.packId!))} /> : null}
-              {p.status === 'pending' || p.status === 'published' ? <Button label={p.status === 'published' ? 'Retirar del catálogo' : 'Cancelar revisión'} small busy={busy} onPress={() => void act(() => client.unpublishPack(p.packId!))} /> : null}
+              <Button label={previewing === `mine:${p.id}` ? t('mobile.worldsScreen.ocultar') : t('mobile.worldsScreen.verPersonajes')} small onPress={() => toggle(`mine:${p.id}`)} />
+              {p.status === 'private' || p.status === 'rejected' ? <Button label={t('myWorldsPage.pedirPublicacion')} small busy={busy} onPress={() => void act(() => client.publishPack(p.packId!))} /> : null}
+              {p.status === 'pending' || p.status === 'published' ? <Button label={p.status === 'published' ? t('play.unpublish') : t('mobile.worldsScreen.cancelarRevision')} small busy={busy} onPress={() => void act(() => client.unpublishPack(p.packId!))} /> : null}
             </View>
           </View>
         ))}
         </View>
 
         <View style={styles.panel}>
-        <SectionTitle>Catálogo</SectionTitle>
-        <Text style={styles.hint}>Mundos que otros publicaron y pasaron revisión. Añadirlos no copia nada: al crear una mesa los ves como opción.</Text>
+        <SectionTitle>{t('myWorldsPage.catalogo')}</SectionTitle>
+        <Text style={styles.hint}>{t('myWorldsPage.mundosQueOtrosPublicaron')}</Text>
         {catalog?.length === 0 ? (
           <Text style={styles.hint}>
-            Todavía no hay mundos de la comunidad. Los oficiales están en{' '}
+            {t('mobile.worldsScreen.todaviaNoHayMundosDe')}{' '}
             <Text style={styles.linkInline} onPress={onBack}>
-              Explorar
+              {t('home.explorar')}
             </Text>
             .
           </Text>
@@ -160,15 +161,15 @@ export function WorldsScreen({ client, onBack, onUnauthorized }: Props) {
         {catalog?.map((p) => (
           <View key={`c${p.packId}`} style={styles.card}>
             <Text style={styles.name}>{p.name}</Text>
-            <Text style={styles.hint}>{`${packOriginText({ origin: 'catalog', author: p.author ?? null })} · ${p.characters} personajes`}</Text>
+            <Text style={styles.hint}>{`${packOriginText({ origin: 'catalog', author: p.author ?? null })} · ${p.characters} ${p.characters === 1 ? t('mobile.worldsScreen.personajeUno') : t('mobile.worldsScreen.personajesVarios')}`}</Text>
             {p.tagline ? <Text style={styles.tagline}>{p.tagline}</Text> : null}
             {previewing === `catalog:${p.id}` ? <Preview client={client} pack={p} /> : null}
             <View style={styles.row}>
-              <Button label={previewing === `catalog:${p.id}` ? 'Ocultar' : 'Ver personajes'} small onPress={() => toggle(`catalog:${p.id}`)} />
+              <Button label={previewing === `catalog:${p.id}` ? t('mobile.worldsScreen.ocultar') : t('mobile.worldsScreen.verPersonajes')} small onPress={() => toggle(`catalog:${p.id}`)} />
               {p.mine ? null : p.activated ? (
-                <Button label="Quitar de mis mundos" small busy={busy} onPress={() => void act(() => client.deactivatePack(p.packId!))} />
+                <Button label={t('myWorldsPage.quitarDeMisMundos')} small busy={busy} onPress={() => void act(() => client.deactivatePack(p.packId!))} />
               ) : (
-                <Button label="Añadir a mis mundos" small primary busy={busy} onPress={() => void act(() => client.activatePack(p.packId!))} />
+                <Button label={t('myWorldsPage.anadirAMisMundos')} small primary busy={busy} onPress={() => void act(() => client.activatePack(p.packId!))} />
               )}
             </View>
           </View>
@@ -199,8 +200,8 @@ function Preview({ client, pack }: { client: ApiClient; pack: PackOption }) {
     }
   }, [client, pack.id, pack.version])
 
-  if (failed) return <Text style={styles.hint}>No se pudo leer este mundo.</Text>
-  if (!sheets) return <Text style={styles.hint}>Cargando...</Text>
+  if (failed) return <Text style={styles.hint}>{t('packPreview.noSePudoLeer')}</Text>
+  if (!sheets) return <Text style={styles.hint}>{t('packPreview.cargando')}</Text>
   return (
     <View style={styles.preview}>
       {sheets.characters.map((c) => {
@@ -215,7 +216,7 @@ function Preview({ client, pack }: { client: ApiClient; pack: PackOption }) {
           </View>
         )
       })}
-      {sheets.sessions.length > 0 ? <Text style={[styles.hint, { width: '100%' }]}>{`Sesiones: ${sheets.sessions.map((s) => s.title).join(' · ')}`}</Text> : null}
+      {sheets.sessions.length > 0 ? <Text style={[styles.hint, { width: '100%' }]}>{t('mobile.worldsScreen.sesionesLista', { sessions: sheets.sessions.map((s) => s.title).join(' · ') })}</Text> : null}
     </View>
   )
 }

@@ -1,17 +1,20 @@
+import { t } from '@rpg-ngn/i18n'
 import { abilityUsage, humanizeId, type SheetView } from '@rpg-ngn/ui-logic'
 import { useState, type ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { theme, VEIL_NOTE } from '../theme'
+import { theme, veilNote } from '../theme'
 import { Icon } from './Icon'
 import { Portrait } from './Portrait'
 
 type Tab = 'inventory' | 'skills' | 'traits'
 
-const TABS: Array<{ id: Tab; label: string }> = [
-  { id: 'inventory', label: 'Inventario' },
-  { id: 'skills', label: 'Habilidades' },
-  { id: 'traits', label: 'Rasgos' },
-]
+function tabs(): Array<{ id: Tab; label: string }> {
+  return [
+    { id: 'inventory', label: t('mobile.sheet.inventario') },
+    { id: 'skills', label: t('mobile.sheet.habilidades') },
+    { id: 'traits', label: t('mobile.sheet.rasgos') },
+  ]
+}
 
 /** Bolsa, para los objetos: el pack no trae icono por objeto. */
 const ITEM_ICON = 'M6 8h12l-1 12H7zM9 8V6a3 3 0 0 1 6 0v2'
@@ -35,7 +38,7 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
           <Text style={styles.name}>{sheet.name}</Text>
           <Text style={styles.sub}>{`${sheet.race} · ${sheet.class}`}</Text>
           <View style={styles.barHead}>
-            <Text style={styles.barLabel}>Vida</Text>
+            <Text style={styles.barLabel}>{t('sheetUi.vida')}</Text>
             <Text style={styles.barValue}>
               <Text style={styles.barStrong}>{sheet.hp.current}</Text>
               {` / ${sheet.hp.max}`}
@@ -45,14 +48,14 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
             <View style={[styles.fill, { width: `${Math.round(hpShare * 100)}%` }]} />
           </View>
           <View style={styles.minor}>
-            <Text style={styles.minorText}>{`Armadura ${sheet.ac === null ? '?' : sheet.ac}`}</Text>
-            <Text style={styles.minorText}>{sheet.fortune ? `${sheet.fortune.tier} ${sheet.fortune.result}` : 'Fortuna ?'}</Text>
+            <Text style={styles.minorText}>{`${t('sheetUi.armadura')} ${sheet.ac === null ? '?' : sheet.ac}`}</Text>
+            <Text style={styles.minorText}>{sheet.fortune ? `${sheet.fortune.tier} ${sheet.fortune.result}` : t('mobile.sheet.fortuna')}</Text>
           </View>
         </View>
       </View>
 
       {sheet.quote ? <Text style={styles.quote}>{`"${sheet.quote}"`}</Text> : null}
-      {sheet.veiled ? <Text style={styles.veil}>{VEIL_NOTE}</Text> : null}
+      {sheet.veiled ? <Text style={styles.veil}>{veilNote()}</Text> : null}
       {sheet.conditions.length > 0 ? (
         <View style={styles.chips}>
           {sheet.conditions.map((c) => (
@@ -74,16 +77,16 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
       </View>
 
       <View style={styles.tabs}>
-        {TABS.map((t) => (
-          <Pressable key={t.id} onPress={() => setTab(t.id)} style={[styles.tab, tab === t.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === t.id }}>
-            <Text style={[styles.tabText, tab === t.id && styles.tabTextOn]}>{t.label}</Text>
+        {tabs().map((tb) => (
+          <Pressable key={tb.id} onPress={() => setTab(tb.id)} style={[styles.tab, tab === tb.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === tb.id }}>
+            <Text style={[styles.tabText, tab === tb.id && styles.tabTextOn]}>{tb.label}</Text>
           </Pressable>
         ))}
       </View>
 
       {tab === 'inventory' ? (
         <View style={styles.list}>
-          {sheet.inventoryHidden ? <Text style={styles.empty}>Lo que lleva solo lo sabe quien lo juega.</Text> : sheet.inventory.length === 0 && sheet.memoriesRecovered === 0 ? <Text style={styles.empty}>No llevas nada todavía.</Text> : null}
+          {sheet.inventoryHidden ? <Text style={styles.empty}>{t('mobile.sheet.loQueLlevaSolo')}</Text> : sheet.inventory.length === 0 && sheet.memoriesRecovered === 0 ? <Text style={styles.empty}>{t('mobile.sheet.noLlevasNadaTodavia')}</Text> : null}
           {sheet.inventory.map((item) => (
             <View key={item.id} style={styles.row}>
               <View style={styles.rowIcon}>
@@ -95,7 +98,7 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
               </View>
             </View>
           ))}
-          {sheet.memoriesRecovered > 0 ? <Text style={styles.rowMeta}>{`Recuerdos recuperados: ${sheet.memoriesRecovered}`}</Text> : null}
+          {sheet.memoriesRecovered > 0 ? <Text style={styles.rowMeta}>{t('mobile.sheet.recuerdosRecuperados', { count: sheet.memoriesRecovered })}</Text> : null}
         </View>
       ) : null}
 
@@ -126,7 +129,7 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
           ))}
           {sheet.skills.length > 0 ? (
             <>
-              <Text style={styles.section}>Eres bueno en</Text>
+              <Text style={styles.section}>{t('sheetUi.eresBuenoEn')}</Text>
               <View style={styles.chips}>
                 {sheet.skills.map((s) => (
                   <Text key={s} style={styles.chip}>
@@ -143,24 +146,24 @@ export function Sheet({ sheet, portraitUri, footer }: { sheet: SheetView; portra
         <View style={styles.list}>
           {sheet.roles.length > 0 ? (
             <>
-              <Text style={styles.section}>Rol en el grupo</Text>
+              <Text style={styles.section}>{t('sheetUi.rolEnElGrupo')}</Text>
               <Text style={styles.body}>{sheet.roles.join(' / ')}</Text>
             </>
           ) : null}
           {sheet.bio ? (
             <>
-              <Text style={styles.section}>Quién eres</Text>
+              <Text style={styles.section}>{t('sheetUi.quienEres')}</Text>
               <Text style={styles.body}>{sheet.bio}</Text>
             </>
           ) : null}
           {sheet.goal ? (
             <>
-              <Text style={styles.section}>Tu objetivo</Text>
+              <Text style={styles.section}>{t('sheetUi.tuObjetivo')}</Text>
               <Text style={styles.body}>{sheet.goal}</Text>
             </>
           ) : null}
-          {sheet.age ? <Text style={styles.rowMeta}>{`Edad: ${sheet.age}`}</Text> : null}
-          {!sheet.roles.length && !sheet.bio && !sheet.goal ? <Text style={styles.empty}>Lo que no recuerdas, lo descubres jugando.</Text> : null}
+          {sheet.age ? <Text style={styles.rowMeta}>{t('mobile.sheet.edad', { age: sheet.age })}</Text> : null}
+          {!sheet.roles.length && !sheet.bio && !sheet.goal ? <Text style={styles.empty}>{t('mobile.sheet.loQueNoRecuerdas')}</Text> : null}
         </View>
       ) : null}
       {footer}

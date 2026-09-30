@@ -1,4 +1,4 @@
-import { language } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, memberOf, normalizeBaseUrl, type ApiClient, type PackCharacter, type PackOption, type RegisterInput, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -71,7 +71,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
 
   const makeClient = useCallback((baseUrl: string) => createApiClient({ baseUrl: normalizeBaseUrl(baseUrl), tokenProvider: () => tokenRef.current, locale: () => language() }), [])
 
-  const unauthorized = useCallback((notice = 'La sesión caducó. Vuelve a entrar.') => {
+  const unauthorized = useCallback((notice = t('auth.sessionExpired')) => {
     tokenRef.current = null
     void storage.clearSession()
     setSession(null)
@@ -161,10 +161,10 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
         } catch (caught) {
           if (!alive) return
           if (caught instanceof ApiError && caught.status > 0) {
-            unauthorized(caught.isUnauthorized ? 'La sesión caducó. Vuelve a entrar.' : caught.message)
+            unauthorized(caught.isUnauthorized ? t('auth.sessionExpired') : caught.message)
             return
           }
-          setStage({ name: 'connect', notice: `No se pudo conectar con ${url}. Revisa la IP y que la API esté levantada.` })
+          setStage({ name: 'connect', notice: t('mobile.onlineRoot.noSePudoConectarCon', { url }) })
           return
         }
       }
@@ -197,7 +197,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
       if (result.kind === 'verify') {
         // Verificacion de correo encendida en la API: sin token hasta pulsar el enlace.
         setServerUrl(normalizeBaseUrl(url))
-        setStage({ name: 'connect', notice: `${result.message} Cuando hayas verificado el correo, entra con tu contraseña.` })
+        setStage({ name: 'connect', notice: `${result.message} ${t('auth.afterVerify')}` })
         return
       }
       await enter(client, url, result.token, result.user)
@@ -247,7 +247,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={theme.colors.accentBright} />
-        <Text style={styles.loading}>Buscando la mesa...</Text>
+        <Text style={styles.loading}>{t('requireSession.buscandoLaMesa')}</Text>
       </View>
     )
   }
@@ -310,7 +310,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
 
     if (stage.name === 'season') {
       const from = stage.from
-      return <SeasonScreen client={session.client} back={from === 'profile' ? 'Perfil' : 'Mundos'} onBack={() => setStage(from === 'profile' ? { name: 'profile' } : { name: 'explore' })} onUnauthorized={() => unauthorized()} />
+      return <SeasonScreen client={session.client} back={from === 'profile' ? t('mobile.onlineRoot.perfil') : t('home.mundos')} onBack={() => setStage(from === 'profile' ? { name: 'profile' } : { name: 'explore' })} onUnauthorized={() => unauthorized()} />
     }
 
     if (stage.name === 'pronto') {
@@ -339,7 +339,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
           onUnauthorized={() => unauthorized()}
           // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,
           // que respondera 401 a partir de ahora.
-          onDeleted={() => unauthorized('Tu cuenta se borró. Lo que escribiste en las partidas se conserva sin tu nombre.')}
+          onDeleted={() => unauthorized(t('mobile.onlineRoot.tuCuentaSeBorro'))}
           onLogout={() => void logout()}
         />
       )
@@ -366,7 +366,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     if (!me) {
       return (
         <View style={styles.center}>
-          <Text style={styles.error}>No eres miembro de esta mesa.</Text>
+          <Text style={styles.error}>{t('tablePage.noEresMiembroDe')}</Text>
         </View>
       )
     }

@@ -1,4 +1,5 @@
 import type { ApiClient, InvitePreview, TableSummary } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { inviteTokenFrom } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
@@ -73,20 +74,20 @@ export function JoinByLink({ client, onOpen, onRefresh, startOpen = false, onClo
   if (!open) {
     return (
       <View style={styles.row}>
-        <Button label="Tengo un enlace" small onPress={() => setOpen(true)} />
+        <Button label={t('mobile.joinByLink.tengoUnEnlace')} small onPress={() => setOpen(true)} />
       </View>
     )
   }
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Entrar con un enlace</Text>
-      <Text style={styles.hint}>Pega aquí el enlace que te mandaron. Vale el enlace entero o solo el código.</Text>
+      <Text style={styles.title}>{t('mobile.joinByLink.entrarConUnEnlace')}</Text>
+      <Text style={styles.hint}>{t('mobile.joinByLink.pegaAquiElEnlace')}</Text>
       <Field
-        label="Enlace"
+        label={t('mobile.joinByLink.enlace')}
         value={text}
-        onChangeText={(t) => {
-          setText(t)
+        onChangeText={(v) => {
+          setText(v)
           setPreview(null)
           setError(null)
         }}
@@ -95,27 +96,27 @@ export function JoinByLink({ client, onOpen, onRefresh, startOpen = false, onClo
         placeholder="https://rpg-worlds…/unirse/…"
         onSubmitEditing={() => void buscar()}
       />
-      {text.trim() && !token ? <Text style={styles.error}>Eso no parece un enlace de mesa. Comprueba que lo copiaste entero.</Text> : null}
+      {text.trim() && !token ? <Text style={styles.error}>{t('mobile.joinByLink.esoNoPareceUn')}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {preview ? (
         <View style={styles.preview}>
           <Text style={styles.mesa}>{preview.tableName}</Text>
-          {preview.hostName ? <Text style={styles.hint}>Te invita {preview.hostName}.</Text> : null}
+          {preview.hostName ? <Text style={styles.hint}>{t('joinPage.teInvita', { name: preview.hostName })}</Text> : null}
           <Text style={styles.hint}>
-            {preview.alreadyMember ? 'Ya eres parte de esta mesa.' : preview.seatsLeft === 1 ? 'Queda un sitio libre.' : `Quedan ${preview.seatsLeft} sitios libres.`}
+            {preview.alreadyMember ? t('play.alreadyMember') : preview.seatsLeft === 1 ? t('play.oneSeatLeft') : t('play.seatsLeft', { count: preview.seatsLeft })}
           </Text>
         </View>
       ) : null}
 
       <View style={styles.row}>
         {preview ? (
-          <Button label={preview.alreadyMember ? 'Ir a la mesa' : 'Entrar a la mesa'} primary busy={busy} onPress={() => void entrar()} />
+          <Button label={preview.alreadyMember ? t('play.goToTable') : t('play.joinTable')} primary busy={busy} onPress={() => void entrar()} />
         ) : (
-          <Button label="Buscar la mesa" primary busy={busy} disabled={!token} onPress={() => void buscar()} />
+          <Button label={t('mobile.joinByLink.buscarLaMesa')} primary busy={busy} disabled={!token} onPress={() => void buscar()} />
         )}
         <Button
-          label="Cancelar"
+          label={t('common.cancel')}
           small
           disabled={busy}
           onPress={() => {

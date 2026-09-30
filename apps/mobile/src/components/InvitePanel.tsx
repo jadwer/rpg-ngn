@@ -1,5 +1,6 @@
 import { ApiError, packPortraitUrl, type ApiClient, type AuthUser, type Friendship, type PackCharacter, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { t } from '@rpg-ngn/i18n'
 import { acceptedFriends, characterNameFrom, freeCharacters, freeRemoteCharacters, friendshipWith, knownByEmail, memberLine, pendingReceived, remoteCharacterNames, remotePortraitOf, takenCharacters } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -103,8 +104,8 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         return
       }
       const user = await client.lookupUser(value)
-      if (!user) setNotice(`No hay ninguna cuenta con el correo ${value}. Pídele que se registre desde la app o la web.`)
-      else if (user.id === meId) setNotice('Ese correo es el tuyo.')
+      if (!user) setNotice(t('mobile.friendsPanel.noAccountWithEmail', { email: value }))
+      else if (user.id === meId) setNotice(t('play.ownEmail'))
       else setFound(user)
     })
 
@@ -132,7 +133,7 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
 
   return (
     <View style={styles.wrap}>
-      {hideMembers ? null : <SectionTitle>En la mesa</SectionTitle>}
+      {hideMembers ? null : <SectionTitle>{t('playersPanel.enLaMesa')}</SectionTitle>}
       {(hideMembers ? [] : table.members).map((member) => (
         <View key={member.id} style={styles.member}>
           <Portrait
@@ -143,29 +144,29 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
           />
           <Text style={styles.memberText}>{memberLine(member, nameOf)}</Text>
           {member.characterId ? (
-            <Button label={member.present === false ? 'Presente' : 'Ausente'} small busy={busy} onPress={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))} />
+            <Button label={member.present === false ? t('mobile.invitePanel.presente') : t('mobile.invitePanel.ausente')} small busy={busy} onPress={() => void act(async () => (await client.setPresence(table.id, member.id, member.present === false), onChanged()))} />
           ) : null}
         </View>
       ))}
 
       {pending.length > 0 ? (
         <>
-          <SectionTitle>Solicitudes de amistad</SectionTitle>
+          <SectionTitle>{t('invitePanel.solicitudesDeAmistadPendientes')}</SectionTitle>
           {pending.map((f) => (
             <View key={f.id} style={styles.row}>
               <Text style={styles.rowText}>{`${f.user.name} (${f.user.email})`}</Text>
-              <Button label="Aceptar" small busy={busy} onPress={() => void accept(f.id)} />
+              <Button label={t('invitePanel.aceptar')} small busy={busy} onPress={() => void accept(f.id)} />
             </View>
           ))}
         </>
       ) : null}
 
-      <SectionTitle>Invitar por correo</SectionTitle>
+      <SectionTitle>{t('invitePanel.invitarPorCorreo')}</SectionTitle>
       <View style={styles.row}>
         <TextInput
           value={email}
           onChangeText={setEmail}
-          placeholder="correo@ejemplo.com"
+          placeholder={t('invitePanel.correoEjemploCom')}
           placeholderTextColor={theme.colors.inkFaint}
           autoCapitalize="none"
           autoCorrect={false}
@@ -175,11 +176,11 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
           returnKeyType="search"
           style={styles.input}
         />
-        <Button label="Buscar" small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
+        <Button label={t('invitePanel.buscar')} small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
       </View>
       {friends.length > 0 ? (
         <View style={styles.chips}>
-          <Text style={styles.hint}>Amigos:</Text>
+          <Text style={styles.hint}>{t('invitePanel.amigos')}</Text>
           {friends.map((u) => (
             <Pressable
               key={u.id}
@@ -201,20 +202,20 @@ export function InvitePanel({ client, table, meId, pack, onChanged, onUnauthoriz
         <View style={styles.found}>
           <Text style={styles.foundName}>{found.name}</Text>
           <Text style={styles.foundEmail}>{found.email}</Text>
-          {alreadyMember ? <Text style={styles.state}>Ya está en la mesa.</Text> : null}
-          {!alreadyMember && state.kind === 'none' ? <Button label="Enviar solicitud de amistad" primary busy={busy} onPress={() => void request(found.id)} /> : null}
-          {!alreadyMember && state.kind === 'requested' ? <Text style={styles.state}>Solicitud enviada; falta que acepte.</Text> : null}
-          {!alreadyMember && state.kind === 'received' ? <Button label="Aceptar su solicitud" primary busy={busy} onPress={() => void accept(state.friendship.id)} /> : null}
-          {!alreadyMember && state.kind === 'accepted' ? <Text style={styles.state}>Son amigos: elige su personaje.</Text> : null}
+          {alreadyMember ? <Text style={styles.state}>{t('mobile.invitePanel.yaEstaEnLaMesa')}</Text> : null}
+          {!alreadyMember && state.kind === 'none' ? <Button label={t('invitePanel.enviarSolicitudDeAmistad')} primary busy={busy} onPress={() => void request(found.id)} /> : null}
+          {!alreadyMember && state.kind === 'requested' ? <Text style={styles.state}>{t('mobile.friendsPanel.requestSentWaiting')}</Text> : null}
+          {!alreadyMember && state.kind === 'received' ? <Button label={t('invitePanel.aceptarSuSolicitud')} primary busy={busy} onPress={() => void accept(state.friendship.id)} /> : null}
+          {!alreadyMember && state.kind === 'accepted' ? <Text style={styles.state}>{t('mobile.invitePanel.sonAmigosElige')}</Text> : null}
         </View>
       ) : null}
 
       {found && state?.kind === 'accepted' && !alreadyMember ? (
         <>
-          <Text style={styles.label}>{`Personaje para ${found.name}`}</Text>
-          {pack || remote.length > 0 ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone noneContext="invite" /> : <Text style={styles.hint}>Cargando los personajes del pack...</Text>}
-          <Text style={styles.hint}>{characterId ? `Jugará a ${nameOf(characterId)}.` : 'Sin personaje: lo elige al entrar a la mesa, entre los que queden libres.'}</Text>
-          <Button label="Invitar a la mesa" primary busy={busy} onPress={() => void invite()} />
+          <Text style={styles.label}>{t('mobile.invitePanel.personajeParaNombre', { name: found.name })}</Text>
+          {pack || remote.length > 0 ? <CharacterPicker characters={free} taken={taken} value={characterId} onChange={setCharacterId} allowNone noneContext="invite" /> : <Text style={styles.hint}>{t('invitePanel.cargandoLosPersonajesDel')}</Text>}
+          <Text style={styles.hint}>{characterId ? t('play.willPlay', { name: nameOf(characterId) }) : t('play.picksOnJoin')}</Text>
+          <Button label={t('mobile.invitePanel.invitarALaMesa')} primary busy={busy} onPress={() => void invite()} />
         </>
       ) : null}
     </View>

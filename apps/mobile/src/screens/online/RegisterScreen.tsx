@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { RegisterInput } from '@rpg-ngn/api-client'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
@@ -43,38 +44,38 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={10}>
-          <Text style={styles.link}>‹ Entrar</Text>
+          <Text style={styles.link}>‹ {t('auth.signIn')}</Text>
         </Pressable>
-        <Text style={styles.title}>Crear cuenta</Text>
+        <Text style={styles.title}>{t('auth.signUpTitle')}</Text>
         <View style={styles.spacer} />
       </View>
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-        <Field label="Servidor" value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
-        <Field label="Tu nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" placeholder="Como te verán en la mesa" maxLength={80} autoFocus />
-        <Field label="Correo" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" />
-        <Field label="Contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint="Al menos 8 caracteres." />
-        <Field label="Repite la contraseña" value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={submit} />
-        {tooShort ? <Text style={styles.error}>La contraseña necesita al menos 8 caracteres.</Text> : null}
-        {mismatch ? <Text style={styles.error}>Las contraseñas no coinciden.</Text> : null}
+        <Field label={t('mobile.connect.server')} value={serverUrl} onChangeText={setServerUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder={PUBLIC_SERVER_URL} />
+        <Field label={t('auth.yourName')} value={name} onChangeText={setName} autoComplete="name" textContentType="name" placeholder={t('auth.namePlaceholder')} maxLength={80} autoFocus />
+        <Field label={t('auth.email')} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" />
+        <Field label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint={t('auth.atLeast8')} />
+        <Field label={t('auth.repeatPassword')} value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={submit} />
+        {tooShort ? <Text style={styles.error}>{t('auth.tooShort')}</Text> : null}
+        {mismatch ? <Text style={styles.error}>{t('auth.mismatch')}</Text> : null}
         <Pressable style={styles.check} onPress={() => setAdult((v) => !v)} accessibilityRole="checkbox" accessibilityState={{ checked: adult }}>
           <Switch value={adult} onValueChange={setAdult} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} thumbColor={theme.colors.ink} />
-          <Text style={styles.checkText}>Tengo 18 años o más.</Text>
+          <Text style={styles.checkText}>{t('auth.adult')}</Text>
         </Pressable>
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
-        <Button label="Crear cuenta" primary busy={busy} disabled={!canSubmit} onPress={submit} />
+        <Button label={t('auth.createAccount')} primary busy={busy} disabled={!canSubmit} onPress={submit} />
         {/* Los legales viven en el servidor al que se conecta, no en la app. */}
         <Text style={styles.foot}>
-          Al crear la cuenta aceptas los{' '}
+          {t('auth.acceptPrefix')}{' '}
           <Text style={styles.legal} onPress={() => void Linking.openURL(`${legalBase}/terminos`)}>
-            términos y condiciones
+            {t('auth.terms')}
           </Text>{' '}
-          y el{' '}
+          {t('auth.andThe')}{' '}
           <Text style={styles.legal} onPress={() => void Linking.openURL(`${legalBase}/privacidad`)}>
-            aviso de privacidad
+            {t('auth.privacy')}
           </Text>
           .
         </Text>
-        <Text style={styles.foot}>Entras directo a tus mesas. Luego dile tu correo al anfitrión para que te invite.</Text>
+        <Text style={styles.foot}>{t('mobile.registerScreen.entrasDirectoATus')}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   )

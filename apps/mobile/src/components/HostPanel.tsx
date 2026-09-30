@@ -1,5 +1,6 @@
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
+import { t } from '@rpg-ngn/i18n'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -47,9 +48,9 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
   return (
     <View style={styles.form}>
       <View style={styles.tabs}>
-        {(['session', 'settings'] as const).map((t) => (
-          <Pressable key={t} onPress={() => setTab(t)} style={[styles.tab, tab === t && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === t }}>
-            <Text style={[styles.tabText, tab === t && styles.tabTextOn]}>{t === 'session' ? 'Sesión' : 'Ajustes de la mesa'}</Text>
+        {(['session', 'settings'] as const).map((tabKey) => (
+          <Pressable key={tabKey} onPress={() => setTab(tabKey)} style={[styles.tab, tab === tabKey && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === tabKey }}>
+            <Text style={[styles.tabText, tab === tabKey && styles.tabTextOn]}>{tabKey === 'session' ? t('hostPanel.sesion') : t('hostPanel.ajustesDeLaMesa')}</Text>
           </Pressable>
         ))}
       </View>
@@ -57,21 +58,21 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
       {tab === 'settings' ? (
         <>
           <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
-          <Panel title="Director de juego">
+          <Panel title={t('hostPanel.directorDeJuego')}>
             <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Panel>
         </>
       ) : (
         <>
-          <Panel title={session ? `Sesión ${session.code}` : 'Abrir sesión'}>
-            <Text style={styles.state}>{session ? 'Abierta: la mesa está jugando.' : 'Sin sesión abierta.'}</Text>
+          <Panel title={session ? t('play.session', { code: session.code }) : t('hostPanel.abrirSesion')}>
+            <Text style={styles.state}>{session ? t('mobile.hostPanel.abiertaLaMesaEsta') : t('play.noSessionDot')}</Text>
             {!session ? (
               <>
                 {opciones.length > 0 ? (
                   <View style={styles.sessions}>
                     {opciones.map((o) => (
                       <Pressable key={o.code} onPress={() => setCode(o.code)} style={[styles.session, code === o.code && styles.sessionOn]} accessibilityRole="radio" accessibilityState={{ selected: code === o.code }}>
-                        <Text style={styles.sessionTitle}>{`${o.code} · ${o.title}${o.played ? ' (ya jugada)' : ''}`}</Text>
+                        <Text style={styles.sessionTitle}>{`${o.code} · ${o.title}${o.played ? t('hostPanel.yaJugada') : ''}`}</Text>
                       </Pressable>
                     ))}
                     {elegida ? <Text style={styles.sessionHint}>{elegida.summary}</Text> : null}
@@ -87,19 +88,19 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
                     style={[styles.input, styles.code]}
                   />
                 )}
-                <TextInput value={note} onChangeText={setNote} placeholder="Nota de la sesión; el GM la recibe" placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={styles.input} />
-                <Button label="Abrir sesión" primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
+                <TextInput value={note} onChangeText={setNote} placeholder={t('mobile.hostPanel.notaDeLaSesionEl')} placeholderTextColor={theme.colors.inkFaint} maxLength={120} style={styles.input} />
+                <Button label={t('hostPanel.abrirSesion')} primary busy={busy} disabled={!isValidSessionCode(code)} onPress={() => onOpenSession(code, note.trim() || null)} />
               </>
             ) : (
               <>
-                <TextInput value={cliffhanger} onChangeText={setCliffhanger} placeholder="Cliffhanger para la próxima (opcional)" placeholderTextColor={theme.colors.inkFaint} style={styles.input} />
+                <TextInput value={cliffhanger} onChangeText={setCliffhanger} placeholder={t('mobile.hostPanel.cliffhangerParaLaProximaOpcional')} placeholderTextColor={theme.colors.inkFaint} style={styles.input} />
                 <View style={styles.row}>
                   {!confirmClose ? (
-                    <Button label="Cerrar sesión" busy={busy} onPress={() => setConfirmClose(true)} />
+                    <Button label={t('hostPanel.cerrarSesion')} busy={busy} onPress={() => setConfirmClose(true)} />
                   ) : (
                     <>
                       <Button
-                        label="Sí, cerrar y congelar"
+                        label={t('mobile.hostPanel.siCerrarYCongelar')}
                         primary
                         busy={busy}
                         onPress={() => {
@@ -107,7 +108,7 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
                           onCloseSession(cliffhanger.trim() || null)
                         }}
                       />
-                      <Button label="No, seguir" onPress={() => setConfirmClose(false)} />
+                      <Button label={t('mobile.hostPanel.noSeguir')} onPress={() => setConfirmClose(false)} />
                     </>
                   )}
                 </View>
@@ -115,7 +116,7 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
             )}
           </Panel>
           {table.premise ? (
-            <Panel title="Premisa">
+            <Panel title={t('hostPanel.premisa')}>
               <Text style={styles.premise}>{table.premise}</Text>
             </Panel>
           ) : null}

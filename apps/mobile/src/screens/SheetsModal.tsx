@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { characterSheet } from '@rpg-ngn/ui-logic'
 import { useState, type ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native'
@@ -39,10 +40,10 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
   return (
     <SheetModal
       visible={visible}
-      title={selected ? selected.character.name : 'La party'}
+      title={selected ? selected.character.name : t('play.theParty')}
       onClose={close}
       onBack={selected ? () => setSelectedId(null) : close}
-      back={selected ? { label: 'Fichas', onPress: () => setSelectedId(null) } : undefined}
+      back={selected ? { label: t('sheetsPanel.fichas'), onPress: () => setSelectedId(null) } : undefined}
     >
       {sheet ? (
         <Sheet sheet={sheet} portraitUri={portraitUriOf?.(sheet.portrait)} footer={selected?.mine && persona ? persona : undefined} />
@@ -54,8 +55,8 @@ export function SheetsModal({ visible, onClose, entries, footer, portraitUriOf, 
               <Text style={styles.cardName}>{character.name}</Text>
               <Text style={styles.cardSub}>{`${character.race}\n${character.class}`}</Text>
               <Text style={styles.cardRoles}>{character.roles.join(' / ')}</Text>
-              {slot.kind === 'taken' ? <Text style={[styles.tag, mine && styles.tagMine]}>{mine ? 'Tú' : slot.player}</Text> : null}
-              {slot.kind === 'free' ? <Text style={[styles.tag, styles.tagFree]}>{visibility.veiled ? 'Libre, sin memoria' : 'Libre'}</Text> : null}
+              {slot.kind === 'taken' ? <Text style={[styles.tag, mine && styles.tagMine]}>{mine ? t('mobile.sheetsModal.tu') : slot.player}</Text> : null}
+              {slot.kind === 'free' ? <Text style={[styles.tag, styles.tagFree]}>{visibility.veiled ? t('mobile.sheetsModal.libreSinMemoria') : t('mobile.sheetsModal.libre')}</Text> : null}
             </Pressable>
           ))}
           {footer ? <Text style={styles.footer}>{footer}</Text> : null}

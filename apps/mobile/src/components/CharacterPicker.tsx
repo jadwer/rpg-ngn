@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { noCharacterText } from '@rpg-ngn/ui-logic'
+import { characterOwnerText, noCharacterText } from '@rpg-ngn/ui-logic'
 import { theme } from '../theme'
 import { Portrait } from './Portrait'
 
@@ -50,7 +50,7 @@ export function CharacterPicker({ characters, taken, value, onChange, allowNone 
             <Portrait path={character.portrait} uri={character.portraitUri} name={character.name} size={72} muted={!!owner} />
             <Text style={[styles.name, selected && styles.nameSelected]}>{character.name}</Text>
             <Text style={styles.sub}>{`${character.race}, ${character.class}`}</Text>
-            <Text style={[styles.tag, owner && styles.tagTaken]}>{owner ? `lo juega ${owner}` : character.roles.join(' / ')}</Text>
+            <Text style={[styles.tag, owner && styles.tagTaken]}>{owner ? characterOwnerText(owner) : character.roles.join(' / ')}</Text>
           </Pressable>
         )
       })}

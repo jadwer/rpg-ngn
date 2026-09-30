@@ -1,4 +1,5 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
@@ -32,17 +33,17 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
 
   const chooseCountdown = (value: number) => {
     if (value === seconds || busy) return
-    void save(withCountdown(table.settings, value), value === 0 ? 'Guardado: se narra al responder el último.' : `Guardado: ${value} segundos antes de narrar.`)
+    void save(withCountdown(table.settings, value), value === 0 ? t('play.savedCountdownNone') : t('play.savedCountdown', { seconds: value }))
   }
 
   const choose = (mode: DiceMode) => {
     if (mode === saved || busy) return
-    void save(withDiceMode(table.settings, mode), `Guardado: ${diceModeLabel(mode).toLowerCase()}.`)
+    void save(withDiceMode(table.settings, mode), t('play.savedDice', { mode: diceModeLabel(mode).toLowerCase() }))
   }
 
   const chooseImages = (on: boolean) => {
     if (on === images || busy) return
-    void save(withSceneImages(table.settings, on), on ? 'Guardado: la mesa se ilustra.' : 'Guardado: solo texto.')
+    void save(withSceneImages(table.settings, on), on ? t('play.savedImagesOn') : t('play.savedImagesOff'))
   }
 
   const save = async (settings: Record<string, unknown>, text: string) => {
@@ -62,13 +63,13 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
 
   return (
     <>
-      <Panel title="Dados">
+      <Panel title={t('tableRules.dados')}>
         {DICE_MODES.map((mode) => (
           <RadioRow key={mode} label={diceModeLabel(mode)} selected={saved === mode} onSelect={() => choose(mode)} />
         ))}
         <Text style={styles.hint}>{diceModeHint(saved)}</Text>
       </Panel>
-      <Panel title="Cuenta atrás">
+      <Panel title={t('tableRules.cuentaAtras')}>
         <View style={styles.chips}>
           {COUNTDOWN_OPTIONS.map((value) => (
             <Pressable key={value} disabled={fixed !== null} onPress={() => chooseCountdown(value)} style={[styles.chip, seconds === value && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected: seconds === value, disabled: fixed !== null }}>
@@ -78,9 +79,9 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
         </View>
         <Text style={styles.hint}>{fixed !== null ? countdownFixedHint(fixed) : countdownHint(seconds)}</Text>
       </Panel>
-      <Panel title="Ilustraciones">
-        <RadioRow label="Ilustrar escenas" selected={images} onSelect={() => chooseImages(true)} />
-        <RadioRow label="Solo texto" selected={!images} onSelect={() => chooseImages(false)} />
+      <Panel title={t('tableRules.ilustraciones')}>
+        <RadioRow label={t('tableRules.ilustrarEscenas')} selected={images} onSelect={() => chooseImages(true)} />
+        <RadioRow label={t('tableRules.soloTexto')} selected={!images} onSelect={() => chooseImages(false)} />
         <Text style={styles.hint}>{sceneImagesHint(images, table.imagesPerSession)}</Text>
         {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
       </Panel>

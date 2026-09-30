@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { nobodyNarrates, readingLanguageLabel, voiceLineSummary } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native'
@@ -42,10 +43,10 @@ export function TtsBar({ tts, autoRead = false, collapsible = true }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.line}>
-        {!active ? <Small label="Leer" primary onPress={() => tts.start()} disabled={tts.count === 0} /> : null}
-        {state.status === 'speaking' ? <Small label="Pausa" onPress={tts.pause} /> : null}
-        {state.status === 'paused' ? <Small label="Seguir" primary onPress={tts.resume} /> : null}
-        {active ? <Small label="Parar" onPress={tts.stop} /> : null}
+        {!active ? <Small label={t('ttsBar.leer')} primary onPress={() => tts.start()} disabled={tts.count === 0} /> : null}
+        {state.status === 'speaking' ? <Small label={t('ttsBar.pausa')} onPress={tts.pause} /> : null}
+        {state.status === 'paused' ? <Small label={t('ttsBar.seguir')} primary onPress={tts.resume} /> : null}
+        {active ? <Small label={t('ttsBar.parar')} onPress={tts.stop} /> : null}
         {collapsible ? (
           <Pressable onPress={() => setExpanded((v) => !v)} style={styles.summary} accessibilityRole="button" accessibilityState={{ expanded }} hitSlop={6}>
             <Text style={[styles.summaryText, summary.warn && styles.summaryWarn]} numberOfLines={1}>
@@ -66,15 +67,15 @@ export function TtsBar({ tts, autoRead = false, collapsible = true }: Props) {
       {expanded ? (
         <View style={styles.panel}>
           <View style={styles.row}>
-            {active ? <Small label="Siguiente" onPress={tts.next} /> : null}
-            <Small label={tts.voice ? `Voz: ${shortName(tts.voice.name)}` : 'Voz del sistema'} onPress={() => setPickerOpen(true)} />
+            {active ? <Small label={t('ttsBar.siguiente')} onPress={tts.next} /> : null}
+            <Small label={tts.voice ? t('mobile.ttsBar.vozNombre', { name: shortName(tts.voice.name) }) : t('mobile.ttsBar.vozDelSistema')} onPress={() => setPickerOpen(true)} />
             <Small label={readingLanguageLabel(tts.settings.lang)} onPress={() => setPickerOpen(true)} />
             <Text style={styles.rate}>{`${tts.settings.rate.toFixed(2)}x`}</Text>
           </View>
 
           {autoRead ? (
             <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Leer lo nuevo desde este teléfono</Text>
+              <Text style={styles.switchLabel}>{t('mobile.ttsBar.leerLoNuevoDesde')}</Text>
               <Switch value={tts.autoRead} onValueChange={tts.setAutoRead} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} thumbColor={theme.colors.ink} />
             </View>
           ) : null}
@@ -87,23 +88,23 @@ export function TtsBar({ tts, autoRead = false, collapsible = true }: Props) {
 
           {nobodyWarns ? (
             <View style={styles.noticeRow}>
-              <Text style={styles.notice}>Nadie narra en voz alta: toca Leer aquí y la mesa lo verá.</Text>
+              <Text style={styles.notice}>{t('mobile.ttsBar.nadieNarraEnVoz')}</Text>
               <Pressable onPress={narrator.dismiss} hitSlop={6}>
-                <Text style={styles.link}>Jugamos leyendo</Text>
+                <Text style={styles.link}>{t('ttsBar.jugamosLeyendo')}</Text>
               </Pressable>
             </View>
           ) : null}
           {narrator.flag.dismissed && !narrating ? (
             <Pressable onPress={narrator.restore} hitSlop={6}>
-              <Text style={styles.link}>Volver a avisar si nadie narra</Text>
+              <Text style={styles.link}>{t('ttsBar.volverAAvisarSi')}</Text>
             </Pressable>
           ) : null}
 
           {tts.noVoiceInLanguage ? (
             <View style={styles.noticeRow}>
-              <Text style={styles.notice}>{`Este teléfono no tiene voz en ${readingLanguageLabel(tts.settings.lang).toLowerCase()}: la lectura sonará en otro idioma o no sonará. Se instala en los ajustes de texto a voz.`}</Text>
+              <Text style={styles.notice}>{t('mobile.ttsBar.esteTelefonoNoTiene', { language: readingLanguageLabel(tts.settings.lang).toLowerCase() })}</Text>
               <Pressable onPress={tts.dismissVoiceNotice} hitSlop={6}>
-                <Text style={styles.link}>Entendido</Text>
+                <Text style={styles.link}>{t('tableScreen.entendido')}</Text>
               </Pressable>
             </View>
           ) : null}

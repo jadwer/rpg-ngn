@@ -27,6 +27,7 @@ import { inviteLink } from './inviteLink.js'
 import { invitePanel } from './invitePanel.js'
 import { joinPage } from './joinPage.js'
 import { mapPanel } from './mapPanel.js'
+import { mobile } from './mobile.js'
 import { myWorldsPage } from './myWorldsPage.js'
 import { newTable } from './newTable.js'
 import { ownKeys } from './ownKeys.js'
@@ -61,4 +62,4 @@ import { worldPage } from './worldPage.js'
 import { worlds } from './worlds.js'
 
 /** El español es el original: cada clave nueva nace aqui y el ingles la sigue. */
-export const es = { account, auth, blessing, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, fortune, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, myWorldsPage, newTable, ownKeys, packPreview, packs, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, shop, soonPage, spriteDie, support, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }
+export const es = { account, auth, blessing, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, fortune, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, mobile, myWorldsPage, newTable, ownKeys, packPreview, packs, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, shop, soonPage, spriteDie, support, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }

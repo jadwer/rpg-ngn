@@ -1,4 +1,5 @@
 import { type ApiClient, ApiError, type GmPreset, type GmProbeResult, type GmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { describePreset, presetAvailability, savedProviderText, type TableGmInfo, tableGmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
@@ -123,11 +124,11 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
   return (
     <View style={styles.wrap}>
       {gmInfo ? <Text style={styles.now}>{tableGmText(gmInfo)}</Text> : null}
-      <Text style={styles.hint}>Tu propia clave se guarda en Mi cuenta; si tienes una para este proveedor, la mesa la usa.</Text>
+      <Text style={styles.hint}>{t('mobile.gmSettingsPanel.tuPropiaClaveSeGuarda')}</Text>
 
-      <Text style={styles.label}>Proveedor</Text>
-      {presets === null ? <Text style={styles.hint}>Consultando los presets del servidor...</Text> : null}
-      <RadioRow label={defaultPreset ? `El del servidor (${describePreset(defaultPreset)})` : 'El del servidor'} selected={preset === ''} disabled={disabled || presets === null} onSelect={() => setPreset('')} />
+      <Text style={styles.label}>{t('gmSettings.proveedor')}</Text>
+      {presets === null ? <Text style={styles.hint}>{t('mobile.gmSettingsPanel.consultandoLosPresetsDel')}</Text> : null}
+      <RadioRow label={defaultPreset ? t('play.serverPreset', { preset: describePreset(defaultPreset) }) : t('play.serverPresetShort')} selected={preset === ''} disabled={disabled || presets === null} onSelect={() => setPreset('')} />
       {(presets ?? []).map((p) => (
         <RadioRow
           key={p.name}
@@ -141,20 +142,20 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
       {current && current.kind !== 'scripted' ? (
         <>
-          <Text style={styles.label}>Modelo (opcional)</Text>
+          <Text style={styles.label}>{t('gmSettings.modeloOpcional')}</Text>
           <TextInput value={model} onChangeText={setModel} placeholder={current.model ?? ''} placeholderTextColor={theme.colors.inkFaint} autoCapitalize="none" autoCorrect={false} maxLength={120} editable={!disabled} style={styles.input} />
-          <Text style={styles.hint}>{`Vacío: ${current.model ?? 'el del preset'}. Solo si sabes qué modelo quieres.`}</Text>
+          <Text style={styles.hint}>{t('gmSettings.vacioElDelPreset', { model: current.model ?? t('gmSettings.elDelPreset') })}</Text>
         </>
       ) : null}
 
-      {probe ? <Text style={[styles.result, probe.ok ? styles.ok : styles.error]}>{`${probe.ok ? 'Listo: ' : 'No responde: '}${probe.message}${probe.model ? ` (${probe.model})` : ''}`}</Text> : null}
+      {probe ? <Text style={[styles.result, probe.ok ? styles.ok : styles.error]}>{`${probe.ok ? t('play.probeOk') : t('play.probeFail')}${probe.message}${probe.model ? ` (${probe.model})` : ''}`}</Text> : null}
       {notice ? <Text style={[styles.result, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
 
       <View style={styles.row}>
-        <Button label="Probar" busy={working} disabled={disabled || presets === null} onPress={() => void test()} />
-        <Button label="Guardar" primary busy={working} disabled={disabled || !dirty} onPress={() => void save()} />
+        <Button label={t('gmSettings.probar')} busy={working} disabled={disabled || presets === null} onPress={() => void test()} />
+        <Button label={t('gmSettings.guardar')} primary busy={working} disabled={disabled || !dirty} onPress={() => void save()} />
       </View>
-      <Text style={styles.hint}>Probar no gasta un turno; solo comprueba clave y modelo.</Text>
+      <Text style={styles.hint}>{t('gmSettings.probarNoGasta')}</Text>
     </View>
   )
 }

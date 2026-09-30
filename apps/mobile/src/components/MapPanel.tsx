@@ -1,5 +1,6 @@
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
+import { t } from '@rpg-ngn/i18n'
 import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEveryoneIs, ZOOM_IDENTITY, ZOOM_STEP, zoomGesture, type ZoomState, zoomStep } from '@rpg-ngn/ui-logic'
 import { useMemo, useRef, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View, type GestureResponderEvent } from 'react-native'
@@ -115,9 +116,9 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
     <>
       {controlled ? null : (
         <Pressable style={({ pressed }) => [styles.head, pressed && styles.pressed]} onPress={() => setOpen(true)}>
-          <Text style={styles.headTitle}>{`Mapa: ${view.map.name}`}</Text>
+          <Text style={styles.headTitle}>{t('mobile.mapPanel.mapaNombre', { name: view.map.name })}</Text>
           <Text style={styles.headSub}>{resumen}</Text>
-          <Text style={styles.headLink}>abrir</Text>
+          <Text style={styles.headLink}>{t('mapPanel.abrir')}</Text>
         </Pressable>
       )}
 
@@ -203,17 +204,17 @@ export function MapPanel({ baseUrl, packId, maps, world, party, viewerCharacterI
               <View style={styles.bisel} pointerEvents="none" />
             </View>
             <View style={styles.zoomBar}>
-              <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Acercar">
+              <Pressable onPress={zoom.zoomIn} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel={t('mapPanel.acercar')}>
                 <Text style={styles.zoomText}>+</Text>
               </Pressable>
-              <Pressable onPress={zoom.zoomOut} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel="Alejar">
+              <Pressable onPress={zoom.zoomOut} style={styles.zoomBtn} accessibilityRole="button" accessibilityLabel={t('mapPanel.alejar')}>
                 <Text style={styles.zoomText}>−</Text>
               </Pressable>
             </View>
           </View>
-          <Text style={styles.nota}>Pellizca para acercar y arrastra para moverte por el mapa.</Text>
+          <Text style={styles.nota}>{t('mobile.mapPanel.pellizcaParaAcercar')}</Text>
 
-          {view.offMap.length > 0 ? <Text style={styles.nota}>{`De camino o fuera de escena: ${view.offMap.map(nameOf).join(', ')}.`}</Text> : null}
+          {view.offMap.length > 0 ? <Text style={styles.nota}>{t('mapPanel.deCaminoOFuera', { names: view.offMap.map(nameOf).join(', ') })}</Text> : null}
           {view.map.description ? (
             <Text style={styles.nota} numberOfLines={3}>
               {view.map.description}

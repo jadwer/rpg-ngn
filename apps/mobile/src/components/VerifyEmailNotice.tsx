@@ -1,4 +1,5 @@
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -35,7 +36,7 @@ export function VerifyEmailNotice({ client }: { client: ApiClient }) {
     try {
       setNotice({ ok: true, text: await client.resendVerification() })
     } catch (caught) {
-      const text = caught instanceof ApiError && caught.status === 429 ? 'Ya te lo enviamos hace un momento: espera un minuto y revisa también el correo no deseado.' : caught instanceof Error ? caught.message : String(caught)
+      const text = caught instanceof ApiError && caught.status === 429 ? t('play.verifyThrottled') : caught instanceof Error ? caught.message : String(caught)
       setNotice({ ok: false, text })
     } finally {
       setBusy(false)
@@ -43,11 +44,11 @@ export function VerifyEmailNotice({ client }: { client: ApiClient }) {
   }
 
   return (
-    <Panel title="Confirma tu correo">
-      <Text style={styles.text}>Para crear mesas y ser anfitrión hace falta confirmar tu correo. Para entrar a la mesa de alguien, no.</Text>
+    <Panel title={t('verifyNotice.confirmaTuCorreo')}>
+      <Text style={styles.text}>{t('verifyNotice.paraCrearMesasY')}</Text>
       {notice ? <Text style={[styles.text, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
       <View style={styles.actions}>
-        <Button label="Enviarme el enlace otra vez" primary busy={busy} onPress={() => void resend()} />
+        <Button label={t('mobile.verifyEmailNotice.enviarmeElEnlaceOtra')} primary busy={busy} onPress={() => void resend()} />
       </View>
     </Panel>
   )

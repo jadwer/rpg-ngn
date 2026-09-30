@@ -74,7 +74,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
       onUserChanged({ id: updated.id, name: updated.name, email: updated.email })
       setNameNotice({
         ok: true,
-        text: emailChanged ? 'Guardado. Tu correo nuevo está sin verificar: entra con él la próxima vez.' : 'Guardado.',
+        text: emailChanged ? t('play.savedEmailUnverified') : t('play.saved'),
       })
     } catch (caught) {
       fail(caught, setNameNotice)
@@ -94,7 +94,7 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
       setCurrent('')
       setPassword('')
       setConfirmation('')
-      setPassNotice({ ok: true, text: 'Contraseña cambiada.' })
+      setPassNotice({ ok: true, text: t('play.passwordChanged') })
     } catch (caught) {
       fail(caught, setPassNotice)
     } finally {
@@ -105,25 +105,25 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior="padding">
       <PageHeader
-        back="Mesas"
+        back={t('play.tablesBack')}
         onBack={onBack}
         right={
           <Pressable onPress={onLogout} hitSlop={10} accessibilityRole="button">
-            <Text style={styles.link}>Salir</Text>
+            <Text style={styles.link}>{t('shell.logout')}</Text>
           </Pressable>
         }
       />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Backdrop />
         <View style={styles.form}>
-        <Text style={styles.pageTitle}>Tu perfil</Text>
-        <Text style={styles.subtitle}>Tu cuenta, tus créditos y tus claves</Text>
+        <Text style={styles.pageTitle}>{t('mobile.profileScreen.tuPerfil')}</Text>
+        <Text style={styles.subtitle}>{t('mobile.profileScreen.tuCuentaTusCreditos')}</Text>
         <VerifyEmailNotice client={client} />
         <View style={styles.card}>
-          <SectionTitle>Cuenta</SectionTitle>
-          <Field label="Nombre" value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />
+          <SectionTitle>{t('profilePage.cuenta')}</SectionTitle>
+          <Field label={t('profilePage.nombre')} value={name} onChangeText={setName} autoComplete="name" textContentType="name" maxLength={80} />
           <Field
-            label="Correo"
+            label={t('profilePage.correo')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -131,11 +131,11 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
             autoComplete="email"
             textContentType="emailAddress"
             maxLength={255}
-            hint="Con él entras a la mesa. Si lo cambias, el nuevo empieza sin verificar."
+            hint={t('profilePage.conElEntrasA')}
           />
           {nameNotice ? <Text style={[styles.notice, nameNotice.ok ? styles.ok : styles.error]}>{nameNotice.text}</Text> : null}
           <View style={styles.actions}>
-            <Button label="Guardar cuenta" primary busy={nameBusy} disabled={!name.trim() || !email.trim() || (name.trim() === user.name && email.trim() === user.email)} onPress={() => void saveName()} />
+            <Button label={t('mobile.profileScreen.guardarCuenta')} primary busy={nameBusy} disabled={!name.trim() || !email.trim() || (name.trim() === user.name && email.trim() === user.email)} onPress={() => void saveName()} />
           </View>
         </View>
 
@@ -147,14 +147,14 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
         </View>
 
         <View style={styles.card}>
-          <SectionTitle>Contraseña</SectionTitle>
-          <Field label="Contraseña actual" value={current} onChangeText={setCurrent} secureTextEntry textContentType="password" />
-          <Field label="Nueva contraseña" value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint="Al menos 8 caracteres." />
-          <Field label="Repite la nueva" value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={() => void savePassword()} />
-          {mismatch ? <Text style={styles.error}>Las contraseñas no coinciden.</Text> : null}
+          <SectionTitle>{t('profilePage.contrasena')}</SectionTitle>
+          <Field label={t('profilePage.contrasenaActual')} value={current} onChangeText={setCurrent} secureTextEntry textContentType="password" />
+          <Field label={t('profilePage.nuevaContrasena')} value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint={t('profilePage.alMenos8Caracteres')} />
+          <Field label={t('profilePage.repiteLaNueva')} value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={() => void savePassword()} />
+          {mismatch ? <Text style={styles.error}>{t('profilePage.lasContrasenasNoCoinciden')}</Text> : null}
           {passNotice ? <Text style={[styles.notice, passNotice.ok ? styles.ok : styles.error]}>{passNotice.text}</Text> : null}
           <View style={styles.actions}>
-            <Button label="Cambiar contraseña" primary busy={passBusy} disabled={!canChange} onPress={() => void savePassword()} />
+            <Button label={t('profilePage.cambiarContrasena')} primary busy={passBusy} disabled={!canChange} onPress={() => void savePassword()} />
           </View>
         </View>
 

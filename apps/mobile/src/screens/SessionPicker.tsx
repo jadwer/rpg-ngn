@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { Session } from '@rpg-ngn/content'
 import { sessionList } from '@rpg-ngn/ui-logic'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -18,19 +19,19 @@ export function SessionPicker({ campaign, onSelect, onBack }: Props) {
     <ScrollView contentContainerStyle={styles.wrap}>
       {onBack ? (
         <Pressable onPress={onBack} hitSlop={10} style={styles.back}>
-          <Text style={styles.backText}>‹ Inicio</Text>
+          <Text style={styles.backText}>‹ {t('shell.nav.home')}</Text>
         </Pressable>
       ) : null}
       {manifest.motto ? <Text style={styles.motto}>{`"${manifest.motto}"`}</Text> : null}
       <Text style={styles.title}>{manifest.name}</Text>
       {manifest.tagline ? <Text style={styles.tagline}>{manifest.tagline}</Text> : null}
 
-      <Text style={styles.hint}>Elige la sesión que se juega hoy</Text>
+      <Text style={styles.hint}>{t('mobile.sessionPicker.eligeLaSesionQue')}</Text>
       {sessions.map((session) => (
         <SessionCard key={session.id} session={session} campaign={campaign} onPress={() => onSelect(session.id)} />
       ))}
 
-      <Text style={styles.footer}>{`${manifest.id}@${manifest.version} · sin conexión`}</Text>
+      <Text style={styles.footer}>{`${manifest.id}@${manifest.version} · ${t('mobile.sessionPicker.sinConexion')}`}</Text>
     </ScrollView>
   )
 }
@@ -38,7 +39,7 @@ export function SessionPicker({ campaign, onSelect, onBack }: Props) {
 function SessionCard({ session, campaign, onPress }: { session: Session; campaign: OfflineCampaign; onPress: () => void }) {
   const party = session.party.map((p) => `${campaign.pack.characters.get(p.character)?.name ?? p.character} (${p.player})`)
   const choosing = (session.availableCharacters?.length ?? 0) > 0
-  const badge = session.status === 'played' ? 'jugada' : session.status === 'planned' ? 'próxima' : 'cancelada'
+  const badge = session.status === 'played' ? t('mobile.sessionPicker.jugada') : session.status === 'planned' ? t('mobile.sessionPicker.proxima') : t('mobile.sessionPicker.cancelada')
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, session.status === 'planned' && styles.cardNext, pressed && styles.pressed]} accessibilityRole="button">
@@ -50,8 +51,8 @@ function SessionCard({ session, campaign, onPress }: { session: Session; campaig
       <Text style={styles.briefing} numberOfLines={3}>
         {session.briefing}
       </Text>
-      {party.length > 0 ? <Text style={styles.party}>{`En la mesa: ${party.join(' · ')}`}</Text> : null}
-      {choosing ? <Text style={styles.party}>{`${session.availableCharacters?.length} personajes por elegir`}</Text> : null}
+      {party.length > 0 ? <Text style={styles.party}>{t('mobile.sessionPicker.enLaMesa', { party: party.join(' · ') })}</Text> : null}
+      {choosing ? <Text style={styles.party}>{t('mobile.sessionPicker.personajesPorElegir', { count: session.availableCharacters?.length ?? 0 })}</Text> : null}
     </Pressable>
   )
 }
