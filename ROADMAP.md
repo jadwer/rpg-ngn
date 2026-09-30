@@ -683,6 +683,21 @@ El modelo completo (free, temporadas, pases, suscripciones, social) vive en el r
 - [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
 - [ ] Colaboraciones con streamers: despues de ajustar el producto base
 
+## Demo en ingles para la beta cerrada (29-09, desplegada)
+
+Para prospectos de Estados Unidos y streamers: una demo jugable en ingles sin romper los otros proyectos de Atomo.
+
+- [x] AtomoPlatform: `ATOMO_LOCALES` (apagado por defecto), middleware `SetLocale`, `users.locale`, textos de atomo-auth en `lang/`
+- [x] API: `lang/{es,en}/game.php` y `pass.php`; avisos guardados en el idioma de la mesa; lecturas del pack con `lang` y cache por idioma
+- [x] Motor: `language` en el contrato, prompt que narra en ingles, bloques de sistema con `tFor`, pack cargado por idioma
+- [x] Web: toda la interfaz, globo de idioma arriba a la derecha y `?lang=` en la URL (web `d69603f`, API `e15c10d`)
+- [x] Los Nueve Viajeros en ingles con la capa `i18n/en/` (docs/05)
+- [ ] Jugar un turno real en ingles en produccion y revisar la narracion
+- [ ] App movil en ingles
+- [ ] La Mascarada y la boticaria en ingles, si entran a la demo
+- [ ] Legales: version oficial en ingles con el abogado; faltan terceros en el aviso (Google Gemini y OpenAI por las imagenes, servicios push de Google y Apple), el estado del INAI y la frase "no es una suscripcion" frente a las suscripciones futuras
+- [ ] En el pack en español (rama `legacy`): "El DM interpreta" en las reglas de las sesiones, y las incoherencias de Bren, Tomas y Mera que salieron al traducir
+
 ## Entrega 13: Constructor de historias (planeada el 2026-09-28)
 
 - [ ] Editor de packs sobre el schema de `packages/content`, borradores versionados, salida `.rpgpack` por el camino de siempre y mesa de prueba desde el panel

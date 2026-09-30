@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-28, 06:30 CST**. Rama `dev`, commit del cierre de sesion (ver `git log`); API `33ae6f9` con platform `536c0bf`. Produccion en https://adastramentis.com.
+Fecha de corte: **2026-09-30, 02:00 UTC** (29-09 noche en CST). Rama `dev` `d69603f`; API `e15c10d` con platform `24c4733`. Produccion en https://adastramentis.com.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -61,6 +61,13 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 ---
 
 ## 3. Que esta implementado (y en produccion)
+
+### Ingles para la beta cerrada (29-09, desplegado)
+
+- **Interfaz**: la web entera en español e ingles con `@rpg-ngn/i18n` (i18next, claves tipadas desde el español). Globo de idioma arriba a la derecha; `?lang=en` en un enlace fija el idioma y se recuerda; con sesion se guarda en la cuenta (`users.locale`) para los correos. Faltan la app movil, las paginas legales en su version oficial (hay traduccion de cortesia) y el `metadata` de SEO.
+- **Plataforma**: AtomoPlatform tiene i18n apagado por defecto (`ATOMO_LOCALES`, middleware `SetLocale`); en produccion `ATOMO_LOCALES=es,en`. Los mensajes de la API, del pase y de atomo-auth salen en el idioma de la peticion.
+- **Mesa**: cada mesa tiene idioma (`settings.language`, el de quien la crea). El GM narra en ese idioma; los bloques de sistema del motor y los avisos que guarda la API tambien, sin importar quien cierre el turno.
+- **Contenido**: los packs se traducen con una capa `i18n/<idioma>/` (docs/05); Los Nueve Viajeros esta en ingles. La Mascarada y la boticaria, no.
 
 ### Motor y dominio
 
