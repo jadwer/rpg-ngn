@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { CampaignState } from '@rpg-ngn/campaign'
 import type { CampaignEvent, Character, LoadedPack, RollEvent, Session } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
@@ -22,14 +23,15 @@ export interface SessionBlocksInput {
   events?: readonly CampaignEvent[] | undefined
 }
 
+// Getters: se leen en el idioma vigente cada vez (i18n).
 export const LABELS = {
-  howToPlay: 'Cómo se juega',
-  fortune: 'Fortuna',
-  notes: 'Notas de la mesa',
-  ledger: 'Registro de la sesión',
-  openThreads: 'Cabos sueltos',
-  worldEvent: 'Sucede en el mundo',
-} as const
+  get howToPlay() { return t('table.blocks.howToPlay') },
+  get fortune() { return t('table.blocks.fortune') },
+  get notes() { return t('table.blocks.notes') },
+  get ledger() { return t('table.blocks.ledger') },
+  get openThreads() { return t('table.blocks.openThreads') },
+  get worldEvent() { return t('table.blocks.worldEvent') },
+}
 
 export function sessionBlocks(input: SessionBlocksInput): TurnBlock[] {
   const { pack, session } = input
@@ -124,22 +126,22 @@ function nameFor(ref: string, pack: LoadedPack): string {
 function rollBlock(event: RollEvent, pack: LoadedPack, session: Session): RollBlock {
   const resolved = event.resolved
   const actor = packSpeaker(event.actor, pack)
-  const who = actor?.name ?? 'Alguien'
+  const who = actor?.name ?? t('table.blocks.someone')
   const advantage = resolved.advantage ? 'advantage' : resolved.disadvantage ? 'disadvantage' : null
-  const suffix = advantage === 'advantage' ? ' con ventaja' : advantage === 'disadvantage' ? ' con desventaja' : ''
-  const target = resolved.target ? ` contra ${nameFor(resolved.target, pack)}` : ''
+  const suffix = advantage === 'advantage' ? t('table.blocks.withAdvantage') : advantage === 'disadvantage' ? t('table.blocks.withDisadvantage') : ''
+  const target = resolved.target ? t('table.blocks.against', { name: nameFor(resolved.target, pack) }) : ''
 
   let label: string
   let text: string
   if (resolved.kind === 'fortune') {
     label = LABELS.fortune
     const tier = fortuneLabel(session, resolved.result)
-    text = `${who} tira ${resolved.die} de Fortuna: ${resolved.result}${tier ? ` (${tier})` : ''}.`
+    text = t('table.blocks.fortuneRoll', { who, die: resolved.die, result: resolved.result, tier: tier ? ` (${tier})` : '' })
   } else {
     const skill = typeof resolved['skill'] === 'string' ? (resolved['skill'] as string) : null
     label = skill ? capitalize(skill.replace(/-/g, ' ')) : capitalize(resolved.kind)
-    const what = skill ? ` de ${skill.replace(/-/g, ' ')}` : ` (${resolved.kind})`
-    text = `${who} tira ${resolved.die}${what}${suffix}${target}: ${resolved.result}.`
+    const what = skill ? t('table.blocks.rollOf', { skill: skill.replace(/-/g, ' ') }) : ` (${resolved.kind})`
+    text = t('table.blocks.roll', { who, die: resolved.die, what, suffix, target, result: resolved.result })
   }
 
   return { kind: 'roll', id: `${session.id}:roll:${event.id}`, actor, rollKind: resolved.kind, die: resolved.die, result: resolved.result, rolls: resolved.rolls ?? null, label, advantage, text }

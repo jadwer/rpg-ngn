@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 
 /**
@@ -40,7 +41,7 @@ export function safeRandom(): RandomSource {
 export function quickRoll(die: string, rng: RandomSource = safeRandom()): QuickRoll {
   const rolled = rollDice(die, rng)
   const detail = rolled.rolls.length > 1 ? ` [${rolled.rolls.join(' + ')}${rolled.modifier !== 0 ? ` ${rolled.modifier > 0 ? '+' : '-'} ${Math.abs(rolled.modifier)}` : ''}]` : ''
-  return { die, result: rolled.total, rolls: rolled.rolls, text: `Tiro ${die}: ${rolled.total}${detail}` }
+  return { die, result: rolled.total, rolls: rolled.rolls, text: t('table.dice.quick', { die, total: rolled.total, detail }) }
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTDOWN_OPTIONS, COUNTDOWN_SECONDS, countdown, countdownFixedHint, countdownLabel, countdownLine, countdownSecondsOf, withCountdown, seats, seatsSummary, waitingPhrase, WAITING_PHRASES, type CountdownTurn, type SeatMember } from './table-presence.js'
+import { COUNTDOWN_OPTIONS, COUNTDOWN_SECONDS, countdown, countdownFixedHint, countdownLabel, countdownLine, countdownSecondsOf, withCountdown, seats, seatsSummary, waitingPhrase, waitingPhrases, type CountdownTurn, type SeatMember } from './table-presence.js'
 import { turnProgress, type TurnSummary } from './turn.js'
 
 const nameOf = (id: string) => ({ zahira: 'Zahira', calder: 'Calder', kael: 'Kael' })[id] ?? id
@@ -93,7 +93,7 @@ describe('waitingPhrase', () => {
   it('es estable dentro de la ventana y cambia entre ventanas', () => {
     expect(waitingPhrase(3, 1000)).toBe(waitingPhrase(3, 5999))
     expect(waitingPhrase(3, 1000)).not.toBe(waitingPhrase(3, 6001))
-    expect(WAITING_PHRASES).toContain(waitingPhrase(9, 123_456))
+    expect(waitingPhrases()).toContain(waitingPhrase(9, 123_456))
   })
 })
 

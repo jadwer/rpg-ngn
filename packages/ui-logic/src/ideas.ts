@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 /**
  * "Otras" ideas (E10b): que boton ve el jugador segun lo que la API le
  * deja pedir. La primera ronda de cada turno es gratis; las siguientes son
@@ -18,11 +19,11 @@ export interface MoreIdeasButton {
 export function moreIdeasButton(more: IdeasMore): MoreIdeasButton | null {
   switch (more) {
     case 'free':
-      return { label: 'Otras ideas', enabled: true, hint: null }
+      return { label: t('table.ideas.more'), enabled: true, hint: null }
     case 'unlocked':
-      return { label: 'Otras ideas', enabled: true, hint: null }
+      return { label: t('table.ideas.more'), enabled: true, hint: null }
     case 'locked':
-      return { label: 'Otras ideas', enabled: false, hint: 'La primera ronda es gratis. Para pedir más, usa tu propia clave del proveedor o el paquete Campaña.' }
+      return { label: t('table.ideas.more'), enabled: false, hint: t('table.ideas.paidHint') }
     default:
       return null
   }

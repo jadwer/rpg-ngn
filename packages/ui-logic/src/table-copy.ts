@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { PackOption } from '@rpg-ngn/api-client'
 
 /**
@@ -27,7 +28,7 @@ export function characterNameFrom(
 
 /** Nombre sugerido para la mesa, a partir del pack. */
 export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): string {
-  return pack ? `${pack.name}, sábado` : 'La mesa del sábado'
+  return pack ? t('table.copy.namePlaceholderPack', { pack: pack.name }) : t('table.copy.namePlaceholder')
 }
 
 /**
@@ -35,13 +36,13 @@ export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): str
  * y su lema, que es lo unico suyo que conocemos sin cargar el contenido.
  */
 export function premisePlaceholder(pack: Pick<PackOption, 'name' | 'tagline'> | null): string {
-  const base = 'Campaña, escena o tono; el director de juego la usa como punto de partida.'
-  if (!pack) return `${base} Por ejemplo: "Primera noche, todos se conocen por primera vez y algo va mal desde el principio."`
+  const base = t('table.copy.premiseBase')
+  if (!pack) return `${base} ${t('table.copy.premiseExample')}`
   // El lema es una frase suelta y necesita su punto, o se lee pegada a la
   // siguiente ("...Nueve Viajeros. Diferentes caminos Tono de misterio"). Sin
   // comillas: el ejemplo entero ya va entre comillas y anidarlas queda peor.
   const gancho = pack.tagline ? ` ${pack.tagline.replace(/[.,;:]$/, '')}.` : ''
-  return `${base} Por ejemplo: "Jugamos ${pack.name}.${gancho} Tono de misterio, ritmo ágil, español de México."`
+  return `${base} ${t('table.copy.premiseExamplePack', { pack: pack.name, hook: gancho })}`
 }
 
 /**
@@ -51,17 +52,17 @@ export function premisePlaceholder(pack: Pick<PackOption, 'name' | 'tagline'> | 
  * detalle de que trae el pack ya se lee debajo, en `packSummaryText`.
  */
 export function packOptionLabel(pack: Pick<PackOption, 'name' | 'type'>): string {
-  return `${pack.name} (${pack.type === 'campaign' ? 'campaña' : 'mundo'})`
+  return `${pack.name} (${pack.type === 'campaign' ? t('table.copy.campaign') : t('table.copy.world')})`
 }
 
 /** Lo que se lee bajo el selector de pack: de que va y cuanto trae. */
 export function packSummaryText(pack: PackOption | null): string | null {
   if (!pack) return null
   const piezas: string[] = []
-  if (pack.characters > 0) piezas.push(`${pack.characters} ${pack.characters === 1 ? 'personaje' : 'personajes'}`)
-  if (pack.sessions > 0) piezas.push(`${pack.sessions} ${pack.sessions === 1 ? 'sesión escrita' : 'sesiones escritas'}`)
+  if (pack.characters > 0) piezas.push(t(pack.characters === 1 ? 'table.copy.characterOne' : 'table.copy.characterMany', { count: pack.characters }))
+  if (pack.sessions > 0) piezas.push(t(pack.sessions === 1 ? 'table.copy.sessionOne' : 'table.copy.sessionMany', { count: pack.sessions }))
   const detalle = piezas.length > 0 ? ` (${piezas.join(', ')})` : ''
-  return pack.tagline ? `${pack.tagline}${detalle}` : `Sistema ${pack.system}${detalle}`
+  return pack.tagline ? `${pack.tagline}${detalle}` : `${t('table.copy.system', { system: pack.system })}${detalle}`
 }
 
 /**
@@ -77,7 +78,7 @@ export function tableCardMeta(
 ): string {
   const pack = packs.find((p) => p.id === table.packId)
   const partes = [pack?.name ?? table.packId]
-  if (table.premise) partes.push('con premisa')
+  if (table.premise) partes.push(t('table.copy.withPremise'))
   return partes.join(' · ')
 }
 
@@ -87,8 +88,8 @@ export function tableCardMeta(
  * jugar, solo que elige su personaje al entrar (Gabino, 20-09).
  */
 export function noCharacterText(context: 'create' | 'invite'): { title: string; hint: string } {
-  if (context === 'invite') return { title: 'Que elija al entrar', hint: 'Escoge su personaje al abrir la mesa, entre los libres' }
-  return { title: 'Sin personaje', hint: 'Solo miras y diriges la mesa' }
+  if (context === 'invite') return { title: t('table.copy.pickOnJoinTitle'), hint: t('table.copy.pickOnJoinHint') }
+  return { title: t('table.copy.noCharacterTitle'), hint: t('table.copy.noCharacterHint') }
 }
 
 /** Lo que se puede hacer para retirar una mesa de la lista. */
@@ -123,19 +124,19 @@ export function tableRetirement(table: { status: string }, options: { host: bool
     archived,
     canDelete: options.host && !options.played,
     canLeave: !options.host,
-    deleteWarning: options.host && !options.played ? 'Se borra la mesa y no se puede deshacer.' : null,
+    deleteWarning: options.host && !options.played ? t('table.copy.deleteWarning') : null,
   }
 }
 
 /** El texto del aviso al retirar, segun lo que toque. */
 export function retirementText(retirement: TableRetirement): { archive: string; hint: string } {
   if (retirement.archived) {
-    return { archive: 'Recuperar mesa', hint: 'Archivada: no sale en tu lista, pero sigue guardada con todo lo que jugaron.' }
+    return { archive: t('table.copy.restore'), hint: t('table.copy.archivedHint') }
   }
   if (retirement.canDelete) {
-    return { archive: 'Archivar', hint: 'Esta mesa no se ha jugado todavía, así que también puedes borrarla del todo.' }
+    return { archive: t('table.copy.archive'), hint: t('table.copy.unplayedHint') }
   }
-  return { archive: 'Archivar mesa', hint: 'Lo que jugaron se guarda: una partida también es de los demás, así que se archiva en vez de borrarse.' }
+  return { archive: t('table.copy.archiveTable'), hint: t('table.copy.playedHint') }
 }
 
 /** De donde sale un pack, para decirlo junto al nombre: nada si es oficial. */

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 /**
  * Quien tira los dados de la mesa (`settings.dice` de la API).
  *
@@ -35,11 +36,11 @@ export function diceModeOf(settings: Record<string, unknown> | null | undefined)
 export function diceModeLabel(mode: DiceMode): string {
   switch (mode) {
     case 'engine':
-      return 'Los tira el servidor'
+      return t('table.dice.engine')
     case 'dice':
-      return 'Tiras el dado en pantalla'
+      return t('table.dice.dice')
     case 'table':
-      return 'Dados de verdad en la mesa'
+      return t('table.dice.table')
   }
 }
 
@@ -47,11 +48,11 @@ export function diceModeLabel(mode: DiceMode): string {
 export function diceModeHint(mode: DiceMode): string {
   switch (mode) {
     case 'engine':
-      return 'El servidor tira por todos y el resultado sale en la narración del mismo turno. Si alguien escribe un número en su respuesta, no cuenta. El más rápido.'
+      return t('table.dice.engineHint')
     case 'dice':
-      return 'Cuando tu acción tiene riesgo, el director te pide tirar: sueltas el dado y el número lo pone el servidor. Nadie puede escribir "saqué 20". La consecuencia llega al turno siguiente.'
+      return t('table.dice.diceHint')
     case 'table':
-      return 'Si escribes el número que sacaste con tus dados, vale. Solo para jugar con dados de verdad en la misma mesa; a distancia cualquiera puede escribir "saqué 20".'
+      return t('table.dice.tableHint')
   }
 }
 

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
 import { LogoHorizontal, LogoVertical } from '../components/Brand'
 import { SessionCta } from '../components/SessionCta'
@@ -48,10 +49,10 @@ export default function LandingPage() {
         <Link href="/" className="brand-mark" aria-label="Ad Astra Mentis">
           <LogoHorizontal height={36} title="Ad Astra Mentis" />
         </Link>
-        <nav className="links" aria-label="Secciones">
-          <a href="#mundos">Mundos</a>
-          <Link href="/mundos/explorar">Explorar</Link>
-          <a href="#como-funciona">Cómo funciona</a>
+        <nav className="links" aria-label={t('home.secciones')}>
+          <a href="#mundos">{t('home.mundos')}</a>
+          <Link href="/mundos/explorar">{t('home.explorar')}</Link>
+          <a href="#como-funciona">{t('home.comoFunciona')}</a>
           <a href={`${REPO}/tree/dev/docs`} target="_blank" rel="noreferrer">
             Docs
           </a>
@@ -70,42 +71,41 @@ export default function LandingPage() {
         <div className="contenido">
           <LogoVertical className="marca" height={260} title="Ad Astra Mentis" />
           <p className="lema">Worlds born from imagination</p>
-          <p className="frase">Tu imaginación también es un mundo.</p>
+          <p className="frase">{t('home.tuImaginacionTambienEs')}</p>
           <SessionCta variant="hero" />
         </div>
-        <ul className="pilares" aria-label="Lo que ofrece">
+        <ul className="pilares" aria-label={t('home.loQueOfrece')}>
           <li>
             <Icon d={ICON.mundos} />
-            <span>Múltiples escenarios</span>
+            <span>{t('home.multiplesEscenarios')}</span>
           </li>
           <li>
             <Icon d={ICON.reglas} />
-            <span>Sistemas de reglas distintos</span>
+            <span>{t('home.sistemasDeReglasDistintos')}</span>
           </li>
           <li>
             <Icon d={ICON.amigos} />
-            <span>Juega con IA o con amigos</span>
+            <span>{t('home.juegaConIaO')}</span>
           </li>
           <li>
             <Icon d={ICON.crear} />
-            <span>Crea tus propias historias</span>
+            <span>{t('home.creaTusPropiasHistorias')}</span>
           </li>
         </ul>
       </section>
 
       <section className="home-motor" aria-labelledby="motor">
         <div className="texto">
-          <h2 id="motor">Un motor. Infinitos mundos.</h2>
+          <h2 id="motor">{t('home.unMotorInfinitosMundos')}</h2>
           <p>
-            Ad Astra Mentis es una mesa de rol donde el director de juego es un modelo de lenguaje con reglas claras: propone, el motor valida y la historia se guarda. Fantasía épica, intriga cortesana, misterio o
-            comedia de máscaras: el mundo lo eliges tú, las reglas cambian con él y nosotros ponemos la mesa.
+            {t('home.adAstraMentisEs')}
           </p>
           <div className="row">
             <a href="#mundos" className="btn primary">
-              Explora los mundos
+              {t('home.exploraLosMundos')}
             </a>
             <a href="#como-funciona" className="btn">
-              Cómo funciona
+              {t('home.comoFunciona')}
             </a>
           </div>
         </div>
@@ -119,51 +119,51 @@ export default function LandingPage() {
       <HomeCatalog />
 
       <section className="home-como" id="como-funciona" aria-labelledby="como-titulo">
-        <h2 id="como-titulo">Cómo funciona</h2>
+        <h2 id="como-titulo">{t('home.comoFunciona')}</h2>
         <ol className="pasos">
           <li>
             <Icon d={ICON.libro} />
-            <b>Elige un mundo y tu personaje</b>
-            <span>Crea la mesa, escoge el mundo y quién eres en él. El director lo lee todo.</span>
+            <b>{t('home.eligeUnMundoY')}</b>
+            <span>{t('home.creaLaMesaEscoge')}</span>
           </li>
           <li>
             <Icon d={ICON.enlace} />
-            <b>Invita con un enlace</b>
-            <span>Mándalo por donde quieras. Quien lo abre entra, elige personaje y se sienta.</span>
+            <b>{t('home.invitaConUnEnlace')}</b>
+            <span>{t('home.mandaloPorDondeQuieras')}</span>
           </li>
           <li>
             <Icon d={ICON.pluma} />
-            <b>Cada quien escribe lo que hace</b>
-            <span>En su teléfono o su laptop, en la misma sala o a distancia. Nadie ve la respuesta de los demás antes de tiempo.</span>
+            <b>{t('home.cadaQuienEscribeLo')}</b>
+            <span>{t('home.enSuTelefonoO')}</span>
           </li>
           <li>
             <Icon d={ICON.dado} />
-            <b>El director narra y tira los dados</b>
-            <span>Cuando todos respondieron, narra las consecuencias, en voz alta si quieren, y abre el siguiente turno.</span>
+            <b>{t('home.elDirectorNarraY')}</b>
+            <span>{t('home.cuandoTodosRespondieronNarra')}</span>
           </li>
         </ol>
       </section>
 
-      <section className="home-pilares" aria-label="Juega, explora, crea, comparte">
+      <section className="home-pilares" aria-label={t('home.juegaExploraCreaComparte')}>
         <div>
           <Icon d={ICON.dado} />
-          <h3>Juega</h3>
-          <p>Con IA o con tus amigos.</p>
+          <h3>{t('home.juega')}</h3>
+          <p>{t('home.conIaOCon')}</p>
         </div>
         <div>
           <Icon d={ICON.estrella} />
-          <h3>Explora</h3>
-          <p>Mundos distintos con reglas distintas.</p>
+          <h3>{t('home.explora')}</h3>
+          <p>{t('home.mundosDistintosConReglas')}</p>
         </div>
         <div>
           <Icon d={ICON.libro} />
-          <h3>Crea</h3>
-          <p>Tus propias historias y campañas.</p>
+          <h3>{t('home.crea')}</h3>
+          <p>{t('home.tusPropiasHistoriasY')}</p>
         </div>
         <div>
           <Icon d={ICON.orbita} />
-          <h3>Comparte</h3>
-          <p>Una mesa que cabe en un enlace.</p>
+          <h3>{t('home.comparte')}</h3>
+          <p>{t('home.unaMesaQueCabe')}</p>
         </div>
       </section>
 
@@ -172,11 +172,11 @@ export default function LandingPage() {
         <div className="velo" aria-hidden />
         <div className="contenido">
           <blockquote>
-            <p id="cierre">&ldquo;Todas las grandes historias comienzan en la mente.&rdquo;</p>
+            <p id="cierre">{t('home.todasLasGrandesHistorias')}</p>
             <cite>Ad Astra Mentis</cite>
           </blockquote>
           <div className="llamada">
-            <span>¿Listo para tu próximo mundo?</span>
+            <span>{t('home.listoParaTuProximo')}</span>
             <SessionCta variant="hero" />
           </div>
         </div>
@@ -187,18 +187,18 @@ export default function LandingPage() {
           <LogoHorizontal height={40} title="Ad Astra Mentis" />
           <span className="hint">Worlds born from imagination</span>
         </div>
-        <nav className="links" aria-label="Pie">
+        <nav className="links" aria-label={t('home.pie')}>
           <a href={`${REPO}/tree/dev/docs`} target="_blank" rel="noreferrer">
             Docs
           </a>
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <Link href="/guia">Guía</Link>
-          <Link href="/terminos">Términos</Link>
-          <Link href="/privacidad">Privacidad</Link>
+          <Link href="/guia">{t('home.guia')}</Link>
+          <Link href="/terminos">{t('home.terminos')}</Link>
+          <Link href="/privacidad">{t('home.privacidad')}</Link>
         </nav>
-        <nav className="redes" aria-label="Redes">
+        <nav className="redes" aria-label={t('home.redes')}>
           {REDES.map((r) => (
             <a key={r.nombre} href={r.href ?? '#'} target={r.href ? '_blank' : undefined} rel={r.href ? 'noreferrer' : undefined} aria-label={r.href ? r.nombre : `${r.nombre}, pronto`} title={r.href ? r.nombre : `${r.nombre}: pronto`} className={r.href ? undefined : 'pronto'}>
               <svg viewBox="0 0 24 24" aria-hidden>
@@ -207,7 +207,7 @@ export default function LandingPage() {
             </a>
           ))}
         </nav>
-        <p className="hint">Motor de rol de mesa de código abierto con contenido original. Antes se llamaba rpg-worlds.</p>
+        <p className="hint">{t('home.motorDeRolDe')}</p>
       </footer>
     </main>
   )

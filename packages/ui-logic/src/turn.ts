@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { LoadedPack } from '@rpg-ngn/content'
 import type { TurnBlock as ApiBlock } from '@rpg-ngn/engine-contract'
 import type { Speaker, TurnBlock } from './blocks.js'
@@ -48,7 +49,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text }
     case 'roll': {
       const actor = block.actor ? (block.actor.includes(':') ? resolve(block.actor, null) : resolve(null, block.actor)) : null
-      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? `Tirada ${block.die}` : 'Tirada', advantage: block.advantage ?? null, text: block.text, ...(block.requested ? { requested: true } : {}) }
+      return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? t('table.turn.rollDie', { die: block.die }) : t('table.turn.roll'), advantage: block.advantage ?? null, text: block.text, ...(block.requested ? { requested: true } : {}) }
     }
     case 'system':
       // Titulo y puntos: los usa la apertura de sesion (briefing y "como se juega" del pack).
@@ -135,21 +136,21 @@ export function turnProgress(turn: TurnSummary | null, viewer: Viewer, pendingRo
 
 /** Frase corta de estado para la barra del turno. */
 export function turnStatusLine(turn: TurnSummary | null, progress: TurnProgress, nameOf: (id: string) => string): string {
-  if (!turn) return 'No hay turno abierto.'
-  if (progress.narrating) return 'El GM está narrando...'
-  if (turn.status === 'resolved') return 'Turno resuelto.'
-  if (progress.mustRoll) return `Te toca tirar ${rollLabel(progress.mustRoll)}.`
-  if (progress.complete) return turn.required.length === 0 ? 'Nadie tiene pregunta directa: cierra el turno y el GM narra.' : 'Todos respondieron: cierra el turno y el GM narra.'
-  return `Faltan por responder: ${progress.pending.map(nameOf).join(', ')}.`
+  if (!turn) return t('table.turn.none')
+  if (progress.narrating) return t('table.turn.narrating')
+  if (turn.status === 'resolved') return t('table.turn.resolved')
+  if (progress.mustRoll) return t('table.turn.mustRoll', { roll: rollLabel(progress.mustRoll) })
+  if (progress.complete) return turn.required.length === 0 ? t('table.turn.nobodyAsked') : t('table.turn.allAnswered')
+  return t('table.turn.pending', { names: progress.pending.map(nameOf).join(', ') })
 }
 
 /** "1d20 de Percepción", o solo el dado si la tirada no lleva habilidad. */
 export function rollLabel(roll: PendingRoll): string {
-  return roll.skill ? `${roll.die} de ${roll.skill}` : roll.die
+  return roll.skill ? t('table.turn.rollOf', { die: roll.die, skill: roll.skill }) : roll.die
 }
 
 /** La frase con el numero de turno delante, como la muestran las dos apps. */
 export function turnLine(turn: (TurnSummary & { number: number }) | null, progress: TurnProgress, nameOf: (id: string) => string): string {
   const line = turnStatusLine(turn, progress, nameOf)
-  return turn ? `Turno ${turn.number}: ${line}` : line
+  return turn ? t('table.turn.numbered', { number: turn.number, line }) : line
 }

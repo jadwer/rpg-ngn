@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { TurnProgress, TurnSummary } from './turn.js'
 
 /**
@@ -34,13 +35,14 @@ export interface Seat {
   mine: boolean
 }
 
+// Getters: se leen en el idioma vigente cada vez (i18n).
 export const SEAT_LABELS: Record<SeatState, string> = {
-  ready: 'Listo',
-  writing: 'Escribiendo',
-  thinking: 'Pensando',
-  away: 'Se tuvo que ir',
-  narrating: 'Narra en voz alta',
-  watching: 'Mira la mesa',
+  get ready() { return t('table.seat.ready') },
+  get writing() { return t('table.seat.writing') },
+  get thinking() { return t('table.seat.thinking') },
+  get away() { return t('table.seat.away') },
+  get narrating() { return t('table.seat.narrating') },
+  get watching() { return t('table.seat.watching') },
 }
 
 interface SeatsInput {
@@ -91,13 +93,13 @@ export function seats({ members, turn, typing, narrators, away = [], viewerMembe
 /** Resumen corto para la barra: "2 de 4 listos", "todos listos", o quien escribe. */
 export function seatsSummary(list: readonly Seat[]): string {
   const playing = list.filter((s) => s.characterId && s.state !== 'away')
-  if (playing.length === 0) return 'Nadie sentado todavía'
+  if (playing.length === 0) return t('table.seat.nobody')
   const ready = playing.filter((s) => s.state === 'ready').length
   const writing = playing.filter((s) => s.state === 'writing')
-  if (writing.length === 1) return `${writing[0]!.name} está escribiendo`
-  if (writing.length > 1) return `${writing.length} escribiendo`
-  if (ready === playing.length) return 'Todos listos'
-  return `${ready} de ${playing.length} listos`
+  if (writing.length === 1) return t('table.seat.oneWriting', { name: writing[0]!.name })
+  if (writing.length > 1) return t('table.seat.manyWriting', { count: writing.length })
+  if (ready === playing.length) return t('table.seat.allReady')
+  return t('table.seat.someReady', { ready, total: playing.length })
 }
 
 /** Segundos que se cuentan antes de cerrar solo, si la mesa no eligio otros (docs/18, D-UX-3). */
@@ -108,7 +110,7 @@ export const COUNTDOWN_OPTIONS: readonly number[] = [0, 3, 5, 10, 15]
 
 /** Por que no se puede elegir la cuenta atras: la fija el plan gratuito del anfitrion. */
 export function countdownFixedHint(seconds: number): string {
-  return `En el plan gratuito la mesa narra a los ${seconds} s. Con un plan de pago la eliges.`
+  return t('table.countdown.freeFixed', { seconds })
 }
 
 /** La cuenta atras de la mesa (`settings.countdown`); la de por omision si no eligio o si el valor no vale. */
@@ -123,13 +125,13 @@ export function withCountdown(settings: Record<string, unknown> | null | undefin
 
 /** "Sin espera" o "5 s", para el selector. */
 export function countdownLabel(seconds: number): string {
-  return seconds === 0 ? 'Sin espera' : `${seconds} s`
+  return seconds === 0 ? t('table.countdown.none') : t('table.countdown.seconds', { seconds })
 }
 
 export function countdownHint(seconds: number): string {
   return seconds === 0
-    ? 'El turno se cierra en cuanto responde el último: nadie tiene tiempo de pedir un momento.'
-    : `Cuando todos respondieron, ${seconds} segundos para corregir o pedir un momento antes de que narre el director.`
+    ? t('table.countdown.hintNone')
+    : t('table.countdown.hint', { seconds })
 }
 
 export interface Countdown {
@@ -181,9 +183,9 @@ export function countdown({ turn, progress, startedAt, now, seconds = COUNTDOWN_
 
 /** La frase de la cuenta atras, con el boton al lado: "El director narra en 7 s". */
 export function countdownLine(state: Countdown): string {
-  if (state.held) return state.heldByName ? `En espera: ${state.heldByName} pidió un momento.` : 'En espera: alguien pidió un momento.'
+  if (state.held) return state.heldByName ? t('table.countdown.heldBy', { name: state.heldByName }) : t('table.countdown.held')
   if (!state.active) return ''
-  return state.remaining <= 0 ? 'El director narra...' : `El director narra en ${state.remaining} s`
+  return state.remaining <= 0 ? t('table.countdown.narratingNow') : t('table.countdown.narratingIn', { seconds: state.remaining })
 }
 
 /**
@@ -192,17 +194,15 @@ export function countdownLine(state: Countdown): string {
  * estable mientras dura la espera, y otra cada tanto para que no parezca
  * congelada.
  */
-export const WAITING_PHRASES: readonly string[] = [
-  'El destino se prepara.',
-  'Los dados ya cayeron; el relato se escribe.',
-  'El director ordena lo que acaba de pasar.',
-  'Algo se mueve al otro lado de la escena.',
-  'La historia toma aire.',
-  'Lo que hicieron ya no se puede deshacer.',
-]
+const WAITING_KEYS = ['table.waiting.p0', 'table.waiting.p1', 'table.waiting.p2', 'table.waiting.p3', 'table.waiting.p4', 'table.waiting.p5'] as const
+
+/** Las frases de espera en el idioma vigente (i18n). */
+export function waitingPhrases(): string[] {
+  return WAITING_KEYS.map((k) => t(k))
+}
 
 /** Frase de espera para este turno y este momento; cambia cada `everyMs`. */
 export function waitingPhrase(turnNumber: number, now: number, everyMs = 6000): string {
   const step = Math.floor(now / everyMs)
-  return WAITING_PHRASES[(turnNumber * 7 + step) % WAITING_PHRASES.length]!
+  return t(WAITING_KEYS[(turnNumber * 7 + step) % WAITING_KEYS.length]!)
 }

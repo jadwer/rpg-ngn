@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { TurnBlock } from './blocks.js'
 
 /**
@@ -25,7 +26,7 @@ export interface TableGmInfo {
 
 /** Nombre legible de un modelo ("claude-sonnet-5" -> "Claude Sonnet 5"). */
 export function modelLabel(model: string | null): string {
-  if (!model) return 'el director de la mesa'
+  if (!model) return t('table.gm.fallbackModel')
   const base = model.replace(/-\d{8}$/, '')
   return base
     .split('-')
@@ -42,16 +43,16 @@ export function tableGmText(info: TableGmInfo): string {
   const who = modelLabel(info.model)
   switch (info.source) {
     case 'own':
-      return `Narra ${who} con tu propia clave: no gasta turnos del cupo.`
+      return t('table.gm.own', { who })
     case 'free':
-      return info.kind === 'scripted' ? 'Narra un director con guion, sin costo.' : `Narra ${who} en un servidor propio, sin costo.`
+      return info.kind === 'scripted' ? t('table.gm.scripted') : t('table.gm.selfHosted', { who })
     case 'none':
-      return 'Esta mesa no tiene director disponible: revisa los ajustes.'
+      return t('table.gm.none')
     case 'quota':
       if (info.firstTurnsLeft && info.firstTurnsLeft > 0) {
-        return `Narra ${who} con tu cupo. Te ${info.firstTurnsLeft === 1 ? 'queda 1 turno' : `quedan ${info.firstTurnsLeft} turnos`} con este modelo; después, uno más económico. Con tu propia clave narra siempre el que elijas.`
+        return info.firstTurnsLeft === 1 ? t('table.gm.quotaFirstOne', { who }) : t('table.gm.quotaFirstMany', { who, count: info.firstTurnsLeft })
       }
-      return `Narra ${who} con tu cupo. Con tu propia clave narra el modelo que elijas.`
+      return t('table.gm.quota', { who })
   }
 }
 

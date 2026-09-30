@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, packArtUrl, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
 import { cardView, passView, seasonProgress, stopLabel } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -72,9 +73,9 @@ export function HomeCatalog() {
     <>
       <section className="home-mundos" id="mundos" aria-labelledby="mundos-titulo">
         <div className="cabeza">
-          <h2 id="mundos-titulo">Mundos destacados</h2>
+          <h2 id="mundos-titulo">{t('catalogHome.mundosDestacados')}</h2>
           <Link href="/mundos/explorar" className="ver-todos">
-            Ver todos los mundos
+            {t('catalogHome.verTodosLosMundos')}
           </Link>
         </div>
         <div className="grid">
@@ -108,19 +109,19 @@ export function HomeCatalog() {
                 <span className="portada" aria-hidden>
                   <Isotipo mini height={48} />
                 </span>
-                <span className="genero">Próximamente</span>
-                <h3>Un mundo nuevo</h3>
-                <p>Se está escribiendo. Llega con la temporada.</p>
+                <span className="genero">{t('catalogHome.proximamente')}</span>
+                <h3>{t('catalogHome.unMundoNuevo')}</h3>
+                <p>{t('catalogHome.seEstaEscribiendoLlega')}</p>
               </div>
             ),
           )}
           <a className="mundo propio" href={SPEC} target="_blank" rel="noreferrer">
             <Isotipo mini height={64} />
-            <h3>Crea tu propio mundo</h3>
-            <p>Un mundo es un pack de datos: personajes, lugares, secretos y sesiones. El formato es público.</p>
+            <h3>{t('catalogHome.creaTuPropioMundo')}</h3>
+            <p>{t('catalogHome.unMundoEsUn')}</p>
             <ul className="tags">
-              <li>Sin límites</li>
-              <li>Tu historia</li>
+              <li>{t('catalogHome.sinLimites')}</li>
+              <li>{t('catalogHome.tuHistoria')}</li>
             </ul>
           </a>
         </div>
@@ -132,8 +133,8 @@ export function HomeCatalog() {
           <div className="contenido">
             <div className="texto">
               <span className="kicker">{season.name}</span>
-              <h2 id="temporada-titulo">Caminos que se abren jugando</h2>
-              <p>Cada turno que juegas es un capítulo. Los capítulos abren mundos nuevos, y lo que abres se queda contigo.</p>
+              <h2 id="temporada-titulo">{t('catalogHome.caminosQueSeAbren')}</h2>
+              <p>{t('catalogHome.cadaTurnoQueJuegas')}</p>
               {signedIn ? (
                 <p className="capitulos">
                   <b>{season.chapters}</b> {season.chapters === 1 ? 'capítulo' : 'capítulos'} esta temporada
@@ -177,9 +178,9 @@ function Pase({ offer, href }: { offer: SeasonPassOffer | null; href: string }) 
   const view = passView(offer)
   if (!view) return null
   return (
-    <aside className={`pase${view.owned ? ' activo' : ''}`} aria-label="Pase de temporada">
-      <span className="kicker">Pase de temporada</span>
-      <h3>Capítulos x2</h3>
+    <aside className={`pase${view.owned ? ' activo' : ''}`} aria-label={t('catalogHome.paseDeTemporada')}>
+      <span className="kicker">{t('catalogHome.paseDeTemporada')}</span>
+      <h3>{t('catalogHome.capitulosX2')}</h3>
       <ul>
         {view.perks.map((perk) => (
           <li key={perk}>{perk}</li>
@@ -188,7 +189,7 @@ function Pase({ offer, href }: { offer: SeasonPassOffer | null; href: string }) 
       <p className="precio">{view.priceLine}</p>
       {view.owned ? null : (
         <Link href={href} className="btn primary">
-          Obtener el pase
+          {t('catalogHome.obtenerElPase')}
         </Link>
       )}
     </aside>

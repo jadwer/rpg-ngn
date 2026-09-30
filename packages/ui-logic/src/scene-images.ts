@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 /**
  * Si la mesa ilustra sus escenas (`settings.images` de la API, E10a).
  * Encendido si nadie eligio: es lo que distingue la mesa, y el anfitrion lo
@@ -18,7 +19,7 @@ export function withSceneImages(settings: Record<string, unknown> | null | undef
  * inventa un numero.
  */
 export function sceneImagesHint(on: boolean, perSession?: number | null): string {
-  if (!on) return 'La mesa juega solo con texto.'
-  const tope = perSession && perSession > 0 ? ` (hasta ${perSession} por sesión)` : ''
-  return `El director ilustra la apertura, los cambios de lugar y los momentos clave${tope}. Solo en mundos originales o con licencia.`
+  if (!on) return t('table.images.textOnly')
+  const tope = perSession && perSession > 0 ? t('table.images.upTo', { count: perSession }) : ''
+  return t('table.images.on', { cap: tope })
 }

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import type { TtsState } from './tts.js'
 
 /**
@@ -55,12 +56,12 @@ export function narratorsToFlag(narrators: readonly NarratorPresence[], ownMembe
 }
 
 /** Como se llama a quien narra, para el aviso: su personaje, su nombre, o algo generico. */
-export function narratorLabel(narrators: readonly NarratorPresence[], ownMemberId: number, nameOf: (characterId: string) => string, device = 'dispositivo'): string | null {
+export function narratorLabel(narrators: readonly NarratorPresence[], ownMemberId: number, nameOf: (characterId: string) => string, device: string = t('table.voice.device')): string | null {
   const other = narrators.find((n) => n.memberId !== ownMemberId)
   if (!other) return null
-  if (other.characterId) return `${nameOf(other.characterId)} narra`
-  if (other.name) return `${other.name} narra`
-  return `Otro ${device} narra`
+  if (other.characterId) return t('table.voice.narrates', { name: nameOf(other.characterId) })
+  if (other.name) return t('table.voice.narrates', { name: other.name })
+  return t('table.voice.otherDevice', { device })
 }
 
 export interface VoiceLineInput {
@@ -77,17 +78,17 @@ export interface VoiceLineInput {
 /** Resumen de la linea de voz plegada; `warn` pide color de aviso. */
 export function voiceLineSummary(input: VoiceLineInput): { text: string; warn: boolean } {
   const { state, narrator } = input
-  const device = input.device ?? 'teléfono'
+  const device = input.device ?? t('table.voice.phone')
   const localSpeaking = state.status === 'speaking'
   const active = localSpeaking || state.status === 'paused'
-  if (input.error) return { text: `Voz: ${input.error}`, warn: true }
-  if (state.status === 'speaking') return { text: `Leyendo ${state.index + 1} de ${state.total}`, warn: false }
+  if (input.error) return { text: t('table.voice.error', { error: input.error }), warn: true }
+  if (state.status === 'speaking') return { text: t('table.voice.reading', { index: state.index + 1, total: state.total }), warn: false }
   if (state.status === 'paused') {
-    return { text: input.nativePause ? `En pausa, ${state.index + 1} de ${state.total}` : `En pausa; Seguir salta al bloque ${Math.min(state.index + 2, state.total)}`, warn: false }
+    return { text: input.nativePause ? t('table.voice.paused', { index: state.index + 1, total: state.total }) : t('table.voice.pausedSkip', { index: Math.min(state.index + 2, state.total) }), warn: false }
   }
-  if (narrator.someoneNarrating) return { text: `Otro ${device} narra`, warn: false }
-  if (nobodyNarrates(narrator, localSpeaking)) return { text: 'Nadie narra en voz alta', warn: !active }
-  if (input.autoRead) return { text: 'Leerá lo nuevo', warn: false }
-  if (state.status === 'done') return { text: 'Lectura terminada', warn: false }
-  return { text: 'Voz lista', warn: false }
+  if (narrator.someoneNarrating) return { text: t('table.voice.otherDevice', { device }), warn: false }
+  if (nobodyNarrates(narrator, localSpeaking)) return { text: t('table.voice.nobody'), warn: !active }
+  if (input.autoRead) return { text: t('table.voice.autoRead'), warn: false }
+  if (state.status === 'done') return { text: t('table.voice.done'), warn: false }
+  return { text: t('table.voice.ready'), warn: false }
 }
