@@ -13,6 +13,7 @@ import { cta } from './cta.js'
 import { deleteAccount } from './deleteAccount.js'
 import { drawer } from './drawer.js'
 import { explorePage } from './explorePage.js'
+import { fortune } from './fortune.js'
 import { friendsPanel } from './friendsPanel.js'
 import { gameBar } from './gameBar.js'
 import { gm } from './gm.js'
@@ -56,4 +57,4 @@ import { worldPage } from './worldPage.js'
 import { worlds } from './worlds.js'
 
 /** El español es el original: cada clave nueva nace aqui y el ingles la sigue. */
-export const es = { account, auth, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, myWorldsPage, newTable, ownKeys, packPreview, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, soonPage, spriteDie, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }
+export const es = { account, auth, blocksUi, catalogHome, checkout, chroniclePage, chroniclePanel, collectionPage, common, communityPage, creditsPanel, cta, deleteAccount, drawer, explorePage, fortune, friendsPanel, gameBar, gm, gmSettings, guide, holdDie, home, hostPanel, inviteLink, invitePanel, joinPage, mapPanel, myWorldsPage, newTable, ownKeys, packPreview, personaPanel, play, playersPanel, profilePage, pushToggle, recap, requireSession, retireTable, seasonPage, sheetUi, sheetsPanel, shell, soonPage, spriteDie, table, tablePage, tableRules, tableScreen, tablesPage, ttsBar, turnPanel, verifyNotice, voicePage, worldPage, worlds }

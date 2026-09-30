@@ -25,7 +25,7 @@ export async function validateRepo(root: string): Promise<ValidationReport> {
   for (const packDir of await subdirectories(join(root, 'content/packs'))) {
     const id = packDir.split('/').at(-1)!
     packNames.push(id)
-    const result = await loadPack(fsSource(packDir))
+    const result = await loadWithTranslations(packDir)
     issues.push(...prefix(result.issues, relative(root, packDir)))
     if (result.pack) packs.set(id, result.pack)
   }
@@ -60,9 +60,24 @@ export async function validateRepo(root: string): Promise<ValidationReport> {
  * que va a subir su .rpgpack). Mismas reglas que el engine al recibirlo.
  */
 export async function validatePackDir(dir: string): Promise<ValidationReport> {
-  const result = await loadPack(fsSource(dir))
+  const result = await loadWithTranslations(dir)
   const id = result.pack?.manifest.id ?? dir.split('/').at(-1) ?? dir
   return { packs: [id], campaigns: [], issues: result.issues, ok: !hasErrors(result.issues) }
+}
+
+/**
+ * El pack y, encima, cada traduccion que declara (i18n, docs/05): una capa
+ * que rompe un schema se señala en su propio archivo, como hace el engine al
+ * recibir un pack subido.
+ */
+async function loadWithTranslations(dir: string): Promise<{ pack: LoadedPack | null; issues: Issue[] }> {
+  const result = await loadPack(fsSource(dir))
+  const issues = [...result.issues]
+  for (const language of result.pack?.manifest.translations ?? []) {
+    const translated = await loadPack(fsSource(dir), { language })
+    issues.push(...translated.issues.filter((i) => i.path.startsWith('i18n/')))
+  }
+  return { pack: result.pack, issues }
 }
 
 async function subdirectories(dir: string): Promise<string[]> {

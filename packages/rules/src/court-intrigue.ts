@@ -1,6 +1,7 @@
 import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import type { CharacterState, Fortune, WorldState } from '@rpg-ngn/core'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
+import type { FortuneTier } from './fortune-tiers.js'
 
 /**
  * Intriga de corte: investigacion sin combate.
@@ -29,12 +30,12 @@ import { UnknownEffectError, type Ruleset } from './ruleset.js'
 const CLAMP = (value: number, max = 10): number => Math.max(0, Math.min(max, value))
 
 /** Lo que significa una tirada en la corte, en palabras del setting. */
-export const COURT_TIERS: ReadonlyArray<{ min: number; max: number; label: string }> = [
-  { min: 1, max: 1, label: 'Alguien se da cuenta' },
-  { min: 2, max: 7, label: 'La puerta se cierra' },
-  { min: 8, max: 13, label: 'Consigues algo, dejas rastro' },
-  { min: 14, max: 19, label: 'Te dejan llegar' },
-  { min: 20, max: 20, label: 'Te abren de par en par' },
+export const COURT_TIERS: ReadonlyArray<FortuneTier> = [
+  { min: 1, max: 1, key: 'court.noticed', label: 'Alguien se da cuenta' },
+  { min: 2, max: 7, key: 'court.doorCloses', label: 'La puerta se cierra' },
+  { min: 8, max: 13, key: 'court.tradeoff', label: 'Consigues algo, dejas rastro' },
+  { min: 14, max: 19, key: 'court.letThrough', label: 'Te dejan llegar' },
+  { min: 20, max: 20, key: 'court.wideOpen', label: 'Te abren de par en par' },
 ]
 
 /** Credito inicial por rango: quien esta cerca del poder empieza con mas puertas abiertas. */

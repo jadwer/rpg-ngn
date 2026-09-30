@@ -1,4 +1,5 @@
-import { t } from '@rpg-ngn/i18n'
+import { t, type MessageKey } from '@rpg-ngn/i18n'
+import { fortuneTierKey } from '@rpg-ngn/rules'
 import type { Ability, Attack, Character, StatKey } from '@rpg-ngn/content'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { CharacterVisibility } from './veil.js'
@@ -97,7 +98,7 @@ export function characterSheet(character: Character, options: SheetOptions): She
     hp: state ? { current: state.hp.current, max: state.hp.max } : { current: character.hp, max: character.hp },
     // De las fichas ajenas la API no manda `custom` ni inventario: nada de leerlos a ciegas.
     ac: typeof state?.custom?.['ac'] === 'number' ? (state.custom['ac'] as number) : (character.ac ?? null),
-    fortune: state?.fortune ?? null,
+    fortune: state?.fortune ? { ...state.fortune, tier: fortuneTierText(state.fortune.tier) } : null,
     inventory: (state?.inventory ?? []).map((item) => ({ id: item.id, note: item.note ?? null })),
     inventoryHidden: state !== undefined && state !== null && !Array.isArray(state.inventory),
     conditions: state?.conditions ?? [],
@@ -111,4 +112,14 @@ export function abilityUsage(ability: Ability): string | null {
   if (ability.uses === null) return t('table.sheet.atWill')
   if (ability.uses === undefined) return null
   return t('table.sheet.usesPer', { uses: ability.uses, per: ability.per ?? t('table.sheet.rest') })
+}
+
+/**
+ * El tramo de Fortuna en el idioma de la interfaz. El estado guarda el texto
+ * en español del ruleset; con su clave se traduce, y uno que no es de ningun
+ * ruleset (la tabla propia de un pack) se deja como vino.
+ */
+export function fortuneTierText(tier: string): string {
+  const key = fortuneTierKey(tier)
+  return key ? t(`fortune.${key}` as MessageKey) : tier
 }

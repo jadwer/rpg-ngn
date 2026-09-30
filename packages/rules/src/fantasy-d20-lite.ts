@@ -2,6 +2,7 @@ import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
 import { adjust, resource, updateCharacter, updateNpc, type CharacterState, type Fortune, type InventoryItem, type WorldState } from '@rpg-ngn/core'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
+import type { FortuneTier } from './fortune-tiers.js'
 
 /**
  * fantasy-d20-lite: el ruleset del piloto. D20 simplificado, seis
@@ -15,13 +16,13 @@ import { UnknownEffectError, type Ruleset } from './ruleset.js'
  *   - condition {who, add?} | {who, remove?} condicion activa
  */
 
-export const FORTUNE_TIERS: ReadonlyArray<{ min: number; max: number; label: string }> = [
-  { min: 1, max: 3, label: 'Mala suerte' },
-  { min: 4, max: 6, label: 'Incómodo' },
-  { min: 7, max: 14, label: 'Normal' },
-  { min: 15, max: 17, label: 'Buena estrella' },
-  { min: 18, max: 19, label: 'Afortunado' },
-  { min: 20, max: 20, label: 'Destino' },
+export const FORTUNE_TIERS: ReadonlyArray<FortuneTier> = [
+  { min: 1, max: 3, key: 'd20.badLuck', label: 'Mala suerte' },
+  { min: 4, max: 6, key: 'd20.awkward', label: 'Incómodo' },
+  { min: 7, max: 14, key: 'd20.normal', label: 'Normal' },
+  { min: 15, max: 17, key: 'd20.goodStar', label: 'Buena estrella' },
+  { min: 18, max: 19, key: 'd20.lucky', label: 'Afortunado' },
+  { min: 20, max: 20, key: 'd20.destiny', label: 'Destino' },
 ]
 
 type Effect = Record<string, unknown>

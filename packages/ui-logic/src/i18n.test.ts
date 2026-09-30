@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { countdownLine, seatsSummary } from './table-presence.js'
 import { relativeTime } from './table-list.js'
 import { streakText } from './discoverer-pass.js'
-import { STAT_LABELS } from './sheet.js'
+import { fortuneTierText, STAT_LABELS } from './sheet.js'
 import { newTableLanguage, tableLanguageOf, worldLanguageNote, worldLanguages } from './table-language.js'
 
 afterEach(() => setLanguage('es'))
@@ -50,5 +50,15 @@ describe('idiomas de un mundo', () => {
     expect(worldLanguageNote({ languages: ['es'] }, 'en')).toBe('Spanish only')
     setLanguage('es')
     expect(worldLanguageNote({ languages: ['en'] }, 'es')).toBe('Solo en inglés')
+  })
+})
+
+describe('tramo de Fortuna', () => {
+  it('se traduce por su clave y lo que no es de un ruleset queda como vino', () => {
+    expect(fortuneTierText('Alguien se da cuenta')).toBe('Alguien se da cuenta')
+    setLanguage('en')
+    expect(fortuneTierText('Alguien se da cuenta')).toBe('Someone notices')
+    expect(fortuneTierText('Buena estrella')).toBe('Lucky star')
+    expect(fortuneTierText('Tabla propia')).toBe('Tabla propia')
   })
 })

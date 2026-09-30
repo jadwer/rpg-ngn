@@ -1,6 +1,7 @@
 import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import type { CharacterState, Fortune, WorldState } from '@rpg-ngn/core'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
+import type { FortuneTier } from './fortune-tiers.js'
 
 /**
  * Mascarada: comedia de enredos sociales. Nadie pelea ni investiga un
@@ -32,12 +33,12 @@ import { UnknownEffectError, type Ruleset } from './ruleset.js'
 const CLAMP = (value: number, max = 10): number => Math.max(0, Math.min(max, value))
 
 /** Lo que significa una tirada en el salon: como te recibe la otra persona. */
-export const MASQUERADE_TIERS: ReadonlyArray<{ min: number; max: number; label: string }> = [
-  { min: 1, max: 1, label: 'Metes la pata delante de todos' },
-  { min: 2, max: 7, label: 'Sonríe por cortesía' },
-  { min: 8, max: 13, label: 'Te escucha, pero mira a otro lado' },
-  { min: 14, max: 19, label: 'Se ríe de verdad' },
-  { min: 20, max: 20, label: 'Se quita la máscara' },
+export const MASQUERADE_TIERS: ReadonlyArray<FortuneTier> = [
+  { min: 1, max: 1, key: 'masquerade.blunder', label: 'Metes la pata delante de todos' },
+  { min: 2, max: 7, key: 'masquerade.politeSmile', label: 'Sonríe por cortesía' },
+  { min: 8, max: 13, key: 'masquerade.looksAway', label: 'Te escucha, pero mira a otro lado' },
+  { min: 14, max: 19, key: 'masquerade.realLaugh', label: 'Se ríe de verdad' },
+  { min: 20, max: 20, key: 'masquerade.maskOff', label: 'Se quita la máscara' },
 ]
 
 /** Los estados de un vinculo, en el orden en que suelen aparecer en una noche. */
