@@ -51,6 +51,14 @@ export const PackCatalog = z.strictObject({
 })
 export type PackCatalog = z.infer<typeof PackCatalog>
 
+/** Codigo de idioma de dos letras (`es`, `en`). */
+export const LanguageCode = z.string().regex(/^[a-z]{2}$/, 'codigo de idioma de dos letras (es, en)')
+
+/** Idiomas en que se puede jugar un pack: el suyo primero y luego sus traducciones. */
+export function packLanguages(manifest: Pick<PackManifest, 'language' | 'translations'>): string[] {
+  return [manifest.language, ...manifest.translations.filter((l) => l !== manifest.language)]
+}
+
 export const PackManifest = z.strictObject({
   id: KebabId,
   type: PackType,
@@ -90,6 +98,13 @@ export const PackManifest = z.strictObject({
   artStyle: z.string().min(1).optional(),
   /** La ficha del mundo en el catalogo (E9). Obligatoria para publicar; opcional en un mundo privado. */
   catalog: PackCatalog.optional(),
+  /** Idioma en que esta escrito el pack (i18n). Los packs de antes de declararlo son en español. */
+  language: LanguageCode.default('es'),
+  /**
+   * Traducciones que trae en `i18n/<idioma>/` (docs/05). Solo las declaradas
+   * se aplican y se validan, y son las que el catalogo anuncia.
+   */
+  translations: z.array(LanguageCode).default([]),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

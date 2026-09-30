@@ -4,7 +4,7 @@ import { countdownLine, seatsSummary } from './table-presence.js'
 import { relativeTime } from './table-list.js'
 import { streakText } from './discoverer-pass.js'
 import { STAT_LABELS } from './sheet.js'
-import { tableLanguageOf } from './table-language.js'
+import { newTableLanguage, tableLanguageOf, worldLanguageNote, worldLanguages } from './table-language.js'
 
 afterEach(() => setLanguage('es'))
 
@@ -28,5 +28,27 @@ describe('tableLanguageOf', () => {
     expect(tableLanguageOf({ language: 'fr' })).toBe('es')
     expect(tableLanguageOf({})).toBe('es')
     expect(tableLanguageOf(null)).toBe('es')
+  })
+})
+
+describe('idiomas de un mundo', () => {
+  it('un mundo sin idiomas es en español y los desconocidos se ignoran', () => {
+    expect(worldLanguages({})).toEqual(['es'])
+    expect(worldLanguages({ languages: ['es', 'en', 'fr', 'en'] })).toEqual(['es', 'en'])
+  })
+
+  it('la mesa nace en el idioma de la interfaz si el mundo lo trae, si no en el del mundo', () => {
+    expect(newTableLanguage({ languages: ['es', 'en'] }, 'en')).toBe('en')
+    expect(newTableLanguage({ languages: ['es'] }, 'en')).toBe('es')
+    expect(newTableLanguage(null, 'en')).toBe('es')
+  })
+
+  it('avisa en el idioma de la interfaz cuando el mundo no se juega en el', () => {
+    expect(worldLanguageNote({ languages: ['es', 'en'] }, 'en')).toBeNull()
+    expect(worldLanguageNote({ languages: ['es'] }, 'es')).toBeNull()
+    setLanguage('en')
+    expect(worldLanguageNote({ languages: ['es'] }, 'en')).toBe('Spanish only')
+    setLanguage('es')
+    expect(worldLanguageNote({ languages: ['en'] }, 'es')).toBe('Solo en inglés')
   })
 })

@@ -56,6 +56,8 @@ export const play = {
   savedCountdown: 'Guardado: {{seconds}} segundos antes de narrar.',
   savedImagesOn: 'Guardado: la mesa se ilustra.',
   savedImagesOff: 'Guardado: solo texto.',
+  savedLanguage: 'Guardado: la mesa ahora se juega en {{language}}.',
+  savedDice: 'Guardado: {{mode}}.',
   saved: 'Guardado.',
   serverPreset: 'El del servidor ({{preset}})',
   serverPresetShort: 'El del servidor',

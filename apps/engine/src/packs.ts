@@ -1,6 +1,6 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { join, resolve, sep } from 'node:path'
-import { loadPack, type FileSource, type Issue, type LoadedPack } from '@rpg-ngn/content'
+import { loadPack, packLanguages, type FileSource, type Issue, type LoadedPack } from '@rpg-ngn/content'
 import type { PackCharacter, PackMapView, PackNpc, PackRef, PackSheets, PackSummary } from '@rpg-ngn/engine-contract'
 
 const PACK_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -62,6 +62,12 @@ export class PackStore {
       return { ok: false, issues: [{ level: 'error', path: dir, message: 'la carpeta no esta en la zona de packs de usuario' }], pack: null }
     }
     const { pack, issues } = await loadPack(fsSource(dir))
+    // Cada traduccion declarada pasa por los mismos schemas: una rota se
+    // avisa al subir, no cuando alguien abre una mesa en ese idioma.
+    for (const translation of pack?.manifest.translations ?? []) {
+      const translated = await loadPack(fsSource(dir), { language: translation })
+      issues.push(...translated.issues.filter((i) => i.path.startsWith('i18n/')))
+    }
     return { ok: pack !== null && !issues.some((i) => i.level === 'error'), issues, pack: pack ? summaryOf(pack) : null }
   }
 
@@ -195,6 +201,7 @@ function summaryOf(pack: LoadedPack): PackSummary {
     characters: m.characters.length,
     sessions: m.sessions.length,
     playerPersona: m.playerPersona,
+    languages: packLanguages(m),
     catalog: m.catalog
       ? {
           genre: m.catalog.genre,

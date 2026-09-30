@@ -1,8 +1,8 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { LANGUAGES, language, t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, passView, playersTag, seasonProgress, stopLabel } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, languageCodes, passView, playersTag, seasonProgress, stopLabel, worldLanguageNote, worldLanguages } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -114,6 +114,14 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
           <ShellIcon name="buscar" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('explorePage.buscarMundos')} aria-label={t('explorePage.buscarMundos2')} />
         </label>
+        <select value={filters.language ?? ''} onChange={(e) => set({ language: e.target.value || undefined })} aria-label={t('common.language')}>
+          <option value="">{t('common.language')}</option>
+          {LANGUAGES.map((l) => (
+            <option key={l} value={l}>
+              {t(`common.languages.${l}`)}
+            </option>
+          ))}
+        </select>
         <select value={filters.genre ?? ''} onChange={(e) => set({ genre: e.target.value || undefined })} aria-label={t('explorePage.genero')}>
           <option value="">{t('explorePage.genero')}</option>
           {genres.map((g) => (
@@ -177,6 +185,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
                   <li>{world.catalog.genre}</li>
                   <li>{playersTag(world.catalog.players)}</li>
                   <li>{durationLabel(world.catalog.duration)}</li>
+                  <li>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</li>
                 </ul>
                 <p className="byline">{view.byline}</p>
                 {view.price ? <p className="precio">{view.price}</p> : null}

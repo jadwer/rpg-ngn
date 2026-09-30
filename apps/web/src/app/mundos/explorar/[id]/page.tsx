@@ -2,7 +2,7 @@
 
 import { t, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldDetail } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, playersTag } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, languageName, playersTag, worldLanguages } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -93,12 +93,14 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
       ) : null}
       <section className="cabecera" style={cover ? { backgroundImage: `linear-gradient(90deg, rgba(11,15,20,0.95) 0%, rgba(11,15,20,0.75) 45%, rgba(11,15,20,0.2) 100%), url(${cover})` } : undefined}>
         <Link href="/mundos/explorar" className="migas">
-          <ShellIcon name="volver" /> Explorar mundos · {world.catalog.genre}
+          <ShellIcon name="volver" /> {t('shell.nav.exploreWorlds')} · {world.catalog.genre}
         </Link>
         <h1>{world.name}</h1>
         <ul className="chips">
           <li>{world.catalog.genre}</li>
-          <li>{playersTag(world.catalog.players)} jugadores</li>
+          <li>
+            {playersTag(world.catalog.players)} {t('worldPage.jugadores').toLowerCase()}
+          </li>
           <li>
             {durationLabel(world.catalog.duration)}
             {world.catalog.hours ? ` (${world.catalog.hours})` : ''}
@@ -148,6 +150,8 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
           <dl>
             <dt>{t('worldPage.genero')}</dt>
             <dd>{world.catalog.genre}</dd>
+            <dt>{t('worldPage.idiomas')}</dt>
+            <dd>{worldLanguages(world).map(languageName).join(', ')}</dd>
             {world.catalog.tags.length ? (
               <>
                 <dt>{t('worldPage.tono')}</dt>

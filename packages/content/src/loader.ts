@@ -29,6 +29,8 @@ export interface LoadedPack {
   sessions: Map<string, Session>
   /** Capa `gm`: solo la lee el motor y el GM; nunca una proyeccion de jugador. */
   secrets: Map<string, Secret>
+  /** Idioma en que quedaron los textos: el pedido si el pack lo trae traducido, si no el suyo. */
+  language: string
 }
 
 export interface LoadPackResult {
@@ -59,20 +61,38 @@ export interface LoadPackOptions {
 
 export async function loadPack(source: FileSource, options: LoadPackOptions = {}): Promise<LoadPackResult> {
   const issues: Issue[] = []
-  const language = options.language && /^[a-z]{2}$/.test(options.language) ? options.language : null
 
   let rawManifest: unknown
   try {
-    rawManifest = await readTranslated(source, 'pack.json', language, issues)
+    rawManifest = await readJson(source, 'pack.json')
   } catch (error) {
     return { pack: null, issues: [{ level: 'error', path: 'pack.json', message: (error as Error).message }] }
   }
 
-  const manifestResult = PackManifest.safeParse(rawManifest)
-  if (!manifestResult.success) {
-    return { pack: null, issues: zodIssues(manifestResult.error, 'pack.json') }
+  const baseResult = PackManifest.safeParse(rawManifest)
+  if (!baseResult.success) {
+    return { pack: null, issues: zodIssues(baseResult.error, 'pack.json') }
   }
-  const manifest = manifestResult.data
+
+  // Cada traduccion declarada tiene que existir: el catalogo la anuncia.
+  for (const translation of baseResult.data.translations) {
+    if (translation === baseResult.data.language) {
+      issues.push({ level: 'error', path: 'pack.json', message: `translations incluye ${translation}, que es el idioma del pack` })
+    } else if (!(await source.exists(`i18n/${translation}/pack.json`))) {
+      issues.push({ level: 'error', path: 'pack.json', message: `translations declara ${translation} y falta i18n/${translation}/pack.json` })
+    }
+  }
+
+  // Solo se aplica una traduccion declarada; cualquier otro idioma carga el original.
+  const language = options.language && baseResult.data.translations.includes(options.language) ? options.language : null
+  let manifest = baseResult.data
+  if (language) {
+    const translated = PackManifest.safeParse(await readTranslated(source, 'pack.json', language, issues))
+    if (!translated.success) {
+      return { pack: null, issues: [...issues, ...zodIssues(translated.error, `i18n/${language}/pack.json`)] }
+    }
+    manifest = translated.data
+  }
 
   const loaded: Record<CollectionKey, Map<string, unknown>> = {
     characters: new Map(),
@@ -198,6 +218,7 @@ export async function loadPack(source: FileSource, options: LoadPackOptions = {}
       quests,
       sessions,
       secrets,
+      language: language ?? manifest.language,
     },
     issues,
   }
@@ -214,7 +235,9 @@ async function loadEntity(source: FileSource, path: string, schema: ZodType, iss
 
   const result = schema.safeParse(raw)
   if (!result.success) {
-    issues.push(...zodIssues(result.error, path))
+    // Si lo rompio la traduccion, el aviso señala el archivo traducido.
+    const translated = language !== null && (await source.exists(`i18n/${language}/${path}`))
+    issues.push(...zodIssues(result.error, translated ? `i18n/${language}/${path}` : path))
     return null
   }
 

@@ -354,6 +354,8 @@ export const PackSummary = z.strictObject({
   sessions: z.number().int().nonnegative(),
   /** El pack pide que cada jugador escriba la personalidad de su personaje. */
   playerPersona: z.boolean().default(false),
+  /** Idiomas en que se puede jugar (i18n): el del pack primero y luego sus traducciones. */
+  languages: z.array(z.string().regex(/^[a-z]{2}$/)).default(['es']),
   /** La ficha del catalogo, con el primer autor de la procedencia si no firma otro. Opcional: no sube la version. */
   catalog: z
     .strictObject({

@@ -5,6 +5,7 @@ export const worldPage = {
   personajesJugables: 'Personajes jugables',
   sobreEsteMundo: 'Sobre este mundo',
   genero: 'Género',
+  idiomas: 'Idiomas',
   tono: 'Tono',
   jugadores: 'Jugadores',
   duracionEstimada: 'Duración estimada',

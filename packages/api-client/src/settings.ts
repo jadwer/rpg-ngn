@@ -83,6 +83,8 @@ export interface CatalogWorldCard {
   sessions: number
   origin: 'oficial' | 'comunidad'
   catalog: WorldCatalog
+  /** Idiomas en que se juega (i18n), el suyo primero. */
+  languages?: string[]
   state: WorldState
   /** De donde salio si es tuyo: gratis, desbloqueo, pase, compra, creador o comunidad. */
   source: string | null
@@ -171,6 +173,8 @@ export interface CatalogFilters {
   players?: number | undefined
   duration?: 'corta' | 'media' | 'larga' | undefined
   origin?: 'oficial' | 'comunidad' | undefined
+  /** Solo los mundos que se juegan en ese idioma (i18n). */
+  language?: string | undefined
 }
 
 export interface PackOption {
@@ -186,6 +190,8 @@ export interface PackOption {
   sessions: number
   /** El pack pide que cada jugador escriba la personalidad de su personaje (La Mascarada). */
   playerPersona?: boolean
+  /** Idiomas en que se juega (i18n), el suyo primero; sin el, español. */
+  languages?: string[]
   /** De donde sale (entrega 8): oficial del servidor, subido por esta cuenta, o del catalogo y activado. */
   origin?: 'official' | 'mine' | 'catalog'
   /** Solo en los subidos: private, pending, published, rejected, retired. */

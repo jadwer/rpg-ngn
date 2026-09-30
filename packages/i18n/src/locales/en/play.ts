@@ -58,6 +58,8 @@ export const play: Messages<typeof es> = {
   savedCountdown: 'Saved: {{seconds}} seconds before narrating.',
   savedImagesOn: 'Saved: the table is illustrated.',
   savedImagesOff: 'Saved: text only.',
+  savedLanguage: 'Saved: the table is now played in {{language}}.',
+  savedDice: 'Saved: {{mode}}.',
   saved: 'Saved.',
   serverPreset: 'The server’s ({{preset}})',
   serverPresetShort: 'The server’s',

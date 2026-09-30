@@ -51,7 +51,7 @@ describe('applyOverlay (i18n de packs)', () => {
 describe('loadPack con idioma', async () => {
   const manifest = JSON.parse(await readFile(join(pilotPackDir, 'pack.json'), 'utf8')) as Record<string, unknown>
   const files = (overlay: string | null): Record<string, string> => ({
-    'pack.json': JSON.stringify({ ...manifest, name: 'Mini', characters: [], npcs: [], locations: [], maps: [], quests: [], sessions: [], secrets: [], catalog: undefined }),
+    'pack.json': JSON.stringify({ ...manifest, name: 'Mini', characters: [], npcs: [], locations: [], maps: [], quests: [], sessions: [], secrets: [], catalog: undefined, translations: overlay ? ['en'] : [] }),
     ...(overlay ? { 'i18n/en/pack.json': overlay } : {}),
   })
 
@@ -70,11 +70,25 @@ describe('loadPack con idioma', async () => {
     expect((await loadPack(source)).pack?.manifest.name).toBe('Mini')
   })
 
+  it('una traduccion que el pack no declara no se aplica, y una declarada que falta es error', async () => {
+    const undeclared = memorySource({ ...files(null), 'i18n/en/pack.json': JSON.stringify({ name: 'Tiny' }) })
+    const loaded = await loadPack(undeclared, { language: 'en' })
+    expect(loaded.pack?.manifest.name).toBe('Mini')
+    expect(loaded.pack?.language).toBe('es')
+
+    const missing = memorySource({ 'pack.json': JSON.stringify({ ...manifest, characters: [], npcs: [], locations: [], maps: [], quests: [], sessions: [], secrets: [], catalog: undefined, translations: ['en'] }) })
+    const result = await loadPack(missing)
+    expect(result.pack).toBeNull()
+    expect(result.issues.map((i) => i.message)).toContain('translations declara en y falta i18n/en/pack.json')
+  })
+
   it('el pack piloto carga en ingles sin errores ni avisos de la traduccion', async () => {
     const { pack, issues } = await loadPack(fsSource(pilotPackDir), { language: 'en' })
 
     expect(issues.filter((i) => i.level === 'error' || i.path.startsWith('i18n/'))).toEqual([])
     expect(pack!.characters.get('zahira')!.race).toBe('Dwarf')
     expect(pack!.characters.size).toBe(9)
+    expect(pack!.language).toBe('en')
+    expect(pack!.manifest.translations).toEqual(['en'])
   })
 })

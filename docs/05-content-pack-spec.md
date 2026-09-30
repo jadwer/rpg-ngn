@@ -205,8 +205,13 @@ pack piloto (`osric-esta-abajo`, `brorg-pago-por-zahira`) salen de las notas de 
 
 ## Traducciones: `i18n/<idioma>/`
 
-Un pack se escribe en un idioma y se traduce con una capa encima (29-09). `i18n/en/` repite la
-ruta de cada archivo que traduce (`i18n/en/characters/zahira.json`) y trae solo los textos:
+Un pack se escribe en un idioma y se traduce con una capa encima (29-09). El manifiesto declara
+las dos cosas: `language` (en que esta escrito; `es` si no lo dice) y `translations` (las capas
+que trae, por ejemplo `["en"]`). Solo las declaradas se aplican, se validan y se anuncian en el
+catalogo, y cada una necesita al menos `i18n/<idioma>/pack.json`; declarar una que falta es error.
+
+`i18n/en/` repite la ruta de cada archivo que traduce (`i18n/en/characters/zahira.json`) y trae
+solo los textos:
 
 - Objetos: solo las claves con texto que lee alguien (nombre de un ataque, biografia, briefing,
   palabras clave de un secreto). Una clave que el original no tiene se avisa y se ignora.
@@ -225,6 +230,13 @@ cachea cada idioma aparte.
 Las `keywords` de los secretos se traducen a como las diria un narrador en ese idioma: el lint
 de conocimiento compara la narracion con ellas, y en ingles no encontraria frases en español.
 `bundle-pack` omite tambien `i18n/<idioma>/secrets/`.
+
+Lo que hace la plataforma con eso (30-09): el engine resume los idiomas en `languages` (el del
+pack primero); Explorar mundos los muestra en cada tarjeta ("ES · EN", o "Solo en español" si no
+esta en el de la interfaz) y filtra por idioma; al crear la mesa solo se ofrecen esos idiomas, y
+la API rechaza una mesa en un idioma que su mundo no trae. El anfitrion puede cambiar el idioma
+de la mesa en Ajustes de la mesa cuando el mundo trae mas de uno. Al subir un pack, el engine
+valida tambien cada traduccion y señala el archivo traducido que falla.
 
 ## Log de eventos de campaña
 

@@ -7,6 +7,7 @@ export const worldPage: Messages<typeof es> = {
   personajesJugables: 'Playable characters',
   sobreEsteMundo: 'About this world',
   genero: 'Genre',
+  idiomas: 'Languages',
   tono: 'Tone',
   jugadores: 'Players',
   duracionEstimada: 'Estimated length',

@@ -65,6 +65,12 @@ repositorio publico donde se publiquen, y que tener **coleccion** se pague.
 Este documento fija lo que ya esta decidido del diseño, lo que se descarto y
 por que, y lo que falta por decidir. No es un plan de trabajo con fechas.
 
+## Packs en varios idiomas (30-09)
+
+Un pack subido puede traer sus traducciones en `i18n/<idioma>/` y declararlas en `translations`
+(formato en docs/05). Se validan al subir con los mismos schemas y el catalogo anuncia sus
+idiomas; `user_packs.languages` los guarda. Los subidos antes son en español.
+
 ## Por que encaja con lo que ya existe
 
 El motor ya trata el contenido como datos: `packages/content` valida cada

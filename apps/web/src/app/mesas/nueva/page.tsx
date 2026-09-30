@@ -1,8 +1,8 @@
 'use client'
 
-import { language, t } from '@rpg-ngn/i18n'
+import { language, t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { newTableLanguage, worldLanguageNote, worldLanguages, packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
@@ -33,7 +33,6 @@ export default function NewTablePage() {
  * despues, invitar amigos (la mesa ya existe y se puede entrar sin invitar).
  */
 function NewTable({ client, user, unauthorized }: { client: ApiClient; user: StoredUser; unauthorized: (notice?: string) => void }) {
-  const { pack, error: packError } = usePack()
   const [packs, setPacks] = useState<PackOption[]>([])
   const [packId, setPackId] = useState('')
   const [remoteCharacters, setRemoteCharacters] = useState<PackCharacter[]>([])
@@ -48,8 +47,14 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [error, setError] = useState<string | null>(null)
   const [created, setCreated] = useState<TableSummary | null>(null)
 
-  const characters = useMemo(() => (pack ? packCharacters(pack) : []), [pack])
   const option = useMemo(() => packs.find((p) => p.id === packId) ?? null, [packs, packId])
+  // Idioma de la mesa (i18n): el de la interfaz si el mundo lo trae; si no, el
+  // del mundo. Con mas de uno, lo elige quien crea la mesa.
+  const [chosenLang, setChosenLang] = useState<Language | null>(null)
+  const optionLangs = worldLanguages(option)
+  const tableLang = chosenLang && optionLangs.includes(chosenLang) ? chosenLang : newTableLanguage(option, language())
+  const { pack, error: packError } = usePack(tableLang)
+  const characters = useMemo(() => (pack ? packCharacters(pack) : []), [pack])
   // La web lleva el pack piloto dentro para pintar retratos y fichas sin pedir
   // nada. Si el servidor ofrece otro, se puede crear la mesa igual, pero esta
   // pantalla no tiene sus personajes.
@@ -80,7 +85,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       return
     }
     let alive = true
-    void client.listPackCharacters(option.id, option.version, language()).then(
+    void client.listPackCharacters(option.id, option.version, tableLang).then(
       (result) => {
         if (alive) setRemoteCharacters(result)
       },
@@ -89,7 +94,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     return () => {
       alive = false
     }
-  }, [client, option])
+  }, [client, option, tableLang])
 
   // Presets del GM que ofrece el servidor (docs/09: el proveedor se elige al crear la mesa).
   useEffect(() => {
@@ -123,7 +128,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       // siempre el del piloto y una mesa de intriga nacia con reglas de combate
       // (VAM del 19-09, motor A1). Sin version: el motor resuelve la unica que
       // tiene; la API rechaza con 422 un ruleset distinto al del pack (R2).
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, settings: { ...(provider ? withProvider({}, provider) : {}), language: language() } })
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, settings: { ...(provider ? withProvider({}, provider) : {}), language: tableLang } })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -177,6 +182,20 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             ))}
           </div>
           {option?.tagline ? <p className="premise">{option.tagline}</p> : packSummaryText(option) ? <span className="hint">{packSummaryText(option)}</span> : null}
+          {optionLangs.length > 1 ? (
+            <div className="field">
+              <span>{t('tableRules.idioma')}</span>
+              <div className="segmented" role="group" aria-label={t('tableRules.idioma')}>
+                {optionLangs.map((l) => (
+                  <button key={l} type="button" lang={l} aria-pressed={tableLang === l} onClick={() => setChosenLang(l)}>
+                    {t(`common.languages.${l}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : worldLanguageNote(option, language()) ? (
+            <span className="hint">{worldLanguageNote(option, language())}</span>
+          ) : null}
         </Panel>
 
         <Panel title={t('newTable.tuPersonaje')}>

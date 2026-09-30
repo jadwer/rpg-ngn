@@ -6,7 +6,7 @@ import type { AnthropicClientLike, OpenAIClientLike } from '@rpg-ngn/narrative'
 import { describe, expect, it } from 'vitest'
 import { createEngine } from './app.js'
 import { PackStore } from './packs.js'
-import { cp, mkdtemp, rm } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
@@ -427,6 +427,33 @@ describe('packs de usuario (entrega 8)', () => {
       expect(((await personajes.json()) as { characters: unknown[] }).characters).toHaveLength(2)
       // El catalogo publico no lo lista: eso lo sabe la plataforma.
       expect(((await (await engine.request('/v1/packs', { headers })).json()) as { packs: unknown[] }).packs).toHaveLength(0)
+    } finally {
+      await rm(userRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('valida tambien cada traduccion declarada y anuncia los idiomas del pack (i18n)', async () => {
+    const userRoot = await mkdtemp(join(tmpdir(), 'packs-usuario-'))
+    try {
+      const cuarentena = join(userRoot, 'quarantine', 'x2')
+      await cp(join(import.meta.dirname, '../tests/packs/salon'), cuarentena, { recursive: true })
+      const manifiesto = JSON.parse(await readFile(join(cuarentena, 'pack.json'), 'utf8')) as Record<string, unknown>
+      await writeFile(join(cuarentena, 'pack.json'), JSON.stringify({ ...manifiesto, translations: ['en'] }))
+      await mkdir(join(cuarentena, 'i18n/en/characters'), { recursive: true })
+      await writeFile(join(cuarentena, 'i18n/en/pack.json'), JSON.stringify({ name: 'The Hall' }))
+      const engine = createEngine({ token: TOKEN, packs: new PackStore(join(import.meta.dirname, '../tests/packs-vacio'), userRoot), now: () => new Date('2026-09-23T20:00:00Z') })
+      const validar = async () => (await (await engine.request('/v1/packs/validate', { method: 'POST', headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify({ dir: cuarentena }) })).json()) as { ok: boolean; issues: Array<{ path: string }>; pack: { languages: string[] } | null }
+
+      const bueno = await validar()
+      expect(bueno.ok).toBe(true)
+      expect(bueno.pack?.languages).toEqual(['es', 'en'])
+
+      // Una traduccion que rompe el schema se señala en su propio archivo.
+      const [ficha] = await readdir(join(cuarentena, 'characters'))
+      await writeFile(join(cuarentena, 'i18n/en/characters', ficha!), JSON.stringify({ name: '' }))
+      const roto = await validar()
+      expect(roto.ok).toBe(false)
+      expect(roto.issues.some((i) => i.path === `i18n/en/characters/${ficha}`)).toBe(true)
     } finally {
       await rm(userRoot, { recursive: true, force: true })
     }

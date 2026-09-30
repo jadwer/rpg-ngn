@@ -1,10 +1,10 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, tableLanguageOf, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -162,6 +162,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [wantsPersona, setWantsPersona] = useState(false)
   // El nombre del pack, para la cabecera de escena (la web solo lleva el piloto).
   const [packName, setPackName] = useState<string | null>(pack?.manifest.name ?? null)
+  // Idiomas en que se juega el mundo (i18n): el anfitrion elige entre ellos.
+  const [worldLangs, setWorldLangs] = useState<Language[]>(['es'])
   useEffect(() => {
     let alive = true
     void client.listPacks().then(
@@ -170,6 +172,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         const mine = packs.find((p) => p.id === table.packId)
         setWantsPersona(mine?.playerPersona === true)
         if (mine?.name) setPackName(mine.name)
+        setWorldLangs(worldLanguages(mine))
       },
       () => undefined,
     )
@@ -774,7 +777,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         {panel === 'host' && isHost && !screen ? (
           <Drawer title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)} className="host-drawer">
-            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Drawer>
         ) : null}
         {panel === 'more' && !screen ? (

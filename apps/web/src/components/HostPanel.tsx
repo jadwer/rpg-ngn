@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@rpg-ngn/i18n'
+import { t, type Language } from '@rpg-ngn/i18n'
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
@@ -20,6 +20,8 @@ interface Props {
   suggestedCode: string
   /** Sesiones ya jugadas por ESTA campaña, para marcarlas en el selector. */
   playedSessions?: readonly SessionSummary[]
+  /** Idiomas en que se juega el mundo (i18n), para elegir el de la mesa. */
+  worldLanguages?: readonly Language[]
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
@@ -36,7 +38,7 @@ interface Props {
  * director de juego). Invitar vive en Jugadores. El GM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
+export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
@@ -161,7 +163,7 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
           {tab === 'settings' ? (
             <div className="hojas">
               <Panel title={t('hostPanel.reglasDeLaMesa')}>
-                <TableRulesPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                <TableRulesPanel client={client} table={table} languages={worldLanguages} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
               </Panel>
               <Panel title={t('hostPanel.directorDeJuego')}>
                 <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />

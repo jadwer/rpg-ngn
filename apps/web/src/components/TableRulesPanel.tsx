@@ -1,13 +1,15 @@
 'use client'
 
-import { t, type MessageKey } from '@rpg-ngn/i18n'
+import { t, type Language, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 
 interface Props {
   client: ApiClient
   table: TableSummary
+  /** Idiomas en que se juega el mundo (i18n); con uno solo no hay nada que elegir. */
+  languages?: readonly Language[] | undefined
   busy?: boolean | undefined
   /** La mesa cambio: que el padre la recargue (de ahi sale el valor guardado). */
   onChanged: () => void
@@ -29,7 +31,7 @@ const LINT_OPTIONS: ReadonlyArray<[string, MessageKey]> = [
  * proveedor, y cambiar los dados no guardaba nada. El valor que se ve es el
  * guardado, que llega con la mesa recargada.
  */
-export function TableRulesPanel({ client, table, busy = false, onChanged, onUnauthorized }: Props) {
+export function TableRulesPanel({ client, table, languages = ['es'], busy = false, onChanged, onUnauthorized }: Props) {
   const dice = diceModeOf(table.settings)
   const lint = typeof table.settings?.['lint'] === 'string' ? (table.settings['lint'] as string) : ''
   const [working, setWorking] = useState(false)
@@ -53,7 +55,15 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
 
   const chooseDice = (mode: DiceMode) => {
     if (mode === dice || disabled) return
-    void save(withDiceMode(table.settings, mode), `Guardado: ${diceModeLabel(mode).toLowerCase()}.`)
+    void save(withDiceMode(table.settings, mode), t('play.savedDice', { mode: diceModeLabel(mode).toLowerCase() }))
+  }
+
+  // Cambia el idioma en que narra el GM y en que salen los textos del mundo;
+  // la API solo acepta los que el mundo trae.
+  const language = tableLanguageOf(table.settings)
+  const chooseLanguage = (l: Language) => {
+    if (l === language || disabled) return
+    void save({ ...(table.settings ?? {}), language: l }, t('play.savedLanguage', { language: languageName(l) }))
   }
 
   const images = sceneImagesOn(table.settings)
@@ -78,6 +88,22 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
 
   return (
     <div className="stack table-rules">
+      {languages.length > 1 ? (
+        <div className="field">
+          <span>{t('tableRules.idioma')}</span>
+          <div className="segmented" role="group" aria-label={t('tableRules.idioma')}>
+            {languages.map((l) => (
+              <button key={l} type="button" lang={l} aria-pressed={language === l} disabled={disabled} onClick={() => chooseLanguage(l)}>
+                {t(`common.languages.${l}`)}
+              </button>
+            ))}
+          </div>
+          <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+            {t('tableRules.idiomaHint')}
+          </span>
+        </div>
+      ) : null}
+
       {/* div y no label: un label con botones dentro pulsa el primero al tocar el texto. */}
       <div className="field">
         <span>{t('tableRules.dados')}</span>
