@@ -67,3 +67,11 @@ export function supportAbout(table: { tableId: string | number; turnId?: string 
   if (table.turnId !== null && table.turnId !== undefined && String(table.turnId) !== '') return { type: 'turn', id: String(table.turnId) }
   return { type: 'table', id: String(table.tableId) }
 }
+
+/** Fecha completa de un reporte o mensaje ("30 sept 2026, 17:05") en el idioma de la interfaz; vacio si no hay. */
+export function supportDate(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString(language() === 'en' ? 'en-US' : 'es-MX', { dateStyle: 'medium', timeStyle: 'short' })
+}

@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -12,6 +13,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { theme } from '../../theme'
 import { SectionTitle } from '../../components/Panel'
 import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
+import { SupportSheet, type SupportView } from '../../components/SupportSheet'
 
 interface Props {
   client: ApiClient
@@ -36,6 +38,7 @@ interface Props {
  */
 export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, onUnauthorized, onDeleted, onLogout }: Props) {
   const [name, setName] = useState(user.name)
+  const [support, setSupport] = useState<SupportView | null>(null)
   const [email, setEmail] = useState(user.email)
   const [nameBusy, setNameBusy] = useState(false)
   const [nameNotice, setNameNotice] = useState<{ ok: boolean; text: string } | null>(null)
@@ -141,9 +144,19 @@ export function ProfileScreen({ client, user, serverUrl, onUserChanged, onBack, 
 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
 
+        <View style={styles.card}>
+          <SectionTitle>{t('support.soporte')}</SectionTitle>
+          <Text style={styles.cardText}>{t('support.soporteTexto')}</Text>
+          <View style={[styles.actions, styles.stacked]}>
+            <Button label={t('support.reportarUnProblema')} primary onPress={() => setSupport({ name: 'new' })} />
+            <Button label={t('support.misReportes')} onPress={() => setSupport({ name: 'list' })} />
+          </View>
+        </View>
+
         <DeleteAccount client={client} onDeleted={onDeleted} />
         </View>
       </ScrollView>
+      <SupportSheet client={client} view={support} onView={setSupport} screen="/perfil" onUnauthorized={onUnauthorized} />
     </KeyboardAvoidingView>
   )
 }
@@ -164,4 +177,6 @@ const styles = StyleSheet.create({
   ok: { color: '#bbf7d0', borderColor: 'rgba(34, 197, 94, 0.45)', backgroundColor: 'rgba(34, 197, 94, 0.12)' },
   error: { color: theme.colors.danger, borderColor: theme.colors.accentBright, backgroundColor: theme.colors.warning, fontFamily: theme.fonts.ui, fontSize: 13 },
   actions: { alignItems: 'flex-start' },
+  stacked: { gap: 10 },
+  cardText: { fontFamily: theme.fonts.ui, fontSize: 15, lineHeight: 21, color: theme.colors.inkDim },
 })

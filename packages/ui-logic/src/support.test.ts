@@ -1,6 +1,6 @@
 import { setLanguage } from '@rpg-ngn/i18n'
 import { afterEach, describe, expect, it } from 'vitest'
-import { supportAbout, supportContext, supportStatusLabel } from './support.js'
+import { supportAbout, supportContext, supportDate, supportStatusLabel } from './support.js'
 
 afterEach(() => setLanguage('es'))
 
@@ -43,5 +43,13 @@ describe('a que apunta el reporte', () => {
   it('sin mesa o sin adjuntar, nada', () => {
     expect(supportAbout(null, true)).toBeUndefined()
     expect(supportAbout({ tableId: 12, turnId: 340 }, false)).toBeUndefined()
+  })
+})
+
+describe('fecha de un reporte', () => {
+  it('vacia si no hay o no se entiende, y con año si hay', () => {
+    expect(supportDate(null)).toBe('')
+    expect(supportDate('no es fecha')).toBe('')
+    expect(supportDate('2026-09-30T17:05:00Z')).toContain('2026')
   })
 })

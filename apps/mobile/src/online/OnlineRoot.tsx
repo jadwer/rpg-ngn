@@ -12,6 +12,7 @@ import { RegisterScreen } from '../screens/online/RegisterScreen'
 import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
+import { BlessingGate } from '../components/BlessingGate'
 import { theme } from '../theme'
 import { storage, type StoredUser } from './storage'
 
@@ -277,108 +278,119 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     )
   }
 
-  if (stage.name === 'tables') {
+  // Todo lo que tiene sesion lleva encima el aviso de la Bendicion del bardo.
+  const screen = () => {
+    if (stage.name === 'tables') {
+      return (
+        <TablesScreen
+          client={session.client}
+          user={session.user}
+          tables={tables}
+          loading={busy}
+          error={tablesError}
+          pack={pack}
+          packs={packs}
+          remoteNames={remoteNames}
+          remoteCharacters={remoteCharacters}
+          onOpen={(table) => setStage({ name: 'table', table })}
+          onCreate={() => setStage({ name: 'new-table' })}
+          onRefresh={() => void loadTables(session.client)}
+          onProfile={() => setStage({ name: 'profile' })}
+          onTab={goTab}
+        />
+      )
+    }
+
+    if (stage.name === 'explore') {
+      return <ExploreScreen client={session.client} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
+    }
+
+    if (stage.name === 'pronto') {
+      return <CommunityScreen client={session.client} user={session.user} onTab={goTab} onProfile={() => setStage({ name: 'profile' })} onUnauthorized={() => unauthorized()} />
+    }
+
+    if (stage.name === 'worlds') {
+      return (
+        <WorldsScreen
+          client={session.client}
+          onBack={() => setStage({ name: 'explore' })}
+          onUnauthorized={() => unauthorized()}
+        />
+      )
+    }
+
+    if (stage.name === 'profile') {
+      return (
+        <ProfileScreen
+          client={session.client}
+          user={session.user}
+          serverUrl={serverUrl}
+          onUserChanged={setUser}
+          onBack={() => setStage({ name: 'tables' })}
+          onUnauthorized={() => unauthorized()}
+          // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,
+          // que respondera 401 a partir de ahora.
+          onDeleted={() => unauthorized('Tu cuenta se borró. Lo que escribiste en las partidas se conserva sin tu nombre.')}
+          onLogout={() => void logout()}
+        />
+      )
+    }
+
+    if (stage.name === 'new-table') {
+      return (
+        <NewTableScreen
+          client={session.client}
+          user={session.user}
+          pack={pack}
+          initialPackId={stage.packId}
+          onBack={() => {
+            setStage({ name: 'tables' })
+            void loadTables(session.client)
+          }}
+          onOpen={(table) => setStage({ name: 'table', table })}
+          onUnauthorized={() => unauthorized()}
+        />
+      )
+    }
+
+    const me = memberOf(stage.table, session.user.id)
+    if (!me) {
+      return (
+        <View style={styles.center}>
+          <Text style={styles.error}>No eres miembro de esta mesa.</Text>
+        </View>
+      )
+    }
+
     return (
-      <TablesScreen
+      <TableScreen
+        key={stage.table.id}
         client={session.client}
+        table={stage.table}
+        me={me}
         user={session.user}
-        tables={tables}
-        loading={busy}
-        error={tablesError}
-        pack={pack}
-        packs={packs}
+        pack={stage.table.packId === pack.manifest.id ? pack : null}
         remoteNames={remoteNames}
-        remoteCharacters={remoteCharacters}
-        onOpen={(table) => setStage({ name: 'table', table })}
-        onCreate={() => setStage({ name: 'new-table' })}
-        onRefresh={() => void loadTables(session.client)}
-        onProfile={() => setStage({ name: 'profile' })}
-        onTab={goTab}
-      />
-    )
-  }
-
-  if (stage.name === 'explore') {
-    return <ExploreScreen client={session.client} onPlay={(packId) => setStage({ name: 'new-table', packId })} onMine={() => setStage({ name: 'worlds' })} onTab={goTab} onUnauthorized={() => unauthorized()} />
-  }
-
-  if (stage.name === 'pronto') {
-    return <CommunityScreen client={session.client} user={session.user} onTab={goTab} onProfile={() => setStage({ name: 'profile' })} onUnauthorized={() => unauthorized()} />
-  }
-
-  if (stage.name === 'worlds') {
-    return (
-      <WorldsScreen
-        client={session.client}
-        onBack={() => setStage({ name: 'explore' })}
-        onUnauthorized={() => unauthorized()}
-      />
-    )
-  }
-
-  if (stage.name === 'profile') {
-    return (
-      <ProfileScreen
-        client={session.client}
-        user={session.user}
-        serverUrl={serverUrl}
-        onUserChanged={setUser}
-        onBack={() => setStage({ name: 'tables' })}
-        onUnauthorized={() => unauthorized()}
-        // La cuenta ya no existe: limpiar la sesion local sin llamar a la API,
-        // que respondera 401 a partir de ahora.
-        onDeleted={() => unauthorized('Tu cuenta se borró. Lo que escribiste en las partidas se conserva sin tu nombre.')}
-        onLogout={() => void logout()}
-      />
-    )
-  }
-
-  if (stage.name === 'new-table') {
-    return (
-      <NewTableScreen
-        client={session.client}
-        user={session.user}
-        pack={pack}
-        initialPackId={stage.packId}
         onBack={() => {
           setStage({ name: 'tables' })
           void loadTables(session.client)
         }}
-        onOpen={(table) => setStage({ name: 'table', table })}
+        onTableChanged={() => reloadTable(session.client, stage.table.id)}
         onUnauthorized={() => unauthorized()}
       />
     )
   }
 
-  const me = memberOf(stage.table, session.user.id)
-  if (!me) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.error}>No eres miembro de esta mesa.</Text>
-      </View>
-    )
-  }
-
   return (
-    <TableScreen
-      key={stage.table.id}
-      client={session.client}
-      table={stage.table}
-      me={me}
-      user={session.user}
-      pack={stage.table.packId === pack.manifest.id ? pack : null}
-      remoteNames={remoteNames}
-      onBack={() => {
-        setStage({ name: 'tables' })
-        void loadTables(session.client)
-      }}
-      onTableChanged={() => reloadTable(session.client, stage.table.id)}
-      onUnauthorized={() => unauthorized()}
-    />
+    <View style={styles.fill}>
+      {screen()}
+      <BlessingGate client={session.client} />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: theme.colors.bg },
   loading: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.inkDim },
   error: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.danger, textAlign: 'center' },

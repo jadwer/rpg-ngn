@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
@@ -9,6 +10,7 @@ import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
 import { ChroniclePanel } from '../../components/ChroniclePanel'
 import { GameBar, type GamePanel } from '../../components/GameBar'
+import { SupportSheet, type SupportView } from '../../components/SupportSheet'
 import { Icon, ICON } from '../../components/Icon'
 import { GameSheet } from '../../components/GameSheet'
 import { Panel } from '../../components/Panel'
@@ -64,6 +66,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   const [mode, setMode] = useState<ViewMode>('narrative')
   const [sheetsOpen, setSheetsOpen] = useState(false)
+  const [support, setSupport] = useState<SupportView | null>(null)
   // La hoja abierta de la barra del juego (docs/18, D-UX-6); las fichas llevan la suya.
   const [panel, setPanel] = useState<Exclude<GamePanel, 'sheets'> | null>(null)
   const [busy, setBusy] = useState(false)
@@ -759,7 +762,18 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           />
           <Text style={styles.screenHint}>Solo la historia, en grande, sin controles: para leer de lejos o proyectar.</Text>
         </Panel>
+        <Panel title={t('support.soporte')}>
+          <Button
+            label={t('support.reportarUnProblema')}
+            small
+            onPress={() => {
+              setPanel(null)
+              setSupport({ name: 'new' })
+            }}
+          />
+        </Panel>
       </GameSheet>
+      <SupportSheet client={client} view={support} onView={setSupport} table={{ tableId: table.id, turnId }} screen={`/mesas/${table.id}`} onUnauthorized={onUnauthorized} />
 
       <SheetsModal visible={sheetsOpen} onClose={() => setSheetsOpen(false)} entries={entries} footer={projections.seq !== null ? `Estado vivo de la mesa, seq ${projections.seq}` : 'Sin estado de la API todavía: fichas del pack'} portraitUriOf={pack ? undefined : absolutePortrait}
         persona={
