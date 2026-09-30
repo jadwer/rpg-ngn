@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { packPortraitUrl, type ApiClient, type PackSheets } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
 import { Portrait } from './Portrait'
@@ -34,8 +35,8 @@ export function PackPreview({ client, packId, version }: Props) {
     }
   }, [client, packId, version])
 
-  if (error) return <p className="hint">No se pudo leer este mundo.</p>
-  if (!sheets) return <p className="hint">Cargando...</p>
+  if (error) return <p className="hint">{t('packPreview.noSePudoLeer')}</p>
+  if (!sheets) return <p className="hint">{t('packPreview.cargando')}</p>
 
   return (
     <div className="pack-preview">

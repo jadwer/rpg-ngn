@@ -2,6 +2,7 @@
 
 import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
 import { destinoSeguro } from '../../lib/volver'
@@ -91,6 +92,9 @@ function AccessPageForm() {
           <ServerField value={server} onChange={setServer} />
         </form>
       )}
+      <div className="language-row">
+        <LanguageSwitch compact />
+      </div>
       <footer className="hint" style={{ textAlign: 'center', marginTop: 28, fontVariant: 'small-caps', letterSpacing: '0.1em', fontStyle: 'normal' }}>
         {t('auth.footer')}
       </footer>

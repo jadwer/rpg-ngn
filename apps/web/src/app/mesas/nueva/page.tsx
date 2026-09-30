@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -116,7 +117,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
     setBusy(true)
     setError(null)
     try {
-      if (!option) throw new Error('Elige un pack para la mesa.')
+      if (!option) throw new Error(t('play.pickPack'))
       const provider = providerForNewTable(preset, defaultPreset)
       // El ruleset lo declara el pack (`system`), no esta web. Antes se mandaba
       // siempre el del piloto y una mesa de intriga nacia con reglas de combate
@@ -148,7 +149,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           </Panel>
           <div className="row" style={{ marginTop: 8 }}>
             <Link href={`/mesas/${created.id}`} className="btn primary">
-              Ir a la mesa
+              {t('newTable.irALaMesa')}
             </Link>
           </div>
         </div>
@@ -158,19 +159,19 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
 
   return (
     <div className="page en-shell">
-      <h1 className="pagina-titulo">Nueva mesa</h1>
+      <h1 className="pagina-titulo">{t('newTable.nuevaMesa')}</h1>
 
       <form className="hojas nueva-mesa" onSubmit={(e) => void submit(e)}>
-        <Panel title="La mesa">
+        <Panel title={t('newTable.laMesa')}>
           <label className="field">
-            <span>Nombre</span>
+            <span>{t('newTable.nombre')}</span>
             <input className="input" name="nombre" value={name} onChange={(e) => setName(e.target.value)} placeholder={tableNamePlaceholder(option)} maxLength={120} required autoFocus />
           </label>
         </Panel>
 
-        <Panel title="Qué van a jugar">
-          <div className="mundos-opciones" role="radiogroup" aria-label="Qué van a jugar">
-            {packs.length === 0 ? <p className="hint">Cargando…</p> : null}
+        <Panel title={t('newTable.queVanAJugar')}>
+          <div className="mundos-opciones" role="radiogroup" aria-label={t('newTable.queVanAJugar')}>
+            {packs.length === 0 ? <p className="hint">{t('newTable.cargando')}</p> : null}
             {packs.map((p) => (
               <WorldOption key={`${p.id}@${p.version}`} world={p} selected={packId === p.id} onSelect={() => setPackId(p.id)} />
             ))}
@@ -178,24 +179,24 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           {option?.tagline ? <p className="premise">{option.tagline}</p> : packSummaryText(option) ? <span className="hint">{packSummaryText(option)}</span> : null}
         </Panel>
 
-        <Panel title="Tu personaje">
+        <Panel title={t('newTable.tuPersonaje')}>
           {packError ? <div className="error">{packError}</div> : null}
           {!bundled && option ? (
             remoteCharacters.length > 0 ? (
               <RemoteCharacterPicker packId={option.id} characters={remoteCharacters} value={characterId} onChange={setCharacterId} allowNone />
             ) : (
-              <p className="hint">Cargando los personajes del pack...</p>
+              <p className="hint">{t('newTable.cargandoLosPersonajesDel')}</p>
             )
           ) : pack ? (
             <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />
           ) : (
-            <p className="hint">Cargando el pack...</p>
+            <p className="hint">{t('newTable.cargandoElPack')}</p>
           )}
         </Panel>
 
         {presets.length > 0 ? (
-          <Panel title="Director de juego">
-            <div className="mundos-opciones" role="radiogroup" aria-label="Director de juego">
+          <Panel title={t('newTable.directorDeJuego')}>
+            <div className="mundos-opciones" role="radiogroup" aria-label={t('newTable.directorDeJuego')}>
               {presets.map((p) => {
                 const parts = presetOptionParts(p, ownKeys.includes(p.name))
                 return (
@@ -209,13 +210,13 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
                 )
               })}
             </div>
-            <span className="hint">Se puede cambiar y probar después desde el mando del anfitrión.</span>
+            <span className="hint">{t('newTable.sePuedeCambiarY')}</span>
           </Panel>
         ) : null}
 
-        <Panel title="Premisa">
-          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={premisePlaceholder(option)} rows={4} maxLength={2000} aria-label="Premisa de la mesa" />
-          <span className="hint">Opcional: el director de juego la usa como punto de partida.</span>
+        <Panel title={t('newTable.premisa')}>
+          <textarea className="textarea" name="premisa" value={premise} onChange={(e) => setPremise(e.target.value)} placeholder={premisePlaceholder(option)} rows={4} maxLength={2000} aria-label={t('newTable.premisaDeLaMesa')} />
+          <span className="hint">{t('newTable.opcionalElDirectorDe')}</span>
         </Panel>
 
         {error ? <div className="error">{error}</div> : null}
@@ -225,7 +226,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
             {busy ? <span className="spinner" aria-hidden /> : null}
             Crear mesa
           </button>
-          <span className="hint">Después podrás invitar a tus amigos.</span>
+          <span className="hint">{t('newTable.despuesPodrasInvitarA')}</span>
         </div>
       </form>
     </div>

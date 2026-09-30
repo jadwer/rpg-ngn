@@ -1,0 +1,18 @@
+/** Textos de la web (lote 2 de la mesa). */
+export const newTable = {
+  irALaMesa: 'Ir a la mesa',
+  nuevaMesa: 'Nueva mesa',
+  nombre: 'Nombre',
+  cargando: 'Cargando…',
+  cargandoLosPersonajesDel: 'Cargando los personajes del pack...',
+  cargandoElPack: 'Cargando el pack...',
+  sePuedeCambiarY: 'Se puede cambiar y probar después desde el mando del anfitrión.',
+  opcionalElDirectorDe: 'Opcional: el director de juego la usa como punto de partida.',
+  despuesPodrasInvitarA: 'Después podrás invitar a tus amigos.',
+  laMesa: 'La mesa',
+  queVanAJugar: 'Qué van a jugar',
+  tuPersonaje: 'Tu personaje',
+  directorDeJuego: 'Director de juego',
+  premisa: 'Premisa',
+  premisaDeLaMesa: 'Premisa de la mesa',
+}

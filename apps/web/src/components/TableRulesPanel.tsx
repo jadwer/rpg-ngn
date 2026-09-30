@@ -1,5 +1,6 @@
 'use client'
 
+import { t, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
 import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
@@ -13,11 +14,11 @@ interface Props {
   onUnauthorized: () => void
 }
 
-const LINT_OPTIONS: ReadonlyArray<[string, string]> = [
-  ['', 'El del servidor'],
-  ['enforce', 'Cortar lo que revele un secreto'],
-  ['report', 'Dejar pasar y avisarme'],
-  ['off', 'No revisar'],
+const LINT_OPTIONS: ReadonlyArray<[string, MessageKey]> = [
+  ['', 'play.lintServer'],
+  ['enforce', 'play.lintEnforce'],
+  ['report', 'play.lintReport'],
+  ['off', 'play.lintOff'],
 ]
 
 /**
@@ -61,26 +62,26 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
   const seconds = fixed ?? countdownSecondsOf(table.settings)
   const chooseCountdown = (value: number) => {
     if (value === seconds || disabled) return
-    void save(withCountdown(table.settings, value), value === 0 ? 'Guardado: se narra al responder el último.' : `Guardado: ${value} segundos antes de narrar.`)
+    void save(withCountdown(table.settings, value), value === 0 ? t('play.savedCountdownNone') : t('play.savedCountdown', { seconds: value }))
   }
   const chooseImages = (on: boolean) => {
     if (on === images || disabled) return
-    void save(withSceneImages(table.settings, on), on ? 'Guardado: la mesa se ilustra.' : 'Guardado: solo texto.')
+    void save(withSceneImages(table.settings, on), on ? t('play.savedImagesOn') : t('play.savedImagesOff'))
   }
 
   const chooseLint = (value: string) => {
     if (value === lint || disabled) return
     // Sin modo elegido se quita la clave: manda el del engine.
     const { lint: _previous, ...rest } = table.settings ?? {}
-    void save(value === '' ? rest : { ...rest, lint: value }, 'Guardado.')
+    void save(value === '' ? rest : { ...rest, lint: value }, t('play.saved'))
   }
 
   return (
     <div className="stack table-rules">
       {/* div y no label: un label con botones dentro pulsa el primero al tocar el texto. */}
       <div className="field">
-        <span>Dados</span>
-        <div className="segmented" role="group" aria-label="Dados">
+        <span>{t('tableRules.dados')}</span>
+        <div className="segmented" role="group" aria-label={t('tableRules.dados')}>
           {DICE_MODES.map((m) => (
             <button key={m} type="button" aria-pressed={dice === m} disabled={disabled} onClick={() => chooseDice(m)}>
               {diceModeLabel(m)}
@@ -93,8 +94,8 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
       </div>
 
       <div className="field">
-        <span>Cuenta atrás</span>
-        <div className="segmented" role="group" aria-label="Cuenta atrás">
+        <span>{t('tableRules.cuentaAtras')}</span>
+        <div className="segmented" role="group" aria-label={t('tableRules.cuentaAtras')}>
           {COUNTDOWN_OPTIONS.map((value) => (
             <button key={value} type="button" aria-pressed={seconds === value} disabled={disabled || fixed !== null} onClick={() => chooseCountdown(value)}>
               {countdownLabel(value)}
@@ -107,13 +108,13 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
       </div>
 
       <div className="field">
-        <span>Ilustraciones</span>
-        <div className="segmented" role="group" aria-label="Ilustraciones">
+        <span>{t('tableRules.ilustraciones')}</span>
+        <div className="segmented" role="group" aria-label={t('tableRules.ilustraciones')}>
           <button type="button" aria-pressed={images} disabled={disabled} onClick={() => chooseImages(true)}>
-            Ilustrar escenas
+            {t('tableRules.ilustrarEscenas')}
           </button>
           <button type="button" aria-pressed={!images} disabled={disabled} onClick={() => chooseImages(false)}>
-            Solo texto
+            {t('tableRules.soloTexto')}
           </button>
         </div>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
@@ -122,16 +123,16 @@ export function TableRulesPanel({ client, table, busy = false, onChanged, onUnau
       </div>
 
       <label className="field">
-        <span>Secretos del pack</span>
+        <span>{t('tableRules.secretosDelPack')}</span>
         <select className="select" name="lint" value={lint} onChange={(e) => chooseLint(e.target.value)} disabled={disabled}>
           {LINT_OPTIONS.map(([value, label]) => (
             <option key={value} value={value}>
-              {label}
+              {t(label)}
             </option>
           ))}
         </select>
         <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
-          El motor compara cada bloque del GM con lo que la mesa ha descubierto. Los avisos solo los ves tú.
+          {t('tableRules.elMotorComparaCada')}
         </span>
       </label>
 

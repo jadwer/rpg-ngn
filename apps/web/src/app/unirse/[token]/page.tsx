@@ -1,7 +1,9 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, createApiClient, normalizeBaseUrl, type InvitePreview } from '@rpg-ngn/api-client'
 import Link from 'next/link'
+import { LanguageSwitch } from '../../../components/LanguageSwitch'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { WEB_HEADER, useSession } from '../../../lib/session'
@@ -86,18 +88,18 @@ export default function UnirsePage() {
             Ad Astra Mentis
           </Link>
         </h1>
-        <p className="tagline">Te invitaron a una mesa</p>
+        <p className="tagline">{t('joinPage.teInvitaronAUna')}</p>
       </header>
       <hr className="rule" />
 
-      {loading ? <p className="hint">Buscando la mesa...</p> : null}
+      {loading ? <p className="hint">{t('joinPage.buscandoLaMesa')}</p> : null}
 
       {!loading && error && !preview ? (
         <div className="card stack">
           <p>{error}</p>
-          <p className="hint">Si crees que es un error, pídele al anfitrión que te mande el enlace otra vez.</p>
+          <p className="hint">{t('joinPage.siCreesQueEs')}</p>
           <Link href="/" className="btn">
-            Ir al inicio
+            {t('joinPage.irAlInicio')}
           </Link>
         </div>
       ) : null}
@@ -108,10 +110,10 @@ export default function UnirsePage() {
           {preview.hostName ? <p className="hint">Te invita {preview.hostName}.</p> : null}
           <p className="hint">
             {preview.alreadyMember
-              ? 'Ya eres parte de esta mesa.'
+              ? t('play.alreadyMember')
               : preview.seatsLeft === 1
-                ? 'Queda un sitio libre.'
-                : `Quedan ${preview.seatsLeft} sitios libres.`}
+                ? t('play.oneSeatLeft')
+                : t('play.seatsLeft', { count: preview.seatsLeft })}
           </p>
 
           {error ? <div className="error">{error}</div> : null}
@@ -119,20 +121,23 @@ export default function UnirsePage() {
           <div className="row">
             <button type="button" className="btn primary" disabled={busy} onClick={() => void entrar()}>
               {busy ? <span className="spinner" aria-hidden /> : null}
-              {preview.alreadyMember ? 'Ir a la mesa' : 'Entrar a la mesa'}
+              {preview.alreadyMember ? t('play.goToTable') : t('play.joinTable')}
             </button>
           </div>
 
           {!session.client ? (
             <p className="hint">
-              Si no tienes cuenta, te pediremos crearla (nombre, correo y contraseña) y volverás aquí. <Link href="/terminos">Términos</Link> y{' '}
-              <Link href="/privacidad">aviso de privacidad</Link>.
+              Si no tienes cuenta, te pediremos crearla (nombre, correo y contraseña) y volverás aquí. <Link href="/terminos">{t('joinPage.terminos')}</Link> y{' '}
+              <Link href="/privacidad">{t('joinPage.avisoDePrivacidad')}</Link>.
             </p>
           ) : null}
 
-          <p className="hint">Aquí el director de juego es el motor: no hace falta que nadie del grupo sepa dirigir una partida.</p>
+          <p className="hint">{t('joinPage.aquiElDirectorDe')}</p>
         </div>
       ) : null}
+      <div className="language-row">
+        <LanguageSwitch compact />
+      </div>
     </main>
   )
 }

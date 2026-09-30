@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { abilityUsage, humanizeId, type SheetView } from '@rpg-ngn/ui-logic'
 import { VEIL_NOTE } from '../lib/sheets'
 import { Portrait } from './Portrait'
@@ -22,7 +23,7 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
       <div className="vitals">
         <Vital value={`${sheet.hp.current}/${sheet.hp.max}`} label="Vida" />
         <Vital value={sheet.ac === null ? '?' : String(sheet.ac)} label="Armadura" />
-        <Vital value={sheet.fortune ? String(sheet.fortune.result) : '?'} label={sheet.fortune ? sheet.fortune.tier : 'Fortuna'} />
+        <Vital value={sheet.fortune ? String(sheet.fortune.result) : '?'} label={sheet.fortune ? sheet.fortune.tier : t('play.fortune')} />
       </div>
 
       <div className="stats">
@@ -37,7 +38,7 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
 
       {sheet.conditions.length > 0 ? (
         <>
-          <div className="label">Estado</div>
+          <div className="label">{t('sheetUi.estado')}</div>
           <div className="chips">
             {sheet.conditions.map((c) => (
               <span key={c} className="accent">
@@ -48,7 +49,7 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
         </>
       ) : null}
 
-      <div className="label">Con qué peleas</div>
+      <div className="label">{t('sheetUi.conQuePeleas')}</div>
       <div className="kit">
         {sheet.attacks.map((attack) => (
           <div key={attack.id} className="item">
@@ -65,7 +66,7 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
 
       {sheet.abilities && sheet.abilities.length > 0 ? (
         <>
-          <div className="label">Qué sabes hacer</div>
+          <div className="label">{t('sheetUi.queSabesHacer')}</div>
           <div className="kit">
             {sheet.abilities.map((ability) => (
               <div key={ability.id} className="item">
@@ -81,19 +82,19 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
         </>
       ) : null}
 
-      <div className="label">Eres bueno en</div>
+      <div className="label">{t('sheetUi.eresBuenoEn')}</div>
       <div className="chips">
         {sheet.skills.map((skill) => (
           <span key={skill}>{skill}</span>
         ))}
       </div>
 
-      <div className="label">Rol en el grupo</div>
+      <div className="label">{t('sheetUi.rolEnElGrupo')}</div>
       <p className="roles">{sheet.roles.join(' / ')}</p>
 
       {sheet.inventory.length > 0 || sheet.memoriesRecovered > 0 ? (
         <>
-          <div className="label">Lo que llevas</div>
+          <div className="label">{t('sheetUi.loQueLlevas')}</div>
           {sheet.inventory.map((item) => (
             <p key={item.id}>
               {humanizeId(item.id)}
@@ -106,13 +107,13 @@ export function Sheet({ sheet, portraitUri }: { sheet: SheetView; portraitUri?: 
 
       {sheet.bio ? (
         <>
-          <div className="label">Quién eres</div>
+          <div className="label">{t('sheetUi.quienEres')}</div>
           <p>{sheet.bio}</p>
         </>
       ) : null}
       {sheet.goal ? (
         <>
-          <div className="label">Tu objetivo</div>
+          <div className="label">{t('sheetUi.tuObjetivo')}</div>
           <p>{sheet.goal}</p>
         </>
       ) : null}

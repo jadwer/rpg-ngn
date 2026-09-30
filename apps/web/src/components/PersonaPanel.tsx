@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { cleanPersona, PERSONA_MAX, personaTemplate } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 
@@ -32,10 +33,10 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
   const dirty = (cleanPersona(text).persona ?? null) !== saved
 
   return (
-    <section className="persona" aria-label="Tu personaje">
+    <section className="persona" aria-label={t('personaPanel.tuPersonaje')}>
       <button type="button" className="head" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
         <span className="t">Tu personaje: {characterName}</span>
-        <span className="s">{saved ? 'Personalidad escrita' : 'Escribe cómo es'}</span>
+        <span className="s">{saved ? t('play.personaWritten') : t('play.personaWrite')}</span>
         <span className="muted">{expanded ? 'ocultar' : 'mostrar'}</span>
       </button>
       {expanded ? (
@@ -68,10 +69,10 @@ export function PersonaPanel({ characterName, saved, busy, onSave }: Props) {
                 void onSave(cleaned.persona).then((ok) => setDone(ok))
               }}
             >
-              Guardar
+              {t('personaPanel.guardar')}
             </button>
             <span className="hint">
-              {error ?? (done ? 'Guardado: el GM lo lee desde el próximo turno.' : `${text.trim().length}/${PERSONA_MAX}`)}
+              {error ?? (done ? t('play.personaSaved') : `${text.trim().length}/${PERSONA_MAX}`)}
             </span>
           </div>
         </div>

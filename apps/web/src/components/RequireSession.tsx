@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { useRouter } from 'next/navigation'
 import { useEffect, type ReactNode } from 'react'
@@ -22,7 +23,7 @@ export function RequireSession({ children }: Props) {
   if (session.stage.name !== 'ready' || !session.client || !session.user) {
     return (
       <div className="page" style={{ textAlign: 'center', paddingTop: 80 }}>
-        <span className="spinner" aria-hidden /> <span className="hint">Buscando la mesa...</span>
+        <span className="spinner" aria-hidden /> <span className="hint">{t('requireSession.buscandoLaMesa')}</span>
       </div>
     )
   }

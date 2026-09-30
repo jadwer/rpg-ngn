@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { SystemBlock } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 
@@ -44,12 +45,12 @@ export function RecapOverlay({ tableId, recap, enabled }: Props) {
   return (
     <div className="recap-overlay" role="dialog" aria-modal="true" aria-labelledby="recap-title">
       <div className="recap-card">
-        <h2 id="recap-title">Anteriormente...</h2>
+        <h2 id="recap-title">{t('recap.anteriormente')}</h2>
         {(recap.text ?? '').split(/\n\s*\n/).map((paragraph, i) => (
           <p key={i}>{paragraph}</p>
         ))}
         <button type="button" className="btn primary" onClick={close} autoFocus>
-          Continuar
+          {t('recap.continuar')}
         </button>
       </div>
     </div>

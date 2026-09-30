@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 import { portraitUrl } from '../lib/pack'
 
 interface Props {
@@ -18,10 +19,10 @@ export function Portrait({ path, uri, name, size, muted = false, className }: Pr
   const classes = ['portrait', muted ? 'muted' : '', className ?? ''].filter(Boolean).join(' ')
   if (url) {
     // <img> a proposito: los retratos son estaticos del pack y next/image no aporta nada en la LAN.
-    return <img className={classes} src={url} alt={`Retrato de ${name}`} style={style} loading="lazy" />
+    return <img className={classes} src={url} alt={t('play.portrait', { name })} style={style} loading="lazy" />
   }
   return (
-    <span className={`${classes} placeholder`} style={style} aria-label={`Sin retrato de ${name}`}>
+    <span className={`${classes} placeholder`} style={style} aria-label={t('play.noPortrait', { name })}>
       {name.charAt(0)}
     </span>
   )

@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -58,7 +59,7 @@ function TableLoader({ client, user, tableId, unauthorized, logout }: { client: 
         <div className="error">{error}</div>
         <p>
           <Link href="/mesas" className="btn">
-            Volver a las mesas
+            {t('tablePage.volverALasMesas')}
           </Link>
         </p>
       </main>
@@ -67,14 +68,14 @@ function TableLoader({ client, user, tableId, unauthorized, logout }: { client: 
   if (!table) {
     return (
       <div className="page" style={{ textAlign: 'center', paddingTop: 80 }}>
-        <span className="spinner" aria-hidden /> <span className="hint">Entrando a la mesa...</span>
+        <span className="spinner" aria-hidden /> <span className="hint">{t('tablePage.entrandoALaMesa')}</span>
       </div>
     )
   }
   if (!memberOf(table, user.id)) {
     return (
       <main className="page">
-        <div className="error">No eres miembro de esta mesa.</div>
+        <div className="error">{t('tablePage.noEresMiembroDe')}</div>
       </main>
     )
   }

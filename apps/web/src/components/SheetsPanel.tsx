@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { characterSheet } from '@rpg-ngn/ui-logic'
 import { useState, type ReactNode } from 'react'
 import { abilityModifier } from '../lib/pack'
@@ -31,18 +32,18 @@ export function SheetsPanel({ entries, footer, persona, portraitUriOf, onClose }
   const sheet = selected ? characterSheet(selected.character, { visibility: selected.visibility, state: selected.state, modifier: abilityModifier }) : null
 
   return (
-    <aside className="aside" aria-label="Fichas de la party">
+    <aside className="aside" aria-label={t('sheetsPanel.fichasDeLaParty')}>
       <div className="head">
         {selected ? (
           <button type="button" className="btn ghost small" onClick={() => setSelectedId(null)}>
-            Fichas
+            {t('sheetsPanel.fichas')}
           </button>
         ) : (
           <span style={{ width: 64 }} />
         )}
-        <h2>{selected ? selected.character.name : 'La party'}</h2>
+        <h2>{selected ? selected.character.name : t('play.theParty')}</h2>
         <button type="button" className="btn ghost small" onClick={onClose}>
-          Cerrar
+          {t('sheetsPanel.cerrar')}
         </button>
       </div>
       <div className="content">
@@ -54,7 +55,7 @@ export function SheetsPanel({ entries, footer, persona, portraitUriOf, onClose }
         ) : entries.length === 0 ? (
           <>
             {/* Un pack que la web no lleva dentro: las fichas completas por API son la E3 del VAM del 19-09. */}
-            <p className="hint">Cargando las fichas del mundo...</p>
+            <p className="hint">{t('sheetsPanel.cargandoLasFichasDel')}</p>
             {persona ? <div className="persona-en-ficha">{persona}</div> : null}
           </>
         ) : (

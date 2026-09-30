@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { holdReleaseMs, quickRoll, settleSchedule, type QuickRoll } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 
@@ -78,7 +79,7 @@ export function HoldDie({ die, disabled = false, onRolled, serverRoll, onFailed,
       setTimeout(() => {
         if (!fromServer) return land(quickRoll(die))
         fromServer.then(
-          (result) => land({ die, result, rolls: [result], text: `Tiro ${die}: ${result}` }),
+          (result) => land({ die, result, rolls: [result], text: t('table.dice.quick', { die, total: result, detail: '' }) }),
           (error: unknown) => {
             setRolling(false)
             setFace(null)
@@ -109,8 +110,8 @@ export function HoldDie({ die, disabled = false, onRolled, serverRoll, onFailed,
       onKeyUp={(e) => {
         if (e.key === 'Enter' || e.key === ' ') release()
       }}
-      title="Mantén presionado y suelta"
-      aria-label={`Tirar ${die}: mantén presionado y suelta`}
+      title={t('holdDie.mantenPresionadoYSuelta')}
+      aria-label={t('play.rollAria', { die })}
     >
       {rolling ? <b className="face">{face ?? ''}</b> : null}
       <span>{label ?? die}</span>

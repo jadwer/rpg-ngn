@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packArtUrl, packPortraitUrl, type ApiClient, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import { characterNameFrom, filterCounts, filterLabel, filterTables, inviteTokenFrom, pendingReceived, relativeTime, seatLabel, stateLabel, TABLE_FILTERS, tableState, worldOf, worldTags, type TableFilter } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
@@ -113,7 +114,7 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
   const join = () => {
     const token = inviteTokenFrom(link)
     if (!token) {
-      setLinkError('Eso no parece un enlace de invitación. Pega el enlace completo que te mandaron.')
+      setLinkError(t('play.notInviteLink'))
       return
     }
     router.push(`/unirse/${token}`)
@@ -122,16 +123,16 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
   return (
     <div className="mesas">
       <section className="mesas-hero">
-        <h1>Tus mesas</h1>
-        <p className="sub">Historias en las que estás jugando</p>
+        <h1>{t('tablesPage.tusMesas')}</h1>
+        <p className="sub">{t('tablesPage.historiasEnLasQue')}</p>
         <div className="acciones">
           <Link href="/mesas/nueva" className="btn primary grande">
             <ShellIcon name="mas" />
-            Crear mesa
+            {t('tablesPage.crearMesa')}
           </Link>
           <button type="button" className="btn grande" aria-expanded={joining} onClick={() => setJoining((v) => !v)}>
             <ShellIcon name="enlace" />
-            Unirme con enlace
+            {t('tablesPage.unirmeConEnlace')}
           </button>
         </div>
         {joining ? (
@@ -142,9 +143,9 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
               join()
             }}
           >
-            <input className="input" value={link} onChange={(e) => (setLink(e.target.value), setLinkError(null))} placeholder="https://adastramentis.com/unirse/…" aria-label="Enlace de invitación" autoFocus />
+            <input className="input" value={link} onChange={(e) => (setLink(e.target.value), setLinkError(null))} placeholder={t('tablesPage.httpsAdastramentisComUnirse')} aria-label={t('tablesPage.enlaceDeInvitacion')} autoFocus />
             <button type="submit" className="btn primary">
-              Entrar
+              {t('tablesPage.entrar')}
             </button>
             {linkError ? <span className="error">{linkError}</span> : null}
           </form>
@@ -154,11 +155,11 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
       {error ? <div className="error">{error}</div> : null}
       {pendingFriends > 0 ? (
         <Link href="/comunidad" className="notice" style={{ display: 'block', marginBottom: 14 }}>
-          {pendingFriends === 1 ? 'Tienes una solicitud de amistad esperando. Acéptala en Comunidad.' : `Tienes ${pendingFriends} solicitudes de amistad esperando. Acéptalas en Comunidad.`}
+          {pendingFriends === 1 ? t('play.friendRequestOne') : t('play.friendRequestMany', { count: pendingFriends })}
         </Link>
       ) : null}
 
-      <div className="mesas-filtros" role="tablist" aria-label="Filtrar mesas">
+      <div className="mesas-filtros" role="tablist" aria-label={t('tablesPage.filtrarMesas')}>
         {TABLE_FILTERS.map((f) => (
           <button key={f} type="button" role="tab" aria-selected={filter === f} className={filter === f ? 'active' : undefined} onClick={() => setFilter(f)}>
             {filterLabel(f, counts[f])}
@@ -166,13 +167,13 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
         ))}
         <span className="orden">
           <ShellIcon name="orden" />
-          Última actividad
+          {t('tablesPage.ultimaActividad')}
         </span>
       </div>
 
-      {tables === null && loading ? <p className="hint">Buscando tus mesas…</p> : null}
+      {tables === null && loading ? <p className="hint">{t('tablesPage.buscandoTusMesas')}</p> : null}
       {tables !== null && shown.length === 0 ? (
-        <p className="hint">{filter === 'todas' ? 'No estás en ninguna mesa todavía. Crea una o pide al anfitrión que te invite.' : 'No hay mesas aquí.'}</p>
+        <p className="hint">{filter === 'todas' ? t('play.noTablesYet') : t('play.noTablesHere')}</p>
       ) : null}
 
       <div className="mesa-lista">
@@ -208,7 +209,7 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
                   <div className="etiquetas">{world?.name ?? table.packId}</div>
                 )}
                 {text ? <p className="sinopsis">{text}</p> : null}
-                {!table.campaignId ? <div className="error">Esta mesa no tiene campaña todavía.</div> : null}
+                {!table.campaignId ? <div className="error">{t('tablesPage.estaMesaNoTiene')}</div> : null}
               </div>
               {/* Quien juega arriba y la fecha debajo, a la derecha (Gabino, 26-09). */}
               <div className="lado">
@@ -220,18 +221,18 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
                   {extra > 0 ? <span className="mas">+{extra}</span> : null}
                 </div>
                 <div className="actividad">
-                  <span>Última actividad</span>
+                  <span>{t('tablesPage.ultimaActividad')}</span>
                   <span>{relativeTime(table.lastActivityAt) || '—'}</span>
                 </div>
                 <div className="botones">
                   <Link href={`/mesas/${table.id}`} className="btn primary">
                     <ShellIcon name="jugar" />
-                    Continuar
+                    {t('tablesPage.continuar')}
                   </Link>
                   <details className="opciones">
                     <summary className="btn">
                       <ShellIcon name="opciones" />
-                      Opciones
+                      {t('tablesPage.opciones')}
                     </summary>
                     <div className="menu">
                       <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={() => void load(true)} />

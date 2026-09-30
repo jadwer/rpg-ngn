@@ -2,6 +2,7 @@
 
 import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
 import { destinoSeguro } from '../../lib/volver'
@@ -120,6 +121,9 @@ function RegisterPageForm() {
           <ServerField value={server} onChange={setServer} />
         </form>
       )}
+      <div className="language-row">
+        <LanguageSwitch compact />
+      </div>
     </main>
   )
 }

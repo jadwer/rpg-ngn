@@ -1,5 +1,8 @@
+'use client'
+
 import { t } from '@rpg-ngn/i18n'
 import Link from 'next/link'
+import { LanguageSwitch } from '../components/LanguageSwitch'
 import { LogoHorizontal, LogoVertical } from '../components/Brand'
 import { SessionCta } from '../components/SessionCta'
 import { HomeCatalog } from '../components/home/HomeCatalog'
@@ -58,6 +61,7 @@ export default function LandingPage() {
           </a>
         </nav>
         <div className="acciones">
+          <LanguageSwitch compact />
           <SessionCta variant="nav" />
         </div>
       </header>

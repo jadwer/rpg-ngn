@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { allFacesOf, diceFaces, droppedFace, faceRange, runDieRoll, sidesOf } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import type { DiceRollerProps, RollOutcome } from './DiceRoller'
@@ -109,8 +110,8 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
       onKeyUp={(e) => {
         if (e.key === 'Enter' || e.key === ' ') release()
       }}
-      title="Mantén presionado y suelta"
-      aria-label={`Tirar ${die}: mantén presionado y suelta`}
+      title={t('spriteDie.mantenPresionadoYSuelta')}
+      aria-label={t('play.rollAria', { die })}
     >
       <span className="faces" aria-hidden>
         {faces.length > 0 ? (

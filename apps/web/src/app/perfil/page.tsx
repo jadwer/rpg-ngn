@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient } from '@rpg-ngn/api-client'
 import { useState, type FormEvent } from 'react'
 import { CreditsPanel } from '../../components/CreditsPanel'
@@ -8,6 +9,7 @@ import { OwnKeys } from '../../components/OwnKeys'
 import { PushToggle } from '../../components/PushToggle'
 import { RequireSession } from '../../components/RequireSession'
 import { VerifyEmailNotice } from '../../components/VerifyEmailNotice'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { AppShell } from '../../components/shell/AppShell'
 import { useSession } from '../../lib/session'
 import type { StoredUser } from '../../lib/storage'
@@ -91,6 +93,13 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
       <h1 className="pagina-titulo">Mi cuenta</h1>
 
       <VerifyEmailNotice client={client} />
+
+      <div className="card stack" style={{ marginBottom: 16 }}>
+        <div className="label" style={{ marginTop: 0 }}>
+          {t('common.language')}
+        </div>
+        <LanguageSwitch client={client} />
+      </div>
 
       <form className="card stack" onSubmit={(e) => void saveName(e)}>
         <div className="label" style={{ marginTop: 0 }}>

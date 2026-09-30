@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { noCharacterText } from '@rpg-ngn/ui-logic'
 import { packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 
@@ -49,10 +50,10 @@ export function RemoteCharacterPicker({ packId, characters, taken, value, onChan
             disabled={!!owner}
             className={`option${value === character.id ? ' selected' : ''}${owner ? ' taken' : ''}`}
             onClick={() => onChange(character.id)}
-            title={owner ? `Lo juega ${owner}` : undefined}
+            title={owner ? t('play.playedBy', { name: owner }) : undefined}
           >
             {src ? (
-              <img src={src} alt={`Retrato de ${character.name}`} className="portrait" style={{ width: '100%', height: 'auto', aspectRatio: '1', objectFit: 'cover', marginBottom: 8 }} />
+              <img src={src} alt={t('play.portrait', { name: character.name })} className="portrait" style={{ width: '100%', height: 'auto', aspectRatio: '1', objectFit: 'cover', marginBottom: 8 }} />
             ) : (
               <span className="portrait placeholder" style={{ width: '100%', height: 'auto', aspectRatio: '1', display: 'flex', fontSize: '2rem', marginBottom: 8 }}>
                 {character.name.slice(0, 1)}

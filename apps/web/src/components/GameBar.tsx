@@ -1,5 +1,6 @@
 'use client'
 
+import { t, type MessageKey } from '@rpg-ngn/i18n'
 export type GamePanel = 'sheets' | 'map' | 'players' | 'host' | 'more'
 
 interface Props {
@@ -22,7 +23,7 @@ const ICONS: Record<GamePanel, string> = {
 }
 
 /** `more` se llama Lectura (vista, voz, pantalla); el id se queda para no tocar CSS ni historial. */
-const LABELS: Record<GamePanel, string> = { sheets: 'Fichas', map: 'Mapa', players: 'Jugadores', host: 'Anfitrión', more: 'Lectura' }
+const LABELS: Record<GamePanel, MessageKey> = { sheets: 'play.barSheets', map: 'play.barMap', players: 'play.barPlayers', host: 'play.barHost', more: 'play.barReading' }
 
 /**
  * La barra del juego (docs/18, D-UX-6): lo que se abre durante la partida,
@@ -32,13 +33,13 @@ const LABELS: Record<GamePanel, string> = { sheets: 'Fichas', map: 'Mapa', playe
 export function GameBar({ active, onSelect, hasMap, isHost, playersSummary, placement }: Props) {
   const items: GamePanel[] = ['sheets', ...(hasMap ? (['map'] as const) : []), 'players', ...(isHost ? (['host'] as const) : []), 'more']
   return (
-    <nav className={`gamebar ${placement === 'bottom' ? 'at-bottom' : 'in-header'} hide-on-screen`} aria-label="Partida">
+    <nav className={`gamebar ${placement === 'bottom' ? 'at-bottom' : 'in-header'} hide-on-screen`} aria-label={t('gameBar.partida')}>
       {items.map((item) => (
         <button key={item} type="button" aria-pressed={active === item} onClick={() => onSelect(item)} title={item === 'players' ? playersSummary : undefined}>
           <svg viewBox="0 0 24 24" aria-hidden>
             <path d={ICONS[item]} />
           </svg>
-          <span className="l">{LABELS[item]}</span>
+          <span className="l">{t(LABELS[item])}</span>
           {item === 'players' ? <span className="s">{playersSummary}</span> : null}
         </button>
       ))}

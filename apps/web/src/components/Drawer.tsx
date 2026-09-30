@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ReactNode } from 'react'
 
 interface Props {
@@ -17,7 +18,7 @@ export function Drawer({ title, onClose, children, className }: Props) {
         <span style={{ width: 64 }} />
         <h2>{title}</h2>
         <button type="button" className="btn ghost small" onClick={onClose}>
-          Cerrar
+          {t('drawer.cerrar')}
         </button>
       </div>
       <div className="content">{children}</div>

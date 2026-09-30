@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import type { ApiClient, TableSummary } from '@rpg-ngn/api-client'
 import { retirementText, tableRetirement } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
@@ -63,7 +64,7 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
           setOpen(true)
         }}
       >
-        {retirement.archived ? 'Recuperar' : 'Retirar'}
+        {retirement.archived ? t('play.restore') : t('play.retire')}
       </button>
     )
   }
@@ -82,12 +83,12 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
 
         {retirement.canLeave ? (
           <button type="button" className="btn small" disabled={busy} onClick={(e) => { stop(e); void act(() => client.leaveTable(table.id)) }}>
-            Salir de la mesa
+            {t('retireTable.salirDeLaMesa')}
           </button>
         ) : null}
 
         <button type="button" className="btn ghost small" disabled={busy} onClick={(e) => { stop(e); setOpen(false); setConfirmando(false) }}>
-          Cancelar
+          {t('retireTable.cancelar')}
         </button>
       </div>
 
@@ -97,12 +98,12 @@ export function RetireTable({ client, table, host, onChanged }: Props) {
             <>
               <span className="hint">{retirement.deleteWarning}</span>
               <button type="button" className="btn danger small" disabled={busy} onClick={(e) => { stop(e); void act(() => client.deleteTable(table.id)) }}>
-                Sí, borrar
+                {t('retireTable.siBorrar')}
               </button>
             </>
           ) : (
             <button type="button" className="btn ghost small" disabled={busy} onClick={(e) => { stop(e); setConfirmando(true) }}>
-              Borrar del todo
+              {t('retireTable.borrarDelTodo')}
             </button>
           )}
         </div>

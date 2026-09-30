@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { type ApiClient, ApiError, type GmPreset, type GmProbeResult, type GmProviderChoice, type OwnKey, providerChoice, type TableSummary, withProvider } from '@rpg-ngn/api-client'
 import { describePreset, presetAvailability, savedProviderText, type TableGmInfo, tableGmText } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
@@ -124,9 +125,9 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
       <p className="hint">Tu propia clave se guarda en Mi cuenta y créditos; si tienes una para este proveedor, la mesa la usa.</p>
 
       <label className="field">
-        <span>Proveedor</span>
+        <span>{t('gmSettings.proveedor')}</span>
         <select className="select" name="preset" value={preset} onChange={(e) => setPreset(e.target.value)} disabled={disabled || presets === null}>
-          <option value="">{defaultPreset ? `El del servidor (${describePreset(defaultPreset)})` : 'El del servidor'}</option>
+          <option value="">{defaultPreset ? t('play.serverPreset', { preset: describePreset(defaultPreset) }) : t('play.serverPresetShort')}</option>
           {(presets ?? []).map((p) => (
             <option key={p.name} value={p.name} disabled={!presetAvailability(p, ownKeys).selectable}>
               {describePreset(p.name)}
@@ -148,7 +149,7 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
 
       {probe ? (
         <div className={probe.ok ? 'ok' : 'error'}>
-          {probe.ok ? 'Listo: ' : 'No responde: '}
+          {probe.ok ? t('play.probeOk') : t('play.probeFail')}
           {probe.message}
           {probe.model ? ` (${probe.model})` : ''}
         </div>
@@ -161,7 +162,7 @@ export function GmSettingsPanel({ client, table, busy = false, onChanged, onUnau
           Probar
         </button>
         <button type="button" className="btn primary" onClick={() => void save()} disabled={disabled || !dirty}>
-          Guardar
+          {t('gmSettings.guardar')}
         </button>
         <span className="hint">Probar no gasta un turno; solo comprueba clave y modelo.</span>
       </div>

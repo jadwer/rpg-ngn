@@ -1,5 +1,6 @@
 'use client'
 
+import { t } from '@rpg-ngn/i18n'
 import { packMapUrl, type PackMapView } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import { currentMapIndex, type Fingers, fingersFrom, mapEdges, mapView, whereEveryoneIs, ZOOM_IDENTITY, ZOOM_STEP, ZOOM_WHEEL, zoomGesture, type ZoomState, zoomStep } from '@rpg-ngn/ui-logic'
@@ -129,11 +130,11 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
   return (
     <>
       {showLine ? (
-        <section className="mapa" aria-label="Mapa de la partida">
+        <section className="mapa" aria-label={t('mapPanel.mapaDeLaPartida')}>
           <button type="button" className="head" onClick={() => setOpen(true)}>
             <span className="t">Mapa: {view.map.name}</span>
             <span className="s">{resumen}</span>
-            <span className="muted">abrir</span>
+            <span className="muted">{t('mapPanel.abrir')}</span>
           </button>
         </section>
       ) : null}
@@ -146,7 +147,7 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
                 <h2>{view.map.name}</h2>
                 <p className="hint">{resumen}</p>
                 {maps.length > 1 ? (
-                  <div className="segmented mapas" role="tablist" aria-label="Mapas del pack">
+                  <div className="segmented mapas" role="tablist" aria-label={t('mapPanel.mapasDelPack')}>
                     {maps.map((m, i) => (
                       <button key={m.id} type="button" role="tab" aria-selected={i === index} aria-pressed={i === index} onClick={() => {
                         setChosen(i)
@@ -159,7 +160,7 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
                 ) : null}
               </div>
               <button type="button" className="btn ghost small" onClick={() => setOpen(false)}>
-                Cerrar <span className="k">Esc</span>
+                {t('mapPanel.cerrar')} <span className="k">{t('mapPanel.esc')}</span>
               </button>
             </header>
             <div className={`lienzo zoomable${zoom.z.s > 1 ? ' acercado' : ''}`} ref={zoom.box} {...zoom.handlers}>
@@ -190,10 +191,10 @@ export function MapPanel({ packId, maps, world, party, viewerCharacterId, nameOf
               ))}
               </div>
               <div className="zoom-botones">
-                <button type="button" aria-label="Acercar" onClick={zoom.zoomIn}>
+                <button type="button" aria-label={t('mapPanel.acercar')} onClick={zoom.zoomIn}>
                   +
                 </button>
-                <button type="button" aria-label="Alejar" onClick={zoom.zoomOut}>
+                <button type="button" aria-label={t('mapPanel.alejar')} onClick={zoom.zoomOut}>
                   −
                 </button>
               </div>
