@@ -1,0 +1,11 @@
+/* La tienda (30-09): lo que da cada compra, en lista corta. */
+.shop-perks {
+  margin: 0 0 12px;
+  padding-left: 1.1em;
+  color: var(--ink);
+  font-family: var(--font-serif);
+}
+
+.shop-perks li + li {
+  margin-top: 4px;
+}

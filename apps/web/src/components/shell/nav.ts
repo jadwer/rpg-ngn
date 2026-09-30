@@ -20,6 +20,7 @@ export const SITE_SECTIONS: readonly NavItem[] = [
   { href: '/mundos/explorar', label: 'shell.nav.exploreWorlds', icon: 'mundos' },
   { href: '/mundos', label: 'shell.nav.myWorlds', icon: 'misMundos' },
   { href: '/mesas', label: 'shell.nav.myTables', icon: 'mesas' },
+  { href: '/tienda', label: 'shell.nav.shop', icon: 'tienda' },
   { href: '/pronto/campanas', label: 'shell.nav.campaigns', icon: 'campanas' },
   { href: '/pronto/personajes', label: 'shell.nav.characters', icon: 'personajes' },
   { href: '/comunidad', label: 'shell.nav.friends', icon: 'amigos' },

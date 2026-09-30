@@ -8,6 +8,7 @@ export const shell: Messages<typeof es> = {
     worlds: 'Worlds',
     tables: 'Tables',
     community: 'Community',
+    shop: 'Shop',
     exploreWorlds: 'Explore worlds',
     myWorlds: 'My worlds',
     myTables: 'My tables',

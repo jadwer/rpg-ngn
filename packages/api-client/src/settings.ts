@@ -179,7 +179,8 @@ export interface BlessingState {
   /** Dias que le quedan por recoger, hoy incluido si no lo ha recogido. */
   daysLeft: number
   turnsPerDay: number
-  price: { amount: number; currency: string }
+  /** Precio en dolares y lo que se cobra hoy en pesos (`charge`), como los paquetes. */
+  price: { amount: number; currency: string; charge: { amount: number; currency: string } | null }
   /** El tema de la temporada vigente, que el aviso muestra. */
   theme: { code: string; name: string } | null
   /** Cabe otra compra sin pasar el tope de 180 dias. */

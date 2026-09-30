@@ -12,6 +12,7 @@ export const SHELL_ICON = {
   buscar: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm9 3-4-4',
   avisos: 'M6 17V11a6 6 0 1 1 12 0v6l2 2H4zm4 3a2 2 0 0 0 4 0',
   mas: 'M12 5v14M5 12h14',
+  tienda: 'M5 8h14l-1.2 12H6.2zM9 8V6.5a3 3 0 0 1 6 0V8',
   enlace: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5',
   jugar: 'M7 4.5v15L19.5 12z',
   opciones: 'M5 12h.01M12 12h.01M19 12h.01',

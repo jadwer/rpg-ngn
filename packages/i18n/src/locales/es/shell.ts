@@ -6,6 +6,7 @@ export const shell = {
     worlds: 'Mundos',
     tables: 'Mesas',
     community: 'Comunidad',
+    shop: 'Tienda',
     exploreWorlds: 'Explorar mundos',
     myWorlds: 'Mis mundos',
     myTables: 'Mis mesas',
