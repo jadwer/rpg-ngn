@@ -670,7 +670,13 @@ decisiones en `docs/25-plan-administracion.md`.
   - Turnos atascados: `closing` o `resolving` hace mas de 5 minutos, y turnos abiertos con error
   - Pagos (por correo o id de Stripe), cupos (cubeta, reserva, `plans.bypass`), pases de temporada y trabajos fallidos
   - Permisos: `admin-tables.index` y `failed-jobs.index` (god, admin, tech); `payments.index`, `quotas.index` y `season-passes.index` (god, admin: dinero). El coste sale del mismo calculo que `turns:usage`
-- [ ] **E11b.3. Operaciones desde el panel**: catalogo, revision, cupo, desatascar, reembolsar, suspender, con motivo y rastro. Gabino prepara permisos granulares por usuario en Atomo; revisarlos cuando lleguen
+- [ ] **E11b.3. Operaciones desde el panel** (plan del 30-09, en curso). Cada una con confirmacion y motivo escrito, que queda en la auditoria (`log_name` admin, con quien, sobre que y el motivo), y su permiso:
+  - Desatascar un turno (`turns.unstick`, god, admin, tech): solo `closing` o `resolving` hace mas de 10 minutos (el doble del limite del job, 300 s); lo reabre con `TurnService::abandon`, igual que cuando el job falla
+  - Dar cupo (`quotas.grant`, god, admin): suma turnos a la reserva, de 1 a 1000, como `quota:grant`
+  - Revision de mundos (`packs.review`, ya existe): la cola con aprobar y rechazar con motivo, sobre la API de hoy
+  - Catalogo (`catalog-worlds.update`, god, admin): precio, destacado, orden, oculto y beta, como `catalog:set`
+  - Reembolsar (`payments.refund` de atomo/payments, god, admin): endpoint propio que guarda el motivo y llama a `PaymentService::refund`; el efecto sigue llegando por el webhook `charge.refunded`
+  - Suspender una cuenta: **espera**. Es generico (estado `banned` y revocar tokens), va en atomo-user, y antes hay que revisar los cambios nuevos de AtomoPlatform (`b9a4279`)
 - [ ] **E11c. Soporte**: `atomo/support` generico (tickets con contexto polimorfico) y "Reportar un problema" en web y app
 - [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
 
