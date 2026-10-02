@@ -121,11 +121,11 @@
 }
 .presentacion.vertical .subtitulo {
   bottom: 20%;
-  font-size: 6.4cqw;
+  font-size: 5.6cqw;
 }
 .presentacion.horizontal .subtitulo {
   bottom: 6.5%;
-  font-size: 5.3cqh;
+  font-size: 4.7cqh;
 }
 .presentacion .subtitulo b {
   color: var(--gold-bright);
