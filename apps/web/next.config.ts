@@ -11,6 +11,10 @@ import type { NextConfig } from 'next'
  * `CORS_ALLOWED_ORIGINS`.
  */
 const config: NextConfig = {
+  // Despliegue sin cortar (02-10): en produccion hay dos instancias que se
+  // turnan, cada una con su carpeta de build (`.next-3010`, `.next-3011`),
+  // para compilar la nueva sin tocar la que esta atendiendo.
+  distDir: process.env['NEXT_DIST_DIR'] || '.next',
   reactStrictMode: true,
   poweredByHeader: false,
 }
