@@ -37,6 +37,17 @@ describe('presentacion de la cronica', () => {
     expect(captionAt(captions, 0.99)).toBe(2)
   })
 
+  it('cada oracion empieza subtitulo y una larga se corta en las comas', () => {
+    const text = 'La campana suena. Nadie baja hoy, dice Bren, mientras cierra la reja con dos vueltas de llave oxidada.'
+    expect(captionsFor(text, 34).map((c) => c.lines.join(' '))).toEqual([
+      'La campana suena.',
+      'Nadie baja hoy, dice Bren,',
+      'mientras cierra la reja con dos vueltas de llave oxidada.',
+    ])
+    // Una oracion que cabe no se parte aunque tenga comas.
+    expect(captionsFor('Sí, claro, vamos.', 34)).toHaveLength(1)
+  })
+
   it('el formato por omision es vertical', () => {
     expect(presentationFormat(null)).toBe('vertical')
     expect(presentationFormat('horizontal')).toBe('horizontal')

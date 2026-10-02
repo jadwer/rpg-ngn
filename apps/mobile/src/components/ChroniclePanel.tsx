@@ -2,7 +2,7 @@ import type { ApiClient, ChronicleShare } from '@rpg-ngn/api-client'
 import { t } from '@rpg-ngn/i18n'
 import { chronicleStatus, chronicleUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { Share, StyleSheet, Switch, Text, View } from 'react-native'
+import { Linking, Share, StyleSheet, Switch, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -80,6 +80,13 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
       ) : null}
       {share && status.canConsent ? <Button label={t('chroniclePanel.aceptoQueSeComparta')} small primary busy={busy} onPress={() => void act(() => client.consentChronicle(tableId))} /> : null}
       {share && url ? <Button label={t('mobile.chroniclePanel.shareLink')} small onPress={() => void Share.share({ message: url })} /> : null}
+      {/* Ya compartida: leerla o verla como presentacion en el navegador para grabarla (02-10). */}
+      {share?.public && url ? (
+        <>
+          <Button label={t('chroniclePage.presentacionVertical')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=vertical`)} />
+          <Button label={t('chroniclePage.presentacionHorizontal')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=horizontal`)} />
+        </>
+      ) : null}
       {share ? (
         <Button
           label={t('chroniclePanel.retirarElEnlace')}

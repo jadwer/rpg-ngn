@@ -64,7 +64,8 @@ export interface Caption {
   start: number
 }
 
-export function captionsFor(text: string, maxChars: number): Caption[] {
+/** Parte en lineas de hasta `maxChars`, sin cortar palabras. */
+function wrap(text: string, maxChars: number): string[] {
   const lines: string[] = []
   let line = ''
   for (const word of text.split(/\s+/).filter(Boolean)) {
@@ -76,13 +77,59 @@ export function captionsFor(text: string, maxChars: number): Caption[] {
     }
   }
   if (line) lines.push(line)
+  return lines
+}
+
+/** Junta trozos en subtitulos de hasta dos lineas; un trozo que no cabe se parte por palabras. */
+function pack(pieces: readonly string[], maxChars: number): string[][] {
+  const out: string[][] = []
+  let current = ''
+  const flush = () => {
+    if (current) out.push(wrap(current, maxChars))
+    current = ''
+  }
+  for (const piece of pieces) {
+    const joined = current ? `${current} ${piece}` : piece
+    if (wrap(joined, maxChars).length <= 2) {
+      current = joined
+      continue
+    }
+    flush()
+    const lines = wrap(piece, maxChars)
+    if (lines.length <= 2) {
+      current = piece
+    } else {
+      for (let i = 0; i < lines.length; i += 2) out.push(lines.slice(i, i + 2))
+    }
+  }
+  flush()
+  return out
+}
+
+/**
+ * Los subtitulos de un bloque (Gabino, 02-10: "mas natural que se corte en
+ * cada punto, o por lo menos en una coma"). Cada oracion empieza subtitulo
+ * nuevo; una oracion que no cabe en dos lineas se parte por comas, punto y
+ * coma o dos puntos, y solo si una de esas partes sigue sin caber, por
+ * palabras. Cada subtitulo lleva hasta dos lineas.
+ */
+export function captionsFor(text: string, maxChars: number): Caption[] {
+  const sentences = text.split(/(?<=[.!?…])["»”)]?\s+/).map((x) => x.trim()).filter(Boolean)
+  const groups: string[][] = []
+  for (const sentence of sentences) {
+    if (wrap(sentence, maxChars).length <= 2) {
+      groups.push(wrap(sentence, maxChars))
+      continue
+    }
+    const clauses = sentence.split(/(?<=[,;:])\s+/).filter(Boolean)
+    groups.push(...pack(clauses, maxChars))
+  }
   const total = Math.max(1, text.length)
   const captions: Caption[] = []
   let at = 0
-  for (let i = 0; i < lines.length; i += 2) {
-    const pair = lines.slice(i, i + 2)
-    captions.push({ lines: pair, start: at / total })
-    at += pair.join(' ').length + 1
+  for (const lines of groups) {
+    captions.push({ lines, start: at / total })
+    at += lines.join(' ').length + 1
   }
   return captions
 }

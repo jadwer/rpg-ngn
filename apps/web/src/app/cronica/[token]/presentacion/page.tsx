@@ -4,7 +4,7 @@ import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type Chronicle } from '@rpg-ngn/api-client'
 import { SUBTITLE_CHARS, buildSlides, captionAt, captionsFor, estimateSeconds, presentationFormat, type Slide } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { WEB_HEADER, useSession } from '../../../../lib/session'
 import { listVoices } from '../../../../lib/webSpeech'
@@ -74,6 +74,7 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
   const [titleOn, setTitleOn] = useState(true)
   const audio = useRef<HTMLAudioElement | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const router = useRouter()
 
   const slide = index < slides.length ? slides[index]! : null
   const captions = useMemo(() => (slide ? captionsFor(slide.text, SUBTITLE_CHARS[format]) : []), [slide, format])
@@ -98,7 +99,11 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
     if (phase !== 'playing') return
     if (index >= slides.length) {
       setSeconds(OUTRO_SECONDS)
-      timer.current = setTimeout(() => setPhase('done'), OUTRO_SECONDS * 1000)
+      timer.current = setTimeout(() => {
+        setPhase('done')
+        // Al terminar se sale de la pantalla completa: en el telefono no hay tecla Esc.
+        if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+      }, OUTRO_SECONDS * 1000)
       return () => {
         if (timer.current) clearTimeout(timer.current)
       }
@@ -171,6 +176,13 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
     }
   }
 
+  /** Salir: en el telefono deslizar desde arriba no quita la pantalla completa (Gabino, 02-10). */
+  const leave = () => {
+    stopAll()
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+    router.push(`/cronica/${token}`)
+  }
+
   const current = captions[caption]
   const outro = index >= slides.length
 
@@ -202,6 +214,20 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
               </span>
             ))}
           </p>
+        ) : null}
+
+        {phase === 'paused' ? (
+          <div className="pausa" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="btn primary" onClick={toggle}>
+              ▶ {t('chroniclePage.seguir')}
+            </button>
+            <button type="button" className="btn ghost small" onClick={start}>
+              {t('chroniclePage.otraVez')}
+            </button>
+            <button type="button" className="btn ghost small" onClick={leave}>
+              {t('chroniclePage.salir')}
+            </button>
+          </div>
         ) : null}
 
         {phase === 'ready' || phase === 'done' ? (

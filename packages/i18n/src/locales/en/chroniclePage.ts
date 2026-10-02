@@ -23,8 +23,11 @@ export const chroniclePage: Messages<typeof es> = {
   presentacionVertical: 'Vertical presentation (social)',
   presentacionHorizontal: 'Horizontal presentation',
   comenzar: 'Start',
-  presentacionAyuda: 'Full screen with no buttons, to record it with OBS or your phone recorder. Tap the screen to pause; Esc to leave.',
+  presentacionAyuda: 'Full screen with no buttons, to record it with OBS or your phone recorder. Tap the screen to pause and see the options; it leaves full screen on its own when it ends.',
   otraVez: 'Play again',
   volverALaHistoria: 'Back to the story',
   outro: 'A story played on Ad Astra Mentis',
+  salir: 'Exit',
+  leerLaHistoria: 'Read the story',
+  compartirParaVer: 'To read it or watch it as a presentation, share it from the table: Reading, Share the story.',
 }

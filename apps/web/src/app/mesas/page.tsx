@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Portrait } from '../../components/Portrait'
 import { RequireSession } from '../../components/RequireSession'
+import { ChronicleShortcuts } from '../../components/ChronicleShortcuts'
 import { RetireTable } from '../../components/RetireTable'
 import { AppShell } from '../../components/shell/AppShell'
 import { ShellIcon } from '../../components/shell/icons'
@@ -38,6 +39,8 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
   const { pack } = usePack()
   const [tables, setTables] = useState<TableSummary[] | null>(null)
   const [packs, setPacks] = useState<PackOption[]>([])
+  // Que menus "Opciones" estan abiertos: la historia de la mesa se pide al abrirlo.
+  const [openOptions, setOpenOptions] = useState<Record<string, boolean>>({})
   // Personajes de los packs que la web no lleva dentro: nombre y retrato.
   const [remote, setRemote] = useState<Record<string, PackCharacter[]>>({})
   const [error, setError] = useState<string | null>(null)
@@ -229,12 +232,14 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
                     <ShellIcon name="jugar" />
                     {t('tablesPage.continuar')}
                   </Link>
-                  <details className="opciones">
+                  <details className="opciones" onToggle={(e) => setOpenOptions((ids) => ({ ...ids, [table.id]: (e.currentTarget as HTMLDetailsElement).open }))}>
                     <summary className="btn">
                       <ShellIcon name="opciones" />
                       {t('tablesPage.opciones')}
                     </summary>
                     <div className="menu">
+                      {/* Solo al abrir: si no, cada tarjeta pediria su historia al cargar la pagina. */}
+                      {openOptions[table.id] ? <ChronicleShortcuts client={client} tableId={table.id} /> : null}
                       <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={() => void load(true)} />
                     </div>
                   </details>

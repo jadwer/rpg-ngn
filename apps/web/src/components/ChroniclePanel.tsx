@@ -4,6 +4,7 @@ import { t } from '@rpg-ngn/i18n'
 import type { ApiClient, ChronicleShare } from '@rpg-ngn/api-client'
 import { chronicleStatus, chronicleUrl } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
+import { ChronicleShortcuts } from './ChronicleShortcuts'
 
 interface Props {
   client: ApiClient
@@ -84,6 +85,7 @@ export function ChroniclePanel({ client, tableId }: Props) {
           {t('chroniclePanel.aceptoQueSeComparta')}
         </button>
       ) : null}
+      {share?.public ? <ChronicleShortcuts client={client} tableId={tableId} share={share} /> : null}
       {share && url ? (
         <div className="row">
           <input className="input" readOnly value={url} aria-label={t('chroniclePanel.enlaceALaHistoria')} onFocus={(e) => e.currentTarget.select()} />

@@ -21,8 +21,11 @@ export const chroniclePage = {
   presentacionVertical: 'Presentación vertical (redes)',
   presentacionHorizontal: 'Presentación horizontal',
   comenzar: 'Comenzar',
-  presentacionAyuda: 'Pantalla completa y sin botones para grabarla con OBS o la grabadora de tu teléfono. Toca la pantalla para pausar; Esc para salir.',
+  presentacionAyuda: 'Pantalla completa y sin botones para grabarla con OBS o la grabadora de tu teléfono. Toca la pantalla para pausar y ver las opciones; al terminar sale sola de pantalla completa.',
   otraVez: 'Otra vez',
   volverALaHistoria: 'Volver a la historia',
   outro: 'Una historia jugada en Ad Astra Mentis',
+  salir: 'Salir',
+  leerLaHistoria: 'Leer la historia',
+  compartirParaVer: 'Para leerla o verla como presentación, compártela desde la mesa: Lectura, Compartir la historia.',
 }

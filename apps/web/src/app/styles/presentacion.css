@@ -151,3 +151,29 @@
 .presentacion .portada .hint {
   max-width: 34em;
 }
+
+/* Pausa: seguir, otra vez o salir (en el telefono no hay Esc). */
+.presentacion .pausa {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: default;
+}
+.presentacion.grabando .pausa {
+  cursor: default;
+}
+
+/* Accesos a la historia compartida, en Lectura y en Opciones de la mesa. */
+.chronicle-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chronicle-shortcuts-hint {
+  max-width: 28em;
+}
