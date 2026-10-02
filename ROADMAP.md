@@ -8,6 +8,48 @@ decisiones estan cerradas) sin leer entrega por entrega:
 [docs/17-estado-del-proyecto.md](docs/17-estado-del-proyecto.md). Este archivo
 es el detalle; aquel es el resumen con fecha de corte.
 
+## LANZAMIENTO: 15 de noviembre de 2026 (fecha fijada por Gabino el 01-10)
+
+Esta seccion manda sobre el resto del archivo hasta esa fecha. Lo que no esta
+aqui no entra al lanzamiento. Prioridad de Gabino: **Comunidad y video
+primero**, para tener contenido en redes antes de publicar.
+
+### Calendario por semana
+
+| Semana | Que se cierra |
+|---|---|
+| 1 (02 al 08-10) | **Comunidad v1**: Historias (las cronicas que su mesa acepto compartir, con portada e ilustraciones) y Creadores (autores con mundos publicados), en web y app. Gabino decide el cobro en Google Play |
+| 2 (09 al 15-10) | **Voz del narrador en el servidor** (base de 6c): audio por bloque, guardado, una voz por idioma. **Google Play**: App Bundle, ficha, formulario de datos, clasificacion; la **prueba cerrada arranca a mas tardar el 15-10** |
+| 3 (16 al 22-10) | **Video de la sesion v1** (10d): de una cronica compartida a un video vertical (redes) y uno horizontal, con imagenes, texto y voz. Empieza el contenido para redes |
+| 4 (23 al 29-10) | **Antes de abrir**: verificacion de correo, boticaria fuera del catalogo publico, vigilancia de servicios, desplegar sin cortar, claves de imagen rotadas, copias fuera del servidor |
+| 5 (30-10 al 05-11) | Legales con el abogado; Plata, Oro y Diamante definidos o retirados de la venta; medir paquetes con cuatro jugadores; mundos de la temporada. La prueba cerrada termina el 29-10 y se pide produccion a Google |
+| 6 (06 al 12-11) | **Congelado de funciones el 06-11**: solo errores. Prueba en dispositivo real, materiales de redes |
+| 13 y 14-11 | Version candidata, despliegue final |
+| **15-11** | **Lanzamiento** |
+
+La regla de Google para cuentas personales nuevas (12 probadores durante 14
+dias antes de publicar, y luego una revision de hasta una semana) es la que
+fija la semana 2: si la prueba cerrada arranca despues del 22-10, la app de
+Android no llega al 15-11 y el lanzamiento seria solo web.
+
+### Decisiones de Gabino, con fecha limite
+
+- [ ] **Cobro en Google Play** (08-10): cobrar con Google Play Billing (comision de 15 a 30%) o que la app no venda y solo muestre lo que ya tienes. Mandar a pagar a la web, como hoy, Google suele rechazarlo fuera de Estados Unidos
+- [ ] **Proveedor de voz del narrador** (09-10): de pago por uso en la nube (OpenAI o Google) o propio con GPU; sin GPU en el servidor, la nube es lo realista
+- [ ] **Doce probadores para la prueba cerrada** (14-10): sus correos de Google
+- [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta hasta despues
+- [ ] **Legales con el abogado** (05-11): version en ingles, terceros del aviso, clausula de la Bendicion
+- [ ] **Copias fuera del servidor** (29-10): el NAS, o mientras tanto un Storage Box de Hetzner
+- [ ] Arte: tema de la temporada, retrato de Bren, "La corte exterior" en el mapa (06-11)
+
+### Despues del 15-11 (fuera del lanzamiento a proposito)
+
+Mesas abiertas a desconocidos (necesita moderacion), Campañas y Personajes
+(hoy "Pronto"), narrador estandar o premium (10e), afinidad con NPC (10f),
+rehacer la ultima accion, constructor de historias (E13), app de iPhone,
+colaboraciones con streamers, excepciones a mano en el panel, capturas en
+soporte.
+
 ## Fase 0: Diseño y piloto (cerrada el 2026-09-05)
 
 - [x] Alcance del motor y ejes de agnosticismo
