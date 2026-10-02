@@ -56,10 +56,10 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 La app esta a la par en juego, tienda (con Google Play), Comunidad, pase,
 soporte, avisos e idioma. Lo que falta, por orden:
 
-- [ ] **P0, antes de la prueba cerrada (15-10): quitar de Explorar los enlaces "Comprar en la web"** de mundos y del pase. Contradicen la decision del 02-10 (la app no vende ni manda a pagar el pase ni los mundos) y Google puede rechazar la app por ellos. Despues, AAB v24 con lo de hoy (accesos a la presentacion y "Generar video")
-- [ ] P1, semana 4: idioma de la mesa al crearla y en Ajustes de la mesa, y el ajuste de secretos del pack (la web los tiene en `TableRulesPanel`, la app solo dados, cuenta atras e ilustraciones)
-- [ ] P1: idioma en Explorar (filtro y aviso de los idiomas de cada mundo)
-- [ ] P1: accesos a la historia y a la presentacion en Opciones de cada mesa (en la app solo estan en Lectura)
+- [x] **P0 (02-10, `5537f7b`, AAB v24): quitar de Explorar los enlaces "Comprar en la web"** de mundos y del pase. Contradicen la decision del 02-10 (la app no vende ni manda a pagar el pase ni los mundos) y Google puede rechazar la app por ellos. Despues, AAB v24 con lo de hoy (accesos a la presentacion y "Generar video")
+- [x] P1 (02-10, `241815f`): idioma de la mesa al crearla y en Ajustes de la mesa, y el ajuste de secretos del pack (la web los tiene en `TableRulesPanel`, la app solo dados, cuenta atras e ilustraciones)
+- [x] P1 (02-10): idioma en Explorar (filtro y aviso de los idiomas de cada mundo)
+- [x] P1 (02-10): accesos a la historia y a la presentacion en Opciones de cada mesa (en la app solo estan en Lectura)
 - [ ] P2: la Guia de como jugar (solo en la web)
 - [ ] Despues del 15-11, en las dos: la voz del narrador generada dentro de la mesa (hoy solo suena en la cronica de la web)
 
