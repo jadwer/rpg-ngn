@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-09-30, 02:00 UTC** (29-09 noche en CST). Rama `dev` `d69603f`; API `e15c10d` con platform `24c4733`. Produccion en https://adastramentis.com.
+Fecha de corte: **2026-10-02, 01:45 UTC** (01-10 noche en CST). Rama `dev` `acc7faf`; API `606e27e` con platform `350485d`. Produccion en https://adastramentis.com. App: APK v21.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -61,6 +61,28 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 ---
 
 ## 3. Que esta implementado (y en produccion)
+
+### Del 30-09 y 01-10: panel, soporte, Bendicion, Tienda y la app al dia
+
+- **Panel de administracion** (E11b.2 y E11b.3): mesas, turnos atascados,
+  pagos, cupos, pases, trabajos fallidos y catalogo; operaciones con motivo
+  (reabrir turno, dar cupo, reembolsar, suspender cuenta). Diseño neutro que
+  AtomoPlatform adopta como plantilla (`platform/docs/DESIGN.md`).
+- **Soporte** (E11c): reportar un problema desde la mesa o la cuenta, la
+  conversacion con el equipo y la cola en el panel; en web y en la app.
+- **Bendicion del bardo**: 30 dias acumulables hasta 180, 4 turnos al dia
+  que se recogen en un aviso a pantalla completa (web y app). `ends_at` se
+  guarda en UTC desde el 01-10 (antes terminaba 6 horas antes);
+  `blessing:grant` regala dias con motivo en la auditoria.
+- **Tienda** en web y app; paquetes de 0.99 a 99.99 USD con precio fijo en
+  pesos para la prueba con beta testers. En la app el pago abre la web.
+- **App**: interfaz en español e ingles (globo arriba a la derecha), pase y
+  coleccion, Inicio con promociones y **avisos push** por Expo y Firebase
+  (probado en el telefono de Gabino el 01-10).
+- **AtomoPlatform al dia** (`350485d`): solo un god modifica a otro god y los
+  roles del recurso users son de solo lectura.
+- Verificado al corte: API 261 tests en verde; app 16 tests, typecheck,
+  lint y `expo-doctor` 21/21.
 
 ### Ingles para la beta cerrada (29-09, desplegado)
 
@@ -563,12 +585,12 @@ conviene asumir que hasta que no se juega, no esta probado.
 
 ## 4. Que esta en progreso ahora mismo
 
-**E11b.2, panel con lo del juego (28-09).** Mesas (miembros, sesiones,
-turnos, tokens), turnos atascados, pagos, cupos, pases y trabajos fallidos en
-lectura; despues E11b.3, las operaciones con motivo y rastro. La auditoria VAM
-del 26-09 cerro y su veredicto esta en el ROADMAP. Por platicar con Gabino:
-planes Plata, Oro y Diamante, temporadas y pases (E12) y el constructor de
-historias (E13). Las copias fuera del servidor esperan al NAS (deuda S1).
+**Beta cerrada con amigos (01-10).** Se juega en produccion con el piloto, la
+Mascarada y la boticaria, en español o ingles, y se prueba la escalera de
+paquetes. Siguiente en el ROADMAP: la tirada y la accion en el mismo turno,
+desplegar sin cortar la web y medir turnos por paquete con una sesion de
+cuatro jugadores. Esperan a Gabino: legales con el abogado, arte del tema de
+temporada y el NAS para las copias fuera del servidor (S1).
 
 ---
 
