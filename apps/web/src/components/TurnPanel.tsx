@@ -32,7 +32,8 @@ interface Props {
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
   /** Suelta el dado de la tirada que el GM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
-  onRoll: () => Promise<RollOutcome>
+  /** Suelta el dado pedido; `text` es lo que intenta con la tirada (va en el mismo turno). */
+  onRoll: (text?: string) => Promise<RollOutcome>
   /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
   onRolled: () => void
   /** El anfitrion se quedo sin turnos: el aviso lleva a recargar antes de chocar con el cierre. */
@@ -108,6 +109,8 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   // trae el bloque y la peticion deja de estar pendiente.
   const [rollError, setRollError] = useState<string | null>(null)
   const [landed, setLanded] = useState<{ die: string; outcome: RollOutcome } | null>(null)
+  // Lo que intenta con la tirada ("si paso, salto el muro"): sale con el dado.
+  const [rollText, setRollText] = useState('')
   // La peticion se recuerda hasta que cambia el turno: el sondeo la quita en
   // cuanto el servidor registra la tirada, y eso pasa a media animacion; si
   // la tarjeta se fuera con ella, el dado se desmontaria antes de aterrizar.
@@ -120,6 +123,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     setRollError(null)
     setActiveRoll(null)
     setStarted(false)
+    setRollText('')
   }, [turn?.id])
   useEffect(() => {
     if (progress.mustRoll) setActiveRoll(progress.mustRoll)
@@ -200,8 +204,9 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
       {turn?.error ? <div className="error">{t('turnPanel.elGmTuvoUnProblema', { error: turn.error })}</div> : null}
       {notice && notice !== turn?.error ? <div className="error">{notice}</div> : null}
 
-      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
-          no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
+      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado
+          (Gabino, 25-09) y, si quiere, decir que intenta con ella, en el mismo
+          turno (29-09). Sin ideas ni dados rapidos. */}
       {open && hasCharacter && activeRoll ? (
         <div className="roll-card" role="group" aria-label={t('turnPanel.teTocaTirar')}>
           <DiceRoller
@@ -211,7 +216,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
             disabled={busy || landed !== null}
             resolve={() => {
               setStarted(true)
-              return onRoll()
+              return onRoll(rollText)
             }}
             onLanded={(outcome) => {
               setRollError(null)
@@ -223,7 +228,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           <span className="text">
             {landed ? (
               <>
-                <b>Sacaste {landed.outcome.result}.</b> {t('turnPanel.elDirectorNarraLo')}
+                <b>{t('turnPanel.sacaste', { n: landed.outcome.result })}</b> {t('turnPanel.elDirectorNarraLo')}
               </>
             ) : (
               <>
@@ -231,6 +236,12 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               </>
             )}
           </span>
+          {landed ? null : (
+            <label className="roll-action">
+              <span>{t('turnPanel.rollAction')}</span>
+              <textarea className="textarea" rows={2} value={rollText} onChange={(e) => setRollText(e.target.value)} placeholder={t('turnPanel.rollActionPlaceholder')} maxLength={4000} disabled={busy || started} />
+            </label>
+          )}
           {rollError ? <span className="error">{rollError}</span> : null}
         </div>
       ) : null}

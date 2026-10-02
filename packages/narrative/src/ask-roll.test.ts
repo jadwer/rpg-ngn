@@ -27,8 +27,11 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
           expect(prompt).not.toContain('El motor ya tiró')
           expect(prompt).not.toContain('"source":"engine"')
           expect(prompt).not.toContain('Tirada extra que pides y el motor resuelve')
-          if (dice === 'dice') expect(prompt).not.toContain('"source":"physical"')
-          else expect(prompt).toContain('"source":"physical"')
+          if (dice === 'dice') {
+            expect(prompt).not.toContain('"source":"physical"')
+            // La tirada y la accion van en el mismo turno (modelo de monetizacion, seccion 12).
+            expect(prompt).toContain('si paso, salto el muro')
+          } else expect(prompt).toContain('"source":"physical"')
         }
       }
     }

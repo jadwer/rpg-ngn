@@ -2919,6 +2919,15 @@ a.plain {
 .turn .roll-card .error {
   flex-basis: 100%;
 }
+/* Lo que intenta con la tirada, debajo del dado y del motivo (29-09). */
+.turn .roll-card .roll-action {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink-dim, #9ca3af);
+  font-size: 0.9rem;
+}
 
 /* El dado con caras de la lamina: se mantiene presionado y frena sobre el numero. */
 .sprite-die {

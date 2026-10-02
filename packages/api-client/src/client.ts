@@ -109,7 +109,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   /** Tira la Fortuna de la sesion del propio personaje; el numero lo saca el servidor. 409 si ya se tiro o no toca. */
   rollFortune(tableId: string | number): Promise<{ result: number; label: string }>
   /** Suelta el dado de la tirada que el GM pidio en este turno; el numero lo saca el servidor y queda como la respuesta del personaje. 409 si no toca. */
-  rollRequested(turnId: number): Promise<RollReceipt>
+  /** `text`: lo que intenta con esa tirada ("si paso, salto el muro"); va en la misma respuesta. */
+  rollRequested(turnId: number, text?: string): Promise<RollReceipt>
   /** "Otras" ideas para el propio personaje; sustituyen a las anteriores. 409 si no toca o hay que pagar. */
   moreIdeas(turnId: number): Promise<{ options: string[]; ideas: TableState['ideas'] }>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
@@ -312,8 +313,9 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       return data.data
     },
 
-    async rollRequested(turnId) {
-      const { data } = await request<{ data: RollReceipt }>(`/api/v1/turns/${turnId}/rolls`, { method: 'POST' })
+    async rollRequested(turnId, text) {
+      const body = text && text.trim() !== '' ? { text: text.trim() } : undefined
+      const { data } = await request<{ data: RollReceipt }>(`/api/v1/turns/${turnId}/rolls`, { method: 'POST', ...(body ? { body } : {}) })
       return data.data
     },
 

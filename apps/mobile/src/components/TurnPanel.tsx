@@ -37,7 +37,8 @@ interface Props {
   /** Pide la tirada a la API; devuelve el numero que saco el servidor. */
   onFortune: () => Promise<number>
   /** Suelta el dado de la tirada que el GM pidio (`progress.mustRoll`); el numero lo pone el servidor. */
-  onRoll: () => Promise<RollOutcome>
+  /** Suelta el dado pedido; `text` es lo que intenta con la tirada (va en el mismo turno). */
+  onRoll: (text?: string) => Promise<RollOutcome>
   /** El dado ya aterrizo: la mesa se refresca sin esperar al sondeo. */
   onRolled: () => void
   /** Ideas de accion del GM para este personaje (E10b); el cuadro sigue libre. */
@@ -104,11 +105,14 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
   // Este dado ya se solto: aunque el sondeo diga "respondio" antes de que
   // aterrice, la tarjeta se queda para enseñar el numero.
   const [started, setStarted] = useState(false)
+  // Lo que intenta con la tirada ("si paso, salto el muro"): sale con el dado.
+  const [rollText, setRollText] = useState('')
   useEffect(() => {
     setLanded(null)
     setRollError(null)
     setActiveRoll(null)
     setStarted(false)
+    setRollText('')
   }, [turn?.id])
   useEffect(() => {
     if (progress.mustRoll) setActiveRoll(progress.mustRoll)
@@ -165,9 +169,11 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
       {turn?.error ? <Text style={styles.error}>{t('turnPanel.elGmTuvoUnProblema', { error: turn.error })}</Text> : null}
       {notice && notice !== turn?.error ? <Text style={styles.notice}>{notice}</Text> : null}
 
-      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado,
-          no escribir (Gabino, 25-09). Sin cuadro, sin ideas, sin dados rapidos. */}
+      {/* El GM pidio una tirada: el turno de este personaje es soltar el dado
+          (Gabino, 25-09) y, si quiere, decir que intenta con ella, en el mismo
+          turno (29-09). Sin ideas ni dados rapidos. */}
       {turn?.status === 'open' && hasCharacter && activeRoll ? (
+        <View style={styles.rollBox}>
         <View style={styles.rollCard}>
           <DiceRoller
             die={activeRoll.die}
@@ -176,7 +182,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
             disabled={busy || landed !== null}
             resolve={() => {
               setStarted(true)
-              return onRoll()
+              return onRoll(rollText)
             }}
             onLanded={(outcome) => {
               setRollError(null)
@@ -199,6 +205,23 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
             )}
             {rollError ? <Text style={styles.error}>{rollError}</Text> : null}
           </View>
+        </View>
+        {landed ? null : (
+          <View style={styles.rollAction}>
+            <Text style={styles.fortuneHint}>{t('turnPanel.rollAction')}</Text>
+            <TextInput
+              value={rollText}
+              onChangeText={setRollText}
+              multiline
+              maxLength={1000}
+              placeholder={t('turnPanel.rollActionPlaceholder')}
+              placeholderTextColor={theme.colors.inkFaint}
+              style={styles.input}
+              editable={!busy && !started}
+              onFocus={() => onFocusInput?.()}
+            />
+          </View>
+        )}
         </View>
       ) : null}
 
@@ -341,6 +364,8 @@ const styles = StyleSheet.create({
   ideasToggle: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.nebula },
   hideText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 16, color: theme.colors.gold },
   fortune: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: theme.colors.accentBright, borderRadius: 12, backgroundColor: 'rgba(124, 58, 237, 0.12)' },
+  rollBox: { gap: 10 },
+  rollAction: { gap: 6 },
   rollCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: theme.colors.gold, borderRadius: 12, backgroundColor: 'rgba(0, 0, 0, 0.35)' },
   fortuneText: { flex: 1, gap: 2 },
   fortuneTitle: { fontFamily: theme.fonts.uiBold, fontSize: 15, color: theme.colors.ink },

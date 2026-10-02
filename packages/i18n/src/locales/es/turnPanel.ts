@@ -28,4 +28,7 @@ export const turnPanel = {
   dadosMantenPresionadoY: 'Dados: mantén presionado y suelta',
   soloElAnfitrionCierra: 'Solo el anfitrión: cierra aunque falte alguien',
   elGmTuvoUnProblema: 'El GM tuvo un problema y el turno se reabrió: {{error}}',
+  rollAction: 'Qué intentas con esta tirada (opcional)',
+  rollActionPlaceholder: 'Si paso, salto el muro y abro el portón.',
+  sacaste: 'Sacaste {{n}}.',
 }

@@ -30,4 +30,7 @@ export const turnPanel: Messages<typeof es> = {
   dadosMantenPresionadoY: 'Dice: press, hold and let go',
   soloElAnfitrionCierra: 'Host only: close even if someone is missing',
   elGmTuvoUnProblema: 'The GM had a problem and the turn reopened: {{error}}',
+  rollAction: 'What you try with this roll (optional)',
+  rollActionPlaceholder: 'If I make it, I jump the wall and open the gate.',
+  sacaste: 'You rolled {{n}}.',
 }

@@ -62,6 +62,18 @@ describe('login y perfil', () => {
     expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ email: 'jaz@example.com', password: 'password', device_name: 'expo-test' })
   })
 
+  it('la tirada pedida lleva lo que intenta el jugador solo si escribio algo', async () => {
+    const receipt = { result: 14, rolls: [14], die: '1d20' }
+    const { fetch, calls } = fakeFetch({ 'POST /api/v1/turns/7/rolls': { status: 201, body: { data: receipt } } })
+    const api = createApiClient({ baseUrl: 'http://api.test', tokenProvider: () => 'tok', fetch })
+    expect(await api.rollRequested(7, '  Si paso, salto el muro  ')).toEqual(receipt)
+    expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ text: 'Si paso, salto el muro' })
+    await api.rollRequested(7, '   ')
+    await api.rollRequested(7)
+    expect(calls[1]?.init.body).toBeUndefined()
+    expect(calls[2]?.init.body).toBeUndefined()
+  })
+
   it('un login invalido es un ApiError 422 con mensaje legible', async () => {
     const { api } = client({ 'POST /api/auth/login': { status: 422, body: { message: 'validation.min.string', errors: { password: ['validation.min.string'] } } } })
     const error = await api.login('a@b.c', 'x', 'd').catch((e: unknown) => e)

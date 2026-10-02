@@ -247,9 +247,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     refresh()
     return options
   }, [client, rollTurnId, refresh])
-  const rollRequested = useCallback(async () => {
+  const rollRequested = useCallback(async (text?: string) => {
     if (rollTurnId === null) throw new Error(t('table.turn.none'))
-    const receipt = await client.rollRequested(rollTurnId)
+    const receipt = await client.rollRequested(rollTurnId, text)
     return { result: receipt.result, rolls: receipt.rolls }
   }, [client, rollTurnId])
 
