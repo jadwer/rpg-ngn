@@ -1,6 +1,6 @@
-import { t } from '@rpg-ngn/i18n'
+import { t, LANGUAGES, language, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
+import { languageCodes, worldLanguageNote, worldLanguages, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useTopInset } from '../../hooks/useTopInset'
@@ -39,6 +39,8 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
   const [pass, setPass] = useState<SeasonPassOffer | null>(null)
   const [names, setNames] = useState<Record<string, string>>({})
   const [genre, setGenre] = useState<string | null>(null)
+  // Idioma del mundo, como el filtro de la web (paridad, 02-10).
+  const [lang, setLang] = useState<Language | null>(null)
   const [q, setQ] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [detail, setDetail] = useState<CatalogWorldDetail | null>(null)
@@ -48,7 +50,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
 
   const load = useCallback(async () => {
     try {
-      const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined })
+      const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined, language: lang ?? undefined })
       setWorlds(result.worlds)
       setSeason(result.season)
       setPass(result.pass)
@@ -59,7 +61,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
       if (e instanceof ApiError && e.isUnauthorized) return onUnauthorized()
       setError(e instanceof ApiError ? e.message : t('play.catalogLoadFailed'))
     }
-  }, [client, genre, q, onUnauthorized])
+  }, [client, genre, q, lang, onUnauthorized])
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), q ? 300 : 0)
@@ -113,7 +115,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           {cover ? <Image source={{ uri: cover }} style={styles.detailCover} resizeMode="cover" /> : null}
           <Text style={styles.detailTitle}>{detail.name}</Text>
           <View style={styles.chips}>
-            {[detail.catalog.genre, `${playersTag(detail.catalog.players)} ${t('explorePage.jugadores').toLowerCase()}`, durationLabel(detail.catalog.duration)].map((c) => (
+            {[detail.catalog.genre, `${playersTag(detail.catalog.players)} ${t('explorePage.jugadores').toLowerCase()}`, durationLabel(detail.catalog.duration), languageCodes(worldLanguages(detail))].map((c) => (
               <Text key={c} style={styles.chip}>
                 {c}
               </Text>
@@ -221,6 +223,13 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
             </Pressable>
           ))}
         </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+          {[null, ...LANGUAGES].map((l) => (
+            <Pressable key={l ?? 'todos'} onPress={() => setLang(l)} style={[styles.filter, lang === l && styles.filterOn]} accessibilityRole="button">
+              <Text style={[styles.filterText, lang === l && styles.filterTextOn]}>{l ? t(`common.languages.${l}`) : t('mobile.exploreScreen.todosLosIdiomas')}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {worlds === null ? <ActivityIndicator color={theme.colors.accentBright} /> : null}
@@ -242,6 +251,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
                       {world.name}
                     </Text>
                     <Text style={styles.meta}>{view.price ?? view.hint ?? view.byline}</Text>
+                    <Text style={styles.meta}>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</Text>
                     {view.progress !== null ? (
                       <View style={styles.bar}>
                         <View style={[styles.barFill, { width: `${Math.round(view.progress * 100)}%` }]} />

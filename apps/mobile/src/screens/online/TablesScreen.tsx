@@ -10,6 +10,7 @@ import { TopBar } from '../../components/TopBar'
 import { Icon, ICON } from '../../components/Icon'
 import { JoinByLink } from '../../components/JoinByLink'
 import { Portrait } from '../../components/Portrait'
+import { ChronicleShortcuts } from '../../components/ChronicleShortcuts'
 import { RetireTable } from '../../components/RetireTable'
 import type { StoredUser } from '../../online/storage'
 import { theme } from '../../theme'
@@ -183,6 +184,7 @@ export function TablesScreen({ client, user, tables, loading, error, pack, packs
                 </View>
                 {options === table.id ? (
                   <View style={styles.optionsBox}>
+                    <ChronicleShortcuts client={client} tableId={table.id} />
                     <RetireTable client={client} table={table} host={me?.role === 'host'} onChanged={onRefresh} />
                   </View>
                 ) : null}

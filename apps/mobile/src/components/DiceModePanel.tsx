@@ -1,6 +1,6 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { t } from '@rpg-ngn/i18n'
-import { COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { t, type Language } from '@rpg-ngn/i18n'
+import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -10,6 +10,8 @@ import { RadioRow } from './RadioRow'
 interface Props {
   client: ApiClient
   table: TableSummary
+  /** Idiomas que trae el mundo; con uno solo no se ofrece cambiar. */
+  languages?: readonly Language[]
   onChanged: () => void
   onUnauthorized: () => void
 }
@@ -19,9 +21,17 @@ interface Props {
  *
  * Con la mesa reunida y dados de verdad, el numero que escribe un jugador
  * vale. A distancia eso es confiar en que nadie escriba "20", asi que el
- * servidor tira por todos.
+ * servidor tira por todos. Tambien el idioma de la mesa y como se vigilan
+ * los secretos del pack, como `TableRulesPanel` de la web (paridad, 02-10).
  */
-export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Props) {
+const LINT_OPTIONS: ReadonlyArray<readonly [string, 'play.lintServer' | 'play.lintEnforce' | 'play.lintReport' | 'play.lintOff']> = [
+  ['', 'play.lintServer'],
+  ['enforce', 'play.lintEnforce'],
+  ['report', 'play.lintReport'],
+  ['off', 'play.lintOff'],
+]
+
+export function DiceModePanel({ client, table, languages = ['es'], onChanged, onUnauthorized }: Props) {
   const saved = useMemo(() => diceModeOf(table.settings), [table.settings])
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
@@ -46,6 +56,20 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
     void save(withSceneImages(table.settings, on), on ? t('play.savedImagesOn') : t('play.savedImagesOff'))
   }
 
+  const language = tableLanguageOf(table.settings)
+  const chooseLanguage = (l: Language) => {
+    if (l === language || busy) return
+    void save({ ...(table.settings ?? {}), language: l }, t('play.savedLanguage', { language: languageName(l) }))
+  }
+
+  const lint = typeof table.settings?.['lint'] === 'string' ? (table.settings['lint'] as string) : ''
+  const chooseLint = (value: string) => {
+    if (value === lint || busy) return
+    // Sin modo elegido se quita la clave: manda el del engine.
+    const { lint: _previous, ...rest } = table.settings ?? {}
+    void save(value === '' ? rest : { ...rest, lint: value }, t('play.saved'))
+  }
+
   const save = async (settings: Record<string, unknown>, text: string) => {
     setBusy(true)
     setNotice(null)
@@ -63,6 +87,14 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
 
   return (
     <>
+      {languages.length > 1 ? (
+        <Panel title={t('tableRules.idioma')}>
+          {languages.map((l) => (
+            <RadioRow key={l} label={t(`common.languages.${l}`)} selected={language === l} onSelect={() => chooseLanguage(l)} />
+          ))}
+          <Text style={styles.hint}>{t('tableRules.idiomaHint')}</Text>
+        </Panel>
+      ) : null}
       <Panel title={t('tableRules.dados')}>
         {DICE_MODES.map((mode) => (
           <RadioRow key={mode} label={diceModeLabel(mode)} selected={saved === mode} onSelect={() => choose(mode)} />
@@ -83,6 +115,12 @@ export function DiceModePanel({ client, table, onChanged, onUnauthorized }: Prop
         <RadioRow label={t('tableRules.ilustrarEscenas')} selected={images} onSelect={() => chooseImages(true)} />
         <RadioRow label={t('tableRules.soloTexto')} selected={!images} onSelect={() => chooseImages(false)} />
         <Text style={styles.hint}>{sceneImagesHint(images, table.imagesPerSession)}</Text>
+      </Panel>
+      <Panel title={t('tableRules.secretosDelPack')}>
+        {LINT_OPTIONS.map(([value, label]) => (
+          <RadioRow key={value || 'servidor'} label={t(label)} selected={lint === value} onSelect={() => chooseLint(value)} />
+        ))}
+        <Text style={styles.hint}>{t('tableRules.elMotorComparaCada')}</Text>
         {notice ? <Text style={[styles.notice, notice.ok ? styles.ok : styles.error]}>{notice.text}</Text> : null}
       </Panel>
     </>

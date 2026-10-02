@@ -1,4 +1,5 @@
 import type { CatalogWorldCard } from '@rpg-ngn/api-client'
+import { t } from '@rpg-ngn/i18n'
 import { cardView } from '@rpg-ngn/ui-logic'
 
 /**
@@ -10,7 +11,7 @@ import { cardView } from '@rpg-ngn/ui-logic'
  */
 export function appCardView(world: Parameters<typeof cardView>[0]): ReturnType<typeof cardView> {
   const view = cardView(world)
-  return view.action === 'comprar' ? { ...view, action: 'detalle', price: null } : view
+  return view.action === 'comprar' ? { ...view, action: 'detalle', price: null, label: t('worlds.details') } : view
 }
 
 export type { CatalogWorldCard }

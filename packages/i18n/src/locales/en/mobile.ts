@@ -96,6 +96,7 @@ export const mobile: Messages<typeof es> = {
     sesionesLista: 'Sessions: {{sessions}}',
   },
   exploreScreen: {
+    todosLosIdiomas: 'All languages',
     comprarEnLaWeb: 'Buy on the web',
     personajesJugablesConTrasfondo: '{{count}} playable characters with backstory',
     mapaDe: 'Map of {{name}}',

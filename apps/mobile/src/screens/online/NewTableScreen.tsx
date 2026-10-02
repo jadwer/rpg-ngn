@@ -1,7 +1,7 @@
-import { t } from '@rpg-ngn/i18n'
+import { t, language, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packPortraitUrl, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { newTableLanguage, worldLanguageNote, worldLanguages, cleanTableName, packCharacters, packOptionLabel, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import { useEffect, useMemo, useState } from 'react'
 import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Backdrop } from '../../components/Backdrop'
@@ -53,6 +53,11 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
   const characters = useMemo(() => packCharacters(pack), [pack])
   const cleanName = cleanTableName(name)
   const option = useMemo(() => packs.find((p) => p.id === packId) ?? null, [packs, packId])
+  // Idioma de la mesa, como la web: el de la interfaz si el mundo lo trae; si
+  // no, el del mundo. Con mas de uno, lo elige quien crea la mesa (02-10).
+  const [chosenLang, setChosenLang] = useState<Language | null>(null)
+  const optionLangs = worldLanguages(option)
+  const tableLang = chosenLang && optionLangs.includes(chosenLang) ? chosenLang : newTableLanguage(option, language())
   // La app lleva el pack piloto dentro para pintar retratos y fichas sin red.
   // De cualquier otro pack, los personajes y sus retratos los da la API.
   const bundled = packId === PACK_OPTION.id
@@ -126,7 +131,7 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
       // del 19-09, movil A1). Sin version: el motor resuelve la unica que tiene.
       const elegido = option ?? PACK_OPTION
       const ruleset = option ? option.system : PACK_OPTION.ruleset
-      const table = await client.createTable({ name: cleanName, packId: elegido.id, packVersion: elegido.version, ruleset, premise, ...(provider ? { settings: withProvider({}, provider) } : {}) })
+      const table = await client.createTable({ name: cleanName, packId: elegido.id, packVersion: elegido.version, ruleset, premise, settings: { ...(provider ? withProvider({}, provider) : {}), language: tableLang } })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -182,6 +187,15 @@ export function NewTableScreen({ client, user, pack, onBack, onOpen, onUnauthori
                 )}
                 {option?.tagline ? <Text style={styles.tagline}>{option.tagline}</Text> : packSummaryText(option) ? <Text style={styles.hint}>{packSummaryText(option)}</Text> : null}
               </Panel>
+              {optionLangs.length > 1 ? (
+                <Panel title={t('tableRules.idioma')}>
+                  {optionLangs.map((l) => (
+                    <RadioRow key={l} label={t(`common.languages.${l}`)} selected={tableLang === l} onSelect={() => setChosenLang(l)} />
+                  ))}
+                </Panel>
+              ) : worldLanguageNote(option, language()) ? (
+                <Text style={styles.hint}>{worldLanguageNote(option, language())}</Text>
+              ) : null}
               <Panel title={t('newTable.tuPersonaje')}>
                 {bundled ? (
                   <CharacterPicker characters={characters} value={characterId} onChange={setCharacterId} allowNone />

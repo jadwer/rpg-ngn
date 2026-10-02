@@ -1,6 +1,6 @@
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { t } from '@rpg-ngn/i18n'
+import { t, type Language } from '@rpg-ngn/i18n'
 import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -19,6 +19,8 @@ interface Props {
   suggestedCode: string
   /** Sesiones que ESTA campaña ya jugo, para marcarlas en el selector. */
   playedSessions?: readonly SessionSummary[]
+  /** Idiomas que trae el mundo, para cambiar el de la mesa. */
+  worldLanguages?: readonly Language[]
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
@@ -32,7 +34,7 @@ interface Props {
  * que es lo de cada noche, y pestaña Ajustes de la mesa (dados, secretos del
  * pack y director), que casi no se toca. Invitar vive en Jugadores.
  */
-export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
@@ -57,7 +59,7 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
 
       {tab === 'settings' ? (
         <>
-          <DiceModePanel client={client} table={table} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+          <DiceModePanel client={client} table={table} languages={worldLanguages} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           <Panel title={t('hostPanel.directorDeJuego')}>
             <GmSettingsPanel client={client} table={table} busy={busy} onChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Panel>

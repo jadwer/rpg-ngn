@@ -94,6 +94,7 @@ export const mobile = {
     sesionesLista: 'Sesiones: {{sessions}}',
   },
   exploreScreen: {
+    todosLosIdiomas: 'Todos los idiomas',
     comprarEnLaWeb: 'Comprar en la web',
     personajesJugablesConTrasfondo: '{{count}} personajes jugables con trasfondo',
     mapaDe: 'Mapa de {{name}}',
