@@ -4,15 +4,17 @@ import { buyablePacks, comingSoonPacks, packDescription, packName, packPrice, pa
 import { LinearGradient } from 'expo-linear-gradient'
 import { useCallback, useEffect, useState } from 'react'
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import { PLAY_BLESSING, playIdOfPack, usePlay } from '../../online/play'
 import { webOriginOf } from '../../online/server-url'
 import { theme } from '../../theme'
 import { Button } from '../Button'
 import { Panel } from '../Panel'
 
 /**
- * Las piezas de la tienda en la app, las mismas que la web (`components/shop`)
- * pero sin cobrar aqui: cada compra abre `/tienda` de la web con la misma
- * cuenta. Las usan la Tienda, Perfil e Inicio.
+ * Las piezas de la tienda en la app, las mismas que la web (`components/shop`).
+ * Con Google Play (02-10) los turnos y la Bendicion se compran aqui, al precio
+ * de Google; el pase y los mundos no se venden en la app. Sin Google Play
+ * (Expo Go, desarrollo) la compra abre `/tienda` de la web.
  */
 export function openWebShop(client: ApiClient): void {
   void Linking.openURL(`${webOriginOf(client.baseUrl)}/tienda`)
@@ -21,6 +23,7 @@ export function openWebShop(client: ApiClient): void {
 /** La Bendicion del bardo: que da, si esta activa y hasta cuando. */
 export function BlessingOffer({ client }: { client: ApiClient }) {
   const [state, setState] = useState<BlessingState | null>(null)
+  const play = usePlay()
 
   const load = useCallback(async () => {
     try {
@@ -32,10 +35,11 @@ export function BlessingOffer({ client }: { client: ApiClient }) {
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, play.deliveries])
 
   if (!state) return null
-  const price = packPrice(state.price)
+  const playPrice = play.available ? play.prices[PLAY_BLESSING] : undefined
+  const price = playPrice ?? packPrice(state.price)
   const until = state.active && state.endsAt ? new Date(state.endsAt).toLocaleDateString(language() === 'en' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'long' }) : null
 
   return (
@@ -48,7 +52,12 @@ export function BlessingOffer({ client }: { client: ApiClient }) {
       {until ? <Text style={styles.ok}>{t('blessing.activeUntil', { date: until })}</Text> : null}
       {state.canBuy ? (
         <View style={styles.actions}>
-          <Button label={state.active ? t('blessing.extend', { price }) : t('blessing.buy', { price })} primary onPress={() => openWebShop(client)} />
+          <Button
+            label={state.active ? t('blessing.extend', { price }) : t('blessing.buy', { price })}
+            primary
+            busy={play.buying === PLAY_BLESSING}
+            onPress={() => (playPrice ? void play.buy(PLAY_BLESSING) : openWebShop(client))}
+          />
         </View>
       ) : (
         <Text style={styles.hint}>{t('blessing.capReached')}</Text>
@@ -79,7 +88,10 @@ export function SeasonPassCard({ client }: { client: ApiClient }) {
   }, [client])
 
   const view = passView(offer)
+  const play = usePlay()
   if (!view || !season) return null
+  // El pase se vende solo en la web (Gabino, 02-10): con Google Play la app no lo vende ni manda a pagarlo.
+  const sells = !play.available
 
   return (
     <Panel title={t('shop.passTitle', { season })}>
@@ -87,8 +99,8 @@ export function SeasonPassCard({ client }: { client: ApiClient }) {
       {view.perks.map((perk) => (
         <Text key={perk} style={styles.perk}>{`✦  ${perk}`}</Text>
       ))}
-      <Text style={view.owned ? styles.ok : styles.price}>{view.priceLine}</Text>
-      {view.owned ? null : (
+      {view.owned || sells ? <Text style={view.owned ? styles.ok : styles.price}>{view.priceLine}</Text> : null}
+      {view.owned || !sells ? null : (
         <View style={styles.actions}>
           <Button label={view.label} primary onPress={() => openWebShop(client)} />
         </View>
@@ -97,26 +109,36 @@ export function SeasonPassCard({ client }: { client: ApiClient }) {
   )
 }
 
-/** Los paquetes de turnos en tarjetas, como la web: nombre, turnos, para que alcanzan y precio. */
+/**
+ * Los paquetes de turnos en tarjetas, como la web: nombre, turnos, para que
+ * alcanzan y precio. Con Google Play, el precio y la compra son los de Google.
+ */
 export function PackCards({ packs, onBuy }: { packs: readonly CreditPack[]; onBuy: () => void }) {
+  const play = usePlay()
   const forSale = buyablePacks(packs)
   const soon = comingSoonPacks(packs)
   if (forSale.length === 0 && soon.length === 0) return null
 
   return (
     <View style={styles.packs}>
-      {forSale.map((pack) => (
-        <Pressable key={pack.id} onPress={onBuy} style={({ pressed }) => [styles.pack, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={`${packName(pack)}, ${packPrice(pack)}`}>
+      {forSale.map((pack) => {
+        const playId = playIdOfPack(pack.id)
+        const playPrice = play.available ? play.prices[playId] : undefined
+        const price = playPrice ?? packPrice(pack)
+        return (
+        <Pressable key={pack.id} onPress={() => (playPrice ? void play.buy(playId) : onBuy())} disabled={play.buying !== null} style={({ pressed }) => [styles.pack, pressed && styles.pressed, play.buying === playId && styles.packBuying]} accessibilityRole="button" accessibilityLabel={`${packName(pack)}, ${price}`}>
           <View style={styles.packHead}>
             <Text style={styles.packName}>{packName(pack)}</Text>
             <Text style={styles.packValue}>{packValue(pack)}</Text>
           </View>
           {packDescription(pack) ? <Text style={styles.hint}>{packDescription(pack)}</Text> : null}
           <View style={styles.pricePill}>
-            <Text style={styles.pricePillText}>{packPrice(pack)}</Text>
+            <Text style={styles.pricePillText}>{price}</Text>
           </View>
         </Pressable>
-      ))}
+        )
+      })}
+      {play.error ? <Text style={styles.error}>{play.error}</Text> : null}
       {soon.length > 0 ? <Text style={styles.soonTitle}>{t('creditsPanel.masAdelante')}</Text> : null}
       {soon.map((pack) => (
         <View key={pack.id} style={[styles.pack, styles.packSoon]}>
@@ -146,6 +168,8 @@ const styles = StyleSheet.create({
   // Precio abajo a la derecha: en una fila junto al texto lo aplastaba a 390 (30-09).
   pack: { gap: 6, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },
   packHead: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: 10 },
+  packBuying: { opacity: 0.6 },
+  error: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.danger },
   packSoon: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', opacity: 0.55 },
   pressed: { opacity: 0.8 },
   packBody: { flex: 1, gap: 3 },

@@ -17,6 +17,7 @@ import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
 import { theme } from '../theme'
+import { PlayStoreProvider } from './play'
 import { disablePush, refreshPush } from './push'
 import { storage, type StoredUser } from './storage'
 
@@ -400,7 +401,8 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     )
   }
 
-  return screen()
+  // Google Play (02-10): una conexion por sesion, para toda la app.
+  return <PlayStoreProvider client={session.client}>{screen()}</PlayStoreProvider>
 }
 
 const styles = StyleSheet.create({

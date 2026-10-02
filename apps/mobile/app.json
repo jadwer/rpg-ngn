@@ -47,7 +47,8 @@
         }
       ],
       "./plugins/withNoAutofillHighlight",
-      "./plugins/withReleaseSigning"
+      "./plugins/withReleaseSigning",
+      "expo-iap"
     ],
     "androidStatusBar": {
       "hidden": true,

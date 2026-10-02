@@ -8,6 +8,7 @@ import { Button } from '../../components/Button'
 import { Panel } from '../../components/Panel'
 import { BlessingOffer, openWebShop, PackCards, SeasonPassCard } from '../../components/shop/ShopOffers'
 import { TopBar } from '../../components/TopBar'
+import { usePlay } from '../../online/play'
 import { theme } from '../../theme'
 
 interface Props {
@@ -37,7 +38,8 @@ export function ShopScreen({ client, user, onProfile, onTab, onUnauthorized }: P
     )
   }, [client, onUnauthorized])
 
-  useEffect(load, [load])
+  const play = usePlay()
+  useEffect(load, [load, play.deliveries])
 
   return (
     <View style={styles.screen}>
@@ -65,7 +67,7 @@ export function ShopScreen({ client, user, onProfile, onTab, onUnauthorized }: P
 
           {packs.length > 0 ? (
             <Panel title={t('shop.packsTitle')}>
-              <Text style={styles.note}>{t('shop.webNote')}</Text>
+              {play.available ? null : <Text style={styles.note}>{t('shop.webNote')}</Text>}
               <PackCards packs={packs} onBuy={() => openWebShop(client)} />
             </Panel>
           ) : null}

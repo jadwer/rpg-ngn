@@ -93,6 +93,10 @@ export interface ApiClient extends AccountApi, SettingsApi {
   shareChronicle(tableId: string | number, options?: { anonymize?: boolean; listed?: boolean }): Promise<ChronicleShare>
   /** Comunidad (publico): las historias que su mesa acepto publicar, de la mas nueva a la mas vieja. */
   communityStories(page?: number): Promise<{ stories: CommunityStory[]; total: number; perPage: number }>
+  /** Google Play (02-10): los productos que la app vende y el id anonimo con el que se marca la compra. */
+  playConfig(): Promise<{ accountId: string; products: string[] }>
+  /** Confirma con Google una compra hecha en la app y entrega lo comprado; `credited` false si ya se habia entregado. */
+  redeemPlayPurchase(productId: string, purchaseToken: string): Promise<{ product: string; credited: boolean }>
   /** Comunidad (publico): quienes tienen mundos publicados. */
   communityCreators(): Promise<CommunityCreator[]>
   /** Aceptar que la cronica se vea con el enlace. */
@@ -271,6 +275,16 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async communityStories(page = 1) {
       const { data } = await request<{ data: CommunityStory[]; meta: { total: number; perPage: number } }>(`/api/v1/community/stories?page=${page}`, { anonymous: true })
       return { stories: data.data, total: data.meta.total, perPage: data.meta.perPage }
+    },
+
+    async playConfig() {
+      const { data } = await request<{ data: { accountId: string; products: string[] } }>('/api/v1/play/config')
+      return data.data
+    },
+
+    async redeemPlayPurchase(productId, purchaseToken) {
+      const { data } = await request<{ data: { product: string; credited: boolean } }>('/api/v1/play/purchases', { method: 'POST', body: { productId, purchaseToken } })
+      return data.data
     },
 
     async communityCreators() {

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
 import { SectionTitle } from './Panel'
+import { usePlay } from '../online/play'
 import { openWebShop, PackCards } from './shop/ShopOffers'
 
 interface Props {
@@ -44,7 +45,9 @@ export function CreditsPanel({ client, onUnauthorized }: Props) {
     )
   }, [client, onUnauthorized])
 
-  useEffect(load, [load])
+  const play = usePlay()
+  // Una compra de Google entregada recarga el saldo.
+  useEffect(load, [load, play.deliveries])
 
   return (
     <View style={styles.card}>
@@ -55,7 +58,7 @@ export function CreditsPanel({ client, onUnauthorized }: Props) {
 
       {packs.length > 0 ? (
         <>
-          <Text style={styles.hint}>{t('shop.webNote')}</Text>
+          {play.available ? null : <Text style={styles.hint}>{t('shop.webNote')}</Text>}
           <PackCards packs={packs} onBuy={() => openWebShop(client)} />
         </>
       ) : null}
