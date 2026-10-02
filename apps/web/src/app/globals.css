@@ -4422,6 +4422,52 @@ a {
   color: var(--ink-faint);
   font-size: 0.92rem;
 }
+/* La voz del narrador en la cronica (02-10): barra fija y bloque que suena. */
+.cronica-player {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 16px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  background: rgba(11, 15, 20, 0.92);
+  backdrop-filter: blur(6px);
+}
+.cronica-voz {
+  position: relative;
+  /* El margen negativo deja el texto alineado y da aire al resaltado. */
+  margin-left: -10px;
+  padding: 4px 34px 4px 10px;
+  border-radius: var(--radius);
+  transition: background 0.2s ease;
+}
+.cronica-voz.sonando {
+  background: var(--highlight);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.cronica-desde {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.cronica-desde:hover,
+.cronica-desde:focus-visible {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+}
 .cronica-foot {
   margin: 40px 0 24px;
   padding-top: 16px;

@@ -8,4 +8,13 @@ export const chroniclePage = {
   unaHistoriaJugadaEn: 'Una historia jugada en Ad Astra Mentis, donde tú decides qué pasa: tu novela ligera o tu campaña de rol, con un director de juego que no se cansa.',
   jugarLaTuya: 'Jugar la tuya',
   sesionCodigo: 'Sesión {{code}}',
+  laJugaron: 'La jugaron {{names}}.',
+  tira: '{{actor}} tira {{die}}: {{result}}.',
+  escuchar: 'Escuchar la historia',
+  escucharDesdeAqui: 'Escuchar desde aquí',
+  pausar: 'Pausar',
+  seguir: 'Seguir',
+  detener: 'Detener',
+  narrando: 'Narrando {{n}} de {{total}}',
+  vozNarrador: 'Con la voz del narrador',
 }

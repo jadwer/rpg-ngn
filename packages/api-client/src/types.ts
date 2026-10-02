@@ -85,8 +85,8 @@ export interface ChronicleShare {
 
 /** Un bloque de la cronica publica: solo lo que se lee, nunca avisos internos. */
 export type ChronicleBlock =
-  | { type: 'narration'; text: string }
-  | { type: 'dialogue'; speaker: string; text: string }
+  | { type: 'narration'; text: string; audioUrl?: string }
+  | { type: 'dialogue'; speaker: string; text: string; audioUrl?: string }
   | { type: 'roll'; text: string; actor: string; die: string; result: number }
   | { type: 'image'; url: string; alt: string }
 
