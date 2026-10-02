@@ -695,7 +695,7 @@ Los retratos se pueden generar con Gemini desde la ficha de cada personaje.
 Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
 abierto.
 
-- [ ] **Desplegar sin cortar**: `deploy-rpg.sh` reinicia `rpg-web` y durante unos segundos nginx da `Connection refused` (visto el 28-09 a las 04:29 UTC con una mesa abierta). Build en otra carpeta y cambio atomico, o `systemctl reload` con dos instancias
+- [x] **Desplegar sin cortar** (02-10, API `e9ff522`, web `760b035`): dos instancias `rpg-web@3010` y `@3011` que se turnan, cada una con su carpeta de build; nginx cambia por upstream con recarga y PHP-FPM se recarga. Medido: 65 de 65 consultas con 200 durante un despliegue. Antes el build pisaba la carpeta que servia (paginas a medias) y el reinicio daba 502
 - [x] **Portado a la plantilla de Atomo** (30-09, platform `8becf33`): sin sesion, `/api` responde 401 en JSON y no 500
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
 - [x] **Renombre DM a GM** (29-09): hecho en todo el proyecto (codigo, API, rutas, permiso, prompts, UI, docs). La capa `gm` de los eventos tambien, sin migrar datos porque nada la usaba (acepta `dm` al leer). Quedan alias `/dm`, `dm:probe`, `dm:key` y `DM_*` para APK y `.env` viejos. Detalle en `docs/12-plan-renombre-gm.md`
