@@ -41,7 +41,7 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
     else return
     for (const f of allFacesOf(die)) {
       const img = new Image()
-      img.src = `/dice/${f.asset}.png`
+      img.src = `/dice/${f.asset}.webp`
     }
   }, [die])
 
@@ -115,9 +115,9 @@ export function SpriteDie({ die, label, disabled = false, resolve, onLanded, onF
     >
       <span className="faces" aria-hidden>
         {faces.length > 0 ? (
-          faces.map((f, index) => <img key={`${f.asset}-${index}`} src={`/dice/${f.asset}.png`} alt="" className={`sprite${dropped === index ? ' dropped' : ''}`} />)
+          faces.map((f, index) => <img key={`${f.asset}-${index}`} src={`/dice/${f.asset}.webp`} alt="" className={`sprite${dropped === index ? ' dropped' : ''}`} />)
         ) : phase === 'idle' && idleAsset ? (
-          <img src={`/dice/${idleAsset}.png`} alt="" className="sprite" />
+          <img src={`/dice/${idleAsset}.webp`} alt="" className="sprite" />
         ) : (
           <span className="generic">
             <b>{shown}</b>

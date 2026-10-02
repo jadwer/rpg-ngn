@@ -112,7 +112,7 @@ function DiceFaces({ block }: { block: RollGroup['block'] }) {
   return (
     <span className="dice-faces" aria-hidden="true">
       {faces.map((face, index) => (
-        <img key={`${face.asset}-${index}`} src={`/dice/${face.asset}.png`} alt="" className={`dice-face${kept !== null && kept !== index ? ' dropped' : ''}`} width={48} height={48} />
+        <img key={`${face.asset}-${index}`} src={`/dice/${face.asset}.webp`} alt="" className={`dice-face${kept !== null && kept !== index ? ' dropped' : ''}`} width={48} height={48} />
       ))}
     </span>
   )

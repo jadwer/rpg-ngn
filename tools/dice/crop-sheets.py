@@ -7,8 +7,10 @@ Cada hoja (dice_d4.png ... dice_d20.png) es una reticula de 6 x 6 celdas
 iguales sobre fondo negro, con los dados en orden de lectura desde el 1. Las
 celdas ocupadas se detectan por brillo, asi que da igual cuantas por fila
 puso el generador (el d8 salio a 4 por fila y el d10 a 5). Salida:
-apps/web/public/dice/d<caras>-<valor>.png y una copia en
-apps/mobile/assets/dice/, mas el mapa de require() de la app.
+apps/web/public/dice/d<caras>-<valor>.webp y una copia en
+apps/mobile/assets/dice/, mas el mapa de require() de la app. En webp calidad
+92 (02-10): cada cara baja de unos 60 KB en PNG a unos 13 KB sin diferencia a
+la vista, y el APK tiene un tope practico de 30 MB para mandarlo.
 """
 
 from pathlib import Path
@@ -23,6 +25,7 @@ GRID = 6
 # Se recorta un poco por dentro de la celda para no llevarse la linea gris de la reticula.
 INSET = 6
 OUTPUT = 192
+QUALITY = 92
 
 
 def cells(image: Image.Image) -> list[tuple[int, int, int, int]]:
@@ -51,7 +54,7 @@ def crop_sheet(sides: int) -> list[str]:
         face = image.crop(box).resize((OUTPUT, OUTPUT), Image.LANCZOS)
         name = f"d{sides}-{value}"
         for target in TARGETS:
-            face.save(target / f"{name}.png", optimize=True)
+            face.save(target / f"{name}.webp", "WEBP", quality=QUALITY, method=6)
         names.append(name)
     return names
 
@@ -66,7 +69,7 @@ def write_mobile_map(names: list[str]) -> None:
         "",
         "export const DICE_FACES: Record<string, ImageSourcePropType> = {",
     ]
-    lines += [f'  "{n}": require("../../assets/dice/{n}.png"),' for n in names]
+    lines += [f'  "{n}": require("../../assets/dice/{n}.webp"),' for n in names]
     lines += ["}", ""]
     (ROOT / "apps" / "mobile" / "src" / "generated" / "dice.ts").write_text("\n".join(lines))
 
@@ -74,8 +77,9 @@ def write_mobile_map(names: list[str]) -> None:
 def main() -> None:
     for target in TARGETS:
         target.mkdir(parents=True, exist_ok=True)
-        for old in target.glob("d*-*.png"):
-            old.unlink()
+        for pattern in ("d*-*.png", "d*-*.webp"):
+            for old in target.glob(pattern):
+                old.unlink()
     names: list[str] = []
     for sides in SIDES:
         names += crop_sheet(sides)

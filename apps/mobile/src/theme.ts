@@ -4,7 +4,6 @@ import { Cinzel_700Bold } from '@expo-google-fonts/cinzel/700Bold'
 import { CrimsonPro_400Regular } from '@expo-google-fonts/crimson-pro/400Regular'
 import { CrimsonPro_400Regular_Italic } from '@expo-google-fonts/crimson-pro/400Regular_Italic'
 import { CrimsonPro_600SemiBold } from '@expo-google-fonts/crimson-pro/600SemiBold'
-import { CrimsonPro_700Bold } from '@expo-google-fonts/crimson-pro/700Bold'
 import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular'
 import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium'
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
@@ -31,7 +30,6 @@ export const FONT_ASSETS = {
   CrimsonPro_400Regular,
   CrimsonPro_400Regular_Italic,
   CrimsonPro_600SemiBold,
-  CrimsonPro_700Bold,
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
@@ -76,7 +74,6 @@ export const theme = {
     serif: 'CrimsonPro_400Regular',
     serifItalic: 'CrimsonPro_400Regular_Italic',
     serifSemiBold: 'CrimsonPro_600SemiBold',
-    serifBold: 'CrimsonPro_700Bold',
     // Texto de interfaz (brand board: Inter para texto y UI). Crimson Pro para
     // narracion y cuerpo; Cinzel (`display`) para la marca, titulos de pagina
     // y de seccion, y acentos como los dados (26-09).
