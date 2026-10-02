@@ -1,6 +1,6 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-10-02, 01:45 UTC** (01-10 noche en CST). Rama `dev` `acc7faf`; API `606e27e` con platform `350485d`. Produccion en https://adastramentis.com. App: APK v21.
+Fecha de corte: **2026-10-02, tarde** (CST). Rama `dev` `7f30a00`; API `40a51c7`+ (desplegada) con platform `69f8130` (v0.2.0). Produccion en https://adastramentis.com. App: APK v22.
 
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
@@ -61,6 +61,19 @@ Decision que manda sobre todo esto: `docs/11-adr-stack-saas.md`.
 ---
 
 ## 3. Que esta implementado (y en produccion)
+
+### Del 02-10: Comunidad, voz del narrador y despliegue sin cortar
+
+- **Comunidad v1**: historias que su mesa acepto publicar (permiso aparte del
+  enlace de la cronica), creadores y amigos; `/comunidad` se ve sin cuenta.
+- **Tirada y accion en el mismo turno**: el jugador escribe que intenta con
+  la tirada y suelta el dado; el director narra las dos cosas.
+- **Voz del narrador** (OpenAI, afinada con ffmpeg) por bloque, guardada y
+  escuchable en la cronica; 0.24 USD por 16.5 minutos.
+- **Despliegue sin cortar**: dos instancias de la web que se turnan.
+- **AtomoPlatform v0.2.0** en produccion.
+- **Google Play**: cuenta verificada; cobro de turnos y Bendicion escrito en
+  app y servidor, falta subir el primer AAB y crear los productos.
 
 ### Del 30-09 y 01-10: panel, soporte, Bendicion, Tienda y la app al dia
 
@@ -585,12 +598,11 @@ conviene asumir que hasta que no se juega, no esta probado.
 
 ## 4. Que esta en progreso ahora mismo
 
-**Beta cerrada con amigos (01-10).** Se juega en produccion con el piloto, la
-Mascarada y la boticaria, en español o ingles, y se prueba la escalera de
-paquetes. Siguiente en el ROADMAP: la tirada y la accion en el mismo turno,
-desplegar sin cortar la web y medir turnos por paquete con una sesion de
-cuatro jugadores. Esperan a Gabino: legales con el abogado, arte del tema de
-temporada y el NAS para las copias fuera del servidor (S1).
+**Lanzamiento el 15-11 (plan por semana al inicio del ROADMAP).** Semana 2:
+Google Play (AAB v23, productos, verificacion en el servidor y prueba
+cerrada a mas tardar el 15-10). Semana 3: video de la sesion v1 con la voz
+y las ilustraciones. Esperan a Gabino: probadores, Plata/Oro/Diamante,
+abogado, copias fuera del servidor y arte del tema.
 
 ---
 
