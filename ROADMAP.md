@@ -19,7 +19,7 @@ primero**, para tener contenido en redes antes de publicar.
 | Semana | Que se cierra |
 |---|---|
 | 1 (02 al 08-10) | **Comunidad v1**: Historias (las cronicas que su mesa acepto compartir, con portada e ilustraciones) y Creadores (autores con mundos publicados), en web y app. Gabino decide el cobro en Google Play |
-| 2 (09 al 15-10) | **Voz del narrador en el servidor** (base de 6c): audio por bloque, guardado, una voz por idioma. **Google Play**: App Bundle, ficha, formulario de datos, clasificacion; la **prueba cerrada arranca a mas tardar el 15-10** |
+| 2 (09 al 15-10) | **Voz del narrador en el servidor** (base de 6c): audio por bloque, guardado, una voz por idioma. **Google Play**: App Bundle, ficha, formulario de datos, clasificacion, y **cobro con Google Play Billing** (turnos y Bendicion, verificado en el servidor); la **prueba cerrada arranca a mas tardar el 15-10** |
 | 3 (16 al 22-10) | **Video de la sesion v1** (10d): de una cronica compartida a un video vertical (redes) y uno horizontal, con imagenes, texto y voz. Empieza el contenido para redes |
 | 4 (23 al 29-10) | **Antes de abrir**: verificacion de correo, boticaria fuera del catalogo publico, vigilancia de servicios, desplegar sin cortar, claves de imagen rotadas, copias fuera del servidor |
 | 5 (30-10 al 05-11) | Legales con el abogado; Plata, Oro y Diamante definidos o retirados de la venta; medir paquetes con cuatro jugadores; mundos de la temporada. La prueba cerrada termina el 29-10 y se pide produccion a Google |
@@ -34,8 +34,8 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 
 ### Decisiones de Gabino, con fecha limite
 
-- [ ] **Cobro en Google Play** (08-10): cobrar con Google Play Billing (comision de 15 a 30%) o que la app no venda y solo muestre lo que ya tienes. Mandar a pagar a la web, como hoy, Google suele rechazarlo fuera de Estados Unidos
-- [ ] **Proveedor de voz del narrador** (09-10): de pago por uso en la nube (OpenAI o Google) o propio con GPU; sin GPU en el servidor, la nube es lo realista
+- [x] **Cobro en Google Play** (decidido el 02-10): Google Play Billing para **paquetes de turnos y Bendicion**, con el precio 15% arriba del de la web (la comision). El pase de temporada y los mundos en venta solo en la web; la app no los vende ni manda a pagarlos (muestra si ya son tuyos). Razon de Gabino: los turnos se compran por impulso
+- [x] **Proveedor de voz del narrador** (decidido el 02-10): fase 1 con OpenAI, detras de una interfaz para poder cambiar; el audio se genera una vez por bloque y se guarda. Investigar despues que proveedor suena mejor (Gabino: "no vamos a cerrarnos con ese por ser facil")
 - [ ] **Doce probadores para la prueba cerrada** (14-10): sus correos de Google
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta hasta despues
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros del aviso, clausula de la Bendicion
