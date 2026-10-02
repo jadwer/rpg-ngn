@@ -19,4 +19,12 @@ export const chroniclePage: Messages<typeof es> = {
   detener: 'Stop',
   narrando: 'Narrating {{n}} of {{total}}',
   vozNarrador: "With the narrator's voice",
+  presentacion: 'Presentation',
+  presentacionVertical: 'Vertical presentation (social)',
+  presentacionHorizontal: 'Horizontal presentation',
+  comenzar: 'Start',
+  presentacionAyuda: 'Full screen with no buttons, to record it with OBS or your phone recorder. Tap the screen to pause; Esc to leave.',
+  otraVez: 'Play again',
+  volverALaHistoria: 'Back to the story',
+  outro: 'A story played on Ad Astra Mentis',
 }

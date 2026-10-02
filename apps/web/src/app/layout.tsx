@@ -15,6 +15,7 @@ import './styles/soporte.css'
 import './styles/bendicion.css'
 import './styles/tienda.css'
 import './styles/comunidad.css'
+import './styles/presentacion.css'
 
 const cinzel = Cinzel({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-cinzel', display: 'swap' })
 const crimson = Crimson_Pro({ subsets: ['latin'], weight: ['400', '600'], style: ['normal', 'italic'], variable: '--font-crimson', display: 'swap' })

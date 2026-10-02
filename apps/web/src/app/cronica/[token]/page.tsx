@@ -82,6 +82,15 @@ export default function CronicaPage() {
         ) : null}
       </header>
 
+      <div className="row cronica-presentar">
+        <Link href={`/cronica/${token}/presentacion?formato=vertical`} className="btn small">
+          {t('chroniclePage.presentacionVertical')}
+        </Link>
+        <Link href={`/cronica/${token}/presentacion?formato=horizontal`} className="btn ghost small">
+          {t('chroniclePage.presentacionHorizontal')}
+        </Link>
+      </div>
+
       {player.total > 0 ? (
         <div className="cronica-player" role="region" aria-label={t('chroniclePage.vozNarrador')}>
           {player.index === null ? (

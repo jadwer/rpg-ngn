@@ -17,4 +17,12 @@ export const chroniclePage = {
   detener: 'Detener',
   narrando: 'Narrando {{n}} de {{total}}',
   vozNarrador: 'Con la voz del narrador',
+  presentacion: 'Presentación',
+  presentacionVertical: 'Presentación vertical (redes)',
+  presentacionHorizontal: 'Presentación horizontal',
+  comenzar: 'Comenzar',
+  presentacionAyuda: 'Pantalla completa y sin botones para grabarla con OBS o la grabadora de tu teléfono. Toca la pantalla para pausar; Esc para salir.',
+  otraVez: 'Otra vez',
+  volverALaHistoria: 'Volver a la historia',
+  outro: 'Una historia jugada en Ad Astra Mentis',
 }

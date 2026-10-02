@@ -3,6 +3,7 @@
 import { t } from '@rpg-ngn/i18n'
 import type { BlessingState } from '@rpg-ngn/api-client'
 import { blessingDaysText, blessingDue } from '@rpg-ngn/ui-logic'
+import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useSession } from '../lib/session'
 
@@ -17,6 +18,8 @@ const POLL_MS = 60_000
  */
 export function BlessingGate() {
   const { client, user } = useSession()
+  // La presentacion de una cronica se graba en pantalla completa: el aviso no la tapa (02-10).
+  const recording = (usePathname() ?? '').endsWith('/presentacion')
   const [state, setState] = useState<BlessingState | null>(null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<number | null>(null)
@@ -71,7 +74,7 @@ export function BlessingGate() {
     }
   }
 
-  if (!state || (!blessingDue(state) && done === null)) return null
+  if (recording || !state || (!blessingDue(state) && done === null)) return null
 
   return (
     <div className="blessing-gate" role="dialog" aria-modal="true" aria-labelledby="blessing-title">

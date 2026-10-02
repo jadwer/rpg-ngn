@@ -1,0 +1,44 @@
+import { describe, expect, it } from 'vitest'
+import type { Chronicle } from '@rpg-ngn/api-client'
+import { buildSlides, captionAt, captionsFor, presentationFormat } from './presentation.js'
+
+const chronicle: Chronicle = {
+  title: 'La mina',
+  pack: { id: 'pilot', version: '1', name: 'Los Nueve Viajeros' },
+  players: null,
+  sessions: [
+    { code: '001', turns: [{ number: 1, actions: [], blocks: [
+      { type: 'narration', text: 'La *campana* suena.', audioUrl: '/a1.mp3' },
+      { type: 'image', url: '/i1.webp', alt: '' },
+      { type: 'roll', text: 'tira', actor: 'Zahira', die: '1d20', result: 3 },
+      { type: 'dialogue', speaker: 'Bren', text: 'Nadie baja hoy.' },
+    ] }] },
+    { code: '002', turns: [{ number: 2, actions: [], blocks: [{ type: 'image', url: '/i2.webp', alt: '' }, { type: 'narration', text: 'Amanece.' }] }] },
+  ],
+}
+
+describe('presentacion de la cronica', () => {
+  it('cada bloque narrado es una diapositiva con la ilustracion vista, y la primera usa la primera de la historia', () => {
+    const slides = buildSlides(chronicle)
+    expect(slides).toEqual([
+      { image: '/i1.webp', text: 'La campana suena.', speaker: null, audioUrl: '/a1.mp3' },
+      { image: '/i1.webp', text: 'Nadie baja hoy.', speaker: 'Bren', audioUrl: null },
+      { image: '/i2.webp', text: 'Amanece.', speaker: null, audioUrl: null },
+    ])
+    expect(buildSlides(chronicle, '002').map((s) => s.text)).toEqual(['Amanece.'])
+  })
+
+  it('los subtitulos van de dos lineas y se reparten por lo que miden', () => {
+    const captions = captionsFor('uno dos tres cuatro cinco seis siete ocho nueve diez', 10)
+    expect(captions.map((c) => c.lines)).toEqual([['uno dos', 'tres'], ['cuatro', 'cinco seis'], ['siete ocho', 'nueve diez']])
+    expect(captions[0]!.start).toBe(0)
+    expect(captionAt(captions, 0)).toBe(0)
+    expect(captionAt(captions, 0.5)).toBe(1)
+    expect(captionAt(captions, 0.99)).toBe(2)
+  })
+
+  it('el formato por omision es vertical', () => {
+    expect(presentationFormat(null)).toBe('vertical')
+    expect(presentationFormat('horizontal')).toBe('horizontal')
+  })
+})
