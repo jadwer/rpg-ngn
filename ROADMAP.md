@@ -51,6 +51,20 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 - [x] **Presentacion de la cronica en la web** (02-10, `61cf486`): `/cronica/<token>/presentacion?formato=vertical|horizontal` reproduce en el navegador el mismo aspecto que el video, sin botones para grabarla con OBS; costo cero de servidor. Es lo gratis para todos
 - [ ] **Cobro con Google Play** (02-10, escrito): servidor desplegado (API `458329d`: `play/config`, `play/purchases` confirma con la Play Developer API y registra un pago capturado; `play:voided` retira lo anulado) y app lista (`7f30a00`, `expo-iap`, precio de Google, el servidor confirma antes de consumir). Falta: compilar el AAB v23 (el intento murio por falta de RAM en WSL), subirlo a Pruebas internas, crear los 7 productos, la cuenta de servicio de verificacion en el servidor e instalar `rpg-play-voided.timer`
 
+### Paridad de la app con la web (analizada el 02-10)
+
+La app esta a la par en juego, tienda (con Google Play), Comunidad, pase,
+soporte, avisos e idioma. Lo que falta, por orden:
+
+- [ ] **P0, antes de la prueba cerrada (15-10): quitar de Explorar los enlaces "Comprar en la web"** de mundos y del pase. Contradicen la decision del 02-10 (la app no vende ni manda a pagar el pase ni los mundos) y Google puede rechazar la app por ellos. Despues, AAB v24 con lo de hoy (accesos a la presentacion y "Generar video")
+- [ ] P1, semana 4: idioma de la mesa al crearla y en Ajustes de la mesa, y el ajuste de secretos del pack (la web los tiene en `TableRulesPanel`, la app solo dados, cuenta atras e ilustraciones)
+- [ ] P1: idioma en Explorar (filtro y aviso de los idiomas de cada mundo)
+- [ ] P1: accesos a la historia y a la presentacion en Opciones de cada mesa (en la app solo estan en Lectura)
+- [ ] P2: la Guia de como jugar (solo en la web)
+- [ ] Despues del 15-11, en las dos: la voz del narrador generada dentro de la mesa (hoy solo suena en la cronica de la web)
+
+Solo en la app, a proposito: lectura sin conexion, cobro con Google Play. Solo en la web: pago con Stripe, presentacion (la app la abre en el navegador).
+
 ### Despues del 15-11 (fuera del lanzamiento a proposito)
 
 Mesas abiertas a desconocidos (necesita moderacion), Campañas y Personajes
