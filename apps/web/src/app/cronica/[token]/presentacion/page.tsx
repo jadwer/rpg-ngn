@@ -2,7 +2,7 @@
 
 import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type Chronicle } from '@rpg-ngn/api-client'
-import { SUBTITLE_CHARS, buildSlides, captionAt, captionsFor, estimateSeconds, presentationFormat, type Slide } from '@rpg-ngn/ui-logic'
+import { SUBTITLE_CHARS, SUBTITLE_LINES, buildSlides, captionAt, captionsFor, estimateSeconds, presentationFormat, type Slide } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -77,7 +77,7 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
   const router = useRouter()
 
   const slide = index < slides.length ? slides[index]! : null
-  const captions = useMemo(() => (slide ? captionsFor(slide.text, SUBTITLE_CHARS[format]) : []), [slide, format])
+  const captions = useMemo(() => (slide ? captionsFor(slide.text, SUBTITLE_CHARS[format], SUBTITLE_LINES[format]) : []), [slide, format])
   // La ilustracion del cierre es la ultima que se vio.
   const image = slide?.image ?? slides[slides.length - 1]?.image ?? null
 
@@ -117,16 +117,30 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
       el.onended = next
       void el.play().catch(next)
     } else if (typeof window !== 'undefined' && window.speechSynthesis) {
+      // La voz del navegador lee subtitulo por subtitulo: en Android no avisa
+      // por que palabra va, y el texto se quedaba en el primero (02-10).
       setSeconds(estimateSeconds(current.text))
-      const utterance = new SpeechSynthesisUtterance(current.speaker ? `${current.speaker}. ${current.text}` : current.text)
       const lang = language()
       const voice = window.speechSynthesis.getVoices().find((v) => v.voiceURI === listVoices(lang)[0]?.uri)
-      if (voice) utterance.voice = voice
-      utterance.lang = lang === 'en' ? 'en-US' : 'es-MX'
-      const offset = current.speaker ? current.speaker.length + 2 : 0
-      utterance.onboundary = (e) => setCaption(captionAt(captions, Math.max(0, e.charIndex - offset) / Math.max(1, current.text.length)))
-      utterance.onend = next
-      window.speechSynthesis.speak(utterance)
+      let alive = true
+      const say = (at: number) => {
+        if (!alive) return
+        if (at >= captions.length) {
+          next()
+          return
+        }
+        setCaption(at)
+        const line = captions[at]!.lines.join(' ')
+        const utterance = new SpeechSynthesisUtterance(at === 0 && current.speaker ? `${current.speaker}. ${line}` : line)
+        if (voice) utterance.voice = voice
+        utterance.lang = lang === 'en' ? 'en-US' : 'es-MX'
+        utterance.onend = () => say(at + 1)
+        window.speechSynthesis.speak(utterance)
+      }
+      say(0)
+      return () => {
+        alive = false
+      }
     } else {
       setSeconds(estimateSeconds(current.text))
       timer.current = setTimeout(next, estimateSeconds(current.text) * 1000)

@@ -13,15 +13,15 @@ describe('estado de la cronica compartida', () => {
   })
 
   it('pendiente dice quien falta y deja aceptar a quien no lo hizo', () => {
-    const status = chronicleStatus({ token: 't', anonymize: false, public: false, mine: false, members })
+    const status = chronicleStatus({ token: 't', anonymize: false, listed: false, public: false, mine: false, members })
     expect(status.state).toBe('pending')
     expect(status.text).toContain('Jaz, alguien')
     expect(status.canConsent).toBe(true)
-    expect(chronicleStatus({ token: 't', anonymize: false, public: false, mine: true, members }).canConsent).toBe(false)
+    expect(chronicleStatus({ token: 't', anonymize: false, listed: false, public: false, mine: true, members }).canConsent).toBe(false)
   })
 
   it('publica cuando todos aceptaron', () => {
-    expect(chronicleStatus({ token: 't', anonymize: false, public: true, mine: true, members }).state).toBe('public')
+    expect(chronicleStatus({ token: 't', anonymize: false, listed: false, public: true, mine: true, members }).state).toBe('public')
   })
 
   it('arma la URL publica sin barras dobles', () => {

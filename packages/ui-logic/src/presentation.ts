@@ -23,6 +23,8 @@ export interface Slide {
 
 /** Caracteres por linea de subtitulo, los mismos del video. */
 export const SUBTITLE_CHARS: Record<PresentationFormat, number> = { vertical: 34, horizontal: 58 }
+/** Lineas por subtitulo: en vertical sobra lugar bajo la ilustracion. */
+export const SUBTITLE_LINES: Record<PresentationFormat, number> = { vertical: 3, horizontal: 2 }
 
 export function presentationFormat(value: string | null | undefined): PresentationFormat {
   return value === 'horizontal' ? 'horizontal' : 'vertical'
@@ -80,8 +82,54 @@ function wrap(text: string, maxChars: number): string[] {
   return lines
 }
 
-/** Junta trozos en subtitulos de hasta dos lineas; un trozo que no cabe se parte por palabras. */
-function pack(pieces: readonly string[], maxChars: number): string[][] {
+/** Palabras con las que un subtitulo no debe terminar ("en la penumbra el"). */
+const WEAK_ENDS = new Set(['el', 'la', 'los', 'las', 'lo', 'un', 'una', 'unos', 'unas', 'de', 'del', 'a', 'al', 'en', 'y', 'e', 'o', 'u', 'que', 'con', 'por', 'para', 'sin', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'se', 'le', 'les', 'me', 'te', 'nos', 'the', 'a', 'an', 'of', 'to', 'in', 'on', 'and', 'or', 'with', 'for', 'your', 'his', 'her', 'its', 'their', 'at', 'by', 'from', 'as'])
+/** Palabras ante las que conviene cortar: empiezan otra parte de la frase. */
+const GOOD_STARTS = new Set(['y', 'e', 'que', 'cuando', 'mientras', 'pero', 'porque', 'donde', 'como', 'hasta', 'aunque', 'sin', 'con', 'para', 'antes', 'despues', 'después', 'and', 'but', 'when', 'while', 'where', 'as', 'until', 'because', 'that', 'which', 'with', 'before', 'after'])
+
+const bare = (word: string) => word.toLowerCase().replace(/[^\p{L}]/gu, '')
+
+/**
+ * Una oracion larga sin comas en trozos parejos: se corta cerca de donde
+ * toca, antes de una conjuncion si la hay a mano, y nunca despues de un
+ * articulo o una preposicion.
+ */
+function splitBalanced(text: string, maxChars: number, maxLines: number): string[][] {
+  const words = text.split(/\s+/).filter(Boolean)
+  const parts = Math.ceil(wrap(text, maxChars).length / maxLines)
+  if (parts <= 1 || words.length < 2) return [wrap(text, maxChars)]
+  const out: string[][] = []
+  let from = 0
+  for (let k = 1; k < parts; k++) {
+    const remaining = words.slice(from).join(' ').length
+    const target = remaining / (parts - k + 1)
+    let best = from + 1
+    let bestCost = Number.POSITIVE_INFINITY
+    let length = 0
+    for (let i = from + 1; i < words.length; i++) {
+      length += words[i - 1]!.length + 1
+      const chunk = words.slice(from, i).join(' ')
+      if (wrap(chunk, maxChars).length > maxLines) break
+      let cost = Math.abs(length - target)
+      if (WEAK_ENDS.has(bare(words[i - 1]!))) cost += 1000
+      if (GOOD_STARTS.has(bare(words[i]!))) cost -= maxChars * 0.4
+      if (cost < bestCost) {
+        bestCost = cost
+        best = i
+      }
+    }
+    out.push(wrap(words.slice(from, best).join(' '), maxChars))
+    from = best
+  }
+  const rest = words.slice(from).join(' ')
+  const lines = wrap(rest, maxChars)
+  if (lines.length <= maxLines) out.push(lines)
+  else for (let i = 0; i < lines.length; i += maxLines) out.push(lines.slice(i, i + maxLines))
+  return out
+}
+
+/** Junta trozos en subtitulos de hasta `maxLines` lineas; uno que no cabe se reparte parejo. */
+function pack(pieces: readonly string[], maxChars: number, maxLines: number): string[][] {
   const out: string[][] = []
   let current = ''
   const flush = () => {
@@ -90,17 +138,13 @@ function pack(pieces: readonly string[], maxChars: number): string[][] {
   }
   for (const piece of pieces) {
     const joined = current ? `${current} ${piece}` : piece
-    if (wrap(joined, maxChars).length <= 2) {
+    if (wrap(joined, maxChars).length <= maxLines) {
       current = joined
       continue
     }
     flush()
-    const lines = wrap(piece, maxChars)
-    if (lines.length <= 2) {
-      current = piece
-    } else {
-      for (let i = 0; i < lines.length; i += 2) out.push(lines.slice(i, i + 2))
-    }
+    if (wrap(piece, maxChars).length <= maxLines) current = piece
+    else out.push(...splitBalanced(piece, maxChars, maxLines))
   }
   flush()
   return out
@@ -109,20 +153,19 @@ function pack(pieces: readonly string[], maxChars: number): string[][] {
 /**
  * Los subtitulos de un bloque (Gabino, 02-10: "mas natural que se corte en
  * cada punto, o por lo menos en una coma"). Cada oracion empieza subtitulo
- * nuevo; una oracion que no cabe en dos lineas se parte por comas, punto y
- * coma o dos puntos, y solo si una de esas partes sigue sin caber, por
- * palabras. Cada subtitulo lleva hasta dos lineas.
+ * nuevo; una oracion que no cabe se parte por comas, punto y coma o dos
+ * puntos, y un trozo que sigue sin caber se reparte parejo antes de una
+ * conjuncion y nunca despues de un articulo.
  */
-export function captionsFor(text: string, maxChars: number): Caption[] {
+export function captionsFor(text: string, maxChars: number, maxLines = 2): Caption[] {
   const sentences = text.split(/(?<=[.!?…])["»”)]?\s+/).map((x) => x.trim()).filter(Boolean)
   const groups: string[][] = []
   for (const sentence of sentences) {
-    if (wrap(sentence, maxChars).length <= 2) {
+    if (wrap(sentence, maxChars).length <= maxLines) {
       groups.push(wrap(sentence, maxChars))
       continue
     }
-    const clauses = sentence.split(/(?<=[,;:])\s+/).filter(Boolean)
-    groups.push(...pack(clauses, maxChars))
+    groups.push(...pack(sentence.split(/(?<=[,;:])\s+/).filter(Boolean), maxChars, maxLines))
   }
   const total = Math.max(1, text.length)
   const captions: Caption[] = []

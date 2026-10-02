@@ -48,6 +48,16 @@ describe('presentacion de la cronica', () => {
     expect(captionsFor('Sí, claro, vamos.', 34)).toHaveLength(1)
   })
 
+  it('una oracion larga sin comas se reparte parejo y no termina en articulo', () => {
+    const text = 'Tu sangre infernal te permite distinguir en la penumbra el contorno de una puerta baja que nadie ha abierto en años.'
+    const captions = captionsFor(text, 34)
+    const endings = captions.map((c) => c.lines.join(' ').split(' ').pop())
+    expect(endings.slice(0, -1).some((w) => ['el', 'la', 'de', 'una', 'en'].includes(w!))).toBe(false)
+    expect(captions.map((c) => c.lines.join(' ')).join(' ')).toBe(text)
+    // En vertical caben tres lineas: menos cortes.
+    expect(captionsFor(text, 34, 3).length).toBeLessThan(captions.length + 1)
+  })
+
   it('el formato por omision es vertical', () => {
     expect(presentationFormat(null)).toBe('vertical')
     expect(presentationFormat('horizontal')).toBe('horizontal')
