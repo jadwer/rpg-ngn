@@ -42,6 +42,11 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 - [ ] **Copias fuera del servidor** (29-10): el NAS, o mientras tanto un Storage Box de Hetzner
 - [ ] Arte: tema de la temporada, retrato de Bren, "La corte exterior" en el mapa (06-11)
 
+### Avance
+
+- [x] **Comunidad v1** (02-10, API `aac4330`, monorepo `81e0d32`, desplegada): Historias en `/comunidad` (se ve sin cuenta) y en la pestaña de la app; al compartir la cronica se puede pedir "publicarla tambien en Comunidad", que toda la mesa acepta aparte del enlace (las ya compartidas no se listan solas). Creadores con mundos publicados y amigos con cuenta. Mesas abiertas, despues del 15-11
+- [x] Tirada y accion en el mismo turno (02-10, desplegada; app en el APK v22)
+
 ### Despues del 15-11 (fuera del lanzamiento a proposito)
 
 Mesas abiertas a desconocidos (necesita moderacion), Campañas y Personajes
