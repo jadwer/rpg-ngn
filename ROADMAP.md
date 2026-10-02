@@ -46,6 +46,7 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 
 - [x] **Comunidad v1** (02-10, API `aac4330`, monorepo `81e0d32`, desplegada): Historias en `/comunidad` (se ve sin cuenta) y en la pestaña de la app; al compartir la cronica se puede pedir "publicarla tambien en Comunidad", que toda la mesa acepta aparte del enlace (las ya compartidas no se listan solas). Creadores con mundos publicados y amigos con cuenta. Mesas abiertas, despues del 15-11
 - [x] Tirada y accion en el mismo turno (02-10, desplegada; app en el APK v22)
+- [x] **Voz del narrador fase 1** (02-10, API `7a2812d`, desplegada): `SpeechProvider` con OpenAI (`gpt-4o-mini-tts`, voz `onyx`) detras, audio por bloque generado una vez y guardado (`block_audio`), `speech:chronicle <token>` con estimacion previa y `audioUrl` en la cronica. Prueba real: mesa 33 narrada completa, 52 bloques, 14 min de audio, unos 0.21 USD estimados, 3 min de generacion. Falta: elegir la voz definitiva (escuchar opciones) y comparar proveedores
 
 ### Despues del 15-11 (fuera del lanzamiento a proposito)
 
