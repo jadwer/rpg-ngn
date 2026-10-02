@@ -75,7 +75,7 @@ export function ChroniclePanel({ client, tableId }: Props) {
       {share && !share.listed ? (
         <>
           <p className="hint">{t('chroniclePanel.publicarHint')}</p>
-          <button type="button" className="btn ghost small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize: share.anonymize, listed: true }))}>
+          <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize: share.anonymize, listed: true }))}>
             {t('chroniclePanel.publicarEnComunidad')}
           </button>
         </>

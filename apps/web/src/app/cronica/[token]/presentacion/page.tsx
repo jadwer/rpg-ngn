@@ -72,14 +72,25 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
   const [caption, setCaption] = useState(0)
   const [seconds, setSeconds] = useState(6)
   const [titleOn, setTitleOn] = useState(true)
+  // Cada "Comenzar" u "Otra vez" es una corrida nueva; pausar no reinicia nada.
+  const [run, setRun] = useState(0)
   const audio = useRef<HTMLAudioElement | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const paused = useRef(false)
+  const captionNow = useRef(0)
+  // Como se retoma lo que sonaba: lo define la reproduccion de cada diapositiva.
+  const resume = useRef<() => void>(() => undefined)
   const router = useRouter()
 
   const slide = index < slides.length ? slides[index]! : null
   const captions = useMemo(() => (slide ? captionsFor(slide.text, SUBTITLE_CHARS[format], SUBTITLE_LINES[format]) : []), [slide, format])
   // La ilustracion del cierre es la ultima que se vio.
   const image = slide?.image ?? slides[slides.length - 1]?.image ?? null
+
+  const showCaption = useCallback((at: number) => {
+    captionNow.current = at
+    setCaption(at)
+  }, [])
 
   const stopAll = useCallback(() => {
     audio.current?.pause()
@@ -88,22 +99,29 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
   }, [])
 
   const next = useCallback(() => {
+    if (paused.current) return
     timer.current = setTimeout(() => {
+      captionNow.current = 0
       setCaption(0)
       setIndex((i) => i + 1)
     }, 350)
   }, [])
 
-  // Reproduce la diapositiva actual.
+  // Reproduce la diapositiva actual. No depende de la pausa: pausar y seguir
+  // no la vuelven a empezar (antes, Seguir reiniciaba el bloque, 02-10).
   useEffect(() => {
-    if (phase !== 'playing') return
+    if (run === 0) return
     if (index >= slides.length) {
       setSeconds(OUTRO_SECONDS)
-      timer.current = setTimeout(() => {
-        setPhase('done')
-        // Al terminar se sale de la pantalla completa: en el telefono no hay tecla Esc.
-        if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
-      }, OUTRO_SECONDS * 1000)
+      const finish = () => {
+        timer.current = setTimeout(() => {
+          setPhase('done')
+          // Al terminar se sale de la pantalla completa: en el telefono no hay tecla Esc.
+          if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+        }, OUTRO_SECONDS * 1000)
+      }
+      resume.current = finish
+      finish()
       return () => {
         if (timer.current) clearTimeout(timer.current)
       }
@@ -113,23 +131,30 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
       const el = audio.current ?? (audio.current = new Audio())
       el.src = current.audioUrl
       el.onloadedmetadata = () => setSeconds(Number.isFinite(el.duration) ? el.duration + 0.35 : estimateSeconds(current.text))
-      el.ontimeupdate = () => setCaption(captionAt(captions, el.duration ? el.currentTime / el.duration : 0))
+      el.ontimeupdate = () => showCaption(captionAt(captions, el.duration ? el.currentTime / el.duration : 0))
       el.onended = next
+      resume.current = () => void el.play().catch(next)
       void el.play().catch(next)
-    } else if (typeof window !== 'undefined' && window.speechSynthesis) {
+      return () => {
+        el.onended = null
+        el.ontimeupdate = null
+      }
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
       // La voz del navegador lee subtitulo por subtitulo: en Android no avisa
-      // por que palabra va, y el texto se quedaba en el primero (02-10).
+      // por que palabra va (el texto se quedaba en el primero) y no sabe
+      // pausar, solo cortar; pausar la corta y Seguir retoma ese subtitulo.
       setSeconds(estimateSeconds(current.text))
       const lang = language()
       const voice = window.speechSynthesis.getVoices().find((v) => v.voiceURI === listVoices(lang)[0]?.uri)
       let alive = true
       const say = (at: number) => {
-        if (!alive) return
+        if (!alive || paused.current) return
         if (at >= captions.length) {
           next()
           return
         }
-        setCaption(at)
+        showCaption(at)
         const line = captions[at]!.lines.join(' ')
         const utterance = new SpeechSynthesisUtterance(at === 0 && current.speaker ? `${current.speaker}. ${line}` : line)
         if (voice) utterance.voice = voice
@@ -137,27 +162,31 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
         utterance.onend = () => say(at + 1)
         window.speechSynthesis.speak(utterance)
       }
+      resume.current = () => {
+        window.speechSynthesis.cancel()
+        say(captionNow.current)
+      }
       say(0)
       return () => {
         alive = false
       }
-    } else {
-      setSeconds(estimateSeconds(current.text))
+    }
+    setSeconds(estimateSeconds(current.text))
+    const wait = () => {
       timer.current = setTimeout(next, estimateSeconds(current.text) * 1000)
     }
+    resume.current = wait
+    wait()
     return () => {
-      if (audio.current) {
-        audio.current.onended = null
-        audio.current.ontimeupdate = null
-      }
+      if (timer.current) clearTimeout(timer.current)
     }
-  }, [phase, index, slides, captions, next])
+  }, [run, index, slides, captions, next, showCaption])
 
   useEffect(() => {
-    if (phase !== 'playing' || index !== 0) return
+    if (run === 0 || index !== 0) return
     const id = setTimeout(() => setTitleOn(false), TITLE_SECONDS * 1000)
     return () => clearTimeout(id)
-  }, [phase, index])
+  }, [run, index])
 
   useEffect(() => stopAll, [stopAll])
 
@@ -170,23 +199,25 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
   })
 
   const start = () => {
+    paused.current = false
     stopAll()
     setIndex(0)
-    setCaption(0)
+    showCaption(0)
     setTitleOn(true)
     setPhase('playing')
+    setRun((r) => r + 1)
     void document.documentElement.requestFullscreen?.().catch(() => undefined)
   }
 
   function toggle() {
     if (phase === 'playing') {
-      audio.current?.pause()
-      window.speechSynthesis?.pause()
+      paused.current = true
+      stopAll()
       setPhase('paused')
     } else if (phase === 'paused') {
-      if (slide?.audioUrl) void audio.current?.play()
-      else window.speechSynthesis?.resume()
+      paused.current = false
       setPhase('playing')
+      resume.current()
     }
   }
 
@@ -207,7 +238,7 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
           <>
             {format === 'vertical' ? <img src={image} alt="" className="fondo" /> : null}
             <div className="cuadro">
-              <img key={`${index}-${phase === 'ready' ? 'r' : 'p'}`} src={image} alt="" className={`kenburns k${index % 3}${phase === 'paused' ? ' pausado' : ''}`} />
+              <img key={`${index}-${run}`} src={image} alt="" className={`kenburns k${index % 3}${phase === 'paused' ? ' pausado' : ''}`} />
             </div>
           </>
         ) : null}

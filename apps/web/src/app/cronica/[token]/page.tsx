@@ -86,7 +86,7 @@ export default function CronicaPage() {
         <Link href={`/cronica/${token}/presentacion?formato=vertical`} className="btn small">
           {t('chroniclePage.presentacionVertical')}
         </Link>
-        <Link href={`/cronica/${token}/presentacion?formato=horizontal`} className="btn ghost small">
+        <Link href={`/cronica/${token}/presentacion?formato=horizontal`} className="btn small">
           {t('chroniclePage.presentacionHorizontal')}
         </Link>
       </div>

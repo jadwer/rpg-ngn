@@ -37,16 +37,16 @@ export function ChronicleShortcuts({ client, tableId, share }: { client: ApiClie
   const base = `/cronica/${loaded.token}`
   return (
     <div className="chronicle-shortcuts">
-      <Link href={base} className="btn ghost small">
+      <Link href={base} className="btn small">
         {t('chroniclePage.leerLaHistoria')}
       </Link>
-      <Link href={`${base}/presentacion?formato=vertical`} className="btn ghost small">
+      <Link href={`${base}/presentacion?formato=vertical`} className="btn small">
         {t('chroniclePage.presentacionVertical')}
       </Link>
-      <Link href={`${base}/presentacion?formato=horizontal`} className="btn ghost small">
+      <Link href={`${base}/presentacion?formato=horizontal`} className="btn small">
         {t('chroniclePage.presentacionHorizontal')}
       </Link>
-      <button type="button" className="btn ghost small video-oro" onClick={() => setGold((v) => !v)} aria-expanded={gold}>
+      <button type="button" className="btn small video-oro" onClick={() => setGold((v) => !v)} aria-expanded={gold}>
         {t('chroniclePage.generarVideo')}
       </button>
       {gold ? (
