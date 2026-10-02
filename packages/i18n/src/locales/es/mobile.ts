@@ -227,4 +227,13 @@ export const mobile = {
   expoSpeechEngine: {
     elMotorDeVoz: 'el motor de voz falló',
   },
+  push: {
+    on: 'Este teléfono te avisa cuando tu mesa tenga turno otra vez y cuando tus turnos gratuitos estén listos.',
+    off: 'Te avisamos cuando tu mesa tenga turno otra vez y cuando tus turnos gratuitos estén listos. Solo eso.',
+    blocked: 'Bloqueaste los avisos de Ad Astra Mentis. Actívalos en los ajustes del teléfono (Aplicaciones, Ad Astra Mentis, Notificaciones) y vuelve aquí.',
+    unavailable: 'Esta versión de la app todavía no puede recibir avisos.',
+    start: 'Avisarme en este teléfono',
+    stop: 'Dejar de avisarme aquí',
+    channel: 'Avisos de tus mesas',
+  },
 }

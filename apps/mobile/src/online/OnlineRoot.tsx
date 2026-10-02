@@ -17,6 +17,7 @@ import { TableScreen } from '../screens/online/TableScreen'
 import { WorldsScreen } from '../screens/online/WorldsScreen'
 import { TablesScreen } from '../screens/online/TablesScreen'
 import { theme } from '../theme'
+import { disablePush, refreshPush } from './push'
 import { storage, type StoredUser } from './storage'
 
 interface Props {
@@ -141,6 +142,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
     setSession({ client, user })
     setStage(landing)
     void loadTables(client)
+    void refreshPush(client)
   }
 
   useEffect(() => {
@@ -159,6 +161,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
           setSession({ client, user: stored })
           setStage(landing)
           void loadTables(client)
+          void refreshPush(client)
           return
         } catch (caught) {
           if (!alive) return
@@ -213,6 +216,8 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
 
   const logout = async () => {
     const client = session?.client
+    // Los avisos de este telefono dejan de ir a esa cuenta (con su token, antes de soltarlo).
+    if (client) await disablePush(client).catch(() => undefined)
     tokenRef.current = null
     await storage.clearSession()
     setSession(null)

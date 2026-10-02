@@ -229,4 +229,13 @@ export const mobile: Messages<typeof es> = {
   expoSpeechEngine: {
     elMotorDeVoz: 'the speech engine failed',
   },
+  push: {
+    on: 'This phone lets you know when your table has a turn again and when your free turns are ready.',
+    off: 'We let you know when your table has a turn again and when your free turns are ready. Nothing else.',
+    blocked: 'You blocked notifications for Ad Astra Mentis. Turn them on in your phone settings (Apps, Ad Astra Mentis, Notifications) and come back here.',
+    unavailable: 'This version of the app cannot receive notifications yet.',
+    start: 'Notify me on this phone',
+    stop: 'Stop notifying me here',
+    channel: 'Your table notifications',
+  },
 }

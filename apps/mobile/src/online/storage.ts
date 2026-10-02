@@ -41,7 +41,7 @@ export function metroServerUrl(): string | null {
 
 export const DEFAULT_SERVER_URL = defaultServerUrl()
 
-const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user', voice: 'rpg.voice', autoRead: 'rpg.autoread', voiceNotice: 'rpg.voice-notice', language: 'rpg.lang' } as const
+const KEYS = { serverUrl: 'rpg.server-url', token: 'rpg.token', user: 'rpg.user', voice: 'rpg.voice', autoRead: 'rpg.autoread', voiceNotice: 'rpg.voice-notice', language: 'rpg.lang', pushToken: 'rpg.push-token' } as const
 
 export interface StoredUser {
   id: string
@@ -119,4 +119,8 @@ export const storage = {
   /** El idioma de la interfaz que se eligio en este telefono; null si nunca se eligio. */
   language: () => read(KEYS.language),
   setLanguage: (lang: string) => write(KEYS.language, lang),
+
+  /** El token de Expo con el que este telefono pidio avisos; null si no los pidio o los apago. */
+  pushToken: () => read(KEYS.pushToken),
+  setPushToken: (token: string | null) => write(KEYS.pushToken, token),
 }

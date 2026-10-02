@@ -7,6 +7,7 @@ import { CreditsPanel } from '../../components/CreditsPanel'
 import { DeleteAccount } from '../../components/DeleteAccount'
 import { Field } from '../../components/Field'
 import { OwnKeysPanel } from '../../components/OwnKeysPanel'
+import { PushToggle } from '../../components/PushToggle'
 import type { StoredUser } from '../../online/storage'
 import { Backdrop } from '../../components/Backdrop'
 import { PageHeader } from '../../components/PageHeader'
@@ -165,6 +166,8 @@ export function ProfileScreen({ client, user, onUserChanged, onBack, onUnauthori
         </View>
 
         <CreditsPanel client={client} onUnauthorized={onUnauthorized} />
+
+        <PushToggle client={client} onUnauthorized={onUnauthorized} />
 
         <OwnKeysPanel client={client} onUnauthorized={onUnauthorized} />
 
