@@ -177,3 +177,13 @@
 .chronicle-shortcuts-hint {
   max-width: 28em;
 }
+
+.chronicle-shortcuts .video-oro {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+.chronicle-shortcuts .video-oro-aviso {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--gold-bright);
+}

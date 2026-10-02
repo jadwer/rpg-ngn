@@ -232,7 +232,11 @@ function Tables({ client, user, unauthorized }: { client: ApiClient; user: Store
                     <ShellIcon name="jugar" />
                     {t('tablesPage.continuar')}
                   </Link>
-                  <details className="opciones" onToggle={(e) => setOpenOptions((ids) => ({ ...ids, [table.id]: (e.currentTarget as HTMLDetailsElement).open }))}>
+                  <details className="opciones" onToggle={(e) => {
+                      // Se lee antes: dentro del setState el evento ya no tiene currentTarget (y la pagina se caia, 02-10).
+                      const open = e.currentTarget.open
+                      setOpenOptions((ids) => ({ ...ids, [table.id]: open }))
+                    }}>
                     <summary className="btn">
                       <ShellIcon name="opciones" />
                       {t('tablesPage.opciones')}

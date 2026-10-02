@@ -28,4 +28,6 @@ export const chroniclePage = {
   salir: 'Salir',
   leerLaHistoria: 'Leer la historia',
   compartirParaVer: 'Para leerla o verla como presentación, compártela desde la mesa: Lectura, Compartir la historia.',
+  generarVideo: 'Generar video',
+  videoOro: 'Esta opción está disponible desde el plan Oro: el video listo para subir a tus redes, con la voz del narrador.',
 }

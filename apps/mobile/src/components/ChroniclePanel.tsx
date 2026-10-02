@@ -23,6 +23,7 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
   const [share, setShare] = useState<ChronicleShare | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [anonymize, setAnonymize] = useState(false)
+  const [gold, setGold] = useState(false)
   const [listed, setListed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +86,9 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
         <>
           <Button label={t('chroniclePage.presentacionVertical')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=vertical`)} />
           <Button label={t('chroniclePage.presentacionHorizontal')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=horizontal`)} />
+          {/* El video procesado es del plan Oro: por ahora solo se anuncia (Gabino, 02-10). */}
+          <Button label={t('chroniclePage.generarVideo')} small onPress={() => setGold((v) => !v)} />
+          {gold ? <Text style={styles.gold}>{t('chroniclePage.videoOro')}</Text> : null}
         </>
       ) : null}
       {share ? (
@@ -112,4 +116,5 @@ const styles = StyleSheet.create({
   hint: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.inkDim, lineHeight: 20 },
   text: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink },
   error: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.danger },
+  gold: { fontFamily: theme.fonts.ui, fontSize: 13, lineHeight: 18, color: theme.colors.goldBright },
 })

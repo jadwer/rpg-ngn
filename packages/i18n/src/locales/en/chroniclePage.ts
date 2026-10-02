@@ -30,4 +30,6 @@ export const chroniclePage: Messages<typeof es> = {
   salir: 'Exit',
   leerLaHistoria: 'Read the story',
   compartirParaVer: 'To read it or watch it as a presentation, share it from the table: Reading, Share the story.',
+  generarVideo: 'Generate video',
+  videoOro: 'This option is available from the Gold plan: the video ready to post on your social networks, with the narrator voice.',
 }
