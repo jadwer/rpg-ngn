@@ -6,4 +6,8 @@ export const chroniclePanel = {
   aceptoQueSeComparta: 'Acepto que se comparta',
   retirarElEnlace: 'Retirar el enlace',
   enlaceALaHistoria: 'Enlace a la historia',
+  publicarEnComunidad: 'Publicarla también en Comunidad',
+  publicarHint: 'Cualquiera podrá leerla en Comunidad, sin necesidad del enlace. Cada miembro de la mesa tiene que aceptarlo.',
+  seraPublicada: 'Esta historia se publicará en Comunidad cuando todos acepten.',
+  publicada: 'Publicada en Comunidad.',
 }

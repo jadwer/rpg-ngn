@@ -21,6 +21,8 @@ import type {
   SessionSummary,
   Chronicle,
   ChronicleShare,
+  CommunityCreator,
+  CommunityStory,
   InvitePreview,
   TableInvite,
   TableMember,
@@ -88,7 +90,11 @@ export interface ApiClient extends AccountApi, SettingsApi {
   /** El enlace a la cronica de la mesa, o null si nadie lo pidio (o se retiro). */
   chronicleShare(tableId: string | number): Promise<ChronicleShare | null>
   /** Pedir el enlace; quien lo pide ya acepta. Devuelve el vigente si ya habia uno. */
-  shareChronicle(tableId: string | number, options?: { anonymize?: boolean }): Promise<ChronicleShare>
+  shareChronicle(tableId: string | number, options?: { anonymize?: boolean; listed?: boolean }): Promise<ChronicleShare>
+  /** Comunidad (publico): las historias que su mesa acepto publicar, de la mas nueva a la mas vieja. */
+  communityStories(page?: number): Promise<{ stories: CommunityStory[]; total: number; perPage: number }>
+  /** Comunidad (publico): quienes tienen mundos publicados. */
+  communityCreators(): Promise<CommunityCreator[]>
   /** Aceptar que la cronica se vea con el enlace. */
   consentChronicle(tableId: string | number): Promise<ChronicleShare>
   /** Retirar el enlace; cualquiera de la mesa puede, y es definitivo. */
@@ -245,7 +251,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     },
 
     async shareChronicle(tableId, options) {
-      const body = options?.anonymize !== undefined ? { anonymize: options.anonymize } : {}
+      const body = {
+        ...(options?.anonymize !== undefined ? { anonymize: options.anonymize } : {}),
+        ...(options?.listed !== undefined ? { listed: options.listed } : {}),
+      }
       const { data } = await request<{ data: ChronicleShare }>(`/api/v1/tables/${tableId}/chronicle`, { method: 'POST', body })
       return data.data
     },
@@ -257,6 +266,16 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async withdrawChronicle(tableId) {
       await request(`/api/v1/tables/${tableId}/chronicle`, { method: 'DELETE' })
+    },
+
+    async communityStories(page = 1) {
+      const { data } = await request<{ data: CommunityStory[]; meta: { total: number; perPage: number } }>(`/api/v1/community/stories?page=${page}`, { anonymous: true })
+      return { stories: data.data, total: data.meta.total, perPage: data.meta.perPage }
+    },
+
+    async communityCreators() {
+      const { data } = await request<{ data: CommunityCreator[] }>('/api/v1/community/creators', { anonymous: true })
+      return data.data
     },
 
     async chronicle(token) {

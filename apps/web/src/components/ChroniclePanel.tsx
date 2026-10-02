@@ -13,12 +13,14 @@ interface Props {
 /**
  * Compartir la historia de la mesa (docs/24, seccion 4). Cualquiera de la
  * mesa lo pide, cada quien acepta, y el enlace solo funciona cuando han
- * aceptado todos. Cualquiera lo retira, y retirar es definitivo.
+ * aceptado todos. Cualquiera lo retira, y retirar es definitivo. Publicarla
+ * en Comunidad (02-10) es aparte del enlace y todos lo aceptan sabiendolo.
  */
 export function ChroniclePanel({ client, tableId }: Props) {
   const [share, setShare] = useState<ChronicleShare | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [anonymize, setAnonymize] = useState(false)
+  const [listed, setListed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -59,8 +61,21 @@ export function ChroniclePanel({ client, tableId }: Props) {
           <label className="check">
             <input type="checkbox" checked={anonymize} onChange={(e) => setAnonymize(e.target.checked)} /> {t('chroniclePanel.sinLosNombresDe')}
           </label>
-          <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize }))}>
+          <label className="check">
+            <input type="checkbox" checked={listed} onChange={(e) => setListed(e.target.checked)} /> {t('chroniclePanel.publicarEnComunidad')}
+          </label>
+          {listed ? <p className="hint">{t('chroniclePanel.publicarHint')}</p> : null}
+          <button type="button" className="btn small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize, listed }))}>
             {t('chroniclePanel.pedirCompartirLaHistoria')}
+          </button>
+        </>
+      ) : null}
+      {share?.listed ? <p className="hint">{share.public ? t('chroniclePanel.publicada') : t('chroniclePanel.seraPublicada')}</p> : null}
+      {share && !share.listed ? (
+        <>
+          <p className="hint">{t('chroniclePanel.publicarHint')}</p>
+          <button type="button" className="btn ghost small" disabled={busy} onClick={() => void act(() => client.shareChronicle(tableId, { anonymize: share.anonymize, listed: true }))}>
+            {t('chroniclePanel.publicarEnComunidad')}
           </button>
         </>
       ) : null}

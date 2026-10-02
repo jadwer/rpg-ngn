@@ -14,7 +14,7 @@ import { AppShell } from './AppShell'
  * marco comun y el cliente con token; sin ella, una barra con el logo y
  * "Entrar", y un cliente sin token.
  */
-export function PublicOrApp({ children }: { children: (client: ApiClient, signedIn: boolean) => ReactNode }) {
+export function PublicOrApp({ children, returnTo = '/mundos/explorar' }: { children: (client: ApiClient, signedIn: boolean) => ReactNode; returnTo?: string }) {
   const session = useSession()
   const publicClient = useMemo(
     () =>
@@ -46,10 +46,10 @@ export function PublicOrApp({ children }: { children: (client: ApiClient, signed
         </Link>
         <div className="shell-actions">
           <LanguageMenu />
-          <Link href="/entrar?volver=/mundos/explorar" className="btn small">
+          <Link href={`/entrar?volver=${encodeURIComponent(returnTo)}`} className="btn small">
             {t('cta.entrar')}
           </Link>
-          <Link href="/crear-cuenta?volver=/mundos/explorar" className="btn primary small">
+          <Link href={`/crear-cuenta?volver=${encodeURIComponent(returnTo)}`} className="btn primary small">
             {t('cta.crearCuenta')}
           </Link>
         </div>

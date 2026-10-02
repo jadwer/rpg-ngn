@@ -16,12 +16,14 @@ interface Props {
 /**
  * Compartir la historia de la mesa (docs/24, seccion 4), igual que en la web:
  * cualquiera lo pide, cada quien acepta, el enlace funciona cuando aceptan
- * todos y cualquiera lo retira.
+ * todos y cualquiera lo retira. Publicarla en Comunidad (02-10) es aparte
+ * del enlace y todos lo aceptan sabiendolo.
  */
 export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
   const [share, setShare] = useState<ChronicleShare | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [anonymize, setAnonymize] = useState(false)
+  const [listed, setListed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,7 +63,19 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
             <Switch value={anonymize} onValueChange={setAnonymize} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} />
             <Text style={styles.text}>{t('chroniclePanel.sinLosNombresDe')}</Text>
           </View>
-          <Button label={t('chroniclePanel.pedirCompartirLaHistoria')} small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize }))} />
+          <View style={styles.row}>
+            <Switch value={listed} onValueChange={setListed} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} />
+            <Text style={styles.text}>{t('chroniclePanel.publicarEnComunidad')}</Text>
+          </View>
+          {listed ? <Text style={styles.hint}>{t('chroniclePanel.publicarHint')}</Text> : null}
+          <Button label={t('chroniclePanel.pedirCompartirLaHistoria')} small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize, listed }))} />
+        </>
+      ) : null}
+      {share?.listed ? <Text style={styles.hint}>{share.public ? t('chroniclePanel.publicada') : t('chroniclePanel.seraPublicada')}</Text> : null}
+      {share && !share.listed ? (
+        <>
+          <Text style={styles.hint}>{t('chroniclePanel.publicarHint')}</Text>
+          <Button label={t('chroniclePanel.publicarEnComunidad')} small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize: share.anonymize, listed: true }))} />
         </>
       ) : null}
       {share && status.canConsent ? <Button label={t('chroniclePanel.aceptoQueSeComparta')} small primary busy={busy} onPress={() => void act(() => client.consentChronicle(tableId))} /> : null}

@@ -74,6 +74,8 @@ export interface TableInvite {
 export interface ChronicleShare {
   token: string
   anonymize: boolean
+  /** Se publica tambien en Comunidad (aparte del enlace; toda la mesa lo acepta sabiendolo). */
+  listed: boolean
   /** Todos los miembros actuales aceptaron y no se retiro: el enlace se ve. */
   public: boolean
   /** Quien mira ya acepto. */
@@ -293,4 +295,26 @@ export interface WorldProjection {
   worldTime: string | null
   characters: Record<string, CharacterState>
   npcs: Record<string, unknown>
+}
+
+/** Una historia de Comunidad: una cronica que su mesa acepto publicar (02-10). */
+export interface CommunityStory {
+  token: string
+  title: string | null
+  pack: { id: string | null; name: string | null }
+  /** Ruta de la primera ilustracion (`/api/v1/scenes/...`), o null. */
+  cover: string | null
+  excerpt: string | null
+  sessions: number
+  turns: number
+  /** null si la mesa la compartio sin nombres. */
+  players: string[] | null
+  language: string | null
+  updatedAt: string | null
+}
+
+/** Quien tiene mundos publicados en el catalogo. */
+export interface CommunityCreator {
+  name: string
+  worlds: Array<{ id: string; name: string; tagline: string | null }>
 }
