@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- React Native exige require() estatico por imagen empaquetada. */
 import { language, t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, packArtUrl, type BlessingState, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, packPrice, passView, seasonPathLine } from '@rpg-ngn/ui-logic'
+import { passView, seasonPathLine } from '@rpg-ngn/ui-logic'
+import { appCardView } from '../online/storeRules'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType } from 'react-native'
@@ -143,7 +144,7 @@ export function ModePicker({ packName, onOnline, onOffline, onTab }: Props) {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.carousel, { paddingHorizontal: inset }]}>
           {live
             ? destacados.map((w) => {
-                const view = cardView(w)
+                const view = appCardView(w)
                 const cover = packArtUrl(w.id, w.catalog.cover)
                 return (
                   <Pressable key={w.id} onPress={() => onTab('mundos')} style={styles.world} accessibilityRole="button" accessibilityLabel={w.name}>
@@ -281,13 +282,14 @@ function Promos({ live, onShop }: { live: Live | null; onShop: () => void }) {
         <Text style={styles.promoTitle}>{t('blessing.title')}</Text>
         {themeName ? <Text style={styles.promoTheme}>{t('blessing.theme', { name: themeName })}</Text> : null}
         <Text style={styles.promoText}>{t('shop.blessingPitch', { daily: blessing?.turnsPerDay ?? 4, first: 10 })}</Text>
-        {until ? <Text style={styles.promoStatus}>{t('blessing.activeUntil', { date: until })}</Text> : blessing ? <Text style={styles.promoPrice}>{packPrice(blessing.price)}</Text> : null}
+        {/* Sin precio aqui: el de la app es el de Google Play, y se ve en la Tienda. */}
+        {until ? <Text style={styles.promoStatus}>{t('blessing.activeUntil', { date: until })}</Text> : null}
         <View style={styles.promoCta}>
           <Text style={styles.promoCtaText}>{t('shop.seeInShop')}</Text>
         </View>
       </Pressable>
 
-      {pass && live.season ? (
+      {pass?.owned && live.season ? (
         <Pressable onPress={onShop} style={({ pressed }) => [styles.promo, styles.promoViolet, pressed && styles.pressed]} accessibilityRole="button">
           <LinearGradient colors={['rgba(124, 58, 237, 0.22)', 'rgba(11, 15, 20, 0)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
           <Text style={styles.promoKicker}>{t('catalogHome.paseDeTemporada')}</Text>

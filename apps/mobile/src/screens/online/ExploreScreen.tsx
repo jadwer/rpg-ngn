@@ -1,15 +1,15 @@
 import { t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
+import { durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Image, Linking, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Image, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useTopInset } from '../../hooks/useTopInset'
 import { Backdrop } from '../../components/Backdrop'
 import { BottomNav, type BottomTab } from '../../components/BottomNav'
 import { TopBar } from '../../components/TopBar'
 import { Icon, ICON } from '../../components/Icon'
 import { Portrait } from '../../components/Portrait'
-import { webOriginOf } from '../../online/server-url'
+import { appCardView } from '../../online/storeRules'
 import { theme } from '../../theme'
 
 interface Props {
@@ -78,10 +78,8 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
   }
 
   const act = async (world: CatalogWorldCard) => {
-    const view = cardView(world)
+    const view = appCardView(world)
     if (view.action === 'jugar') return onPlay(world.id)
-    // Se paga en la web, como los paquetes: la app todavia no cobra dentro.
-    if (view.action === 'comprar') return void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar/${encodeURIComponent(world.id)}`)
     if (view.action === 'anadir' && world.packId !== undefined) {
       setBusy(world.id)
       try {
@@ -99,7 +97,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
   }
 
   if (detail) {
-    const view = cardView(detail)
+    const view = appCardView(detail)
     const cover = url(packArtUrl(detail.id, detail.catalog.cover))
     return (
       <View style={styles.screen}>
@@ -123,9 +121,9 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           </View>
           <Text style={styles.byline}>{view.byline}</Text>
           <View style={styles.row}>
-            {view.action === 'jugar' || view.action === 'anadir' || view.action === 'comprar' ? (
+            {view.action === 'jugar' || view.action === 'anadir' ? (
               <Pressable onPress={() => void act(detail)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
-                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.action === 'comprar' ? t('mobile.exploreScreen.comprarEnLaWeb') : view.label}</Text>}
+                {busy === detail.id ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.ctaText}>{view.label}</Text>}
               </Pressable>
             ) : null}
             {view.price ? <Text style={styles.price}>{view.price}</Text> : null}
@@ -206,16 +204,8 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
               <View style={styles.pass}>
                 <Text style={styles.passTitle}>{t('explorePage.paseDeTemporada')}</Text>
                 <Text style={styles.meta}>{offer.perks.join('  ·  ')}</Text>
-                {offer.owned ? (
-                  <Text style={styles.seasonChapters}>{offer.label}</Text>
-                ) : (
-                  <>
-                    <Text style={styles.passPrice}>{offer.priceLine}</Text>
-                    <Pressable onPress={() => void Linking.openURL(`${webOriginOf(client.baseUrl)}/mundos/explorar`)} accessibilityRole="button">
-                      <Text style={styles.link}>{t('mobile.exploreScreen.comprarEnLaWeb')}</Text>
-                    </Pressable>
-                  </>
-                )}
+                {/* El pase no se vende ni se cobra fuera desde la app (Google Play, 02-10): solo si ya es tuyo. */}
+                {offer.owned ? <Text style={styles.seasonChapters}>{offer.label}</Text> : null}
               </View>
             ) : null}
           </View>
@@ -238,7 +228,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
 
         <View style={styles.grid}>
           {worlds?.map((world) => {
-            const view = cardView(world)
+            const view = appCardView(world)
             const cover = url(packArtUrl(world.id, world.catalog.cover))
             return (
               <View key={world.id} style={[styles.card, wide && styles.cardWide, (world.state === 'tuyo' || world.state === 'pase') && styles.cardOwned]}>

@@ -88,10 +88,8 @@ export function SeasonPassCard({ client }: { client: ApiClient }) {
   }, [client])
 
   const view = passView(offer)
-  const play = usePlay()
-  if (!view || !season) return null
-  // El pase se vende solo en la web (Gabino, 02-10): con Google Play la app no lo vende ni manda a pagarlo.
-  const sells = !play.available
+  // El pase se vende solo en la web (Gabino, 02-10): la app no lo vende ni manda a pagarlo, solo dice si ya es tuyo.
+  if (!view || !season || !view.owned) return null
 
   return (
     <Panel title={t('shop.passTitle', { season })}>
@@ -99,12 +97,7 @@ export function SeasonPassCard({ client }: { client: ApiClient }) {
       {view.perks.map((perk) => (
         <Text key={perk} style={styles.perk}>{`✦  ${perk}`}</Text>
       ))}
-      {view.owned || sells ? <Text style={view.owned ? styles.ok : styles.price}>{view.priceLine}</Text> : null}
-      {view.owned || !sells ? null : (
-        <View style={styles.actions}>
-          <Button label={view.label} primary onPress={() => openWebShop(client)} />
-        </View>
-      )}
+      <Text style={styles.ok}>{view.priceLine}</Text>
     </Panel>
   )
 }
