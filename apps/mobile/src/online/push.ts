@@ -26,8 +26,10 @@ Notifications.setNotificationHandler({
 
 export async function pushState(): Promise<PushState> {
   if (Platform.OS === 'web' || !projectId()) return 'unavailable'
-  const { status } = await Notifications.getPermissionsAsync()
-  if (status === 'denied') return 'blocked'
+  // Android 13 reporta `denied` antes de la primera pregunta; solo esta
+  // bloqueado si ya no se puede volver a preguntar (01-10).
+  const { status, canAskAgain } = await Notifications.getPermissionsAsync()
+  if (status === 'denied' && !canAskAgain) return 'blocked'
   return (await storage.pushToken()) ? 'on' : 'off'
 }
 
