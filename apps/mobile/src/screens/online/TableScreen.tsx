@@ -723,7 +723,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
-      <EndingModal blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
+      <EndingModal client={client} tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
       {screen ? (
         <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
           <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>

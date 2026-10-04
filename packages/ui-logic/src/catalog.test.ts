@@ -1,6 +1,6 @@
 import type { WorldCatalog } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { cardView, catalogBlessing, durationLabel, passView, playersTag, seasonPathLine, seasonProgress, stopLabel } from './catalog.js'
+import { cardView, catalogBlessing, durationLabel, passView, playersTag, ratingLine, seasonPathLine, seasonProgress, stopLabel } from './catalog.js'
 
 const catalog = { genre: 'Intriga', author: 'Nara', players: { min: 2, max: 5 }, duration: 'media' } as WorldCatalog
 const w = (over: object) => ({ state: 'gratis', origin: 'oficial', catalog, price: null, path: null, name: 'X', ...over }) as Parameters<typeof cardView>[0]
@@ -53,5 +53,13 @@ describe('seasonProgress', () => {
     expect(seasonPathLine([{ packId: 'pilot', threshold: 0, unlocked: true }, { packId: 'mascarada', threshold: 20, unlocked: false }], { pilot: 'Los Nueve Viajeros' })).toBe('Los Nueve Viajeros: gratis  ·  mascarada: 20 capítulos')
     expect(passView({ season: 't1', amount: 500, currency: 'usd', charge: { amount: 9200, currency: 'mxn' }, owned: false })?.priceLine).toBe('$5 USD ($92 MXN), pago único')
     expect(passView({ season: 't1', amount: 500, currency: 'usd', charge: null, owned: true })?.priceLine).toBe('Ya es tuyo esta temporada')
+  })
+})
+
+describe('estrellas en la tarjeta (docs/26, H6)', () => {
+  it('sin valoraciones no hay estrellas; con ellas, promedio y cuantas', () => {
+    expect(ratingLine(null)).toBeNull()
+    expect(ratingLine({ average: 0, count: 0 })).toBeNull()
+    expect(ratingLine({ average: 4.6, count: 12 })).toBe('★ 4.6 (12)')
   })
 })

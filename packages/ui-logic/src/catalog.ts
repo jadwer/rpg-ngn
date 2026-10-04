@@ -112,3 +112,12 @@ export function stopLabel(stop: { threshold: number; unlocked: boolean }): strin
 export function seasonPathLine(worlds: ReadonlyArray<{ packId: string; threshold: number; unlocked: boolean }>, names: Readonly<Record<string, string>>): string {
   return worlds.map((w) => `${names[w.packId] ?? w.packId}: ${stopLabel(w).toLowerCase()}`).join('  ·  ')
 }
+
+/**
+ * Las estrellas de un mundo en su tarjeta (docs/26, H6): "★ 4.6 (12)". Null
+ * si nadie lo ha valorado: una tarjeta sin estrellas es mejor que un cero.
+ */
+export function ratingLine(rating: { average: number; count: number } | null | undefined): string | null {
+  if (!rating || rating.count === 0) return null
+  return `★ ${rating.average.toFixed(1)} (${rating.count})`
+}

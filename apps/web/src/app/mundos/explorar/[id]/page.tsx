@@ -2,7 +2,7 @@
 
 import { t, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldDetail } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, languageName, playersTag, worldLanguages } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, languageName, playersTag, ratingLine, worldLanguages } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -107,6 +107,7 @@ function Mundo({ client, signedIn }: { client: ApiClient; signedIn: boolean }) {
           </li>
         </ul>
         <p className="byline">{view.byline}</p>
+        {ratingLine(world.rating) ? <p className="estrellas">{ratingLine(world.rating)}</p> : null}
         <div className="accion">
           {view.action === 'jugar' || view.action === 'anadir' || view.action === 'comprar' ? (
             <button type="button" className="btn primary grande" disabled={busy} onClick={() => void act()}>

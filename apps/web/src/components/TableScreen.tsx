@@ -668,7 +668,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
-      <EndingOverlay tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
+      <EndingOverlay client={client} tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       <header className="table-header hide-on-screen">
         <SystemMenu

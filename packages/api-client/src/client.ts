@@ -129,6 +129,10 @@ export interface ApiClient extends AccountApi, SettingsApi {
   holdTurn(turnId: number, held: boolean): Promise<TurnView>
   openSession(campaignId: string | number, code: string, worldTime?: string): Promise<TurnView>
   closeSession(sessionId: string | number, cliffhanger?: string): Promise<SessionClosed>
+  /** Mi valoracion del mundo de la mesa (docs/26, H6), o null si no lo he valorado. */
+  tableRating(tableId: string | number): Promise<{ stars: number; review: string | null } | null>
+  /** Valora el mundo de la mesa: estrellas de 1 a 5 y reseña opcional. */
+  rateTable(tableId: string | number, stars: number, review?: string | null): Promise<{ stars: number; review: string | null }>
   /** "Un turno mas": el anfitrion alarga la sesion dos turnos (docs/26, H1). */
   extendSession(sessionId: string | number): Promise<{ session: string; extraTurns: number }>
   /** "Pedir el final": el proximo turno cierra la sesion (docs/26, H1). */
@@ -387,6 +391,16 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async closeSession(sessionId, cliffhanger) {
       const { data } = await request<{ data: SessionClosed }>(`/api/v1/sessions/${sessionId}/close`, { method: 'POST', body: cliffhanger ? { cliffhanger } : {} })
+      return data.data
+    },
+
+    async tableRating(tableId) {
+      const { data } = await request<{ data: { stars: number; review: string | null } | null }>(`/api/v1/tables/${tableId}/rating`)
+      return data.data
+    },
+
+    async rateTable(tableId, stars, review) {
+      const { data } = await request<{ data: { stars: number; review: string | null } }>(`/api/v1/tables/${tableId}/rating`, { method: 'POST', body: { stars, review: review ?? null } })
       return data.data
     },
 

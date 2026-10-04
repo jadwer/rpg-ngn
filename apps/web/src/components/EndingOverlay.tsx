@@ -2,9 +2,12 @@
 
 import { t } from '@rpg-ngn/i18n'
 import { endingTitle, latestEnding, type TurnBlock } from '@rpg-ngn/ui-logic'
+import type { ApiClient } from '@rpg-ngn/api-client'
 import { useEffect, useState } from 'react'
+import { RatingForm } from './RatingForm'
 
 interface Props {
+  client: ApiClient
   tableId: string | number
   blocks: readonly TurnBlock[]
   isHost: boolean
@@ -18,7 +21,7 @@ interface Props {
  * lo que lograron y lo que queda pendiente. Nacio de la partida del 03-10:
  * dos horas sin una sola sensacion de cierre. Una vez por fin y navegador.
  */
-export function EndingOverlay({ tableId, blocks, isHost, onKeepPlaying }: Props) {
+export function EndingOverlay({ client, tableId, blocks, isHost, onKeepPlaying }: Props) {
   const ending = latestEnding(blocks)
   const key = ending ? `rpg:ending:${tableId}:${ending.id}` : null
   const [open, setOpen] = useState(false)
@@ -71,6 +74,7 @@ export function EndingOverlay({ tableId, blocks, isHost, onKeepPlaying }: Props)
         <section className="ending-rate">
           <h3>{t('ending.rateTitle')}</h3>
           <p>{t('ending.rateText')}</p>
+          <RatingForm client={client} tableId={tableId} />
         </section>
         <div className="ending-actions">
           {ending.scope !== 'story' && isHost ? (

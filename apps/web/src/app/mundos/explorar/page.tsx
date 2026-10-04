@@ -2,7 +2,7 @@
 
 import { LANGUAGES, language, t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, languageCodes, passView, playersTag, seasonProgress, stopLabel, worldLanguageNote, worldLanguages } from '@rpg-ngn/ui-logic'
+import { cardView, durationLabel, languageCodes, passView, playersTag, ratingLine, seasonProgress, stopLabel, worldLanguageNote, worldLanguages } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -188,6 +188,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
                   <li>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</li>
                 </ul>
                 <p className="byline">{view.byline}</p>
+                {ratingLine(world.rating) ? <p className="estrellas">{ratingLine(world.rating)}</p> : null}
                 {view.price ? <p className="precio">{view.price}</p> : null}
                 {view.hint ? <p className="pista">{view.hint}</p> : null}
                 {view.progress !== null ? (

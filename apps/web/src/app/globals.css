@@ -5923,3 +5923,45 @@ a {
   text-transform: uppercase;
   color: var(--gold-bright);
 }
+/* Estrellas y reseña (docs/26, H6). */
+.rating-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.rating-form .stars {
+  display: flex;
+  gap: 4px;
+}
+.rating-form .star {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--border);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.rating-form .star.on {
+  color: var(--gold-bright);
+}
+.rating-form .star:hover {
+  transform: scale(1.12);
+}
+.rating-form .textarea {
+  width: 100%;
+}
+.rating-form .ok {
+  color: var(--success, #4ade80);
+}
+.mundo-card .estrellas {
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  color: var(--gold-bright);
+}
+.mundo-detalle .estrellas, .estrellas {
+  color: var(--gold-bright);
+}

@@ -1,6 +1,6 @@
 import { t, LANGUAGES, language, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { languageCodes, worldLanguageNote, worldLanguages, durationLabel, passView, playersTag, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
+import { languageCodes, worldLanguageNote, worldLanguages, durationLabel, passView, playersTag, ratingLine, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useTopInset } from '../../hooks/useTopInset'
@@ -122,6 +122,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
             ))}
           </View>
           <Text style={styles.byline}>{view.byline}</Text>
+          {ratingLine(detail.rating) ? <Text style={styles.stars}>{ratingLine(detail.rating)}</Text> : null}
           <View style={styles.row}>
             {view.action === 'jugar' || view.action === 'anadir' ? (
               <Pressable onPress={() => void act(detail)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]} accessibilityRole="button">
@@ -252,6 +253,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
                     </Text>
                     <Text style={styles.meta}>{view.price ?? view.hint ?? view.byline}</Text>
                     <Text style={styles.meta}>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</Text>
+                    {ratingLine(world.rating) ? <Text style={styles.stars}>{ratingLine(world.rating)}</Text> : null}
                     {view.progress !== null ? (
                       <View style={styles.bar}>
                         <View style={[styles.barFill, { width: `${Math.round(view.progress * 100)}%` }]} />
@@ -320,6 +322,7 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { paddingHorizontal: 8, paddingVertical: 2, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 6, fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.inkDim },
   byline: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
+  stars: { fontFamily: theme.fonts.uiMedium, fontSize: 13, color: theme.colors.goldBright },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   cta: { minWidth: 140, minHeight: 46, paddingHorizontal: 20, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.accent },
   ctaText: { fontFamily: theme.fonts.uiSemiBold, fontSize: 16, color: '#ffffff' },

@@ -91,6 +91,8 @@ export interface CatalogWorldCard {
   /** En venta (3d): precio en USD y lo que se cobra hoy en pesos; null sin tipo de cambio. */
   price: { amount: number; currency: string; charge?: { amount: number; currency: string } | null } | null
   featured: boolean
+  /** Estrellas (docs/26, H6): promedio bayesiano y cuantas valoraciones; null si nadie lo ha valorado. */
+  rating?: { average: number; count: number } | null
   /** Solo en los de la comunidad: el id numerico para añadirlo a mis mundos. */
   packId?: number
   /** Camino de temporada (3b): capitulos que faltan y el umbral. */

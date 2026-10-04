@@ -2,10 +2,14 @@ import { t } from '@rpg-ngn/i18n'
 import { endingTitle, latestEnding, type TurnBlock } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
+import type { ApiClient } from '@rpg-ngn/api-client'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { RatingForm } from './RatingForm'
 
 interface Props {
+  client: ApiClient
+  tableId: string
   blocks: readonly TurnBlock[]
   isHost: boolean
   /** El anfitrion abre la sesion siguiente desde su panel. */
@@ -19,7 +23,7 @@ const seen = new Set<string>()
  * La pantalla de fin (docs/26, H1), como la web: cuando la sesion termina,
  * toda la mesa ve el fin a pantalla completa con lo que lograron.
  */
-export function EndingModal({ blocks, isHost, onKeepPlaying }: Props) {
+export function EndingModal({ client, tableId, blocks, isHost, onKeepPlaying }: Props) {
   const ending = latestEnding(blocks)
   const [open, setOpen] = useState(false)
   const fade = useRef(new Animated.Value(0)).current
@@ -62,6 +66,7 @@ export function EndingModal({ blocks, isHost, onKeepPlaying }: Props) {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('ending.rateTitle')}</Text>
               <Text style={styles.text}>{t('ending.rateText')}</Text>
+              <RatingForm client={client} tableId={tableId} />
             </View>
             {continues && isHost ? (
               <Button
