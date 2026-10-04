@@ -241,8 +241,10 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     // Lo que guardan los rulesets sin combate (court-intrigue): si el modelo
     // no lo ve, no puede narrar sus consecuencias ni proponer cambiarlo.
     const custom = live.custom
-    if (typeof custom['standing'] === 'number') parts.push(`crédito en la corte: ${custom['standing']}/10`)
-    if (typeof custom['suspicion'] === 'number') parts.push(`sospecha: ${custom['suspicion']}/10`)
+    // El drama (H5) usa la mecanica de la corte con otras palabras.
+    const drama = pack.manifest.system === 'drama-lite'
+    if (typeof custom['standing'] === 'number') parts.push(`${drama ? 'reputación' : 'crédito en la corte'}: ${custom['standing']}/10`)
+    if (typeof custom['suspicion'] === 'number') parts.push(`${drama ? 'presión' : 'sospecha'}: ${custom['suspicion']}/10`)
     const clues = custom['clues']
     if (Array.isArray(clues) && clues.length) parts.push(`pistas: ${clues.map(String).join('; ')}`)
     // Lo de la mascarada: prestigio, escandalo, rumores oidos y como esta con cada persona.

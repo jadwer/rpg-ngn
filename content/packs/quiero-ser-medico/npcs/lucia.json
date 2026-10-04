@@ -1,0 +1,14 @@
+{
+  "id": "lucia",
+  "name": "Lucía",
+  "description": "La mamá de Emiliano. Enfermera de turno nocturno y costurera los fines de semana. Lo crió sola desde que él tenía siete años y no se queja nunca, cosa que a Emiliano le pesa más que si se quejara.",
+  "portrait": null,
+  "goals": [
+    "Que su hijo llegue más lejos que ella.",
+    "No soporta que Emiliano cargue con los problemas de su padre.",
+    "Todavía cree que Rogelio puede cambiar, aunque ya no lo diga."
+  ],
+  "knows": [],
+  "relationships": [],
+  "location": "casa-de-mama"
+}

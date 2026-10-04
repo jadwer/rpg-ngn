@@ -1,0 +1,46 @@
+{
+  "id": "emiliano",
+  "name": "Emiliano",
+  "race": "Humano",
+  "class": "Estudiante de la Vocacional 10",
+  "age": "18 años",
+  "quote": "Ya descubrí mi pasión: ¡quiero ser médico!",
+  "bio": "Estudió en la Vocacional 10 del IPN porque era lo que estaba cerca y lo que se podía pagar. En el último año descubrió que quería ser médico, y desde entonces estudia de noche con la guía de la UNAM. Hizo tres exámenes de admisión: Administración en la UAM Azcapotzalco, Medicina en la Facultad de CU y, por si acaso, Comunicaciones y Electrónica en ESIME Zacatenco. Vive con su mamá; a su papá lo ve cuando a su papá le conviene.",
+  "stats": {
+    "fue": 11,
+    "des": 12,
+    "con": 12,
+    "int": 15,
+    "sab": 13,
+    "car": 11
+  },
+  "hp": 1,
+  "attacks": [],
+  "abilities": [
+    {
+      "id": "la-guia",
+      "name": "La guía de estudio",
+      "type": "rasgo",
+      "uses": 1,
+      "per": "sesión",
+      "effect": "Recuerda algo exacto de lo que estudió: un dato de biología, un procedimiento, una fecha. Lo que recuerda es cierto."
+    },
+    {
+      "id": "hijo-de-enfermera",
+      "name": "Hijo de enfermera",
+      "type": "pasiva",
+      "effect": "Sabe mantener la calma ante la sangre y dar primeros auxilios básicos. Nadie le enseñó a mantenerla ante su padre."
+    }
+  ],
+  "skills": [
+    "Estudio",
+    "Primeros auxilios",
+    "Paciencia",
+    "Ingenio"
+  ],
+  "roles": [
+    "Protagonista"
+  ],
+  "goal": "Estudiar Medicina en la UNAM. Y, aunque no lo diga, que su papá por una vez esté orgulloso de él.",
+  "portrait": null
+}

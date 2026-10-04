@@ -38,3 +38,14 @@ describe('idioma de la mesa', () => {
     expect(en.endsWith(NARRATE_IN_ENGLISH)).toBe(true)
   })
 })
+
+describe('drama sin combate (docs/26, H5)', () => {
+  it('usa los eventos de la corte con palabras de historia, sin hablar de la corte', () => {
+    const drama = systemPromptFor('drama-lite')
+    expect(drama).toContain('reputación, presión y lo que el protagonista descubre')
+    expect(drama).toContain('- Reputación: cuánto le abren las puertas')
+    expect(drama).toContain('- Presión: cuánto lo acorralan')
+    expect(drama).not.toContain('En esta corte')
+    expect(systemPromptFor('drama-lite', true)).toContain('reputación (standing)')
+  })
+})

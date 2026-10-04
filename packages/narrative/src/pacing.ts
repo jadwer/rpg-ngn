@@ -106,8 +106,8 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
     lines.push(
       'Este turno CIERRA la sesión. Narra el desenlace a partir de lo que declararon; no devuelvas la palabra ni hagas preguntas, no emitas "suggest" ni "addressed".',
       endings.length > 0
-        ? 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","ending":"<id>","cliffhanger":"..."}: el final que ganaron y, si la historia sigue, una frase con lo que queda pendiente.'
-        : 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí).',
+        ? 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","ending":"<id>","cliffhanger":"..."}: el final que ganaron y, si la historia sigue, una frase con lo que queda pendiente, sin secretos ni lo que los personajes todavía no saben.'
+        : 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí). El cliffhanger lo leen los jugadores: nada de secretos ni de lo que los personajes todavía no saben.',
     )
   }
   return lines.join('\n')

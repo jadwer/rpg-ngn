@@ -1,0 +1,18 @@
+{
+  "id": "esime-zacatenco",
+  "name": "ESIME Zacatenco",
+  "description": "La Escuela Superior de Ingeniería Mecánica y Eléctrica del IPN, unidad Zacatenco. Para entrar a Comunicaciones y Electrónica piden 50 aciertos de 140.",
+  "newcomerView": "Edificios grises, burros blancos en las chamarras y un salón donde nadie pregunta por qué estás ahí.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "el-departamento",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "IPN",
+    "plan B"
+  ]
+}

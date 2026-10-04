@@ -1,0 +1,51 @@
+{
+  "id": "003",
+  "title": "Capítulo 3: La venganza",
+  "date": "2026-10-04",
+  "status": "planned",
+  "briefing": "Tienes dieciocho años otra vez y recuerdas los quince que vienen. Es la víspera del examen de Medicina. El teléfono está sonando.",
+  "howToPlay": [
+    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el director narra lo que pasa.",
+    "Aquí nadie pelea. Lo que se mueve es tu reputación, la presión que te acorrala y lo que descubres.",
+    "Cada capítulo es corto. El director lleva el ritmo y cierra el capítulo solo al llegar al final."
+  ],
+  "availableCharacters": [
+    "emiliano"
+  ],
+  "startLocation": "casa-de-mama",
+  "party": [],
+  "arc": {
+    "chapter": {
+      "number": 3,
+      "title": "La venganza"
+    },
+    "turns": {
+      "target": 8,
+      "min": 2
+    },
+    "hook": "El teléfono suena a las once de la noche, igual que la primera vez. Del otro lado, la voz pastosa de tu papá: \"Mijo, choqué. Ven por mí antes de que llegue la patrulla.\"",
+    "objective": "No repetir tu vida.",
+    "beats": [
+      "Todo empuja a Emiliano a ir: Rogelio suplica, Lucía llama desde el hospital, un vecino toca la puerta. Tres presiones, cada una más fuerte. Nadie puede obligarlo; necesita excusas que convenzan.",
+      "Si va a salvar a su padre, aunque esquive las trampas de la primera vez aparecen trampas nuevas que lo llevan a la cárcel.",
+      "Si sostiene el no hasta el final, llega al examen; después, en pocos turnos, la carrera: lo mal que la pasó en Medicina, que casi lo expulsan por lo difícil, que se tituló."
+    ],
+    "endings": [
+      {
+        "id": "se-repite",
+        "when": "Emiliano decide ir a salvar a su padre, de cualquier forma: aunque esquive las trampas de antes, aparecen otras y termina otra vez en la cárcel.",
+        "title": "La historia se repite",
+        "text": "La historia se repite… pero esta vez no hay otra oportunidad. FIN.",
+        "final": true
+      },
+      {
+        "id": "medico",
+        "when": "Emiliano sostiene el no hasta el final y llega a su examen.",
+        "title": "FIN",
+        "text": "Medicina en CU fue más dura de lo que soñó y casi lo expulsan, pero se tituló. Hoy atiende el consultorio de Farmacias Parecidas, la fila de las siete de la mañana lo saluda por su nombre, y Mariana le lleva café a la hora de la comida. No es el director de nada. Es feliz.",
+        "final": true,
+        "default": true
+      }
+    ]
+  }
+}

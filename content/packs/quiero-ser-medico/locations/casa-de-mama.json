@@ -1,0 +1,18 @@
+{
+  "id": "casa-de-mama",
+  "name": "La casa de mamá",
+  "description": "Un departamento chico en la Gustavo A. Madero: dos recámaras, una mesa que también es escritorio y la guía de estudio de la UNAM llena de separadores. Lucía lo mantiene a flote con dos trabajos.",
+  "newcomerView": "Olor a café de olla, la tele prendida sin volumen y la guía de estudio abierta en Biología.",
+  "connections": [
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "el-departamento",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "casa",
+    "familia"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "quiero-ser-medico",
+  "type": "campaign",
+  "version": "0.1.0",
+  "name": "Ya descubrí mi pasión: ¡QUIERO SER MÉDICO!",
+  "tagline": "La vida se repite. Tú no tienes por qué.",
+  "motto": "Hay segundas vueltas que no vienen en la convocatoria.",
+  "system": "drama-lite",
+  "provenance": {
+    "class": "original",
+    "authors": [
+      "Gabino Ramirez"
+    ],
+    "sources": [
+      "Historia original de Gabino Ramirez (04-10-2026). Universidades y escuelas reales como escenario; la farmacia es una parodia."
+    ],
+    "license": "Todos los derechos reservados, Ad Astra Mentis",
+    "createdAt": "2026-10-04",
+    "updatedAt": "2026-10-04"
+  },
+  "characters": [
+    "emiliano"
+  ],
+  "npcs": [
+    "lucia",
+    "rogelio",
+    "mariana",
+    "dona-chelo",
+    "el-agente"
+  ],
+  "locations": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "el-departamento",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "sessions": [
+    "001",
+    "002",
+    "003"
+  ],
+  "artStyle": "Ciudad de México contemporánea, ilustración semirrealista con luz cálida de atardecer y tonos de concreto, sin texto ni logotipos.",
+  "finale": {
+    "title": "FIN",
+    "text": "Y así termina la historia de Emiliano. ¿Habrá otra segunda vuelta? Quizá. Solo el tiempo lo dirá."
+  }
+}

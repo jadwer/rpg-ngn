@@ -1,0 +1,18 @@
+{
+  "id": "el-departamento",
+  "name": "El departamento del octavo piso",
+  "description": "Un cuarto de azotea convertido en departamento, en un edificio de ocho pisos sin elevador en la colonia Doctores. Es lo más barato que se puede pagar. La ventana da a la calle desde muy alto.",
+  "newcomerView": "Ocho pisos de escalera, una ventana grande que no cierra bien y el reglamento de doña Chelo pegado en la puerta: nada de ruido después de las nueve.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "soledad",
+    "octavo piso"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "002",
+  "title": "Capítulo 2: La revelación",
+  "date": "2026-10-04",
+  "status": "planned",
+  "briefing": "Pasaron quince años. Te titulaste de ingeniero, pero vives de lo que salga. Rentas un cuarto en un octavo piso sin elevador en la colonia Doctores. Mañana cumples treinta y tres.",
+  "howToPlay": [
+    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el director narra lo que pasa.",
+    "Aquí nadie pelea. Lo que se mueve es tu reputación, la presión que te acorrala y lo que descubres.",
+    "Cada capítulo es corto. El director lleva el ritmo y cierra el capítulo solo al llegar al final."
+  ],
+  "availableCharacters": [
+    "emiliano"
+  ],
+  "startLocation": "el-departamento",
+  "party": [],
+  "arc": {
+    "chapter": {
+      "number": 2,
+      "title": "La revelación"
+    },
+    "turns": {
+      "target": 7
+    },
+    "hook": "Tu cumpleaños treinta y tres empieza con un mensaje: Mariana se casa el sábado con un médico de la Facultad. Esa misma noche alguien sube los ocho pisos y toca tu puerta: es tu papá, con un pastel de supermercado.",
+    "objective": "Que este año, por fin, sea distinto.",
+    "beats": [
+      "Escenas rápidas de una vida mediocre: el call center, el metro y el camión, doña Chelo y su reglamento. Cualquier intento de mejorar (otro empleo, buscar pareja, seducir a la casera) fracasa con gracia, sin crueldad gratuita.",
+      "Rogelio sube con el pastel; Emiliano cree por un momento que viene a felicitarlo.",
+      "Rogelio confiesa: siempre lo odió porque fue la razón por la que Lucía lo dejó; chocó a propósito la noche antes del examen y le echó la culpa para que lo perdiera todo, y jura que nunca lo dejará ser feliz.",
+      "Emiliano explota e intenta hacerle daño; en el forcejeo cae por la ventana del octavo piso."
+    ],
+    "fixedOutcome": "Emiliano cae por la ventana. Narra la caída como la escribió el autor: los vidrios, el cuello y la espalda rotos, las piernas que ya no duelen, las manos que suben a la cara llena de vidrios, los pulmones que se llenan de sangre, y cuando intenta respirar todo se pone blanco. Entonces suena el teléfono de la casa de su mamá: es la noche antes del examen de la UNAM. Regresó en el tiempo. Nada de lo que haga antes evita la caída; cambia el cómo, no el qué.",
+    "endCard": {
+      "title": "Fin del capítulo 2: La revelación",
+      "text": "Suena el teléfono. Son las once de la noche. Mañana es el examen."
+    }
+  }
+}

@@ -309,11 +309,24 @@ const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "p
 Estados de vínculo: interes, atraccion, confianza, quimica, decepcion, desconfianza. Si dudas de cómo llenar un evento, no lo propongas.`
 
 /** Rulesets con seccion de eventos propia; el resto usa la del d20 del piloto. */
-export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue', 'masquerade']
+export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue', 'masquerade', 'drama-lite']
+
+/**
+ * Drama sin combate (H5): los mismos eventos que la corte con otras
+ * palabras. Se deriva del texto de la corte para que una correccion en uno
+ * llegue al otro.
+ */
+const DRAMA_EVENTS = INTRIGUE_EVENTS.replace('En esta corte no hay puntos de vida ni combate: lo que se gana y se pierde es crédito, sospecha y pistas, y eso solo existe si lo registras.', 'En esta historia no hay puntos de vida ni combate: lo que se gana y se pierde es reputación, presión y lo que el protagonista descubre, y eso solo existe si lo registras.')
+  .replace('Si alguien lo ve donde no debía, pregunta de más o lo pillan mintiendo, sube "suspicion". Si alguien lo cubre o se gana a un superior, baja.', 'Si las circunstancias lo acorralan (lo culpan, lo descubren, se le cierra una salida), sube "suspicion", que aquí es la presión. Si alguien lo respalda o encuentra un respiro, baja.')
+  .replace('Si se gana o pierde el favor de la corte (un aliado nuevo, una puerta que se cierra), mueve "standing".', 'Si gana o pierde el apoyo de alguien que importa (un aliado nuevo, una puerta que se cierra), mueve "standing", que aquí es su reputación.')
+  .replace('- Crédito en la corte: cuánto le abren las puertas a ese personaje', '- Reputación: cuánto le abren las puertas a ese personaje')
+  .replace('- Sospecha: cuánto creen que tuvo que ver con el atentado (de 0 a 10; al llegar a 10 lo detienen; sube cuando lo ven donde no debía, baja cuando alguien lo cubre)', '- Presión: cuánto lo acorralan las circunstancias (de 0 a 10; sube cuando lo culpan o se le cierra una salida, baja cuando alguien lo respalda)')
+const DRAMA_EVENTS_COMPACT = INTRIGUE_EVENTS_COMPACT.replace('lo que se mueve es crédito, sospecha y pistas', 'lo que se mueve es reputación (standing), presión (suspicion) y lo que descubre (clue)').replace('quien es visto donde no debía sube "suspicion"', 'cuando las circunstancias lo acorralan sube "suspicion"')
 
 const OWN_EVENTS: Record<string, { full: string; compact: string }> = {
   'court-intrigue': { full: INTRIGUE_EVENTS, compact: INTRIGUE_EVENTS_COMPACT },
   masquerade: { full: MASQUERADE_EVENTS, compact: MASQUERADE_EVENTS_COMPACT },
+  'drama-lite': { full: DRAMA_EVENTS, compact: DRAMA_EVENTS_COMPACT },
 }
 
 /** El prompt de sistema para un ruleset y un modo de dados; sin ruleset o con uno desconocido, el del d20. */

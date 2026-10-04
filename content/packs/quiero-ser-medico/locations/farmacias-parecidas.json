@@ -1,0 +1,18 @@
+{
+  "id": "farmacias-parecidas",
+  "name": "Farmacias Parecidas",
+  "description": "Una farmacia de barrio con consultorio al lado: consulta barata, fila larga y un letrero que promete \"lo mismo pero más barato\". Aquí puede terminar la carrera de un médico, o empezar.",
+  "newcomerView": "Un consultorio de dos por dos, una báscula vieja y una fila de señoras que saben más de medicina que muchos titulados.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "el-departamento",
+    "la-oficina"
+  ],
+  "tags": [
+    "final",
+    "consultorio"
+  ]
+}

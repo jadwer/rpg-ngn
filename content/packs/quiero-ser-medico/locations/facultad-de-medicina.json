@@ -1,0 +1,18 @@
+{
+  "id": "facultad-de-medicina",
+  "name": "La Facultad de Medicina, en CU",
+  "description": "Ciudad Universitaria: los murales, las islas, y al fondo la Facultad de Medicina, el lugar donde Emiliano decidió que quería pasar el resto de su vida.",
+  "newcomerView": "Batas blancas cruzando las islas, estudiantes con libros de anatomía bajo el brazo y el sol de mediodía sobre la piedra volcánica.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "esime-zacatenco",
+    "el-departamento",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "sueño",
+    "UNAM"
+  ]
+}

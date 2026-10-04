@@ -242,7 +242,8 @@ const MASQUERADE_EVENT = z.discriminatedUnion('type', [
  * sabe aplicar se descarta aqui, antes de llegar al reductor.
  */
 export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT | typeof MASQUERADE_EVENT {
-  if (rulesetId === 'court-intrigue') return INTRIGUE_EVENT
+  // drama-lite (H5) mueve lo mismo que la corte: reputacion, presion y pistas.
+  if (rulesetId === 'court-intrigue' || rulesetId === 'drama-lite') return INTRIGUE_EVENT
   if (rulesetId === 'masquerade') return MASQUERADE_EVENT
   return D20_EVENT
 }

@@ -1,0 +1,18 @@
+{
+  "id": "agencia-del-mp",
+  "name": "La agencia del Ministerio Público",
+  "description": "Una agencia de la delegación con luz de tubo, sillas de plástico y un agente que escribe con dos dedos. Aquí los papeles tardan lo que quiere quien los firma.",
+  "newcomerView": "Gente esperando sin saber qué espera, un reloj que no avanza y un \"ahorita lo atienden\" que no llega.",
+  "connections": [
+    "casa-de-mama",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "el-departamento",
+    "la-oficina",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "autoridad",
+    "espera"
+  ]
+}

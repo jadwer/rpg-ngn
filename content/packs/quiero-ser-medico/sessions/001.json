@@ -1,0 +1,40 @@
+{
+  "id": "001",
+  "title": "Capítulo 1: El drama",
+  "date": "2026-10-04",
+  "status": "planned",
+  "briefing": "Es mayo y mañana es tu examen de admisión a Medicina en la UNAM. Llevas meses estudiando de noche con la guía, después del último año en la Vocacional 10. La UAM ya pasó, en marzo. El IPN viene después. Mañana es el que importa.",
+  "howToPlay": [
+    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el director narra lo que pasa.",
+    "Aquí nadie pelea. Lo que se mueve es tu reputación, la presión que te acorrala y lo que descubres.",
+    "Cada capítulo es corto. El director lleva el ritmo y cierra el capítulo solo al llegar al final."
+  ],
+  "availableCharacters": [
+    "emiliano"
+  ],
+  "startLocation": "casa-de-mama",
+  "party": [],
+  "arc": {
+    "chapter": {
+      "number": 1,
+      "title": "El drama"
+    },
+    "turns": {
+      "target": 6
+    },
+    "hook": "Son las once de la noche, la víspera del examen de la UNAM. Suena el teléfono de la casa: es tu papá, borracho, que acaba de chocar el coche y te pide que vayas por él antes de que llegue la patrulla.",
+    "objective": "Llegar mañana a tu examen de Medicina en la UNAM.",
+    "beats": [
+      "La llamada: Rogelio suplica, tu mamá está en el turno de noche, nadie más puede ir.",
+      "Si Emiliano se niega, el mundo lo arrastra con causas creíbles: la patrulla llega a la casa porque el coche está a nombre de su mamá, o Lucía llama llorando desde el hospital.",
+      "En el lugar del choque Rogelio está ileso y culpa a otro; cuando llega la patrulla, el coche, la botella y la historia apuntan a Emiliano.",
+      "Noche en la agencia del Ministerio Público con el agente Ramírez; el examen de la UNAM pasa mientras espera.",
+      "Sale justo a tiempo para el examen del IPN, sin dormir y con la cabeza en otro lado; el resultado de la UAM tampoco alcanza."
+    ],
+    "fixedOutcome": "Por salvar a su padre, Emiliano termina detenido toda la noche, pierde el examen de la UNAM, le va mal en los demás y entra a Comunicaciones y Electrónica en ESIME Zacatenco (piden 50 aciertos de 140). Nada de lo que haga lo evita; lo que decide cambia cómo lo vive, no a dónde llega. No reveles en este capítulo que Rogelio lo hizo a propósito.",
+    "endCard": {
+      "title": "Fin del capítulo 1: El drama",
+      "text": "ESIME Zacatenco, Comunicaciones y Electrónica. Cincuenta aciertos de ciento cuarenta. No era el plan."
+    }
+  }
+}

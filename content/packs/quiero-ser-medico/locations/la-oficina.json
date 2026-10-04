@@ -1,0 +1,18 @@
+{
+  "id": "la-oficina",
+  "name": "La oficina",
+  "description": "Un call center en Insurgentes donde Emiliano vende planes de telefonía que nadie quiere. Metas imposibles, un supervisor que grita y una diadema que aprieta.",
+  "newcomerView": "Cubículos grises, un pizarrón de metas en rojo y cuarenta voces repitiendo el mismo guion.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp",
+    "facultad-de-medicina",
+    "esime-zacatenco",
+    "el-departamento",
+    "farmacias-parecidas"
+  ],
+  "tags": [
+    "trabajo",
+    "rutina"
+  ]
+}
