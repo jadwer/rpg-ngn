@@ -342,7 +342,8 @@ export type TurnBlock = z.infer<typeof TurnBlock>
  * la mesa) y con que proveedor.
  */
 export const Illustration = z.strictObject({
-  reason: z.enum(['opening', 'location', 'moment']),
+  /** `climax` y `ending` vienen del reloj de la historia (docs/26, H3) y siempre se ilustran. */
+  reason: z.enum(['opening', 'location', 'moment', 'climax', 'ending']),
   /** Descripcion lista para el generador: momento, lugar, personajes y estilo. */
   prompt: z.string().min(1),
   /** Texto alternativo corto para quien no ve la imagen. */

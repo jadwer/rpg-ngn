@@ -41,6 +41,14 @@ describe('illustrationFor', () => {
     expect(illustrationFor({ pack, before: inn, after: mine, party, opening: false, moment: null })).toMatchObject({ reason: 'location', location: 'boca-de-la-mina' })
   })
 
+  it('el climax y el cierre del reloj siempre se ilustran y lo dicen en el motivo (docs/26, H3)', () => {
+    const inn = at(base, { zahira: 'posada', calder: 'posada' })
+    expect(illustrationFor({ pack, before: inn, after: inn, party, opening: false, moment: null, beat: 'climax' })?.reason).toBe('climax')
+    const ending = illustrationFor({ pack, before: inn, after: inn, party, opening: false, moment: 'La campana suena sola.', beat: 'ending' })
+    expect(ending?.reason).toBe('ending')
+    expect(ending?.alt).toBe('La campana suena sola.')
+  })
+
   it('el momento del GM manda y es el texto alternativo', () => {
     const inn = at(base, { zahira: 'posada', calder: 'posada' })
     const illustration = illustrationFor({ pack, before: inn, after: inn, party, opening: false, moment: 'Una figura de niebla gris se forma junto a la chimenea.' })

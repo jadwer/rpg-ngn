@@ -190,7 +190,9 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     return
   }
 
-  const illustration = illustrationFor({ pack, before: initial, after: state, party: session.party, opening, moment })
+  // El reloj marca dos momentos que siempre se ilustran: entrar al climax y el cierre.
+  const beat = clock?.phase === 'cierre' ? 'ending' : clock?.phase === 'climax' && clock.phaseStart ? 'climax' : null
+  const illustration = illustrationFor({ pack, before: initial, after: state, party: session.party, opening, moment, beat })
 
   yield {
     kind: 'result',

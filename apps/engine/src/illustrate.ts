@@ -28,6 +28,12 @@ export interface IllustrationInput {
   opening: boolean
   /** La frase del GM, si marco un momento. */
   moment: string | null
+  /**
+   * Momento del reloj de la historia que siempre lleva imagen (docs/26, H3):
+   * el primer turno del climax y el cierre. La API no les aplica el hueco
+   * entre imagenes.
+   */
+  beat?: 'climax' | 'ending' | null
 }
 
 /** Donde esta la mayor parte de la party; null si nadie tiene lugar. */
@@ -49,11 +55,12 @@ export function partyLocation(state: CampaignState, party: readonly string[]): s
 }
 
 export function illustrationFor(input: IllustrationInput): Illustration | null {
-  const { pack, before, after, party, opening, moment } = input
+  const { pack, before, after, party, opening, moment, beat = null } = input
   const location = partyLocation(after, party)
   const moved = location !== null && location !== partyLocation(before, party)
 
-  const reason: Illustration['reason'] | null = moment ? 'moment' : opening ? 'opening' : moved ? 'location' : null
+  // La apertura y los momentos del reloj mandan sobre el motivo: la API no les aplica el hueco entre imagenes.
+  const reason: Illustration['reason'] | null = opening ? 'opening' : beat ? beat : moment ? 'moment' : moved ? 'location' : null
   if (!reason) return null
 
   const place = location ? pack.locations.get(location) : undefined
