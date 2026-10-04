@@ -69,6 +69,24 @@ lo demuestra.
   jugador, one-shots cortos, y campañas de sesiones cortas, medias o largas
   configurables por mesa.
 
+## Estado (04-10, noche)
+
+| Bloque | Estado |
+|---|---|
+| H0 | Hecho y desplegado |
+| H1 | Hecho y desplegado; partida de prueba local: cerro en el turno 8 con 4 logros y 126 a 200 palabras por turno |
+| H2 | Apertura nueva hecha y desplegada; el A/B solo tiene a Claude (`gm/ab/apertura-2026-10-04.md`), falta GPT (sin clave local; Gabino lo deja para despues) |
+| H3 | Hecho y desplegado |
+| H4 | Hecho y desplegado |
+| H5 | Mundo escrito y desplegado (`content/packs/quiero-ser-medico`, sistema nuevo `drama-lite`); capitulos 1 y 2 jugados en local y cierran como se escribieron. Falta jugar el 3 por sus dos finales: la cuenta de Anthropic se quedo sin credito a media prueba |
+| H6, H7, H8, H9 | Hechos y desplegados (H9 sobre Atomo v0.4.1) |
+| AAB v25 | Compilando el 04-10 |
+
+Decisiones tomadas al implementar: el anfitrion ya no lee la proyeccion
+privada de otro jugador ni sus fichas por dentro (tambien juega); un
+susurro puede revelarle un secreto solo a ese personaje; el contador de
+turnos usa el presupuesto que calcula el engine (arco del mundo incluido).
+
 ## Orden y dependencias
 
 ```
