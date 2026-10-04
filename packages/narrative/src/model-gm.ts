@@ -402,10 +402,11 @@ export class ModelGMProvider implements GMProvider {
     }
 
     if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
-    // Quien tiene tirada pedida tira en vez de escribir: sin ideas para el, y
-    // siempre con la palabra (aunque el modelo lo olvidara en "addressed").
+    // Quien tiene tirada pedida tira, siempre con la palabra (aunque el modelo
+    // lo olvidara en "addressed"). Sus ideas se quedan: con el dado puede
+    // decir que intenta, y casi todos solo tiraban sin ideas (03-10).
     const requests = Object.values(interpreter.rollRequests)
-    const suggestions = Object.fromEntries(Object.entries(interpreter.suggestions).filter(([id]) => !interpreter.rollRequests[id]))
+    const suggestions = interpreter.suggestions
     if (Object.keys(suggestions).length) yield { kind: 'suggestions', byCharacter: suggestions }
     if (requests.length) yield { kind: 'rollRequests', requests }
     const addressed = interpreter.addressed ?? party

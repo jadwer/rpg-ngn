@@ -2928,6 +2928,9 @@ a.plain {
   color: var(--ink-dim, #9ca3af);
   font-size: 0.9rem;
 }
+.turn .roll-card .ideas {
+  flex-basis: 100%;
+}
 
 /* El dado con caras de la lamina: se mantiene presionado y frena sobre el numero. */
 .sprite-die {

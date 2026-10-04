@@ -271,6 +271,24 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
               <textarea className="textarea" rows={2} value={rollText} onChange={(e) => setRollText(e.target.value)} placeholder={t('turnPanel.rollActionPlaceholder')} maxLength={4000} disabled={busy || started} />
             </label>
           )}
+          {/* Ideas tambien con el dado: casi todos solo tiraban (03-10). Tocar una la copia a lo que intenta. */}
+          {!landed && !started && (shownIdeas.length > 0 || moreButton) ? (
+            <div className="ideas" role="group" aria-label={t('turnPanel.ideasParaTuPersonaje')}>
+              <span className="label">{t('turnPanel.ideas')}</span>
+              {shownIdeas.map((idea) => (
+                <button key={idea} type="button" className="idea" disabled={busy} onClick={() => setRollText(idea)}>
+                  {idea}
+                </button>
+              ))}
+              {moreButton ? (
+                <button type="button" className="idea more" disabled={busy || askingIdeas || !moreButton.enabled} onClick={() => void askMore()} title={moreButton.hint ?? undefined}>
+                  {askingIdeas ? <span className="spinner" aria-hidden /> : null}
+                  {moreButton.label}
+                </button>
+              ) : null}
+              {ideasError ? <span className="ideas-hint error">{ideasError}</span> : null}
+            </div>
+          ) : null}
           {rollError ? <span className="error">{rollError}</span> : null}
         </div>
       ) : null}

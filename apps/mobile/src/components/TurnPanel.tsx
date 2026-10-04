@@ -254,6 +254,22 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
               editable={!busy && !started}
               onFocus={() => onFocusInput?.()}
             />
+            {/* Ideas tambien con el dado, como la web (03-10). */}
+            {!started && (shownIdeas.length > 0 || moreButton) ? (
+              <View style={styles.ideas}>
+                {shownIdeas.map((idea) => (
+                  <Pressable key={idea} style={({ pressed }) => [styles.idea, pressed && styles.ideaPressed]} disabled={busy} onPress={() => setRollText(idea)} accessibilityRole="button">
+                    <Text style={styles.ideaText}>{idea}</Text>
+                  </Pressable>
+                ))}
+                {moreButton ? (
+                  <Pressable style={({ pressed }) => [styles.idea, styles.more, pressed && styles.ideaPressed, (!moreButton.enabled || askingIdeas) && styles.sendOff]} disabled={busy || askingIdeas || !moreButton.enabled} onPress={() => void askMore()} accessibilityRole="button">
+                    {askingIdeas ? <ActivityIndicator size="small" color={theme.colors.ink} /> : null}
+                    <Text style={styles.ideaText}>{moreButton.label}</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
           </View>
         )}
         </View>

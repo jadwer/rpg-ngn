@@ -60,9 +60,9 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
       kind: 'rollRequests',
       requests: [{ characterId: 'zahira', die: '1d20', kind: 'skill', skill: 'Percepción', reason: 'lo que hay grabado en la roca' }],
     })
-    // Quien tira va en addressed aunque el modelo lo olvidara, y sin ideas: su turno es soltar el dado.
+    // Quien tira va en addressed aunque el modelo lo olvidara, y conserva sus ideas para decir que intenta con el dado.
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder', 'zahira'] })
-    expect(outputs.find((o) => o.kind === 'suggestions')).toEqual({ kind: 'suggestions', byCharacter: { calder: ['Vigilo la entrada', 'Enciendo la lámpara'] } })
+    expect(outputs.find((o) => o.kind === 'suggestions')).toEqual({ kind: 'suggestions', byCharacter: { zahira: ['Me acerco', 'Espero'], calder: ['Vigilo la entrada', 'Enciendo la lámpara'] } })
     expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
   })
 
