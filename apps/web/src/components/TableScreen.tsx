@@ -14,6 +14,7 @@ import { useTts } from '../lib/useTts'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
 import { ChroniclePanel } from './ChroniclePanel'
+import { ShareConsentModal } from './ShareConsentModal'
 import { Drawer } from './Drawer'
 import { Panel } from './Panel'
 import { GameBar, type GamePanel } from './GameBar'
@@ -655,6 +656,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
+      {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       <header className="table-header hide-on-screen">
         <SystemMenu
           user={user}
