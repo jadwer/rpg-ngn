@@ -98,3 +98,20 @@ describe('arcos de autor', () => {
     expect(last.result.close).toEqual({ scope: 'story', endingId: 'medico', card: { title: 'FIN', text: 'Se titula y se queda con Mariana.' } })
   })
 })
+
+describe('lo privado al abrir la sesion (docs/26, H7)', () => {
+  it('cada jugador recibe en privado su meta, sin depender del modelo', async () => {
+    const pack = await twoChapters()
+    const opening = { ...request('001', 1), turn: { id: 't-1', number: 1, sessionId: '001', responses: [] } }
+    const transport = new Reply(narration)
+    const lines: ResolveLine[] = []
+    for await (const line of resolveTurn(opening, { loadPack: async () => pack, now: () => new Date('2026-10-04T12:02:00.000Z'), provider: new ModelGMProvider(transport, 'sk-test-arc-000000000000') })) lines.push(line)
+
+    const privateBlocks = lines.flatMap((l) => (l.kind === 'block' && l.block.type === 'narration' && l.block.to ? [l.block] : []))
+    expect(privateBlocks).toHaveLength(1)
+    expect(privateBlocks[0]!.to).toEqual(['zahira'])
+    expect(privateBlocks[0]!.text).toContain(pack.characters.get('zahira')!.goal)
+    const result = lines.find((l): l is Extract<ResolveLine, { kind: 'result' }> => l.kind === 'result')!
+    expect(result.events.some((e) => e.type === 'narration' && e.visibility?.layer === 'player')).toBe(true)
+  })
+})

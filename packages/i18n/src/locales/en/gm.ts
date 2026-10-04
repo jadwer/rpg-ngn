@@ -21,4 +21,6 @@ export const gm: Messages<typeof es> = {
   notedMany: 'The GM takes note of what {{names}} declare. The scene is still open and the table has the floor.',
   and: 'and',
   sessionStarts: 'The session starts at {{place}}.',
+  yourGoal: 'Only you know this: {{name}} is here for this: {{goal}}',
+  youKnow: 'And you know something the others don\'t: {{knows}}',
 }

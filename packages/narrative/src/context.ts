@@ -320,7 +320,9 @@ function memoryLayer(ctx: GMTurnContext, session: SessionRecord | undefined, bud
 
 function describeEntry(entry: NarrativeEntry): string {
   const label = entry.type === 'world_event' ? 'Mundo' : entry.type === 'scene_started' ? 'Escena' : entry.type === 'scene_closed' ? 'Cierre' : 'Narración'
-  return `${label}: ${clip(entry.text, 400)}`
+  // Un susurro (H7): el director recuerda que solo lo supo ese personaje.
+  const to = entry.to?.length ? ` [solo lo sabe: ${entry.to.join(', ')}]` : ''
+  return `${label}${to}: ${clip(entry.text, 400)}`
 }
 
 function describeEvent(event: CampaignEvent, pack: LoadedPack): string | null {

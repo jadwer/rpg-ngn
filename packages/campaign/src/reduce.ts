@@ -319,9 +319,12 @@ function applyWitnesses(state: CampaignState, event: CampaignEvent): CampaignSta
  */
 function appendLog(state: CampaignState, event: CampaignEvent, text: string): CampaignState {
   if (event.visibility?.layer === 'gm') return state
+  // Capa de jugador (un susurro, docs/26 H7): la entrada recuerda a quien se le dijo.
+  const to = event.visibility?.layer === 'player' ? (event.visibility.witnesses ?? []).filter((ref) => refKind(ref) === 'character').map((ref) => refId(ref)) : []
+  const entry = { seq: event.seq, event: event.id, type: event.type, text, ...(to.length ? { to } : {}) }
   return {
     ...state,
-    narrative: { ...state.narrative, log: [...state.narrative.log, { seq: event.seq, event: event.id, type: event.type, text }] },
+    narrative: { ...state.narrative, log: [...state.narrative.log, entry] },
   }
 }
 

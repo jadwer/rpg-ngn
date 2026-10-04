@@ -105,6 +105,22 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         },
       }
 
+      // Cada jugador recibe en privado por que esta aqui (docs/26, H7): su
+      // meta y lo que solo el sabe. No depende de que el modelo lo susurre.
+      const tr = tFor(request.language ?? 'es')
+      for (const id of session.party) {
+        const character = pack.characters.get(id)
+        if (!character) continue
+        const knows = character.private?.knows ?? []
+        const text = [tr('gm.yourGoal', { name: character.name, goal: character.goal }), ...(knows.length ? [tr('gm.youKnow', { knows: knows.join(' ') })] : [])].join(' ')
+        yield { kind: 'block', block: { type: 'narration', text, to: [id] } }
+        const parsed = seal({ type: 'narration', payload: { text }, visibility: { layer: 'player', witnesses: [`character:${id}`] } })
+        if (parsed.success) {
+          state = applyEvent(state, parsed.data, ruleset, secrets)
+          events.push(parsed.data)
+        }
+      }
+
       // Y se coloca a la party donde el pack dice que arranca la sesion. Sin
       // esto nadie tiene ubicacion hasta que el GM mueva a alguien, y el mapa
       // de la mesa sale vacio de gente durante toda la primera escena.

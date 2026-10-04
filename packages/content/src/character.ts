@@ -78,6 +78,12 @@ export const Character = z.strictObject({
   skills: z.array(z.string().min(1)).min(1),
   roles: z.array(z.string().min(1)).min(1),
   goal: z.string().min(1),
+  /**
+   * Lo que solo este personaje sabe al empezar (docs/26, H7): su jugador lo
+   * recibe en privado al abrir la sesion, junto con su meta. Es el "por que
+   * existe" de cada jugador en una historia de grupo.
+   */
+  private: z.strictObject({ knows: z.array(z.string().min(1)).min(1) }).optional(),
   /** A quien le debe lealtad; lo leen los rulesets de intriga. */
   faction: KebabId.optional(),
   /** Posicion en la jerarquia, en palabras del setting. */

@@ -19,4 +19,6 @@ export const gm = {
   notedMany: 'El GM toma nota de lo que {{names}} declaran. La escena sigue abierta y la mesa tiene la palabra.',
   and: 'y',
   sessionStarts: 'La sesión arranca en {{place}}.',
+  yourGoal: 'Solo tú lo sabes: {{name}} está aquí por esto: {{goal}}',
+  youKnow: 'Y sabes algo que los demás no: {{knows}}',
 }

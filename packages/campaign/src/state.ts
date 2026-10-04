@@ -80,6 +80,8 @@ export interface NarrativeEntry {
   event: string
   type: string
   text: string
+  /** Solo lo supieron estos personajes (un susurro del director, docs/26 H7); sin el, toda la mesa. */
+  to?: string[]
 }
 
 export interface NarrativeState {

@@ -258,6 +258,8 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
   // Reloj de la historia (docs/26, H1): un logro por turno y el cierre de la sesion.
   z.object({ kind: z.literal('milestone'), title: z.string() }),
+  // Lo privado (docs/26, H7): lo que solo un personaje percibe, sabe o recuerda.
+  z.object({ kind: z.literal('whisper'), characterId: z.string(), text: z.string() }),
   z.object({ kind: z.literal('close'), cliffhanger: z.string().optional(), ending: z.string().optional() }),
   // `rollKind` y no `kind`: la clave `kind` ya es la de la linea.
   z.object({
@@ -627,6 +629,8 @@ class LineInterpreter {
   defaultEnding: string | null = null
   /** Ya hubo logro este turno: uno como maximo. */
   private milestoned = false
+  /** Personajes que ya recibieron su susurro este turno: uno por personaje. */
+  private whispered = new Set<string>()
   /** Ideas de accion por personaje (E10b). */
   suggestions: Record<string, string[]> = {}
   private pending: { text: string; depth: number } | null = null
@@ -848,6 +852,36 @@ class LineInterpreter {
         if (cut) return
         this.milestoned = true
         yield { kind: 'block', block: { type: 'milestone', title } }
+        return
+      }
+      case 'whisper': {
+        // Solo para ese personaje: el bloque lleva `to`, el evento va en la
+        // capa del jugador y el lint lo revisa contra el, no contra la mesa.
+        const id = refId(line.data.characterId)
+        if (!this.party.includes(id) || this.whispered.has(id)) {
+          this.ignore()
+          return
+        }
+        const text = clipWords(line.data.text.trim().replace(/\s+/g, ' '), 420)
+        if (!text) return
+        // Un susurro puede revelarle un secreto solo a ese personaje: el
+        // secreto queda revelado para el y nadie mas (el lint no lo corta).
+        const revealed: string[] = []
+        if (this.knowledge) {
+          const findings = lintText(text, this.knowledge, this.ctx.pack, [id])
+          for (const finding of findings) {
+            if (finding.level === 'error' && finding.secretId && this.ctx.pack.secrets.has(finding.secretId)) revealed.push(finding.secretId)
+            else yield { kind: 'lint', finding }
+          }
+          for (const secretId of revealed) markRevealed(this.knowledge, secretId, [id])
+        }
+        for (const secretId of new Set(revealed)) {
+          yield { kind: 'event', event: { type: 'secret_revealed', payload: { secretId }, visibility: { layer: 'player', witnesses: [`character:${id}`] } } }
+        }
+        this.whispered.add(id)
+        this.blocks++
+        yield { kind: 'block', block: { type: 'narration', text, to: [id] } }
+        yield { kind: 'event', event: { type: 'narration', payload: { text }, visibility: { layer: 'player', witnesses: [`character:${id}`] } } }
         return
       }
       case 'close': {

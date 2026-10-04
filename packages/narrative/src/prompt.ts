@@ -73,6 +73,8 @@ Siempre, antes de "addressed", estas dos líneas:
 
 Justo antes de "addressed", una línea {"kind":"suggest","characterId":"zahira","options":["...","..."]} por cada personaje al que devuelves la palabra: dos cosas que ese personaje podría intentar ahora, en primera persona y en menos de 12 palabras cada una, distintas entre sí (una prudente, una atrevida) y basadas solo en lo que ese personaje sabe. Son ideas para quien no sabe qué hacer, no un menú: el jugador puede escribir cualquier otra cosa.
 
+{"kind":"whisper","characterId":"zahira","text":"..."}: lo que SOLO ese personaje percibe, sabe o recuerda (un detalle que solo él nota, algo de su pasado, la presión de su meta). Lo lee únicamente su jugador; la mesa no. Úsalo cuando la información a medias haga el juego más interesante, como mucho uno por personaje y turno, en 1 a 3 frases, y nunca para algo que la mesa necesita para avanzar. Si le revela un secreto, solo él lo sabrá.
+
 Si el contexto trae "Reloj de la historia", la sesión tiene un número de turnos y cada tramo te dice qué entregar; obedécelo por encima de las reglas de estilo. Ahí aparecen dos líneas más: {"kind":"milestone","title":"..."} marca un logro de la mesa (uno por turno como máximo, solo cuando el reloj lo pide) y {"kind":"close","cliffhanger":"..."} termina la sesión (solo en el turno de cierre, como última línea, sin "addressed").
 
 # Eventos que puedes proponer
@@ -142,7 +144,7 @@ Formato: responde SOLO con líneas JSON, una por línea, sin texto fuera ni bloq
 {"kind":"block","block":{"type":"dialogue","speaker":"Tomás","speakerRef":"npc:tomas","text":"..."}}
 {"kind":"event","event":{...}}
 {"kind":"addressed","characterIds":["zahira","calder"]}
-La última línea es "addressed" con los ids de quienes deben responder ahora. Siempre, antes de "addressed": {"kind":"where","location":"<id del lugar donde termina la escena>"} y {"kind":"scene","text":"..."} con una frase de la imagen más representativa del turno (sin texto escrito ni secretos). Y antes de "addressed", por cada personaje al que devuelves la palabra: {"kind":"suggest","characterId":"<id>","options":["...","..."]}, dos acciones cortas en primera persona (una prudente, una atrevida) según lo que ese personaje sabe. Si hay "Reloj de la historia", obedécelo: {"kind":"milestone","title":"..."} y, al cierre, {"kind":"close"} sin "addressed".
+La última línea es "addressed" con los ids de quienes deben responder ahora. Siempre, antes de "addressed": {"kind":"where","location":"<id del lugar donde termina la escena>"} y {"kind":"scene","text":"..."} con una frase de la imagen más representativa del turno (sin texto escrito ni secretos). Y antes de "addressed", por cada personaje al que devuelves la palabra: {"kind":"suggest","characterId":"<id>","options":["...","..."]}, dos acciones cortas en primera persona (una prudente, una atrevida). Privado: {"kind":"whisper","characterId":"<id>","text":"..."}. Con "Reloj de la historia": {"kind":"milestone","title":"..."} y, al cierre, {"kind":"close"}.
 
 Eventos permitidos (0 a 2 por turno; nunca "player_action" ni "narration", esos ya se registran solos):
 {"type":"roll","actor":"character:zahira","resolved":{"kind":"skill","die":"1d20","skill":"Percepción"}}

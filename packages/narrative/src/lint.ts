@@ -38,7 +38,8 @@ export function buildKnowledgeView(ctx: GMTurnContext, party: readonly string[])
   const knownRefs = new Set<string>()
 
   for (const response of ctx.turn.responses) heardParts.push(response.text)
-  for (const entry of state.narrative.log) heardParts.push(entry.text)
+  // Un susurro (H7) no lo oyo la mesa: no cuenta como dicho.
+  for (const entry of state.narrative.log) if (!entry.to) heardParts.push(entry.text)
   for (const id of Object.keys(state.world.npcs)) knownRefs.add(`npc:${id}`)
 
   // Datos publicos de las sesiones hasta la actual: lo que un jugador puede leer en la ficha de sesion.
@@ -84,12 +85,22 @@ function hasWord(text: string, name: string): boolean {
   return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`).test(text)
 }
 
-/** Marca el secreto como revelado a toda la party (un `secret_revealed` de este turno). */
-export function markRevealed(view: KnowledgeView, secretId: string): void {
-  view.secrets.set(secretId, new Set(view.party))
+/** Marca el secreto como revelado (un `secret_revealed` de este turno): a toda la party, o solo a quien se le susurro. */
+export function markRevealed(view: KnowledgeView, secretId: string, to?: readonly string[]): void {
+  if (!to) {
+    view.secrets.set(secretId, new Set(view.party))
+    return
+  }
+  view.secrets.set(secretId, new Set([...(view.secrets.get(secretId) ?? []), ...to]))
 }
 
-export function lintText(text: string, view: KnowledgeView, pack: LoadedPack): LintFinding[] {
+/**
+ * Hallazgos de un texto que va a leer `audience` (toda la party si no se
+ * dice). Un susurro (H7) solo se revisa contra quien lo recibe: puede
+ * contarle a un personaje lo que solo el sabe.
+ */
+export function lintText(text: string, view: KnowledgeView, pack: LoadedPack, audience?: readonly string[]): LintFinding[] {
+  const readers = audience ? view.party.filter((id) => audience.includes(id)) : view.party
   const findings: LintFinding[] = []
   const folded = fold(text)
 
@@ -98,7 +109,7 @@ export function lintText(text: string, view: KnowledgeView, pack: LoadedPack): L
     const marker = secret.keywords.find((k) => folded.includes(fold(k)) && !view.heard.includes(fold(k)))
     if (!marker) continue
     const knows = view.secrets.get(secret.id) ?? new Set<string>()
-    const receivers = view.party.filter((id) => !knows.has(id))
+    const receivers = readers.filter((id) => !knows.has(id))
     if (receivers.length === 0) continue
     findings.push({
       level: 'error',
@@ -120,7 +131,7 @@ export function lintText(text: string, view: KnowledgeView, pack: LoadedPack): L
     if (hasWord(view.heard, name)) continue
     const mentioned = hasWord(folded, name) ? entity.name : folded.includes(entity.ref) ? entity.ref : null
     if (!mentioned) continue
-    findings.push({ level: 'warning', entity: entity.ref, marker: mentioned, receivers: [...view.party], message: `nombra a ${entity.name} (${entity.ref}), que la mesa no ha presenciado` })
+    findings.push({ level: 'warning', entity: entity.ref, marker: mentioned, receivers: [...readers], message: `nombra a ${entity.name} (${entity.ref}), que la mesa no ha presenciado` })
   }
 
   return findings

@@ -256,12 +256,14 @@ export type LintFinding = z.infer<typeof LintFinding>
 
 /** Bloques tipados de un turno (docs/09): lo que el jugador ve y oye. */
 export const TurnBlock = z.discriminatedUnion('type', [
-  z.strictObject({ type: z.literal('narration'), text: z.string().min(1) }),
+  /** `to`: solo para estos personajes (un susurro del director, docs/26 H7); sin el, toda la mesa. */
+  z.strictObject({ type: z.literal('narration'), text: z.string().min(1), to: z.array(KebabId).optional() }),
   z.strictObject({
     type: z.literal('dialogue'),
     speaker: z.string().min(1),
     speakerRef: z.string().nullable(),
     text: z.string().min(1),
+    to: z.array(KebabId).optional(),
   }),
   z.strictObject({
     type: z.literal('roll'),
