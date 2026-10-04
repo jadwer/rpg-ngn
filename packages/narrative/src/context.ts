@@ -402,13 +402,15 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
   if (turn.responses.length === 0) {
     lines.push(turn.number === 1
       ? [
-          'APERTURA DE LA SESIÓN. Nadie ha actuado todavía: este turno es tuyo entero y es la primera impresión de la mesa.',
-          'Presenta la escena con fuerza, en 3 a 5 bloques de narración: dónde están, qué acaba de pasar, qué se huele y se oye. Sitúa a CADA personaje presente por su nombre con un detalle propio (algo que ve, siente o lleva encima), sin decidir nada por ellos.',
-          'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay NPCs en escena, que uno hable.',
+          'APERTURA DE LA SESIÓN. Nadie ha actuado todavía: este turno es tuyo entero y es la primera impresión de la mesa. Si arranca flojo, la mesa se va.',
+          'Empieza en plena acción: el PRIMER bloque es un incidente que está ocurriendo ahora y exige decidir (un grito, un cuerpo, una acusación, alguien que llega con prisa), no una descripción del lugar ni del clima. Tres o cuatro bloques breves en total.',
+          'Cada personaje presente entra en UNA frase atada al incidente: qué le toca a él o por qué le importa. Nada de retratos ni repasos de su ficha, y sin decidir nada por ellos.',
+          'Di qué está en juego en una frase, dentro de la ficción: qué se pierde si nadie actúa, y cuándo.',
+          'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay un NPC en escena, que hable y que presione.',
           ...(previous
             ? ['Antes de todo, en la PRIMERA línea, el resumen de lo que la mesa vivió en la sesión anterior: {"kind":"recap","text":"..."} con 3 a 5 frases en pasado, en orden, desde la Crónica y el cliffhanger. Solo lo que la mesa sabe, sin secretos ni lo que no vieron. Es el "Anteriormente..." que leen al volver; no lo repitas en la narración.']
             : []),
-          'No pidas tiradas todavía y no propongas eventos salvo un world_event si hace falta. Termina con una situación abierta y una pregunta directa a toda la mesa, y devuelve la palabra a todos ("addressed" con toda la party).',
+          'No pidas tiradas todavía y no propongas eventos salvo un world_event si hace falta. Termina con un dilema con prisa: dos caminos concretos y un plazo (de la forma "¿hacen esto o aquello antes de que pase tal cosa?"), no con un "¿qué hacen?" a secas, y devuelve la palabra a todos ("addressed" con toda la party).',
           ...(party.length === 1
             ? ['La mesa es de UNA sola persona. Háblale de tú, en singular. Si el briefing o el pack hablan de un grupo ("ustedes", "llevan dos jornadas juntos"), adáptalo a quien llega sola o solo: nunca le hables como a varios ni le atribuyas compañeros que no están en la mesa.']
             : []),

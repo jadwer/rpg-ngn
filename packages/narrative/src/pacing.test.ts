@@ -90,3 +90,17 @@ describe('logros', () => {
     expect(title).not.toMatch(/ …$/)
   })
 })
+
+describe('apertura con gancho (docs/26, H2)', () => {
+  it('pide un incidente en el primer bloque, una linea por personaje, lo que esta en juego y un dilema con plazo', async () => {
+    const base = await openSession003()
+    const transport = new FakeTransport('{"kind":"block","block":{"type":"narration","text":"Un grito corta la noche."}}')
+    await collect(new ModelGMProvider(transport, KEY).narrate(contextFor(base, turn(1, []), { notes: { pacing: corta } })))
+    const user = transport.prompts[0]!.user
+    expect(user).toContain('el PRIMER bloque es un incidente')
+    expect(user).toContain('UNA frase atada al incidente')
+    expect(user).toContain('qué está en juego')
+    expect(user).toContain('dilema con prisa')
+    expect(user).not.toContain('con un detalle propio')
+  })
+})
