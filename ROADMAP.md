@@ -62,7 +62,7 @@ Lo planeo Fable; lo implementa Opus, bloque por bloque.
 - [x] **H6. Estrellas y reseñas** (04-10, API `55c5f12`): la pantalla de fin pide siempre la valoracion; promedio bayesiano en Explorar; el texto de las reseñas, privado hasta tener moderacion
 - [x] **H7. Lo privado** (04-10, motor `9cd3da4`, API `faf3faa`; falta el AAB v25): susurros del director a un solo jugador, objetivo personal garantizado al abrir la sesion, la API filtra por jugador (ni el anfitrion ve lo ajeno). Cierra de paso la deuda de informacion asimetrica (S14 y E1 del VAM del 19-09). Al cerrar, AAB v25 (antes del 14-10)
 - [x] **H8. Formatos en la mesa y en Explorar** (04-10, API `27475d5`): formato, un jugador o grupo, largo de sesion, generos y estilo como datos del mundo con vocabulario controlado; el largo de sesion se elige al crear la mesa; filtros en Explorar, web y app
-- [ ] **H9. Catalogo sobre atomo/taxonomy**: cuando Atomo avise con la etiqueta; no bloquea lo anterior
+- [x] **H9. Catalogo sobre atomo/taxonomy** (04-10, API `57f5b44` y `bcd810d`, platform v0.4.1; `catalog:taxonomy` corre en cada despliegue): cuando Atomo avise con la etiqueta; no bloquea lo anterior
 
 Metas medibles (misma consulta del 04-10 sobre `turns`, `turn_blocks` y
 `scene_images`): hasta 200 palabras del director por turno (eran 350), cierre
