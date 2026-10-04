@@ -1,4 +1,4 @@
-import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ImageGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { t } from '@rpg-ngn/i18n'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
@@ -35,6 +35,10 @@ export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = 
             return <System key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
           case 'image':
             return <Scene key={group.id} group={group} assetBase={assetBase} />
+          case 'milestone':
+            return <Milestone key={group.id} group={group} />
+          case 'ending':
+            return <EndingCard key={group.id} group={group} />
         }
       })}
     </View>
@@ -157,7 +161,39 @@ function Scene({ group, assetBase }: { group: ImageGroup; assetBase: string }) {
   )
 }
 
+/** Un logro de la sesion (docs/26, H1): una banda dorada en la historia. */
+function Milestone({ group }: { group: MilestoneGroup }) {
+  return (
+    <View style={styles.milestone} accessibilityRole="text">
+      <Text style={styles.milestoneStar}>✦</Text>
+      <View style={styles.milestoneBody}>
+        <Text style={styles.milestoneKind}>{t('ending.milestone')}</Text>
+        <Text style={styles.milestoneTitle}>{group.block.title}</Text>
+      </View>
+    </View>
+  )
+}
+
+/** El fin de una sesion dentro de la historia; la pantalla completa la pinta `EndingModal`. */
+function EndingCard({ group }: { group: EndingGroup }) {
+  const { block } = group
+  return (
+    <View style={styles.endingCard}>
+      <Text style={styles.endingTitle}>{endingTitle(block)}</Text>
+      {block.cliffhanger ? <Text style={styles.endingNext}>{`${t('ending.toBeContinued')} ${block.cliffhanger}`}</Text> : null}
+    </View>
+  )
+}
+
 const styles = StyleSheet.create({
+  milestone: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.gold, backgroundColor: 'rgba(212, 175, 55, 0.12)' },
+  milestoneStar: { fontSize: 18, color: theme.colors.goldBright },
+  milestoneBody: { flex: 1, gap: 2 },
+  milestoneKind: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: theme.colors.goldBright },
+  milestoneTitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink },
+  endingCard: { alignItems: 'center', gap: 6, paddingVertical: 14, borderTopWidth: 1, borderBottomWidth: 1, borderColor: theme.colors.gold },
+  endingTitle: { fontFamily: theme.fonts.display, fontSize: 20, letterSpacing: 1.5, color: theme.colors.goldBright, textAlign: 'center' },
+  endingNext: { fontFamily: theme.fonts.serifItalic, fontSize: 16, color: theme.colors.ink, textAlign: 'center' },
   paragraphLarge: { fontSize: 24, lineHeight: 35 },
   lineTextLarge: { fontSize: 22, lineHeight: 31 },
   scene: { marginVertical: 10, borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.panel },

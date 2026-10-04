@@ -1,0 +1,37 @@
+import type { Messages } from '../../types.js'
+import type { ending as es } from '../es/ending.js'
+
+/** Story clock and ending screen (docs/26, H1). */
+export const ending: Messages<typeof es> = {
+  turnOf: 'Turn {{turn}} of {{total}}',
+  lastTurn: 'Last turn',
+  sessionEnd: 'End of session {{n}}',
+  sessionEndPlain: 'End of session',
+  chapterEnd: 'End of chapter {{n}}',
+  chapterEndPlain: 'End of chapter',
+  theEnd: 'THE END',
+  achievements: 'What you achieved',
+  milestone: 'Milestone',
+  milestoneSpoken: 'Milestone: {{title}}',
+  toBeContinued: 'To be continued…',
+  rateTitle: 'Did you enjoy this adventure?',
+  rateText: 'If you want it to continue or get a part 2, give it 5 stars and don\'t forget to leave your review.',
+  keepPlaying: 'Keep playing',
+  waitingHost: 'Waiting for the host to start the next session.',
+  readStory: 'Read the story',
+  close: 'Close',
+  extend: 'One more turn',
+  extendHint: 'Extends the session by two turns (up to three times).',
+  wrap: 'Ask for the ending',
+  wrapHint: 'The next turn will be the last: the director resolves and closes.',
+  wrapAsked: 'You asked for the ending: the next turn closes the session.',
+  pacingFailed: 'Could not change the session length.',
+  lengthTitle: 'Session length',
+  lengthHint: 'The director keeps the pace and closes the session on the last turn.',
+  length: {
+    corta: 'Short (8 turns, 30 to 40 min)',
+    media: 'Medium (14 turns, 1 h)',
+    larga: 'Long (22 turns, 2 h)',
+    libre: 'Free (no limit)',
+  },
+}

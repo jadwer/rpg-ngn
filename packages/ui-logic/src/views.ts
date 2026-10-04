@@ -1,4 +1,4 @@
-import type { DialogueBlock, ImageBlock, NarrationBlock, RollBlock, SystemBlock, TurnBlock } from './blocks.js'
+import type { DialogueBlock, EndingBlock, ImageBlock, MilestoneBlock, NarrationBlock, RollBlock, SystemBlock, TurnBlock } from './blocks.js'
 import { splitSentences } from './narration.js'
 
 /**
@@ -43,7 +43,19 @@ export interface ImageGroup {
   block: ImageBlock
 }
 
-export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup | ImageGroup
+export interface MilestoneGroup {
+  kind: 'milestone'
+  id: string
+  block: MilestoneBlock
+}
+
+export interface EndingGroup {
+  kind: 'ending'
+  id: string
+  block: EndingBlock
+}
+
+export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup | ImageGroup | MilestoneGroup | EndingGroup
 
 /**
  * Quita los avisos tecnicos que solo el anfitrion puede accionar (una linea
@@ -83,6 +95,12 @@ export function groupBlocks(blocks: readonly TurnBlock[], mode: ViewMode): ViewG
       case 'image':
         groups.push({ kind: 'image', id: `image:${block.id}`, block })
         break
+      case 'milestone':
+        groups.push({ kind: 'milestone', id: `milestone:${block.id}`, block })
+        break
+      case 'ending':
+        groups.push({ kind: 'ending', id: `ending:${block.id}`, block })
+        break
     }
   }
   return groups
@@ -105,6 +123,8 @@ export function groupBlockIds(group: ViewGroup): string[] {
     case 'roll':
     case 'system':
     case 'image':
+    case 'milestone':
+    case 'ending':
       return [group.block.id]
   }
 }

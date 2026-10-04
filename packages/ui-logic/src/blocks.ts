@@ -1,3 +1,4 @@
+import { t } from '@rpg-ngn/i18n'
 /**
  * Bloques tipados de un turno (docs/09, "Lectura"). Un turno del GM, o una
  * sesion offline construida desde el pack, es un array de bloques; cada
@@ -76,7 +77,28 @@ export interface ImageBlock {
   caption: string | null
 }
 
-export type TurnBlock = NarrationBlock | DialogueBlock | RollBlock | SystemBlock | ImageBlock
+/** Un logro de la sesion (docs/26, H1): lo que la mesa acaba de conseguir. */
+export interface MilestoneBlock {
+  kind: 'milestone'
+  id: string
+  title: string
+}
+
+/** Fin de una sesion, capitulo o historia (docs/26, H1): la pantalla de fin sale de aqui. */
+export interface EndingBlock {
+  kind: 'ending'
+  id: string
+  scope: 'session' | 'chapter' | 'story'
+  /** Codigo de la sesion que cierra ("003"). */
+  session: string
+  title: string | null
+  text: string | null
+  achievements: string[]
+  cliffhanger: string | null
+  closedBy: 'director' | 'host'
+}
+
+export type TurnBlock = NarrationBlock | DialogueBlock | RollBlock | SystemBlock | ImageBlock | MilestoneBlock | EndingBlock
 export type BlockKind = TurnBlock['kind']
 
 export function narration(id: string, text: string): NarrationBlock {
@@ -121,7 +143,23 @@ export function speechTextOf(block: TurnBlock): string {
     case 'image':
       // Una imagen no se lee en voz alta: la narracion ya conto la escena.
       return ''
+    case 'milestone':
+      return t('ending.milestoneSpoken', { title: block.title })
+    case 'ending':
+      // El fin lo enseña la pantalla completa; la voz no lo repite.
+      return ''
   }
+}
+
+/** El fin de sesion mas reciente, si es el ultimo bloque que importa: la pantalla de fin sale de aqui. */
+export function latestEnding(blocks: readonly TurnBlock[]): EndingBlock | null {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i]
+    if (block?.kind === 'ending') return block
+    // Si despues del fin ya hay historia nueva (otra sesion), el fin ya paso.
+    if (block && (block.kind === 'narration' || block.kind === 'dialogue')) return null
+  }
+  return null
 }
 
 /**

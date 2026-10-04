@@ -5758,3 +5758,155 @@ a {
   padding: 4px 10px;
   font-size: 0.8rem;
 }
+
+/* Reloj de la historia (docs/26, H1): logros en la historia y pantalla de fin. */
+.block.milestone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0.04));
+  animation: milestone-in 0.6s ease-out;
+}
+.block.milestone .milestone-star {
+  color: var(--gold-bright);
+  font-size: 1.2rem;
+}
+.block.milestone .milestone-kind {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+.block.milestone .milestone-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+@keyframes milestone-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.block.ending-card {
+  margin: 18px 0;
+  padding: 18px;
+  text-align: center;
+  border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+}
+.block.ending-card .ending-card-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+.block.ending-card p {
+  margin: 8px 0 0;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+.block.ending-card .ending-card-next {
+  font-style: italic;
+}
+.ending-overlay {
+  z-index: 70;
+  animation: ending-fade 0.8s ease-out;
+}
+.ending-panel {
+  border-color: var(--gold);
+  box-shadow: 0 20px 80px rgba(212, 175, 55, 0.22);
+  text-align: center;
+}
+.ending-panel .ending-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  letter-spacing: 0.1em;
+  color: var(--gold-bright);
+  animation: ending-title 1.2s ease-out;
+}
+.ending-panel h3 {
+  margin: 18px 0 8px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ending-panel .ending-achievements ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ending-panel .ending-achievements li {
+  margin: 6px 0;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  color: var(--ink);
+}
+.ending-panel .ending-achievements li span {
+  color: var(--gold-bright);
+}
+.ending-panel .ending-next {
+  margin-top: 16px;
+  font-style: italic;
+}
+.ending-panel .ending-rate {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.ending-panel .ending-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+@keyframes ending-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ending-title {
+  from {
+    opacity: 0;
+    letter-spacing: 0.5em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.1em;
+  }
+}
+.cronica-logro {
+  margin: 10px 0;
+  font-family: var(--font-serif);
+  color: var(--gold-bright);
+}
+.cronica-fin {
+  margin: 18px 0 6px;
+  padding: 12px 0;
+  text-align: center;
+  border-top: 1px solid var(--gold-dim);
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+.cronica-fin p {
+  margin: 6px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--ink);
+}

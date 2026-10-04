@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -26,6 +26,7 @@ import { PersonaPanel } from './PersonaPanel'
 import { PlayersPanel } from './PlayersPanel'
 import { RemoteCharacterPicker } from './RemoteCharacterPicker'
 import { SheetsPanel } from './SheetsPanel'
+import { EndingOverlay } from './EndingOverlay'
 import { RecapOverlay } from './RecapOverlay'
 import { ReportProblem } from './ReportProblem'
 import { SystemMenu } from './SystemMenu'
@@ -601,6 +602,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), t('play.openSessionFailed'))
   }
+  // Reloj de la historia (docs/26, H1): el anfitrion alarga la sesion o pide el final.
+  const extendSession = () => {
+    const session = snapshot?.session
+    if (session) void act(() => client.extendSession(session.id).then(() => undefined), t('ending.pacingFailed'))
+  }
+  const wrapSession = () => {
+    const session = snapshot?.session
+    if (session) void act(() => client.wrapSession(session.id).then(() => undefined), t('ending.pacingFailed'))
+  }
   const closeSession = (cliffhanger: string | null) => {
     const session = snapshot?.session
     if (!session) return
@@ -656,6 +666,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
+      <EndingOverlay tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       <header className="table-header hide-on-screen">
         <SystemMenu
@@ -701,7 +712,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             <div className="scene-caption hide-on-screen">
               {turn ? (
                 <span className="pill">
-                  <b>{t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
+                  <b>{pacingLine(snapshot?.pacing) ?? t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
                 </span>
               ) : null}
             </div>
@@ -723,7 +734,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             <section className="scene-hero hide-on-screen" style={heroStyle} aria-label={t('tableScreen.escena')}>
               {turn ? (
                 <span className="pill">
-                  <b>{t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
+                  <b>{pacingLine(snapshot?.pacing) ?? t('tableScreen.turnoNumero', { number: turn.number })}</b> {progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}
                 </span>
               ) : null}
               <div className="kicker">{packName ?? table.name}</div>
@@ -810,7 +821,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         {panel === 'host' && isHost && !screen ? (
           <Drawer title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)} className="host-drawer">
-            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Drawer>
         ) : null}
         {panel === 'more' && !screen ? (

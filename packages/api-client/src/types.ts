@@ -91,6 +91,9 @@ export type ChronicleBlock =
   | { type: 'dialogue'; speaker: string; text: string; audioUrl?: string }
   | { type: 'roll'; text: string; actor: string; die: string; result: number }
   | { type: 'image'; url: string; alt: string }
+  /** Logros y fin de sesion (docs/26, H1). */
+  | { type: 'milestone'; title: string }
+  | { type: 'ending'; scope: 'session' | 'chapter' | 'story'; session: string; title?: string; text?: string; achievements: string[]; cliffhanger?: string }
 
 /** La cronica publica de una mesa, tal como la ve quien abre el enlace. */
 export interface Chronicle {
@@ -241,6 +244,8 @@ export interface TableState {
   ideas: { more: 'free' | 'unlocked' | 'locked' | 'exhausted' | 'none'; used: number }
   /** Segundos de cuenta atras antes de narrar que eligio el anfitrion (0, 3, 5, 10 o 15). */
   countdown?: number
+  /** Reloj de la historia (docs/26, H1): "Turno 5 de 8". Null si la mesa juega libre; ausente en una API vieja. */
+  pacing?: { length: 'corta' | 'media' | 'larga' | 'libre'; turn: number; total: number; wrap: boolean } | null
   /** Para el siguiente `after`: el ultimo bloque leido, tambien si era solo para el anfitrion. */
   lastBlockId: number
   /** La pagina vino llena: hay mas bloques por pedir. */

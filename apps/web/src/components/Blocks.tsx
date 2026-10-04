@@ -1,7 +1,7 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { facesOf, keptFace, proseExcerpt, type DialogueGroup, type ImageGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
 
@@ -31,9 +31,42 @@ export function Blocks({ groups, currentBlockId, onPressBlock }: Props) {
             return <System key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
           case 'image':
             return <Scene key={group.id} group={group} />
+          case 'milestone':
+            return <Milestone key={group.id} group={group} />
+          case 'ending':
+            return <EndingCard key={group.id} group={group} />
         }
       })}
     </>
+  )
+}
+
+/** Un logro de la sesion (docs/26, H1): una banda dorada en la historia. */
+function Milestone({ group }: { group: MilestoneGroup }) {
+  return (
+    <div data-block={group.block.id} className="block milestone" role="status">
+      <span className="milestone-star" aria-hidden="true">
+        ✦
+      </span>
+      <span className="milestone-kind">{t('ending.milestone')}</span>
+      <span className="milestone-title">{group.block.title}</span>
+    </div>
+  )
+}
+
+/** El fin de una sesion dentro de la historia; la pantalla completa la pinta `EndingOverlay`. */
+function EndingCard({ group }: { group: EndingGroup }) {
+  const { block } = group
+  return (
+    <div data-block={block.id} className="block ending-card">
+      <div className="ending-card-title">{endingTitle(block)}</div>
+      {block.text ? <p>{block.text}</p> : null}
+      {block.cliffhanger ? (
+        <p className="ending-card-next">
+          {t('ending.toBeContinued')} {block.cliffhanger}
+        </p>
+      ) : null}
+    </div>
   )
 }
 

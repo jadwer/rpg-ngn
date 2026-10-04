@@ -1,6 +1,6 @@
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
 import { t, type Language } from '@rpg-ngn/i18n'
-import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, SESSION_LENGTHS, sessionLengthLabel, sessionLengthOf, withCountdown, withDiceMode, withSceneImages, withSessionLength, type DiceMode, type SessionLength } from '@rpg-ngn/ui-logic'
 import { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
@@ -49,6 +49,13 @@ export function DiceModePanel({ client, table, languages = ['es'], onChanged, on
   const choose = (mode: DiceMode) => {
     if (mode === saved || busy) return
     void save(withDiceMode(table.settings, mode), t('play.savedDice', { mode: diceModeLabel(mode).toLowerCase() }))
+  }
+
+  // Largo de sesion (docs/26, H1): el director lleva el ritmo y cierra solo al final.
+  const length = sessionLengthOf(table.settings)
+  const chooseLength = (value: SessionLength) => {
+    if (value === length || busy) return
+    void save(withSessionLength(table.settings, value), t('play.saved'))
   }
 
   const chooseImages = (on: boolean) => {
@@ -110,6 +117,12 @@ export function DiceModePanel({ client, table, languages = ['es'], onChanged, on
           ))}
         </View>
         <Text style={styles.hint}>{fixed !== null ? countdownFixedHint(fixed) : countdownHint(seconds)}</Text>
+      </Panel>
+      <Panel title={t('ending.lengthTitle')}>
+        {SESSION_LENGTHS.map((value) => (
+          <RadioRow key={value} label={sessionLengthLabel(value)} selected={length === value} onSelect={() => chooseLength(value)} />
+        ))}
+        <Text style={styles.hint}>{t('ending.lengthHint')}</Text>
       </Panel>
       <Panel title={t('tableRules.ilustraciones')}>
         <RadioRow label={t('tableRules.ilustrarEscenas')} selected={images} onSelect={() => chooseImages(true)} />

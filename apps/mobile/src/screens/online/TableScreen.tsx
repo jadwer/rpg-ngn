@@ -2,7 +2,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -21,6 +21,7 @@ import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
 import { RecapModal } from '../../components/RecapModal'
 import { ShareConsentModal } from '../../components/ShareConsentModal'
+import { EndingModal } from '../../components/EndingModal'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
@@ -494,6 +495,15 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), t('play.openSessionFailed'))
   }
+  // Reloj de la historia (docs/26, H1): el anfitrion alarga la sesion o pide el final.
+  const extendSession = () => {
+    const session = snapshot?.session
+    if (session) void act(() => client.extendSession(session.id).then(() => undefined), t('ending.pacingFailed'))
+  }
+  const wrapSession = () => {
+    const session = snapshot?.session
+    if (session) void act(() => client.wrapSession(session.id).then(() => undefined), t('ending.pacingFailed'))
+  }
   const closeSession = (cliffhanger: string | null) => {
     const session = snapshot?.session
     if (!session) return
@@ -587,7 +597,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           </View>
           <View style={styles.titleText}>
             <Text style={styles.title} numberOfLines={1}>
-              {turn ? t('mobile.tableScreen.turnoNumero', { number: turn.number }) : table.name}
+              {turn ? (pacingLine(snapshot?.pacing) ?? t('mobile.tableScreen.turnoNumero', { number: turn.number })) : table.name}
             </Text>
             <Text style={styles.subtitle} numberOfLines={1}>
               {turn ? (progress.narrating ? t('mobile.tableScreen.elDirectorNarraCap') : progress.complete ? t('mobile.tableScreen.todosRespondieronCap') : t('mobile.tableScreen.faseDeAccionesCap')) : subtitle}
@@ -619,7 +629,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             <Image source={{ uri: sceneUri }} style={styles.sceneBackdrop} resizeMode="cover" accessibilityLabel={sceneImage?.alt ?? t('tableScreen.escena')} />
             {turn ? (
               <View style={styles.scenePill}>
-                <Text style={styles.scenePillText}>{`${t('mobile.tableScreen.turnoNumero', { number: turn.number })} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}`}</Text>
+                <Text style={styles.scenePillText}>{`${(pacingLine(snapshot?.pacing) ?? t('mobile.tableScreen.turnoNumero', { number: turn.number }))} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}`}</Text>
               </View>
             ) : null}
           </>
@@ -647,7 +657,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             kicker={packName ?? table.name}
             title={sessionTitle ?? (snapshot?.session ? table.name : t('play.noSession'))}
             when={worldTime}
-            pill={turn ? `${t('mobile.tableScreen.turnoNumero', { number: turn.number })} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}` : null}
+            pill={turn ? `${(pacingLine(snapshot?.pacing) ?? t('mobile.tableScreen.turnoNumero', { number: turn.number }))} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}` : null}
           />}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} />
@@ -704,6 +714,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
+      <EndingModal blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
       {screen ? (
         <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
           <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>
@@ -753,7 +764,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       </GameSheet>
       {isHost ? (
         <GameSheet visible={panel === 'host'} title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)}>
-                <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
         </GameSheet>
       ) : null}
       <GameSheet visible={panel === 'reading'} title={t('tableScreen.lectura')} onClose={() => setPanel(null)}>

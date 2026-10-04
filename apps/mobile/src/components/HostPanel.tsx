@@ -1,7 +1,7 @@
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
 import { t, type Language } from '@rpg-ngn/i18n'
-import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
+import { isValidSessionCode, pacingLine, sessionOptions, type TablePacing } from '@rpg-ngn/ui-logic'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
@@ -24,6 +24,10 @@ interface Props {
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
+  /** Reloj de la sesion abierta (docs/26, H1); null si la mesa juega libre. */
+  pacing?: TablePacing | null | undefined
+  onExtendSession?: (() => void) | undefined
+  onWrapSession?: (() => void) | undefined
   onTableChanged: () => void
   onUnauthorized: () => void
 }
@@ -34,7 +38,7 @@ interface Props {
  * que es lo de cada noche, y pestaña Ajustes de la mesa (dados, secretos del
  * pack y director), que casi no se toca. Invitar vive en Jugadores.
  */
-export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, onTableChanged, onUnauthorized }: Props) {
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
@@ -95,6 +99,15 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
               </>
             ) : (
               <>
+                {pacing ? (
+                  <>
+                    <Text style={styles.hint}>{pacing.wrap ? t('ending.wrapAsked') : pacingLine(pacing)}</Text>
+                    <View style={styles.row}>
+                      <Button label={t('ending.extend')} small busy={busy} onPress={() => onExtendSession?.()} />
+                      {pacing.wrap ? null : <Button label={t('ending.wrap')} small busy={busy} onPress={() => onWrapSession?.()} />}
+                    </View>
+                  </>
+                ) : null}
                 <TextInput value={cliffhanger} onChangeText={setCliffhanger} placeholder={t('mobile.hostPanel.cliffhangerParaLaProximaOpcional')} placeholderTextColor={theme.colors.inkFaint} style={styles.input} />
                 <View style={styles.row}>
                   {!confirmClose ? (
@@ -143,6 +156,7 @@ const styles = StyleSheet.create({
   tabTextOn: { color: '#ffffff' },
   premise: { fontFamily: theme.fonts.serifItalic, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
   row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
+  hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim },
   input: { fontFamily: theme.fonts.ui, fontSize: 15, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.borderSoft, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
   code: { width: 72, textAlign: 'center', fontFamily: theme.fonts.uiSemiBold, letterSpacing: 0.2 },
 })

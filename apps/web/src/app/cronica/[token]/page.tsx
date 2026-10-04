@@ -2,6 +2,7 @@
 
 import { t } from '@rpg-ngn/i18n'
 import { createApiClient, normalizeBaseUrl, type Chronicle } from '@rpg-ngn/api-client'
+import { endingTitle } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -149,6 +150,19 @@ export default function CronicaPage() {
                   <figure key={i} className="scene-image loaded">
                     <img src={b.url} alt={b.alt} loading="lazy" />
                   </figure>
+                ) : b.type === 'milestone' ? (
+                  <p key={i} className="cronica-logro">
+                    <span aria-hidden="true">✦</span> {t('ending.milestone')}: {b.title}
+                  </p>
+                ) : b.type === 'ending' ? (
+                  <div key={i} className="cronica-fin">
+                    <b>{endingTitle({ scope: b.scope, session: b.session, title: b.title ?? null })}</b>
+                    {b.cliffhanger ? (
+                      <p>
+                        {t('ending.toBeContinued')} {b.cliffhanger}
+                      </p>
+                    ) : null}
+                  </div>
                 ) : (
                   <p key={i} className="cronica-roll">
                     {t('chroniclePage.tira', { actor: b.actor, die: b.die, result: b.result })} {b.text}

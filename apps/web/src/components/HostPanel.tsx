@@ -3,7 +3,7 @@
 import { t, type Language } from '@rpg-ngn/i18n'
 import type { ApiClient, SessionSummary, TableSummary } from '@rpg-ngn/api-client'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { isValidSessionCode, sessionOptions } from '@rpg-ngn/ui-logic'
+import { isValidSessionCode, pacingLine, sessionOptions, type TablePacing } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef, useState } from 'react'
 import { GmSettingsPanel } from './GmSettingsPanel'
 import { Panel } from './Panel'
@@ -25,6 +25,11 @@ interface Props {
   busy: boolean
   onOpenSession: (code: string, note: string | null) => void
   onCloseSession: (cliffhanger: string | null) => void
+  /** Reloj de la sesion abierta (docs/26, H1); null si la mesa juega libre. */
+  pacing?: TablePacing | null | undefined
+  /** "Un turno mas" y "Pedir el final". */
+  onExtendSession?: (() => void) | undefined
+  onWrapSession?: (() => void) | undefined
   onTableChanged: () => void
   onUnauthorized: () => void
   /** Dentro de un panel de la barra del juego: sin cabecera plegable, siempre abierto. */
@@ -38,7 +43,7 @@ interface Props {
  * director de juego). Invitar vive en Jugadores. El GM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
+export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
@@ -123,6 +128,21 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
 
           {tab === 'session' && session ? (
             <Panel title={t('play.session', { code: session.code })}>
+              {pacing ? (
+                <div className="stack pacing-controls">
+                  <p className="hint">{pacing.wrap ? t('ending.wrapAsked') : pacingLine(pacing)}</p>
+                  <div className="row">
+                    <button type="button" className="btn small" onClick={onExtendSession} disabled={busy} title={t('ending.extendHint')}>
+                      {t('ending.extend')}
+                    </button>
+                    {pacing.wrap ? null : (
+                      <button type="button" className="btn small" onClick={onWrapSession} disabled={busy} title={t('ending.wrapHint')}>
+                        {t('ending.wrap')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : null}
               <label className="field">
                 <span>{t('hostPanel.cliffhangerParaLaProxima')}</span>
                 <input className="input" name="cliffhanger" value={cliffhanger} onChange={(e) => setCliffhanger(e.target.value)} placeholder={t('hostPanel.opcionalConQueSe')} />

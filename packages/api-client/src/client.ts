@@ -129,6 +129,10 @@ export interface ApiClient extends AccountApi, SettingsApi {
   holdTurn(turnId: number, held: boolean): Promise<TurnView>
   openSession(campaignId: string | number, code: string, worldTime?: string): Promise<TurnView>
   closeSession(sessionId: string | number, cliffhanger?: string): Promise<SessionClosed>
+  /** "Un turno mas": el anfitrion alarga la sesion dos turnos (docs/26, H1). */
+  extendSession(sessionId: string | number): Promise<{ session: string; extraTurns: number }>
+  /** "Pedir el final": el proximo turno cierra la sesion (docs/26, H1). */
+  wrapSession(sessionId: string | number): Promise<{ session: string; wrap: boolean }>
   listSessions(campaignId: string | number): Promise<SessionSummary[]>
   playerProjection(campaignId: string | number, characterId: string): Promise<Projection<PlayerProjection>>
   worldProjection(campaignId: string | number): Promise<Projection<WorldProjection>>
@@ -383,6 +387,16 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async closeSession(sessionId, cliffhanger) {
       const { data } = await request<{ data: SessionClosed }>(`/api/v1/sessions/${sessionId}/close`, { method: 'POST', body: cliffhanger ? { cliffhanger } : {} })
+      return data.data
+    },
+
+    async extendSession(sessionId) {
+      const { data } = await request<{ data: { session: string; extraTurns: number } }>(`/api/v1/sessions/${sessionId}/extend`, { method: 'POST', body: {} })
+      return data.data
+    },
+
+    async wrapSession(sessionId) {
+      const { data } = await request<{ data: { session: string; wrap: boolean } }>(`/api/v1/sessions/${sessionId}/wrap`, { method: 'POST', body: {} })
       return data.data
     },
 

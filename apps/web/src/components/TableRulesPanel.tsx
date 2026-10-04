@@ -2,7 +2,7 @@
 
 import { t, type Language, type MessageKey } from '@rpg-ngn/i18n'
 import { ApiError, type ApiClient, type TableSummary } from '@rpg-ngn/api-client'
-import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, withCountdown, withDiceMode, withSceneImages, type DiceMode } from '@rpg-ngn/ui-logic'
+import { languageName, tableLanguageOf, COUNTDOWN_OPTIONS, countdownFixedHint, countdownHint, countdownLabel, countdownSecondsOf, DICE_MODES, diceModeHint, diceModeLabel, diceModeOf, sceneImagesHint, sceneImagesOn, SESSION_LENGTHS, sessionLengthLabel, sessionLengthOf, withCountdown, withDiceMode, withSceneImages, withSessionLength, type DiceMode, type SessionLength } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 
 interface Props {
@@ -79,6 +79,13 @@ export function TableRulesPanel({ client, table, languages = ['es'], busy = fals
     void save(withSceneImages(table.settings, on), on ? t('play.savedImagesOn') : t('play.savedImagesOff'))
   }
 
+  // Largo de sesion (docs/26, H1): el director lleva el ritmo y cierra solo al final.
+  const length = sessionLengthOf(table.settings)
+  const chooseLength = (value: SessionLength) => {
+    if (value === length || disabled) return
+    void save(withSessionLength(table.settings, value), t('play.saved'))
+  }
+
   const chooseLint = (value: string) => {
     if (value === lint || disabled) return
     // Sin modo elegido se quita la clave: manda el del engine.
@@ -88,6 +95,19 @@ export function TableRulesPanel({ client, table, languages = ['es'], busy = fals
 
   return (
     <div className="stack table-rules">
+      <label className="field">
+        <span>{t('ending.lengthTitle')}</span>
+        <select className="input" name="sessionLength" value={length} disabled={disabled} onChange={(e) => chooseLength(e.target.value as SessionLength)}>
+          {SESSION_LENGTHS.map((value) => (
+            <option key={value} value={value}>
+              {sessionLengthLabel(value)}
+            </option>
+          ))}
+        </select>
+        <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
+          {t('ending.lengthHint')}
+        </span>
+      </label>
       {languages.length > 1 ? (
         <div className="field">
           <span>{t('tableRules.idioma')}</span>

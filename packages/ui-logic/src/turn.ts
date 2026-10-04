@@ -56,6 +56,20 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
       return { kind: 'system', id, title: block.title ?? null, text: block.text, items: block.items ? [...block.items] : [], audience: block.audience ?? 'table', tone: block.tone ?? 'info', detail: block.detail ?? null, ...(block.recap ? { recap: true } : {}) }
     case 'image':
       return { kind: 'image', id, url: block.url, alt: block.alt, caption: block.caption ?? null }
+    case 'milestone':
+      return { kind: 'milestone', id, title: block.title }
+    case 'ending':
+      return {
+        kind: 'ending',
+        id,
+        scope: block.scope,
+        session: block.session,
+        title: block.title ?? null,
+        text: block.text ?? null,
+        achievements: [...block.achievements],
+        cliffhanger: block.cliffhanger ?? null,
+        closedBy: block.closedBy,
+      }
     default:
       return null
   }

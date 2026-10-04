@@ -129,6 +129,8 @@ export function pitchFor(item: Pick<TtsItem, 'kind' | 'speakerRef'> | undefined,
     case 'narration':
     case 'system':
     case 'image':
+    case 'milestone':
+    case 'ending':
       return settings.narratorPitch
     case 'dialogue':
     case 'roll':
