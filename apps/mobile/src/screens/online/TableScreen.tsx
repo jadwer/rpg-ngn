@@ -20,6 +20,7 @@ import { PlayersPanel } from '../../components/PlayersPanel'
 import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
 import { RecapModal } from '../../components/RecapModal'
+import { ShareConsentModal } from '../../components/ShareConsentModal'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
@@ -702,6 +703,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         </View>
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
+      {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       {screen ? (
         <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
           <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>
