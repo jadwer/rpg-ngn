@@ -409,6 +409,11 @@ export const PackSummary = z.strictObject({
       duration: z.enum(['corta', 'media', 'larga']),
       hours: z.string().nullable(),
       format: z.enum(['campaña', 'aventura', 'one-shot']),
+      /** Vocabulario del catalogo (docs/26, H8). Opcionales: no suben la version. */
+      sessionLength: z.enum(['corta', 'media', 'larga']).optional(),
+      genres: z.array(z.string()).optional(),
+      style: z.enum(['historia', 'mision', 'libre']).optional(),
+      contentWarnings: z.array(z.string()).optional(),
       synopsis: z.string(),
       cover: z.string(),
       gallery: z.array(z.string()),

@@ -1,4 +1,5 @@
 import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, PackValidateRequest, ProjectRequest, ProviderConfig, ResolveTurnRequest, SuggestRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
+import { GENRES, PLAY_MODES, SESSION_LENGTHS, STORY_FORMATS, STORY_STYLES } from '@rpg-ngn/content'
 import { createProvider, redact, type ProviderDeps } from '@rpg-ngn/narrative'
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
@@ -41,6 +42,11 @@ export function createEngine(options: EngineOptions): Hono {
 
   /** Los packs que este servidor puede jugar, para que la mesa se cree con uno de verdad. */
   app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog(c.req.query('lang')) }))
+
+  /** Vocabularios del catalogo (docs/26, H8): la API los sincroniza con atomo/taxonomy (H9). */
+  app.get('/v1/vocabularies', (c) =>
+    c.json({ formats: STORY_FORMATS, sessionLengths: SESSION_LENGTHS, genres: GENRES, styles: STORY_STYLES, modes: PLAY_MODES }),
+  )
 
   /** Personajes jugables de un pack, para elegir al crear mesa o invitar. */
   app.get('/v1/packs/:id/:version/characters', async (c) => {

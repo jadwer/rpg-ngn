@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { GENRES, SESSION_LENGTHS, STORY_STYLES } from './taxonomy.js'
 import { IsoDate, KebabId, SemVer } from './common.js'
 
 /**
@@ -43,6 +44,14 @@ export const PackCatalog = z.strictObject({
   /** Duracion estimada de cara al jugador: "10-15 h". */
   hours: z.string().min(1).max(20).optional(),
   format: z.enum(['campaña', 'aventura', 'one-shot']),
+  /** Largo de sesion que recomienda (docs/26, H8); la mesa nueva lo toma. */
+  sessionLength: z.enum(SESSION_LENGTHS).optional(),
+  /** De uno a tres generos del vocabulario (`taxonomy.ts`); `genre` queda como etiqueta libre. */
+  genres: z.array(z.enum(GENRES)).min(1).max(3).optional(),
+  /** Como se cuenta: historia, mision o libre (`taxonomy.ts`). */
+  style: z.enum(STORY_STYLES).optional(),
+  /** Avisos de contenido, cortos: "alcohol", "muerte". */
+  contentWarnings: z.array(z.string().min(1).max(40)).max(8).optional(),
   synopsis: z.string().min(1).max(700),
   cover: ArtFile,
   gallery: z.array(ArtFile).max(8).default([]),
