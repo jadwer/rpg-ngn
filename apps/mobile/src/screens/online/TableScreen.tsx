@@ -461,8 +461,21 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   }
 
   const respond = (text: string) => (turn ? act(() => client.respond(turn.id, text, idempotencyKey).then(() => undefined), t('play.sendFailed')) : Promise.resolve(false))
+  // Al acabar la cuenta atras cada dispositivo pide cerrar; uno gana y los
+  // demas reciben 409 `already_closing`. No es error para nadie (mesa 43, 03-10).
   const closeTurn = (force: boolean) => {
-    if (turn) void act(() => client.closeTurn(turn.id, force).then(() => undefined), t('play.closeFailed'))
+    if (turn)
+      void act(
+        () =>
+          client.closeTurn(turn.id, force).then(
+            () => undefined,
+            (caught: unknown) => {
+              const code = caught instanceof ApiError ? (caught.body as { code?: unknown } | null)?.code : null
+              if (code !== 'already_closing') throw caught
+            },
+          ),
+        t('play.closeFailed'),
+      )
   }
   const holdTurn = (held: boolean) => {
     if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), t('play.holdFailed'))
