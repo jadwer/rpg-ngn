@@ -92,8 +92,18 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
     setFolded(false)
   }, [turn?.id])
   const [text, setText] = useState('')
-  const composing = !folded && (opened || autoOpen || text.length > 0)
-  useEffect(() => onComposingChange?.(composing && progress.canRespond), [composing, progress.canRespond, onComposingChange])
+  // Corregir lo enviado mientras el turno siga abierto (03-10), como la web.
+  const [editing, setEditing] = useState(false)
+  const [lastSent, setLastSent] = useState<string | null>(null)
+  const [heldForEdit, setHeldForEdit] = useState(false)
+  useEffect(() => {
+    setEditing(false)
+    setLastSent(null)
+    setHeldForEdit(false)
+  }, [turn?.id])
+  const canWrite = progress.canRespond || (editing && turn?.status === 'open' && progress.hasResponded)
+  const composing = editing || (!folded && (opened || autoOpen || text.length > 0))
+  useEffect(() => onComposingChange?.(composing && canWrite), [composing, canWrite, onComposingChange])
   // La tirada pedida: el numero se queda en pantalla hasta que el sondeo
   // trae el bloque y la peticion deja de estar pendiente.
   const [rollError, setRollError] = useState<string | null>(null)
@@ -134,7 +144,31 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
     const value = text.trim()
     if (!value || busy) return
     onTyping(false)
-    if (await onRespond(value)) setText('')
+    if (await onRespond(value)) {
+      setText('')
+      setLastSent(value)
+      if (editing) {
+        setEditing(false)
+        if (heldForEdit) onHold(false)
+        setHeldForEdit(false)
+      }
+    }
+  }
+
+  const startEdit = () => {
+    setText(lastSent ?? '')
+    setEditing(true)
+    if (countdown.active) {
+      setHeldForEdit(true)
+      onHold(true)
+    }
+  }
+
+  const stopEdit = () => {
+    setEditing(false)
+    setText('')
+    if (heldForEdit) onHold(false)
+    setHeldForEdit(false)
   }
 
   return (
@@ -261,17 +295,21 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
           {fortunePending && !fortuneLanded ? <Text style={styles.ideasToggle}>{t('turnPanel.tiraTuFortuna2')}</Text> : shownIdeas.length > 0 ? <Text style={styles.ideasToggle}>{t('mobile.turnPanel.nIdeas', { count: shownIdeas.length })}</Text> : null}
         </Pressable>
       ) : null}
-      {progress.canRespond && composing ? (
+      {canWrite && composing ? (
         <View style={styles.compose}>
           <Pressable
             style={styles.hide}
             hitSlop={8}
             onPress={() => {
+              if (editing) {
+                stopEdit()
+                return
+              }
               setOpened(false)
               setFolded(true)
             }}
           >
-            <Text style={styles.hideText}>{t('turnPanel.ocultar')}</Text>
+            <Text style={styles.hideText}>{editing ? t('turnPanel.cancelar') : t('turnPanel.ocultar')}</Text>
           </Pressable>
           {!focused ? <Text style={styles.ask}>{t('turnPanel.queHaceTuPersonaje')}</Text> : null}
           {/* Ideas del GM: tocar una la copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
@@ -340,7 +378,12 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, outOfTurns, ha
         </View>
       ) : null}
       {turn && turn.status === 'open' && !hasCharacter ? <Text style={styles.sent}>{t('turnPanel.mirasLaMesaSin')}</Text> : null}
-      {turn && progress.hasResponded && turn.status === 'open' && !countdown.active && !countdown.held ? <Text style={styles.sent}>{t('turnPanel.tuRespuestaEstaEnviada')}</Text> : null}
+      {turn && progress.hasResponded && turn.status === 'open' && !editing ? (
+        <View style={styles.sentRow}>
+          <Text style={styles.sent}>{t('turnPanel.tuRespuestaEstaEnviada')}</Text>
+          {started ? null : <Button label={t('turnPanel.corregir')} small busy={busy} onPress={startEdit} />}
+        </View>
+      ) : null}
 
       {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
         <View style={styles.actions}>
@@ -396,6 +439,7 @@ const styles = StyleSheet.create({
   dieDisabled: { opacity: 0.45 },
   diePressed: { opacity: 0.7 },
   input: { fontFamily: theme.fonts.ui, fontSize: 16, lineHeight: 22, color: theme.colors.ink, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.border, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56, maxHeight: 120, textAlignVertical: 'top' },
+  sentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   sent: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.success },
   actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
 })

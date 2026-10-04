@@ -18,6 +18,7 @@ export const turnPanel = {
   ctrlEnterTambienEnvia: 'Ctrl+Enter también envía.',
   mirasLaMesaSin: 'Miras la mesa sin personaje: puedes leer y cerrar el turno, pero no responder.',
   tuRespuestaEstaEnviada: 'Tu respuesta está enviada.',
+  corregir: 'Corregir',
   cerrarTurnoYNarrar: 'Cerrar turno y narrar',
   forzarCierre: 'Forzar cierre',
   unMomentoLaMesa: 'Un momento: la mesa espera hasta que alguien cierre',

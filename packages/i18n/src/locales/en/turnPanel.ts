@@ -20,6 +20,7 @@ export const turnPanel: Messages<typeof es> = {
   ctrlEnterTambienEnvia: 'Ctrl+Enter also sends.',
   mirasLaMesaSin: 'You watch the table without a character: you can read and close the turn, but not answer.',
   tuRespuestaEstaEnviada: 'Your answer is sent.',
+  corregir: 'Edit',
   cerrarTurnoYNarrar: 'Close turn and narrate',
   forzarCierre: 'Force close',
   unMomentoLaMesa: 'One moment: the table waits until someone closes',

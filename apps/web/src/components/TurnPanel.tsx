@@ -104,7 +104,18 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     if (!fortunePending) setFortuneLanded(false)
   }, [fortunePending])
   const [text, setText] = useState('')
-  const composing = !folded && (opened || autoOpen || text.length > 0)
+  // Corregir lo enviado mientras el turno siga abierto (03-10): el servidor
+  // sustituye la respuesta. Si la cuenta atras corria, se detiene mientras
+  // se corrige y se reanuda al reenviar.
+  const [editing, setEditing] = useState(false)
+  const [lastSent, setLastSent] = useState<string | null>(null)
+  const [heldForEdit, setHeldForEdit] = useState(false)
+  useEffect(() => {
+    setEditing(false)
+    setLastSent(null)
+    setHeldForEdit(false)
+  }, [turn?.id])
+  const composing = editing || (!folded && (opened || autoOpen || text.length > 0))
   // La tirada pedida: el numero se queda en pantalla hasta que el sondeo
   // trae el bloque y la peticion deja de estar pendiente.
   const [rollError, setRollError] = useState<string | null>(null)
@@ -146,7 +157,24 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
     const value = text.trim()
     if (!value || busy) return
     onTyping(false)
-    if (await onRespond(value)) setText('')
+    if (await onRespond(value)) {
+      setText('')
+      setLastSent(value)
+      if (editing) {
+        setEditing(false)
+        if (heldForEdit) onHold(false)
+        setHeldForEdit(false)
+      }
+    }
+  }
+
+  const startEdit = () => {
+    setText(lastSent ?? '')
+    setEditing(true)
+    if (countdown.active) {
+      setHeldForEdit(true)
+      onHold(true)
+    }
   }
 
   const onKey = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -157,6 +185,7 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
   }
 
   const open = turn?.status === 'open'
+  const canWrite = progress.canRespond || (editing && open && progress.hasResponded)
 
   return (
     <div className="turn">
@@ -282,17 +311,24 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
           {fortunePending && !fortuneLanded ? <span className="count">{t('turnPanel.tiraTuFortuna2')}</span> : shownIdeas.length > 0 ? <span className="count">{shownIdeas.length} ideas</span> : null}
         </button>
       ) : null}
-      {progress.canRespond && composing ? (
+      {canWrite && composing ? (
         <>
           <button
             type="button"
             className="compose-hide"
             onClick={() => {
+              if (editing) {
+                setEditing(false)
+                setText('')
+                if (heldForEdit) onHold(false)
+                setHeldForEdit(false)
+                return
+              }
               setOpened(false)
               setFolded(true)
             }}
           >
-            {t('turnPanel.ocultar')}
+            {editing ? t('turnPanel.cancelar') : t('turnPanel.ocultar')}
           </button>
           {/* Ideas del GM para quien no sabe que espera el narrador. Tocar una la
               copia al cuadro, donde se edita; escribir otra cosa siempre vale. */}
@@ -360,7 +396,16 @@ export function TurnPanel({ turn, progress, nameOf, busy, notice, hasCharacter, 
         </>
       ) : null}
       {open && !hasCharacter ? <div className="hint">{t('turnPanel.mirasLaMesaSin')}</div> : null}
-      {open && progress.hasResponded && !countdown.active && !countdown.held ? <div className="sent">{t('turnPanel.tuRespuestaEstaEnviada')}</div> : null}
+      {open && progress.hasResponded && !editing ? (
+        <div className="sent">
+          {t('turnPanel.tuRespuestaEstaEnviada')}{' '}
+          {started ? null : (
+            <button type="button" className="btn ghost small" disabled={busy} onClick={startEdit}>
+              {t('turnPanel.corregir')}
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {/* Sin cuenta atras (falta gente, o la API no manda completedAt): el cierre a mano de siempre. */}
       {(progress.canClose && !countdown.active && !countdown.held) || progress.canForceClose ? (
