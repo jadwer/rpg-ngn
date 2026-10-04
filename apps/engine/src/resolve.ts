@@ -2,7 +2,7 @@ import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
 import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
-import { createProvider, redact, type GMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
+import { createProvider, redact, storyClock, type GMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
 import { projectionsOf, rebuildState } from './state.js'
@@ -67,6 +67,9 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let moment: string | null = null
   let suggestions: Record<string, string[]> = {}
   let rollRequests: RollRequest[] = []
+  // El director cerro la sesion en el turno de cierre del reloj (docs/26, H1).
+  let closed: { cliffhanger?: string } | null = null
+  const clock = storyClock(request.turn.number, request.context?.pacing)
 
   // Cierra un evento nacido en el engine con su id, version y momento. El
   // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
@@ -170,6 +173,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'close') {
+        closed = output.cliffhanger ? { cliffhanger: output.cliffhanger } : {}
+        continue
+      }
+
       const parsed = seal(output.event)
       if (!parsed.success) {
         throw new Error(`el GM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
@@ -197,6 +205,9 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     ...(Object.keys(suggestions).length ? { suggestions: Object.fromEntries(Object.entries(suggestions).filter(([id]) => addressed.includes(id))) } : {}),
     // Tiradas pedidas: esos personajes tiran en vez de escribir el turno que viene.
     ...(rollRequests.length ? { rollRequests: rollRequests.filter((r) => addressed.includes(r.characterId)) } : {}),
+    // Fin de la sesion: la API no abre otro turno y escribe el bloque `ending`.
+    ...(closed ? { close: { scope: 'session' as const, ...closed } } : {}),
+    ...(clock ? { clock: { total: clock.total } } : {}),
   }
 }
 

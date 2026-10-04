@@ -146,11 +146,28 @@ export const TurnBudget = z.strictObject({
  * la sesion (`sessionNote`). Entra al contexto del GM como contenido no
  * confiable, delimitado; no puede cambiar las reglas del GM (entrega 6).
  */
+/** Largo de sesion de la mesa (docs/26, H1). `libre` es sin reloj, lo de antes del 04-10. */
+export const SessionLength = z.enum(['corta', 'media', 'larga', 'libre'])
+export type SessionLength = z.infer<typeof SessionLength>
+
+/**
+ * El reloj de la historia que la API manda cada turno: el largo de la mesa,
+ * los turnos que el anfitrion añadio ("un turno mas") y si pidio el final.
+ */
+export const TurnPacing = z.strictObject({
+  length: SessionLength,
+  extra: z.number().int().min(0).max(20).default(0),
+  wrap: z.boolean().default(false),
+})
+export type TurnPacing = z.infer<typeof TurnPacing>
+
 export const TurnContext = z.strictObject({
   premise: z.string().max(4000).optional(),
   sessionNote: z.string().max(1000).optional(),
   /** Personalidad escrita por cada jugador presente, por id de personaje. Texto del usuario, delimitado en el contexto. */
   personas: z.record(KebabId, z.string().max(600)).optional(),
+  /** Reloj de la historia (docs/26, H1). Sin el, la sesion no tiene presupuesto de turnos. */
+  pacing: TurnPacing.optional(),
 })
 export type TurnContext = z.infer<typeof TurnContext>
 
@@ -280,6 +297,28 @@ export const TurnBlock = z.discriminatedUnion('type', [
     items: z.array(z.string().min(1)).optional(),
     /** Es el "Anteriormente..." de la apertura (E10c): los clientes lo enseñan al entrar. */
     recap: z.literal(true).optional(),
+  }),
+  /**
+   * Un logro de la sesion (docs/26, H1): lo que la mesa acaba de conseguir,
+   * marcado por el director al empezar cada tramo. Es la recompensa que
+   * hace sentir que la historia avanza.
+   */
+  z.strictObject({ type: z.literal('milestone'), title: z.string().min(1).max(120) }),
+  /**
+   * Fin de una sesion, capitulo o historia (docs/26, H1). No lo escribe el
+   * engine: la API lo añade al cerrar la sesion, con los logros que junto, y
+   * los clientes lo enseñan a pantalla completa.
+   */
+  z.strictObject({
+    type: z.literal('ending'),
+    scope: z.enum(['session', 'chapter', 'story']),
+    /** Codigo de la sesion que cierra. */
+    session: z.string(),
+    title: z.string().optional(),
+    text: z.string().optional(),
+    achievements: z.array(z.string()),
+    cliffhanger: z.string().optional(),
+    closedBy: z.enum(['director', 'host']),
   }),
   /**
    * Ilustracion de la escena (E10a). No la escribe el engine: la API la
@@ -445,6 +484,21 @@ export const ResolveLine = z.discriminatedUnion('kind', [
      * la version.
      */
     rollRequests: z.array(RollRequest).optional(),
+    /**
+     * El director cerro la sesion (docs/26, H1): la API no abre otro turno,
+     * cierra la sesion y escribe el bloque `ending`. Opcional: no sube la
+     * version.
+     */
+    close: z
+      .strictObject({
+        scope: z.enum(['session', 'chapter', 'story']),
+        cliffhanger: z.string().max(500).optional(),
+        endingId: KebabId.optional(),
+        card: z.strictObject({ title: z.string().optional(), text: z.string().optional() }).optional(),
+      })
+      .optional(),
+    /** Presupuesto de turnos de la sesion si tiene reloj, para que la mesa vea "Turno 5 de 8". */
+    clock: z.strictObject({ total: z.number().int().positive() }).optional(),
   }),
   z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
 ])

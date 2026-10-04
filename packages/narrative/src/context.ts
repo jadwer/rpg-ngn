@@ -3,6 +3,7 @@ import { isManualReveal, refId, refKind, type CampaignEvent, type Character, typ
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
 import { secretTouchesScene } from './lint.js'
+import { clockLayer, storyClock, type StoryClock } from './pacing.js'
 import type { GMTurnContext } from './provider.js'
 
 /**
@@ -49,6 +50,7 @@ export interface BuiltContext {
 export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEFAULT_BUDGET): BuiltContext {
   const session = ctx.state.meta.sessions[ctx.turn.sessionId]
   const party = session?.party ?? []
+  const clock = clockOf(ctx)
 
   const sections = [
     worldLayer(ctx, budget, party),
@@ -56,6 +58,7 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     memoryLayer(ctx, session, budget),
     gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx)),
+    clock ? clockLayer(clock, party.length) : null,
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
@@ -381,6 +384,11 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
     default:
       return `${op} sobre ${target}`
   }
+}
+
+/** El reloj de la historia de este turno, si la mesa lo tiene (docs/26, H1). */
+export function clockOf(ctx: Pick<GMTurnContext, 'turn' | 'notes'>): StoryClock | null {
+  return storyClock(ctx.turn.number, ctx.notes?.pacing)
 }
 
 // Capa d: el turno.

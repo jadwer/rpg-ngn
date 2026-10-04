@@ -3,7 +3,7 @@ import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/
 import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
 import { z } from 'zod'
-import { budgetFor, buildTurnContext, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
+import { budgetFor, buildTurnContext, clockOf, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
 import type { GMOutput, GMProbe, GMProvider, GMSuggestion, GMTurnContext, ProposedEvent } from './provider.js'
@@ -255,6 +255,9 @@ const ModelLine = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('recap'), text: z.string() }),
   z.object({ kind: z.literal('where'), location: z.string(), characterIds: z.array(z.string()).optional() }),
   z.object({ kind: z.literal('suggest'), characterId: z.string(), options: z.array(z.string()) }),
+  // Reloj de la historia (docs/26, H1): un logro por turno y el cierre de la sesion.
+  z.object({ kind: z.literal('milestone'), title: z.string() }),
+  z.object({ kind: z.literal('close'), cliffhanger: z.string().optional(), ending: z.string().optional() }),
   // `rollKind` y no `kind`: la clave `kind` ya es la de la linea.
   z.object({
     kind: z.literal('ask_roll'),
@@ -332,6 +335,9 @@ export class ModelGMProvider implements GMProvider {
 
     const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', random, diceMode, preRolled)
     interpreter.recapAllowed = ctx.turn.number === 1 && ctx.turn.responses.length === 0 && hasPreviousSession(ctx)
+    // En el turno de cierre del reloj el director puede (y debe) cerrar la sesion.
+    const clock = clockOf(ctx)
+    interpreter.closeAllowed = clock?.phase === 'cierre'
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -377,7 +383,8 @@ export class ModelGMProvider implements GMProvider {
     // Cada turno devuelve la palabra (docs/03), y el modelo suele hacerlo en
     // su ultimo bloque. Si el lint corto justo ese, la mesa se quedaba sin
     // pregunta y a la deriva (mesa 33, turno 5): el motor la devuelve.
-    if (reply.finish !== 'length' && interpreter.lastWasCut) {
+    // En el turno de cierre no se devuelve la palabra: la sesion termina.
+    if (reply.finish !== 'length' && interpreter.lastWasCut && !interpreter.closeAllowed) {
       const text = party.length === 1 ? tr('gm.whatDoYouDo', { name: ctx.pack.characters.get(party[0]!)?.name ?? party[0]! }) : tr('gm.whatDoYouAllDo')
       yield { kind: 'block', block: { type: 'narration', text } }
       yield { kind: 'event', event: { type: 'narration', payload: { text }, visibility: { layer: 'campaign', witnesses } } }
@@ -402,6 +409,14 @@ export class ModelGMProvider implements GMProvider {
     }
 
     if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
+    // Turno de cierre del reloj: la sesion termina aunque el modelo olvide
+    // la linea `close` (sin cliffhanger), y no hay ideas ni tiradas para un
+    // turno que no viene.
+    if (interpreter.closeAllowed) {
+      yield { kind: 'close', ...(interpreter.closed ?? {}) }
+      yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
+      return
+    }
     // Quien tiene tirada pedida tira, siempre con la palabra (aunque el modelo
     // lo olvidara en "addressed"). Sus ideas se quedan: con el dado puede
     // decir que intenta, y casi todos solo tiraban sin ideas (03-10).
@@ -594,6 +609,12 @@ class LineInterpreter {
   /** "Anteriormente..." (E10c): permitido solo en la apertura con sesion previa, y uno. */
   recapAllowed = false
   recapped = false
+  /** El reloj esta en el turno de cierre: la linea `close` vale. */
+  closeAllowed = false
+  /** El director cerro la sesion; el cliffhanger, si dejo uno. */
+  closed: { cliffhanger?: string } | null = null
+  /** Ya hubo logro este turno: uno como maximo. */
+  private milestoned = false
   /** Ideas de accion por personaje (E10b). */
   suggestions: Record<string, string[]> = {}
   private pending: { text: string; depth: number } | null = null
@@ -804,6 +825,27 @@ class LineInterpreter {
           const event = this.event({ type: 'state_change', effects: [{ op: 'move', who: `character:${id}`, to: location }] })
           if (event) yield* this.emitEvent(event)
         }
+        return
+      }
+      case 'milestone': {
+        // Un logro por turno, corto, y pasa el lint como cualquier texto que la mesa ve.
+        const title = line.data.title.trim().replace(/\s+/g, ' ').slice(0, 80)
+        if (!title || this.milestoned) return
+        const cut = yield* this.lint(title)
+        if (cut) return
+        this.milestoned = true
+        yield { kind: 'block', block: { type: 'milestone', title } }
+        return
+      }
+      case 'close': {
+        // Solo en el turno de cierre del reloj: fuera de el, el modelo no
+        // termina la sesion por su cuenta (lo que pide la mesa manda).
+        if (!this.closeAllowed) {
+          this.ignore()
+          return
+        }
+        const cliffhanger = line.data.cliffhanger?.trim().replace(/\s+/g, ' ').slice(0, 500)
+        this.closed = cliffhanger ? { cliffhanger } : {}
         return
       }
       case 'recap': {
