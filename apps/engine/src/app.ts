@@ -1,6 +1,7 @@
 import { ENGINE_CONTRACT_VERSION, ENGINE_HEADERS, PackValidateRequest, ProjectRequest, ProviderConfig, ResolveTurnRequest, SuggestRequest, ValidateEventsRequest, type LintMode, type ProbeResponse } from '@rpg-ngn/engine-contract'
 import { GENRES, PLAY_MODES, SESSION_LENGTHS, STORY_FORMATS, STORY_STYLES } from '@rpg-ngn/content'
 import { createProvider, redact, type ProviderDeps } from '@rpg-ngn/narrative'
+import { tFor, type MessageKey } from '@rpg-ngn/i18n'
 import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
 import type { PackStore } from './packs.js'
@@ -43,10 +44,12 @@ export function createEngine(options: EngineOptions): Hono {
   /** Los packs que este servidor puede jugar, para que la mesa se cree con uno de verdad. */
   app.get('/v1/packs', async (c) => c.json({ packs: await options.packs.catalog(c.req.query('lang')) }))
 
-  /** Vocabularios del catalogo (docs/26, H8): la API los sincroniza con atomo/taxonomy (H9). */
-  app.get('/v1/vocabularies', (c) =>
-    c.json({ formats: STORY_FORMATS, sessionLengths: SESSION_LENGTHS, genres: GENRES, styles: STORY_STYLES, modes: PLAY_MODES }),
-  )
+  /**
+   * Vocabularios del catalogo (docs/26, H8) con su etiqueta en cada idioma:
+   * la API los sincroniza con atomo/taxonomy (H9). La lista de slugs vive en
+   * `packages/content/src/taxonomy.ts` y las etiquetas en i18n (`taxonomy.*`).
+   */
+  app.get('/v1/vocabularies', (c) => c.json({ vocabularies: catalogVocabularies() }))
 
   /** Personajes jugables de un pack, para elegir al crear mesa o invitar. */
   app.get('/v1/packs/:id/:version/characters', async (c) => {
@@ -222,4 +225,24 @@ export function createEngine(options: EngineOptions): Hono {
   })
 
   return app
+}
+
+/** Cada vocabulario del catalogo con sus terminos y etiquetas en español e ingles. */
+function catalogVocabularies() {
+  const es = tFor('es')
+  const en = tFor('en')
+  const label = (key: string) => ({ es: es(key as MessageKey), en: en(key as MessageKey) })
+  const vocab = (slug: string, name: { es: string; en: string }, allowMultiple: boolean, terms: readonly string[], key: string) => ({
+    slug,
+    name,
+    allowMultiple,
+    terms: terms.map((term) => ({ slug: term, name: label(`taxonomy.${key}.${term}`) })),
+  })
+  return [
+    vocab('format', { es: 'Formato', en: 'Format' }, false, STORY_FORMATS, 'format'),
+    vocab('mode', { es: 'Para quién', en: 'For whom' }, true, PLAY_MODES, 'mode'),
+    vocab('session', { es: 'Largo de sesión', en: 'Session length' }, false, SESSION_LENGTHS, 'session'),
+    vocab('genre', { es: 'Género', en: 'Genre' }, true, GENRES, 'genre'),
+    vocab('style', { es: 'Cómo se cuenta', en: 'How it is told' }, false, STORY_STYLES, 'style'),
+  ]
 }
