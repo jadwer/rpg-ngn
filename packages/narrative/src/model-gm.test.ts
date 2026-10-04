@@ -326,6 +326,27 @@ describe('ModelGMProvider', () => {
       expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system', 'narration'])
       expect(blocks[3]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
     })
+
+    it('entiende un bloque envuelto con su tipo como kind (mesa 43, 03-10)', async () => {
+      const base = await openSession003()
+      const wrapped = '{"kind":"narration","block":{"type":"narration","text":"Zahira deja pasar un instante antes de moverse. ¿Qué hace?"}}'
+      const outputs = await collect(new ModelGMProvider(new FakeTransport(wrapped), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+      const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+      expect(blocks.some((b) => b?.type === 'narration' && b.text.startsWith('Zahira deja pasar'))).toBe(true)
+      expect(blocks.some((b) => b?.type === 'system')).toBe(false)
+    })
+
+    it('si el ultimo bloque llega roto, el motor tambien devuelve la palabra (mesa 43, 03-10)', async () => {
+      const base = await openSession003()
+      const endsBroken = [
+        '{"kind":"block","block":{"type":"narration","text":"La puerta de la casa cede con un crujido."}}',
+        '{"kind":"dialogue","speaker":"Zahira","speakerRef":"npc:zahira","text":""}}',
+      ].join('\n')
+      const outputs = await collect(new ModelGMProvider(new FakeTransport(endsBroken), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
+      const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'narration', 'system'])
+      expect(blocks[2]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
+    })
   })
 
   it('la Fortuna la tira el jugador: el motor no la tira al abrir y el d20 del modelo no la pisa', async () => {

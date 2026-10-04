@@ -549,6 +549,11 @@ class LineInterpreter {
 
   private ignore(): void {
     this.ignored++
+    // Un bloque de historia roto (dialogo vacio, JSON mal cerrado) cuenta
+    // como cortado: si era el ultimo, la mesa se quedaba sin pregunta y sin
+    // ideas (mesa 43, turno 1, 03-10). Un evento roto no, porque suelen ir
+    // despues de la pregunta.
+    if (/"(?:kind|type)"\s*:\s*"(?:dialogue|narration)"/.test(this.current)) this.lastWasCut = true
     if (this.current && this.ignoredLines.length < 5) this.ignoredLines.push(this.current.slice(0, 240))
   }
 
@@ -723,6 +728,16 @@ class LineInterpreter {
       const withEvent = parsed as { event?: unknown }
       if (withEvent && typeof withEvent === 'object' && withEvent.event && typeof withEvent.event === 'object') {
         if (yield* this.emitProposed(withEvent.event)) return
+      }
+      // `{"kind":"narration","block":{...}}`: lo mismo con bloques. Sonnet 5
+      // lo hizo un turno entero y la mesa se quedo sin narracion (mesa 43, 03-10).
+      const withBlock = parsed as { block?: unknown }
+      if (withBlock && typeof withBlock === 'object' && withBlock.block && typeof withBlock.block === 'object') {
+        const wrapped = TurnBlock.safeParse(withBlock.block)
+        if (wrapped.success) {
+          yield* this.block(wrapped.data)
+          return
+        }
       }
       const asKind = parsed as { kind?: unknown }
       if (asKind && typeof asKind === 'object' && typeof asKind.kind === 'string') {

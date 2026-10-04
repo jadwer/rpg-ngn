@@ -107,6 +107,14 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     else if (!panel && previous && state?.rpgPanel) window.history.back()
   }, [panel])
   useEffect(() => {
+    // Una entrada con panel que dejo otra visita (recargar, o volver a la mesa
+    // desde otra pagina) se limpia al entrar: si no, al cerrar las fichas el
+    // back() caia en ella y abria Jugadores, que ya no se podia cerrar (03-10).
+    const stale = window.history.state as { rpgPanel?: GamePanel } | null
+    if (stale?.rpgPanel) {
+      const { rpgPanel: _drop, ...rest } = stale
+      window.history.replaceState(rest, '')
+    }
     const onPop = (event: PopStateEvent) => {
       const state = event.state as { rpgPanel?: GamePanel } | null
       setPanel(state?.rpgPanel ?? null)
