@@ -242,7 +242,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // estorban. Y el modo pantalla es un asiento, no un estilo: lo que se
   // comparte por OBS es lo que veria un jugador, y eso vale tambien para la
   // voz. Antes se escondian con CSS y el TTS los leia igual en directo.
-  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost && !screen), [allBlocks, isHost, screen])
+  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost && !screen, { characterId: viewer.characterId, shared: screen }), [allBlocks, isHost, screen, viewer.characterId])
   // "Anteriormente..." (E10c): solo si ya estaba al entrar, no si llega en vivo.
   const recap = useMemo(() => latestRecap(blocks), [blocks])
   const [recapAtEntry, setRecapAtEntry] = useState<string | null | undefined>(undefined)

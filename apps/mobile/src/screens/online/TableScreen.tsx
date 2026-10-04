@@ -150,7 +150,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   }, [client, table.packId])
 
   // Los avisos tecnicos del motor solo los ve el anfitrion; a un jugador le estorban.
-  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost), [allBlocks, isHost])
+  const [screen, setScreen] = useState(false)
+  const blocks = useMemo(() => blocksForSeat(allBlocks, isHost, { characterId: viewer.characterId, shared: screen }), [allBlocks, isHost, viewer.characterId, screen])
   // "Anteriormente..." (E10c): solo si ya estaba al entrar, no si llega en vivo.
   const recap = useMemo(() => latestRecap(blocks), [blocks])
   const [recapAtEntry, setRecapAtEntry] = useState<string | null | undefined>(undefined)
@@ -164,7 +165,6 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const [composing, setComposing] = useState(false)
   // Pantalla de lectura (como el modo pantalla de la web): solo la historia,
   // en grande, sin cabecera ni pie.
-  const [screen, setScreen] = useState(false)
   const { height: windowHeight } = useWindowDimensions()
   // Cuanto de la pantalla es escena y cuanto texto: se arrastra la agarradera
   // del panel (Gabino, 25-09, "asi pueden ver la imagen o el texto que

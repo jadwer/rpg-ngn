@@ -1,7 +1,7 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
 
@@ -35,9 +35,22 @@ export function Blocks({ groups, currentBlockId, onPressBlock }: Props) {
             return <Milestone key={group.id} group={group} />
           case 'ending':
             return <EndingCard key={group.id} group={group} />
+          case 'whisper':
+            return <Whisper key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
         }
       })}
     </>
+  )
+}
+
+/** Un susurro del director (docs/26, H7): lo que solo este jugador lee. */
+function Whisper({ group, currentBlockId, onPressBlock }: GroupProps<WhisperGroup>) {
+  const { block } = group
+  return (
+    <div data-block={block.id} className={`block whisper${block.id === currentBlockId ? ' current' : ''}`} onClick={() => onPressBlock?.(block.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onPressBlock?.(block.id)}>
+      <div className="whisper-tag">{t('blocksUi.soloParaTi')}</div>
+      <p>{block.text}</p>
+    </div>
   )
 }
 

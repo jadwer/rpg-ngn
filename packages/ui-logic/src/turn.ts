@@ -44,9 +44,9 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
   const block = envelope.block
   switch (block.type) {
     case 'narration':
-      return { kind: 'narration', id, text: block.text }
+      return { kind: 'narration', id, text: block.text, ...(block.to?.length ? { to: [...block.to] } : {}) }
     case 'dialogue':
-      return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text }
+      return { kind: 'dialogue', id, speaker: resolve(block.speakerRef, block.speaker), text: block.text, ...(block.to?.length ? { to: [...block.to] } : {}) }
     case 'roll': {
       const actor = block.actor ? (block.actor.includes(':') ? resolve(block.actor, null) : resolve(null, block.actor)) : null
       return { kind: 'roll', id, actor, rollKind: 'roll', die: block.die, result: block.result, rolls: block.rolls ?? null, label: block.die ? t('table.turn.rollDie', { die: block.die }) : t('table.turn.roll'), advantage: block.advantage ?? null, text: block.text, ...(block.requested ? { requested: true } : {}) }

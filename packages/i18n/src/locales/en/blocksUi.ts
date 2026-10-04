@@ -5,4 +5,6 @@ export const blocksUi: Messages<typeof es> = {
   comprimir: 'Collapse',
   soloParaTiAnfitrion: 'Only for you, host',
   masN: '({{count}} more)',
+  /** Un susurro del director (docs/26, H7). */
+  soloParaTi: 'Only for you',
 }

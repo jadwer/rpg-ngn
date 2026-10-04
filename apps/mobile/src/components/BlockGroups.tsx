@@ -1,4 +1,4 @@
-import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { t } from '@rpg-ngn/i18n'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
@@ -39,6 +39,8 @@ export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = 
             return <Milestone key={group.id} group={group} />
           case 'ending':
             return <EndingCard key={group.id} group={group} />
+          case 'whisper':
+            return <Whisper key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
         }
       })}
     </View>
@@ -161,6 +163,17 @@ function Scene({ group, assetBase }: { group: ImageGroup; assetBase: string }) {
   )
 }
 
+/** Un susurro del director (docs/26, H7): lo que solo este jugador lee. */
+function Whisper({ group, currentBlockId, onPressBlock }: GroupProps<WhisperGroup>) {
+  const { block } = group
+  return (
+    <Pressable onPress={() => onPressBlock?.(block.id)} style={[styles.whisper, block.id === currentBlockId && styles.current]} accessibilityRole="text">
+      <Text style={styles.whisperTag}>{t('blocksUi.soloParaTi')}</Text>
+      <Text style={styles.whisperText}>{block.text}</Text>
+    </Pressable>
+  )
+}
+
 /** Un logro de la sesion (docs/26, H1): una banda dorada en la historia. */
 function Milestone({ group }: { group: MilestoneGroup }) {
   return (
@@ -186,6 +199,9 @@ function EndingCard({ group }: { group: EndingGroup }) {
 }
 
 const styles = StyleSheet.create({
+  whisper: { gap: 4, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.colors.accentBright, backgroundColor: 'rgba(124, 58, 237, 0.10)' },
+  whisperTag: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.3, textTransform: 'uppercase', color: theme.colors.accentBright },
+  whisperText: { fontFamily: theme.fonts.serifItalic, fontSize: 17, lineHeight: 25, color: theme.colors.ink },
   milestone: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.gold, backgroundColor: 'rgba(212, 175, 55, 0.12)' },
   milestoneStar: { fontSize: 18, color: theme.colors.goldBright },
   milestoneBody: { flex: 1, gap: 2 },

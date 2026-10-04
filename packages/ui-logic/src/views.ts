@@ -37,6 +37,13 @@ export interface SystemGroup {
   block: SystemBlock
 }
 
+/** Un susurro del director (H7): lo que solo este jugador lee. */
+export interface WhisperGroup {
+  kind: 'whisper'
+  id: string
+  block: NarrationBlock
+}
+
 export interface ImageGroup {
   kind: 'image'
   id: string
@@ -55,16 +62,22 @@ export interface EndingGroup {
   block: EndingBlock
 }
 
-export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup | ImageGroup | MilestoneGroup | EndingGroup
+export type ViewGroup = ProseGroup | DialogueGroup | RollGroup | SystemGroup | ImageGroup | MilestoneGroup | EndingGroup | WhisperGroup
 
 /**
  * Quita los avisos tecnicos que solo el anfitrion puede accionar (una linea
  * que el motor ignoro, un corte del lint). Un jugador no puede hacer nada con
  * ellos y le ensucian la narracion. Todo lo demas pasa igual para todos.
  */
-export function blocksForSeat(blocks: readonly TurnBlock[], isHost: boolean): TurnBlock[] {
-  if (isHost) return [...blocks]
-  return blocks.filter((block) => block.kind !== 'system' || block.audience !== 'host')
+export function blocksForSeat(blocks: readonly TurnBlock[], isHost: boolean, seat: { characterId?: string | null; shared?: boolean } = {}): TurnBlock[] {
+  // Un susurro (H7) es de quien lo recibe; en la pantalla compartida, de nadie.
+  // La API ya los filtra; esto es la defensa del cliente.
+  const mine = (block: TurnBlock) => {
+    const to = block.kind === 'narration' || block.kind === 'dialogue' ? block.to : undefined
+    if (!to?.length) return true
+    return !seat.shared && !!seat.characterId && to.includes(seat.characterId)
+  }
+  return blocks.filter((block) => mine(block) && (isHost || block.kind !== 'system' || block.audience !== 'host'))
 }
 
 export function groupBlocks(blocks: readonly TurnBlock[], mode: ViewMode): ViewGroup[] {
@@ -73,6 +86,10 @@ export function groupBlocks(blocks: readonly TurnBlock[], mode: ViewMode): ViewG
     const last = groups[groups.length - 1]
     switch (block.kind) {
       case 'narration':
+        if (block.to?.length) {
+          groups.push({ kind: 'whisper', id: `whisper:${block.id}`, block })
+          break
+        }
         if (last?.kind === 'prose') {
           last.blocks.push(block)
         } else {
@@ -125,6 +142,7 @@ export function groupBlockIds(group: ViewGroup): string[] {
     case 'image':
     case 'milestone':
     case 'ending':
+    case 'whisper':
       return [group.block.id]
   }
 }

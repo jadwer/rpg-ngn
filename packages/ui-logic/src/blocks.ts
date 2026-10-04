@@ -23,6 +23,8 @@ export interface NarrationBlock {
   kind: 'narration'
   id: string
   text: string
+  /** Solo para estos personajes: un susurro del director (docs/26, H7). */
+  to?: string[]
 }
 
 export interface DialogueBlock {
@@ -30,6 +32,8 @@ export interface DialogueBlock {
   id: string
   speaker: Speaker
   text: string
+  /** Solo para estos personajes (H7). */
+  to?: string[]
 }
 
 export interface RollBlock {
