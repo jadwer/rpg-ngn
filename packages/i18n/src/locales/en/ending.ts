@@ -3,6 +3,7 @@ import type { ending as es } from '../es/ending.js'
 
 /** Story clock and ending screen (docs/26, H1). */
 export const ending: Messages<typeof es> = {
+  objective: 'Goal:',
   turnOf: 'Turn {{turn}} of {{total}}',
   lastTurn: 'Last turn',
   sessionEnd: 'End of session {{n}}',

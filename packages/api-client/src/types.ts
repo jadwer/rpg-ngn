@@ -55,6 +55,8 @@ export interface TableSummary {
   lastActivityAt?: string | null
   /** Tope real de ilustraciones por sesion (config de la API); null si la API no lo manda. */
   imagesPerSession?: number | null
+  /** La historia termino (arco de autor, docs/26 H4): la mesa queda "Terminada" y no abre mas sesiones. */
+  finishedAt?: string | null
   /** Cuenta atras que fija el plan del anfitrion (10 en el gratuito); null si la elige la mesa. */
   countdownFixed?: number | null
   /** Viene con `include=members.user`. */
@@ -218,7 +220,8 @@ export interface TableState {
   campaign: { id: number; headSeq: number }
   /** Quien consulta, para no cruzar `members.user` en el cliente. */
   viewer: TableViewer
-  session: { id: number; code: string; status: string } | null
+  /** `objective`: lo que buscan los personajes en esta sesion, si el mundo lo trae (H4). */
+  session: { id: number; code: string; status: string; objective?: string | null } | null
   turn: TurnView | null
   blocks: BlockEnvelope[]
   /** Quien lee en voz alta ahora mismo (anuncio que caduca solo). */

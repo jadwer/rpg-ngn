@@ -1,5 +1,6 @@
 /** Reloj de la historia y pantalla de fin (docs/26, H1). */
 export const ending = {
+  objective: 'Objetivo:',
   turnOf: 'Turno {{turn}} de {{total}}',
   lastTurn: 'Último turno',
   sessionEnd: 'Fin de la sesión {{n}}',

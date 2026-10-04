@@ -42,3 +42,10 @@ describe('table-list', () => {
     expect(worldTags(null)).toEqual([])
   })
 })
+
+describe('mesas con la historia terminada (docs/26, H4)', () => {
+  it('una mesa terminada cuenta como finalizada aunque siga activa', () => {
+    expect(tableState({ id: '1', status: 'active', sessionOpen: false, lastActivityAt: null, finishedAt: '2026-10-04T12:00:00Z' })).toBe('finalizadas')
+    expect(tableState({ id: '2', status: 'active', sessionOpen: false, lastActivityAt: null, finishedAt: null })).toBe('pausa')
+  })
+})

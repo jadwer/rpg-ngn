@@ -64,6 +64,7 @@ export function blockFromApi(envelope: ApiBlockEnvelope, resolve: SpeakerResolve
         id,
         scope: block.scope,
         session: block.session,
+        next: block.next ?? null,
         title: block.title ?? null,
         text: block.text ?? null,
         achievements: [...block.achievements],

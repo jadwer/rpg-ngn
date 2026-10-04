@@ -462,6 +462,7 @@ function tableFrom(resource: Resource, included: Included): TableSummary {
     sessionOpen,
     lastActivityAt,
     imagesPerSession: attr<number | null>(resource, 'imagesPerSession', null),
+    finishedAt: attr<string | null>(resource, 'finishedAt', null),
     countdownFixed: attr<number | null>(resource, 'countdownFixed', null),
     members,
   }

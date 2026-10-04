@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -621,7 +621,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     () => (sheetSource ? sheetEntries({ source: sheetSource, sessionCode, members: table.members, viewerCharacterId: viewer.characterId, own: projections.own, world: projections.world }) : []),
     [sheetSource, sessionCode, table.members, viewer.characterId, projections],
   )
-  const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingCodes), [pack, existingCodes])
+  // Tras un final con sesion siguiente (arco de autor, H4), "Seguir jugando" propone esa.
+  const nextFromEnding = useMemo(() => latestEnding(allBlocks)?.next ?? null, [allBlocks])
+  const suggestedCode = useMemo(() => nextFromEnding ?? suggestedSessionCode(pack, existingCodes), [nextFromEnding, pack, existingCodes])
 
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
   const connectionNotice = connection === 'offline' ? t('play.offline') : error
@@ -740,6 +742,12 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               <div className="kicker">{packName ?? table.name}</div>
               <h2>{sessionTitle ?? (snapshot?.session ? table.name : t('play.noSession'))}</h2>
               {worldTime ? <p className="when">{worldTime}</p> : null}
+              {/* El objetivo de la sesion siempre a la vista (arco de autor, docs/26 H4). */}
+              {snapshot?.session?.objective ? (
+                <p className="objective">
+                  <b>{t('ending.objective')}</b> {snapshot.session.objective}
+                </p>
+              ) : null}
             </section>
             {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
             <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />

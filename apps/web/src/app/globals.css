@@ -5910,3 +5910,16 @@ a {
   letter-spacing: 0;
   color: var(--ink);
 }
+.scene-hero .objective {
+  margin: 8px 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+.scene-hero .objective b {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}

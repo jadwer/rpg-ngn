@@ -11,11 +11,11 @@ export type TableFilter = 'todas' | 'activas' | 'pausa' | 'finalizadas'
 
 export const TABLE_FILTERS: readonly TableFilter[] = ['todas', 'activas', 'pausa', 'finalizadas']
 
-type ListedTable = Pick<TableSummary, 'status' | 'sessionOpen' | 'lastActivityAt' | 'id'>
+type ListedTable = Pick<TableSummary, 'status' | 'sessionOpen' | 'lastActivityAt' | 'id'> & Partial<Pick<TableSummary, 'finishedAt'>>
 
-/** Finalizada es archivada; en pausa, activa sin sesion abierta; activa, con sesion abierta. */
+/** Finalizada es archivada o con la historia terminada (H4); en pausa, activa sin sesion abierta; activa, con sesion abierta. */
 export function tableState(table: ListedTable): Exclude<TableFilter, 'todas'> {
-  if (table.status === 'archived') return 'finalizadas'
+  if (table.status === 'archived' || table.finishedAt) return 'finalizadas'
   return table.sessionOpen ? 'activas' : 'pausa'
 }
 

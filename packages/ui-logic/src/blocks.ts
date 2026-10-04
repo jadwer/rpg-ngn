@@ -91,6 +91,8 @@ export interface EndingBlock {
   scope: 'session' | 'chapter' | 'story'
   /** Codigo de la sesion que cierra ("003"). */
   session: string
+  /** La sesion que sigue segun el mundo (H4), para "Seguir jugando". */
+  next: string | null
   title: string | null
   text: string | null
   achievements: string[]

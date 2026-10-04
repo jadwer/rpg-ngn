@@ -2,7 +2,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -552,7 +552,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     [sheetSource, sessionCode, table.members, viewer.characterId, projections],
   )
 
-  const suggestedCode = useMemo(() => suggestedSessionCode(pack, existingSessions), [pack, existingSessions])
+  // Tras un final con sesion siguiente (arco de autor, H4), "Seguir jugando" propone esa.
+  const nextFromEnding = useMemo(() => latestEnding(allBlocks)?.next ?? null, [allBlocks])
+  const suggestedCode = useMemo(() => nextFromEnding ?? suggestedSessionCode(pack, existingSessions), [nextFromEnding, pack, existingSessions])
   const connectionNotice = connection === 'offline' ? t('play.offline') : error
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
   const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
@@ -659,6 +661,13 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             when={worldTime}
             pill={turn ? `${(pacingLine(snapshot?.pacing) ?? t('mobile.tableScreen.turnoNumero', { number: turn.number }))} · ${progress.narrating ? t('tableScreen.elDirectorNarra') : progress.complete ? t('tableScreen.todosRespondieron') : t('tableScreen.faseDeAcciones')}` : null}
           />}
+          {/* El objetivo de la sesion siempre a la vista (arco de autor, docs/26 H4). */}
+          {snapshot?.session?.objective ? (
+            <View style={styles.objective}>
+              <Text style={styles.objectiveLabel}>{t('ending.objective')}</Text>
+              <Text style={styles.objectiveText}>{snapshot.session.objective}</Text>
+            </View>
+          ) : null}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} />
           {start ? (
@@ -863,6 +872,9 @@ const styles = StyleSheet.create({
   sceneBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' },
   scenePill: { position: 'absolute', top: 10, left: 12, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(5, 5, 10, 0.6)' },
   scenePillText: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.ink },
+  objective: { gap: 2, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: theme.colors.goldDim, backgroundColor: 'rgba(212, 175, 55, 0.08)' },
+  objectiveLabel: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.3, textTransform: 'uppercase', color: theme.colors.goldBright },
+  objectiveText: { fontFamily: theme.fonts.serif, fontSize: 16, lineHeight: 22, color: theme.colors.ink },
   // Negro puro con alfa clarito (Gabino, 24-09): el texto va transparente encima.
   hidden: { display: 'none' },
   screenExit: { position: 'absolute', right: 14, bottom: 24, zIndex: 5, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(0, 0, 0, 0.6)', borderWidth: 1, borderColor: 'rgba(167, 139, 250, 0.5)' },
