@@ -2,6 +2,12 @@
 
 Fecha de corte: **2026-10-02, tarde** (CST). Rama `dev` `7f30a00`; API `40a51c7`+ (desplegada) con platform `69f8130` (v0.2.0). Produccion en https://adastramentis.com. App: APK v22.
 
+**Nota del 04-10.** Tras la partida real del 03-10 hay plan nuevo aprobado y
+sin empezar: [docs/26](26-plan-historias-que-enganchan.md) (reloj de la
+historia, cierre automatico, logros, susurros, arcos de autor, formatos y un
+one-shot de un jugador). El resto de este archivo sigue con corte del 02-10;
+lo desplegado el 03-10 esta listado en el ROADMAP, "Plan del 04-10".
+
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
 decisiones estan cerradas. Se escribio a peticion de un colaborador externo

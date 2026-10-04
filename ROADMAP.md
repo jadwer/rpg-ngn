@@ -40,7 +40,48 @@ Android no llega al 15-11 y el lanzamiento seria solo web.
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta hasta despues
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros del aviso, clausula de la Bendicion
 - [ ] **Copias fuera del servidor** (29-10): el NAS, o mientras tanto un Storage Box de Hetzner
-- [ ] Arte: tema de la temporada, retrato de Bren, "La corte exterior" en el mapa (06-11)
+- [ ] Arte: tema de la temporada, retrato de Bren (06-11). "La corte exterior" ya tiene punto en el mapa de la ciudad (03-10); portada y retrato del one-shot de H5
+
+### Plan del 04-10: historias que enganchan, avanzan y cierran
+
+Manda sobre el resto del calendario hasta cerrarse. Sale de la partida real
+del 03-10 (mesas 42 y 43, boticaria): 12 turnos en 1 h 50 min, ningun cierre,
+una ilustracion, nada privado, y un jugador pidiendo "ya solo quiero saber
+quien es el asesino". El calendario lo aguanta: Comunidad, voz y video
+(semanas 1 a 3) se cerraron el 02-10. Diseño completo, archivos y criterio de
+hecho de cada bloque en
+[docs/26-plan-historias-que-enganchan.md](docs/26-plan-historias-que-enganchan.md).
+Lo planeo Fable; lo implementa Opus, bloque por bloque.
+
+- [ ] **H0. Preparacion**: suite completa de la API y `pnpm check` pendientes del 03-10; desplegar el aviso de compartir en ventana (`37fdacb`) y hacer su par en la app; corte de subtitulos nuevo en el video del servidor. El pedido a Atomo ya esta en curso (sesion `atomoplatform-d4`, 04-10)
+- [ ] **H1. Reloj de la historia, logros y cierre automatico**: ajuste de mesa `pacing.length` (corta 8 turnos, media 14, larga 22, libre); el motor le dice al director en que tramo va (gancho, complicacion, escalada, climax, cierre); logros (`milestone`) cada dos o tres turnos; el director cierra solo (`close`) y todos ven la pantalla de fin; "Un turno mas" y "Pedir el final" para el anfitrion. Las mesas existentes siguen en libre
+- [ ] **H2. Gancho de apertura y prueba A/B**: la apertura arranca con un incidente que exige decidir, no con presentaciones; `tools/ab-opening` compara Claude y GPT lado a lado y Gabino decide el proveedor por omision
+- [ ] **H3. Imagenes por formato**: apertura, climax y final garantizadas; hueco de 2 turnos en sesion corta, 3 en media, 5 en larga
+- [ ] **H4. Arcos de autor**: `arc` en la sesion del mundo (capitulo, presupuesto de turnos, gancho, objetivo visible, puntos de trama, desenlace inevitable, finales con rama) y `finale` en el manifiesto; mesa "Terminada"
+- [ ] **H5. One-shot "Ya descubrí mi pasión: ¡QUIERO SER MÉDICO!"**: un jugador, tres capitulos cortos, dos finales. Universidades reales, farmacia parodiada (decision de Gabino). Es la prueba de aceptacion del plan
+- [ ] **H6. Estrellas y reseñas**: la pantalla de fin pide siempre la valoracion; promedio bayesiano en Explorar; el texto de las reseñas, privado hasta tener moderacion
+- [ ] **H7. Lo privado**: susurros del director a un solo jugador, objetivo personal garantizado al abrir la sesion, la API filtra por jugador (ni el anfitrion ve lo ajeno). Cierra de paso la deuda de informacion asimetrica (S14 y E1 del VAM del 19-09). Al cerrar, AAB v25 (antes del 14-10)
+- [ ] **H8. Formatos en la mesa y en Explorar**: formato, un jugador o grupo, largo de sesion, generos y estilo como datos del mundo con vocabulario controlado; el largo de sesion se elige al crear la mesa; filtros en Explorar, web y app
+- [ ] **H9. Catalogo sobre atomo/taxonomy**: cuando Atomo avise con la etiqueta; no bloquea lo anterior
+
+Metas medibles (misma consulta del 04-10 sobre `turns`, `turn_blocks` y
+`scene_images`): hasta 200 palabras del director por turno (eran 350), cierre
+en el turno 8 (no hubo en 12), dos logros o mas y cuatro ilustraciones o mas
+por sesion corta, y todos los jugadores ven la pantalla de fin. Compuerta:
+Gabino juega una sesion corta con sus amigos antes de dar H1 a H3 por buenos.
+
+Arreglos de la partida del 03-10, ya desplegados (monorepo `ee6f457`, API
+`99aa5c8`, boticaria `57782af`): el motor entiende bloques con su tipo como
+`kind` y devuelve la palabra si el ultimo bloque llega roto; quien elige
+personaje con la sesion en marcha entra al turno abierto; corregir la
+respuesta enviada; ideas en la tarjeta de tirada; sin el aviso "ya esta
+closing"; el panel de Jugadores ya no se abre solo; mundos derivados ilustran
+mientras sean privados, con deslinde en la cronica y sin video ni Comunidad;
+"La corte exterior" en el mapa.
+
+Despues de este plan: one-shots como misiones del camino de temporada, limite
+de tiempo por respuesta en sesiones cortas, reseñas publicas con moderacion,
+mas one-shots de un jugador por genero.
 
 ### Avance
 
