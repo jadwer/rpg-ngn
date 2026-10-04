@@ -68,8 +68,9 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let suggestions: Record<string, string[]> = {}
   let rollRequests: RollRequest[] = []
   // El director cerro la sesion en el turno de cierre del reloj (docs/26, H1).
-  let closed: { cliffhanger?: string } | null = null
-  const clock = storyClock(request.turn.number, request.context?.pacing)
+  let closed: { cliffhanger?: string; endingId?: string } | null = null
+  const arc = pack.sessions.get(request.turn.sessionId)?.arc
+  const clock = storyClock(request.turn.number, request.context?.pacing, arc)
 
   // Cierra un evento nacido en el engine con su id, version y momento. El
   // seq sale del estado ya aplicado, asi que hay que llamarlo en orden.
@@ -174,7 +175,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       }
 
       if (output.kind === 'close') {
-        closed = output.cliffhanger ? { cliffhanger: output.cliffhanger } : {}
+        closed = { ...(output.cliffhanger ? { cliffhanger: output.cliffhanger } : {}), ...(output.endingId ? { endingId: output.endingId } : {}) }
         continue
       }
 
@@ -208,8 +209,34 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     // Tiradas pedidas: esos personajes tiran en vez de escribir el turno que viene.
     ...(rollRequests.length ? { rollRequests: rollRequests.filter((r) => addressed.includes(r.characterId)) } : {}),
     // Fin de la sesion: la API no abre otro turno y escribe el bloque `ending`.
-    ...(closed ? { close: { scope: 'session' as const, ...closed } } : {}),
+    ...(closed ? { close: closeOf(pack, request.turn.sessionId, closed) } : {}),
     ...(clock ? { clock: { total: clock.total } } : {}),
+    ...(arc?.objective ? { objective: arc.objective } : {}),
+  }
+}
+
+/**
+ * El cierre que ve la mesa (docs/26, H4). Alcance: `story` si el final es
+ * `final`, o si es la ultima sesion del mundo y el mundo trae `finale`;
+ * `chapter` si la sesion es un capitulo; si no, `session`. La tarjeta sale
+ * del mundo (final elegido, tarjeta de la sesion o `finale`), nunca del modelo.
+ */
+function closeOf(pack: LoadedPack, sessionId: string, closed: { cliffhanger?: string; endingId?: string }) {
+  const arc = pack.sessions.get(sessionId)?.arc
+  const ending = closed.endingId ? arc?.endings?.find((e) => e.id === closed.endingId) : undefined
+  const last = [...pack.sessions.keys()].sort().at(-1) === sessionId
+  const finale = pack.manifest.finale
+  const scope = ending?.final || (last && !ending?.next && finale) ? 'story' : arc?.chapter ? 'chapter' : 'session'
+  const title = ending?.title ?? arc?.endCard?.title ?? (scope === 'story' ? finale?.title : undefined)
+  const text = ending?.text ?? arc?.endCard?.text ?? (scope === 'story' ? finale?.text : undefined)
+  // Una historia que termina no deja nada pendiente.
+  const cliffhanger = scope === 'story' ? undefined : closed.cliffhanger
+  return {
+    scope: scope as 'session' | 'chapter' | 'story',
+    ...(cliffhanger ? { cliffhanger } : {}),
+    ...(ending ? { endingId: ending.id } : {}),
+    ...(title || text ? { card: { ...(title ? { title } : {}), ...(text ? { text } : {}) } } : {}),
+    ...(ending?.next ? { next: ending.next } : {}),
   }
 }
 

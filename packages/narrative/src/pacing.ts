@@ -1,3 +1,4 @@
+import type { SessionArc } from '@rpg-ngn/content'
 import type { SessionLength, TurnPacing } from '@rpg-ngn/engine-contract'
 
 /**
@@ -24,12 +25,16 @@ export interface StoryClock {
   phaseStart: boolean
   /** El siguiente turno es el ultimo. */
   penultimate: boolean
+  /** Desde aqui un final del arco con su condicion cumplida puede cerrar antes (H4). */
+  earlyEnding: boolean
 }
 
 /** Presupuesto de una sesion: el del mundo (arco de autor) manda sobre el largo de la mesa. */
 export function sessionBudget(pacing: TurnPacing | undefined, arcTurns?: number): number | null {
+  // Una sesion con arco de autor (H4) tiene reloj aunque la mesa juegue libre.
+  if (arcTurns !== undefined) return arcTurns + (pacing?.extra ?? 0)
   if (!pacing) return null
-  const base = arcTurns ?? (pacing.length === 'libre' ? null : SESSION_TURNS[pacing.length])
+  const base = pacing.length === 'libre' ? null : SESSION_TURNS[pacing.length]
   return base === null ? null : base + pacing.extra
 }
 
@@ -47,13 +52,14 @@ function phaseAt(turn: number, total: number): StoryPhase {
 }
 
 /** Donde va la sesion en este turno, o null si no hay reloj. */
-export function storyClock(turn: number, pacing: TurnPacing | undefined, arcTurns?: number): StoryClock | null {
-  const total = sessionBudget(pacing, arcTurns)
+export function storyClock(turn: number, pacing: TurnPacing | undefined, arc?: Pick<SessionArc, 'turns' | 'endings'>): StoryClock | null {
+  const total = sessionBudget(pacing, arc?.turns.target)
   if (total === null) return null
   // "Pedir el final": el anfitrion corta y el turno siguiente es el cierre.
   const phase = pacing?.wrap ? 'cierre' : phaseAt(turn, total)
   const previous = turn > 1 ? phaseAt(turn - 1, total) : null
-  return { turn, total, phase, phaseStart: phase !== previous, penultimate: phase !== 'cierre' && turn === total - 1 }
+  const earlyEnding = phase !== 'cierre' && (arc?.endings?.length ?? 0) > 0 && turn >= (arc?.turns.min ?? 2)
+  return { turn, total, phase, phaseStart: phase !== previous, penultimate: phase !== 'cierre' && turn === total - 1, earlyEnding }
 }
 
 const PHASE_GOAL: Record<StoryPhase, string> = {
@@ -77,7 +83,7 @@ const PHASE_NAME: Record<StoryPhase, string> = {
  * y como cerrar. Va en el mensaje de usuario (el system prompt se queda
  * estable para la cache).
  */
-export function clockLayer(clock: StoryClock, partySize: number): string {
+export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionArc): string {
   const words = partySize === 1 ? 220 : 180
   const lines = [
     '# Reloj de la historia',
@@ -90,10 +96,18 @@ export function clockLayer(clock: StoryClock, partySize: number): string {
     lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".')
   }
   if (clock.penultimate) lines.push('El turno siguiente es el ÚLTIMO de la sesión: deja a la mesa ante la decisión final.')
+  const endings = arc?.endings ?? []
+  if (endings.length > 0) {
+    lines.push('Finales posibles de esta sesión (elige el que hayan ganado con lo que hicieron; el id va en la línea close):')
+    for (const ending of endings) lines.push(`- "${ending.id}": ${ending.when}${ending.default ? ' (si ninguno se cumple, este)' : ''}`)
+    if (clock.earlyEnding) lines.push('Si este turno se cumple de lleno la condición de un final, puedes cerrar ya: narra ese desenlace y termina con {"kind":"close","ending":"<id>"}. Si no se cumple, sigue la historia.')
+  }
   if (clock.phase === 'cierre') {
     lines.push(
       'Este turno CIERRA la sesión. Narra el desenlace a partir de lo que declararon; no devuelvas la palabra ni hagas preguntas, no emitas "suggest" ni "addressed".',
-      'Marca lo que lograron con un "milestone" y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí).',
+      endings.length > 0
+        ? 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","ending":"<id>","cliffhanger":"..."}: el final que ganaron y, si la historia sigue, una frase con lo que queda pendiente.'
+        : 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí).',
     )
   }
   return lines.join('\n')

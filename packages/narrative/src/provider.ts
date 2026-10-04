@@ -54,7 +54,7 @@ export type GMOutput =
   /** Hallazgo del lint de conocimiento; el engine lo acumula en `result.lint`. */
   | { kind: 'lint'; finding: LintFinding }
   /** El director cerro la sesion en su turno de cierre (docs/26, H1); el engine lo pasa a `result.close`. */
-  | { kind: 'close'; cliffhanger?: string }
+  | { kind: 'close'; cliffhanger?: string; endingId?: string }
   /** El GM marco un momento para ilustrar: una frase de lo que se ve (docs/ROADMAP, E10a). */
   | { kind: 'illustrate'; moment: string }
   /** Ideas de accion por personaje interpelado (E10b); el cuadro de texto sigue libre. */

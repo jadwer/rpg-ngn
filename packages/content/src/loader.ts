@@ -187,6 +187,23 @@ export async function loadPack(source: FileSource, options: LoadPackOptions = {}
     if (session.startLocation !== undefined && !locations.has(session.startLocation)) {
       issues.push({ level: 'error', path, message: `startLocation apunta a ${session.startLocation}, que no esta en el pack` })
     }
+    // Los finales de un arco (docs/26, H4): ids unicos, un solo final por omision y `next` que exista.
+    const endings = session.arc?.endings ?? []
+    const ids = new Set<string>()
+    for (const ending of endings) {
+      if (ids.has(ending.id)) issues.push({ level: 'error', path, message: `el final ${ending.id} esta repetido` })
+      ids.add(ending.id)
+      if (ending.next !== undefined && !sessions.has(ending.next)) {
+        issues.push({ level: 'error', path, message: `el final ${ending.id} sigue en la sesion ${ending.next}, que no esta en el pack` })
+      }
+    }
+    if (endings.length > 0 && endings.filter((e) => e.default).length !== 1) {
+      issues.push({ level: 'error', path, message: 'los finales necesitan exactamente uno con default: true' })
+    }
+    const min = session.arc?.turns.min
+    if (min !== undefined && session.arc && min > session.arc.turns.target) {
+      issues.push({ level: 'error', path, message: `turns.min (${min}) pasa del presupuesto (${session.arc.turns.target})` })
+    }
   }
 
   for (const [id, secret] of secrets) {

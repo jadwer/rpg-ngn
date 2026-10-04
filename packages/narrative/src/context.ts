@@ -58,7 +58,7 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     memoryLayer(ctx, session, budget),
     gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx)),
-    clock ? clockLayer(clock, party.length) : null,
+    clock ? clockLayer(clock, party.length, ctx.session?.arc) : null,
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
@@ -115,6 +115,18 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
     const jugadaAqui = ctx.state.meta.sessions[packSession.id]?.status === 'closed'
     if (packSession.recap && jugadaAqui) lines.push(`Resumen previo: ${clip(packSession.recap, budget.sheets === 'compact' ? 500 : 2000)}`)
     if (packSession.openThreads?.length) lines.push(`Hilos abiertos: ${packSession.openThreads.join('; ')}`)
+    // El arco del autor (docs/26, H4): capitulo, gancho, objetivo, puntos de trama y desenlace.
+    const arc = packSession.arc
+    if (arc) {
+      if (arc.chapter) lines.push(`Capítulo ${arc.chapter.number}: ${arc.chapter.title}`)
+      if (arc.objective) lines.push(`Objetivo de los personajes en esta sesión (los jugadores lo ven en pantalla): ${arc.objective}`)
+      if (arc.hook) lines.push(`Gancho de apertura (el incidente con el que empieza la sesión): ${arc.hook}`)
+      if (arc.beats?.length) lines.push(`Puntos de trama obligados, en orden (capa del GM; llévalos a escena sin anunciarlos): ${arc.beats.map((b, i) => `${i + 1}. ${b}`).join(' ')}`)
+      if (arc.fixedOutcome) {
+        lines.push(`Desenlace inevitable (capa del GM): ${arc.fixedOutcome}`)
+        lines.push('Lo que decida el jugador cambia el cómo, nunca el qué. No lo anuncies. Haz que cada camino desemboque ahí con causas creíbles, sin castigar al jugador por intentarlo y sin quitarle la decisión: el mundo lo empuja, no lo obliga.')
+      }
+    }
     if (budget.sheets === 'full') {
       if (packSession.notes) lines.push(`Notas de la sesión: ${packSession.notes}`)
       if (packSession.howToPlay.length) lines.push(`Reglas de la mesa: ${packSession.howToPlay.join(' ')}`)
@@ -387,8 +399,8 @@ function describeEffect(effect: Record<string, unknown>, actor: string | undefin
 }
 
 /** El reloj de la historia de este turno, si la mesa lo tiene (docs/26, H1). */
-export function clockOf(ctx: Pick<GMTurnContext, 'turn' | 'notes'>): StoryClock | null {
-  return storyClock(ctx.turn.number, ctx.notes?.pacing)
+export function clockOf(ctx: Pick<GMTurnContext, 'turn' | 'notes' | 'session'>): StoryClock | null {
+  return storyClock(ctx.turn.number, ctx.notes?.pacing, ctx.session?.arc)
 }
 
 // Capa d: el turno.
@@ -406,7 +418,7 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
           'Empieza en plena acción: el PRIMER bloque es un incidente que está ocurriendo ahora y exige decidir (un grito, un cuerpo, una acusación, alguien que llega con prisa), no una descripción del lugar ni del clima. Tres o cuatro bloques breves en total.',
           'Cada personaje presente entra en UNA frase atada al incidente: qué le toca a él o por qué le importa. Nada de retratos ni repasos de su ficha, y sin decidir nada por ellos.',
           'Di qué está en juego en una frase, dentro de la ficción: qué se pierde si nadie actúa, y cuándo.',
-          'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si hay un NPC en escena, que hable y que presione.',
+          'Si la sesión trae un briefing, es tu punto de partida; no lo copies, hazlo vivir. Si trae "Gancho de apertura", ese es el incidente con el que empiezas, sin cambiarlo. Si hay un NPC en escena, que hable y que presione.',
           ...(previous
             ? ['Antes de todo, en la PRIMERA línea, el resumen de lo que la mesa vivió en la sesión anterior: {"kind":"recap","text":"..."} con 3 a 5 frases en pasado, en orden, desde la Crónica y el cliffhanger. Solo lo que la mesa sabe, sin secretos ni lo que no vieron. Es el "Anteriormente..." que leen al volver; no lo repitas en la narración.']
             : []),

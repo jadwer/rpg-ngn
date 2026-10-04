@@ -105,6 +105,12 @@ export const PackManifest = z.strictObject({
    * se aplican y se validan, y son las que el catalogo anuncia.
    */
   translations: z.array(LanguageCode).default([]),
+  /**
+   * El texto con el que termina la historia entera (docs/26, H4): "Y asi
+   * termina la historia de los Nueve Viajeros...". Sale en la pantalla de
+   * fin cuando se cierra la ultima sesion o un final marcado como `final`.
+   */
+  finale: z.strictObject({ title: z.string().min(1), text: z.string().min(1) }).optional(),
 })
 
 export type PackManifest = z.infer<typeof PackManifest>

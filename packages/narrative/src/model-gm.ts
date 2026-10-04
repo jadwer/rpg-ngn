@@ -338,6 +338,10 @@ export class ModelGMProvider implements GMProvider {
     // En el turno de cierre del reloj el director puede (y debe) cerrar la sesion.
     const clock = clockOf(ctx)
     interpreter.closeAllowed = clock?.phase === 'cierre'
+    // Un final del arco con su condicion cumplida puede cerrar antes (H4), pero solo nombrandolo.
+    interpreter.earlyEnding = clock?.earlyEnding ?? false
+    interpreter.endingIds = (ctx.session?.arc?.endings ?? []).map((e) => e.id)
+    interpreter.defaultEnding = ctx.session?.arc?.endings?.find((e) => e.default)?.id ?? null
     let buffer = ''
     let raw = ''
     let reply: ModelReply
@@ -413,7 +417,10 @@ export class ModelGMProvider implements GMProvider {
     // la linea `close` (sin cliffhanger), y no hay ideas ni tiradas para un
     // turno que no viene.
     if (interpreter.closeAllowed) {
-      yield { kind: 'close', ...(interpreter.closed ?? {}) }
+      // Sin final valido en el cierre, el que el autor marco por omision.
+      const closed = interpreter.closed ?? {}
+      const endingId = closed.endingId ?? interpreter.defaultEnding ?? undefined
+      yield { kind: 'close', ...closed, ...(endingId ? { endingId } : {}) }
       yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
       return
     }
@@ -611,8 +618,12 @@ class LineInterpreter {
   recapped = false
   /** El reloj esta en el turno de cierre: la linea `close` vale. */
   closeAllowed = false
-  /** El director cerro la sesion; el cliffhanger, si dejo uno. */
-  closed: { cliffhanger?: string } | null = null
+  /** El director cerro la sesion; el cliffhanger y el final del arco, si los dio. */
+  closed: { cliffhanger?: string; endingId?: string } | null = null
+  /** Un final del arco puede cerrar antes del presupuesto (H4). */
+  earlyEnding = false
+  endingIds: string[] = []
+  defaultEnding: string | null = null
   /** Ya hubo logro este turno: uno como maximo. */
   private milestoned = false
   /** Ideas de accion por personaje (E10b). */
@@ -839,14 +850,18 @@ class LineInterpreter {
         return
       }
       case 'close': {
-        // Solo en el turno de cierre del reloj: fuera de el, el modelo no
-        // termina la sesion por su cuenta (lo que pide la mesa manda).
-        if (!this.closeAllowed) {
+        // Solo en el turno de cierre del reloj, o antes si nombra un final del
+        // arco cuya condicion se cumplio (H4). Fuera de eso, el modelo no
+        // termina la sesion por su cuenta.
+        const ending = line.data.ending?.trim().replace(/^ending:/, '')
+        const validEnding = ending !== undefined && this.endingIds.includes(ending) ? ending : undefined
+        if (!this.closeAllowed && !(this.earlyEnding && validEnding)) {
           this.ignore()
           return
         }
         const cliffhanger = line.data.cliffhanger?.trim().replace(/\s+/g, ' ').slice(0, 500)
-        this.closed = cliffhanger ? { cliffhanger } : {}
+        this.closed = { ...(cliffhanger ? { cliffhanger } : {}), ...(validEnding ? { endingId: validEnding } : {}) }
+        this.closeAllowed = true
         return
       }
       case 'recap': {

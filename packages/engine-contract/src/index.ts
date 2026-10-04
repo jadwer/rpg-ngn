@@ -314,6 +314,8 @@ export const TurnBlock = z.discriminatedUnion('type', [
     scope: z.enum(['session', 'chapter', 'story']),
     /** Codigo de la sesion que cierra. */
     session: z.string(),
+    /** La sesion que sigue (arco de autor, H4). */
+    next: z.string().optional(),
     title: z.string().optional(),
     text: z.string().optional(),
     achievements: z.array(z.string()),
@@ -496,8 +498,12 @@ export const ResolveLine = z.discriminatedUnion('kind', [
         cliffhanger: z.string().max(500).optional(),
         endingId: KebabId.optional(),
         card: z.strictObject({ title: z.string().optional(), text: z.string().optional() }).optional(),
+        /** La sesion del pack que sigue tras este final (H4): "Seguir jugando" abre esa. */
+        next: z.string().regex(/^\d{3}$/).optional(),
       })
       .optional(),
+    /** El objetivo visible de la sesion (arco de autor, H4): la mesa lo ve en pantalla. */
+    objective: z.string().optional(),
     /** Presupuesto de turnos de la sesion si tiene reloj, para que la mesa vea "Turno 5 de 8". */
     clock: z.strictObject({ total: z.number().int().positive() }).optional(),
   }),
