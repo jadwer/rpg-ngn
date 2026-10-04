@@ -87,7 +87,7 @@ export function clockLayer(clock: StoryClock, partySize: number): string {
     `Texto: como máximo ${words} palabras en total${partySize === 1 ? '' : ' y 2 diálogos de NPC de hasta dos frases'}. Menos es mejor: la mesa lee en voz alta y quiere decidir.`,
   ]
   if (clock.phaseStart && clock.phase !== 'gancho') {
-    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."} (hasta 80 caracteres, en pasado, lo que lograron, sin revelar secretos).')
+    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".')
   }
   if (clock.penultimate) lines.push('El turno siguiente es el ÚLTIMO de la sesión: deja a la mesa ante la decisión final.')
   if (clock.phase === 'cierre') {

@@ -829,7 +829,8 @@ class LineInterpreter {
       }
       case 'milestone': {
         // Un logro por turno, corto, y pasa el lint como cualquier texto que la mesa ve.
-        const title = line.data.title.trim().replace(/\s+/g, ' ').slice(0, 80)
+        // Hasta 80 caracteres sin partir palabras (la partida de prueba del 04-10 cerro uno en "empieza por ").
+        const title = clipWords(line.data.title.trim().replace(/\s+/g, ' '), 80)
         if (!title || this.milestoned) return
         const cut = yield* this.lint(title)
         if (cut) return
@@ -1184,4 +1185,12 @@ export function preRollFor(characterIds: readonly string[], random: RandomSource
     rolled[id] = rollD20(random, {}).result
   }
   return rolled
+}
+
+/** Corta en la ultima palabra entera que cabe y marca el corte. */
+function clipWords(text: string, max: number): string {
+  if (text.length <= max) return text
+  const cut = text.slice(0, max - 1)
+  const space = cut.lastIndexOf(' ')
+  return `${(space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:.]+$/, '')}…`
 }

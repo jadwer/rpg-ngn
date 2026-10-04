@@ -529,6 +529,23 @@ Hecho cuando: tests de schema y de `CatalogService`; filtros en web y app a
 
 ## H9. Catalogo sobre atomo/taxonomy
 
+**Lista en Atomo v0.4.1** (04-10, tag `v0.4.1`, commit `14d71d0`, sesion
+`atomoplatform-d4`). Lo que hay que saber al consumirla:
+
+- Comando `atomo-taxonomy:sync [--prune]` (no `taxonomy:sync`); config
+  `atomo-taxonomy.vocabularies` con slug, name, translations, allow_multiple
+  y terms (slug, name, translations, order, metadata, children).
+- Trait `Atomo\Taxonomy\Concerns\HasTerms`: `terms()`, `termsIn()`,
+  `syncTerms($vocab, $slugs)`, `attachTerm`, `detachTerm`, `hasTerm`, scopes
+  `whereHasTerm` y `whereHasAnyTerm` (O dentro de un vocabulario, Y
+  encadenando). Errores de etiquetado: `ValidationException`.
+- Lector `Atomo\Taxonomy\Support\TaxonomyReader::vocabulary($slug,
+  $locale, $countFor)` y `label($vocab, $slug, $locale)`.
+- Actualizar desde v0.2.0: ninguno de los "Como actualizar" mayores toca a la
+  API. Pasos: submodule a v0.4.1, `composer require atomo/taxonomy`,
+  `php artisan migrate`, `php artisan atomo-taxonomy:sync` en el despliegue,
+  hook del submodule y `atomo_ref` nuevo en el inventario de oficina.
+
 Cuando el agente de Atomo avise con la etiqueta:
 
 1. `git -C platform fetch`, `node platform/scripts/changes.mjs since 69f8130 --to <tag>`,

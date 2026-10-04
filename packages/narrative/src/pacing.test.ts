@@ -78,3 +78,15 @@ describe('el director con reloj', () => {
     expect(outputs.some((o) => o.kind === 'close')).toBe(false)
   })
 })
+
+describe('logros', () => {
+  it('un logro largo se corta sin partir palabras', async () => {
+    const base = await openSession003()
+    const long = '{"kind":"milestone","title":"Confirmaron que el pueblo oculta algo sobre la mina y un nombre que empieza por ene"}\n{"kind":"block","block":{"type":"narration","text":"Sigue."}}'
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(long), KEY).narrate(contextFor(base, turn(4, [response('zahira', 'Miro.')]), { notes: { pacing: corta } })))
+    const title = outputs.flatMap((o) => (o.kind === 'block' && o.block.type === 'milestone' ? [o.block.title] : []))[0]!
+    expect(title.length).toBeLessThanOrEqual(80)
+    expect(title.endsWith('…')).toBe(true)
+    expect(title).not.toMatch(/ …$/)
+  })
+})
