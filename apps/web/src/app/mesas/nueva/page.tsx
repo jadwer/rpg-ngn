@@ -2,7 +2,7 @@
 
 import { language, t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, withProvider, type ApiClient, type GmPreset, type PackCharacter, type PackOption, type TableSummary } from '@rpg-ngn/api-client'
-import { newTableLanguage, worldLanguageNote, worldLanguages, packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
+import { defaultSessionLength, SESSION_LENGTHS, sessionLengthLabel, withSessionLength, type SessionLength, newTableLanguage, worldLanguageNote, worldLanguages, packCharacters, packSummaryText, premisePlaceholder, presetOptionParts, providerForNewTable, selectablePresets, tableNamePlaceholder } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CharacterPicker } from '../../../components/CharacterPicker'
@@ -53,6 +53,9 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
   const [chosenLang, setChosenLang] = useState<Language | null>(null)
   const optionLangs = worldLanguages(option)
   const tableLang = chosenLang && optionLangs.includes(chosenLang) ? chosenLang : newTableLanguage(option, language())
+  // Largo de sesion (docs/26, H8): el que recomienda el mundo, o el que elija quien crea la mesa.
+  const [chosenLength, setChosenLength] = useState<SessionLength | null>(null)
+  const sessionLength = chosenLength ?? defaultSessionLength(option)
   const { pack, error: packError } = usePack(tableLang)
   const characters = useMemo(() => (pack ? packCharacters(pack) : []), [pack])
   // La web lleva el pack piloto dentro para pintar retratos y fichas sin pedir
@@ -128,7 +131,7 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
       // siempre el del piloto y una mesa de intriga nacia con reglas de combate
       // (VAM del 19-09, motor A1). Sin version: el motor resuelve la unica que
       // tiene; la API rechaza con 422 un ruleset distinto al del pack (R2).
-      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, settings: { ...(provider ? withProvider({}, provider) : {}), language: tableLang } })
+      const table = await client.createTable({ name: name.trim(), packId: option.id, packVersion: option.version, ruleset: option.system || RULESET_ID, premise, settings: withSessionLength({ ...(provider ? withProvider({}, provider) : {}), language: tableLang }, sessionLength) })
       if (characterId) await client.setOwnerCharacter(table.id, user.id, characterId)
       setCreated(await client.table(table.id))
     } catch (caught) {
@@ -196,6 +199,17 @@ function NewTable({ client, user, unauthorized }: { client: ApiClient; user: Sto
           ) : worldLanguageNote(option, language()) ? (
             <span className="hint">{worldLanguageNote(option, language())}</span>
           ) : null}
+          <label className="field">
+            <span>{t('ending.lengthTitle')}</span>
+            <select className="input" name="sessionLength" value={sessionLength} onChange={(e) => setChosenLength(e.target.value as SessionLength)}>
+              {SESSION_LENGTHS.map((value) => (
+                <option key={value} value={value}>
+                  {sessionLengthLabel(value)}
+                </option>
+              ))}
+            </select>
+            <span className="hint">{t('ending.lengthHint')}</span>
+          </label>
         </Panel>
 
         <Panel title={t('newTable.tuPersonaje')}>

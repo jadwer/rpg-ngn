@@ -62,3 +62,8 @@ export function endingTitle(block: Pick<EndingBlock, 'scope' | 'session' | 'titl
   if (block.scope === 'chapter') return Number.isFinite(number) ? t('ending.chapterEnd', { n: number }) : t('ending.chapterEndPlain')
   return Number.isFinite(number) ? t('ending.sessionEnd', { n: number }) : t('ending.sessionEndPlain')
 }
+
+/** El largo con el que nace una mesa: el que recomienda el mundo, o sesiones cortas (docs/26, H8). */
+export function defaultSessionLength(option: { catalog?: { sessionLength?: 'corta' | 'media' | 'larga' } | null } | null | undefined): SessionLength {
+  return option?.catalog?.sessionLength ?? 'corta'
+}

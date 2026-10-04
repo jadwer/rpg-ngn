@@ -2,7 +2,7 @@
 
 import { LANGUAGES, language, t } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, type ApiClient, type CatalogFilters, type CatalogWorldCard, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { cardView, durationLabel, languageCodes, passView, playersTag, ratingLine, seasonProgress, stopLabel, worldLanguageNote, worldLanguages } from '@rpg-ngn/ui-logic'
+import { CATALOG_GENRES, CATALOG_MODES, cardView, formatLine, genreLabel, modeLabel, languageCodes, passView, ratingLine, seasonProgress, stopLabel, worldLanguageNote, worldLanguages } from '@rpg-ngn/ui-logic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -109,6 +109,15 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
       {season && season.worlds.length > 0 ? <SeasonBlock season={season} known={known} signedIn={signedIn} pass={pass} onBuyPass={buyPass} /> : null}
       {buying ? <CatalogCheckout client={client} product={buying} onClose={() => setBuying(null)} onDone={load} /> : null}
 
+      {/* Formatos (docs/26, H8): primero para quien es la historia. */}
+      <div className="explorar-modos" role="group" aria-label={t('taxonomy.allModes')}>
+        {CATALOG_MODES.map((mode) => (
+          <button key={mode} type="button" className="btn" aria-pressed={filters.mode === mode} onClick={() => set({ mode: filters.mode === mode ? undefined : mode })}>
+            {modeLabel(mode)}
+          </button>
+        ))}
+      </div>
+
       <div className="explorar-filtros" id="mundos">
         <label className="buscar">
           <ShellIcon name="buscar" />
@@ -126,6 +135,14 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
           <option value="">{t('explorePage.genero')}</option>
           {genres.map((g) => (
             <option key={g}>{g}</option>
+          ))}
+        </select>
+        <select value={filters.genres ?? ''} onChange={(e) => set({ genres: e.target.value || undefined })} aria-label={t('taxonomy.allGenres')}>
+          <option value="">{t('taxonomy.allGenres')}</option>
+          {CATALOG_GENRES.map((g) => (
+            <option key={g} value={g}>
+              {genreLabel(g)}
+            </option>
           ))}
         </select>
         <select value={filters.tone ?? ''} onChange={(e) => set({ tone: e.target.value || undefined })} aria-label={t('explorePage.tono')}>
@@ -183,8 +200,7 @@ function Explorar({ client, signedIn }: { client: ApiClient; signedIn: boolean }
                 </Link>
                 <ul className="chips">
                   <li>{world.catalog.genre}</li>
-                  <li>{playersTag(world.catalog.players)}</li>
-                  <li>{durationLabel(world.catalog.duration)}</li>
+                  <li>{formatLine(world.catalog)}</li>
                   <li>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</li>
                 </ul>
                 <p className="byline">{view.byline}</p>

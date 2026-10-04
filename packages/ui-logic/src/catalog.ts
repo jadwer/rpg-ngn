@@ -1,5 +1,6 @@
-import { t } from '@rpg-ngn/i18n'
-import type { CatalogWorldCard, SeasonPassOffer, WorldState } from '@rpg-ngn/api-client'
+import { t, type MessageKey } from '@rpg-ngn/i18n'
+import type { CatalogWorldCard, SeasonPassOffer, WorldCatalog, WorldState } from '@rpg-ngn/api-client'
+import { GENRES, PLAY_MODES, type PlayMode } from '@rpg-ngn/content'
 import { packPrice } from './credits.js'
 
 /**
@@ -120,4 +121,28 @@ export function seasonPathLine(worlds: ReadonlyArray<{ packId: string; threshold
 export function ratingLine(rating: { average: number; count: number } | null | undefined): string | null {
   if (!rating || rating.count === 0) return null
   return `★ ${rating.average.toFixed(1)} (${rating.count})`
+}
+
+/** Los generos y modos del vocabulario (docs/26, H8), para los filtros de Explorar. */
+export const CATALOG_GENRES: readonly string[] = GENRES
+export const CATALOG_MODES: readonly PlayMode[] = PLAY_MODES
+
+/** Etiqueta de un genero del vocabulario; un slug desconocido se enseña tal cual. */
+export function genreLabel(slug: string): string {
+  return (GENRES as readonly string[]).includes(slug) ? t(`taxonomy.genre.${slug}` as MessageKey) : slug
+}
+
+export function modeLabel(mode: PlayMode): string {
+  return mode === 'solo' ? t('taxonomy.mode.solo') : t('taxonomy.mode.grupo')
+}
+
+/**
+ * La linea de formato de una tarjeta (docs/26, H8): "One-shot · 1 jugador ·
+ * 30 a 40 min por sesion". Sin el vocabulario nuevo, la duracion de siempre.
+ */
+export function formatLine(catalog: Pick<WorldCatalog, 'format' | 'players' | 'duration' | 'sessionLength'>): string {
+  const format = t(`taxonomy.format.${catalog.format}` as MessageKey)
+  const players = catalog.players.max <= 1 ? t('taxonomy.onePlayer') : `${playersTag(catalog.players)} ${t('explorePage.jugadores').toLowerCase()}`
+  const length = catalog.sessionLength ? t(`taxonomy.session.${catalog.sessionLength}` as MessageKey) : durationLabel(catalog.duration)
+  return [format, players, length].join(' · ')
 }

@@ -1,6 +1,7 @@
 import { t, LANGUAGES, language, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packArtUrl, packMapUrl, packPortraitUrl, type ApiClient, type CatalogWorldCard, type CatalogWorldDetail, type SeasonPassOffer, type SeasonPath } from '@rpg-ngn/api-client'
-import { languageCodes, worldLanguageNote, worldLanguages, durationLabel, passView, playersTag, ratingLine, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
+import { CATALOG_MODES, formatLine, languageCodes, modeLabel, worldLanguageNote, worldLanguages, durationLabel, passView, playersTag, ratingLine, seasonPathLine, seasonProgress } from '@rpg-ngn/ui-logic'
+import type { PlayMode } from '@rpg-ngn/content'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Image, useWindowDimensions, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useTopInset } from '../../hooks/useTopInset'
@@ -39,6 +40,8 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
   const [pass, setPass] = useState<SeasonPassOffer | null>(null)
   const [names, setNames] = useState<Record<string, string>>({})
   const [genre, setGenre] = useState<string | null>(null)
+  // Para ti o para tu grupo (docs/26, H8).
+  const [mode, setMode] = useState<PlayMode | null>(null)
   // Idioma del mundo, como el filtro de la web (paridad, 02-10).
   const [lang, setLang] = useState<Language | null>(null)
   const [q, setQ] = useState('')
@@ -50,7 +53,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
 
   const load = useCallback(async () => {
     try {
-      const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined, language: lang ?? undefined })
+      const result = await client.catalogWorlds({ genre: genre ?? undefined, q: q.trim() || undefined, language: lang ?? undefined, mode: mode ?? undefined })
       setWorlds(result.worlds)
       setSeason(result.season)
       setPass(result.pass)
@@ -61,7 +64,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
       if (e instanceof ApiError && e.isUnauthorized) return onUnauthorized()
       setError(e instanceof ApiError ? e.message : t('play.catalogLoadFailed'))
     }
-  }, [client, genre, q, lang, onUnauthorized])
+  }, [client, genre, mode, q, lang, onUnauthorized])
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), q ? 300 : 0)
@@ -218,6 +221,13 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
           <TextInput value={q} onChangeText={setQ} placeholder={t('explorePage.buscarMundos')} placeholderTextColor={theme.colors.inkFaint} style={styles.searchInput} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+          {CATALOG_MODES.map((m) => (
+            <Pressable key={m} onPress={() => setMode(mode === m ? null : m)} style={[styles.filter, mode === m && styles.filterOn]} accessibilityRole="button">
+              <Text style={[styles.filterText, mode === m && styles.filterTextOn]}>{modeLabel(m)}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
           {[null, ...genres].map((g) => (
             <Pressable key={g ?? 'todos'} onPress={() => setGenre(g)} style={[styles.filter, genre === g && styles.filterOn]}>
               <Text style={[styles.filterText, genre === g && styles.filterTextOn]}>{g ?? t('mobile.exploreScreen.todos')}</Text>
@@ -252,6 +262,7 @@ export function ExploreScreen({ client, onSeason, onPlay, onMine, onTab, onUnaut
                       {world.name}
                     </Text>
                     <Text style={styles.meta}>{view.price ?? view.hint ?? view.byline}</Text>
+                    <Text style={styles.meta}>{formatLine(world.catalog)}</Text>
                     <Text style={styles.meta}>{worldLanguageNote(world, language()) ?? languageCodes(worldLanguages(world))}</Text>
                     {ratingLine(world.rating) ? <Text style={styles.stars}>{ratingLine(world.rating)}</Text> : null}
                     {view.progress !== null ? (

@@ -61,6 +61,11 @@ export interface WorldCatalog {
   duration: 'corta' | 'media' | 'larga'
   hours: string | null
   format: 'campaña' | 'aventura' | 'one-shot'
+  /** Vocabulario del catalogo (docs/26, H8); ausente en mundos que aun no lo declaran. */
+  sessionLength?: 'corta' | 'media' | 'larga'
+  genres?: string[]
+  style?: 'historia' | 'mision' | 'libre'
+  contentWarnings?: string[]
   synopsis: string
   /** Archivo de `art/`; se pinta con `packArtUrl`. */
   cover: string
@@ -198,6 +203,12 @@ export interface CatalogFilters {
   origin?: 'oficial' | 'comunidad' | undefined
   /** Solo los mundos que se juegan en ese idioma (i18n). */
   language?: string | undefined
+  /** Formatos (docs/26, H8). `genres` va separado por comas: basta con uno. */
+  format?: 'one-shot' | 'aventura' | 'campaña' | undefined
+  mode?: 'solo' | 'grupo' | undefined
+  style?: 'historia' | 'mision' | 'libre' | undefined
+  genres?: string | undefined
+  session?: 'corta' | 'media' | 'larga' | undefined
 }
 
 export interface PackOption {

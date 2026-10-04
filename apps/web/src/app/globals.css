@@ -5987,3 +5987,14 @@ a {
   font-size: 1.05rem;
   color: var(--ink);
 }
+/* Para ti o para tu grupo (docs/26, H8). */
+.explorar-modos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.explorar-modos .btn[aria-pressed='true'] {
+  border-color: var(--accent-bright);
+  background: rgba(124, 58, 237, 0.22);
+}

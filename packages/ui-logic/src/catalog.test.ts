@@ -1,6 +1,6 @@
 import type { WorldCatalog } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
-import { cardView, catalogBlessing, durationLabel, passView, playersTag, ratingLine, seasonPathLine, seasonProgress, stopLabel } from './catalog.js'
+import { cardView, catalogBlessing, durationLabel, passView, formatLine, genreLabel, playersTag, ratingLine, seasonPathLine, seasonProgress, stopLabel } from './catalog.js'
 
 const catalog = { genre: 'Intriga', author: 'Nara', players: { min: 2, max: 5 }, duration: 'media' } as WorldCatalog
 const w = (over: object) => ({ state: 'gratis', origin: 'oficial', catalog, price: null, path: null, name: 'X', ...over }) as Parameters<typeof cardView>[0]
@@ -61,5 +61,14 @@ describe('estrellas en la tarjeta (docs/26, H6)', () => {
     expect(ratingLine(null)).toBeNull()
     expect(ratingLine({ average: 0, count: 0 })).toBeNull()
     expect(ratingLine({ average: 4.6, count: 12 })).toBe('★ 4.6 (12)')
+  })
+})
+
+describe('formatos del catalogo (docs/26, H8)', () => {
+  it('la linea de formato dice que es, para cuantos y cuanto dura cada sesion', () => {
+    expect(formatLine({ format: 'one-shot', players: { min: 1, max: 1 }, duration: 'corta', sessionLength: 'corta' })).toBe('One-shot · 1 jugador · 30 a 40 min por sesión')
+    expect(formatLine({ format: 'campaña', players: { min: 2, max: 5 }, duration: 'larga' })).toMatch(/^Campaña · 2-5 /)
+    expect(genreLabel('ciencia-ficcion')).toBe('Ciencia ficción')
+    expect(genreLabel('inventado')).toBe('inventado')
   })
 })
