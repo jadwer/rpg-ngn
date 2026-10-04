@@ -76,6 +76,8 @@ export interface ChronicleShare {
   anonymize: boolean
   /** Se publica tambien en Comunidad (aparte del enlace; toda la mesa lo acepta sabiendolo). */
   listed: boolean
+  /** El mundo viene de una obra ajena: sin video ni Comunidad (03-10). */
+  derived?: boolean
   /** Todos los miembros actuales aceptaron y no se retiro: el enlace se ve. */
   public: boolean
   /** Quien mira ya acepto. */
@@ -93,7 +95,8 @@ export type ChronicleBlock =
 /** La cronica publica de una mesa, tal como la ve quien abre el enlace. */
 export interface Chronicle {
   title: string
-  pack: { id: string; version: string; name: string | null }
+  /** `derived`: el mundo viene de una obra ajena; la cronica lleva el deslinde y no hay video ni Comunidad (03-10). */
+  pack: { id: string; version: string; name: string | null; derived?: boolean }
   /** Null si la mesa pidio no enseñar quien jugo. */
   players: Array<{ name: string | null; character: string | null }> | null
   sessions: Array<{

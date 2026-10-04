@@ -37,8 +37,9 @@ export function ChronicleShortcuts({ client, tableId }: { client: ApiClient; tab
       <Button label={t('chroniclePage.leerLaHistoria')} small onPress={() => void Linking.openURL(url)} />
       <Button label={t('chroniclePage.presentacionVertical')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=vertical`)} />
       <Button label={t('chroniclePage.presentacionHorizontal')} small onPress={() => void Linking.openURL(`${url}/presentacion?formato=horizontal`)} />
-      <Button label={t('chroniclePage.generarVideo')} small onPress={() => setGold((v) => !v)} />
-      {gold ? <Text style={styles.gold}>{t('chroniclePage.videoOro')}</Text> : null}
+      {/* Sin video de un mundo derivado de obra ajena (Gabino, 03-10). */}
+      {share.derived ? null : <Button label={t('chroniclePage.generarVideo')} small onPress={() => setGold((v) => !v)} />}
+      {gold && !share.derived ? <Text style={styles.gold}>{t('chroniclePage.videoOro')}</Text> : null}
     </View>
   )
 }

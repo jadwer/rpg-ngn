@@ -25,6 +25,8 @@ export const chroniclePage = {
   otraVez: 'Otra vez',
   volverALaHistoria: 'Volver a la historia',
   outro: 'Una historia jugada en Ad Astra Mentis',
+  derivedNotice: 'Historia privada en un mundo creado por sus jugadores a partir de una obra ajena. Ad Astra Mentis no tiene ni reclama derechos sobre esa obra, sus personajes ni las imágenes derivadas de ella.',
+  derivedShort: 'Historia privada. Ad Astra Mentis no tiene derechos sobre la obra en que se basa este mundo.',
   salir: 'Salir',
   leerLaHistoria: 'Leer la historia',
   compartirParaVer: 'Para leerla o verla como presentación, compártela desde la mesa: Lectura, Compartir la historia.',

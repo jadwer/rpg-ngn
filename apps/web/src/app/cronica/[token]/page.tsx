@@ -80,6 +80,8 @@ export default function CronicaPage() {
             })}
           </p>
         ) : null}
+        {/* Mundo derivado de obra ajena: el deslinde va siempre a la vista (Gabino, 03-10). */}
+        {chronicle.pack.derived ? <p className="hint cronica-deslinde">{t('chroniclePage.derivedNotice')}</p> : null}
       </header>
 
       <div className="row cronica-presentar">
@@ -159,6 +161,7 @@ export default function CronicaPage() {
       ))}
 
       <footer className="cronica-foot">
+        {chronicle.pack.derived ? <p className="hint cronica-deslinde">{t('chroniclePage.derivedNotice')}</p> : null}
         <p>{t('chroniclePage.unaHistoriaJugadaEn')}</p>
         <Link href="/crear-cuenta" className="btn">
           {t('chroniclePage.jugarLaTuya')}

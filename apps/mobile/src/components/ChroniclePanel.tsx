@@ -73,7 +73,7 @@ export function ChroniclePanel({ client, tableId, webOrigin }: Props) {
         </>
       ) : null}
       {share?.listed ? <Text style={styles.hint}>{share.public ? t('chroniclePanel.publicada') : t('chroniclePanel.seraPublicada')}</Text> : null}
-      {share && !share.listed ? (
+      {share && !share.listed && !share.derived ? (
         <>
           <Text style={styles.hint}>{t('chroniclePanel.publicarHint')}</Text>
           <Button label={t('chroniclePanel.publicarEnComunidad')} small busy={busy} onPress={() => void act(() => client.shareChronicle(tableId, { anonymize: share.anonymize, listed: true }))} />

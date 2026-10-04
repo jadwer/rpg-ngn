@@ -46,10 +46,13 @@ export function ChronicleShortcuts({ client, tableId, share }: { client: ApiClie
       <Link href={`${base}/presentacion?formato=horizontal`} className="btn small">
         {t('chroniclePage.presentacionHorizontal')}
       </Link>
-      <button type="button" className="btn small video-oro" onClick={() => setGold((v) => !v)} aria-expanded={gold}>
-        {t('chroniclePage.generarVideo')}
-      </button>
-      {gold ? (
+      {/* Sin video de un mundo derivado de obra ajena (Gabino, 03-10). */}
+      {loaded.derived ? null : (
+        <button type="button" className="btn small video-oro" onClick={() => setGold((v) => !v)} aria-expanded={gold}>
+          {t('chroniclePage.generarVideo')}
+        </button>
+      )}
+      {gold && !loaded.derived ? (
         <p className="hint video-oro-aviso" role="status">
           {t('chroniclePage.videoOro')}
         </p>

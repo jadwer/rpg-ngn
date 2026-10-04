@@ -261,6 +261,9 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
           </p>
         ) : null}
 
+        {/* En la grabacion tambien: un mundo derivado lleva el deslinde en pantalla todo el tiempo (03-10). */}
+        {chronicle.pack.derived ? <p className="deslinde">{t('chroniclePage.derivedShort')}</p> : null}
+
         {phase === 'paused' ? (
           <div className="pausa" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="btn primary" onClick={toggle}>
@@ -279,6 +282,7 @@ function Player({ chronicle, slides, format, token }: { chronicle: Chronicle; sl
           <div className="portada" onClick={(e) => e.stopPropagation()}>
             <p className="kicker">{chronicle.pack.name ?? 'Ad Astra Mentis'}</p>
             <h1>{chronicle.title}</h1>
+            {chronicle.pack.derived ? <p className="hint">{t('chroniclePage.derivedNotice')}</p> : null}
             <button type="button" className="btn primary" onClick={start}>
               ▶ {phase === 'done' ? t('chroniclePage.otraVez') : t('chroniclePage.comenzar')}
             </button>

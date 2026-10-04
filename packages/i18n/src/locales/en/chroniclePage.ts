@@ -27,6 +27,8 @@ export const chroniclePage: Messages<typeof es> = {
   otraVez: 'Play again',
   volverALaHistoria: 'Back to the story',
   outro: 'A story played on Ad Astra Mentis',
+  derivedNotice: 'Private story in a world its players built from another author\'s work. Ad Astra Mentis holds and claims no rights over that work, its characters or the images derived from it.',
+  derivedShort: 'Private story. Ad Astra Mentis holds no rights over the work this world is based on.',
   salir: 'Exit',
   leerLaHistoria: 'Read the story',
   compartirParaVer: 'To read it or watch it as a presentation, share it from the table: Reading, Share the story.',
