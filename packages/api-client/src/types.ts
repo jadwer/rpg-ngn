@@ -90,7 +90,8 @@ export interface ChronicleShare {
 /** Un bloque de la cronica publica: solo lo que se lee, nunca avisos internos. */
 export type ChronicleBlock =
   | { type: 'narration'; text: string; audioUrl?: string }
-  | { type: 'dialogue'; speaker: string; text: string; audioUrl?: string }
+  /** `declared`: lo que el jugador escribio como accion, tal cual; la presentacion y el video lo quitan. */
+  | { type: 'dialogue'; speaker: string; text: string; audioUrl?: string; declared?: boolean }
   | { type: 'roll'; text: string; actor: string; die: string; result: number }
   | { type: 'image'; url: string; alt: string }
   /** Logros y fin de sesion (docs/26, H1). */

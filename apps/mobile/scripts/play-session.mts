@@ -17,8 +17,12 @@ const PACK_VERSION = process.env['PACK_VERSION'] ?? '0.4.0'
 const RULESET = process.env['RULESET'] ?? 'fantasy-d20-lite@1.0.0'
 const SESSIONS = (process.env['SESSIONS'] ?? '001').split(',')
 const SEATS = (process.env['SEATS'] ?? 'jaz@example.com:zahira,armando@example.com:calder').split(',').map((s) => s.split(':') as [string, string])
-/** Si esta, el primer jugador responde siempre esto en vez de la primera idea del director. */
+/** Si esta, el primer jugador responde siempre esto en vez de la primera idea del GM. */
 const ACTION = process.env['ACTION'] ?? null
+/** Quien tira los dados. Por omision `dice`, como las mesas de produccion: el GM pide la tirada y el jugador la suelta. */
+const DICE = process.env['DICE'] ?? 'dice'
+/** Que idea elige cada jugador: la primera (prudente) o la segunda (atrevida). */
+const PICK = Number(process.env['PICK'] ?? 0)
 
 async function login(email: string): Promise<{ token: string; id: string }> {
   const r = await fetch(`${API}/api/auth/login`, {
@@ -85,7 +89,7 @@ async function main(): Promise<void> {
           settings: {
             provider: { preset: 'anthropic' },
             language: 'es',
-            dice: 'engine',
+            dice: DICE,
             countdown: 0,
           },
         },
@@ -150,7 +154,14 @@ async function main(): Promise<void> {
       console.log(`turno ${turn.number} abierto ${state.pacing ? `(${state.pacing.turn} de ${state.pacing.total})` : ''}`)
       for (const p of players) {
         const mine = await p.api.tableState(tableId, 0)
-        const idea = (p === players[0] && ACTION) || mine.suggestions[0] || 'Observo con cuidado lo que pasa.'
+        if (mine.suggestions.length === 0) console.log(`  ! ${p.character} abrio el turno ${turn.number} SIN IDEAS`)
+        const idea = (p === players[0] && ACTION) || mine.suggestions[PICK] || mine.suggestions[0] || 'Observo con cuidado lo que pasa.'
+        // Con tirada pedida, el turno del jugador es soltar el dado (y decir que intenta con el).
+        if (mine.rolls.pending) {
+          console.log(`  ${p.character} suelta el dado: ${mine.rolls.pending.skill ?? mine.rolls.pending.kind} (${mine.rolls.pending.reason ?? ''})`)
+          await p.api.rollRequested(turn.id, mine.suggestions[PICK] ?? mine.suggestions[0]).catch((e: unknown) => console.log('tirada fallo', String(e)))
+          continue
+        }
         await p.api.respond(turn.id, idea).catch((e: unknown) => console.log('respuesta fallo', String(e)))
       }
       await reader.api.closeTurn(turn.id).catch((e: unknown) => console.log('cierre fallo', String(e)))

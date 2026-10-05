@@ -24,7 +24,7 @@ export const tableScreen = {
   textoMasPequeno: 'Texto más pequeño',
   textoMasGrande: 'Texto más grande',
   turnoNumero: 'Turno {{number}}',
-  elDirectorNarra: 'el director narra',
+  elDirectorNarra: 'el GM narra',
   todosRespondieron: 'todos respondieron',
   faseDeAcciones: 'fase de acciones',
   esteNavegadorNoTiene: 'Este navegador no tiene voces en español instaladas; la lectura sonará en otro idioma o no sonará.',

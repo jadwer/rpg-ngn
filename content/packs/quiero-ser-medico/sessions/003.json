@@ -5,9 +5,9 @@
   "status": "planned",
   "briefing": "Tienes dieciocho años otra vez y recuerdas los quince que vienen. Es la víspera del examen de Medicina. El teléfono está sonando.",
   "howToPlay": [
-    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el director narra lo que pasa.",
+    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el GM narra lo que pasa.",
     "Aquí nadie pelea. Lo que se mueve es tu reputación, la presión que te acorrala y lo que descubres.",
-    "Cada capítulo es corto. El director lleva el ritmo y cierra el capítulo solo al llegar al final."
+    "Cada capítulo es corto. El GM lleva el ritmo y cierra el capítulo solo al llegar al final."
   ],
   "availableCharacters": [
     "emiliano"
@@ -26,26 +26,43 @@
     "hook": "El teléfono suena a las once de la noche, igual que la primera vez. Del otro lado, la voz pastosa de tu papá: \"Mijo, choqué. Ven por mí antes de que llegue la patrulla.\"",
     "objective": "No repetir tu vida.",
     "beats": [
-      "Todo empuja a Emiliano a ir: Rogelio suplica, Lucía llama desde el hospital, un vecino toca la puerta. Tres presiones, cada una más fuerte. Nadie puede obligarlo; necesita excusas que convenzan.",
-      "Si va a salvar a su padre, aunque esquive las trampas de la primera vez aparecen trampas nuevas que lo llevan a la cárcel.",
-      "Si sostiene el no hasta el final, llega al examen; después, en pocos turnos, la carrera: lo mal que la pasó en Medicina, que casi lo expulsan por lo difícil, que se tituló."
+      "Primera presión: Rogelio suplica por teléfono con las mismas palabras de la primera vez; Emiliano ya sabe que es una trampa.",
+      "Segunda presión, más fuerte: Lucía llama llorando desde el hospital porque Rogelio ya le habló a ella, y le pide a Emiliano que vaya.",
+      "Tercera presión, la más fuerte: un vecino toca la puerta; vio el Tsuru de Lucía chocado y dice que una patrulla pregunta por el dueño. Nadie puede obligar a Emiliano; necesita excusas que convenzan.",
+      "La venganza: la noche le da a Emiliano la ocasión de usar lo que sabe contra Rogelio. Lo que diga pesa, y Rogelio, sin nadie a quien culpar, queda solo frente a la patrulla."
     ],
     "endings": [
       {
         "id": "se-repite",
-        "when": "En cuanto Emiliano decide ir a salvar a su padre (sale de la casa, acepta ir o manda a alguien en su lugar), la historia se repite: aunque esquive las trampas de antes aparecen otras y termina otra vez detenido. Cierra en ese mismo turno o, a más tardar, en el siguiente.",
+        "when": "En cuanto Emiliano decide ayudar o cubrir a su padre (va por él, acepta ir, manda a alguien en su lugar o miente por él), la historia se repite: aunque esquive las trampas de antes aparecen otras y termina otra vez detenido. Cierra en ese mismo turno o, a más tardar, en el siguiente. Salir a decir la verdad o a denunciarlo no cuenta: eso es sostener el no.",
         "title": "La historia se repite",
         "text": "La historia se repite… pero esta vez no hay otra oportunidad. FIN.",
-        "final": true
+        "final": true,
+        "scene": "Un muchacho de dieciocho años sentado en la banca de una agencia del Ministerio Público, bajo luz de tubo, con la ropa de ayer y la mirada perdida."
       },
       {
         "id": "medico",
-        "when": "Emiliano sostiene el no hasta el final y llega a su examen.",
+        "when": "Emiliano sostiene el no hasta el final (no lo cubre, aunque lo enfrente o lo denuncie) y llega a su examen.",
         "title": "FIN",
-        "text": "Medicina en CU fue más dura de lo que soñó y casi lo expulsan, pero se tituló. Hoy atiende el consultorio de Farmacias Parecidas, la fila de las siete de la mañana lo saluda por su nombre, y Mariana le lleva café a la hora de la comida. No es el director de nada. Es feliz.",
+        "text": "A Rogelio lo detuvieron esa misma noche por declarar en falso. Al investigarlo salió todo lo demás: llevaba años estafando gente. Le dieron veinte años. Medicina en CU fue más dura de lo que soñaste y casi te expulsan, pero te titulaste. Hoy atiendes el consultorio de Farmacias Parecidas, la fila de las siete de la mañana te saluda por tu nombre, y Mariana te lleva café a la hora de la comida. No eres el director de nada. Eres feliz.",
         "final": true,
-        "default": true
+        "default": true,
+        "scene": "Un médico joven y sonriente, con bata blanca, frente al consultorio de una farmacia de barrio en la Ciudad de México, a media mañana, con una fila de vecinos que lo saludan."
       }
+    ],
+    "goal": "No repetir tu vida: llegar mañana a tu examen de Medicina. Y que esta vez pague quien tiene que pagar.",
+    "previously": "La noche de tu cumpleaños treinta y tres, tu papá subió con un pastel y te lo dijo de frente: chocó a propósito la víspera de tu examen, dejó que te culparan y juró que nunca te dejaría ser feliz. En el forcejeo caíste por la ventana del octavo piso. Todo se puso blanco. Y entonces sonó el teléfono.",
+    "canon": [
+      "Es una noche de mayo, las once. El examen de la UNAM es mañana a las siete de la mañana en la Facultad de Medicina, en Ciudad Universitaria.",
+      "Emiliano está solo en la casa de su mamá: un departamento chico en la Gustavo A. Madero, en un edificio de pocos pisos con zaguán a la calle.",
+      "Lucía es enfermera y está en el hospital: su turno de noche empezó a las once. No está en casa, no puede ir y solo puede llamar por teléfono.",
+      "El teléfono de la casa lo contesta Emiliano, y quien llama es Rogelio.",
+      "Rogelio chocó el Tsuru gris de Lucía a unas cuadras de la casa, junto a una farmacia. Es el único coche de la familia y está a nombre de Lucía; Emiliano no tiene coche y se mueve a pie. Rogelio está borracho e ileso.",
+      "Mariana es compañera de Emiliano en la Vocacional 10 y presenta Medicina ese mismo día.",
+      "Es la misma noche del capítulo 1, repetida igual: mismo teléfono, misma hora, misma llamada. Solo Emiliano recuerda los quince años que vienen; nadie más sabe nada.",
+      "Rogelio provocó el choque a propósito y piensa culpar a Emiliano en cuanto llegue. Emiliano lo sabe y puede usarlo: decírselo a Lucía, a la patrulla o al propio Rogelio. Decir la verdad o denunciarlo no es ir a salvarlo, aunque para eso salga de la casa.",
+      "Si Emiliano no lo cubre, Rogelio queda solo frente a la patrulla: intenta culpar al otro conductor, lo detienen por declarar en falso, y la investigación destapa que lleva años estafando gente. Le dan veinte años de cárcel. Emiliano se entera a la mañana siguiente o después.",
+      "Esta noche solo existen Rogelio, Lucía, Mariana, los vecinos y la policía. Doña Chelo es la casera de un cuarto donde Emiliano vivirá quince años después: no vive en este edificio ni aparece."
     ]
   }
 }

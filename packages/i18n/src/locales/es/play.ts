@@ -1,9 +1,9 @@
 /** Avisos y errores de la mesa en la web (logica de components/). */
 export const play = {
   ideasFailed: 'No se pudieron pedir más ideas.',
-  narrating: 'El director narra...',
+  narrating: 'El GM narra...',
   rollFailed: 'No se pudo tirar; prueba otra vez.',
-  askedRoll: 'El director te pide una tirada.',
+  askedRoll: 'El GM te pide una tirada.',
   rollHow: 'Tira {{roll}}: mantén presionado el dado y suéltalo.',
   noTurn: 'No hay turno abierto.',
   sendFailed: 'No se pudo enviar la respuesta.',

@@ -83,8 +83,8 @@ describe('countdown', () => {
   })
 
   it('la frase cuenta y al llegar a cero anuncia', () => {
-    expect(countdownLine(at(t0 + 500))).toBe('El director narra en 3 s')
-    expect(countdownLine(at(t0 + 12_000))).toBe('El director narra...')
+    expect(countdownLine(at(t0 + 500))).toBe('El GM narra en 3 s')
+    expect(countdownLine(at(t0 + 12_000))).toBe('El GM narra...')
     expect(countdownLine(countdown({ turn: null, progress, startedAt: t0, now: t0 }))).toBe('')
   })
 })

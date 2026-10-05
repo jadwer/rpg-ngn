@@ -25,7 +25,7 @@ export const APP_NAME = 'Ad Astra Mentis'
 export const metadata: Metadata = {
   title: { default: `${APP_NAME}, worlds born from imagination`, template: `%s | ${APP_NAME}` },
   applicationName: APP_NAME,
-  description: 'Tu imaginación también es un mundo. Mesas de rol con amigos y un director de juego que narra, tira los dados y recuerda, en el navegador.',
+  description: 'Tu imaginación también es un mundo. Mesas de rol con amigos y un GM que narra, tira los dados y recuerda, en el navegador.',
   appleWebApp: { title: APP_NAME, statusBarStyle: 'black-translucent', capable: true },
   formatDetection: { telephone: false },
 }

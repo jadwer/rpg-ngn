@@ -6,7 +6,7 @@ export const joinPage = {
   irAlInicio: 'Ir al inicio',
   terminos: 'Términos',
   avisoDePrivacidad: 'aviso de privacidad',
-  aquiElDirectorDe: 'Aquí el director de juego es el motor: no hace falta que nadie del grupo sepa dirigir una partida.',
+  aquiElDirectorDe: 'Aquí el GM es el motor: no hace falta que nadie del grupo sepa dirigir una partida.',
   teInvita: 'Te invita {{name}}.',
   siNoTienesCuenta: 'Si no tienes cuenta, te pediremos crearla (nombre, correo y contraseña) y volverás aquí.',
   y: 'y',

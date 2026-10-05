@@ -49,7 +49,7 @@ function TermsEs() {
       </p>
       <ul>
         <li>
-          Un <b>turno</b> es una intervención del director de juego: se consume cuando la mesa cierra el turno y el sistema genera la narración.
+          Un <b>turno</b> es una intervención del GM (el director de juego de la plataforma): se consume cuando la mesa cierra el turno y el sistema genera la narración.
         </li>
         <li>
           <b>Los turnos los paga quien crea la mesa</b>, no cada jugador. Si invitas a alguien a tu mesa, sus intervenciones consumen tus turnos.
@@ -82,7 +82,7 @@ function TermsEs() {
       </p>
       <ul>
         <li>
-          El texto que produce el director de juego <b>lo genera un modelo de lenguaje</b>, y puede contener errores, incoherencias o contenido inesperado.
+          El texto que produce el GM <b>lo genera un modelo de lenguaje</b>, y puede contener errores, incoherencias o contenido inesperado.
         </li>
         <li>
           <b>No garantizamos que la narración sea original ni única.</b> Dos partidas distintas pueden recibir textos parecidos.

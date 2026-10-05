@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Ad Astra Mentis',
     short_name: 'Ad Astra',
-    description: 'Mesas de rol con un director de juego que narra por ti.',
+    description: 'Mesas de rol con un GM que narra por ti.',
     start_url: '/mesas',
     display: 'standalone',
     background_color: '#0b0f14',

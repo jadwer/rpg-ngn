@@ -28,6 +28,20 @@ describe('presentacion de la cronica', () => {
     expect(buildSlides(chronicle, '002').map((s) => s.text)).toEqual(['Amanece.'])
   })
 
+  it('lo que el jugador escribio como accion no sale: la historia la cuenta el GM, y lo que el GM le hace decir si', () => {
+    const played: Chronicle = {
+      ...chronicle,
+      sessions: [
+        { code: '001', turns: [{ number: 2, actions: [{ character: 'Emiliano', text: 'Le pregunto de frente qué quiere en realidad.' }], blocks: [
+          { type: 'dialogue', speaker: 'Emiliano', text: 'Le pregunto de frente qué quiere en realidad.', declared: true },
+          { type: 'narration', text: 'Rogelio deja el pastel sobre la mesa.' },
+          { type: 'dialogue', speaker: 'Emiliano', text: '¿Qué quieres en realidad, papá?' },
+        ] }] },
+      ],
+    }
+    expect(buildSlides(played).map((s) => s.text)).toEqual(['Rogelio deja el pastel sobre la mesa.', '¿Qué quieres en realidad, papá?'])
+  })
+
   it('los subtitulos van de dos lineas y se reparten por lo que miden', () => {
     const captions = captionsFor('uno dos tres cuatro cinco seis siete ocho nueve diez', 10)
     expect(captions.map((c) => c.lines)).toEqual([['uno dos', 'tres'], ['cuatro', 'cinco seis'], ['siete ocho', 'nueve diez']])

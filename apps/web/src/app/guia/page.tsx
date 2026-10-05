@@ -9,7 +9,7 @@ import { GuideContent } from '../../components/GuideContent'
  */
 export const metadata: Metadata = {
   title: 'Guía del anfitrión',
-  description: 'Cómo crear una mesa en Ad Astra Mentis, invitar a tu grupo, abrir una sesión y jugar los turnos con el director de juego.',
+  description: 'Cómo crear una mesa en Ad Astra Mentis, invitar a tu grupo, abrir una sesión y jugar los turnos con el GM.',
 }
 
 export default function GuiaPage() {

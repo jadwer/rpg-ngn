@@ -34,11 +34,11 @@ export const ending: Messages<typeof es> = {
   extend: 'One more turn',
   extendHint: 'Extends the session by two turns (up to three times).',
   wrap: 'Ask for the ending',
-  wrapHint: 'The next turn will be the last: the director resolves and closes.',
+  wrapHint: 'The next turn will be the last: the GM resolves and closes.',
   wrapAsked: 'You asked for the ending: the next turn closes the session.',
   pacingFailed: 'Could not change the session length.',
   lengthTitle: 'Session length',
-  lengthHint: 'The director keeps the pace and closes the session on the last turn.',
+  lengthHint: 'The GM keeps the pace and closes the session on the last turn.',
   length: {
     corta: 'Short (8 turns, 30 to 40 min)',
     media: 'Medium (14 turns, 1 h)',

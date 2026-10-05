@@ -15,7 +15,7 @@ export const hostPanel = {
   opcionalConQueSe: 'Opcional: con qué se queda la mesa',
   premisa: 'Premisa',
   reglasDeLaMesa: 'Reglas de la mesa',
-  directorDeJuego: 'Director de juego',
+  directorDeJuego: 'GM',
   yaJugada: ' (ya jugada)',
   momentoDelMundo: 'Momento del mundo o lo que pasa hoy; el GM la recibe',
 }

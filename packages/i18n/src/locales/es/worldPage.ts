@@ -13,6 +13,6 @@ export const worldPage = {
   procedencia: 'Procedencia',
   queIncluye: 'Qué incluye',
   escenarioCompleto: 'Escenario completo',
-  directorDeJuegoPor: 'Director de juego por IA',
+  directorDeJuegoPor: 'GM por IA',
   imagenesDelMundo: 'Imágenes del mundo',
 }

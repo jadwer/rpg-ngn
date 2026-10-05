@@ -31,11 +31,11 @@ export const ending = {
   extend: 'Un turno más',
   extendHint: 'Alarga la sesión dos turnos (hasta tres veces).',
   wrap: 'Pedir el final',
-  wrapHint: 'El próximo turno será el último: el director resuelve y cierra.',
+  wrapHint: 'El próximo turno será el último: el GM resuelve y cierra.',
   wrapAsked: 'Pediste el final: el próximo turno cierra la sesión.',
   pacingFailed: 'No se pudo cambiar el largo de la sesión.',
   lengthTitle: 'Largo de la sesión',
-  lengthHint: 'El director lleva el ritmo y cierra la sesión solo al llegar al último turno.',
+  lengthHint: 'El GM lleva el ritmo y cierra la sesión solo al llegar al último turno.',
   length: {
     corta: 'Corta (8 turnos, 30 a 40 min)',
     media: 'Media (14 turnos, 1 h)',

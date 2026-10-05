@@ -5,9 +5,9 @@
   "status": "planned",
   "briefing": "Pasaron quince años. Te titulaste de ingeniero, pero vives de lo que salga. Rentas un cuarto en un octavo piso sin elevador en la colonia Doctores. Mañana cumples treinta y tres.",
   "howToPlay": [
-    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el director narra lo que pasa.",
+    "Juegas solo: eres Emiliano. Escribe lo que hace o dice y el GM narra lo que pasa.",
     "Aquí nadie pelea. Lo que se mueve es tu reputación, la presión que te acorrala y lo que descubres.",
-    "Cada capítulo es corto. El director lleva el ritmo y cierra el capítulo solo al llegar al final."
+    "Cada capítulo es corto. El GM lleva el ritmo y cierra el capítulo solo al llegar al final."
   ],
   "availableCharacters": [
     "emiliano"
@@ -22,7 +22,7 @@
     "turns": {
       "target": 7
     },
-    "hook": "Tu cumpleaños treinta y tres empieza con un mensaje: Mariana se casa el sábado con un médico de la Facultad. Esa misma noche alguien sube los ocho pisos y toca tu puerta: es tu papá, con un pastel de supermercado.",
+    "hook": "La víspera de tu cumpleaños treinta y tres llega un mensaje: Mariana se casa el sábado con un médico de la Facultad. Esa noche, pasada la medianoche, alguien sube los ocho pisos y toca tu puerta: es tu papá, con un pastel de supermercado.",
     "objective": "Que este año, por fin, sea distinto.",
     "beats": [
       "Escenas rápidas de una vida mediocre: el call center, el metro y el camión, doña Chelo y su reglamento. Cualquier intento de mejorar (otro empleo, buscar pareja, seducir a la casera) fracasa con gracia, sin crueldad gratuita.",
@@ -33,7 +33,16 @@
     "fixedOutcome": "Emiliano cae por la ventana. Narra la caída como la escribió el autor: los vidrios, el cuello y la espalda rotos, las piernas que ya no duelen, las manos que suben a la cara llena de vidrios, los pulmones que se llenan de sangre, y cuando intenta respirar todo se pone blanco. Entonces suena el teléfono de la casa de su mamá: es la noche antes del examen de la UNAM. Regresó en el tiempo. Nada de lo que haga antes evita la caída; cambia el cómo, no el qué.",
     "endCard": {
       "title": "Fin del capítulo 2: La revelación",
-      "text": "Suena el teléfono. Son las once de la noche. Mañana es el examen."
-    }
+      "text": "Suena el teléfono. Son las once de la noche. Mañana es el examen.",
+      "scene": "Un cuarto de adolescente a oscuras, un teléfono de casa sonando y un despertador que marca las once de la noche."
+    },
+    "goal": "Que este año, por fin, algo cambie. Y, aunque ya no lo digas, que tu papá te vea.",
+    "previously": "Rogelio chocó el coche de tu mamá la víspera del examen de la UNAM y, frente a la patrulla, te señaló a ti. Pasaste la noche en la agencia del Ministerio Público mientras el examen ocurría sin ti. Saliste con el tiempo justo para el del IPN: cincuenta aciertos de ciento cuarenta, ESIME Zacatenco. No era el plan.",
+    "canon": [
+      "Han pasado quince años. Hoy es la víspera: Emiliano tiene treinta y dos y a medianoche cumple treinta y tres. Rogelio llega pasada la medianoche, ya en su cumpleaños. Es ingeniero en Comunicaciones y Electrónica por ESIME Zacatenco y trabaja en un call center.",
+      "Vive solo en un cuarto de un octavo piso sin elevador en la colonia Doctores. La casera es doña Chelo.",
+      "Lucía dejó a Rogelio hace años. Mariana se casa el sábado con un médico.",
+      "Emiliano todavía no sabe que el choque fue a propósito: lo descubre cuando Rogelio se lo confiesa esta noche."
+    ]
   }
 }

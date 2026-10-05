@@ -2,7 +2,7 @@
 export const explorePage = {
   historiasQueExisten: 'Historias que existen',
   porqueTuLasViviste: 'porque tú las viviste',
-  viveUnaHistoriaDonde: 'Vive una historia donde tú decides qué pasa, con un director de juego que no se cansa.',
+  viveUnaHistoriaDonde: 'Vive una historia donde tú decides qué pasa, con un GM que no se cansa.',
   explorarHistorias: 'Explorar historias',
   descubrirCampanas: 'Descubrir campañas',
   genero: 'Género',

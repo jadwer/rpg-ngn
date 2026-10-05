@@ -131,7 +131,7 @@ export const mobile = {
     comienzaTuHistoria: 'COMIENZA TU HISTORIA →',
     unMotor: 'Un motor.',
     infinitosMundos: 'Infinitos mundos.',
-    exploraCreaYVive: 'Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un director de juego que no se cansa. Tú decides el mundo.',
+    exploraCreaYVive: 'Explora, crea y vive historias en cualquier universo: tu novela ligera o tu campaña de rol, con amigos o sola, y un GM que no se cansa. Tú decides el mundo.',
     leerSinConexion: 'Leer sin conexión',
     mundosDestacadosMayus: 'MUNDOS DESTACADOS',
     verTodos: 'Ver todos →',
@@ -169,7 +169,7 @@ export const mobile = {
   tableScreen: {
     volverATusMesas: 'Volver a tus mesas',
     turnoNumero: 'Turno {{number}}',
-    elDirectorNarraCap: 'El director narra',
+    elDirectorNarraCap: 'El GM narra',
     todosRespondieronCap: 'Todos respondieron',
     faseDeAccionesCap: 'Fase de acciones',
     paraOtroCodigo: 'Para otro código o una nota al GM, usa el mando del anfitrión de abajo.',

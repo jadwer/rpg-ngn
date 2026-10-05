@@ -52,6 +52,10 @@ export function buildSlides(chronicle: Chronicle, session?: string | null): Slid
       continue
     }
     if (block.type !== 'narration' && block.type !== 'dialogue') continue
+    // Lo que el jugador escribio como accion ("Le pregunto de frente que
+    // quiere") no va en el video: ahi la historia la cuenta el GM, que ya
+    // narra esa accion (Gabino, 05-10).
+    if (block.type === 'dialogue' && block.declared) continue
     const text = clean(block.text)
     if (!text) continue
     slides.push({ image: current, text, speaker: block.type === 'dialogue' ? block.speaker || null : null, audioUrl: block.audioUrl ?? null })
