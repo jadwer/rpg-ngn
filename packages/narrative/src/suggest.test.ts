@@ -4,7 +4,10 @@ import { contextFor, FakeTransport, openSession003, response, turn } from './pil
 
 const KEY = 'sk-proj-SECRETA-1234567890abcdef'
 
-/** "Otras" ideas (E10b): una llamada aparte que solo pide la linea suggest de un personaje. */
+/**
+ * "Otras" ideas (E10b): una llamada aparte que solo pide la linea suggest de
+ * un personaje. Desde docs/27 esa llamada ve solo lo que el jugador sabe.
+ */
 describe('ModelGMProvider.suggest', () => {
   it('pide dos ideas nuevas para el personaje, sin las que ya vio, y no narra nada', async () => {
     const base = await openSession003()
@@ -15,11 +18,13 @@ describe('ModelGMProvider.suggest', () => {
     expect(result.options).toEqual(['Reviso la campana de cerca', 'Una tercera que sobra'])
     expect(result.usage.inputTokens).toBeGreaterThanOrEqual(0)
     const prompt = transport.prompts[0]!
-    expect(prompt.user).toContain('AHORA NO NARRES NADA')
+    expect(prompt.user).toContain('Dos ideas para Zahira')
     expect(prompt.user).toContain('"Bajo sola al segundo nivel"')
-    expect(prompt.maxOutputTokens).toBe(300)
-    // El prefijo de sistema es el mismo que el del turno: el proveedor lo cachea.
-    expect(prompt.system).toContain('# Agencia del jugador')
+    expect(prompt.maxOutputTokens).toBe(1200)
+    // No es el prompt del director: ni reglas del GM, ni capa de secretos, ni puntos de trama.
+    expect(prompt.system).not.toContain('Capa del GM')
+    expect(prompt.user).not.toContain('# Capa del GM')
+    expect(prompt.user).not.toContain('NO REVELADO')
   })
 
   it('ignora ideas de otro personaje y falla claro si el modelo no da ninguna', async () => {

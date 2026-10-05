@@ -57,7 +57,8 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     partyLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
     gmLayer(ctx, party, budget),
-    turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx)),
+    turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx) && !ctx.session?.arc?.previously),
+    rollsLayer(ctx, party),
     clock ? clockLayer(clock, party.length, ctx.session?.arc) : null,
   ].filter((s) => s !== null)
 
@@ -122,6 +123,10 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
       if (arc.objective) lines.push(`Objetivo de los personajes en esta sesión (los jugadores lo ven en pantalla): ${arc.objective}`)
       if (arc.hook) lines.push(`Gancho de apertura (el incidente con el que empieza la sesión): ${arc.hook}`)
       if (arc.beats?.length) lines.push(`Puntos de trama obligados, en orden (capa del GM; llévalos a escena sin anunciarlos): ${arc.beats.map((b, i) => `${i + 1}. ${b}`).join(' ')}`)
+      // Hechos que el autor fija (docs/27, H): sin ellos el director se
+      // contradecia de un capitulo a otro (la mama en el hospital en el
+      // capitulo 1 y contestando en la cocina en el 3, mesa 44).
+      if (arc.canon?.length) lines.push(`Hechos fijos de esta sesión (capa del GM; no los contradigas ni los cambies, aunque la crónica o tu propia narración anterior digan otra cosa): ${arc.canon.map((c, i) => `${i + 1}. ${c}`).join(' ')}`)
       if (arc.fixedOutcome) {
         lines.push(`Desenlace inevitable (capa del GM): ${arc.fixedOutcome}`)
         lines.push('Lo que decida el jugador cambia el cómo, nunca el qué. No lo anuncies. Haz que cada camino desemboque ahí con causas creíbles, sin castigar al jugador por intentarlo y sin quitarle la decisión: el mundo lo empuja, no lo obliga.')
@@ -161,16 +166,25 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
 
   const npcs = [...ctx.pack.npcs.values()]
   if (npcs.length) {
-    lines.push('', 'NPCs del pack (usa speakerRef npc:<id>):')
+    lines.push('', 'NPCs del pack (usa speakerRef npc:<id>; "Ahora" es lo que la mesa ya provocó en él: actitud de -5 enemigo a 5 aliado, y cómo quedó):')
     for (const npc of npcs) {
       const goals = npc.goals.length ? ` Objetivos: ${npc.goals.join('; ')}.` : ''
-      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}`)
+      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}${npcNow(ctx, npc.id)}`)
     }
+  }
+  // NPCs que nacieron en la mesa y ya tienen algo guardado (actitud, condicion):
+  // lo que el motor recuerda tiene que volver al director, o no lo recuerda nadie.
+  const improvised = Object.keys(ctx.state.world.npcs).filter((id) => !ctx.pack.npcs.has(id) && npcNow(ctx, id) !== '')
+  if (improvised.length) {
+    lines.push('', 'NPCs que nacieron en esta mesa:')
+    for (const id of improvised) lines.push(`- npc:${id}.${npcNow(ctx, id)}`)
   }
 
   const quests = [...ctx.pack.quests.values()]
   // Sin misiones el GM las inventaba ("quest:examen-unam") y la linea se tiraba (mesa 44, 05-10).
   if (!quests.length) lines.push('', 'Este mundo no declara misiones: no propongas "quest_update"; el avance lo cuentan la narración y los logros.')
+  // Lo mismo con los secretos: sin ninguno declarado, el GM se inventaba uno para "revelarlo" (partida de prueba, 05-10).
+  if (ctx.pack.secrets.size === 0) lines.push('', 'Este mundo no declara secretos: no propongas "secret_revealed". Lo que un personaje descubre se registra con "discovery" o con una pista.')
   if (quests.length) {
     lines.push('', 'Misiones del pack (con lo conseguido en esta campaña):')
     for (const quest of quests) {
@@ -198,6 +212,23 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
   return lines.join('\n')
 }
 
+/** Lo que el estado guarda de un NPC (como trata a cada personaje y como quedo), o '' si nada. */
+function npcNow(ctx: GMTurnContext, id: string): string {
+  const live = ctx.state.world.npcs[id]
+  if (!live) return ''
+  const parts: string[] = []
+  const relationships = live.custom['relationships']
+  if (relationships && typeof relationships === 'object') {
+    for (const [ref, value] of Object.entries(relationships as Record<string, unknown>)) {
+      if (typeof value === 'number' && value !== 0) parts.push(`con ${refName(ctx.pack, ref)} ${value > 0 ? `+${value}` : value}`)
+    }
+  }
+  const conditions = live.custom['conditions']
+  if (Array.isArray(conditions) && conditions.length) parts.push(conditions.map(String).join(', '))
+  if (live.inventory.length) parts.push(`tiene ${live.inventory.map((i) => i.id).join(', ')}`)
+  return parts.length ? ` Ahora: ${parts.join('; ')}.` : ''
+}
+
 // Capa b: party con estado vivo.
 function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string {
   const lines: string[] = ['# Party presente', '']
@@ -206,23 +237,28 @@ function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget):
   for (const id of party) {
     const sheet = ctx.pack.characters.get(id)
     const live = ctx.state.world.characters[id]
-    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, ctx.notes?.personas?.[id]))
+    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal }))
     lines.push('')
   }
 
   return lines.join('\n').trimEnd()
 }
 
-function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string): string {
+/**
+ * `view.goal`: la meta de ESTA sesion si el autor la escribio (a los 33 años
+ * la ficha seguia diciendo "estudiar Medicina en la UNAM"). `view.player`: la
+ * ficha como la conoce su jugador, sin lo que solo sabe el GM (que rumor es falso).
+ */
+function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string, view: { goal?: string | undefined; player?: boolean } = {}): string {
   const lines: string[] = []
   const name = sheet?.name ?? id
   lines.push(`## ${name} (character:${id})`)
   if (sheet && sheets === 'compact') {
-    lines.push(`${sheet.race}, ${sheet.class}. Meta: ${sheet.goal} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
+    lines.push(`${sheet.race}, ${sheet.class}. Meta: ${view.goal ?? sheet.goal} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
   } else if (sheet) {
     lines.push(`${sheet.race}, ${sheet.class}, ${sheet.age}. "${sheet.quote}"`)
     lines.push(sheet.bio)
-    lines.push(`Meta: ${sheet.goal}`)
+    lines.push(`Meta: ${view.goal ?? sheet.goal}`)
     const stats = Object.entries(sheet.stats).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(', ')
     // CA y ataques son del d20; un personaje de corte no los tiene y antes
     // salia "CA undefined" y "Ataques: ." (VAM del 19-09, motor A8).
@@ -261,7 +297,8 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
   // Lo que ha oido, aparte de lo que sabe: un rumor puede ser falso, y el GM
   // tiene que poder jugarlo como tal.
   const rumors = state.knowledge[id]?.rumors ?? []
-  if (rumors.length) lines.push(`Ha oído (rumores, no hechos): ${rumors.map((r) => (r.false ? `${r.text} [FALSO]` : r.text)).join('; ')}.`)
+  // Que un rumor es falso lo sabe el GM, no quien lo oyo.
+  if (rumors.length) lines.push(`Ha oído (rumores, no hechos): ${rumors.map((r) => (r.false && !view.player ? `${r.text} [FALSO]` : r.text)).join('; ')}.`)
   // Lo escribio su jugador: describe al personaje (como es, que busca, que no
   // soporta, como coquetea, su defecto, su secreto). Es texto del usuario,
   // delimitado como la premisa; su secreto es del personaje, no de la mesa.
@@ -446,7 +483,15 @@ function turnLayer(pack: LoadedPack, turn: TurnInput, party: string[], preRolled
         const r = response.roll
         const skill = r.skill ? ` (${r.skill})` : ''
         const edge = r.die.startsWith('1d20') && r.result === 20 ? ' Es un 20: brilla.' : r.die.startsWith('1d20') && r.result === 1 ? ' Es un 1: falla feo.' : ''
-        lines.push(`- ${name} (character:${response.characterId})${late} tiró ${r.die}${skill} cuando se lo pediste: ${r.result}.${edge} Ya está registrada: narra ahora su consecuencia y no emitas "roll" para esta acción.`)
+        // La primera linea la escribe la API ("Tiro 1d20 (Ingenio): 12"); lo que
+        // sigue lo escribio el jugador junto al dado. Antes se tiraba aqui y el
+        // director nunca lo veia, aunque el prompt se lo prometia y la pantalla
+        // invita a escribirlo (6 mensajes perdidos entre las mesas 43 y 44).
+        const said = response.text.split('\n').slice(1).join(' ').trim()
+        const intent = said
+          ? ` Junto al dado escribió: "${clip(said, 1000)}". Es parte de este turno: narra el resultado de la tirada y, si el número lo permite, también eso que escribió.`
+          : ' No escribió nada más: narra el resultado de lo que declaró el turno anterior, sin ponerle palabras ni decisiones nuevas.'
+        lines.push(`- ${name} (character:${response.characterId})${late} tiró ${r.die}${skill} cuando se lo pediste: ${r.result}.${edge} Ya está registrada: narra ahora su consecuencia y no emitas "roll" para esta acción.${intent}`)
         continue
       }
       lines.push(`- ${name} (character:${response.characterId})${late}: ${clip(response.text, 4000)}`)
@@ -484,4 +529,98 @@ function clip(text: string, max: number): string {
 /** Texto del usuario: se neutralizan los cierres de bloque para que no pueda salirse del delimitador. */
 function untrusted(text: string): string {
   return text.replace(/<\/?(premisa_de_la_mesa|nota_de_la_sesion|personalidad)>/gi, '').trim()
+}
+
+/**
+ * Cuantas tiradas pedidas le quedan a cada personaje en esta sesion (modos
+ * `dice` y `table`). Pedir una tirada cuesta una ronda entera: se declara en
+ * un turno y se suelta el dado en el siguiente. En la mesa 43 un tercio de
+ * las respuestas fueron solo eso. Por eso son pocas y para lo que decide
+ * algo (Gabino, 05-10): una por personaje cada ocho turnos de presupuesto;
+ * sin reloj, una cada seis turnos jugados. null con el motor tirando.
+ */
+export function rollAllowance(ctx: Pick<GMTurnContext, 'dice' | 'turn' | 'notes' | 'session' | 'state' | 'recentEvents'>, party: readonly string[]): { limit: number; left: Record<string, number> } | null {
+  if ((ctx.dice ?? 'engine') === 'engine') return null
+  const clock = clockOf(ctx)
+  const limit = clock ? Math.max(1, Math.ceil(clock.total / 8)) : 1 + Math.floor(ctx.turn.number / 6)
+  const startedSeq = ctx.state.meta.sessions[ctx.turn.sessionId]?.startedSeq ?? 0
+  const used: Record<string, number> = {}
+  for (const event of ctx.recentEvents ?? []) {
+    if (event.type !== 'roll' || event.seq < startedSeq || !event.actor) continue
+    // La Fortuna es de la sesion, no una tirada pedida; la del motor no cuesta
+    // ronda; y un numero que el jugador escribio por su cuenta con dados de
+    // verdad (`physical`) tampoco: nadie se lo pidio ni espero una ronda por el.
+    if (event.resolved.kind === 'fortune' || event.resolved.source === 'engine' || event.resolved.source === 'physical') continue
+    const id = refId(event.actor)
+    used[id] = (used[id] ?? 0) + 1
+  }
+  return { limit, left: Object.fromEntries(party.map((id) => [id, Math.max(0, limit - (used[id] ?? 0))])) }
+}
+
+function rollsLayer(ctx: GMTurnContext, party: string[]): string | null {
+  const allowance = rollAllowance(ctx, party)
+  if (!allowance || party.length === 0) return null
+  const name = (id: string): string => ctx.pack.characters.get(id)?.name ?? id
+  const withLeft = party.filter((id) => (allowance.left[id] ?? 0) > 0)
+  const without = party.filter((id) => (allowance.left[id] ?? 0) === 0)
+  const lines = ['# Tiradas pedidas', '', `Pedir una tirada cuesta a la mesa una ronda entera, así que son pocas: ${allowance.limit} por personaje en esta sesión.`]
+  if (withLeft.length) lines.push(`Les queda: ${withLeft.map((id) => `${name(id)} ${allowance.left[id]}`).join(', ')}. Guárdala para el momento que decide la sesión; no la gastes en algo que la historia puede resolver sola.`)
+  if (without.length) lines.push(`Ya no les queda: ${without.map(name).join(', ')}. No les pidas tirada: el motor la descartaría y el jugador se quedaría esperando.`)
+  lines.push(
+    ctx.dice === 'table'
+      ? 'Toda otra acción con riesgo la resuelves en ESTE turno sin pedir dado: si el jugador escribió su número, úsalo; si no, decide por lo que declaró, lo que sabe hacer y su Fortuna, y cobra el riesgo con un costo dentro de la historia, nunca con un turno de espera.'
+      : 'Toda otra acción con riesgo la resuelves en ESTE turno, sin dado: decide por lo que el personaje declaró, lo que sabe hacer (sus habilidades) y su Fortuna, y cobra el riesgo con un costo dentro de la historia, nunca con un turno de espera.',
+  )
+  return lines.join('\n')
+}
+
+/**
+ * El contexto para proponer ideas de accion a UN personaje (docs/27, bloque
+ * I): solo lo que ese jugador ya puede saber. Sin capa del GM, sin puntos de
+ * trama, sin desenlace ni finales, sin la lista de NPCs del pack. Las ideas
+ * salian de la llamada que tiene los secretos delante y los filtraban
+ * ("Pregunto por Suirei, la dama de manos de boticaria" antes de que nadie
+ * la nombrara, mesa 43); lo que este contexto no trae, no se puede filtrar.
+ *
+ * `narrated` son los bloques que el director acaba de escribir este turno y
+ * que ese personaje lee (los publicos y sus susurros).
+ */
+export function buildPlayerContext(ctx: GMTurnContext, characterId: string, narrated: readonly string[] = [], budget: ContextBudget = DEFAULT_BUDGET, pendingRoll?: { skill?: string | undefined; reason?: string | undefined }): string {
+  const id = refId(characterId)
+  const session = ctx.state.meta.sessions[ctx.turn.sessionId]
+  const party = session?.party ?? []
+  const sheet = ctx.pack.characters.get(id)
+  const name = sheet?.name ?? id
+  const lines: string[] = ['# La historia', '']
+  lines.push(`${ctx.pack.manifest.name}${ctx.pack.manifest.tagline ? ` (${ctx.pack.manifest.tagline})` : ''}`)
+  if (ctx.session) {
+    lines.push(`Sesión: ${ctx.session.title}. ${clip(ctx.session.briefing, 900)}`)
+    if (ctx.session.arc?.objective) lines.push(`Objetivo a la vista: ${ctx.session.arc.objective}`)
+  }
+  const here = ctx.state.world.characters[id]?.location
+  const place = here ? ctx.pack.locations.get(here) : undefined
+  if (place) lines.push(`Dónde está ${name}: ${place.name}. ${place.newcomerView}`)
+
+  lines.push('', '# El personaje', '', characterCard(id, sheet, ctx.state.world.characters[id], ctx.state, 'compact', ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, player: true }))
+  if (party.length > 1) lines.push(`Con ${name} en la mesa: ${party.filter((p) => p !== id).map((p) => ctx.pack.characters.get(p)?.name ?? p).join(', ')}.`)
+
+  // Lo que ese personaje ha vivido: la cronica publica y lo que solo el sabe.
+  const startedSeq = session?.startedSeq ?? Number.POSITIVE_INFINITY
+  const mine = (entry: NarrativeEntry): boolean => !entry.to || entry.to.includes(id)
+  const before = ctx.state.narrative.log.filter((e) => e.seq < startedSeq && mine(e)).slice(-6).map(describeEntry)
+  const now = ctx.state.narrative.log.filter((e) => e.seq >= startedSeq && mine(e)).slice(-budget.recentEvents).map(describeEntry)
+  const memory = Math.floor(budget.memoryChars / 2)
+  const nowText = fitFromEnd(now, Math.floor(memory * 0.75))
+  const beforeText = fitFromEnd(before, Math.max(0, memory - nowText.join('\n').length))
+  if (beforeText.length) lines.push('', '# Antes', '', ...beforeText.map((l) => `- ${l}`))
+  if (nowText.length) lines.push('', '# Esta sesión', '', ...nowText.map((l) => `- ${l}`))
+
+  lines.push('', '# Ahora mismo', '')
+  for (const response of ctx.turn.responses) {
+    const who = ctx.pack.characters.get(response.characterId)?.name ?? response.characterId
+    lines.push(`${who} hizo: ${clip(response.text, 400)}`)
+  }
+  for (const text of narrated) lines.push(`Narración: ${clip(text, 700)}`)
+  if (pendingRoll) lines.push(`A ${name} le toca soltar un dado${pendingRoll.skill ? ` (${pendingRoll.skill})` : ''}${pendingRoll.reason ? `: ${pendingRoll.reason}` : ''}. Las ideas son qué intenta con esa tirada.`)
+  return lines.join('\n')
 }

@@ -107,6 +107,30 @@ describe('loadPack sobre packs en memoria', () => {
     expect(issues).toContainEqual(expect.objectContaining({ level: 'error', message: expect.stringContaining('ninguna-parte') }))
   })
 
+  it('avisa de puntos de trama que no caben en el presupuesto o que son ramas, y acepta los campos de autor', async () => {
+    // Con 5 puntos en 6 turnos el GM salto la escena central entera, y una
+    // rama puesta en fila ("Si va...") le hizo empujar la que el jugador no eligio (mesa 44).
+    const arc = {
+      turns: { target: 6 },
+      beats: ['La llamada', 'Si se niega, el mundo lo arrastra', 'El choque', 'La agencia', 'El examen'],
+      canon: ['La mamá está en el hospital.'],
+      previously: 'Antes pasó algo.',
+      goal: 'Llegar al examen.',
+      endCard: { title: 'Fin', text: 'No era el plan.', scene: 'Un salón gris al amanecer.' },
+    }
+    const source = (a: unknown) => memorySource({ 'pack.json': JSON.stringify(manifest), 'characters/ana.json': JSON.stringify(ana), 'sessions/001.json': JSON.stringify({ ...session, arc: a }) })
+
+    const tight = await loadPack(source(arc))
+    expect(tight.pack).not.toBeNull()
+    expect(tight.issues.map((i) => i.level)).toEqual(['warning', 'warning'])
+    expect(tight.issues[0]?.message).toContain('hacen falta al menos 8')
+    expect(tight.issues[1]?.message).toContain('es una rama')
+
+    const roomy = await loadPack(source({ ...arc, turns: { target: 8 }, beats: ['La llamada', 'El mundo lo arrastra', 'El choque', 'La agencia', 'El examen'] }))
+    expect(roomy.issues).toEqual([])
+    expect(roomy.pack?.sessions.get('001')?.arc?.canon).toEqual(['La mamá está en el hospital.'])
+  })
+
   it('marca error cuando el retrato no existe y advierte de archivos no declarados', async () => {
     const source = memorySource({
       'pack.json': JSON.stringify(manifest),

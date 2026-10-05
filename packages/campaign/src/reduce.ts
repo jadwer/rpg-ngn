@@ -1,6 +1,6 @@
 import type { CampaignEvent, LoadedPack, Secret } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
-import { emptyWorld, updateCharacter, type WorldState } from '@rpg-ngn/core'
+import { emptyWorld, updateCharacter, updateNpc, type WorldState } from '@rpg-ngn/core'
 import { rulesetRef, type Ruleset } from '@rpg-ngn/rules'
 import { revealsOf } from './knowledge.js'
 import type { CampaignState, PlayerKnowledge } from './state.js'
@@ -263,14 +263,18 @@ function applyMove(world: WorldState, effect: Record<string, unknown>): WorldSta
  */
 function applyNpcCondition(world: WorldState, effect: Record<string, unknown>): WorldState {
   const id = refId(String(effect['who'] ?? ''))
-  const npc = world.npcs[id]
-  if (!npc) return world
+  if (id === '') return world
   const add = effect['add']
   const remove = effect['remove']
-  let conditions = (npc.custom['conditions'] as string[] | undefined) ?? []
-  if (typeof add === 'string' && !conditions.includes(add)) conditions = [...conditions, add]
-  if (typeof remove === 'string') conditions = conditions.filter((c) => c !== remove)
-  return { ...world, npcs: { ...world.npcs, [id]: { ...npc, custom: { ...npc.custom, conditions } } } }
+  // `updateNpc` crea al NPC la primera vez que el mundo lo toca. Antes se
+  // exigia que ya existiera y nadie lo creaba: la condicion no se guardaba
+  // nunca (mesa 44: `world.npcs` vacio tras tres capitulos).
+  return updateNpc(world, id, (npc) => {
+    let conditions = (npc.custom['conditions'] as string[] | undefined) ?? []
+    if (typeof add === 'string' && !conditions.includes(add)) conditions = [...conditions, add]
+    if (typeof remove === 'string') conditions = conditions.filter((c) => c !== remove)
+    return { ...npc, custom: { ...npc.custom, conditions } }
+  })
 }
 
 /** Escala de actitud de un NPC hacia un personaje: de -5 (enemigo) a 5 (aliado). */
@@ -287,15 +291,17 @@ function applyRelationship(world: WorldState, effect: Record<string, unknown>): 
   const npcId = refId(String(effect['who'] ?? ''))
   const withRef = String(effect['with'] ?? '')
   const delta = Number(effect['delta'] ?? 0)
-  const npc = world.npcs[npcId]
-  if (!npc || withRef === '' || !Number.isFinite(delta) || delta === 0) return world
+  // El sujeto es un NPC. Antes del 05-10 el interprete exigia un personaje
+  // en `who` y hay eventos guardados asi: no deben crear un NPC fantasma.
+  if (refKind(String(effect['who'] ?? '')) !== 'npc' || npcId === '' || withRef === '' || !Number.isFinite(delta) || delta === 0) return world
 
-  const current = (npc.custom['relationships'] as Record<string, number> | undefined) ?? {}
-  const value = Math.max(RELATION_MIN, Math.min(RELATION_MAX, (current[withRef] ?? 0) + delta))
-  return {
-    ...world,
-    npcs: { ...world.npcs, [npcId]: { ...npc, custom: { ...npc.custom, relationships: { ...current, [withRef]: value } } } },
-  }
+  // Con `updateNpc`: el NPC nace en el estado la primera vez que algo lo
+  // toca. Antes se exigia que existiera y la actitud no se guardaba nunca.
+  return updateNpc(world, npcId, (npc) => {
+    const current = (npc.custom['relationships'] as Record<string, number> | undefined) ?? {}
+    const value = Math.max(RELATION_MIN, Math.min(RELATION_MAX, (current[withRef] ?? 0) + delta))
+    return { ...npc, custom: { ...npc.custom, relationships: { ...current, [withRef]: value } } }
+  })
 }
 
 function applyWitnesses(state: CampaignState, event: CampaignEvent): CampaignState {

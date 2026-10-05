@@ -75,7 +75,7 @@ describe('OpenAITransport (OpenAI y compatibles como DeepSeek)', () => {
     const params = calls[0]!
     expect(params.stream).toBe(true)
     expect(params.stream_options).toEqual({ include_usage: true })
-    expect(params.max_tokens).toBe(4000)
+    expect(params.max_tokens).toBe(4800)
     expect(params).not.toHaveProperty('max_completion_tokens')
     expect(params).not.toHaveProperty('reasoning_effort')
     expect(params.messages[0]).toMatchObject({ role: 'system' })

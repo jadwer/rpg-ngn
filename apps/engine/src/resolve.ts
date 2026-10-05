@@ -1,8 +1,8 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
-import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse } from '@rpg-ngn/engine-contract'
+import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse, TurnDiagnostics } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
-import { createProvider, redact, storyClock, type GMProvider, type ProviderDeps } from '@rpg-ngn/narrative'
+import { createProvider, GMProviderError, redact, storyClock, type GMProvider, type GMTurnContext, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
 import { illustrationFor } from './illustrate.js'
 import { projectionsOf, rebuildState } from './state.js'
@@ -26,7 +26,8 @@ export interface ResolveDeps {
  */
 export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDeps): AsyncGenerator<ResolveLine> {
   const credential = request.provider.kind === 'scripted' ? undefined : request.provider.credential
-  const fail = (error: unknown): ResolveLine => ({ kind: 'error', message: redact(error instanceof Error ? error.message : String(error), credential) })
+  // Con la salida que el modelo alcanzo a escribir, si el fallo fue suyo: el intento que mas hace falta leer es el que no salio.
+  const fail = (error: unknown): ResolveLine => ({ kind: 'error', message: redact(error instanceof Error ? error.message : String(error), credential), ...(error instanceof GMProviderError && error.raw ? { raw: error.raw } : {}) })
 
   let pack: LoadedPack
   let ruleset: Ruleset
@@ -69,6 +70,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
   let rollRequests: RollRequest[] = []
   // El director cerro la sesion en el turno de cierre del reloj (docs/26, H1).
   let closed: { cliffhanger?: string; endingId?: string } | null = null
+  // Lo tecnico del turno: la salida del modelo y lo que el motor no pudo usar (docs/27, D).
+  let diagnostics: TurnDiagnostics | null = null
+  const dropped: string[] = []
+  const ideasUsage = { calls: 0, inputTokens: 0, outputTokens: 0 }
   const arc = pack.sessions.get(request.turn.sessionId)?.arc
   const clock = storyClock(request.turn.number, request.context?.pacing, arc)
 
@@ -112,7 +117,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         const character = pack.characters.get(id)
         if (!character) continue
         const knows = character.private?.knows ?? []
-        const text = [tr('gm.yourGoal', { name: character.name, goal: character.goal }), ...(knows.length ? [tr('gm.youKnow', { knows: knows.join(' ') })] : [])].join(' ')
+        // La meta de ESTA sesion si el autor la escribio (docs/27, H): a los 33
+        // años el susurro seguia diciendo "estudiar Medicina en la UNAM".
+        const goal = packSession.arc?.goal ?? character.goal
+        const text = [tr('gm.yourGoal', { name: character.name, goal }), ...(knows.length ? [tr('gm.youKnow', { knows: knows.join(' ') })] : [])].join(' ')
         yield { kind: 'block', block: { type: 'narration', text, to: [id] } }
         const parsed = seal({ type: 'narration', payload: { text }, visibility: { layer: 'player', witnesses: [`character:${id}`] } })
         if (parsed.success) {
@@ -124,8 +132,18 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       // Y se coloca a la party donde el pack dice que arranca la sesion. Sin
       // esto nadie tiene ubicacion hasta que el GM mueva a alguien, y el mapa
       // de la mesa sale vacio de gente durante toda la primera escena.
+      // El "Anteriormente..." del autor (docs/27, H): si el mundo lo trae, sale
+      // este y el director no escribe el suyo. Solo si la campaña ya jugo otra sesion.
+      const previously = packSession.arc?.previously
+      if (previously && Object.values(state.meta.sessions).some((s) => s.id !== request.turn.sessionId && s.status === 'closed')) {
+        yield { kind: 'block', block: { type: 'system', title: tr('gm.previously'), text: previously, audience: 'table', tone: 'info', recap: true } }
+      }
+
+      // Se coloca a toda la party donde la sesion dice que arranca. Antes solo
+      // a quien no tenia lugar: tras un salto de tiempo el personaje abria
+      // donde termino la sesion anterior (capitulo 2 del medico: en ESIME).
       const start = packSession.startLocation
-      const sinUbicar = start ? session.party.filter((id) => !state.world.characters[id]?.location) : []
+      const sinUbicar = start ? session.party.filter((id) => state.world.characters[id]?.location !== start) : []
       if (start && sinUbicar.length > 0) {
         const parsed = seal({
           type: 'world_event',
@@ -140,7 +158,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       }
     }
 
-    const outputs = provider.narrate({
+    const context: GMTurnContext = {
       pack,
       state,
       session: packSession,
@@ -153,7 +171,8 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       language: request.language,
       // El prompt y los eventos aceptados dependen del ruleset de la mesa.
       rulesetId: ruleset.id,
-    })
+    }
+    const outputs = provider.narrate(context)
     for await (const output of outputs) {
       if (output.kind === 'block') {
         yield { kind: 'block', block: output.block }
@@ -190,6 +209,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
 
+      if (output.kind === 'diagnostics') {
+        diagnostics = output.diagnostics
+        continue
+      }
+
       if (output.kind === 'close') {
         closed = { ...(output.cliffhanger ? { cliffhanger: output.cliffhanger } : {}), ...(output.endingId ? { endingId: output.endingId } : {}) }
         continue
@@ -199,8 +223,45 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       if (!parsed.success) {
         throw new Error(`el GM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
       }
-      state = applyEvent(state, parsed.data, ruleset, secrets)
+      // Un evento del GM que el ruleset no sabe aplicar se descarta y se
+      // apunta; el turno ya narrado no se repite por un efecto. Antes lanzaba y
+      // la mesa pagaba dos veces la espera y el modelo (mesa 42, 04-10).
+      try {
+        state = applyEvent(state, parsed.data, ruleset, secrets)
+      } catch (error) {
+        dropped.push(`${output.event.type}: ${redact(error instanceof Error ? error.message : String(error), credential).slice(0, 300)}`)
+        continue
+      }
       events.push(parsed.data)
+    }
+
+    // Ideas de accion (docs/27, bloque I): se piden aqui, con los eventos del
+    // turno ya aplicados, para que salgan del mundo como quedo (el lugar al
+    // que se movieron, lo que acaban de averiguar) y solo de lo que cada
+    // jugador sabe. Una por personaje con la palabra, en paralelo y con tope
+    // de tiempo: la mesa ya esta leyendo lo narrado y unas ideas que no
+    // llegan no pueden retener ni tumbar el turno.
+    if (provider.separateIdeas && provider.suggest && !closed) {
+      const suggest = provider.suggest.bind(provider)
+      const after: GMTurnContext = { ...context, state, recentEvents: [...recentEvents, ...events] }
+      const asked = await Promise.all(
+        addressed.map(async (id) => {
+          try {
+            return { id, idea: await withTimeout(suggest(after, id, [], { pendingRoll: rollRequests.find((r) => r.characterId === id) }), IDEAS_TIMEOUT_MS) }
+          } catch (error) {
+            dropped.push(`sin ideas para ${id}: ${redact(error instanceof Error ? error.message : String(error), credential).slice(0, 200)}`)
+            return { id, idea: null }
+          }
+        }),
+      )
+      suggestions = {}
+      for (const { id, idea } of asked) {
+        if (!idea) continue
+        suggestions[id] = idea.options.slice(0, 2)
+        ideasUsage.calls += 1
+        ideasUsage.inputTokens += idea.usage.inputTokens
+        ideasUsage.outputTokens += idea.usage.outputTokens
+      }
     }
   } catch (error) {
     yield fail(error)
@@ -209,6 +270,12 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 
   // El reloj marca dos momentos que siempre se ilustran: entrar al climax y el cierre.
   const beat = clock?.phase === 'cierre' ? 'ending' : clock?.phase === 'climax' && clock.phaseStart ? 'climax' : null
+  // La imagen del cierre: sin escena del director, la que el autor escribio
+  // para ese final, o la primera frase de su tarjeta. Antes caia al lugar
+  // donde estaba el personaje: el final feliz salio como "La casa de mama".
+  const closing = closed ? closeOf(pack, request.turn.sessionId, closed) : null
+  // La del autor manda sobre la del director: es la imagen con la que quiso cerrar.
+  if (closing) moment = closingScene(pack, request.turn.sessionId, closed?.endingId) ?? moment ?? closing.card?.text?.split(/(?<=[.!?])\s/)[0] ?? null
   const illustration = illustrationFor({ pack, before: initial, after: state, party: session.party, opening, moment, beat })
 
   yield {
@@ -225,10 +292,38 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     // Tiradas pedidas: esos personajes tiran en vez de escribir el turno que viene.
     ...(rollRequests.length ? { rollRequests: rollRequests.filter((r) => addressed.includes(r.characterId)) } : {}),
     // Fin de la sesion: la API no abre otro turno y escribe el bloque `ending`.
-    ...(closed ? { close: closeOf(pack, request.turn.sessionId, closed) } : {}),
+    ...(closing ? { close: closing } : {}),
+    ...(diagnostics ? { diagnostics: { ...diagnostics, dropped: [...diagnostics.dropped, ...dropped], ...(ideasUsage.calls > 0 ? { ideasUsage } : {}) } } : {}),
     ...(clock ? { clock: { total: clock.total } } : {}),
     ...(arc?.objective ? { objective: arc.objective } : {}),
   }
+}
+
+/** Cuanto se espera a las ideas de un personaje antes de abrir el turno sin ellas. */
+const IDEAS_TIMEOUT_MS = 15_000
+
+/** Rechaza si la promesa no termina a tiempo; la llamada sigue por su cuenta y su resultado se ignora. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`sin respuesta en ${ms} ms`)), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (error: unknown) => {
+        clearTimeout(timer)
+        reject(error instanceof Error ? error : new Error(String(error)))
+      },
+    )
+  })
+}
+
+/** La imagen que el autor escribio para el final elegido o para la tarjeta de la sesion. */
+function closingScene(pack: LoadedPack, sessionId: string, endingId: string | undefined): string | null {
+  const arc = pack.sessions.get(sessionId)?.arc
+  const ending = endingId ? arc?.endings?.find((e) => e.id === endingId) : undefined
+  return ending?.scene ?? arc?.endCard?.scene ?? null
 }
 
 /**
@@ -271,7 +366,7 @@ export async function suggestMore(request: SuggestRequest, deps: ResolveDeps): P
     const session = state.meta.sessions[request.turn.sessionId]
     if (!session || session.status !== 'open') throw new Error(`la sesion ${request.turn.sessionId} no esta abierta en la campaña`)
     const provider = deps.provider ?? createProvider(request.provider, deps.providers ?? {})
-    if (!provider.suggest) throw new Error('el director de esta mesa no da ideas: no tiene modelo')
+    if (!provider.suggest) throw new Error('el GM de esta mesa no da ideas: no tiene modelo')
     return await provider.suggest(
       {
         pack,

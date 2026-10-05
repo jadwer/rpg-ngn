@@ -62,6 +62,17 @@ export function storyClock(turn: number, pacing: TurnPacing | undefined, arc?: P
   return { turn, total, phase, phaseStart: phase !== previous, penultimate: phase !== 'cierre' && turn === total - 1, earlyEnding }
 }
 
+/**
+ * Si en este turno toca logro: al empezar un tramo (no el gancho) y en el
+ * cierre. En sesiones de 6 turnos o menos casi cada turno empieza tramo, asi
+ * que ahi solo al entrar a la escalada, al climax y en el cierre. El motor lo
+ * usa tambien para descartar un logro que el modelo escriba fuera de turno.
+ */
+export function milestoneDue(clock: StoryClock): boolean {
+  if (clock.phase === 'cierre') return true
+  return clock.phaseStart && clock.phase !== 'gancho' && (clock.total > 6 || clock.phase === 'escalada' || clock.phase === 'climax')
+}
+
 const PHASE_GOAL: Record<StoryPhase, string> = {
   gancho: 'Abre con fuerza: un incidente que ya está pasando y exige decidir.',
   complicacion: 'El problema se enreda: una pista que abre otra pregunta, un obstáculo, alguien que miente.',
@@ -90,11 +101,24 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
     '',
     `Turno ${clock.turn} de ${clock.total}. Tramo: ${PHASE_NAME[clock.phase]}. ${PHASE_GOAL[clock.phase]}`,
     'Cada turno cambia algo: una pista, una consecuencia o un peligro nuevo. Cierra una pregunta chica y abre otra. Un turno que no mueve nada no cuenta.',
+    // Fallar avanza (docs/27, R2). La regla general dice "a veces no hay
+    // nada"; con reloj eso mata la sesion: en la mesa 43 fallaron 4 tiradas
+    // de 9 y ninguna dio nada, y la pista del cuerpo se perdio en un 2.
+    'Aquí un fallo nunca deja el turno vacío: el personaje consigue lo que buscaba pagando un costo (lo ven, pierde un apoyo, llega tarde, sube la presión) o consigue otra cosa útil. Lo que la mesa necesita para avanzar no depende de un solo dado ni de una sola pregunta: el dado decide el costo y cuánto se sabe, no si se sabe. Lo que un jugador ganó con su acción lo aprovecha ese jugador, no otro.',
+    'No repitas como desconocido lo que la mesa ya averiguó (está en "pistas" y en la crónica): si alguien pregunta por algo ya sabido, recuérdaselo en una frase y dale lo que sigue.',
     `Texto: como máximo ${words} palabras en total${partySize === 1 ? '' : ' y 2 diálogos de NPC de hasta dos frases'}. Menos es mejor: la mesa lee en voz alta y quiere decidir.`,
   ]
-  if (clock.phaseStart && clock.phase !== 'gancho') {
-    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".')
+  // En sesiones de 6 turnos o menos casi cada turno empieza tramo: el logro
+  // salia en casi todos y por cualquier cosa. Ahi solo al entrar a la
+  // escalada y al climax (el del cierre se pide abajo).
+  const milestoneNow = clock.phase !== 'cierre' && milestoneDue(clock)
+  if (clock.phaseStart && clock.phase !== 'gancho' && !milestoneNow) lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué busca la mesa en esta sesión.')
+  if (milestoneNow) {
+    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".' + (partySize === 1 ? ' La mesa es de una sola persona: en singular ("Sacó", "Se ganó").' : ''))
   }
+  // Sin dados de utileria (docs/27, R3): en la mesa 44 se tiro 12 con el
+  // agente y 6 en la ventana, y nada podia cambiar. Vale con cualquier modo de dados.
+  if (arc?.fixedOutcome) lines.push('Esta sesión tiene un desenlace inevitable: no pidas ni uses un dado para nada que ese desenlace ya decide. Un dado solo entra si cambia el cómo (qué pierde, a quién tiene de su lado, qué se lleva); un dado que no puede cambiar nada le cuesta a la mesa un turno por nada.')
   if (clock.penultimate) lines.push('El turno siguiente es el ÚLTIMO de la sesión: deja a la mesa ante la decisión final.')
   // Donde deberia ir la trama segun el turno (H5): los puntos del autor se
   // reparten en el presupuesto. Sin esto el director se quedaba en el primero
@@ -102,7 +126,11 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
   const beats = arc?.beats ?? []
   if (beats.length > 0 && clock.phase !== 'cierre') {
     const at = Math.min(beats.length - 1, Math.floor(((clock.turn - 1) / Math.max(1, clock.total - 1)) * beats.length))
-    lines.push(`Ritmo de la trama: vas por el punto ${at + 1} de ${beats.length} ("${beats[at]}"). Si vas atrás, avanza hasta él en este turno, aunque tengas que saltar tiempo con una transición breve.`)
+    const next = beats[at + 1]
+    // Antes: "avanza hasta el en este turno aunque tengas que saltar tiempo".
+    // El jugador dudo dos turnos y, al decir "voy", llego al choque, lo
+    // culparon y ya iba en la patrulla en un solo turno (mesa 44).
+    lines.push(`Ritmo de la trama: deberías ir por el punto ${at + 1} de ${beats.length} ("${beats[at]}").${next ? ` Después viene: "${next}".` : ''} Si vas atrás, acércate en este turno, pero no borres lo que el jugador acaba de abrir: si declaró ir a un lugar o empezar una escena, juégala al menos un intercambio antes de saltar. El ritmo se recupera acortando lo que sigue, nunca saltándote lo que el jugador eligió.`)
   }
   const endings = arc?.endings ?? []
   if (endings.length > 0) {
@@ -114,8 +142,8 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
     lines.push(
       'Este turno CIERRA la sesión. Narra el desenlace a partir de lo que declararon; no devuelvas la palabra ni hagas preguntas, no emitas "suggest" ni "addressed".',
       endings.length > 0
-        ? 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","ending":"<id>","cliffhanger":"..."}: el final que ganaron y, si la historia sigue, una frase con lo que queda pendiente, sin secretos ni lo que los personajes todavía no saben.'
-        : 'Marca lo que lograron con un "milestone" y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí). El cliffhanger lo leen los jugadores: nada de secretos ni de lo que los personajes todavía no saben.',
+        ? 'Marca lo que lograron con un "milestone" (de 3 a 8 palabras, como los demás) y termina con {"kind":"close","ending":"<id>","cliffhanger":"..."}: el final que ganaron y, si la historia sigue, una frase con lo que queda pendiente, sin secretos ni lo que los personajes todavía no saben.'
+        : 'Marca lo que lograron con un "milestone" (de 3 a 8 palabras, como los demás) y termina con {"kind":"close","cliffhanger":"..."}: el cliffhanger es una frase con lo que queda pendiente para la próxima sesión (vacío si la historia termina aquí). El cliffhanger lo leen los jugadores: nada de secretos ni de lo que los personajes todavía no saben.',
     )
   }
   return lines.join('\n')

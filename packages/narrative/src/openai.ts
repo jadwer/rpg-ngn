@@ -110,5 +110,11 @@ function acceptsReasoningEffort(model: string): boolean {
 }
 
 export function createOpenAIProvider(options: OpenAIProviderOptions): ModelGMProvider {
-  return new ModelGMProvider(new OpenAITransport(options), options.credential, options)
+  const transport = new OpenAITransport(options)
+  // Las ideas salen de una llamada aparte que solo ve lo que el jugador sabe
+  // (docs/27, bloque I), tambien con la nube compatible (DeepSeek). Solo con
+  // el perfil compacto, que es el de los modelos locales (Ollama en una M1),
+  // otra llamada son minutos: ahi las sigue escribiendo el GM.
+  const ideasTransport = options.ideasTransport ?? (options.contextProfile === 'compact' ? undefined : transport)
+  return new ModelGMProvider(transport, options.credential, { ...options, ideasTransport })
 }

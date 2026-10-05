@@ -2,7 +2,7 @@ import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
 import { buildTurnContext } from './context.js'
 import { ModelGMProvider } from './model-gm.js'
-import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
+import { collect, contextFor, diagnosticsOf, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
 import { ASK_ROLL_EXAMPLE, GM_SYSTEM_PROMPT, GM_SYSTEM_PROMPT_COMPACT, systemPromptFor } from './prompt.js'
 
 const KEY = 'sk-proj-SECRETA-1234567890abcdef'
@@ -63,7 +63,7 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
     // Quien tira va en addressed aunque el modelo lo olvidara, y conserva sus ideas para decir que intenta con el dado.
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder', 'zahira'] })
     expect(outputs.find((o) => o.kind === 'suggestions')).toEqual({ kind: 'suggestions', byCharacter: { zahira: ['Me acerco', 'Espero'], calder: ['Vigilo la entrada', 'Enciendo la lámpara'] } })
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 
   it('red de seguridad: un numero inventado se vuelve peticion y el anfitrion se entera; una tirada sin numero tambien se pide, sin aviso', async () => {
@@ -85,9 +85,8 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
         { characterId: 'calder', die: '2d6+1', kind: 'attack' },
       ],
     })
-    const notice = outputs.find((o) => o.kind === 'block' && o.block.type === 'system')
-    expect(notice?.kind === 'block' && notice.block.type === 'system' ? notice.block : null).toMatchObject({ audience: 'host', text: expect.stringMatching(/^El GM propuso 1 línea/) })
-    expect(notice?.kind === 'block' && notice.block.type === 'system' ? notice.block.detail : '').toContain('inventó un 9')
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(1)
+    expect(diagnosticsOf(outputs).ignored.join('\n')).toContain('inventó un 9')
   })
 
   it('en modo table el numero escrito sigue valiendo; el no escrito se pide', async () => {
@@ -123,7 +122,7 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
     const provider = new ModelGMProvider(new FakeTransport(lines), KEY, { random: seededRandom(1) })
     const outputs = await collect(provider.narrate(contextFor(base, turn(3, [rolled]), { dice: 'dice' })))
     expect(outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))).toEqual(['player_action', 'narration'])
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
     expect(outputs.find((o) => o.kind === 'rollRequests')).toBeUndefined()
   })
 
@@ -133,6 +132,6 @@ describe('tirada pedida por el GM (modos dice y table)', () => {
     const provider = new ModelGMProvider(new FakeTransport(lines), KEY, { random: seededRandom(1) })
     const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]), { dice: 'engine' })))
     expect(outputs.find((o) => o.kind === 'rollRequests')).toBeUndefined()
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && /1 línea/.test(o.block.text))).toBe(true)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(1)
   })
 })

@@ -1,7 +1,7 @@
 import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
 import { ModelGMProvider, parseLoose } from './model-gm.js'
-import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
+import { collect, contextFor, diagnosticsOf, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
 import { GMProviderError } from './redact.js'
 
 const KEY = 'sk-proj-SECRETA-1234567890abcdef'
@@ -75,7 +75,8 @@ describe('ModelGMProvider', () => {
 
     // El prompt lleva las cuatro capas y respeta el presupuesto de salida por defecto.
     const prompt = transport.prompts[0]!
-    expect(prompt.maxOutputTokens).toBe(4000)
+    // 4,000 mas 800 por cada jugador a partir del segundo: el razonamiento cuenta en la salida.
+    expect(prompt.maxOutputTokens).toBe(4800)
     expect(prompt.user).toContain('# Mundo y premisa')
     expect(prompt.user).toContain('## Zahira (character:zahira)')
     expect(prompt.user).toContain('Miro la campana. Saqué un 14 en Historia.')
@@ -102,9 +103,11 @@ describe('ModelGMProvider', () => {
     const outputs = await collect(provider.narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]), { dice: 'table' })))
 
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-    expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'dialogue', 'system'])
+    // Lo ignorado ya no sale como aviso dentro de la historia: va al diagnostico del turno.
+    expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'dialogue'])
     expect(blocks[2]).toMatchObject({ speaker: 'Un minero', speakerRef: null })
-    expect(blocks[3]?.type === 'system' && blocks[3].text).toMatch(/^El GM propuso 5 líneas/)
+    expect(diagnosticsOf(outputs)).toMatchObject({ ignoredCount: 5, lostStory: 0 })
+    expect(diagnosticsOf(outputs).raw).toContain('El aire huele a piedra mojada.')
 
     const events = outputs.filter((o) => o.kind === 'event').map((o) => (o.kind === 'event' ? o.event['type'] : ''))
     // Orion no esta en la sesion, el roll de 19 no fue reportado, la cosa no esta en el inventario, narration del modelo se descarta.
@@ -165,7 +168,7 @@ describe('ModelGMProvider', () => {
     expect(blocks[2]).toMatchObject({ text: 'Calder siente la llave tibia en la mano.' })
     expect(blocks[3]).toMatchObject({ text: '¿Qué hacéis?' })
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira', 'calder'] })
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 
   it('entiende JSON con formato en varias lineas y objetos sin la envoltura kind', async () => {
@@ -196,8 +199,11 @@ describe('ModelGMProvider', () => {
     ].join('\n')
     const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, []))))
     const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-    expect(blocks.map((b) => b?.type)).toEqual(['narration', 'system'])
-    expect(blocks[0]).toMatchObject({ text: 'Este sí llega.' })
+    // El parrafo que quedo sin cerrar se rescata en vez de perderse, y el siguiente llega entero.
+    expect(blocks.map((b) => b?.type)).toEqual(['narration', 'narration'])
+    expect(blocks[0]).toMatchObject({ text: 'roto sin cerrar' })
+    expect(blocks[1]).toMatchObject({ text: 'Este sí llega.' })
+    expect(diagnosticsOf(outputs)).toMatchObject({ ignoredCount: 0, repaired: [expect.stringContaining('roto sin cerrar')] })
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
   })
 
@@ -243,10 +249,9 @@ describe('ModelGMProvider', () => {
 
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
       // Un solo aviso, al final del turno: en medio de la historia parecia que el GM se corregia en vivo.
-      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system'])
-      // El aviso del lint es para el anfitrion: un jugador no puede hacer nada con el.
-      expect(blocks[2]).toMatchObject({ type: 'system', text: 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info' })
-      expect(blocks[2]?.type === 'system' && blocks[2].detail).toMatch(/cortó 2 bloques/)
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration'])
+      // El corte del lint va al diagnostico: un jugador no puede hacer nada con el.
+      expect(diagnosticsOf(outputs).lintCuts).toBe(2)
       expect(JSON.stringify(blocks)).not.toContain('Brorg')
       expect(JSON.stringify(blocks)).not.toContain('está abajo')
 
@@ -270,7 +275,7 @@ describe('ModelGMProvider', () => {
       const outputs = await collect(new ModelGMProvider(transport, KEY).narrate(contextFor(base, turn(1, [response('zahira', 'Miro la campana. Saqué un 14 en Historia.')]))))
 
       expect(outputs.some((o) => o.kind === 'lint')).toBe(false)
-      expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+      expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
       const user = transport.prompts[0]!.user
       expect(user).toContain('# Capa del GM: secretos')
       expect(user).toContain('- osric-esta-abajo (sobre npc:osric; NO REVELADO a Zahira, Calder). Se revela solo si tú lo decides, con un evento secret_revealed; puede soltarlo npc:osric.')
@@ -299,8 +304,8 @@ describe('ModelGMProvider', () => {
       expect(events[0]).toEqual({ type: 'secret_revealed', payload: { secretId: 'osric-esta-abajo', how: 'lo encuentran en el tercer nivel' }, visibility: { layer: 'campaign', witnesses: ['character:zahira', 'character:calder'] } })
       expect(events.map((e) => e?.['type'])).toEqual(['secret_revealed', 'narration'])
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'system'])
-      expect(blocks[1]?.type === 'system' && blocks[1].text).toMatch(/1 línea que no se pudo aplicar/)
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue'])
+      expect(diagnosticsOf(outputs).ignoredCount).toBe(1)
     })
 
     it('en modo report el bloque pasa y el hallazgo se anota; en modo off no se revisa', async () => {
@@ -323,8 +328,8 @@ describe('ModelGMProvider', () => {
       ].join('\n')
       const outputs = await collect(new ModelGMProvider(new FakeTransport(endsCut), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'system', 'narration'])
-      expect(blocks[3]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'narration'])
+      expect(blocks[2]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
     })
 
     it('entiende un bloque envuelto con su tipo como kind (mesa 43, 03-10)', async () => {
@@ -333,7 +338,7 @@ describe('ModelGMProvider', () => {
       const outputs = await collect(new ModelGMProvider(new FakeTransport(wrapped), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
       expect(blocks.some((b) => b?.type === 'narration' && b.text.startsWith('Zahira deja pasar'))).toBe(true)
-      expect(blocks.some((b) => b?.type === 'system')).toBe(false)
+      expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
     })
 
     it('si el ultimo bloque llega roto, el motor tambien devuelve la palabra (mesa 43, 03-10)', async () => {
@@ -344,8 +349,9 @@ describe('ModelGMProvider', () => {
       ].join('\n')
       const outputs = await collect(new ModelGMProvider(new FakeTransport(endsBroken), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Entro en la casa de Osric.')]))))
       const blocks = outputs.filter((o) => o.kind === 'block').map((o) => (o.kind === 'block' ? o.block : null))
-      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'narration', 'system'])
+      expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration', 'narration'])
       expect(blocks[2]).toEqual({ type: 'narration', text: '¿Qué hacen?' })
+      expect(diagnosticsOf(outputs)).toMatchObject({ ignoredCount: 1, lostStory: 1 })
     })
   })
 
@@ -423,8 +429,7 @@ describe('ModelGMProvider', () => {
     // Calder ya se movio con su evento; zahira la mueve `where`; nadie dos veces.
     expect(moves.map((m) => `${m.who}>${m.to}`).sort()).toEqual(['character:calder>camino-a-la-mina', 'character:zahira>camino-a-la-mina'])
     // El lugar inventado se ignora, y el anfitrion ve cual fue.
-    const notice = outputs.find((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('se ignoró'))
-    expect(notice?.kind === 'block' && notice.block.type === 'system' && notice.block.detail).toContain('el-castillo-que-no-existe')
+    expect(diagnosticsOf(outputs).ignored.join('\n')).toContain('el-castillo-que-no-existe')
   })
 
   it('una tirada con el tipo del evento como kind se entiende igual', async () => {
@@ -435,7 +440,7 @@ describe('ModelGMProvider', () => {
     ].join('\n')
     const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY, { random: seededRandom(5) }).narrate(contextFor(base, turn(2, [response('zahira', 'Escucho.')]))))
     expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'roll')).toBe(true)
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && o.block.text.includes('se ignoró'))).toBe(false)
+expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 
   it('con dados del motor ignora el numero que escribio el jugador y tira el engine', async () => {

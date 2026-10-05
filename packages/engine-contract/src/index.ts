@@ -264,6 +264,12 @@ export const TurnBlock = z.discriminatedUnion('type', [
     speakerRef: z.string().nullable(),
     text: z.string().min(1),
     to: z.array(KebabId).optional(),
+    /**
+     * Lo que el jugador escribio como accion de su turno, tal cual. Lo marca
+     * el motor, nunca el modelo. En la mesa se lee; en el video y la
+     * presentacion se quita, porque ahi la historia la cuenta el GM (Gabino, 05-10).
+     */
+    declared: z.boolean().optional(),
   }),
   z.strictObject({
     type: z.literal('roll'),
@@ -468,6 +474,31 @@ export const TurnProjections = z.strictObject({
 export type TurnProjections = z.infer<typeof TurnProjections>
 
 /** Una linea del stream NDJSON de `POST /v1/turns/resolve`. */
+/** Diagnostico de un turno narrado por modelo. Antes eran avisos dentro de la historia y la salida se perdia. */
+export const TurnDiagnostics = z.strictObject({
+  finish: z.enum(['stop', 'length', 'refusal', 'other']),
+  /** Lineas del modelo que no se pudieron usar, recortadas. */
+  ignored: z.array(z.string()),
+  ignoredCount: z.number().int().nonnegative(),
+  /** De las ignoradas, cuantas eran narracion o dialogo: eso si lo perdio la mesa. */
+  lostStory: z.number().int().nonnegative(),
+  /** Lineas que llegaron rotas y se repararon o rescataron. */
+  repaired: z.array(z.string()),
+  /** Lo que el motor descarto a proposito (una tirada de mas, un evento que no se pudo aplicar). */
+  dropped: z.array(z.string()),
+  /** Bloques que corto el lint de conocimiento. */
+  lintCuts: z.number().int().nonnegative(),
+  /** La salida del modelo tal cual, sin la credencial. */
+  raw: z.string(),
+  /**
+   * Lo que costaron las ideas de accion, aparte: van a otro modelo y con
+   * otro precio, y sumadas al `usage` del turno falseaban la medida del
+   * narrador (cuanto de la salida es razonamiento).
+   */
+  ideasUsage: z.strictObject({ calls: z.number().int().nonnegative(), inputTokens: z.number().int().nonnegative(), outputTokens: z.number().int().nonnegative() }).optional(),
+})
+export type TurnDiagnostics = z.infer<typeof TurnDiagnostics>
+
 export const ResolveLine = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('block'), block: TurnBlock }),
   z.strictObject({
@@ -513,8 +544,15 @@ export const ResolveLine = z.discriminatedUnion('kind', [
     objective: z.string().optional(),
     /** Presupuesto de turnos de la sesion si tiene reloj, para que la mesa vea "Turno 5 de 8". */
     clock: z.strictObject({ total: z.number().int().positive() }).optional(),
+    /**
+     * Lo tecnico del turno (docs/27, D): la salida del modelo tal cual y lo
+     * que el motor ignoro, reparo o descarto. Lo guarda la plataforma para
+     * quien administra; nunca llega a la mesa. Opcional: no sube la version.
+     */
+    diagnostics: TurnDiagnostics.optional(),
   }),
-  z.strictObject({ kind: z.literal('error'), message: z.string().min(1) }),
+  /** `raw`: lo que el modelo alcanzo a escribir antes del fallo, para el diagnostico. Opcional: no sube la version. */
+  z.strictObject({ kind: z.literal('error'), message: z.string().min(1), raw: z.string().optional() }),
 ])
 export type ResolveLine = z.infer<typeof ResolveLine>
 

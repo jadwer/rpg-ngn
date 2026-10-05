@@ -37,6 +37,12 @@ export const SessionEnding = z.strictObject({
   default: z.boolean().optional(),
   /** La sesion que sigue si se juega este final ("001", "002"). */
   next: SessionId.optional(),
+  /**
+   * La imagen de este final, en una frase (docs/27): lo que se dibuja al
+   * cerrar. Sin ella la ilustracion caia al lugar donde estaba el personaje
+   * y el final feliz del medico salio como "La casa de mama".
+   */
+  scene: z.string().min(1).max(400).optional(),
 })
 export type SessionEnding = z.infer<typeof SessionEnding>
 
@@ -62,8 +68,28 @@ export const SessionArc = z.strictObject({
   /** Desenlace inevitable (capa del GM): las decisiones cambian el como, nunca el que. */
   fixedOutcome: z.string().min(1).optional(),
   endings: z.array(SessionEnding).optional(),
-  /** Tarjeta de cierre cuando la sesion no tiene finales con rama. */
-  endCard: z.strictObject({ title: z.string().min(1).optional(), text: z.string().min(1).optional() }).optional(),
+  /** Tarjeta de cierre cuando la sesion no tiene finales con rama. `scene` es su imagen, como en los finales. */
+  endCard: z.strictObject({ title: z.string().min(1).optional(), text: z.string().min(1).optional(), scene: z.string().min(1).max(400).optional() }).optional(),
+  /**
+   * Hechos que el director no puede contradecir (capa del GM, docs/27): quien
+   * contesta el telefono, donde esta cada quien, a que hora es el examen. Una
+   * historia que vuelve sobre una escena los necesita, o cada capitulo la
+   * cuenta distinta.
+   */
+  canon: z.array(z.string().min(1)).optional(),
+  /**
+   * El "Anteriormente..." escrito por el autor. Si esta, el motor lo enseña
+   * al abrir la sesion y el director no escribe el suyo: en un arco con
+   * desenlace inevitable el autor ya sabe que paso, y el resumen del modelo
+   * inventaba causas (mesa 44).
+   */
+  previously: z.string().min(1).max(1200).optional(),
+  /**
+   * La meta privada del protagonista en ESTA sesion, en segunda persona. Sin
+   * ella vale la de la ficha, que a los 33 años seguia diciendo "estudiar
+   * Medicina en la UNAM".
+   */
+  goal: z.string().min(1).optional(),
 })
 export type SessionArc = z.infer<typeof SessionArc>
 

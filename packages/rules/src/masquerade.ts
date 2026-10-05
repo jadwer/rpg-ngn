@@ -1,5 +1,6 @@
 import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import type { CharacterState, Fortune, WorldState } from '@rpg-ngn/core'
+import { applyInventoryEffect } from './inventory.js'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
 import type { FortuneTier } from './fortune-tiers.js'
 
@@ -139,6 +140,12 @@ export const masquerade: Ruleset = {
           characters: { ...world.characters, [who]: { ...character, conditions } },
         }
       }
+
+      // Objetos: comunes a todos los sistemas (inventory.ts). El prompt de este
+      // los ofrece; sin esto, darle algo a alguien tumbaba el turno.
+      case 'gain':
+      case 'lose':
+        return applyInventoryEffect(world, effect, _event)!
 
       default:
         throw new UnknownEffectError(op, 'masquerade')

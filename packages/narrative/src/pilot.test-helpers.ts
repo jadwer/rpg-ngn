@@ -5,7 +5,7 @@ import { CampaignEvent, loadPack, parseEventLog, type FileSource, type LoadedPac
 import type { TurnInput, TurnResponse } from '@rpg-ngn/engine-contract'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
 import type { ModelPrompt, ModelReply, ModelTransport } from './model-gm.js'
-import type { GMOutput, GMProbe, GMTurnContext } from './provider.js'
+import type { GMOutput, GMProbe, GMTurnContext, TurnDiagnostics } from './provider.js'
 
 const repoRoot = resolve(import.meta.dirname, '../../..')
 
@@ -47,6 +47,13 @@ export function response(characterId: string, text: string, late = false): TurnR
 
 export function turn(number: number, responses: TurnResponse[], id = `t-${number}`): TurnInput {
   return { id, number, sessionId: '003', responses }
+}
+
+/** El diagnostico del turno (lineas ignoradas, reparadas, cortes): ya no sale como aviso dentro de la historia. */
+export function diagnosticsOf(outputs: readonly GMOutput[]): TurnDiagnostics {
+  const found = outputs.find((o) => o.kind === 'diagnostics')
+  if (found?.kind !== 'diagnostics') throw new Error('el turno no trae diagnostico')
+  return found.diagnostics
 }
 
 export async function collect(iterable: AsyncIterable<GMOutput>): Promise<GMOutput[]> {

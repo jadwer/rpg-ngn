@@ -40,7 +40,10 @@ export function buildKnowledgeView(ctx: GMTurnContext, party: readonly string[])
   for (const response of ctx.turn.responses) heardParts.push(response.text)
   // Un susurro (H7) no lo oyo la mesa: no cuenta como dicho.
   for (const entry of state.narrative.log) if (!entry.to) heardParts.push(entry.text)
-  for (const id of Object.keys(state.world.npcs)) knownRefs.add(`npc:${id}`)
+  // Un NPC con estado guardado no es por eso un NPC que la mesa conozca: la
+  // actitud o la condicion las puede registrar el GM sin que nadie lo haya
+  // visto. Lo que la mesa presencio esta en lo que oyo (cronica, declaraciones)
+  // y en los eventos recientes que pudo ver.
 
   // Datos publicos de las sesiones hasta la actual: lo que un jugador puede leer en la ficha de sesion.
   const current = ctx.turn.sessionId

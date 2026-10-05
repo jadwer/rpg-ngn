@@ -23,6 +23,8 @@ export interface AnthropicProviderOptions extends ModelGMOptions {
   /** Esfuerzo del pensamiento adaptativo; `low` para turnos rapidos. */
   effort?: 'low' | 'medium' | 'high'
   timeoutMs?: number
+  /** Reintentos del SDK; las ideas van con cero para no retener el turno. */
+  maxRetries?: number
 }
 
 /**
@@ -44,7 +46,7 @@ export class AnthropicTransport implements ModelTransport {
       new Anthropic({
         apiKey: options.credential,
         ...(options.fetch ? { fetch: options.fetch } : {}),
-        maxRetries: 2,
+        maxRetries: options.maxRetries ?? 2,
         timeout: options.timeoutMs ?? 120_000,
       })
   }
@@ -100,6 +102,14 @@ function acceptsEffort(model: string): boolean {
   return !/haiku/i.test(model)
 }
 
+/** El modelo de las ideas de accion: una llamada corta por personaje y turno, que no necesita al narrador. */
+export const ANTHROPIC_IDEAS_MODEL = 'claude-haiku-4-5-20251001'
+const IDEAS_CALL_TIMEOUT_MS = 15_000
+
 export function createAnthropicProvider(options: AnthropicProviderOptions): ModelGMProvider {
-  return new ModelGMProvider(new AnthropicTransport(options), options.credential, options)
+  const transport = new AnthropicTransport(options)
+  // Las ideas salen de una llamada aparte que solo ve lo que el jugador sabe (docs/27, bloque I).
+  // Con tiempo corto y sin reintentos: unas ideas que tardan no valen la espera de la mesa.
+  const ideasTransport = options.ideasTransport ?? new AnthropicTransport({ ...options, model: /haiku/i.test(options.model) ? options.model : ANTHROPIC_IDEAS_MODEL, timeoutMs: Math.min(options.timeoutMs ?? IDEAS_CALL_TIMEOUT_MS, IDEAS_CALL_TIMEOUT_MS), maxRetries: 0 })
+  return new ModelGMProvider(transport, options.credential, { ...options, ideasTransport })
 }

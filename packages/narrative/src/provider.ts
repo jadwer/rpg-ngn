@@ -1,6 +1,6 @@
 import type { CampaignState } from '@rpg-ngn/campaign'
 import type { CampaignEvent, LoadedPack, Session } from '@rpg-ngn/content'
-import type { DiceMode, LintFinding, LintMode, RollRequest, TurnBlock, TurnContext, TurnInput } from '@rpg-ngn/engine-contract'
+import type { DiceMode, LintFinding, LintMode, RollRequest, TurnBlock, TurnContext, TurnDiagnostics, TurnInput } from '@rpg-ngn/engine-contract'
 
 /**
  * Lo que el GM recibe para narrar un turno. El estado completo llega tal
@@ -61,6 +61,10 @@ export type GMOutput =
   | { kind: 'suggestions'; byCharacter: Record<string, string[]> }
   /** Tiradas que el GM pidio para el turno que viene (modos `dice` y `table`): esos personajes tiran en vez de escribir. */
   | { kind: 'rollRequests'; requests: RollRequest[] }
+  /** Lo tecnico del turno: lo lee quien administra, nunca la mesa (docs/27, D). */
+  | { kind: 'diagnostics'; diagnostics: TurnDiagnostics }
+
+export type { TurnDiagnostics }
 
 export interface GMProbe {
   ok: boolean
@@ -82,5 +86,11 @@ export interface GMProvider {
    * "Otras" ideas: dos sugerencias mas para un personaje con el contexto del
    * turno, sin narrar nada. Opcional: el GM con guion no tiene modelo.
    */
-  suggest?(context: GMTurnContext, characterId: string, exclude: readonly string[]): Promise<GMSuggestion>
+  suggest?(context: GMTurnContext, characterId: string, exclude: readonly string[], extra?: { narrated?: readonly string[]; pendingRoll?: { skill?: string | undefined; reason?: string | undefined } | undefined }): Promise<GMSuggestion>
+  /**
+   * Si las ideas del turno salen de `suggest` y no de `narrate` (docs/27,
+   * bloque I): el engine las pide despues de aplicar los eventos, con el
+   * estado ya movido y solo lo que cada jugador sabe.
+   */
+  readonly separateIdeas?: boolean
 }

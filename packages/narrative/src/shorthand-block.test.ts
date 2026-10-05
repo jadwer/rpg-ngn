@@ -1,7 +1,7 @@
 import { seededRandom } from '@rpg-ngn/core'
 import { describe, expect, it } from 'vitest'
 import { ModelGMProvider, type ModelPrompt, type ModelReply, type ModelTransport } from './model-gm.js'
-import { contextFor, openSession003, response, turn } from './pilot.test-helpers.js'
+import { contextFor, diagnosticsOf, openSession003, response, turn } from './pilot.test-helpers.js'
 import type { GMProbe } from './provider.js'
 
 /**
@@ -54,7 +54,7 @@ describe('eventos abreviados del modelo (05-10)', () => {
     const lines = ['{"kind":"block","block":{"type":"narration","text":"Tomás baja la vista."}}', '{"kind":"npc_action","actor":"npc:tomas","payload":{"text":"Culpa al minero y mete a Zahira en su versión"}}'].join('\n')
     const outputs = await collect(new ModelGMProvider(new Once(lines), 'sk-test-shorthand-0000000').narrate(contextFor(base, turn(2, [response('zahira', 'Pregunto.')]))))
     expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'npc_action')).toBe(true)
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 })
 
@@ -67,7 +67,7 @@ describe('efectos sobre un NPC (mesa 44, 05-10)', () => {
     ].join('\n')
     const outputs = await collect(new ModelGMProvider(new Once(lines), 'sk-test-relation-00000000').narrate(contextFor(base, turn(2, [response('zahira', 'Le reclamo.')]))))
     expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'state_change')).toBe(true)
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 
   it('una relacion con un personaje que no esta en escena se sigue tirando', async () => {

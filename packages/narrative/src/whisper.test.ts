@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ModelGMProvider } from './model-gm.js'
-import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
+import { collect, contextFor, diagnosticsOf, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
 
 const KEY = 'sk-test-whisper-000000000'
 
@@ -33,6 +33,6 @@ describe('susurros', () => {
     expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'narration' && o.block.to?.[0] === 'calder')).toBe(true)
     const reveal = outputs.find((o) => o.kind === 'event' && o.event['type'] === 'secret_revealed')
     expect(reveal?.kind === 'event' && reveal.event['visibility']).toEqual({ layer: 'player', witnesses: ['character:calder'] })
-    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system' && /línea|lint/i.test(o.block.text))).toBe(false)
+    expect(diagnosticsOf(outputs)).toMatchObject({ ignoredCount: 0, lintCuts: 0 })
   })
 })

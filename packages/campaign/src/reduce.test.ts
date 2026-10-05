@@ -167,7 +167,12 @@ describe('relaciones con NPC', () => {
     expect(state.world.npcs['tomas']?.inventory.map((i) => i.id)).toEqual(['campana-de-bronce'])
   })
 
-  it('un NPC que no existe en el mundo no crea estado de la nada', async () => {
+  // Antes este test pedia lo contrario ("no crea estado de la nada") y eso
+  // era el fallo: `world.npcs` nace vacio y nadie lo llenaba, asi que la
+  // actitud de un NPC solo se guardaba si antes le habian dado un objeto. En
+  // la mesa 44 quedo vacio tras tres capitulos. Quien decide que NPC vale es
+  // el interprete del GM, que es quien conoce la escena (docs/27, F3).
+  it('un NPC que el mundo todavia no conocia nace en el estado con esa actitud', async () => {
     const { pack, events } = await loadPilot()
     const state = reduce(events, { pack, ruleset: fantasyD20Lite })
     const fantasma = {
@@ -179,7 +184,9 @@ describe('relaciones con NPC', () => {
       recordedAt: '2026-09-12T19:00:00Z',
       effects: [{ op: 'relationship', who: 'npc:nadie', with: 'character:calder', delta: 1 }],
     } as unknown as CampaignEvent
-    expect(applyEvent(state, fantasma, fantasyD20Lite).world.npcs['nadie']).toBeUndefined()
+    const after = applyEvent(state, fantasma, fantasyD20Lite).world.npcs['nadie']
+    expect(after?.custom['relationships']).toEqual({ 'character:calder': 1 })
+    expect(after?.inventory).toEqual([])
   })
 })
 

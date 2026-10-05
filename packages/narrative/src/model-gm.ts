@@ -1,16 +1,15 @@
 import { CharacterRef, DiceSpec, EntityRef, KebabId, refId, refKind } from '@rpg-ngn/content'
+import { fold } from '@rpg-ngn/campaign'
 import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
 import { z } from 'zod'
-import { budgetFor, buildTurnContext, clockOf, hasPreviousSession, type ContextBudget, type ContextProfile } from './context.js'
+import { budgetFor, buildPlayerContext, buildTurnContext, clockOf, hasPreviousSession, rollAllowance, type ContextBudget, type ContextProfile } from './context.js'
+import { milestoneDue } from './pacing.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
 import type { GMOutput, GMProbe, GMProvider, GMSuggestion, GMTurnContext, ProposedEvent } from './provider.js'
 import { GMProviderError, errorMessage, redact } from './redact.js'
-
-/** Los avisos de calidad del turno son para el anfitrion: un jugador no puede hacer nada con ellos. */
-const HOST_NOTICE = { audience: 'host', tone: 'info' } as const
 
 /** Lo que el GM manda al modelo en un turno. */
 export interface ModelPrompt {
@@ -47,11 +46,34 @@ export interface ModelGMOptions {
   maxOutputTokens?: number
   /** Fuente de azar para las tiradas que pide el GM; Web Crypto por defecto, semilla en tests. */
   random?: RandomSource
+  /**
+   * Transporte para las ideas de accion (docs/27, bloque I). Con el, las
+   * ideas salen de una llamada aparte que solo ve lo que el jugador sabe, y
+   * el director deja de escribirlas. Sin el (modelos locales, donde otra
+   * llamada son minutos) siguen saliendo en linea, del director.
+   */
+  ideasTransport?: ModelTransport | undefined
 }
 
 const DEFAULT_MAX_OUTPUT_TOKENS = 4000
+/** Por cada jugador a partir del segundo: con tres, un turno llego a 3,925 de 4,000 (el razonamiento cuenta). */
+const OUTPUT_TOKENS_PER_EXTRA_PLAYER = 800
+/** Instrucciones de la llamada de ideas: corta y estable, para que el proveedor la cachee. */
+/** Holgado: con un modelo que razona, el razonamiento cuenta en la salida y 400 no dejaban sitio para la linea. */
+const IDEAS_MAX_OUTPUT_TOKENS = 1200
+const IDEAS_SYSTEM = `Ayudas a un jugador de rol de mesa que no sabe qué hacer. Te doy lo que su personaje ha vivido y lo que acaba de pasar. Propón DOS cosas distintas que ese personaje podría intentar ahora mismo: una prudente y una atrevida.
+
+Cómo se escriben: en primera persona del singular y en presente, como si las dijera el jugador ("Le pregunto qué vio", "Salgo a la calle sin esperar"), concretas, en menos de 12 palabras cada una, y que respondan a lo último que pasó. Nunca en infinitivo ("Preguntarle...") ni como orden ("Dile...").
+
+Usa solo lo que aparece en el texto: no inventes nombres, lugares ni hechos que no estén ahí, y no adivines lo que nadie le ha dicho al personaje.
+
+Responde con UNA sola línea JSON y nada más:
+{"kind":"suggest","options":["...","..."]}`
 /** Un objeto JSON partido en varias lineas se acumula hasta aqui antes de darlo por perdido. */
 const MAX_PENDING_CHARS = 8000
+/** Cuantas lineas se guardan en el diagnostico del turno y hasta que largo cada una. */
+const MAX_NOTES = 12
+const NOTE_CHARS = 600
 
 // Formas de evento que el prompt ofrece. Son mas estrictas que el schema de
 // content a proposito: solo lo que el ruleset de la mesa sabe aplicar. Los
@@ -323,24 +345,29 @@ export class ModelGMProvider implements GMProvider {
     // Las declaraciones se registran siempre, sin depender del modelo.
     for (const response of ctx.turn.responses) {
       const name = ctx.pack.characters.get(response.characterId)?.name ?? response.characterId
-      yield { kind: 'block', block: { type: 'dialogue', speaker: name, speakerRef: `character:${response.characterId}`, text: response.text } }
+      yield { kind: 'block', block: { type: 'dialogue', speaker: name, speakerRef: `character:${response.characterId}`, text: response.text, declared: true } }
       yield {
         kind: 'event',
         event: { type: 'player_action', actor: `character:${response.characterId}`, declared: response.text, visibility: { layer: 'campaign', witnesses } },
       }
     }
 
+    const separateIdeas = this.separateIdeas
     const prompt: ModelPrompt = {
-      system: systemPromptFor(ctx.rulesetId, compact, diceMode, ctx.language ?? 'es'),
+      system: systemPromptFor(ctx.rulesetId, compact, diceMode, ctx.language ?? 'es', separateIdeas ? 'separate' : 'inline'),
       user: built.user + fortuneNote,
-      maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
+      maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS + OUTPUT_TOKENS_PER_EXTRA_PLAYER * Math.max(0, party.length - 1),
     }
 
     const interpreter = new LineInterpreter(ctx, party, ctx.lint ?? 'enforce', random, diceMode, preRolled)
-    interpreter.recapAllowed = ctx.turn.number === 1 && ctx.turn.responses.length === 0 && hasPreviousSession(ctx)
+    interpreter.rollsLeft = rollAllowance(ctx, party)?.left ?? null
+    // Con "Anteriormente" del autor, el del modelo no vale: saldrian dos.
+    interpreter.recapAllowed = ctx.turn.number === 1 && ctx.turn.responses.length === 0 && hasPreviousSession(ctx) && !ctx.session?.arc?.previously
     // En el turno de cierre del reloj el director puede (y debe) cerrar la sesion.
     const clock = clockOf(ctx)
     interpreter.closeAllowed = clock?.phase === 'cierre'
+    // El logro solo vale en el turno en que el reloj lo pide; sin reloj nadie lo pidio.
+    interpreter.milestoneAllowed = clock ? milestoneDue(clock) : false
     // Un final del arco con su condicion cumplida puede cerrar antes (H4), pero solo nombrandolo.
     interpreter.earlyEnding = clock?.earlyEnding ?? false
     interpreter.endingIds = (ctx.session?.arc?.endings ?? []).map((e) => e.id)
@@ -367,6 +394,9 @@ export class ModelGMProvider implements GMProvider {
           newline = buffer.indexOf('\n')
         }
       }
+      // Con la salida cortada por el limite, lo que quedo a medias no se repara.
+      if (reply.finish === 'length') yield* interpreter.settleBeforeTail(buffer)
+      interpreter.truncated = reply.finish === 'length'
       if (buffer.trim() !== '') yield* interpreter.line(buffer)
       yield* interpreter.finish()
       // Con GM_LOG_RAW=1 el engine deja en su log lo que el modelo dijo tal
@@ -374,19 +404,16 @@ export class ModelGMProvider implements GMProvider {
       // produccion con mesas ajenas, porque el texto lleva la escena entera.
       if (wantsRawLog()) console.warn(`[gm raw ${this.transport.kind}/${this.transport.model}]\n${raw}\n[/gm raw]`)
     } catch (error) {
-      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential, raw)
     }
 
     if (reply.finish === 'refusal') {
-      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} rechazó narrar el turno`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} rechazó narrar el turno`, this.credential, raw)
     }
     if (interpreter.blocks === 0) {
-      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ningún bloque (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
+      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ningún bloque (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential, raw)
     }
 
-    if (interpreter.cuts > 0) {
-      yield { kind: 'block', block: { type: 'system', text: tr('gm.lintCut'), ...HOST_NOTICE, detail: interpreter.cuts === 1 ? tr('gm.lintCutDetailOne') : tr('gm.lintCutDetailMany', { n: interpreter.cuts }) } }
-    }
     // Cada turno devuelve la palabra (docs/03), y el modelo suele hacerlo en
     // su ultimo bloque. Si el lint corto justo ese, la mesa se quedaba sin
     // pregunta y a la deriva (mesa 33, turno 5): el motor la devuelve.
@@ -400,19 +427,26 @@ export class ModelGMProvider implements GMProvider {
     if (reply.finish === 'length') {
       yield { kind: 'block', block: { type: 'system', text: tr('gm.cutShort'), audience: 'table', tone: 'action', detail: tr('gm.cutShortDetail') } }
     }
-    if (interpreter.ignored > 0) {
-      // Ruido tecnico: el modelo propuso un evento que el motor no pudo aplicar. La narracion esta intacta.
-      yield {
-        kind: 'block',
-        block: {
-          type: 'system',
-          text: interpreter.ignored === 1 ? tr('gm.ignoredOne') : tr('gm.ignoredMany', { n: interpreter.ignored }),
-          ...HOST_NOTICE,
-          // Cuales fueron, recortadas: sin esto no habia forma de saber que se
-          // rechazaba (mesa 39, 25-09). Solo lo ve el anfitrion.
-          detail: `${tr('gm.ignoredDetail')}${interpreter.ignoredLines.length ? `\n\n${interpreter.ignoredLines.join('\n')}` : ''}`,
-        },
-      }
+    // El logro va al final de lo narrado: el modelo lo escribe primero y salia
+    // antes del parrafo que lo gana ("Llego al lugar del choque" antes de llegar).
+    if (interpreter.milestone) yield { kind: 'block', block: { type: 'milestone', title: interpreter.milestone } }
+
+    // Lo tecnico del turno (lineas rotas, reparadas, cortes del lint, la
+    // salida tal cual) va al diagnostico, no a la historia: en una partida de
+    // uno el anfitrion es el unico jugador y leia JSON entre parrafos; y sin
+    // la salida cruda cada fallo se diagnosticaba adivinando (docs/27, D).
+    yield {
+      kind: 'diagnostics',
+      diagnostics: {
+        finish: reply.finish,
+        ignored: interpreter.ignoredLines,
+        ignoredCount: interpreter.ignored,
+        lostStory: interpreter.lostStory,
+        repaired: interpreter.repairedLines,
+        dropped: interpreter.droppedNotes,
+        lintCuts: interpreter.cuts,
+        raw: redact(raw, this.credential),
+      },
     }
 
     if (interpreter.scene) yield { kind: 'illustrate', moment: interpreter.scene }
@@ -431,11 +465,28 @@ export class ModelGMProvider implements GMProvider {
     // lo olvidara en "addressed"). Sus ideas se quedan: con el dado puede
     // decir que intenta, y casi todos solo tiraban sin ideas (03-10).
     const requests = Object.values(interpreter.rollRequests)
-    const suggestions = interpreter.suggestions
-    if (Object.keys(suggestions).length) yield { kind: 'suggestions', byCharacter: suggestions }
+    // Sin `addressed` (el modelo lo olvido o la salida se corto antes), la palabra es de todos.
+    const named = interpreter.addressed
+    // Quien tira va con la palabra aunque el modelo lo olvidara; y aquel al que
+    // se le descarto una tirada de mas tambien: el modelo lo dejo esperando un
+    // dado que no va a llegar, y sin la palabra no podria ni escribir.
+    const extra = [...requests.map((r) => r.characterId), ...interpreter.overRolled]
+    const addressed = [...(named ?? party), ...extra.filter((id, i) => !(named ?? party).includes(id) && extra.indexOf(id) === i)]
+
+    // Ideas (docs/27, bloque I): con transporte propio (`separateIdeas`) las
+    // pide el engine despues de aplicar los eventos del turno, con el estado ya
+    // movido y solo lo que cada jugador sabe. Aqui solo salen las que escribio
+    // el director cuando no hay transporte aparte (modelos locales).
+    if (!separateIdeas && Object.keys(interpreter.suggestions).length) yield { kind: 'suggestions', byCharacter: interpreter.suggestions }
     if (requests.length) yield { kind: 'rollRequests', requests }
-    const addressed = interpreter.addressed ?? party
-    yield { kind: 'addressed', characterIds: [...addressed, ...requests.map((r) => r.characterId).filter((id) => !addressed.includes(id))] }
+    // Una tirada pedida de mas deja una accion a medias: el GM lo sabe en el
+    // turno siguiente por esta nota de su capa (la mesa no la ve) y la resuelve
+    // sin dado. Sin esto la narracion pedia un dado que nunca llegaba y el
+    // turno siguiente arrancaba como si nada.
+    for (const note of interpreter.overRollNotes) {
+      yield { kind: 'event', event: { type: 'world_event', payload: { note }, visibility: { layer: 'gm', witnesses: [] } } }
+    }
+    yield { kind: 'addressed', characterIds: addressed }
     yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
   }
 
@@ -445,26 +496,42 @@ export class ModelGMProvider implements GMProvider {
    * solo pide la linea `suggest` de un personaje. Cada idea pasa el lint
    * como las del turno: una sugerencia tambien puede filtrar un secreto.
    */
-  async suggest(ctx: GMTurnContext, characterId: string, exclude: readonly string[]): Promise<GMSuggestion> {
-    const compact = this.options.contextProfile === 'compact'
-    const built = buildTurnContext(ctx, this.options.budget ?? budgetFor(this.options.contextProfile))
+  async suggest(ctx: GMTurnContext, characterId: string, exclude: readonly string[], extra: { narrated?: readonly string[]; pendingRoll?: { skill?: string | undefined; reason?: string | undefined } | undefined } = {}): Promise<GMSuggestion> {
     const id = refId(characterId)
-    if (!built.party.includes(id)) throw new GMProviderError(`${characterId} no está en la sesión`, this.credential)
+    const party = ctx.state.meta.sessions[ctx.turn.sessionId]?.party ?? []
+    if (!party.includes(id)) throw new GMProviderError(`${characterId} no está en la sesión`, this.credential)
+    const idea = await this.ideasFor(ctx, id, exclude, extra.narrated ?? [], extra.pendingRoll)
+    // Con el porque: sin el, "no devolvio ideas" no decia si el modelo escribio
+    // otra cosa o si el motor las descarto (y cuales).
+    if (!idea.options.length) throw new GMProviderError(`el modelo ${idea.model} no devolvió ideas (${idea.why})`, this.credential)
+    return { options: idea.options, usage: idea.usage }
+  }
+
+  /** Si las ideas del turno salen de una llamada aparte (la pide el engine con `suggest`) y no del director. */
+  get separateIdeas(): boolean {
+    return this.options.ideasTransport !== undefined
+  }
+
+  /**
+   * Dos ideas para un personaje desde lo que su jugador sabe (docs/27, bloque
+   * I). El contexto no trae secretos, puntos de trama ni finales: lo que no
+   * esta delante no se puede filtrar. Antes salian de la llamada del director,
+   * con la capa del GM entera, y el lint (frases exactas) no veia una
+   * parafrasis: asi se le ofrecio a una jugadora preguntar por la culpable
+   * antes de que nadie la nombrara (mesa 43). Cada idea pasa ademas el lint, y
+   * aqui nombrar a alguien que la mesa no ha presenciado tambien la descarta.
+   */
+  private async ideasFor(ctx: GMTurnContext, id: string, exclude: readonly string[], narrated: readonly string[], pendingRoll?: { skill?: string | undefined; reason?: string | undefined }): Promise<GMSuggestion & { model: string; why: string }> {
+    const transport = this.options.ideasTransport ?? this.transport
     const name = ctx.pack.characters.get(id)?.name ?? id
     const seen = exclude.filter((e) => e.trim()).map((e) => `"${e.trim()}"`)
-    const ask = [
-      '',
-      `AHORA NO NARRES NADA. ${name} (character:${id}) pidió otras ideas. Responde con UNA sola línea JSON y nada más:`,
-      `{"kind":"suggest","characterId":"${id}","options":["...","..."]}`,
-      `Dos cosas distintas que ${name} podría intentar ahora, en primera persona, en menos de 12 palabras cada una, una prudente y una atrevida, basadas solo en lo que ${name} sabe.`,
-      ...(seen.length ? [`Distintas de estas, que ya vio: ${seen.join(', ')}.`] : []),
-    ].join('\n')
-    const prompt: ModelPrompt = { system: systemPromptFor(ctx.rulesetId, compact, ctx.dice ?? 'engine', ctx.language ?? 'es'), user: built.user + ask, maxOutputTokens: 300 }
+    const ask = ['', `# Encargo`, '', `Dos ideas para ${name}.${seen.length ? ` Distintas de estas, que ya vio: ${seen.join(', ')}.` : ''}${ctx.language === 'en' ? ' Write them in English.' : ''}`].join('\n')
+    const prompt: ModelPrompt = { system: IDEAS_SYSTEM, user: buildPlayerContext(ctx, id, narrated, this.options.budget ?? budgetFor(this.options.contextProfile), pendingRoll) + ask, maxOutputTokens: IDEAS_MAX_OUTPUT_TOKENS }
 
     let raw = ''
     let reply: ModelReply
     try {
-      const stream = this.transport.stream(prompt)
+      const stream = transport.stream(prompt)
       for (;;) {
         const next = await stream.next()
         if (next.done) {
@@ -474,26 +541,39 @@ export class ModelGMProvider implements GMProvider {
         raw += next.value
       }
     } catch (error) {
-      throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} falló: ${errorMessage(error)}`, this.credential)
+      throw new GMProviderError(`el modelo ${transport.kind}/${transport.model} falló: ${errorMessage(error)}`, this.credential)
     }
 
-    const knowledge = (ctx.lint ?? 'enforce') === 'off' ? null : buildKnowledgeView(ctx, built.party)
+    const party = ctx.state.meta.sessions[ctx.turn.sessionId]?.party ?? []
+    const knowledge = (ctx.lint ?? 'enforce') === 'off' ? null : buildKnowledgeView(ctx, party)
+    // Lo recien narrado ya lo oyo la mesa: una idea puede nombrar a quien acaba de aparecer.
+    if (knowledge) knowledge.heard = `${knowledge.heard}\n${fold(narrated.join('\n'))}`
     const options: string[] = []
-    for (const piece of raw.split('\n').flatMap((line) => (/^[{[]/.test(line.trim()) ? splitJsonObjects(line.trim()) : [line]))) {
-      const parsed = parseLoose(piece)
-      const line = ModelLine.safeParse(parsed)
-      if (!line.success || line.data.kind !== 'suggest' || refId(line.data.characterId) !== id) continue
-      for (const rawOption of line.data.options) {
+    const rejected: string[] = []
+    // El modelo de ideas suele envolver la linea en un bloque de codigo o partirla en varias: se lee el objeto entero.
+    const whole = parseLoose(raw.replace(/```[a-z]*/gi, ' ').trim())
+    const candidates = whole !== undefined ? [whole] : raw.split('\n').flatMap((line) => (/^[{[]/.test(line.trim()) ? splitJsonObjects(line.trim()) : [line])).map((piece) => parseLoose(piece))
+    for (const candidate of candidates) {
+      const parsed = candidate as { kind?: unknown; options?: unknown; characterId?: unknown } | undefined
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.options)) continue
+      if (parsed.kind !== undefined && parsed.kind !== 'suggest') continue
+      if (typeof parsed.characterId === 'string' && refId(parsed.characterId) !== id) continue
+      for (const rawOption of parsed.options) {
+        if (typeof rawOption !== 'string') continue
         const option = rawOption.trim().replace(/\s+/g, ' ').slice(0, 120)
         if (!option || options.includes(option) || exclude.includes(option)) continue
-        if (knowledge && (ctx.lint ?? 'enforce') === 'enforce' && lintText(option, knowledge, ctx.pack).some((f) => f.level === 'error')) continue
+        const findings = knowledge ? lintText(option, knowledge, ctx.pack, [id]) : []
+        if (findings.length > 0) {
+          rejected.push(`"${option}" (${findings[0]!.message})`)
+          continue
+        }
         options.push(option)
         if (options.length === 2) break
       }
       if (options.length) break
     }
-    if (!options.length) throw new GMProviderError(`el modelo ${this.transport.kind}/${this.transport.model} no devolvió ideas (${redact(raw.slice(0, 200), this.credential) || 'salida vacía'})`, this.credential)
-    return { options, usage: { inputTokens: reply.inputTokens, outputTokens: reply.outputTokens } }
+    const why = rejected.length ? `descartadas: ${rejected.join('; ')}` : `escribió: ${redact(raw.replace(/\s+/g, ' ').slice(0, 200), this.credential) || 'nada'}`
+    return { options, usage: { inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }, model: `${transport.kind}/${transport.model}`, why }
   }
 
   async probe(): Promise<GMProbe> {
@@ -528,8 +608,8 @@ export function parseLoose(text: string): unknown {
 }
 
 /** Profundidad de llaves y corchetes fuera de cadenas al final de `text`, partiendo de `depth`. */
-export function scanJson(text: string, depth: number): { depth: number; inString: boolean } {
-  let inString = false
+export function scanJson(text: string, depth: number, startInString = false): { depth: number; inString: boolean } {
+  let inString = startInString
   let escape = false
   for (const ch of text) {
     if (inString) {
@@ -563,8 +643,14 @@ class LineInterpreter {
   lastWasCut: boolean
   blocks = 0
   ignored = 0
-  /** Las lineas ignoradas, recortadas, para que el anfitrion vea cuales fueron. */
+  /** Las lineas ignoradas, recortadas, para el diagnostico del turno. */
   ignoredLines: string[] = []
+  /** De las ignoradas, cuantas eran historia (narracion o dialogo): eso si lo pierde la mesa. */
+  lostStory = 0
+  /** Lineas que llegaron rotas y se pudieron reparar o rescatar. */
+  repairedLines: string[] = []
+  /** Lo que el motor descarto a proposito (una tirada de mas, un bloque que no es del modelo). */
+  droppedNotes: string[] = []
   /** La linea que se esta interpretando. */
   private current = ''
   /** Quien se movio este turno por un evento `move`, para que `where` no lo repita. */
@@ -573,14 +659,28 @@ class LineInterpreter {
   /** Un `roll` de los modos donde tira el jugador, pendiente de que `playerRoll` decida (ver `event()`). */
   private pendingPlayerRoll: { event: ProposedEvent & { actor: string; resolved: Record<string, unknown> }; witnesses: string[] } | null = null
 
-  private ignore(): void {
+  /**
+   * Cuenta una linea como descartada, con SU texto. Antes guardaba la ultima
+   * linea leida, que con un objeto pendiente era otra: el aviso señalaba una
+   * linea sana (`addressed`) y escondia la rota.
+   */
+  private ignore(text: string = this.current, story: boolean = isStoryText(text)): void {
     this.ignored++
     // Un bloque de historia roto (dialogo vacio, JSON mal cerrado) cuenta
     // como cortado: si era el ultimo, la mesa se quedaba sin pregunta y sin
     // ideas (mesa 43, turno 1, 03-10). Un evento roto no, porque suelen ir
     // despues de la pregunta.
-    if (/"(?:kind|type)"\s*:\s*"(?:dialogue|narration)"/.test(this.current)) this.lastWasCut = true
-    if (this.current && this.ignoredLines.length < 5) this.ignoredLines.push(this.current.slice(0, 240))
+    if (story) {
+      this.lastWasCut = true
+      this.lostStory++
+    }
+    if (text && this.ignoredLines.length < MAX_NOTES) this.ignoredLines.push(text.slice(0, NOTE_CHARS))
+  }
+
+  /** Apunta algo para el diagnostico del turno (lo lee quien administra, no la mesa). */
+  private note(kind: 'repaired' | 'dropped', text: string): void {
+    const list = kind === 'repaired' ? this.repairedLines : this.droppedNotes
+    if (list.length < MAX_NOTES) list.push(text.slice(0, NOTE_CHARS))
   }
 
   /** Tiradas pedidas este turno, una por personaje (modos `dice` y `table`). */
@@ -595,6 +695,19 @@ class LineInterpreter {
     const id = refId(raw.characterId)
     if (!this.party.includes(id)) return false
     if (this.rollRequests[id]) return true
+    // Sin tiradas que le queden en la sesion, la peticion se descarta: cada
+    // una cuesta una ronda entera (docs/27, R1). El director lo sabe por
+    // "Tiradas pedidas"; si aun asi la pide, queda apuntado y nadie espera un dado.
+    if (this.rollsLeft && (this.rollsLeft[id] ?? 0) <= 0) {
+      const about = [raw.skill, raw.reason].filter(Boolean).join(', ')
+      this.note('dropped', `tirada pedida de mas para ${id}: ${about}`)
+      if (!this.overRolled.includes(id)) {
+        this.overRolled.push(id)
+        const name = this.ctx.pack.characters.get(id)?.name ?? id
+        this.overRollNotes.push(`Pendiente del GM: se le pidió una tirada a ${name}${about ? ` (${about})` : ''} y ya no le quedaban en esta sesión, así que no hubo dado. Su acción sigue sin resolver: resuélvela al empezar el turno siguiente, sin dado y con un costo.`)
+      }
+      return true
+    }
     const kind = RollKind.safeParse(raw.rollKind)
     const skill = raw.skill?.trim().slice(0, 60)
     const reason = raw.reason?.trim().replace(/\s+/g, ' ').slice(0, 160)
@@ -627,13 +740,23 @@ class LineInterpreter {
   earlyEnding = false
   endingIds: string[] = []
   defaultEnding: string | null = null
-  /** Ya hubo logro este turno: uno como maximo. */
-  private milestoned = false
+  /** La salida se corto por el limite: lo que quede a medias no se repara. */
+  truncated = false
+  /** Personajes a los que se les descarto una tirada pedida de mas: conservan la palabra. */
+  overRolled: string[] = []
+  /** Lo que el GM tiene que saber el turno siguiente de cada tirada descartada (capa del GM). */
+  overRollNotes: string[] = []
+  /** Si el reloj pide logro en este turno (docs/27, M7); fuera de eso, el del modelo se descarta. */
+  milestoneAllowed = true
+  /** El logro de este turno (uno como maximo); sale al final de lo narrado. */
+  milestone: string | null = null
+  /** Tiradas pedidas que le quedan a cada personaje en la sesion (modos `dice` y `table`); null si no hay tope. */
+  rollsLeft: Record<string, number> | null = null
   /** Personajes que ya recibieron su susurro este turno: uno por personaje. */
   private whispered = new Set<string>()
   /** Ideas de accion por personaje (E10b). */
   suggestions: Record<string, string[]> = {}
-  private pending: { text: string; depth: number } | null = null
+  private pending: { text: string; depth: number; inString: boolean } | null = null
   private readonly knowledge: KnowledgeView | null
   private readonly allowed: ReturnType<typeof allowedEventFor>
   /** Dados ya usados este turno: el mismo d20 no vale para dos acciones. */
@@ -673,36 +796,47 @@ class LineInterpreter {
 
     // Un objeto o array que empezo en una linea anterior y sigue aqui (JSON con formato).
     if (this.pending !== null) {
-      const scanned = scanJson(text, this.pending.depth)
-      if (!scanned.inString) {
-        this.pending = { text: `${this.pending.text}\n${text}`, depth: scanned.depth }
-        if (scanned.depth <= 0) yield* this.flushPending()
-        else if (this.pending.text.length > MAX_PENDING_CHARS) this.dropPending()
+      // Una linea que empieza un registro no continua nada: lo pendiente estaba
+      // roto. Antes se le pegaba todo lo que venia detras y el turno entero se
+      // perdia (mesa 44, sesion 003, turno 5). Se mira como empieza, no si se
+      // puede leer: una linea con un punto de mas tambien corta. Y dentro de
+      // una cadena abierta, una llave al principio de linea es otro registro,
+      // no texto: nadie narra una linea que empieza con "{".
+      // Y fuera de una cadena, una llave tras un valor ya cerrado (sin coma ni
+      // dos puntos antes) tampoco puede continuar nada en JSON: es el registro
+      // siguiente de una salida con formato a la que le falto un cierre.
+      const boundary = startsRecord(text) || (text.startsWith('{') && (this.pending.inString || !/[,:[{]$/.test(this.pending.text.trimEnd())))
+      if (!boundary) {
+        // Si lo pendiente quedo dentro de una cadena, el modelo metio un salto
+        // de linea en mitad de un texto: se une como salto escapado, que es lo
+        // que JSON admite, y el parrafo llega entero.
+        const scanned = scanJson(text, this.pending.depth, this.pending.inString)
+        this.pending = { text: `${this.pending.text}${this.pending.inString ? '\\n' : '\n'}${text}`, depth: scanned.depth, inString: scanned.inString }
+        if ((!scanned.inString && scanned.depth <= 0) || this.pending.text.length > MAX_PENDING_CHARS) yield* this.closePending()
         return
       }
-      // Una cadena JSON no puede quedar abierta al final de una linea: lo pendiente estaba roto.
-      this.dropPending()
+      // Lo pendiente se cierra como se pueda y esta linea se lee por si misma.
+      yield* this.closePending()
     }
 
-    if (/^[{[]/.test(text)) {
-      const scanned = scanJson(text, 0)
-      if (scanned.inString) {
-        this.ignore()
-        return
-      }
-      if (scanned.depth > 0) {
-        this.pending = { text, depth: scanned.depth }
-        return
-      }
+    const record = stripListPrefix(text)
+    if (/^[{[]/.test(record)) {
       // Varios objetos en la misma linea ({...} {...}): Haiku lo hace y antes
       // la linea entera fallaba al parsear y el turno acababa "sin bloques"
-      // con una narracion perfecta dentro (mesa "cinco personas", 19-09).
-      const pieces = splitJsonObjects(text)
-      for (const piece of pieces) {
-        const parsed = parseLoose(piece)
-        if (parsed !== undefined) yield* this.items(parsed)
-        else this.ignore()
-      }
+      // con una narracion perfecta dentro (mesa "cinco personas", 19-09). Cada
+      // uno se lee por separado; si el ultimo quedo sin cerrar, es su problema
+      // y no el de los anteriores.
+      const { pieces, rest } = splitRecords(record)
+      for (const piece of pieces) yield* this.piece(piece)
+      if (rest === null) return
+      const scanned = scanJson(rest, 0)
+      // Solo se repara al vuelo el trozo que ya cerro algo y se quedo corto de
+      // cierres (termina en llave o corchete): es el caso real, una llave de
+      // menos. Si termina en coma o en comilla puede seguir en la linea
+      // siguiente (un registro partido en dos); repararlo ahi le quitaba
+      // campos y dejaba el resto como narracion con claves de JSON.
+      if (/[}\]]$/.test(rest) && !scanned.inString && (yield* this.recover(rest))) return
+      this.pending = { text: rest, depth: scanned.depth, inString: scanned.inString }
       return
     }
 
@@ -710,7 +844,7 @@ class LineInterpreter {
 
     const parsed = parseLoose(text)
     if (parsed !== undefined) {
-      yield* this.items(parsed)
+      yield* this.items(parsed, text)
       return
     }
     // Prosa suelta: el modelo olvido el formato; se narra en vez de perderse.
@@ -718,96 +852,158 @@ class LineInterpreter {
   }
 
   *finish(): Generator<GMOutput> {
-    if (this.pending !== null) yield* this.flushPending()
+    if (this.pending !== null) yield* this.closePending()
   }
 
-  private *flushPending(): Generator<GMOutput> {
-    const parsed = parseLoose(this.pending?.text ?? '')
+  /** Cierra el objeto pendiente: lo lee, lo repara o rescata su texto; si nada vale, lo cuenta con SU texto. */
+  private *closePending(): Generator<GMOutput> {
+    const text = this.pending?.text ?? ''
     this.pending = null
-    if (parsed !== undefined) yield* this.items(parsed)
-    else this.ignore()
+    // Solo el corchete o la llave que abria una lista con un registro por
+    // linea, o la envoltura cuyo contenido llego en la linea siguiente: los
+    // registros ya se leyeron uno a uno y aqui no queda nada.
+    if (/^[[\]{},\s]*$/.test(text) || /^\{\s*"kind"\s*:\s*"(?:block|event)"\s*,\s*"(?:block|event)"\s*:\s*$/.test(text)) return
+    // Entero si se puede leer entero (JSON con formato en varias lineas).
+    try {
+      yield* this.items(JSON.parse(text.replace(/,\s*$/, '')) as unknown, text)
+      return
+    } catch {
+      // Sigue abajo, trozo a trozo.
+    }
+    // Si no, cada objeto por separado: lo que venia pegado a un trozo roto no
+    // se pierde con el, y lo que no se pueda usar queda apuntado con su texto.
+    const { pieces, rest } = splitRecords(text)
+    for (const piece of pieces) yield* this.piece(piece)
+    if (rest !== null && !(yield* this.recover(rest))) this.ignore(rest)
   }
 
-  private dropPending(): void {
-    this.pending = null
-    this.ignore()
+  /** Un objeto JSON suelto y entero en sus llaves: se lee, se recupera o se apunta. */
+  private *piece(piece: string): Generator<GMOutput> {
+    const parsed = parseLoose(piece)
+    if (parsed !== undefined) yield* this.items(parsed, piece)
+    else if (!(yield* this.recover(piece))) this.ignore(piece)
   }
 
-  private *items(parsed: unknown): Generator<GMOutput> {
+  /**
+   * Antes de procesar el ultimo trozo de una salida cortada por el limite: lo
+   * pendiente que ese trozo no continua (porque empieza otro registro) no lo
+   * corto el limite, solo le faltaba un cierre, y se repara como siempre.
+   */
+  *settleBeforeTail(tail: string): Generator<GMOutput> {
+    if (this.pending !== null && startsRecord(tail.trim())) yield* this.closePending()
+  }
+
+  /**
+   * Una linea que no es JSON valido: se le cierra lo que dejo abierto y, si
+   * aun asi no sirve y era historia, se rescata su texto. La historia vale
+   * mas que su envoltura; un evento roto si se descarta.
+   */
+  private *recover(text: string): Generator<GMOutput, boolean> {
+    // Lo que corto el limite de salida no se repara: cerrar a ciegas una linea
+    // a medias daba por bueno un numero incompleto (un daño de -1 que iba a
+    // ser -10) o una frase que podia decir lo contrario. Ya sale el aviso de corte.
+    if (this.truncated) {
+      this.note('dropped', `salida cortada: ${text}`)
+      if (isStoryText(text)) this.lostStory++
+      return true
+    }
+    const repaired = repairJson(text)
+    if (repaired !== undefined && !hasJsonResidue(repaired) && this.usable(repaired)) {
+      this.note('repaired', text)
+      yield* this.items(repaired, text)
+      return true
+    }
+    const saved = salvageStory(text)
+    if (saved) {
+      this.note('repaired', text)
+      // Si dentro venian pegados mas parrafos, esos si se perdieron.
+      this.lostStory += Math.max(0, storyRecordsIn(text) - 1)
+      if (recordsIn(text) > storyRecordsIn(text)) this.ignore(`(pegado a un parrafo rescatado) ${text}`, false)
+      yield* this.block(saved)
+      return true
+    }
+    return false
+  }
+
+  /** Si esto, ya leido, se podria usar: un bloque de historia valido, un evento con forma valida o una linea de control. */
+  private usable(parsed: unknown): boolean {
     const list = Array.isArray(parsed) ? parsed : [parsed]
-    for (const item of list) yield* this.item(item)
+    return list.length > 0 && list.every((item) => {
+      const record = normalizeRecord(item)
+      if (!record) return false
+      if (record.kind === 'block') return storyBlock(record.raw) !== null
+      if (record.kind === 'event') return this.allowed.safeParse(record.raw).success
+      return true
+    })
+  }
+
+  private *items(parsed: unknown, source: string): Generator<GMOutput> {
+    const list = Array.isArray(parsed) ? parsed : [parsed]
+    for (const item of list) yield* this.item(item, list.length === 1 ? source : JSON.stringify(item))
   }
 
   private *prose(text: string): Generator<GMOutput> {
     const cleaned = text.replace(/^\*\*[^*]{1,40}\*\*:?\s*/, '').replace(/^[-*•]\s+/, '').trim()
     if (cleaned === '' || isChatter(cleaned)) return
-    yield* this.block({ type: 'narration', text: cleaned })
+    // El resto de un registro partido (`"speaker":"Ignacio"}`, `y calló."}`) no
+    // es prosa: narrarlo ponia claves y llaves de JSON delante de la mesa.
+    if (looksLikeJson(cleaned)) {
+      this.ignore(cleaned, true)
+      return
+    }
+    // "Lucía (npc:lucia): «¿Emiliano?»": el modelo escribio el dialogo como
+    // prosa. Sigue siendo alguien hablando: sale como dialogo, con su hablante,
+    // y la mesa no lee la referencia interna (partida de prueba con Sonnet, 05-10).
+    const spoken = proseDialogue(cleaned)
+    yield* this.block(spoken ?? { type: 'narration', text: cleaned })
   }
 
-  private *item(parsed: unknown): Generator<GMOutput> {
-    const line = ModelLine.safeParse(parsed)
-    if (!line.success) {
-      // Un bloque o evento sin la envoltura {"kind":...} tambien se entiende.
-      const block = TurnBlock.safeParse(parsed)
-      if (block.success) {
-        yield* this.block(block.data)
+  private *item(parsed: unknown, source: string): Generator<GMOutput> {
+    // Todas las formas en que el modelo escribe lo mismo se reducen a tres:
+    // un bloque de historia, un evento o una linea de control (`normalizeRecord`).
+    const record = normalizeRecord(parsed)
+    if (!record) {
+      this.ignore(source)
+      return
+    }
+    if (record.kind === 'block') {
+      // Un bloque que el modelo marco para alguien (`to`, o `characterId` como
+      // en un susurro) era privado: sale como susurro o no sale, nunca publico.
+      // Vale con `to` como lista o como texto suelto.
+      const marked = record.raw as { to?: unknown; characterId?: unknown } | null
+      const target = marked?.to ?? marked?.characterId
+      if (target !== undefined && target !== null) {
+        const to = typeof target === 'string' ? [target] : Array.isArray(target) ? target : []
+        const story = storyBlock(record.raw)
+        if (story && to.length === 1 && typeof to[0] === 'string') {
+          const whisper = { kind: 'whisper', characterId: to[0], text: story.type === 'dialogue' ? `${story.speaker}: ${story.text}` : story.text }
+          // Si no se puede (ya tuvo su susurro, no esta en la mesa), se apunta como susurro y no como historia de la mesa.
+          yield* this.item(whisper, JSON.stringify(whisper))
+        } else this.ignore(source, false)
         return
       }
-      if (yield* this.emitProposed(parsed)) return
-      // `{"kind":"dialogue","speaker":...}` en vez de
-      // `{"kind":"block","block":{"type":"dialogue",...}}`: el modelo usa el
-      // tipo de bloque como `kind`, que es la abreviacion natural. Se
-      // entiende igual. Sin esto, un turno entero podia quedarse sin ningun
-      // bloque y morir con "el modelo no devolvio ningun bloque" (mesa de
-      // prueba con Sonnet, 20-09).
-      // `{"kind":"roll","event":{...}}`: el modelo pone el tipo del evento
-      // como `kind`. Si trae `event`, es un evento (mesa 39, turno 15: la
-      // tirada que pedia el movimiento se perdio por esto).
-      const withEvent = parsed as { event?: unknown }
-      if (withEvent && typeof withEvent === 'object' && withEvent.event && typeof withEvent.event === 'object') {
-        if (yield* this.emitProposed(withEvent.event)) return
+      // Del modelo solo salen narracion y dialogo: un bloque `system`, `image`
+      // o `ending` escrito por el no es historia, es el modelo haciendose
+      // pasar por el motor.
+      const block = storyBlock(record.raw)
+      if (!block) {
+        this.ignore(source)
+        return
       }
-      // `{"kind":"narration","block":{...}}`: lo mismo con bloques. Sonnet 5
-      // lo hizo un turno entero y la mesa se quedo sin narracion (mesa 43, 03-10).
-      const withBlock = parsed as { block?: unknown }
-      if (withBlock && typeof withBlock === 'object' && withBlock.block && typeof withBlock.block === 'object') {
-        const wrapped = TurnBlock.safeParse(withBlock.block)
-        if (wrapped.success) {
-          yield* this.block(wrapped.data)
-          return
-        }
-      }
-      const asKind = parsed as { kind?: unknown }
-      if (asKind && typeof asKind === 'object' && typeof asKind.kind === 'string') {
-        const { kind, ...rest } = asKind as Record<string, unknown>
-        const shorthand = TurnBlock.safeParse({ type: kind, ...rest })
-        if (shorthand.success) {
-          yield* this.block(shorthand.data)
-          return
-        }
-        // `{"kind":"npc_action","actor":...,"payload":...}`: el tipo del evento
-        // como `kind` y sin envoltura. Rogelio daba su version de los hechos
-        // asi y se perdia (one-shot, 05-10).
-        if (yield* this.emitProposed({ type: kind, ...rest })) return
-      }
-      this.ignore()
+      yield* this.block(block)
+      return
+    }
+    if (record.kind === 'event') {
+      if (!(yield* this.emitProposed(record.raw))) this.ignore(source)
       return
     }
 
+    const line = { data: record.line }
     switch (line.data.kind) {
-      case 'block': {
-        const block = TurnBlock.safeParse(line.data.block)
-        if (!block.success) {
-          this.ignore()
-          return
-        }
-        yield* this.block(block.data)
+      // `block` y `event` ya salieron arriba; quedan las lineas de control.
+      case 'block':
+      case 'event':
         return
-      }
-      case 'event': {
-        if (!(yield* this.emitProposed(line.data.event))) this.ignore()
-        return
-      }
       case 'addressed': {
         const ids = line.data.characterIds.map((id) => refId(id)).filter((id) => this.party.includes(id))
         if (ids.length) this.addressed = ids
@@ -836,7 +1032,7 @@ class LineInterpreter {
         // linea es tan simple como `addressed` y el motor la vuelve `move`.
         const location = line.data.location.replace(/^location:/, '')
         if (!this.ctx.pack.locations.has(location)) {
-          this.ignore()
+          this.ignore(source)
           return
         }
         const ids = (line.data.characterIds?.map((id) => refId(id)) ?? this.party).filter((id) => this.party.includes(id))
@@ -851,11 +1047,14 @@ class LineInterpreter {
         // Un logro por turno, corto, y pasa el lint como cualquier texto que la mesa ve.
         // Hasta 80 caracteres sin partir palabras (la partida de prueba del 04-10 cerro uno en "empieza por ").
         const title = clipWords(line.data.title.trim().replace(/\s+/g, ' '), 80)
-        if (!title || this.milestoned) return
+        if (!title || this.milestone !== null) return
+        if (!this.milestoneAllowed) {
+          this.note('dropped', `logro fuera de su turno: ${title}`)
+          return
+        }
         const cut = yield* this.lint(title)
         if (cut) return
-        this.milestoned = true
-        yield { kind: 'block', block: { type: 'milestone', title } }
+        this.milestone = title
         return
       }
       case 'whisper': {
@@ -863,7 +1062,7 @@ class LineInterpreter {
         // capa del jugador y el lint lo revisa contra el, no contra la mesa.
         const id = refId(line.data.characterId)
         if (!this.party.includes(id) || this.whispered.has(id)) {
-          this.ignore()
+          this.ignore(source)
           return
         }
         const text = clipWords(line.data.text.trim().replace(/\s+/g, ' '), 420)
@@ -895,7 +1094,7 @@ class LineInterpreter {
         const ending = line.data.ending?.trim().replace(/^ending:/, '')
         const validEnding = ending !== undefined && this.endingIds.includes(ending) ? ending : undefined
         if (!this.closeAllowed && !(this.earlyEnding && validEnding)) {
-          this.ignore()
+          this.ignore(source)
           return
         }
         const cliffhanger = line.data.cliffhanger?.trim().replace(/\s+/g, ' ').slice(0, 500)
@@ -919,10 +1118,10 @@ class LineInterpreter {
         // suelta desde la mesa (modo `dice`) o escribe su numero (`table`).
         // Con el motor tirando no tiene sentido: ya tiro antes de llamar.
         if (this.diceMode === 'engine') {
-          this.ignore()
+          this.ignore(source)
           return
         }
-        if (!(yield* this.requestRoll(line.data))) this.ignore()
+        if (!(yield* this.requestRoll(line.data))) this.ignore(source)
         return
       }
       case 'scene': {
@@ -937,8 +1136,10 @@ class LineInterpreter {
     }
   }
 
-  private *block(block: TurnBlock): Generator<GMOutput> {
+  private *block(raw: TurnBlock): Generator<GMOutput> {
     const witnesses = this.party.map((id) => `character:${id}`)
+    // Lo que el modelo deja colgando al final de un texto no es historia.
+    const block = raw.type === 'narration' || raw.type === 'dialogue' ? { ...raw, text: tidyStory(raw.text) || raw.text } : raw
     this.blocks++
     if (block.type === 'narration' || block.type === 'dialogue') {
       const cut = yield* this.lint(block.text)
@@ -1201,6 +1402,229 @@ function wantsRawLog(): boolean {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
   // DM_LOG_RAW: nombre anterior al renombre a GM (29-09).
   return (env?.['GM_LOG_RAW'] ?? env?.['DM_LOG_RAW']) === '1'
+}
+
+/** Kinds de las lineas de control: lo que no es ni historia ni evento. */
+const CONTROL_KINDS = new Set(['addressed', 'scene', 'recap', 'where', 'suggest', 'milestone', 'whisper', 'close', 'ask_roll'])
+
+type NormalizedRecord = { kind: 'block'; raw: unknown } | { kind: 'event'; raw: unknown } | { kind: 'line'; line: z.infer<typeof ModelLine> }
+
+/**
+ * Reduce a una sola forma todo lo que el modelo escribe para decir lo mismo.
+ * El formato del prompt es plano (`{"kind":"narration","text":"..."}`,
+ * `{"kind":"state_change","effects":[...]}`), que es el que el modelo usa
+ * solo; las envolturas de antes (`{"kind":"block","block":{...}}`,
+ * `{"kind":"event","event":{...}}`) y sus mezclas se siguen entendiendo.
+ * Cada variante fue en su dia un turno roto en produccion (20-09, 25-09,
+ * 03-10, 05-10): aqui viven todas juntas en vez de en parches sueltos.
+ */
+export function normalizeRecord(parsed: unknown): NormalizedRecord | null {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+  const record = parsed as Record<string, unknown>
+  // Con envoltura, sea cual sea el `kind` que le pusiera: {"kind":"narration","block":{...}}, {"kind":"roll","event":{...}}.
+  if (record['block'] && typeof record['block'] === 'object') return { kind: 'block', raw: record['block'] }
+  if (record['event'] && typeof record['event'] === 'object') return { kind: 'event', raw: record['event'] }
+  const kind = typeof record['kind'] === 'string' ? record['kind'] : undefined
+  if (kind !== undefined && CONTROL_KINDS.has(kind)) {
+    const line = ModelLine.safeParse(record)
+    return line.success ? { kind: 'line', line: line.data } : null
+  }
+  const tag = kind ?? (typeof record['type'] === 'string' ? record['type'] : undefined)
+  if (tag === undefined || tag === 'block' || tag === 'event') return null
+  const { kind: _kind, type: _type, ...rest } = record
+  const flat = { type: tag, ...rest }
+  return tag === 'narration' || tag === 'dialogue' ? { kind: 'block', raw: flat } : { kind: 'event', raw: flat }
+}
+
+/**
+ * Un bloque de historia valido (narracion o dialogo) con solo sus campos: ni
+ * `to` (lo privado sale por `whisper`) ni `declared` (lo pone el motor) ni lo
+ * que el modelo añada por su cuenta. Un campo de mas (`"mood":"tenso"`) o un
+ * dialogo sin `speakerRef` tumbaban el turno entero con "no devolvio ningun bloque".
+ */
+type StoryBlock = Extract<TurnBlock, { type: 'narration' | 'dialogue' }>
+
+function storyBlock(raw: unknown): StoryBlock | null {
+  if (!raw || typeof raw !== 'object') return null
+  const record = raw as Record<string, unknown>
+  const candidate =
+    record['type'] === 'narration'
+      ? { type: 'narration', text: record['text'] }
+      : record['type'] === 'dialogue'
+        ? { type: 'dialogue', speaker: record['speaker'], speakerRef: typeof record['speakerRef'] === 'string' ? record['speakerRef'] : null, text: record['text'] }
+        : null
+  if (!candidate) return null
+  const block = TurnBlock.safeParse(candidate)
+  return block.success && (block.data.type === 'narration' || block.data.type === 'dialogue') ? block.data : null
+}
+
+/** Prefijo de lista que algunos modelos ponen delante de cada linea (`- {...}`, `1. {...}`). */
+function stripListPrefix(text: string): string {
+  return /^(?:[-*•]|\d{1,2}[.)])\s+[{[]/.test(text) ? text.replace(/^(?:[-*•]|\d{1,2}[.)])\s+/, '') : text
+}
+
+/** Si la linea empieza un registro (`{"kind":` o `{"type":`), se pueda leer entera o no. */
+function startsRecord(text: string): boolean {
+  return /^\{\s*"(?:kind|type)"\s*:/.test(stripListPrefix(text))
+}
+
+/**
+ * Quita del final de un texto de historia lo que el modelo deja colgando: una
+ * llave o un corchete tras el punto (cerro `}"` en vez de `"}`) y una comilla
+ * angular de cierre que nunca se abrio. Vistos los dos con Sonnet el 05-10.
+ */
+export function tidyStory(text: string): string {
+  let tidy = text.trim().replace(/([.!?…»”"'])\s*[}\]{[]+$/, '$1')
+  const opened = (tidy.match(/«/g) ?? []).length
+  const closed = (tidy.match(/»/g) ?? []).length
+  if (closed > opened && tidy.endsWith('»')) tidy = tidy.slice(0, -1).trimEnd()
+  return tidy
+}
+
+/**
+ * Una linea de prosa con forma de dialogo: `Nombre (npc:id): «texto»` o
+ * `Nombre: «texto»`, con cualquier tipo de comillas. El nombre es corto y sin
+ * puntuacion de frase; si no encaja, es narracion.
+ */
+export function proseDialogue(text: string): StoryBlock | null {
+  const match = /^([\p{Lu}][\p{L}\p{M}.' -]{0,48}?)\s*(?:\(((?:npc|character):[a-z0-9]+(?:-[a-z0-9]+)*)\))?\s*:\s*[«“"'](.+?)[»”"']?$/u.exec(text)
+  if (!match) return null
+  const speaker = match[1]!.trim()
+  const said = match[3]!.trim()
+  // Sin referencia, solo vale un nombre de hasta cuatro palabras: "El letrero dice: 'Cerrado'" es narracion.
+  if (!match[2] && (speaker.split(/\s+/).length > 4 || /\b(?:dice|dijo|responde|pregunta|grita|susurra|añade|lee|pone)\b/i.test(speaker))) return null
+  if (speaker === '' || said.length < 2) return null
+  return { type: 'dialogue', speaker, speakerRef: match[2] ?? null, text: said }
+}
+
+/** Claves del formato de salida: una linea de prosa que empieza con una de ellas es un trozo de registro. */
+const FORMAT_KEYS = 'kind|type|text|speaker|speakerRef|characterId|characterIds|location|options|effects|title|cliffhanger|payload|resolved|block|event'
+
+/**
+ * Restos de JSON en un texto que iba a narrarse: llaves pegadas a comillas o
+ * una clave del formato con sus dos puntos. Una cita seguida de dos puntos
+ * (`El letrero dice "Cerrado": "Vuelva mañana"`) es prosa y se queda.
+ */
+function looksLikeJson(text: string): boolean {
+  return new RegExp(`\\{\\s*"|"\\s*\\}|"\\s*\\]\\s*[},]?$|"(?:${FORMAT_KEYS})"\\s*:`).test(text)
+}
+
+/** Si el texto de una linea era historia (narracion o dialogo) y no un evento duplicado. */
+function isStoryText(text: string): boolean {
+  return /"(?:kind|type)"\s*:\s*"(?:dialogue|narration)"/.test(text) && !/"kind"\s*:\s*"event"/.test(text) && !/"payload"\s*:/.test(text)
+}
+
+/** Cuantos registros empiezan dentro de un texto. */
+function recordsIn(text: string): number {
+  return (text.match(/\{\s*"(?:kind|type)"\s*:/g) ?? []).length
+}
+
+/**
+ * Los objetos JSON de primer nivel que caben enteros en una linea y lo que
+ * sobra sin cerrar al final (o null). `{...} {..."` da un objeto y un resto:
+ * el resto es problema suyo y no del que venia antes.
+ */
+export function splitRecords(text: string): { pieces: string[]; rest: string | null } {
+  const pieces: string[] = []
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let start = -1
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]!
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === '\\') escaped = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') inString = true
+    else if (ch === '{' || ch === '[') {
+      if (depth === 0) start = i
+      depth++
+    } else if (ch === '}' || ch === ']') {
+      depth--
+      if (depth === 0 && start !== -1) {
+        pieces.push(text.slice(start, i + 1))
+        start = -1
+      }
+    }
+  }
+  const rest = start !== -1 ? text.slice(start).trim() : null
+  return { pieces, rest: rest === '' ? null : rest }
+}
+
+/** Si algun texto de lo reparado trae restos de otro registro: entonces la reparacion pego dos cosas y no vale. */
+function hasJsonResidue(value: unknown): boolean {
+  if (typeof value === 'string') return /"(?:kind|type)"\s*:|\{\s*"(?:kind|type|text)"/.test(value)
+  if (Array.isArray(value)) return value.some(hasJsonResidue)
+  if (value && typeof value === 'object') return Object.values(value).some(hasJsonResidue)
+  return false
+}
+
+/** Cuantos bloques de historia empiezan dentro de un texto (para contar lo que se pierde cuando vienen pegados). */
+function storyRecordsIn(text: string): number {
+  return (text.match(/\{\s*"(?:kind|type)"\s*:\s*"(?:narration|dialogue)"/g) ?? []).length
+}
+
+/**
+ * Cierra lo que una linea dejo abierto (una cadena, llaves, corchetes) y la
+ * lee. undefined si no habia nada que cerrar o ni asi es JSON. El modelo se
+ * come un cierre de vez en cuando; lo que escribio antes suele estar bien.
+ */
+export function repairJson(text: string): unknown {
+  const closers: string[] = []
+  let inString = false
+  let escape = false
+  for (const ch of text) {
+    if (inString) {
+      if (escape) escape = false
+      else if (ch === '\\') escape = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') inString = true
+    else if (ch === '{') closers.push('}')
+    else if (ch === '[') closers.push(']')
+    else if (ch === '}' || ch === ']') closers.pop()
+  }
+  if (!inString && closers.length === 0) return undefined
+  const closed = `${inString ? text : text.replace(/[,\s]+$/, '')}${inString ? '"' : ''}${closers.reverse().join('')}`
+  try {
+    return JSON.parse(closed)
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Rescata el texto de un bloque de historia cuyo JSON no se puede leer
+ * (comillas sin escapar dentro del texto, cierre perdido). Solo narracion y
+ * dialogo, y solo si queda texto de verdad. null si no es historia.
+ */
+export function salvageStory(text: string): StoryBlock | null {
+  // El tipo es el del PROPIO registro, no uno que aparezca mas adelante: con
+  // lineas pegadas, un susurro roto seguido de una narracion salia publico.
+  const head = /^\s*\{\s*"(?:kind|type)"\s*:\s*"(narration|dialogue)"/.exec(text) ?? /^\s*\{\s*"kind"\s*:\s*"block"\s*,\s*"block"\s*:\s*\{\s*"type"\s*:\s*"(narration|dialogue)"/.exec(text)
+  if (!head) return null
+  // Nada privado ni de la capa de eventos se rescata como historia publica.
+  if (/"(?:to|visibility|payload|characterId)"\s*:/.test(text)) return null
+  const dialogue = head[1] === 'dialogue'
+  const field = /"text"\s*:\s*"/.exec(text)
+  if (!field) return null
+  let body = text.slice(field.index + field[0].length)
+  // El texto termina donde empieza otro campo o donde se cierra o se abre una
+  // llave tras una comilla; si no hay nada de eso, donde acaba la linea.
+  const end = /"\s*,\s*"[A-Za-z_]+"\s*:|"\s*[}\]{]/.exec(body)
+  body = end ? body.slice(0, end.index) : body.replace(/"?[\s}\],]*$/, '')
+  const story = body.replace(/\\n/g, ' ').replace(/\\"/g, '"').replace(/\\\\/g, '\\').replace(/\s+/g, ' ').trim()
+  // Solo restos de estructura: una cita con dos puntos dentro del parrafo es prosa.
+  if (story.length < 3 || /\{\s*"|"\s*\}|"(?:kind|type)"\s*:/.test(story)) return null
+  if (!dialogue) return { type: 'narration', text: story }
+  const speaker = /"speaker"\s*:\s*"([^"]{1,80})"/.exec(text)?.[1]
+  if (!speaker) return { type: 'narration', text: story }
+  const ref = /"speakerRef"\s*:\s*"([^"]{1,80})"/.exec(text)?.[1]
+  return { type: 'dialogue', speaker, speakerRef: ref ?? null, text: story }
 }
 
 /**

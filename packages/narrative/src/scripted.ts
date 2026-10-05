@@ -43,7 +43,7 @@ export class ScriptedGMProvider implements GMProvider {
       const name = pack.characters.get(response.characterId)?.name ?? response.characterId
       yield {
         kind: 'block',
-        block: { type: 'dialogue', speaker: name, speakerRef: `character:${response.characterId}`, text: response.text },
+        block: { type: 'dialogue', speaker: name, speakerRef: `character:${response.characterId}`, text: response.text, declared: true },
       }
       yield {
         kind: 'event',

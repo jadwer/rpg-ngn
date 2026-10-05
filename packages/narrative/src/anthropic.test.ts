@@ -57,10 +57,13 @@ describe('AnthropicTransport', () => {
     expect(blocks[1]).toMatchObject({ text: 'El farol parpadea.' })
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
     expect(outputs.at(-1)).toEqual({ kind: 'usage', inputTokens: 1800, outputTokens: 310 })
+    // Las ideas no salen de `narrate`: las pide el engine aparte, al modelo barato (docs/27, bloque I).
+    expect(calls).toHaveLength(1)
+    expect(provider.separateIdeas).toBe(true)
 
     const params = calls[0]!
     expect(params.stream).toBe(true)
-    expect(params.max_tokens).toBe(4000)
+    expect(params.max_tokens).toBe(4800)
     expect(params.system).toEqual([expect.objectContaining({ type: 'text', cache_control: { type: 'ephemeral' } })])
     expect(params.output_config).toEqual({ effort: 'medium' })
     expect(params.messages).toHaveLength(1)

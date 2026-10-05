@@ -200,6 +200,18 @@ export async function loadPack(source: FileSource, options: LoadPackOptions = {}
     if (endings.length > 0 && endings.filter((e) => e.default).length !== 1) {
       issues.push({ level: 'error', path, message: 'los finales necesitan exactamente uno con default: true' })
     }
+    // Los puntos de trama necesitan sitio (docs/27, R4): apertura, cierre y un
+    // turno de holgura ademas de un turno por punto. Con 5 puntos en 6 turnos
+    // el director salto la escena del choque entera (mesa 44, capitulo 1).
+    const beats = session.arc?.beats ?? []
+    if (session.arc && beats.length > 0 && session.arc.turns.target < beats.length + 3) {
+      issues.push({ level: 'warning', path, message: `${beats.length} puntos de trama no caben en ${session.arc.turns.target} turnos: hacen falta al menos ${beats.length + 3} (apertura, cierre y un turno de holgura)` })
+    }
+    // Una rama no es un paso: "Si va..." y "Si no va..." en fila hacen que el
+    // director empuje la rama que el jugador no eligio.
+    for (const beat of beats) {
+      if (/^si\s/i.test(beat.trim())) issues.push({ level: 'warning', path, message: `el punto de trama "${beat.slice(0, 50)}" es una rama: las ramas van en endings[].when, no en la fila de beats` })
+    }
     const min = session.arc?.turns.min
     if (min !== undefined && session.arc && min > session.arc.turns.target) {
       issues.push({ level: 'error', path, message: `turns.min (${min}) pasa del presupuesto (${session.arc.turns.target})` })

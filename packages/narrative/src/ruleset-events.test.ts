@@ -37,7 +37,7 @@ describe('prompt de la mascarada', () => {
     const prompt = systemPromptFor('masquerade')
     for (const op of ['bond', 'prestige', 'scandal']) expect(prompt).toContain(`"op":"${op}"`)
     // Los rumores dejaron de ser un efecto del ruleset y son un evento del dominio.
-    expect(prompt).toContain('"type":"rumor_heard"')
+    expect(prompt).toContain('"kind":"rumor_heard"')
     expect(prompt).not.toContain('"op":"hp"')
     expect(prompt).not.toContain('"op":"suspicion"')
     expect(prompt).toContain('Nunca digas al jugador lo que un NPC siente')
@@ -127,8 +127,8 @@ describe('lo que pasa en una escena social', () => {
   it('el prompt se las ofrece al GM en los tres rulesets', () => {
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
       const prompt = systemPromptFor(id)
-      expect(prompt).toContain('"type":"npc_action"')
-      expect(prompt).toContain('"type":"discovery"')
+      expect(prompt).toContain('"kind":"npc_action"')
+      expect(prompt).toContain('"kind":"discovery"')
       expect(prompt).toContain('"op":"relationship"')
     }
   })
@@ -158,7 +158,7 @@ describe('escenas y paso del tiempo', () => {
 
   it('el prompt se las ofrece al GM', () => {
     for (const id of ['fantasy-d20-lite', 'court-intrigue', 'masquerade']) {
-      expect(systemPromptFor(id)).toContain('"type":"scene_started"')
+      expect(systemPromptFor(id)).toContain('"kind":"scene_started"')
       expect(systemPromptFor(id)).toContain('"worldTime"')
     }
   })

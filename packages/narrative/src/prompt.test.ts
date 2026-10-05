@@ -17,14 +17,14 @@ describe('GM_SYSTEM_PROMPT', () => {
   it('explica la capa de secretos y el evento secret_revealed', () => {
     expect(GM_SYSTEM_PROMPT).toContain('# Secretos (capa del GM)')
     expect(GM_SYSTEM_PROMPT).toContain('emite ANTES del bloque que lo cuenta el evento secret_revealed')
-    expect(GM_SYSTEM_PROMPT).toContain('{"type":"secret_revealed","payload":{"secretId":"osric-subio-solo"')
+    expect(GM_SYSTEM_PROMPT).toContain('{"kind":"secret_revealed","payload":{"secretId":"osric-subio-solo"')
     expect(GM_SYSTEM_PROMPT).toContain('El motor corta cualquier bloque que use un secreto no revelado')
   })
 
   it('la version compacta conserva las mismas reglas en corto', () => {
     expect(GM_SYSTEM_PROMPT_COMPACT).toContain('"Calder cierra el puño y decide esperar" no lo es')
     expect(GM_SYSTEM_PROMPT_COMPACT).toContain('nunca con un personaje jugador actuando')
-    expect(GM_SYSTEM_PROMPT_COMPACT).toContain('{"type":"secret_revealed","payload":{"secretId":"<id>"}}')
+    expect(GM_SYSTEM_PROMPT_COMPACT).toContain('{"kind":"secret_revealed","payload":{"secretId":"<id>"}}')
     expect(GM_SYSTEM_PROMPT_COMPACT.length).toBeLessThan(4200)
   })
 })

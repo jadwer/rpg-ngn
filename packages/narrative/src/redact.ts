@@ -22,9 +22,13 @@ export function redact(text: string, credential?: string): string {
 
 /** Error del proveedor con el mensaje ya redactado y sin causa encadenada (la causa podria traer cabeceras). */
 export class GMProviderError extends Error {
-  constructor(message: string, credential?: string) {
+  /** Lo que el modelo escribio antes del fallo, sin la credencial: para el diagnostico del intento (docs/27, D). */
+  readonly raw: string | undefined
+
+  constructor(message: string, credential?: string, raw?: string) {
     super(redact(message, credential))
     this.name = 'GMProviderError'
+    this.raw = raw ? redact(raw, credential) : undefined
   }
 }
 

@@ -305,9 +305,18 @@ describe('apps/engine', () => {
       if (result?.kind !== 'result') return
       expect(result.events.map((e) => [e.seq, e.type])).toEqual([[23, 'player_action'], [24, 'narration'], [25, 'world_event']])
       expect(result.addressed).toEqual(['calder'])
+      // El consumo del turno es el del narrador; las ideas van aparte, al modelo barato (docs/27, bloque I).
       expect(result.usage).toEqual({ inputTokens: 900, outputTokens: 120 })
+      // (El cliente falso contesta lo mismo a todo, asi que esa llamada no trae ideas: queda apuntado y el turno sale igual.)
+      expect(result.diagnostics?.dropped.join(' ')).toContain('sin ideas para calder')
+      const ideas = anthropicCalls.at(-1)!
+      expect(ideas.model).toBe('claude-haiku-4-5-20251001')
+      expect(String(ideas.messages[0]?.content)).not.toContain('Capa del GM')
+      // Lo tecnico del turno viaja en el resultado, no en la historia.
+      expect(result.diagnostics).toMatchObject({ finish: 'stop', ignoredCount: 0, lostStory: 0 })
+      expect(result.diagnostics?.raw).toContain('"kind"')
 
-      const params = anthropicCalls.at(-1)!
+      const params = anthropicCalls.filter((c) => c.model === 'claude-sonnet-5').at(-1)!
       expect(params.max_tokens).toBe(1200)
       const user = String(params.messages[0]?.content)
       expect(user).toContain('<premisa_de_la_mesa>\nEsta noche esperan a Calder en la posada.\n</premisa_de_la_mesa>')
@@ -326,14 +335,14 @@ describe('apps/engine', () => {
 
       const lines = await readLines(await leaking.request('/v1/turns/resolve', { method: 'POST', headers, body: JSON.stringify(await request(provider)) }))
       expect(lines.filter((l) => l.kind === 'block').map((l) => (l.kind === 'block' ? l.block : null))).toEqual([
-        { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Miro la campana.' },
+        { type: 'dialogue', speaker: 'Zahira', speakerRef: 'character:zahira', text: 'Miro la campana.', declared: true },
         { type: 'narration', text: 'El silencio pesa. ¿Qué hacéis?' },
-        // El aviso al anfitrion, una vez y al final: en medio parecia que el GM se corregia en vivo.
-        { type: 'system', text: 'El GM revisó su narración: contaba algo que la mesa todavía no ha descubierto.', audience: 'host', tone: 'info', detail: 'El lint de conocimiento cortó un bloque. El motivo va en el resultado del turno; el modo se fija con GM_LINT o por mesa.' },
       ])
       const result = lines.at(-1)
       expect(result?.kind).toBe('result')
       if (result?.kind !== 'result') return
+      // El corte ya no es un aviso dentro de la historia: va en el diagnostico del turno.
+      expect(result.diagnostics?.lintCuts).toBe(1)
       expect(result.lint).toEqual([{ level: 'error', secretId: 'brorg-pago-por-zahira', marker: 'fue Brorg', receivers: ['zahira', 'calder'], message: 'usa "fue Brorg" del secreto brorg-pago-por-zahira, que zahira, calder no conocen' }])
       expect(result.events.map((e) => e.type)).toEqual(['player_action', 'narration'])
       const serialized = JSON.stringify({ state: result.state, projections: result.projections })

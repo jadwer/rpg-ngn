@@ -1,6 +1,7 @@
 import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
-import { adjust, resource, updateCharacter, updateNpc, type CharacterState, type Fortune, type InventoryItem, type WorldState } from '@rpg-ngn/core'
+import { adjust, resource, updateCharacter, type CharacterState, type Fortune, type WorldState } from '@rpg-ngn/core'
+import { applyInventoryEffect, optionalStr, str, type Effect } from './inventory.js'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
 import type { FortuneTier } from './fortune-tiers.js'
 
@@ -25,59 +26,6 @@ export const FORTUNE_TIERS: ReadonlyArray<FortuneTier> = [
   { min: 20, max: 20, key: 'd20.destiny', label: 'Destino' },
 ]
 
-type Effect = Record<string, unknown>
-
-function str(effect: Effect, key: string, event: CampaignEvent): string {
-  const value = effect[key]
-  if (typeof value !== 'string' || value === '') {
-    throw new Error(`${event.id}: el effect "${String(effect['op'])}" requiere "${key}" como texto`)
-  }
-  return value
-}
-
-function optionalStr(effect: Effect, key: string): string | undefined {
-  const value = effect[key]
-  return typeof value === 'string' && value !== '' ? value : undefined
-}
-
-function holderOf(effect: Effect, event: CampaignEvent): string {
-  const holder = optionalStr(effect, 'holder') ?? optionalStr(effect, 'who') ?? event.actor
-  if (!holder) {
-    throw new Error(`${event.id}: el effect "${String(effect['op'])}" no tiene holder ni el evento tiene actor`)
-  }
-  return holder
-}
-
-function addItem(world: WorldState, holder: string, item: InventoryItem): WorldState {
-  const id = refId(holder)
-  switch (refKind(holder)) {
-    case 'character':
-      return updateCharacter(world, id, (c) => ({ ...c, inventory: [...c.inventory, item] }))
-    case 'npc':
-      return updateNpc(world, id, (n) => ({ ...n, inventory: [...n.inventory, item] }))
-    default:
-      throw new Error(`${holder} no puede tener inventario (solo character:* y npc:*)`)
-  }
-}
-
-function removeItem(world: WorldState, holder: string, itemId: string, eventId: string): WorldState {
-  const id = refId(holder)
-  const drop = (inventory: InventoryItem[]): InventoryItem[] => {
-    const index = inventory.findIndex((i) => i.id === itemId)
-    if (index === -1) {
-      throw new Error(`${eventId}: ${holder} no tiene "${itemId}" para perderlo`)
-    }
-    return [...inventory.slice(0, index), ...inventory.slice(index + 1)]
-  }
-  switch (refKind(holder)) {
-    case 'character':
-      return updateCharacter(world, id, (c) => ({ ...c, inventory: drop(c.inventory) }))
-    case 'npc':
-      return updateNpc(world, id, (n) => ({ ...n, inventory: drop(n.inventory) }))
-    default:
-      throw new Error(`${holder} no puede tener inventario (solo character:* y npc:*)`)
-  }
-}
 
 function characterId(ref: string, event: CampaignEvent): string {
   if (refKind(ref) !== 'character') {
@@ -121,16 +69,9 @@ export const fantasyD20Lite: Ruleset = {
         const who = characterId(str(effect, 'who', event), event)
         return updateCharacter(world, who, (c) => ({ ...c, memoriesRecovered: c.memoriesRecovered + 1 }))
       }
-      case 'gain': {
-        const item: InventoryItem = { id: str(effect, 'item', event), since: event.id }
-        const note = optionalStr(effect, 'note')
-        const source = optionalStr(effect, 'source')
-        if (note) item.note = note
-        if (source) item.note = note ? `${note} (${source})` : source
-        return addItem(world, holderOf(effect, event), item)
-      }
+      case 'gain':
       case 'lose':
-        return removeItem(world, holderOf(effect, event), str(effect, 'item', event), event.id)
+        return applyInventoryEffect(world, effect, event)!
       case 'hp': {
         const who = characterId(str(effect, 'who', event), event)
         const delta = effect['delta']
