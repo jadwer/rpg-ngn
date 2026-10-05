@@ -27,7 +27,8 @@ const TABLES = [
 ]
 
 const providers: Array<{ label: string; config: ProviderConfig }> = []
-if (process.env['ANTHROPIC_API_KEY']) providers.push({ label: 'Claude (claude-sonnet-5)', config: { kind: 'anthropic', model: process.env['AB_ANTHROPIC_MODEL'] ?? 'claude-sonnet-5', credential: process.env['ANTHROPIC_API_KEY'] } })
+const anthropicModel = process.env['AB_ANTHROPIC_MODEL'] ?? 'claude-sonnet-5'
+if (process.env['ANTHROPIC_API_KEY']) providers.push({ label: `Claude (${anthropicModel})`, config: { kind: 'anthropic', model: anthropicModel, credential: process.env['ANTHROPIC_API_KEY'] } })
 if (process.env['OPENAI_API_KEY']) providers.push({ label: `GPT (${process.env['AB_OPENAI_MODEL'] ?? 'gpt-5'})`, config: { kind: 'openai', model: process.env['AB_OPENAI_MODEL'] ?? 'gpt-5', credential: process.env['OPENAI_API_KEY'] } })
 
 function render(block: TurnBlock): string | null {

@@ -79,6 +79,14 @@ closing"; el panel de Jugadores ya no se abre solo; mundos derivados ilustran
 mientras sean privados, con deslinde en la cronica y sin video ni Comunidad;
 "La corte exterior" en el mapa.
 
+Decidido el 05-10 (Gabino): el modelo se queda como esta (Sonnet en las
+mesas de pago y en los primeros turnos de cada cuenta, Haiku en el cupo
+gratuito). Comparacion de apertura Haiku contra Sonnet en
+`gm/ab/apertura-2026-10-05.md`: Haiku cuesta la quinta parte pero se salta el
+limite de palabras y comete errores de mundo (Rin viva, Maomao de treinta
+años). El modo mixto por tramo (Sonnet en apertura, climax y cierre; Haiku en
+medio, la mitad del costo) queda para cuando se definan Plata, Oro y Diamante.
+
 Despues de este plan: one-shots como misiones del camino de temporada, limite
 de tiempo por respuesta en sesiones cortas, reseñas publicas con moderacion,
 mas one-shots de un jugador por genero.
