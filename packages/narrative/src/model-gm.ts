@@ -785,6 +785,10 @@ class LineInterpreter {
           yield* this.block(shorthand.data)
           return
         }
+        // `{"kind":"npc_action","actor":...,"payload":...}`: el tipo del evento
+        // como `kind` y sin envoltura. Rogelio daba su version de los hechos
+        // asi y se perdia (one-shot, 05-10).
+        if (yield* this.emitProposed({ type: kind, ...rest })) return
       }
       this.ignore()
       return

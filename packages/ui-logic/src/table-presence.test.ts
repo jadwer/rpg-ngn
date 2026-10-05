@@ -61,8 +61,8 @@ describe('countdown', () => {
 
   it('corre desde que este cliente vio el turno completo', () => {
     expect(at(t0)).toMatchObject({ active: true, remaining: COUNTDOWN_SECONDS, held: false })
-    expect(at(t0 + 3200).remaining).toBe(7)
-    expect(at(t0 + 10_000).remaining).toBe(0)
+    expect(at(t0 + 1200).remaining).toBe(2)
+    expect(at(t0 + 3000).remaining).toBe(0)
     expect(at(t0 + 60_000).remaining).toBe(0)
   })
 
@@ -83,7 +83,7 @@ describe('countdown', () => {
   })
 
   it('la frase cuenta y al llegar a cero anuncia', () => {
-    expect(countdownLine(at(t0 + 2500))).toBe('El director narra en 8 s')
+    expect(countdownLine(at(t0 + 500))).toBe('El director narra en 3 s')
     expect(countdownLine(at(t0 + 12_000))).toBe('El director narra...')
     expect(countdownLine(countdown({ turn: null, progress, startedAt: t0, now: t0 }))).toBe('')
   })
@@ -102,8 +102,8 @@ describe('cuenta atras elegida por la mesa', () => {
     expect(COUNTDOWN_OPTIONS).toEqual([0, 3, 5, 10, 15])
     expect(countdownSecondsOf({ countdown: 3 })).toBe(3)
     expect(countdownSecondsOf({ countdown: 0 })).toBe(0)
-    expect(countdownSecondsOf({ countdown: 7 })).toBe(10)
-    expect(countdownSecondsOf(null)).toBe(10)
+    expect(countdownSecondsOf({ countdown: 7 })).toBe(3)
+    expect(countdownSecondsOf(null)).toBe(3)
     expect(withCountdown({ dice: 'dice' }, 5)).toEqual({ dice: 'dice', countdown: 5 })
     expect(countdownLabel(0)).toBe('Sin espera')
     expect(countdownLabel(5)).toBe('5 s')

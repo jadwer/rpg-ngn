@@ -103,7 +103,7 @@ export function seatsSummary(list: readonly Seat[]): string {
 }
 
 /** Segundos que se cuentan antes de cerrar solo, si la mesa no eligio otros (docs/18, D-UX-3). */
-export const COUNTDOWN_SECONDS = 10
+export const COUNTDOWN_SECONDS = 3
 
 /** Lo que el anfitrion puede elegir (Gabino, 27-09: diez segundos se hacian largos). 0 es cerrar al completarse. */
 export const COUNTDOWN_OPTIONS: readonly number[] = [0, 3, 5, 10, 15]

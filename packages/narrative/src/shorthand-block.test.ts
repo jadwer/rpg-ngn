@@ -47,3 +47,13 @@ describe('bloques abreviados del modelo', () => {
     expect(blocks.some((b) => b.block.text.includes('no se pudo aplicar'))).toBe(false)
   })
 })
+
+describe('eventos abreviados del modelo (05-10)', () => {
+  it('un evento con su tipo como kind y sin envoltura se registra', async () => {
+    const base = await openSession003()
+    const lines = ['{"kind":"block","block":{"type":"narration","text":"Tomás baja la vista."}}', '{"kind":"npc_action","actor":"npc:tomas","payload":{"text":"Culpa al minero y mete a Zahira en su versión"}}'].join('\n')
+    const outputs = await collect(new ModelGMProvider(new Once(lines), 'sk-test-shorthand-0000000').narrate(contextFor(base, turn(2, [response('zahira', 'Pregunto.')]))))
+    expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'npc_action')).toBe(true)
+    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+  })
+})
