@@ -169,6 +169,8 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
   }
 
   const quests = [...ctx.pack.quests.values()]
+  // Sin misiones el GM las inventaba ("quest:examen-unam") y la linea se tiraba (mesa 44, 05-10).
+  if (!quests.length) lines.push('', 'Este mundo no declara misiones: no propongas "quest_update"; el avance lo cuentan la narración y los logros.')
   if (quests.length) {
     lines.push('', 'Misiones del pack (con lo conseguido en esta campaña):')
     for (const quest of quests) {

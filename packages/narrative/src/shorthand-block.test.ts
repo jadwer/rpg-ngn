@@ -57,3 +57,23 @@ describe('eventos abreviados del modelo (05-10)', () => {
     expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
   })
 })
+
+describe('efectos sobre un NPC (mesa 44, 05-10)', () => {
+  it('la relacion de un NPC con un personaje presente se registra y no avisa al anfitrion', async () => {
+    const base = await openSession003()
+    const lines = [
+      '{"kind":"block","block":{"type":"narration","text":"Tomás te mira distinto."}}',
+      '{"kind":"event","event":{"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:zahira","delta":-2}]}}',
+    ].join('\n')
+    const outputs = await collect(new ModelGMProvider(new Once(lines), 'sk-test-relation-00000000').narrate(contextFor(base, turn(2, [response('zahira', 'Le reclamo.')]))))
+    expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'state_change')).toBe(true)
+    expect(outputs.some((o) => o.kind === 'block' && o.block.type === 'system')).toBe(false)
+  })
+
+  it('una relacion con un personaje que no esta en escena se sigue tirando', async () => {
+    const base = await openSession003()
+    const lines = ['{"kind":"block","block":{"type":"narration","text":"Nada."}}', '{"kind":"event","event":{"type":"state_change","effects":[{"op":"relationship","who":"npc:tomas","with":"character:nadie","delta":1}]}}'].join('\n')
+    const outputs = await collect(new ModelGMProvider(new Once(lines), 'sk-test-relation-00000001').narrate(contextFor(base, turn(2, [response('zahira', 'Espero.')]))))
+    expect(outputs.some((o) => o.kind === 'event' && o.event['type'] === 'state_change')).toBe(false)
+  })
+})

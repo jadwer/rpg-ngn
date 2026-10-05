@@ -1124,6 +1124,15 @@ class LineInterpreter {
       }
       case 'state_change': {
         for (const effect of event.effects) {
+          // Como trata un NPC a un personaje: el sujeto es el NPC y quien la
+          // recibe tiene que estar en escena. El prompt la enseña asi y el
+          // reductor la aplica, pero aqui se exigia un personaje en `who` y se
+          // tiraba siempre (mesa 44, 05-10). Igual una condicion sobre un NPC.
+          if (effect.op === 'relationship') {
+            if (refKind(effect.who) !== 'npc' || !present(effect.with)) return null
+            continue
+          }
+          if (effect.op === 'condition' && refKind(effect.who) === 'npc') continue
           if (!present(effect.who)) return null
           if (effect.op === 'condition' && effect.remove && !characters[refId(effect.who)]!.conditions.includes(effect.remove)) return null
         }
