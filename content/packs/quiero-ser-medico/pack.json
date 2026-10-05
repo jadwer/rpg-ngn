@@ -46,6 +46,38 @@
     "003"
   ],
   "artStyle": "Ciudad de México contemporánea, ilustración semirrealista con luz cálida de atardecer y tonos de concreto, sin texto ni logotipos.",
+  "catalog": {
+    "genre": "Drama",
+    "tags": [
+      "drama",
+      "venganza",
+      "comedia"
+    ],
+    "players": {
+      "min": 1,
+      "max": 1
+    },
+    "duration": "corta",
+    "hours": "1-2 h",
+    "format": "one-shot",
+    "sessionLength": "corta",
+    "genres": [
+      "drama",
+      "venganza",
+      "comedia"
+    ],
+    "style": "historia",
+    "contentWarnings": [
+      "alcohol",
+      "violencia",
+      "muerte",
+      "cárcel"
+    ],
+    "synopsis": "Mañana es tu examen de Medicina en la UNAM y llevas meses estudiando de noche para él. A las once suena el teléfono: es tu papá, que acaba de chocar borracho y te pide que vayas por él. Una historia para una persona, en tres capítulos cortos, sobre las decisiones que te cambian la vida y las que la vida toma por ti.",
+    "cover": "cover.webp",
+    "gallery": [],
+    "author": "Gabino Ramirez"
+  },
   "finale": {
     "title": "FIN",
     "text": "Y así termina la historia de Emiliano. ¿Habrá otra segunda vuelta? Quizá. Solo el tiempo lo dirá."
