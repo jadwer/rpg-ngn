@@ -24,10 +24,17 @@ module.exports = function withReleaseSigning(config) {
     let gradle = config.modResults.contents
     if (!gradle.includes("RPG_UPLOAD_STORE_FILE")) {
       gradle = gradle.replace(/signingConfigs \{\n(\s+debug \{[\s\S]*?\n\s+\})/, (block) => block + RELEASE_CONFIG)
+      // La plantilla de Expo escribe `signingConfig signingConfigs.debug` o, desde
+      // su ultima version, `signingConfig = signingConfigs.debug`. Con la forma
+      // nueva el reemplazo no pegaba y el AAB v25 salio firmado en depuracion
+      // (Play lo rechazo, 05-10).
       gradle = gradle.replace(
-        /(release \{\n(?:\s+\/\/[^\n]*\n)*)(\s+)signingConfig signingConfigs\.debug/,
-        "$1$2signingConfig project.hasProperty('RPG_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug",
+        /(release \{\n(?:\s+\/\/[^\n]*\n)*)(\s+)signingConfig(\s*=\s*|\s+)signingConfigs\.debug/,
+        "$1$2signingConfig = project.hasProperty('RPG_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug",
       )
+      if (!/release \{[\s\S]*?signingConfig = project\.hasProperty\('RPG_UPLOAD_STORE_FILE'\)/.test(gradle)) {
+        throw new Error('withReleaseSigning: no encontre el signingConfig del release en build.gradle; la plantilla de Expo cambio otra vez')
+      }
     }
     config.modResults.contents = gradle
     return config
