@@ -104,3 +104,12 @@ describe('apertura con gancho (docs/26, H2)', () => {
     expect(user).not.toContain('con un detalle propio')
   })
 })
+
+describe('ritmo de los puntos de trama (H5)', () => {
+  it('el turno dice por que punto de la trama deberia ir el director', () => {
+    const arc = { turns: { target: 8 }, beats: ['La llamada', 'La presión', 'El epílogo'] }
+    expect(clockLayer(storyClock(1, undefined, arc)!, 1, arc)).toContain('vas por el punto 1 de 3 ("La llamada")')
+    expect(clockLayer(storyClock(5, undefined, arc)!, 1, arc)).toContain('vas por el punto 2 de 3')
+    expect(clockLayer(storyClock(7, undefined, arc)!, 1, arc)).toContain('vas por el punto 3 de 3 ("El epílogo")')
+  })
+})

@@ -33,7 +33,7 @@
     "endings": [
       {
         "id": "se-repite",
-        "when": "Emiliano decide ir a salvar a su padre, de cualquier forma: aunque esquive las trampas de antes, aparecen otras y termina otra vez en la cárcel.",
+        "when": "En cuanto Emiliano decide ir a salvar a su padre (sale de la casa, acepta ir o manda a alguien en su lugar), la historia se repite: aunque esquive las trampas de antes aparecen otras y termina otra vez detenido. Cierra en ese mismo turno o, a más tardar, en el siguiente.",
         "title": "La historia se repite",
         "text": "La historia se repite… pero esta vez no hay otra oportunidad. FIN.",
         "final": true

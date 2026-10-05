@@ -96,11 +96,19 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
     lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".')
   }
   if (clock.penultimate) lines.push('El turno siguiente es el ÚLTIMO de la sesión: deja a la mesa ante la decisión final.')
+  // Donde deberia ir la trama segun el turno (H5): los puntos del autor se
+  // reparten en el presupuesto. Sin esto el director se quedaba en el primero
+  // y el desenlace ya no cabia (prueba del one-shot, 05-10).
+  const beats = arc?.beats ?? []
+  if (beats.length > 0 && clock.phase !== 'cierre') {
+    const at = Math.min(beats.length - 1, Math.floor(((clock.turn - 1) / Math.max(1, clock.total - 1)) * beats.length))
+    lines.push(`Ritmo de la trama: vas por el punto ${at + 1} de ${beats.length} ("${beats[at]}"). Si vas atrás, avanza hasta él en este turno, aunque tengas que saltar tiempo con una transición breve.`)
+  }
   const endings = arc?.endings ?? []
   if (endings.length > 0) {
     lines.push('Finales posibles de esta sesión (elige el que hayan ganado con lo que hicieron; el id va en la línea close):')
     for (const ending of endings) lines.push(`- "${ending.id}": ${ending.when}${ending.default ? ' (si ninguno se cumple, este)' : ''}`)
-    if (clock.earlyEnding) lines.push('Si este turno se cumple de lleno la condición de un final, puedes cerrar ya: narra ese desenlace y termina con {"kind":"close","ending":"<id>"}. Si no se cumple, sigue la historia.')
+    if (clock.earlyEnding) lines.push('Si con lo que declararon se cumple la condición de un final, CIERRA en este mismo turno: narra ese desenlace completo y termina con {"kind":"close","ending":"<id>"}. No lo alargues ni lo dejes para después. Si no se cumple, sigue la historia.')
   }
   if (clock.phase === 'cierre') {
     lines.push(
