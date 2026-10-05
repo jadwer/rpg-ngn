@@ -56,7 +56,9 @@ export function buildSlides(chronicle: Chronicle, session?: string | null): Slid
     // quiere") no va en el video: ahi la historia la cuenta el GM, que ya
     // narra esa accion (Gabino, 05-10).
     if (block.type === 'dialogue' && block.declared) continue
-    const text = clean(block.text)
+    // Ni la pregunta con que el GM devuelve la palabra al cerrar el turno
+    // ("¿Qué haces?"): la API manda el texto sin ella en `spoken`.
+    const text = clean(block.type === 'narration' && block.spoken !== undefined ? block.spoken : block.text)
     if (!text) continue
     slides.push({ image: current, text, speaker: block.type === 'dialogue' ? block.speaker || null : null, audioUrl: block.audioUrl ?? null })
   }

@@ -90,6 +90,13 @@ export const SessionArc = z.strictObject({
    * Medicina en la UNAM".
    */
   goal: z.string().min(1).optional(),
+  /**
+   * Quien es cada personaje en ESTA sesion, por id, cuando la historia salta
+   * en el tiempo: clase, edad y bio sustituyen a los de la ficha. Sin esto el GM
+   * leia "estudiante de la Vocacional, 18 años, vive con su mama" en el
+   * capitulo de los 33 años.
+   */
+  sheets: z.record(KebabId, z.strictObject({ class: z.string().min(1).optional(), age: z.string().min(1).optional(), bio: z.string().min(1).optional() })).optional(),
 })
 export type SessionArc = z.infer<typeof SessionArc>
 

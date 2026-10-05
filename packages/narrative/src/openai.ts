@@ -27,6 +27,8 @@ export interface OpenAIProviderOptions extends ModelGMOptions {
   /** Esfuerzo de razonamiento; solo se manda a modelos que lo aceptan (gpt-5*, o*). */
   reasoningEffort?: 'minimal' | 'low' | 'medium' | 'high'
   timeoutMs?: number
+  /** Reintentos del SDK; las ideas van con cero para no retener el turno ni pagar llamadas que ya nadie espera. */
+  maxRetries?: number
 }
 
 /**
@@ -51,7 +53,7 @@ export class OpenAITransport implements ModelTransport {
         apiKey: options.credential,
         ...(options.baseUrl ? { baseURL: options.baseUrl } : {}),
         ...(options.fetch ? { fetch: options.fetch } : {}),
-        maxRetries: 2,
+        maxRetries: options.maxRetries ?? 2,
         timeout: options.timeoutMs ?? 120_000,
       })
   }
@@ -115,6 +117,8 @@ export function createOpenAIProvider(options: OpenAIProviderOptions): ModelGMPro
   // (docs/27, bloque I), tambien con la nube compatible (DeepSeek). Solo con
   // el perfil compacto, que es el de los modelos locales (Ollama en una M1),
   // otra llamada son minutos: ahi las sigue escribiendo el GM.
-  const ideasTransport = options.ideasTransport ?? (options.contextProfile === 'compact' ? undefined : transport)
+  // Con tiempo corto y sin reintentos: una llamada de ideas abandonada por
+  // tiempo seguia corriendo y reintentando, pagando lo que ya nadie esperaba.
+  const ideasTransport = options.ideasTransport ?? (options.contextProfile === 'compact' ? undefined : new OpenAITransport({ ...options, timeoutMs: Math.min(options.timeoutMs ?? 15_000, 15_000), maxRetries: 0 }))
   return new ModelGMProvider(transport, options.credential, { ...options, ideasTransport })
 }

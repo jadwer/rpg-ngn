@@ -428,11 +428,16 @@ describe('VAM: la reparacion no inventa ni publica lo que no debe', () => {
   })
 
   it('lo privado no se publica con ninguna forma de marcarlo, y un susurro de mas no cuenta como historia perdida', async () => {
-    for (const line of ['{"kind":"narration","text":"Solo tú recuerdas la voz de tu madre.","to":"zahira"}', '{"kind":"narration","text":"Solo tú recuerdas la voz de tu madre.","to":["zahira"]}', '{"kind":"narration","characterId":"zahira","text":"Solo tú recuerdas la voz de tu madre."}']) {
+    for (const line of ['{"kind":"narration","text":"Solo tú recuerdas la voz de tu madre.","to":"zahira"}', '{"kind":"narration","text":"Solo tú recuerdas la voz de tu madre.","to":["zahira"]}']) {
       const outputs = await play(['{"kind":"narration","text":"Llueve."}', line])
       expect(publicStory(outputs), line).toEqual(['Llueve.'])
       expect(blocksOf(outputs).some((b) => b.type === 'narration' && b.to?.[0] === 'zahira'), line).toBe(true)
     }
+    // `characterId` en una narracion es un campo de mas, no un destinatario: la mesa la lee
+    // (tratarlo como privado le quitaba a la mesa parrafos enteros) y queda apuntado.
+    const tagged = await play(['{"kind":"narration","characterId":"zahira","text":"Zahira empuja la puerta y entra a la posada."}', '{"kind":"narration","characterId":"zahira","text":"Todos la miran en silencio."}', '{"kind":"dialogue","speaker":"Bren","speakerRef":"npc:bren","characterId":"zahira","text":"Tú, la del pañuelo, ven aquí."}'])
+    expect(publicStory(tagged)).toEqual(['Zahira empuja la puerta y entra a la posada.', 'Todos la miran en silencio.', 'Tú, la del pañuelo, ven aquí.'])
+    expect(diagnosticsOf(tagged).dropped.join(' ')).toContain('characterId de mas')
     // Una forma que no se puede leer: no sale de ninguna manera.
     const weird = await play(['{"kind":"narration","text":"Llueve."}', '{"kind":"narration","text":"Solo para algunos.","to":{"who":"zahira"}}'])
     expect(publicStory(weird)).toEqual(['Llueve.'])
@@ -516,11 +521,80 @@ describe('cuando el modelo escribe la historia como prosa (Sonnet sin razonar, 0
     expect(blocks).toEqual([
       { type: 'narration', text: 'Le dices a tu papá que espere y marcas al hospital.' },
       { type: 'dialogue', speaker: 'Lucía', speakerRef: 'npc:lucia', text: '¿Emiliano? ¿Qué pasó?' },
-      { type: 'dialogue', speaker: 'Bren', speakerRef: null, text: 'Nadie baja hoy.' },
+      // Sin referencia escrita, pero Bren es alguien del mundo: sale con la suya.
+      { type: 'dialogue', speaker: 'Bren', speakerRef: 'npc:bren', text: 'Nadie baja hoy.' },
       // Una frase con dos puntos y una cita no es alguien hablando.
       { type: 'narration', text: 'El letrero dice: "Cerrado".' },
     ])
     expect(JSON.stringify(blocks)).not.toContain('(npc:')
+  })
+
+  it('solo es dialogo si alguien conocido habla y la cita cierra la linea; una nota del modelo no llega a la mesa', async () => {
+    const base = await openSession003()
+    const text = [
+      'La lluvia golpea los cristales.',
+      // Nadie se llama asi: no son dialogos.
+      'Las once: «ya es tarde»',
+      'Valdoria: "la ciudad que nunca duerme".',
+      // Texto detras de la cita, o un verbo en el "nombre": narracion.
+      'Bren: «Ven conmigo.» Y se marcha sin mirar atrás.',
+      'Bren murmura: "ven"',
+      // Con negrita, el hablante se conserva.
+      '**Bren:** "Ven conmigo, rápido."',
+      '**Mera (npc:mera):** «¿Quién anda ahí?»',
+      '*La puerta se cierra sola.*',
+      // Notas del modelo para si mismo.
+      'Nota: "el jugador eligió X, sigue el final médico"',
+      'Nota: el jugador eligió ayudar a Bren, sigue el final médico.',
+      '(Nota para mí: Bren miente sobre la llave.)',
+      '**Nota del GM:** el secreto del alcalde se revela en el turno 6.',
+      'GM: subo la tensión aquí.',
+      'Resultado: "fracaso" para character:zahira',
+      // Una referencia de jugador colgada a otro nombre no vale.
+      'Bren (character:zahira): «Yo no fui.»',
+      '{"kind":"addressed","characterIds":["zahira"]}',
+    ].join('\n')
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(text), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    const blocks = blocksOf(outputs).filter((b) => !(b.type === 'dialogue' && b.declared))
+    expect(blocks).toEqual([
+      { type: 'narration', text: 'La lluvia golpea los cristales.' },
+      { type: 'narration', text: 'Las once: «ya es tarde»' },
+      { type: 'narration', text: 'Valdoria: "la ciudad que nunca duerme".' },
+      { type: 'narration', text: 'Bren: «Ven conmigo.» Y se marcha sin mirar atrás.' },
+      { type: 'narration', text: 'Bren murmura: "ven"' },
+      { type: 'dialogue', speaker: 'Bren', speakerRef: 'npc:bren', text: 'Ven conmigo, rápido.' },
+      { type: 'dialogue', speaker: 'Mera', speakerRef: 'npc:mera', text: '¿Quién anda ahí?' },
+      { type: 'narration', text: 'La puerta se cierra sola.' },
+      // Bren es conocido: habla el, con SU referencia, no con la de Zahira.
+      { type: 'dialogue', speaker: 'Bren', speakerRef: 'npc:bren', text: 'Yo no fui.' },
+    ])
+    const dropped = diagnosticsOf(outputs).dropped.join('\n')
+    for (const note of ['el jugador eligió X', 'eligió ayudar a Bren', 'Bren miente sobre la llave', 'el secreto del alcalde', 'subo la tensión', 'character:zahira']) expect(dropped).toContain(note)
+  })
+
+  it('una linea JSON sin su llave final, seguida de prosa, no se traga la prosa', async () => {
+    const base = await openSession003()
+    const run = async (lines: string[], reply: Partial<ModelReply> = {}) => collect(new ModelGMProvider(new FakeTransport(lines.join('\n'), reply), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    // El dialogo se repara y la narracion sale aparte, no en boca del NPC.
+    const spoken = await run(['{"kind":"narration","text":"Llueve."}', '{"kind":"dialogue","speaker":"Bren","speakerRef":"npc:bren","text":"Oí algo en el sótano."', 'Bren baja la mirada y se marcha.', 'La lluvia arrecia.', '{"kind":"addressed","characterIds":["zahira"]}'])
+    expect(blocksOf(spoken).filter((b) => !(b.type === 'dialogue' && b.declared))).toEqual([
+      { type: 'narration', text: 'Llueve.' },
+      { type: 'dialogue', speaker: 'Bren', speakerRef: 'npc:bren', text: 'Oí algo en el sótano.' },
+      { type: 'narration', text: 'Bren baja la mirada y se marcha.' },
+      { type: 'narration', text: 'La lluvia arrecia.' },
+    ])
+    // Con un susurro igual: el susurro sigue privado y la prosa publica no se pierde.
+    const whispered = await run(['{"kind":"whisper","characterId":"zahira","text":"Tu hermana vive."', 'Bren baja la mirada y se marcha.'])
+    expect(blocksOf(whispered).filter((b) => b.type === 'narration')).toEqual([{ type: 'narration', text: 'Tu hermana vive.', to: ['zahira'] }, { type: 'narration', text: 'Bren baja la mirada y se marcha.' }])
+    // Prosa pegada a un objeto en la misma linea, delante o detras.
+    const glued = await run(['{"kind":"narration","text":"Llueve."} Bren entra empapado y cierra la puerta.', 'Mera lo mira sin decir nada. {"kind":"addressed","characterIds":["zahira"]}'])
+    expect(storyOf(glued).slice(1)).toEqual(['Llueve.', 'Bren entra empapado y cierra la puerta.', 'Mera lo mira sin decir nada.'])
+    expect(glued.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira'] })
+    // Con la salida cortada: la linea anterior, entera salvo su llave, se repara aunque la cola sea prosa o no haya cola.
+    for (const tail of ['Bren se va y la', '{"op":"hp"', '']) {
+      const cut = await run(['{"kind":"narration","text":"Llueve."}', '{"kind":"dialogue","speaker":"Bren","speakerRef":null,"text":"Oí algo."', tail].filter((l, i) => i < 2 || l !== ''), { finish: 'length' })
+      expect(storyOf(cut).slice(1, 3), `cola: ${tail}`).toEqual(['Llueve.', 'Oí algo.'])
+    }
   })
 
   it('lo que el modelo deja colgando al final de un texto no llega a la mesa', async () => {
@@ -531,11 +605,73 @@ describe('cuando el modelo escribe la historia como prosa (Sonnet sin razonar, 0
     expect(storyOf(outputs).slice(1)).toEqual(['Te pide que te cuides.', 'El oficial estira la mano, esperando.', '«Nadie baja hoy», dijo.'])
   })
 
+  it('ronda 4 del fiscal: tras una linea rota, la prosa que empieza con comilla, guion, numero o corchete sigue siendo prosa', async () => {
+    const base = await openSession003()
+    const run = async (lines: string[], reply: Partial<ModelReply> = {}) => collect(new ModelGMProvider(new FakeTransport(lines.join('\n'), reply), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    const prose = ['"Nadie baja hoy", repite Bren sin mirarte.', '- Mera lo deja pasar.', '3 pasos mas y la puerta cede.', '[El reloj marca las once.]', 'true dice el letrero, y nadie entiende.']
+    const outputs = await run(['{"kind":"narration","text":"Llueve."}', '{"kind":"dialogue","speaker":"Bren","speakerRef":"npc:bren","text":"Oí algo."', ...prose, '{"kind":"addressed","characterIds":["zahira"]}'])
+    expect(storyOf(outputs).slice(1)).toEqual(['Llueve.', 'Oí algo.', '"Nadie baja hoy", repite Bren sin mirarte.', 'Mera lo deja pasar.', '3 pasos mas y la puerta cede.', '[El reloj marca las once.]', 'true dice el letrero, y nadie entiende.'])
+    expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['zahira'] })
+    // Un registro roto dentro de una cadena solo lo cierra otro registro.
+    const inString = await run(['{"kind":"narration","text":"Llueve, y Bren', 'dice que no baja.', '{"kind":"narration","text":"Mera entra."}'])
+    expect(storyOf(inString).slice(1)).toEqual(['Llueve, y Bren\ndice que no baja.', 'Mera entra.'])
+  })
+
+  it('ronda 4 del fiscal: frases en español con dos puntos, parentesis o verbos que parecen etiquetas son historia; las notas al GM no', async () => {
+    const base = await openSession003()
+    const story = ['Todo está en silencio: nadie respira.', '(La puerta se cierra sola.)', 'Los jugadores de cartas levantan la vista.', 'Nota el frío en la nuca antes de oír los pasos.', 'Meta la mano en el bolsillo: la llave sigue ahí.']
+    const notes = ['Recordatorio: Bren miente sobre la llave.', 'Objetivo oculto: que Zahira baje al sótano.', '> Nota: subir la tensión en el turno 4.', 'Narrador (para mí): el alcalde ya lo sabe.', '// fin del turno', '# turno 2', '<- aquí iba el logro']
+    const outputs = await collect(new ModelGMProvider(new FakeTransport([...story, ...notes, '{"kind":"addressed","characterIds":["zahira"]}'].join('\n')), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    expect(storyOf(outputs).slice(1)).toEqual(['Todo está en silencio: nadie respira.', '(La puerta se cierra sola.)', 'Los jugadores de cartas levantan la vista.', 'Nota el frío en la nuca antes de oír los pasos.', 'Meta la mano en el bolsillo: la llave sigue ahí.'])
+    const dropped = diagnosticsOf(outputs).dropped.join('\n')
+    for (const note of ['Bren miente', 'baje al sótano', 'subir la tensión', 'el alcalde ya lo sabe', 'fin del turno', 'iba el logro']) expect(dropped).toContain(note)
+  })
+
+  it('ronda 4 del fiscal: prosa entre objetos de una misma linea, cola cortada por el limite y un turno solo de prosa', async () => {
+    const base = await openSession003()
+    const run = async (lines: string[], reply: Partial<ModelReply> = {}) => collect(new ModelGMProvider(new FakeTransport(lines.join('\n'), reply), KEY).narrate(contextFor(base, turn(2, [response('zahira', 'Miro.')]))))
+    const between = await run(['{"kind":"narration","text":"Llueve."} Bren entra empapado. {"kind":"dialogue","speaker":"Mera","speakerRef":"npc:mera","text":"Cierra."} Y la puerta cede.', '{"kind":"addressed","characterIds":["zahira"]}'])
+    expect(storyOf(between).slice(1)).toEqual(['Llueve.', 'Bren entra empapado.', 'Cierra.', 'Y la puerta cede.'])
+    // La prosa que corto el limite de salida no llega a la mesa, y cuenta como historia perdida.
+    const cut = await run(['{"kind":"narration","text":"Llueve."}', 'Bren entra empapado y, antes de que nadie diga nada, se'], { finish: 'length' })
+    expect(storyOf(cut).slice(1)).toEqual(['Llueve.'])
+    expect(diagnosticsOf(cut).lostStory).toBeGreaterThan(0)
+    // Un turno escrito entero en prosa se narra; no muere por falta de objetos.
+    const plain = await run(['Bren entra empapado.', '', 'Mera lo mira sin decir nada.'])
+    expect(storyOf(plain).slice(1)).toEqual(['Bren entra empapado.', 'Mera lo mira sin decir nada.'])
+    expect(diagnosticsOf(plain).lostStory).toBe(0)
+  })
+
   it('el prompt enseña un turno completo y dice que todo va en un objeto', () => {
     for (const ruleset of ['fantasy-d20-lite', 'court-intrigue', 'masquerade', 'drama-lite']) {
       const prompt = systemPromptFor(ruleset, false, 'dice', 'es', 'separate')
       expect(prompt).toContain('Un turno completo se ve así:')
       expect(prompt).toContain('nunca escribas prosa suelta')
     }
+  })
+})
+
+describe('VAM, segunda ronda del fiscal de contexto', () => {
+  it('la sesion puede decir quien es el personaje ahora: clase, edad y bio en la ficha del GM y en las ideas', async () => {
+    const base = await openSession003()
+    const session = { ...base.pack.sessions.get('003')!, arc: { turns: { target: 8 }, sheets: { zahira: { class: 'Ingeniera en un call center', age: '32 años', bio: 'Vive sola en un octavo piso.' } } } }
+    const ctx = contextFor(base, turn(2, []), { session })
+    const gm = buildTurnContext(ctx).user
+    expect(gm).toContain('Ingeniera en un call center, 32 años')
+    expect(gm).toContain('Vive sola en un octavo piso.')
+    expect(gm).not.toContain(base.pack.characters.get('zahira')!.bio.slice(0, 30))
+    expect(buildPlayerContext(ctx, 'zahira')).toContain('Ingeniera en un call center')
+    // Solo a quien va: Calder sigue con su ficha.
+    expect(gm).toContain(base.pack.characters.get('calder')!.bio.slice(0, 30))
+  })
+
+  it('la nota de una tirada de mas solo llega al GM en el turno siguiente, no el resto de la sesion', async () => {
+    const base = await openSession003()
+    const note = (seq: number, turnNumber: number) => CampaignEvent.parse({ id: `evt-${String(seq).padStart(5, '0')}`, v: 1, seq, type: 'world_event', sessionId: '003', recordedAt: '2026-09-12T19:10:00Z', payload: { note: `Pendiente del GM (turno ${turnNumber}): se le pidió una tirada a Zahira y no hubo dado. Su acción sigue sin resolver: resuélvela al empezar este turno, sin dado y con un costo.` }, visibility: { layer: 'gm', witnesses: [] } })
+    const events = [...base.recentEvents, note(23, 3)]
+    expect(buildTurnContext(contextFor(base, turn(4, []), { recentEvents: events })).user).toContain('Pendiente del GM (turno 3)')
+    expect(buildTurnContext(contextFor(base, turn(5, []), { recentEvents: events })).user).not.toContain('Pendiente del GM')
+    // Y nunca a quien juega.
+    expect(buildPlayerContext(contextFor(base, turn(4, []), { recentEvents: events }), 'zahira')).not.toContain('Pendiente del GM')
   })
 })

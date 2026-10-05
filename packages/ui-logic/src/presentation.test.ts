@@ -42,6 +42,22 @@ describe('presentacion de la cronica', () => {
     expect(buildSlides(played).map((s) => s.text)).toEqual(['Rogelio deja el pastel sobre la mesa.', '¿Qué quieres en realidad, papá?'])
   })
 
+  it('la pregunta con que el GM cierra el turno tampoco sale: se usa el texto que la API manda sin ella', () => {
+    const asked: Chronicle = {
+      ...chronicle,
+      sessions: [
+        { code: '001', turns: [{ number: 2, actions: [], blocks: [
+          { type: 'narration', text: 'Tomás no aparta la mano de la llave. ¿Qué haces?', spoken: 'Tomás no aparta la mano de la llave.' },
+          // El bloque entero era la pregunta: no hay diapositiva.
+          { type: 'narration', text: '¿Cuelgas o te quedas?', spoken: '' },
+          // Lo que pregunta alguien de la historia se queda.
+          { type: 'dialogue', speaker: 'Patrullero', text: '¿Qué es lo que trae ahí?' },
+        ] }] },
+      ],
+    }
+    expect(buildSlides(asked).map((s) => s.text)).toEqual(['Tomás no aparta la mano de la llave.', '¿Qué es lo que trae ahí?'])
+  })
+
   it('los subtitulos van de dos lineas y se reparten por lo que miden', () => {
     const captions = captionsFor('uno dos tres cuatro cinco seis siete ocho nueve diez', 10)
     expect(captions.map((c) => c.lines)).toEqual([['uno dos', 'tres'], ['cuatro', 'cinco seis'], ['siete ocho', 'nueve diez']])

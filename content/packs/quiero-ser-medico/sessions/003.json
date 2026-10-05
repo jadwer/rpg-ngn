@@ -62,7 +62,14 @@
       "Es la misma noche del capítulo 1, repetida igual: mismo teléfono, misma hora, misma llamada. Solo Emiliano recuerda los quince años que vienen; nadie más sabe nada.",
       "Rogelio provocó el choque a propósito y piensa culpar a Emiliano en cuanto llegue. Emiliano lo sabe y puede usarlo: decírselo a Lucía, a la patrulla o al propio Rogelio. Decir la verdad o denunciarlo no es ir a salvarlo, aunque para eso salga de la casa.",
       "Si Emiliano no lo cubre, Rogelio queda solo frente a la patrulla: intenta culpar al otro conductor, lo detienen por declarar en falso, y la investigación destapa que lleva años estafando gente. Le dan veinte años de cárcel. Emiliano se entera a la mañana siguiente o después.",
-      "Esta noche solo existen Rogelio, Lucía, Mariana, los vecinos y la policía. Doña Chelo es la casera de un cuarto donde Emiliano vivirá quince años después: no vive en este edificio ni aparece."
-    ]
+      "Esta noche solo existen Rogelio, Lucía, Mariana, los vecinos y la policía. Doña Chelo es la casera de un cuarto donde Emiliano vivirá quince años después: no vive en este edificio ni aparece.",
+      "Si Emiliano dice la verdad o denuncia a Rogelio esta noche, la patrulla le cree a él: Rogelio apesta a alcohol y su historia no se sostiene. La patrulla solo cree a Rogelio si Emiliano lo cubre."
+    ],
+    "sheets": {
+      "emiliano": {
+        "age": "18 años, con la memoria de los quince que vienen",
+        "bio": "Estudió en la Vocacional 10 del IPN. Mañana presenta Medicina en la Facultad de CU. Acaba de volver a esta noche con todo lo que vivió hasta los 33: sabe que su papá provocó el choque a propósito, sabe cómo acabó la primera vez y sabe que, si va, pierde el examen."
+      }
+    }
   }
 }

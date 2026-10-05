@@ -1,5 +1,5 @@
 import { secretsKnownBy, type CampaignState, type NarrativeEntry, type SessionRecord } from '@rpg-ngn/campaign'
-import { isManualReveal, refId, refKind, type CampaignEvent, type Character, type LoadedPack, type Secret } from '@rpg-ngn/content'
+import { isManualReveal, refId, refKind, type CampaignEvent, type Character, type LoadedPack, type Secret, type SessionArc } from '@rpg-ngn/content'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
 import { secretTouchesScene } from './lint.js'
@@ -237,7 +237,7 @@ function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget):
   for (const id of party) {
     const sheet = ctx.pack.characters.get(id)
     const live = ctx.state.world.characters[id]
-    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal }))
+    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, sheet: ctx.session?.arc?.sheets?.[id] }))
     lines.push('')
   }
 
@@ -249,7 +249,9 @@ function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget):
  * la ficha seguia diciendo "estudiar Medicina en la UNAM"). `view.player`: la
  * ficha como la conoce su jugador, sin lo que solo sabe el GM (que rumor es falso).
  */
-function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string, view: { goal?: string | undefined; player?: boolean } = {}): string {
+function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string, view: { goal?: string | undefined; player?: boolean; sheet?: NonNullable<SessionArc['sheets']>[string] | undefined } = {}): string {
+  // La sesion puede decir quien es el personaje ahora (un salto de quince años).
+  if (sheet && view.sheet) sheet = { ...sheet, ...(view.sheet.class ? { class: view.sheet.class } : {}), ...(view.sheet.age ? { age: view.sheet.age } : {}), ...(view.sheet.bio ? { bio: view.sheet.bio } : {}) }
   const lines: string[] = []
   const name = sheet?.name ?? id
   lines.push(`## ${name} (character:${id})`)
@@ -330,7 +332,10 @@ function memoryLayer(ctx: GMTurnContext, session: SessionRecord | undefined, bud
 
   const previous = ctx.state.narrative.log.filter((e) => e.seq < startedSeq).slice(-budget.chronicleEntries)
   const recent = (ctx.recentEvents ?? []).filter((e) => e.seq >= startedSeq)
-  const recentLines = recent.map((e) => describeEvent(e, ctx.pack)).filter((l): l is string => l !== null).slice(-budget.recentEvents)
+  // Una nota del GM para el turno siguiente ("Pendiente del GM (turno 6)") solo
+  // vale en ese turno: despues seguia diciendo "sin resolver" y el GM lo cobraba otra vez.
+  const stale = (e: CampaignEvent): boolean => e.type === 'world_event' && e.visibility?.layer === 'gm' && /^Pendiente del GM \(turno (\d+)\)/.test(e.payload.note) && Number(/\(turno (\d+)\)/.exec(e.payload.note)?.[1]) !== ctx.turn.number - 1
+  const recentLines = recent.filter((e) => !stale(e)).map((e) => describeEvent(e, ctx.pack)).filter((l): l is string => l !== null).slice(-budget.recentEvents)
 
   // Lo de esta sesion pesa mas que lo anterior: se recorta primero lo viejo.
   const recentText = fitFromEnd(recentLines, Math.floor(remaining * 0.7))
@@ -601,7 +606,7 @@ export function buildPlayerContext(ctx: GMTurnContext, characterId: string, narr
   const place = here ? ctx.pack.locations.get(here) : undefined
   if (place) lines.push(`Dónde está ${name}: ${place.name}. ${place.newcomerView}`)
 
-  lines.push('', '# El personaje', '', characterCard(id, sheet, ctx.state.world.characters[id], ctx.state, 'compact', ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, player: true }))
+  lines.push('', '# El personaje', '', characterCard(id, sheet, ctx.state.world.characters[id], ctx.state, 'compact', ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, sheet: ctx.session?.arc?.sheets?.[id], player: true }))
   if (party.length > 1) lines.push(`Con ${name} en la mesa: ${party.filter((p) => p !== id).map((p) => ctx.pack.characters.get(p)?.name ?? p).join(', ')}.`)
 
   // Lo que ese personaje ha vivido: la cronica publica y lo que solo el sabe.

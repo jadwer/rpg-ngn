@@ -43,6 +43,13 @@
       "Vive solo en un cuarto de un octavo piso sin elevador en la colonia Doctores. La casera es doña Chelo.",
       "Lucía dejó a Rogelio hace años. Mariana se casa el sábado con un médico.",
       "Emiliano todavía no sabe que el choque fue a propósito: lo descubre cuando Rogelio se lo confiesa esta noche."
-    ]
+    ],
+    "sheets": {
+      "emiliano": {
+        "class": "Ingeniero en Comunicaciones y Electrónica que atiende llamadas en un call center",
+        "age": "32 años; a medianoche cumple 33",
+        "bio": "Entró a ESIME Zacatenco porque fue el examen que alcanzó a presentar. Se tituló, pero nunca ejerció: lleva años en un call center. Vive solo en un cuarto de un octavo piso sin elevador en la colonia Doctores, con una casera, doña Chelo, que cobra la renta en persona. A su papá no lo ve desde hace años; a su mamá la llama poco. De Mariana sabe solo lo que llega por mensajes."
+      }
+    }
   }
 }

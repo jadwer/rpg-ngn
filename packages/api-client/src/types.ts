@@ -89,7 +89,8 @@ export interface ChronicleShare {
 
 /** Un bloque de la cronica publica: solo lo que se lee, nunca avisos internos. */
 export type ChronicleBlock =
-  | { type: 'narration'; text: string; audioUrl?: string }
+  /** `spoken`: el texto sin la pregunta con que el GM cierra el turno; es lo que la presentacion enseña y lee ('' si el bloque era solo la pregunta). */
+  | { type: 'narration'; text: string; audioUrl?: string; spoken?: string }
   /** `declared`: lo que el jugador escribio como accion, tal cual; la presentacion y el video lo quitan. */
   | { type: 'dialogue'; speaker: string; text: string; audioUrl?: string; declared?: boolean }
   | { type: 'roll'; text: string; actor: string; die: string; result: number }

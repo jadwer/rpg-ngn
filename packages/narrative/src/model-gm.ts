@@ -704,7 +704,7 @@ class LineInterpreter {
       if (!this.overRolled.includes(id)) {
         this.overRolled.push(id)
         const name = this.ctx.pack.characters.get(id)?.name ?? id
-        this.overRollNotes.push(`Pendiente del GM: se le pidió una tirada a ${name}${about ? ` (${about})` : ''} y ya no le quedaban en esta sesión, así que no hubo dado. Su acción sigue sin resolver: resuélvela al empezar el turno siguiente, sin dado y con un costo.`)
+        this.overRollNotes.push(`Pendiente del GM (turno ${this.ctx.turn.number}): se le pidió una tirada a ${name}${about ? ` (${about})` : ''} y ya no le quedaban en esta sesión, así que no hubo dado. Su acción sigue sin resolver: resuélvela al empezar este turno, sin dado y con un costo.`)
       }
       return true
     }
@@ -802,10 +802,7 @@ class LineInterpreter {
       // puede leer: una linea con un punto de mas tambien corta. Y dentro de
       // una cadena abierta, una llave al principio de linea es otro registro,
       // no texto: nadie narra una linea que empieza con "{".
-      // Y fuera de una cadena, una llave tras un valor ya cerrado (sin coma ni
-      // dos puntos antes) tampoco puede continuar nada en JSON: es el registro
-      // siguiente de una salida con formato a la que le falto un cierre.
-      const boundary = startsRecord(text) || (text.startsWith('{') && (this.pending.inString || !/[,:[{]$/.test(this.pending.text.trimEnd())))
+      const boundary = this.breaksPending(text)
       if (!boundary) {
         // Si lo pendiente quedo dentro de una cadena, el modelo metio un salto
         // de linea en mitad de un texto: se une como salto escapado, que es lo
@@ -820,14 +817,21 @@ class LineInterpreter {
     }
 
     const record = stripListPrefix(text)
-    if (/^[{[]/.test(record)) {
+    // `[El reloj marca las once.]` es prosa entre corchetes, no una lista JSON.
+    if (/^[{[]/.test(record) && !/^\[[^{["\]]*\]$/.test(record)) {
       // Varios objetos en la misma linea ({...} {...}): Haiku lo hace y antes
       // la linea entera fallaba al parsear y el turno acababa "sin bloques"
       // con una narracion perfecta dentro (mesa "cinco personas", 19-09). Cada
       // uno se lee por separado; si el ultimo quedo sin cerrar, es su problema
       // y no el de los anteriores.
-      const { pieces, rest } = splitRecords(record)
-      for (const piece of pieces) yield* this.piece(piece)
+      const { segments, rest } = splitRecords(record)
+      for (const segment of segments) {
+        if (segment.json) yield* this.piece(segment.json)
+        // Prosa entre objetos o detras del ultimo: historia, salvo una anotacion
+        // del modelo ("// fin del turno", "<- quien responde").
+        else if (isAnnotation(segment.text)) this.note('dropped', `anotacion del modelo: ${segment.text}`)
+        else yield* this.prose(segment.text)
+      }
       if (rest === null) return
       const scanned = scanJson(rest, 0)
       // Solo se repara al vuelo el trozo que ya cerro algo y se quedo corto de
@@ -840,7 +844,20 @@ class LineInterpreter {
       return
     }
 
+    // Prosa y, en la misma linea, un registro: cada cosa por su lado. Antes el
+    // registro se leia y la prosa de delante se perdia (o el turno moria sin bloques).
+    const inline = /\{\s*"(?:kind|type)"\s*:/.exec(text)
+    if (inline && inline.index > 0) {
+      yield* this.prose(text.slice(0, inline.index))
+      yield* this.line(text.slice(inline.index))
+      return
+    }
+
     if (isChatter(text)) return
+    if (isAnnotation(text)) {
+      this.note('dropped', `anotacion del modelo: ${text}`)
+      return
+    }
 
     const parsed = parseLoose(text)
     if (parsed !== undefined) {
@@ -872,8 +889,11 @@ class LineInterpreter {
     }
     // Si no, cada objeto por separado: lo que venia pegado a un trozo roto no
     // se pierde con el, y lo que no se pueda usar queda apuntado con su texto.
-    const { pieces, rest } = splitRecords(text)
-    for (const piece of pieces) yield* this.piece(piece)
+    const { segments, rest } = splitRecords(text)
+    for (const segment of segments) {
+      if (segment.json) yield* this.piece(segment.json)
+      else yield* this.prose(segment.text)
+    }
     if (rest !== null && !(yield* this.recover(rest))) this.ignore(rest)
   }
 
@@ -890,7 +910,35 @@ class LineInterpreter {
    * corto el limite, solo le faltaba un cierre, y se repara como siempre.
    */
   *settleBeforeTail(tail: string): Generator<GMOutput> {
-    if (this.pending !== null && startsRecord(tail.trim())) yield* this.closePending()
+    if (this.pending === null) return
+    const rest = tail.trim()
+    // Sin cola: si lo pendiente termina en un valor ya cerrado, le faltaba la
+    // llave y no el texto; el limite cayo justo en el salto de linea.
+    if (rest === '' ? !this.pending.inString && /["}\]]$/.test(this.pending.text.trimEnd()) : this.breaksPending(rest)) yield* this.closePending()
+  }
+
+  /**
+   * Si una linea NO continua lo pendiente y por tanto lo cierra. Tres casos:
+   * empieza un registro (`{"kind":`); empieza con una llave y lo pendiente
+   * esta dentro de una cadena o termina en un valor ya cerrado (sin coma ni
+   * dos puntos antes: JSON con formato al que le falto un cierre); o, fuera
+   * de una cadena, empieza con algo que no puede continuar JSON, es decir,
+   * prosa. Sin este ultimo, un dialogo sin su llave final se tragaba la
+   * narracion en prosa que venia detras y la ponia en boca del NPC.
+   */
+  private breaksPending(text: string): boolean {
+    const pending = this.pending
+    if (pending === null) return false
+    if (startsRecord(text)) return true
+    if (pending.inString) return text.startsWith('{')
+    const tail = pending.text.trimEnd()
+    // Tras una coma, dos puntos o una apertura puede venir una clave o un valor.
+    if (/[,:[{]$/.test(tail)) return !/^(?:["{[\d-]|true\b|false\b|null\b)/.test(text)
+    // Tras un valor ya cerrado (comilla, numero, llave, corchete, true, false,
+    // null) lo unico que sigue en JSON es una coma o un cierre; lo demas es
+    // otra cosa: un registro nuevo, o prosa, aunque empiece con comillas, con
+    // un guion de viñeta, con un numero o con un corchete.
+    return !/^[,}\]]/.test(text)
   }
 
   /**
@@ -902,7 +950,9 @@ class LineInterpreter {
     // Lo que corto el limite de salida no se repara: cerrar a ciegas una linea
     // a medias daba por bueno un numero incompleto (un daño de -1 que iba a
     // ser -10) o una frase que podia decir lo contrario. Ya sale el aviso de corte.
-    if (this.truncated) {
+    // Salvo que lo cortado termine en un valor ya cerrado fuera de una cadena:
+    // entonces solo le faltaban los cierres y lo escrito esta entero.
+    if (this.truncated && (scanJson(text, 0).inString || !/["}\]]$/.test(text.trimEnd()))) {
       this.note('dropped', `salida cortada: ${text}`)
       if (isStoryText(text)) this.lostStory++
       return true
@@ -943,7 +993,21 @@ class LineInterpreter {
   }
 
   private *prose(text: string): Generator<GMOutput> {
-    const cleaned = text.replace(/^\*\*[^*]{1,40}\*\*:?\s*/, '').replace(/^[-*•]\s+/, '').trim()
+    // Viñeta delante y cursiva que envuelve la linea entera: fuera.
+    let cleaned = text.replace(/^[-*•]\s+/, '').trim().replace(/^\*([^*].*[^*])\*$/, '$1').replace(/^_(.+)_$/, '$1').trim()
+    // `**Etiqueta:** resto`: si la etiqueta es alguien que habla, es su
+    // dialogo; si no (un encabezado como "Narración del GM"), sobra.
+    const labelled = /^\*\*([^*]{1,40}?):?\*\*:?\s*(.*)$/.exec(cleaned)
+    if (labelled) {
+      const label = labelled[1]!.trim()
+      const rest = labelled[2]!.trim()
+      if (proseDialogue(`${label}: ${rest}`, this.speakerRef)) cleaned = `${label}: ${rest}`
+      else if (isModelNote(`${label}: ${rest}`)) {
+        this.note('dropped', `nota del modelo, no se narra: ${cleaned}`)
+        this.lostStory++
+        return
+      } else cleaned = rest
+    }
     if (cleaned === '' || isChatter(cleaned)) return
     // El resto de un registro partido (`"speaker":"Ignacio"}`, `y calló."}`) no
     // es prosa: narrarlo ponia claves y llaves de JSON delante de la mesa.
@@ -954,9 +1018,46 @@ class LineInterpreter {
     // "Lucía (npc:lucia): «¿Emiliano?»": el modelo escribio el dialogo como
     // prosa. Sigue siendo alguien hablando: sale como dialogo, con su hablante,
     // y la mesa no lee la referencia interna (partida de prueba con Sonnet, 05-10).
-    const spoken = proseDialogue(cleaned)
-    yield* this.block(spoken ?? { type: 'narration', text: cleaned })
+    const spoken = proseDialogue(cleaned, this.speakerRef)
+    if (spoken) {
+      yield* this.block(spoken)
+      return
+    }
+    // Una nota del modelo para si mismo ("Nota: el jugador eligio X, sigue el
+    // final medico") no es historia: no llega a la mesa y queda apuntada.
+    if (isModelNote(cleaned)) {
+      this.note('dropped', `nota del modelo, no se narra: ${cleaned}`)
+      this.lostStory++
+      return
+    }
+    // La cola de una salida cortada por el limite: una frase a medias no se narra.
+    if (this.truncated) {
+      this.note('dropped', `salida cortada: ${cleaned}`)
+      this.lostStory++
+      return
+    }
+    yield* this.block({ type: 'narration', text: cleaned })
   }
+
+  /**
+   * La referencia de quien habla por su nombre, si la mesa lo conoce: un NPC
+   * del mundo, un personaje de la mesa o alguien que ya hablo en la sesion
+   * (null: conocido pero sin ficha). undefined si ese nombre no es de nadie:
+   * entonces "Nombre: «...»" no es un dialogo ("Las once: «ya es tarde»").
+   */
+  private readonly speakerRef = (name: string): string | null | undefined => {
+    const wanted = fold(name)
+    for (const npc of this.ctx.pack.npcs.values()) if (fold(npc.name) === wanted) return `npc:${npc.id}`
+    for (const id of this.party) if (fold(this.ctx.pack.characters.get(id)?.name ?? id) === wanted) return `character:${id}`
+    for (const event of this.ctx.recentEvents ?? []) {
+      const payload = 'payload' in event && event.payload && typeof event.payload === 'object' ? (event.payload as Record<string, unknown>) : {}
+      if (typeof payload['speaker'] === 'string' && fold(payload['speaker']) === wanted) return typeof payload['speakerRef'] === 'string' ? payload['speakerRef'] : null
+    }
+    return this.spoke.has(wanted) ? null : undefined
+  }
+
+  /** Quien ya hablo este turno en un dialogo bien formado: su nombre vale como hablante el resto del turno. */
+  private readonly spoke = new Set<string>()
 
   private *item(parsed: unknown, source: string): Generator<GMOutput> {
     // Todas las formas en que el modelo escribe lo mismo se reducen a tres:
@@ -967,11 +1068,14 @@ class LineInterpreter {
       return
     }
     if (record.kind === 'block') {
-      // Un bloque que el modelo marco para alguien (`to`, o `characterId` como
-      // en un susurro) era privado: sale como susurro o no sale, nunca publico.
-      // Vale con `to` como lista o como texto suelto.
+      // Un bloque que el modelo marco para alguien con `to` era privado: sale
+      // como susurro o no sale, nunca publico. Vale con `to` como lista o como
+      // texto suelto. `characterId` no cuenta: en una narracion es un campo de
+      // mas (el susurro tiene su propia linea), y tratarlo como privado le
+      // quitaba a la mesa parrafos enteros.
       const marked = record.raw as { to?: unknown; characterId?: unknown } | null
-      const target = marked?.to ?? marked?.characterId
+      if (marked?.characterId !== undefined) this.note('dropped', `campo characterId de mas en un bloque de historia: ${source}`)
+      const target = marked?.to
       if (target !== undefined && target !== null) {
         const to = typeof target === 'string' ? [target] : Array.isArray(target) ? target : []
         const story = storyBlock(record.raw)
@@ -1155,6 +1259,7 @@ class LineInterpreter {
       this.lastWasCut = false
     }
     if (block.type === 'dialogue') {
+      this.spoke.add(fold(block.speaker))
       // speakerRef invalido no tumba el bloque: se deja sin referencia.
       const speakerRef = block.speakerRef && EntityRef.safeParse(block.speakerRef).success ? block.speakerRef : null
       const fixed: TurnBlock = { ...block, speakerRef }
@@ -1463,6 +1568,11 @@ function stripListPrefix(text: string): string {
   return /^(?:[-*•]|\d{1,2}[.)])\s+[{[]/.test(text) ? text.replace(/^(?:[-*•]|\d{1,2}[.)])\s+/, '') : text
 }
 
+/** Una anotacion del modelo al margen ("// fin del turno", "<- quien responde"): ni historia ni registro. */
+function isAnnotation(text: string): boolean {
+  return /^(?:\/\/|#|←|<-|->)/.test(text)
+}
+
 /** Si la linea empieza un registro (`{"kind":` o `{"type":`), se pueda leer entera o no. */
 function startsRecord(text: string): boolean {
   return /^\{\s*"(?:kind|type)"\s*:/.test(stripListPrefix(text))
@@ -1474,27 +1584,59 @@ function startsRecord(text: string): boolean {
  * angular de cierre que nunca se abrio. Vistos los dos con Sonnet el 05-10.
  */
 export function tidyStory(text: string): string {
-  let tidy = text.trim().replace(/([.!?…»”"'])\s*[}\]{[]+$/, '$1')
+  let tidy = text.trim().replace(/([.!?…»”"'])\s*[}{]+$/, '$1')
+  // Un corchete de cierre sobra solo si nadie lo abrio ("[El reloj marca las once.]" es prosa entera).
+  if (/[.!?…»”"']\s*\]$/.test(tidy) && (tidy.match(/\[/g) ?? []).length < (tidy.match(/\]/g) ?? []).length) tidy = tidy.replace(/\s*\]+$/, '')
   const opened = (tidy.match(/«/g) ?? []).length
   const closed = (tidy.match(/»/g) ?? []).length
   if (closed > opened && tidy.endsWith('»')) tidy = tidy.slice(0, -1).trimEnd()
   return tidy
 }
 
+/** Con que se cierra cada comilla de apertura. */
+const QUOTE_CLOSERS: Record<string, string> = { '«': '»', '“': '”', '"': '"', "'": "'", '‘': '’' }
+
 /**
  * Una linea de prosa con forma de dialogo: `Nombre (npc:id): «texto»` o
- * `Nombre: «texto»`, con cualquier tipo de comillas. El nombre es corto y sin
- * puntuacion de frase; si no encaja, es narracion.
+ * `Nombre: «texto»`. Solo si de verdad es alguien hablando:
+ * - la cita abre y cierra la linea con sus comillas, sin texto detras;
+ * - quien habla es alguien conocido (`known` devuelve su referencia) o viene
+ *   con su `(npc:id)`. "Nota: «...»", "Las once: «ya es tarde»" o
+ *   "Resultado: «fracaso»" no son nadie, y son narracion.
  */
-export function proseDialogue(text: string): StoryBlock | null {
-  const match = /^([\p{Lu}][\p{L}\p{M}.' -]{0,48}?)\s*(?:\(((?:npc|character):[a-z0-9]+(?:-[a-z0-9]+)*)\))?\s*:\s*[«“"'](.+?)[»”"']?$/u.exec(text)
+export function proseDialogue(text: string, known: (name: string) => string | null | undefined = () => undefined): StoryBlock | null {
+  const match = /^([\p{Lu}][\p{L}\p{M}.' -]{0,48}?)\s*(?:\(((?:npc|character):[a-z0-9]+(?:-[a-z0-9]+)*)\))?\s*:\s*(\S.*)$/u.exec(text)
   if (!match) return null
   const speaker = match[1]!.trim()
-  const said = match[3]!.trim()
-  // Sin referencia, solo vale un nombre de hasta cuatro palabras: "El letrero dice: 'Cerrado'" es narracion.
-  if (!match[2] && (speaker.split(/\s+/).length > 4 || /\b(?:dice|dijo|responde|pregunta|grita|susurra|añade|lee|pone)\b/i.test(speaker))) return null
-  if (speaker === '' || said.length < 2) return null
-  return { type: 'dialogue', speaker, speakerRef: match[2] ?? null, text: said }
+  const quoted = match[3]!.trim()
+  const closer = QUOTE_CLOSERS[quoted[0]!]
+  if (!closer || quoted.length < 4 || !quoted.endsWith(closer)) return null
+  const said = quoted.slice(1, -1).trim()
+  // Otra comilla de cierre dentro: la cita termino antes y lo demas es narracion.
+  if (said.length < 2 || said.includes(closer)) return null
+  const ref = known(speaker)
+  // Con `(npc:id)` vale aunque el nombre sea nuevo. Una referencia a un
+  // personaje jugador solo vale si es SU nombre: no se le cuelga a otro.
+  if (match[2]?.startsWith('npc:')) return { type: 'dialogue', speaker, speakerRef: match[2], text: said }
+  if (ref === undefined) return null
+  return { type: 'dialogue', speaker, speakerRef: ref, text: said }
+}
+
+/**
+ * Una linea de prosa que el modelo escribio para si mismo y no para la mesa:
+ * empieza con una etiqueta de nota ("Nota:", "GM:", "OOC:"), va entera entre
+ * parentesis o corchetes, o habla de la mecanica (ids del motor, "el jugador").
+ * Puede llevarse por delante una nota escrita dentro del mundo que empiece
+ * igual; es raro, y lo descartado queda en el diagnostico del turno.
+ */
+export function isModelNote(text: string): boolean {
+  const bare = text.trim().replace(/^(?:>\s*|[*_]+)/, '')
+  // Etiqueta de nota pegada a los dos puntos, con mayuscula inicial (o toda en
+  // mayusculas si es sigla): "Nota:", "Recordatorio:", "GM:", "TODO:". No
+  // "Todo está en silencio:" ni "Nota el frío:", que son narracion.
+  if (/^[([]?\s*(?:(?:Nota|Note|Recordatorio|Objetivo oculto|Pensamiento|Razonamiento|Thinking|Plan del GM|Siguiente turno|GM|DM|OOC|TODO)(?:\s*(?:\(?para m[ií]\)?|del GM|interna?))?|Narrador\s*\(para m[ií]\))\s*:/u.test(bare)) return true
+  // Ids del motor fuera de un dialogo: "character:zahira", "ending:medico".
+  return /\b(?:npc|ending|location|character|quest|fact):[a-z0-9]+(?:-[a-z0-9]+)*\b/i.test(bare)
 }
 
 /** Claves del formato de salida: una linea de prosa que empieza con una de ellas es un trozo de registro. */
@@ -1520,16 +1662,22 @@ function recordsIn(text: string): number {
 }
 
 /**
- * Los objetos JSON de primer nivel que caben enteros en una linea y lo que
- * sobra sin cerrar al final (o null). `{...} {..."` da un objeto y un resto:
- * el resto es problema suyo y no del que venia antes.
+ * Una linea partida en lo que trae, en orden: los objetos JSON de primer
+ * nivel que caben enteros y la prosa que va entre ellos o detras, mas lo que
+ * quedo sin cerrar al final (o null). `{...} prosa {...} {..."` da dos
+ * objetos, una prosa y un resto: el resto es problema suyo y no de lo anterior.
  */
-export function splitRecords(text: string): { pieces: string[]; rest: string | null } {
-  const pieces: string[] = []
+export function splitRecords(text: string): { segments: Array<{ json?: string; text: string }>; rest: string | null } {
+  const segments: Array<{ json?: string; text: string }> = []
+  const prose = (chunk: string): void => {
+    const clean = chunk.replace(/^[\s,.;\]})]+/, '').trim()
+    if (clean.length > 3) segments.push({ text: clean })
+  }
   let depth = 0
   let inString = false
   let escaped = false
   let start = -1
+  let from = 0
   for (let i = 0; i < text.length; i++) {
     const ch = text[i]!
     if (inString) {
@@ -1540,18 +1688,23 @@ export function splitRecords(text: string): { pieces: string[]; rest: string | n
     }
     if (ch === '"') inString = true
     else if (ch === '{' || ch === '[') {
-      if (depth === 0) start = i
+      if (depth === 0) {
+        prose(text.slice(from, i))
+        start = i
+      }
       depth++
     } else if (ch === '}' || ch === ']') {
       depth--
       if (depth === 0 && start !== -1) {
-        pieces.push(text.slice(start, i + 1))
+        segments.push({ json: text.slice(start, i + 1), text: text.slice(start, i + 1) })
         start = -1
+        from = i + 1
       }
     }
   }
+  if (start === -1) prose(text.slice(from))
   const rest = start !== -1 ? text.slice(start).trim() : null
-  return { pieces, rest: rest === '' ? null : rest }
+  return { segments, rest: rest === '' ? null : rest }
 }
 
 /** Si algun texto de lo reparado trae restos de otro registro: entonces la reparacion pego dos cosas y no vale. */
