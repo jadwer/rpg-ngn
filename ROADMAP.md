@@ -91,6 +91,31 @@ Despues de este plan: one-shots como misiones del camino de temporada, limite
 de tiempo por respuesta en sesiones cortas, reseñas publicas con moderacion,
 mas one-shots de un jugador por genero.
 
+### Correccion del motor del 05-10 (tras leer las mesas 43 y 44)
+
+Gabino jugo el one-shot en produccion (mesa 44) y se perdio un turno entero,
+hubo turnos sin ideas y avisos tecnicos dentro de la historia; leidas completas
+esa mesa y la 43, salieron 16 fallos del motor, 3 de reglas y los del mundo.
+Detalle, pruebas, VAM de dos rondas y prueba con el modelo real en
+[docs/27-correccion-del-motor.md](docs/27-correccion-del-motor.md). Lo hizo
+Fable; monorepo `db2e13d` y `47bfa1a`, API `22b364d`, boticaria `86aa784`,
+mascarada `1dfa970`. **Sin desplegar**: falta el visto bueno de Gabino.
+
+- [x] Formato plano del GM y un interprete donde una linea rota no daña a las demas (repara, rescata la historia, apunta lo perdido con su texto)
+- [x] Lo que el jugador escribe junto al dado llega al GM
+- [x] Ideas desde lo que el jugador sabe: llamada aparte tras aplicar el turno, sin secretos delante, con tope de espera y garantizadas
+- [x] Tope de tiradas pedidas (una por personaje cada ocho turnos de presupuesto); fallar avanza; sin dados cuando el desenlace ya esta decidido
+- [x] NPCs con memoria (actitud y condicion se guardan y vuelven al GM); dar un objeto ya no tumba el turno en los sistemas sin combate
+- [x] Diagnostico del turno fuera de la historia: `turn_diagnostics` con la salida del modelo, `turns:notices` y `tables:review`
+- [x] Canon, "Anteriormente" y meta por capitulo escritos por el autor; QUIERO SER MEDICO corregido (canon, la venganza, Rogelio con veinte años)
+- [x] El video, la presentacion y la voz quitan lo que el jugador escribio como accion
+- [x] De cara al jugador se dice GM
+- [x] Prueba de contrato: todo ejemplo de los prompts lo acepta y lo aplica el motor
+- [ ] **Desplegar** (migracion `turn_diagnostics`; engine y API juntos) y que Gabino juegue el one-shot
+- [ ] Probar con modelo real los otros tres sistemas y una mesa de tres (el tope de tiradas no se ejercito con modelo)
+- [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
+- [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
+
 ### Avance
 
 - [x] **Comunidad v1** (02-10, API `aac4330`, monorepo `81e0d32`, desplegada): Historias en `/comunidad` (se ve sin cuenta) y en la pestaña de la app; al compartir la cronica se puede pedir "publicarla tambien en Comunidad", que toda la mesa acepta aparte del enlace (las ya compartidas no se listan solas). Creadores con mundos publicados y amigos con cuenta. Mesas abiertas, despues del 15-11

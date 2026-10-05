@@ -8,6 +8,16 @@ historia, cierre automatico, logros, susurros, arcos de autor, formatos y un
 one-shot de un jugador). El resto de este archivo sigue con corte del 02-10;
 lo desplegado el 03-10 esta listado en el ROADMAP, "Plan del 04-10".
 
+**Nota del 05-10.** El plan de docs/26 esta implementado y desplegado. Tras
+jugar el one-shot en produccion se leyeron completas las mesas 43 y 44 y se
+corrigio el motor de punta a punta: formato plano del GM, interprete que no
+pierde historia, ideas desde lo que el jugador sabe, tope de tiradas,
+diagnostico del turno fuera de la historia y canon de autor. Esta en commits
+(monorepo `db2e13d`, API `22b364d`) y **sin desplegar**; el detalle y lo que
+queda abierto, en [docs/27](27-correccion-del-motor.md). Para revisar una
+partida ya no se consulta la base a mano: `php artisan tables:review <mesa>`
+y `php artisan turns:notices`.
+
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
 decisiones estan cerradas. Se escribio a peticion de un colaborador externo
