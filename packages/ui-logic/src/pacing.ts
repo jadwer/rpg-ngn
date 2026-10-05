@@ -67,3 +67,14 @@ export function endingTitle(block: Pick<EndingBlock, 'scope' | 'session' | 'titl
 export function defaultSessionLength(option: { catalog?: { sessionLength?: 'corta' | 'media' | 'larga' } | null } | null | undefined): SessionLength {
   return option?.catalog?.sessionLength ?? 'corta'
 }
+
+/**
+ * El boton que abre la pantalla de fin (Gabino, 05-10): ya no sale sola
+ * encima del ultimo texto, se abre cuando quien lee termino.
+ */
+export function endingCloseLabel(block: Pick<EndingBlock, 'scope' | 'session'>): string {
+  if (block.scope === 'story') return t('ending.seeTheEnd')
+  const n = Number.parseInt(block.session, 10)
+  const number = Number.isFinite(n) ? n : 1
+  return block.scope === 'chapter' ? t('ending.closeChapter', { n: number }) : t('ending.closeSession', { n: number })
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingCloseLabel, endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { Portrait } from './Portrait'
 
@@ -14,9 +14,11 @@ interface Props {
   groups: ViewGroup[]
   currentBlockId: string | null
   onPressBlock?: ((blockId: string) => void) | undefined
+  /** Abre la pantalla de fin desde su tarjeta (Gabino, 05-10). */
+  onOpenEnding?: ((block: EndingGroup['block']) => void) | undefined
 }
 
-export function Blocks({ groups, currentBlockId, onPressBlock }: Props) {
+export function Blocks({ groups, currentBlockId, onPressBlock, onOpenEnding }: Props) {
   return (
     <>
       {groups.map((group) => {
@@ -34,7 +36,7 @@ export function Blocks({ groups, currentBlockId, onPressBlock }: Props) {
           case 'milestone':
             return <Milestone key={group.id} group={group} />
           case 'ending':
-            return <EndingCard key={group.id} group={group} />
+            return <EndingCard key={group.id} group={group} onOpen={onOpenEnding} />
           case 'whisper':
             return <Whisper key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
         }
@@ -68,7 +70,7 @@ function Milestone({ group }: { group: MilestoneGroup }) {
 }
 
 /** El fin de una sesion dentro de la historia; la pantalla completa la pinta `EndingOverlay`. */
-function EndingCard({ group }: { group: EndingGroup }) {
+function EndingCard({ group, onOpen }: { group: EndingGroup; onOpen?: ((block: EndingGroup['block']) => void) | undefined }) {
   const { block } = group
   return (
     <div data-block={block.id} className="block ending-card">
@@ -78,6 +80,11 @@ function EndingCard({ group }: { group: EndingGroup }) {
         <p className="ending-card-next">
           {t('ending.toBeContinued')} {block.cliffhanger}
         </p>
+      ) : null}
+      {onOpen ? (
+        <button type="button" className="btn primary" onClick={() => onOpen(block)}>
+          {endingCloseLabel(block)}
+        </button>
       ) : null}
     </div>
   )

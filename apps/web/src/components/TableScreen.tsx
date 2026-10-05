@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -623,6 +623,31 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   )
   // Tras un final con sesion siguiente (arco de autor, H4), "Seguir jugando" propone esa.
   const nextFromEnding = useMemo(() => latestEnding(allBlocks)?.next ?? null, [allBlocks])
+  // La pantalla de fin la abre el boton de la tarjeta, no sale sola (Gabino,
+  // 05-10). Hasta verla, el anfitrion no abre la sesion siguiente.
+  const lastEnding = useMemo(() => latestEnding(allBlocks), [allBlocks])
+  const [openedEnding, setOpenedEnding] = useState<EndingBlock | null>(null)
+  const [endingSeen, setEndingSeen] = useState<string | null>(null)
+  const endingKey = lastEnding ? `rpg:ending:${table.id}:${lastEnding.id}` : null
+  useEffect(() => {
+    if (!endingKey || !lastEnding) return
+    try {
+      if (localStorage.getItem(endingKey) === '1') setEndingSeen(lastEnding.id)
+    } catch {
+      // Sin almacenamiento hay que volver a verla al entrar.
+    }
+  }, [endingKey, lastEnding])
+  const closeEnding = () => {
+    setOpenedEnding(null)
+    if (!lastEnding || !endingKey) return
+    setEndingSeen(lastEnding.id)
+    try {
+      localStorage.setItem(endingKey, '1')
+    } catch {
+      // Nada que guardar.
+    }
+  }
+  const pendingEnding = lastEnding && endingSeen !== lastEnding.id ? lastEnding : null
   const suggestedCode = useMemo(() => nextFromEnding ?? suggestedSessionCode(pack, existingCodes), [nextFromEnding, pack, existingCodes])
 
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
@@ -668,7 +693,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
-      <EndingOverlay client={client} tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
+      <EndingOverlay client={client} tableId={table.id} ending={openedEnding} isHost={isHost} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       <header className="table-header hide-on-screen">
         <SystemMenu
@@ -750,7 +775,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
               ) : null}
             </section>
             {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
-            <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} />
+            <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} onOpenEnding={setOpenedEnding} />
             {start ? (
               <section className="start-card hide-on-screen" aria-label={t('tableScreen.inicioDeLaPartida')}>
                 <h2>{start.title}</h2>
@@ -829,7 +854,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
         ) : null}
         {panel === 'host' && isHost && !screen ? (
           <Drawer title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)} className="host-drawer">
-            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+            <HostPanel embedded client={client} table={table} pack={pack} session={snapshot?.session ?? null} loaded={snapshot !== null} suggestedCode={suggestedCode} playedSessions={existingCodes} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} pendingEndingLabel={pendingEnding ? endingCloseLabel(pendingEnding) : null} onOpenEnding={() => setOpenedEnding(pendingEnding)} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
           </Drawer>
         ) : null}
         {panel === 'more' && !screen ? (

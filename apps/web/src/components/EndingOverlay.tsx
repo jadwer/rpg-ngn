@@ -1,51 +1,31 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, latestEnding, type TurnBlock } from '@rpg-ngn/ui-logic'
+import { endingTitle, type EndingBlock } from '@rpg-ngn/ui-logic'
 import type { ApiClient } from '@rpg-ngn/api-client'
-import { useEffect, useState } from 'react'
 import { RatingForm } from './RatingForm'
 
 interface Props {
   client: ApiClient
   tableId: string | number
-  blocks: readonly TurnBlock[]
+  /** El fin que se enseña; null para no enseñar nada. */
+  ending: EndingBlock | null
   isHost: boolean
+  /** Se cierra: quien mira ya vio el fin y la mesa puede seguir. */
+  onClose: () => void
   /** El anfitrion abre la sesion siguiente desde su panel. */
   onKeepPlaying: () => void
 }
 
 /**
- * La pantalla de fin (docs/26, H1): cuando el director cierra la sesion, o el
- * anfitrion la cierra a mano, toda la mesa ve el fin a pantalla completa, con
- * lo que lograron y lo que queda pendiente. Nacio de la partida del 03-10:
- * dos horas sin una sola sensacion de cierre. Una vez por fin y navegador.
+ * La pantalla de fin (docs/26, H1): lo que lograron, lo que queda pendiente,
+ * las estrellas y seguir jugando. No se abre sola (Gabino, 05-10: salia
+ * encima del ultimo texto y no se alcanzaba a leer como acabo); la abre el
+ * boton "Cerrar el capitulo" que queda al final de la historia.
  */
-export function EndingOverlay({ client, tableId, blocks, isHost, onKeepPlaying }: Props) {
-  const ending = latestEnding(blocks)
-  const key = ending ? `rpg:ending:${tableId}:${ending.id}` : null
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (!key) return
-    try {
-      if (localStorage.getItem(key) === '1') return
-    } catch {
-      // Sin almacenamiento se enseña cada vez que se entra.
-    }
-    setOpen(true)
-  }, [key])
-
-  if (!open || !ending) return null
-
-  const close = () => {
-    setOpen(false)
-    try {
-      if (key) localStorage.setItem(key, '1')
-    } catch {
-      // Nada que guardar.
-    }
-  }
+export function EndingOverlay({ client, tableId, ending, isHost, onClose, onKeepPlaying }: Props) {
+  if (!ending) return null
+  const close = onClose
 
   return (
     <div className="recap-overlay ending-overlay" role="dialog" aria-modal="true" aria-labelledby="ending-title">

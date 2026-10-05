@@ -30,6 +30,9 @@ interface Props {
   /** "Un turno mas" y "Pedir el final". */
   onExtendSession?: (() => void) | undefined
   onWrapSession?: (() => void) | undefined
+  /** Fin sin ver: hasta abrirlo no se abre la sesion siguiente (Gabino, 05-10). */
+  pendingEndingLabel?: string | null | undefined
+  onOpenEnding?: (() => void) | undefined
   onTableChanged: () => void
   onUnauthorized: () => void
   /** Dentro de un panel de la barra del juego: sin cabecera plegable, siempre abierto. */
@@ -43,7 +46,7 @@ interface Props {
  * director de juego). Invitar vive en Jugadores. El GM es la IA; el anfitrion
  * dirige la mesa.
  */
-export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, onTableChanged, onUnauthorized, embedded = false }: Props) {
+export function HostPanel({ client, table, pack, session, loaded, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, pendingEndingLabel = null, onOpenEnding, onTableChanged, onUnauthorized, embedded = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
@@ -92,7 +95,18 @@ export function HostPanel({ client, table, pack, session, loaded, suggestedCode,
             </button>
           </div>
 
-          {tab === 'session' && !session ? (
+          {tab === 'session' && !session && pendingEndingLabel ? (
+            <Panel title={t('hostPanel.abrirSesion')}>
+              <div className="row">
+                <button type="button" className="btn primary" onClick={onOpenEnding}>
+                  {pendingEndingLabel}
+                </button>
+                <span className="hint">{t('ending.closeFirst')}</span>
+              </div>
+            </Panel>
+          ) : null}
+
+          {tab === 'session' && !session && !pendingEndingLabel ? (
             <Panel title={t('hostPanel.abrirSesion')}>
               <div className="row">
                 {opciones.length > 0 ? (

@@ -2,7 +2,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { BlockGroups } from '../../components/BlockGroups'
@@ -21,7 +21,7 @@ import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
 import { RecapModal } from '../../components/RecapModal'
 import { ShareConsentModal } from '../../components/ShareConsentModal'
-import { EndingModal } from '../../components/EndingModal'
+import { EndingModal, seenEndings } from '../../components/EndingModal'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
@@ -554,6 +554,16 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
 
   // Tras un final con sesion siguiente (arco de autor, H4), "Seguir jugando" propone esa.
   const nextFromEnding = useMemo(() => latestEnding(allBlocks)?.next ?? null, [allBlocks])
+  // La pantalla de fin la abre el boton de la tarjeta, no sale sola (Gabino,
+  // 05-10). Hasta verla, el anfitrion no abre la sesion siguiente.
+  const lastEnding = useMemo(() => latestEnding(allBlocks), [allBlocks])
+  const [openedEnding, setOpenedEnding] = useState<EndingBlock | null>(null)
+  const [, setSeenTick] = useState(0)
+  const pendingEnding = lastEnding && !seenEndings.has(lastEnding.id) ? lastEnding : null
+  const closeEnding = () => {
+    setOpenedEnding(null)
+    setSeenTick((n) => n + 1)
+  }
   const suggestedCode = useMemo(() => nextFromEnding ?? suggestedSessionCode(pack, existingSessions), [nextFromEnding, pack, existingSessions])
   const connectionNotice = connection === 'offline' ? t('play.offline') : error
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
@@ -669,7 +679,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             </View>
           ) : null}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
-          <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} />
+          <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} onOpenEnding={setOpenedEnding} />
           {start ? (
             <View style={styles.start}>
               <Text style={styles.startTitle}>{start.title}</Text>
@@ -723,7 +733,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
-      <EndingModal client={client} tableId={table.id} blocks={allBlocks} isHost={isHost} onKeepPlaying={() => setPanel('host')} />
+      <EndingModal client={client} tableId={table.id} ending={openedEnding} isHost={isHost} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
       {screen ? (
         <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
           <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>
@@ -773,7 +783,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       </GameSheet>
       {isHost ? (
         <GameSheet visible={panel === 'host'} title={t('tableScreen.anfitrion')} onClose={() => setPanel(null)}>
-                <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
+                <HostPanel client={client} table={table} pack={pack} session={snapshot?.session ?? null} suggestedCode={suggestedCode} playedSessions={existingSessions} worldLanguages={worldLangs} busy={busy} onOpenSession={openSession} onCloseSession={closeSession} pacing={snapshot?.pacing ?? null} onExtendSession={extendSession} onWrapSession={wrapSession} pendingEndingLabel={pendingEnding ? endingCloseLabel(pendingEnding) : null} onOpenEnding={() => setOpenedEnding(pendingEnding)} onTableChanged={onTableChanged} onUnauthorized={onUnauthorized} />
         </GameSheet>
       ) : null}
       <GameSheet visible={panel === 'reading'} title={t('tableScreen.lectura')} onClose={() => setPanel(null)}>

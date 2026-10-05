@@ -1,9 +1,10 @@
-import { endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
+import { endingCloseLabel, endingTitle, facesOf, keptFace, proseExcerpt, type DialogueGroup, type EndingGroup, type ImageGroup, type MilestoneGroup, type ProseGroup, type WhisperGroup, type RollGroup, type SystemGroup, type ViewGroup } from '@rpg-ngn/ui-logic'
 import { t } from '@rpg-ngn/i18n'
 import { useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { DICE_FACES } from '../generated/dice'
 import { theme } from '../theme'
+import { Button } from './Button'
 import { Portrait } from './Portrait'
 
 /**
@@ -18,9 +19,11 @@ interface Props {
   assetBase?: string
   /** Pantalla de lectura: letra grande para leer de lejos o proyectar. */
   large?: boolean
+  /** Abre la pantalla de fin desde su tarjeta (Gabino, 05-10). */
+  onOpenEnding?: ((block: EndingGroup['block']) => void) | undefined
 }
 
-export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = '', large = false }: Props) {
+export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = '', large = false, onOpenEnding }: Props) {
   return (
     <View style={styles.list}>
       {groups.map((group) => {
@@ -38,7 +41,7 @@ export function BlockGroups({ groups, currentBlockId, onPressBlock, assetBase = 
           case 'milestone':
             return <Milestone key={group.id} group={group} />
           case 'ending':
-            return <EndingCard key={group.id} group={group} />
+            return <EndingCard key={group.id} group={group} onOpen={onOpenEnding} />
           case 'whisper':
             return <Whisper key={group.id} group={group} currentBlockId={currentBlockId} onPressBlock={onPressBlock} />
         }
@@ -188,12 +191,13 @@ function Milestone({ group }: { group: MilestoneGroup }) {
 }
 
 /** El fin de una sesion dentro de la historia; la pantalla completa la pinta `EndingModal`. */
-function EndingCard({ group }: { group: EndingGroup }) {
+function EndingCard({ group, onOpen }: { group: EndingGroup; onOpen?: ((block: EndingGroup['block']) => void) | undefined }) {
   const { block } = group
   return (
     <View style={styles.endingCard}>
       <Text style={styles.endingTitle}>{endingTitle(block)}</Text>
       {block.cliffhanger ? <Text style={styles.endingNext}>{`${t('ending.toBeContinued')} ${block.cliffhanger}`}</Text> : null}
+      {onOpen ? <Button label={endingCloseLabel(block)} primary onPress={() => onOpen(block)} /> : null}
     </View>
   )
 }

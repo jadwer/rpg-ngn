@@ -28,6 +28,9 @@ interface Props {
   pacing?: TablePacing | null | undefined
   onExtendSession?: (() => void) | undefined
   onWrapSession?: (() => void) | undefined
+  /** Fin sin ver: hasta abrirlo no se abre la sesion siguiente (Gabino, 05-10). */
+  pendingEndingLabel?: string | null | undefined
+  onOpenEnding?: (() => void) | undefined
   onTableChanged: () => void
   onUnauthorized: () => void
 }
@@ -38,7 +41,7 @@ interface Props {
  * que es lo de cada noche, y pestaña Ajustes de la mesa (dados, secretos del
  * pack y director), que casi no se toca. Invitar vive en Jugadores.
  */
-export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, onTableChanged, onUnauthorized }: Props) {
+export function HostPanel({ client, table, pack, session, suggestedCode, playedSessions = [], worldLanguages = ['es'], busy, onOpenSession, onCloseSession, pacing = null, onExtendSession, onWrapSession, pendingEndingLabel = null, onOpenEnding, onTableChanged, onUnauthorized }: Props) {
   const [tab, setTab] = useState<'session' | 'settings'>('session')
   const [code, setCode] = useState(suggestedCode)
   const [note, setNote] = useState('')
@@ -72,7 +75,12 @@ export function HostPanel({ client, table, pack, session, suggestedCode, playedS
         <>
           <Panel title={session ? t('play.session', { code: session.code }) : t('hostPanel.abrirSesion')}>
             <Text style={styles.state}>{session ? t('mobile.hostPanel.abiertaLaMesaEsta') : t('play.noSessionDot')}</Text>
-            {!session ? (
+            {!session && pendingEndingLabel ? (
+              <>
+                <Text style={styles.hint}>{t('ending.closeFirst')}</Text>
+                <Button label={pendingEndingLabel} primary onPress={() => onOpenEnding?.()} />
+              </>
+            ) : !session ? (
               <>
                 {opciones.length > 0 ? (
                   <View style={styles.sessions}>

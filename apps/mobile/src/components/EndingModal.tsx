@@ -1,6 +1,6 @@
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, latestEnding, type TurnBlock } from '@rpg-ngn/ui-logic'
-import { useEffect, useRef, useState } from 'react'
+import { endingTitle, type EndingBlock } from '@rpg-ngn/ui-logic'
+import { useEffect, useRef } from 'react'
 import { Animated, Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { theme } from '../theme'
@@ -10,27 +10,24 @@ import { RatingForm } from './RatingForm'
 interface Props {
   client: ApiClient
   tableId: string
-  blocks: readonly TurnBlock[]
+  /** El fin que se muestra; null la cierra. La abre el boton de su tarjeta. */
+  ending: EndingBlock | null
   isHost: boolean
   /** El anfitrion abre la sesion siguiente desde su panel. */
   onKeepPlaying: () => void
+  onClose: () => void
 }
 
-/** Fines ya vistos mientras la app esta abierta. */
-const seen = new Set<string>()
+/** Fines ya vistos mientras la app esta abierta: hasta verlo no se abre la sesion siguiente. */
+export const seenEndings = new Set<string>()
 
 /**
- * La pantalla de fin (docs/26, H1), como la web: cuando la sesion termina,
- * toda la mesa ve el fin a pantalla completa con lo que lograron.
+ * La pantalla de fin (docs/26, H1), como la web. No sale sola: la abre el
+ * boton de la tarjeta de fin para que primero se termine de leer (Gabino, 05-10).
  */
-export function EndingModal({ client, tableId, blocks, isHost, onKeepPlaying }: Props) {
-  const ending = latestEnding(blocks)
-  const [open, setOpen] = useState(false)
+export function EndingModal({ client, tableId, ending, isHost, onKeepPlaying, onClose }: Props) {
+  const open = ending !== null
   const fade = useRef(new Animated.Value(0)).current
-
-  useEffect(() => {
-    if (ending && !seen.has(ending.id)) setOpen(true)
-  }, [ending])
 
   useEffect(() => {
     if (!open) return
@@ -41,8 +38,8 @@ export function EndingModal({ client, tableId, blocks, isHost, onKeepPlaying }: 
   if (!ending) return null
 
   const close = () => {
-    seen.add(ending.id)
-    setOpen(false)
+    seenEndings.add(ending.id)
+    onClose()
   }
   const continues = ending.scope !== 'story'
 
