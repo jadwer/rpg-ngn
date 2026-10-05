@@ -2,7 +2,7 @@
   "id": "el-agente",
   "name": "El agente Ramírez",
   "description": "Agente del Ministerio Público con veinte años de oficio y cero prisa. No es malo: es indiferente, que a veces es peor. Lo que dice el primer reporte es lo que queda.",
-  "portrait": null,
+  "portrait": "portraits/el-agente.webp",
   "goals": [
     "Cerrar el turno sin problemas.",
     "Le cree al que llegó primero con la historia más completa."

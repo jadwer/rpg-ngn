@@ -2,7 +2,7 @@
   "id": "mariana",
   "name": "Mariana",
   "description": "Compañera de la Vocacional 10, la mejor de la generación en Biología. Va a presentar a Medicina en CU el mismo día que Emiliano. Se ríe con los ojos y cree en él más que él mismo.",
-  "portrait": null,
+  "portrait": "portraits/mariana.webp",
   "goals": [
     "Entrar a Medicina y no soltar la mano de nadie en el camino.",
     "No espera a nadie para siempre."

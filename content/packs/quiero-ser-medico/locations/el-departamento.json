@@ -14,5 +14,8 @@
   "tags": [
     "soledad",
     "octavo piso"
-  ]
+  ],
+  "map": "ciudad",
+  "x": 64.0,
+  "y": 38.0
 }

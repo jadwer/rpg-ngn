@@ -2,7 +2,7 @@
   "id": "dona-chelo",
   "name": "Doña Chelo",
   "description": "La casera del edificio de la colonia Doctores. Setenta años, chal de estambre, oído de murciélago y un reglamento para cada cosa. Cobra puntual y perdona poco, pero a veces deja un plato de pozole en la puerta.",
-  "portrait": null,
+  "portrait": "portraits/dona-chelo.webp",
   "goals": [
     "Que nadie le haga ruido después de las nueve.",
     "Detrás del reglamento hay una mujer muy sola."

@@ -37,6 +37,9 @@
     "la-oficina",
     "farmacias-parecidas"
   ],
+  "maps": [
+    "ciudad"
+  ],
   "sessions": [
     "001",
     "002",

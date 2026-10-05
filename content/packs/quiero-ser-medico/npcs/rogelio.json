@@ -2,7 +2,7 @@
   "id": "rogelio",
   "name": "Rogelio",
   "description": "El papá de Emiliano. Encantador cuando quiere, borracho cuando no. Se fue de la casa hace once años y aparece cuando necesita algo. Siempre tiene una historia que explica por qué nada fue su culpa.",
-  "portrait": null,
+  "portrait": "portraits/rogelio.webp",
   "goals": [
     "Que Emiliano lo necesite más de lo que él necesita a Emiliano.",
     "Esconde algo que no va a decir hasta que le convenga."
