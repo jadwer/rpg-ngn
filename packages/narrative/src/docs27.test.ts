@@ -440,7 +440,7 @@ describe('VAM: la reparacion no inventa ni publica lo que no debe', () => {
     expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
     const revealed = outputs.filter((o) => o.kind === 'event' && o.event['type'] === 'secret_revealed')
     expect(revealed).toHaveLength(1)
-    expect((revealed[0] as { event: { payload: { secretId: string } } }).event.payload.secretId).toBe('brorg-pago-por-zahira')
+    expect((revealed[0] as unknown as { event: { payload: { secretId: string } } }).event.payload.secretId).toBe('brorg-pago-por-zahira')
   })
 
   it('un susurro roto no se publica ni se come el parrafo siguiente', async () => {
