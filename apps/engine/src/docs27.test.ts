@@ -175,4 +175,30 @@ describe('lo que el autor escribio para abrir y cerrar una sesion', () => {
     // Y el GM ve esa meta en la ficha, no la de la hoja.
     expect(transport.prompts[0]!.user).toContain('Meta: Que este año, por fin, algo cambie.')
   })
+
+  it('un secreto que es del personaje (knownBy) se le cuenta solo a el al abrir, queda como conocido y el GM lo sabe', async () => {
+    const pack = await pilot()
+    const secrets = new Map(pack.secrets)
+    const own = [...secrets.values()][0]!
+    secrets.set(own.id, { ...own, knownBy: ['character:zahira'], text: 'Fuiste tú quien dejó la puerta abierta aquella noche.' })
+    const party = { ...started(1, '003'), payload: { party: ['character:zahira', 'character:calder'] } }
+    const transport = new Reply('narrador', () => '{"kind":"narration","text":"La posada huele a humo."}\n{"kind":"addressed","characterIds":["zahira","calder"]}')
+    const { lines, result } = await run({ ...pack, secrets }, request('003', 1, [party], false), new ModelGMProvider(transport, KEY))
+
+    const whisperTo = (id: string) => lines.filter((l) => l.kind === 'block' && l.block.type === 'narration' && l.block.to?.includes(id)).map(text).join(' ')
+    const toZahira = whisperTo('zahira')
+    const toCalder = whisperTo('calder')
+    expect(toZahira).toContain('Y sabes algo que los demás no: Fuiste tú quien dejó la puerta abierta aquella noche.')
+    expect(toCalder).not.toContain('puerta abierta')
+    // Registrado como conocido por ella y solo por ella; a la mesa no se publica nada.
+    const revealed = result.events.filter((e) => (e as { type: string }).type === 'secret_revealed') as Array<{ visibility: { witnesses: string[] } }>
+    expect(revealed).toHaveLength(1)
+    expect(revealed[0]!.visibility.witnesses).toEqual(['character:zahira'])
+    const knowledge = (result.state as { knowledge: Record<string, { secrets?: Record<string, unknown> }> }).knowledge
+    expect(knowledge['zahira']?.secrets?.[own.id]).toBeTruthy()
+    expect(knowledge['calder']?.secrets?.[own.id]).toBeUndefined()
+    expect(lines.some((l) => l.kind === 'block' && !('to' in l.block && l.block.to) && 'text' in l.block && (l.block.text ?? '').includes('puerta abierta'))).toBe(false)
+    // El GM lo ve como el secreto de Zahira en su capa.
+    expect(transport.prompts[0]!.user).toContain(`es el secreto de Zahira`)
+  })
 })

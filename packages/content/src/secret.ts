@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EntityRef, FactRef, KebabId } from './common.js'
+import { CharacterRef, EntityRef, FactRef, KebabId } from './common.js'
 import { EventType } from './event.js'
 
 /**
@@ -55,6 +55,13 @@ export const Secret = z.strictObject({
   revealWhen: RevealWhen,
   /** Quien puede soltarlo en la ficcion (un NPC, normalmente). */
   revealedBy: EntityRef.optional(),
+  /**
+   * Personajes que lo saben desde el principio (el secreto es suyo: la deuda
+   * de Armand, el hermano de Manon). Al abrir la sesion se les cuenta en
+   * privado y el estado los registra como conocedores: el GM puede
+   * susurrarselo sin que el lint lo corte, y a los demas no.
+   */
+  knownBy: z.array(CharacterRef).optional(),
   /** Nota para el GM humano o para quien mantiene el pack. */
   note: z.string().optional(),
 })

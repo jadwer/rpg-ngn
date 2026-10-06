@@ -116,7 +116,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       for (const id of session.party) {
         const character = pack.characters.get(id)
         if (!character) continue
-        const knows = character.private?.knows ?? []
+        // Los secretos que son suyos (`knownBy`) se le cuentan con su texto y
+        // quedan registrados como conocidos por el: el GM puede susurrarselos
+        // y el lint no se los corta; a los demas, no (Gabino, 06-10).
+        const own = secrets.filter((s) => (s.knownBy ?? []).includes(`character:${id}`))
+        const knows = [...(character.private?.knows ?? []), ...own.map((s) => s.text)]
         // La meta de ESTA sesion si el autor la escribio (docs/27, H): a los 33
         // años el susurro seguia diciendo "estudiar Medicina en la UNAM".
         const goal = packSession.arc?.goal ?? character.goal
@@ -126,6 +130,14 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         if (parsed.success) {
           state = applyEvent(state, parsed.data, ruleset, secrets)
           events.push(parsed.data)
+        }
+        for (const secret of own) {
+          if (state.knowledge[id]?.secrets?.[secret.id]) continue
+          const revealed = seal({ type: 'secret_revealed', payload: { secretId: secret.id }, visibility: { layer: 'player', witnesses: [`character:${id}`] } })
+          if (revealed.success) {
+            state = applyEvent(state, revealed.data, ruleset, secrets)
+            events.push(revealed.data)
+          }
         }
       }
 

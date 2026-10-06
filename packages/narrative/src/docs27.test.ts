@@ -161,6 +161,23 @@ describe('formato plano: el que el modelo escribe solo', () => {
 describe('bloque I: las ideas salen de lo que el jugador sabe', () => {
   const gm = ['{"kind":"narration","text":"El viento golpea la contraventana de la posada."}', '{"kind":"where","location":"posada"}', '{"kind":"addressed","characterIds":["zahira","calder"]}'].join('\n')
 
+  it('las ideas se leen aunque vengan en un bloque de código, con texto alrededor o cortadas por el límite', async () => {
+    const base = await openSession003()
+    const ctx = contextFor(base, turn(2, [response('zahira', 'Escucho.')]))
+    const replies = [
+      '```json\n{"kind":"suggest","options":["Cierro la contraventana","Salgo a ver quién anda fuera"]}\n```',
+      'Aquí van las ideas:\n```json\n{"kind":"suggest","options":["Cierro la contraventana","Salgo a ver quién anda fuera"]}\n```\nListo.',
+      '```json\n{\n  "kind": "suggest",\n  "options": [\n    "Cierro la contraventana",\n    "Salgo a ver quién anda fuera"\n  ]\n}\n```',
+      // Cortada por el limite de salida: la primera idea entera vale mas que ninguna.
+      '```json\n{"kind":"suggest","options":["Cierro la contraventana","Salgo a ver quié',
+    ]
+    for (const reply of replies) {
+      const provider = new ModelGMProvider(new Scripted('narrador', () => gm), KEY, { ideasTransport: new Scripted('ideas', () => reply) })
+      const idea = await provider.suggest(ctx, 'zahira', [])
+      expect(idea.options[0], reply).toBe('Cierro la contraventana')
+    }
+  })
+
   it('con transporte de ideas, el GM deja de escribirlas y el engine las pide aparte', async () => {
     const base = await openSession003()
     const main = new Scripted('narrador', () => gm)
@@ -322,6 +339,13 @@ describe('H: canon, anteriormente y logros', () => {
     const early = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(contextFor(base, turn(3, [response('zahira', 'Corro.')]), corta)))
     expect(blocksOf(early).map((b) => b.type)).toEqual(['dialogue', 'narration'])
     expect(diagnosticsOf(early).dropped.join(' ')).toContain('logro fuera de su turno')
+    // El logro queda en la cronica como evento, y el GM del turno siguiente lo ve para no repetirlo (boticaria, mesa 42).
+    const logged = outputs.find((o) => o.kind === 'event' && o.event['type'] === 'world_event' && String((o.event['payload'] as { note: string }).note).startsWith('Logro: '))
+    expect(logged).toBeTruthy()
+    const seq = (base.recentEvents.at(-1)?.seq ?? 0) + 1
+    const event = CampaignEvent.parse({ ...(logged as { event: object }).event, id: `evt-${String(seq).padStart(5, '0')}`, v: 1, seq, sessionId: '003', recordedAt: '2026-10-06T10:00:00Z' })
+    const ctx = contextFor({ ...base, recentEvents: [...base.recentEvents, event] }, turn(6, [response('zahira', 'Sigo.')]), corta)
+    expect(buildTurnContext(ctx).user).toContain('Logros ya dados en esta sesión, que no se repiten ni con otras palabras: "Llegó al lugar del choque"')
   })
 
   it('en sesiones de seis turnos no hay logro en cada turno, y en mesa de uno va en singular', () => {
@@ -357,6 +381,20 @@ describe('VAM: la reparacion no inventa ni publica lo que no debe', () => {
   const noJson = (outputs: GMOutput[]) => {
     for (const text of blocksOf(outputs).flatMap((b) => (b.type === 'narration' || b.type === 'dialogue' ? [b.text] : []))) expect(text, `restos de JSON en la mesa: ${text}`).not.toMatch(/"kind"|"text"|"speaker"|\{"|"\}|characterIds/)
   }
+
+  it('un parrafo que nombra un secreto antes del secret_revealed del mismo turno se cuenta, en orden; sin el evento, se corta', async () => {
+    const story = ['{"kind":"narration","text":"Llueve."}', '{"kind":"dialogue","speaker":"Mera","speakerRef":"npc:mera","text":"Fue Brorg. Él pagó por Zahira."}', '{"kind":"narration","text":"Nadie respira."}']
+    const revealed = await play([...story, '{"kind":"secret_revealed","payload":{"secretId":"brorg-pago-por-zahira","how":"Mera lo suelta"}}', '{"kind":"addressed","characterIds":["zahira"]}'])
+    expect(storyOf(revealed).slice(1)).toEqual(['Llueve.', 'Fue Brorg. Él pagó por Zahira.', 'Nadie respira.'])
+    expect(diagnosticsOf(revealed).lintCuts).toBe(0)
+    // Lo retenido sale en orden y antes de lo que cierra el turno.
+    const kinds = revealed.map((o) => (o.kind === 'block' ? `block:${o.block.type}` : o.kind))
+    expect(kinds.indexOf('addressed')).toBeGreaterThan(kinds.lastIndexOf('block:narration'))
+
+    const silent = await play([...story, '{"kind":"addressed","characterIds":["zahira"]}'])
+    expect(storyOf(silent).slice(1)).toEqual(['Llueve.', 'Nadie respira.'])
+    expect(diagnosticsOf(silent).lintCuts).toBe(1)
+  })
 
   it('un susurro roto no se publica ni se come el parrafo siguiente', async () => {
     const outputs = await play(['{"kind":"narration","text":"Llueve."}', '{"kind":"whisper","characterId":"zahira","text":"Oyes "Suirei" en tu mente, y sabes que tu hermana vive', '{', '"kind": "narration",', '"text": "Ignacio cierra la puerta."', '}', '{"kind":"addressed","characterIds":["zahira"]}'])

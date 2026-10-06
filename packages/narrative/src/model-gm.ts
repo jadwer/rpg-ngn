@@ -5,7 +5,7 @@ import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '
 import { tFor } from '@rpg-ngn/i18n'
 import { z } from 'zod'
 import { budgetFor, buildPlayerContext, buildTurnContext, clockOf, hasPreviousSession, rollAllowance, type ContextBudget, type ContextProfile } from './context.js'
-import { milestoneDue } from './pacing.js'
+import { MILESTONE_NOTE, milestoneDue } from './pacing.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
 import type { GMOutput, GMProbe, GMProvider, GMSuggestion, GMTurnContext, ProposedEvent } from './provider.js'
@@ -442,7 +442,13 @@ export class ModelGMProvider implements GMProvider {
     }
     // El logro va al final de lo narrado: el modelo lo escribe primero y salia
     // antes del parrafo que lo gana ("Llego al lugar del choque" antes de llegar).
-    if (interpreter.milestone) yield { kind: 'block', block: { type: 'milestone', title: interpreter.milestone } }
+    if (interpreter.milestone) {
+      yield { kind: 'block', block: { type: 'milestone', title: interpreter.milestone } }
+      // Y queda en la cronica como evento: el GM del turno siguiente lo ve y
+      // no lo repite con otro verbo ("Detuvieron el traslado", "Frenaron el
+      // traslado"; boticaria, mesa 42).
+      yield { kind: 'event', event: { type: 'world_event', payload: { note: `${MILESTONE_NOTE}${interpreter.milestone}` }, visibility: { layer: 'campaign', witnesses } } }
+    }
 
     // Lo tecnico del turno (lineas rotas, reparadas, cortes del lint, la
     // salida tal cual) va al diagnostico, no a la historia: en una partida de
@@ -564,8 +570,18 @@ export class ModelGMProvider implements GMProvider {
     const options: string[] = []
     const rejected: string[] = []
     // El modelo de ideas suele envolver la linea en un bloque de codigo o partirla en varias: se lee el objeto entero.
-    const whole = parseLoose(raw.replace(/```[a-z]*/gi, ' ').trim())
-    const candidates = whole !== undefined ? [whole] : raw.split('\n').flatMap((line) => (/^[{[]/.test(line.trim()) ? splitJsonObjects(line.trim()) : [line])).map((piece) => parseLoose(piece))
+    const stripped = raw.replace(/```[a-z]*/gi, ' ').trim()
+    const whole = parseLoose(stripped)
+    const candidates: unknown[] = whole !== undefined ? [whole] : raw.split('\n').flatMap((line) => (/^[{[]/.test(line.trim()) ? splitJsonObjects(line.trim()) : [line])).map((piece) => parseLoose(piece))
+    // Cortada por el limite de salida (mascarada, mesa 43: la mesa abrio sin
+    // ideas): se cierra lo abierto y se usa lo que llego entero; la ultima
+    // idea, si quedo a medias, no.
+    if (!candidates.some((c) => c !== undefined)) {
+      const start = stripped.indexOf('{')
+      const repaired = start === -1 ? undefined : (repairJson(stripped.slice(start)) as { options?: unknown } | undefined)
+      if (repaired && Array.isArray(repaired.options) && !/[\]}]\s*$/.test(stripped)) repaired.options = repaired.options.slice(0, -1)
+      if (repaired) candidates.push(repaired)
+    }
     for (const candidate of candidates) {
       const parsed = candidate as { kind?: unknown; options?: unknown; characterId?: unknown } | undefined
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.options)) continue
@@ -585,7 +601,7 @@ export class ModelGMProvider implements GMProvider {
       }
       if (options.length) break
     }
-    const why = rejected.length ? `descartadas: ${rejected.join('; ')}` : `escribió: ${redact(raw.replace(/\s+/g, ' ').slice(0, 200), this.credential) || 'nada'}`
+    const why = rejected.length ? `descartadas: ${rejected.join('; ')}` : `escribió: ${redact(raw.replace(/\s+/g, ' ').slice(0, 600), this.credential) || 'nada'}`
     return { options, usage: { inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }, model: `${transport.kind}/${transport.model}`, why }
   }
 
@@ -654,6 +670,16 @@ class LineInterpreter {
   cuts: number
   /** El ultimo bloque de narracion o dialogo lo corto el lint. */
   lastWasCut: boolean
+  /**
+   * Bloques de historia retenidos desde que el lint corto uno: el cortado,
+   * con su texto para volver a revisarlo, y los que vinieron detras, para que
+   * salgan en orden. El modelo suele nombrar el secreto en el parrafo y
+   * emitir `secret_revealed` despues (boticaria, mesa 42, turno 6: el nombre
+   * del veneno se corto y la mesa lo supo por las pistas); al cerrar el turno
+   * se revisa el cortado contra lo que el turno revelo y, si ya se puede
+   * contar, se cuenta.
+   */
+  private held: Array<{ block: TurnBlock; retry: boolean }> = []
   blocks = 0
   ignored = 0
   /** Las lineas ignoradas, recortadas, para el diagnostico del turno. */
@@ -883,6 +909,7 @@ class LineInterpreter {
 
   *finish(): Generator<GMOutput> {
     if (this.pending !== null) yield* this.closePending()
+    yield* this.releaseHeld()
   }
 
   /** Cierra el objeto pendiente: lo lee, lo repara o rescata su texto; si nada vale, lo cuenta con SU texto. */
@@ -1254,23 +1281,47 @@ class LineInterpreter {
   }
 
   private *block(raw: TurnBlock): Generator<GMOutput> {
-    const witnesses = this.party.map((id) => `character:${id}`)
     // Lo que el modelo deja colgando al final de un texto no es historia.
     const block = raw.type === 'narration' || raw.type === 'dialogue' ? { ...raw, text: tidyStory(raw.text) || raw.text } : raw
     this.blocks++
     if (block.type === 'narration' || block.type === 'dialogue') {
       const cut = yield* this.lint(block.text)
-      if (cut) {
-        // El bloque no llega a la mesa ni a la cronica; el motivo va en
+      if (cut || this.held.length) {
+        // Cortado: no sale ahora. Se retiene con lo que venga detras y al
+        // cerrar el turno se vuelve a mirar (ver `held`). Si entonces sigue
+        // cortado, no llega a la mesa ni a la cronica; el motivo va en
         // result.lint y el aviso al anfitrion sale una vez, al final del
         // turno: en medio de la historia parecia que el GM se corregia en
         // vivo (Gabino, 23-09).
-        this.cuts++
-        this.lastWasCut = true
+        this.held.push({ block, retry: cut })
         return
       }
       this.lastWasCut = false
     }
+    yield* this.emitBlock(block)
+  }
+
+  /** Al cerrar el turno: lo retenido sale en orden, y lo cortado solo si lo que el turno revelo ya lo permite. */
+  private *releaseHeld(): Generator<GMOutput> {
+    const held = this.held
+    this.held = []
+    for (const { block, retry } of held) {
+      if (retry && (block.type === 'narration' || block.type === 'dialogue')) {
+        // Sin avisar dos veces: los hallazgos ya salieron la primera vez.
+        const findings = this.knowledge ? lintText(block.text, this.knowledge, this.ctx.pack) : []
+        if (this.lintMode === 'enforce' && findings.some((f) => f.level === 'error')) {
+          this.cuts++
+          this.lastWasCut = true
+          continue
+        }
+      }
+      this.lastWasCut = false
+      yield* this.emitBlock(block)
+    }
+  }
+
+  private *emitBlock(block: TurnBlock): Generator<GMOutput> {
+    const witnesses = this.party.map((id) => `character:${id}`)
     if (block.type === 'dialogue') {
       this.spoke.add(fold(block.speaker))
       // speakerRef invalido no tumba el bloque: se deja sin referencia.

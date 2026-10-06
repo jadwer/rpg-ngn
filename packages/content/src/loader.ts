@@ -221,7 +221,7 @@ export async function loadPack(source: FileSource, options: LoadPackOptions = {}
   for (const [id, secret] of secrets) {
     const path = `secrets/${id}.json`
     // Un personaje es siempre del pack; NPC, lugar o mision pueden vivir solo en la cronica.
-    for (const ref of [secret.about, secret.revealedBy]) {
+    for (const ref of [secret.about, secret.revealedBy, ...(secret.knownBy ?? [])]) {
       if (!ref) continue
       const kind = refKind(ref)
       const target = refId(ref)

@@ -91,6 +91,8 @@ async function main(): Promise<void> {
             language: 'es',
             dice: DICE,
             countdown: 0,
+            // Largo de sesion de la mesa (corta, media, larga); sin el, manda `arc.turns` del mundo o es libre.
+            ...(process.env['PACING'] ? { pacing: { length: process.env['PACING'] } } : {}),
           },
         },
       },
@@ -119,6 +121,7 @@ async function main(): Promise<void> {
   const table = await host.api.table(tableId)
   const reader = seated[0]!
   const players = seated
+  const seenPrivate = new Set<string>()
   let after = 0
   for (const code of SESSIONS) {
     await host.api.openSession(table.campaignId!, code)
@@ -154,6 +157,17 @@ async function main(): Promise<void> {
       console.log(`turno ${turn.number} abierto ${state.pacing ? `(${state.pacing.turn} de ${state.pacing.total})` : ''}`)
       for (const p of players) {
         const mine = await p.api.tableState(tableId, 0)
+        // Lo privado que ve cada asiento (susurros con `to`): para comprobar que cada uno recibe lo suyo y nada ajeno.
+        if (process.env['SHOW_PRIVATE']) {
+          for (const envelope of mine.blocks) {
+            const block = envelope.block
+            const key = `${p.character}:${envelope.id}`
+            if ((block.type === 'narration' || block.type === 'dialogue') && block.to?.length && !seenPrivate.has(key)) {
+              seenPrivate.add(key)
+              console.log(`  [${p.character} ve privado para ${block.to.join(',')}] ${block.text.slice(0, 110)}`)
+            }
+          }
+        }
         if (mine.suggestions.length === 0) console.log(`  ! ${p.character} abrio el turno ${turn.number} SIN IDEAS`)
         const idea = (p === players[0] && ACTION) || mine.suggestions[PICK] || mine.suggestions[0] || 'Observo con cuidado lo que pasa.'
         // Con tirada pedida, el turno del jugador es soltar el dado (y decir que intenta con el).

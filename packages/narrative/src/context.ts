@@ -3,7 +3,7 @@ import { isManualReveal, refId, refKind, type CampaignEvent, type Character, typ
 import type { CharacterState } from '@rpg-ngn/core'
 import type { TurnInput } from '@rpg-ngn/engine-contract'
 import { secretTouchesScene } from './lint.js'
-import { clockLayer, storyClock, type StoryClock } from './pacing.js'
+import { MILESTONE_NOTE, clockLayer, storyClock, type StoryClock } from './pacing.js'
 import type { GMTurnContext } from './provider.js'
 
 /**
@@ -59,10 +59,21 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx) && !ctx.session?.arc?.previously),
     rollsLayer(ctx, party),
-    clock ? clockLayer(clock, party.length, ctx.session?.arc) : null,
+    clock ? clockLayer(clock, party.length, ctx.session?.arc, achievedSoFar(ctx)) : null,
   ].filter((s) => s !== null)
 
   return { user: sections.join('\n\n'), party }
+}
+
+/** Los logros que ya salieron en esta sesion, por sus eventos en la cronica reciente. */
+function achievedSoFar(ctx: GMTurnContext): string[] {
+  const out: string[] = []
+  for (const event of ctx.recentEvents ?? []) {
+    if (event.sessionId !== ctx.turn.sessionId || event.type !== 'world_event') continue
+    const note = (event.payload as { note?: string }).note ?? ''
+    if (note.startsWith(MILESTONE_NOTE)) out.push(note.slice(MILESTONE_NOTE.length))
+  }
+  return out
 }
 
 // Capa gm: secretos del pack con su estado de revelacion para la party
@@ -79,7 +90,8 @@ function gmLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): st
     const knowers = [...(known.get(secret.id) ?? [])]
     const unaware = party.filter((id) => !knowers.includes(id))
     const status = unaware.length === 0 ? 'ya lo conoce toda la party presente' : knowers.length === 0 ? `NO REVELADO a ${names(unaware)}` : `lo conoce ${names(knowers)}; NO REVELADO a ${names(unaware)}`
-    lines.push('', `- ${secret.id} (sobre ${secret.about}; ${status}). Se revela ${describeReveal(secret)}${secret.revealedBy ? `; puede soltarlo ${secret.revealedBy}` : ''}.`)
+    const own = (secret.knownBy ?? []).map(refId).filter((id) => party.includes(id))
+    lines.push('', `- ${secret.id} (sobre ${secret.about}; ${status}). Se revela ${describeReveal(secret)}${secret.revealedBy ? `; puede soltarlo ${secret.revealedBy}` : ''}${own.length ? `; es el secreto de ${names(own)}: lo sabe desde el principio y decide cuándo contarlo` : ''}.`)
     lines.push(`  ${clip(secret.text, budget.sheets === 'compact' ? 240 : 600)}`)
   }
   return lines.join('\n')

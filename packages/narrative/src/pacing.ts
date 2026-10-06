@@ -94,7 +94,10 @@ const PHASE_NAME: Record<StoryPhase, string> = {
  * y como cerrar. Va en el mensaje de usuario (el system prompt se queda
  * estable para la cache).
  */
-export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionArc): string {
+/** Prefijo con el que un logro queda en la cronica como `world_event`, para que el GM del turno siguiente lo vea. */
+export const MILESTONE_NOTE = 'Logro: '
+
+export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionArc, achieved: readonly string[] = []): string {
   const words = partySize === 1 ? 220 : 180
   const lines = [
     '# Reloj de la historia',
@@ -114,7 +117,7 @@ export function clockLayer(clock: StoryClock, partySize: number, arc?: SessionAr
   const milestoneNow = clock.phase !== 'cierre' && milestoneDue(clock)
   if (clock.phaseStart && clock.phase !== 'gancho' && !milestoneNow) lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué busca la mesa en esta sesión.')
   if (milestoneNow) {
-    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".' + (partySize === 1 ? ' La mesa es de una sola persona: en singular ("Sacó", "Se ganó").' : ''))
+    lines.push('Empieza un tramo nuevo: recuerda en una frase, dentro de la ficción, qué buscan los personajes en esta sesión, y marca lo que acaban de conseguir con un logro: {"kind":"milestone","title":"..."}. El logro es lo que ganaron, no lo que averiguaron: de 3 a 8 palabras, en pasado, con un verbo de acción distinto cada vez ("Sacaron a Osric de la mina", "Se ganaron la confianza de Tomás"), sin revelar secretos y sin empezar por "Confirmaron".' + (partySize === 1 ? ' La mesa es de una sola persona: en singular ("Sacó", "Se ganó").' : '') + (achieved.length ? ` Logros ya dados en esta sesión, que no se repiten ni con otras palabras: ${achieved.map((a) => `"${a}"`).join(', ')}. Este tiene que ser algo nuevo que consiguieron desde entonces.` : ''))
   }
   // Sin dados de utileria (docs/27, R3): en la mesa 44 se tiro 12 con el
   // agente y 6 en la ventana, y nada podia cambiar. Vale con cualquier modo de dados.
