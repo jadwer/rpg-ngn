@@ -118,7 +118,8 @@ con respaldo previo.
 - [ ] Regrabar las voces de las cronicas publicadas (`speech:chronicle --dry-run` primero)
 - [x] Costo por partida: cache del prompt del sistema con una hora de vida y tokens de cache medidos (06-10, desplegado); `effort: low` medido en local (-36% de salida, misma historia), pendiente de que Gabino lo apruebe para produccion (`ANTHROPIC_EFFORT=low`)
 - [ ] Costo, siguiente paso si hace falta: segundo punto de cache con la parte fija del mundo (unos 0.15 USD por one-shot); medir Haiku con `tables:review`
-- [ ] Probar con modelo real los otros tres sistemas y una mesa de tres (el tope de tiradas no se ejercito con modelo)
+- [x] Mesas de tres con modelo real: boticaria y mascarada (06-10); secretos propios por personaje (`knownBy`), parrafo cortado por el lint se reconsidera, logros sin repetir, ideas cortadas se rescatan. Desplegado
+- [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y modelo real
 - [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
 - [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
 

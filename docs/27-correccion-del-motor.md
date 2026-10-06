@@ -233,11 +233,39 @@ paso si hace falta: segundo punto de cache con la parte fija del mundo
 (manifiesto, arco, lugares, NPCs sin su "Ahora"), unos 0.15 USD por one-shot;
 exige partir `worldLayer` en fija y viva.
 
+## Mesas de tres con el modelo real (06-10, local)
+
+Boticaria (mesa 42, court-intrigue) y mascarada (mesa 43, masquerade), tres
+asientos, sesion corta de 8 turnos, Sonnet en `low`, ideas con Haiku. Las dos
+cerraron solas en el turno 8 con 3 o 4 logros; 0 parrafos perdidos, 0 lineas
+reparadas; mediana de 208 a 222 palabras por turno; cada asiento recibio su
+susurro y ninguno el ajeno (comprobado por la API con las tres cuentas).
+
+Lo que destaparon y se corrigio:
+
+- Los secretos que son del propio personaje no se le contaban al jugador ni
+  el motor sabia que el los conoce. `Secret.knownBy`: se cuentan en el
+  susurro de apertura, quedan como conocidos solo por el y el GM lo ve.
+- El GM nombra el secreto en el parrafo y emite `secret_revealed` despues:
+  el lint cortaba el parrafo y la mesa supo el veneno por las pistas. Un
+  bloque cortado se retiene, con lo que viene detras, y se revisa al cerrar
+  el turno contra lo que el turno revelo.
+- Logros repetidos con otro verbo: el logro queda en la cronica como
+  `world_event` "Logro: ..." y el reloj le dice al GM cuales ya dio.
+- Un asiento abrio sin ideas: Haiku devolvio el JSON cortado; se repara y se
+  usa lo que llego entero.
+- Las metas de los dos mundos estaban en tercera persona ("No le importa
+  quien quede en medio") detras de "Tu meta:"; pasaron a segunda persona.
+
+Visto y no tocado: en la mascarada el GM puso dialogo en boca de los
+personajes de los jugadores 7 veces en 8 turnos (decision del 05-10: se
+permite en el juego). Ninguno de los dos mundos tiene `canon` ni `arc`.
+
 ## Abierto
 
 | Que | Por que queda | Dueño |
 |---|---|---|
-| Probar el formato plano y las reglas nuevas con el modelo real en los otros tres sistemas y con tres jugadores | Solo se jugo el medico (drama, un jugador); el tope de tiradas y la separacion de la mesa no se ejercitaron con modelo | Antes de desplegar, o Gabino juega una mesa corta de la boticaria |
+| Probar con el modelo real fantasy-d20-lite (el piloto) con tres jugadores | Jugados drama (uno), court-intrigue y masquerade (tres); falta el sistema con combate | Cuando toque el piloto |
 | Decir por sesion que NPCs del mundo existen | Hoy se listan todos en todas; se tapa con `canon` | Siguiente sesion |
 | Una nota del modelo para si mismo que no empieza con una etiqueta conocida se narra como historia | Se descartan las etiquetadas (Nota, Recordatorio, Objetivo oculto, GM, anotaciones); una nota en prosa limpia no se distingue de narracion | Vigilar en `tables:review`; si se repite, descartar la prosa cuando el turno ya trae lineas JSON de historia |
 | Las voces de las cronicas publicadas con audio quedan `stale` al cambiar el texto que se cuenta | El audio viejo lleva las preguntas del GM; se regenera al pedirlo y el video no se arma con el | Regrabar con `speech:chronicle <token>` (primero `--dry-run` por el costo) |
