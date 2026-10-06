@@ -14,6 +14,11 @@ import { GMProviderError, errorMessage, redact } from './redact.js'
 /** Lo que el GM manda al modelo en un turno. */
 export interface ModelPrompt {
   system: string
+  /**
+   * Prefijo de `user` que no cambia dentro de la sesion (mundo y fichas):
+   * el transporte que sepa cachear lo marca. `user` lo incluye entero.
+   */
+  fixed?: string
   user: string
   maxOutputTokens: number
 }
@@ -369,6 +374,7 @@ export class ModelGMProvider implements GMProvider {
     const prompt: ModelPrompt = {
       system: systemPromptFor(ctx.rulesetId, compact, diceMode, ctx.language ?? 'es', separateIdeas ? 'separate' : 'inline'),
       user: built.user + fortuneNote,
+      fixed: built.fixed,
       maxOutputTokens: ctx.maxOutputTokens ?? this.options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS + OUTPUT_TOKENS_PER_EXTRA_PLAYER * Math.max(0, party.length - 1),
     }
 
@@ -1301,6 +1307,19 @@ class LineInterpreter {
     yield* this.emitBlock(block)
   }
 
+  /** Secretos del pack que alguno de estos textos nombra con sus palabras y que la mesa entera aun no conoce. */
+  private secretsNamedIn(texts: readonly string[]): string[] {
+    if (!this.knowledge || texts.length === 0) return []
+    const folded = fold(texts.join('\n'))
+    const out: string[] = []
+    for (const secret of this.ctx.pack.secrets.values()) {
+      const known = this.knowledge.secrets.get(secret.id)
+      if (known && this.party.every((id) => known.has(id))) continue
+      if (secret.keywords.some((k) => folded.includes(fold(k)))) out.push(secret.id)
+    }
+    return out
+  }
+
   /** Al cerrar el turno: lo retenido sale en orden, y lo cortado solo si lo que el turno revelo ya lo permite. */
   private *releaseHeld(): Generator<GMOutput> {
     const held = this.held
@@ -1363,6 +1382,18 @@ class LineInterpreter {
     }
     if (event['type'] === 'secret_revealed' && this.knowledge) {
       markRevealed(this.knowledge, (event['payload'] as { secretId: string }).secretId)
+    }
+    // Una pista o un descubrimiento que usa las palabras de un secreto es el
+    // GM revelandolo a proposito: cuenta como `secret_revealed` a la mesa, y
+    // la narracion que lo cuenta ya no se corta. Antes la pista llegaba a la
+    // ficha del jugador y el parrafo que la contaba se perdia (boticaria,
+    // mesa 44, turnos 6 y 7: "cal viva" tres veces).
+    const told: string[] = []
+    if (event['type'] === 'state_change') for (const effect of (event['effects'] as Array<Record<string, unknown>> | undefined) ?? []) if (effect['op'] === 'clue' && typeof effect['clue'] === 'string') told.push(effect['clue'])
+    if (event['type'] === 'discovery') for (const key of ['method', 'note']) if (typeof (event['payload'] as Record<string, unknown>)?.[key] === 'string') told.push((event['payload'] as Record<string, string>)[key]!)
+    for (const secretId of this.secretsNamedIn(told)) {
+      if (this.knowledge) markRevealed(this.knowledge, secretId)
+      yield { kind: 'event', event: { type: 'secret_revealed', payload: { secretId, how: 'el GM lo dio como pista' }, visibility: { layer: 'campaign', witnesses: this.party.map((id) => `character:${id}`) } } }
     }
     if (event['type'] === 'roll' && (event['resolved'] as { kind?: string }).kind === 'fortune') {
       // La Fortuna la tira el jugador por la API; el d20 que el modelo
@@ -1619,9 +1650,12 @@ function storyBlock(raw: unknown): StoryBlock | null {
   const candidate =
     record['type'] === 'narration'
       ? { type: 'narration', text: record['text'] }
-      : record['type'] === 'dialogue'
-        ? { type: 'dialogue', speaker: record['speaker'], speakerRef: typeof record['speakerRef'] === 'string' ? record['speakerRef'] : null, text: record['text'] }
-        : null
+      : record['type'] === 'dialogue' && (typeof record['speaker'] !== 'string' || record['speaker'].trim() === '')
+        ? // Un dialogo sin hablante (speaker null; boticaria, mesa 44) sigue siendo historia: se narra.
+          { type: 'narration', text: record['text'] }
+        : record['type'] === 'dialogue'
+          ? { type: 'dialogue', speaker: record['speaker'], speakerRef: typeof record['speakerRef'] === 'string' ? record['speakerRef'] : null, text: record['text'] }
+          : null
   if (!candidate) return null
   const block = TurnBlock.safeParse(candidate)
   return block.success && (block.data.type === 'narration' || block.data.type === 'dialogue') ? block.data : null

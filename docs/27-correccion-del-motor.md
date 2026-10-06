@@ -227,11 +227,30 @@ ESIME. Dos narraciones en tercera persona ("Emiliano guarda silencio"), que
 ya pasaba con `medium`. Decision pendiente de Gabino: poner `low` en
 produccion (es una linea del `.env` y reiniciar el worker).
 
-Lo que sigue pesando: el contexto dinamico (mundo, party, memoria, unos 7,000
-tokens por turno a precio normal) es ahora mas de la mitad del costo. Siguiente
-paso si hace falta: segundo punto de cache con la parte fija del mundo
-(manifiesto, arco, lugares, NPCs sin su "Ahora"), unos 0.15 USD por one-shot;
-exige partir `worldLayer` en fija y viva.
+Segundo punto de cache (06-10, tarde): el contexto empieza por un prefijo
+fijo (mundo del pack sin su estado, fichas de la party sin su estado, premisa
+de la mesa) que el transporte de Anthropic manda como bloque aparte con una
+hora de cache; lo vivo (donde esta cada quien, el "Ahora" de los NPCs, HP y
+pistas, cronica, turno, reloj) va despues. `worldLayer` y `partyLayer` se
+partieron en fija y viva; la prueba fija que el prefijo no cambia entre
+turnos aunque cambie el estado.
+
+Medido con las mismas dos mesas de tres (Sonnet `low`, 8 turnos):
+
+| | Sin prefijo (42, 43) | Con prefijo (44, 45) |
+|---|---|---|
+| Boticaria, entrada normal | 65,498 | 30,733 |
+| Boticaria, costo | 0.39 USD | 0.32 USD |
+| Mascarada, entrada normal | 111,492 | 39,354 |
+| Mascarada, de cache por turno | 6,914 (solo el sistema) | 16,692 |
+| Mascarada, costo | 0.54 USD | 0.36 USD |
+
+La mascarada baja un tercio; una sesion corta de tres sale entre 0.32 y
+0.36 USD mas 0.05 de ideas. Lo que destapo la repeticion y se corrigio: el GM
+daba una pista con las palabras de un secreto (`clue`) y el lint cortaba el
+parrafo que la contaba; ahora una pista o un descubrimiento que nombra un
+secreto cuenta como revelarlo a la mesa. Y un dialogo con `speaker: null` se
+narra en vez de perderse.
 
 ## Mesas de tres con el modelo real (06-10, local)
 

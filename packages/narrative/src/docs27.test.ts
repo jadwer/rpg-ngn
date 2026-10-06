@@ -315,6 +315,36 @@ describe('F3 y F4: lo que el motor guarda de un NPC vuelve al GM', () => {
   })
 })
 
+describe('costo: el contexto empieza por un prefijo fijo que el proveedor cachea', () => {
+  it('el prefijo (mundo y fichas) no cambia aunque cambie el estado vivo, y lo vivo sigue llegando', async () => {
+    const base = await openSession003()
+    const event = (seq: number, effects: unknown[]) => CampaignEvent.parse({ id: `evt-${String(seq).padStart(5, '0')}`, v: 1, seq, type: 'state_change', sessionId: '003', recordedAt: '2026-10-06T10:00:00Z', effects })
+    const before = buildTurnContext(contextFor(base, turn(2, [response('zahira', 'Miro.')])))
+    let state = applyEvent(base.state, event(23, [{ op: 'relationship', who: 'npc:mera', with: 'character:zahira', delta: -2 }]), fantasyD20Lite)
+    state = applyEvent(state, event(24, [{ op: 'move', who: 'character:zahira', to: 'plaza' }]), fantasyD20Lite)
+    state = applyEvent(state, event(25, [{ op: 'hp', who: 'character:zahira', delta: -3 }]), fantasyD20Lite)
+    const after = buildTurnContext(contextFor({ ...base, state }, turn(3, [response('calder', 'Sigo.')])))
+
+    expect(after.fixed).toBe(before.fixed)
+    expect(after.user.startsWith(after.fixed)).toBe(true)
+    // El prefijo lleva el mundo y las fichas; nada vivo.
+    expect(after.fixed).toContain('# Mundo y premisa')
+    expect(after.fixed).toContain('# Party presente')
+    expect(after.fixed).toContain(base.pack.characters.get('zahira')!.bio.slice(0, 30))
+    expect(after.fixed).not.toMatch(/HP \d+\/\d+/)
+    expect(after.fixed).not.toContain('Ahora:')
+    // Lo vivo va despues, y llega entero.
+    const live = after.user.slice(after.fixed.length)
+    expect(live).toContain('# Estado del mundo')
+    expect(live).toMatch(/En .*\(location:plaza\): Zahira/)
+    expect(live).toMatch(/npc:mera\):\s*Ahora: con Zahira -2\./)
+    expect(live).toMatch(/## Zahira \(character:zahira\)\nEstado: HP \d+\/\d+; en /)
+    expect(live).toContain('# Crónica')
+    // Y el prefijo es la mayor parte de lo que no es cronica: es lo que se ahorra.
+    expect(after.fixed.length).toBeGreaterThan(live.length / 2)
+  })
+})
+
 describe('H: canon, anteriormente y logros', () => {
   it('los hechos fijos del autor van al GM y su "Anteriormente" quita el del modelo', async () => {
     const base = await openSession003()
@@ -394,6 +424,23 @@ describe('VAM: la reparacion no inventa ni publica lo que no debe', () => {
     const silent = await play([...story, '{"kind":"addressed","characterIds":["zahira"]}'])
     expect(storyOf(silent).slice(1)).toEqual(['Llueve.', 'Nadie respira.'])
     expect(diagnosticsOf(silent).lintCuts).toBe(1)
+  })
+
+  it('una pista que usa las palabras de un secreto lo revela a la mesa: el parrafo que lo cuenta no se corta, y un dialogo sin hablante se narra', async () => {
+    const lines = [
+      '{"kind":"narration","text":"Llueve."}',
+      '{"kind":"narration","text":"Mera lo dice sin mirarte: fue Brorg quien pagó."}',
+      '{"kind":"discovery","targets":["character:zahira"],"payload":{"fact":"fact:brorg-y-mera","confidence":"uncertain","method":"Mera deja caer que Brorg pagó por Zahira"}}',
+      '{"kind":"dialogue","speaker":null,"speakerRef":null,"text":"Y no es lo único que pagó."}',
+      '{"kind":"addressed","characterIds":["zahira"]}',
+    ]
+    const outputs = await play(lines)
+    expect(storyOf(outputs).slice(1)).toEqual(['Llueve.', 'Mera lo dice sin mirarte: fue Brorg quien pagó.', 'Y no es lo único que pagó.'])
+    expect(diagnosticsOf(outputs).lintCuts).toBe(0)
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
+    const revealed = outputs.filter((o) => o.kind === 'event' && o.event['type'] === 'secret_revealed')
+    expect(revealed).toHaveLength(1)
+    expect((revealed[0] as { event: { payload: { secretId: string } } }).event.payload.secretId).toBe('brorg-pago-por-zahira')
   })
 
   it('un susurro roto no se publica ni se come el parrafo siguiente', async () => {

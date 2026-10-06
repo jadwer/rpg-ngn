@@ -68,6 +68,13 @@ describe('AnthropicTransport', () => {
     expect(params.system).toEqual([expect.objectContaining({ type: 'text', cache_control: { type: 'ephemeral', ttl: '1h' } })])
     expect(params.output_config).toEqual({ effort: 'medium' })
     expect(params.messages).toHaveLength(1)
+    // El mensaje de usuario va en dos bloques: el mundo y las fichas, cacheados una hora, y lo vivo del turno.
+    const content = params.messages[0]!.content as Array<{ type: string; text: string; cache_control?: unknown }>
+    expect(content).toHaveLength(2)
+    expect(content[0]).toMatchObject({ type: 'text', cache_control: { type: 'ephemeral', ttl: '1h' } })
+    expect(content[0]!.text).toContain('# Mundo y premisa')
+    expect(content[1]!.cache_control).toBeUndefined()
+    expect(content[1]!.text).toContain('# Turno')
   })
 
   it('el esfuerzo del pensamiento se elige desde la plataforma (ProviderConfig.effort)', async () => {

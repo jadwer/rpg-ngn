@@ -41,8 +41,17 @@ export function budgetFor(profile: ContextProfile | undefined): ContextBudget {
 }
 
 export interface BuiltContext {
-  /** Mensaje de usuario completo, con las cuatro capas. */
+  /** Mensaje de usuario completo, con todas las capas; empieza por `fixed`. */
   user: string
+  /**
+   * El prefijo que no cambia de un turno a otro dentro de la sesion: el
+   * mundo del pack (manifiesto, arco, lugares, NPCs, misiones, premisa de la
+   * mesa) y las fichas de la party sin su estado. Va primero para que el
+   * proveedor lo cachee: en la mascarada son unos 8,000 tokens por turno
+   * (docs/27, costo). Lo vivo (donde esta cada quien, el "Ahora" de un NPC,
+   * HP, pistas, cronica, turno) viene despues.
+   */
+  fixed: string
   /** Ids de la party presente, para dirigir el turno si el modelo no lo hace. */
   party: string[]
 }
@@ -52,9 +61,10 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
   const party = session?.party ?? []
   const clock = clockOf(ctx)
 
-  const sections = [
-    worldLayer(ctx, budget, party),
-    partyLayer(ctx, party, budget),
+  const fixed = [worldFixedLayer(ctx, budget), partyFixedLayer(ctx, party, budget)].join('\n\n')
+  const live = [
+    worldLiveLayer(ctx, party),
+    partyLiveLayer(ctx, party, budget),
     memoryLayer(ctx, session, budget),
     gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx) && !ctx.session?.arc?.previously),
@@ -62,7 +72,7 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     clock ? clockLayer(clock, party.length, ctx.session?.arc, achievedSoFar(ctx)) : null,
   ].filter((s) => s !== null)
 
-  return { user: sections.join('\n\n'), party }
+  return { user: [fixed, ...live].join('\n\n'), fixed, party }
 }
 
 /** Los logros que ya salieron en esta sesion, por sus eventos en la cronica reciente. */
@@ -109,7 +119,7 @@ function describeReveal(secret: Secret): string {
 }
 
 // Capa a: mundo y premisa.
-function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] = []): string {
+function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
   const { manifest } = ctx.pack
   const lines: string[] = ['# Mundo y premisa', '']
   lines.push(`Campaña: ${manifest.name}${manifest.tagline ? ` (${manifest.tagline})` : ''}`)
@@ -150,46 +160,25 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
     }
   }
 
-  const worldTime = ctx.state.world.worldTime
-  if (worldTime) lines.push('', `Momento del mundo: ${worldTime}`)
-
   const locations = [...ctx.pack.locations.values()]
   if (locations.length) {
     // Con `connections` el GM sabe que caminos existen: del comedor no se
-    // pasa a la biblioteca sin cruzar el salon. Y con quien esta en cada
-    // sitio puede narrar quien se cruza con quien.
-    const dondeEsta = new Map<string, string[]>()
-    for (const [id, character] of Object.entries(ctx.state.world.characters)) {
-      if (!character.location) continue
-      const nombre = ctx.pack.characters.get(id)?.name ?? id
-      dondeEsta.set(character.location, [...(dondeEsta.get(character.location) ?? []), nombre])
-    }
-    lines.push('', 'Lugares del pack (con los caminos que salen de cada uno y quien esta alli):')
+    // pasa a la biblioteca sin cruzar el salon. Quien esta en cada sitio va
+    // en el estado del mundo, mas abajo.
+    lines.push('', 'Lugares del pack (con los caminos que salen de cada uno):')
     for (const location of locations) {
       const salidas = location.connections.length ? ` Se llega desde aqui a: ${location.connections.join(', ')}.` : ''
-      const gente = dondeEsta.get(location.id)
-      lines.push(`- ${location.name} (location:${location.id}): ${location.newcomerView}${salidas}${gente ? ` AQUI: ${gente.join(', ')}.` : ''}`)
+      lines.push(`- ${location.name} (location:${location.id}): ${location.newcomerView}${salidas}`)
     }
-    const sinSitio = Object.entries(ctx.state.world.characters)
-      .filter(([id, c]) => c.location === null && party.includes(id))
-      .map(([id]) => ctx.pack.characters.get(id)?.name ?? id)
-    if (sinSitio.length) lines.push(`De camino o fuera de escena: ${sinSitio.join(', ')}.`)
   }
 
   const npcs = [...ctx.pack.npcs.values()]
   if (npcs.length) {
-    lines.push('', 'NPCs del pack (usa speakerRef npc:<id>; "Ahora" es lo que la mesa ya provocó en él: actitud de -5 enemigo a 5 aliado, y cómo quedó):')
+    lines.push('', 'NPCs del pack (usa speakerRef npc:<id>; lo que la mesa ya provocó en cada uno está en "Estado del mundo"):')
     for (const npc of npcs) {
       const goals = npc.goals.length ? ` Objetivos: ${npc.goals.join('; ')}.` : ''
-      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}${npcNow(ctx, npc.id)}`)
+      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}`)
     }
-  }
-  // NPCs que nacieron en la mesa y ya tienen algo guardado (actitud, condicion):
-  // lo que el motor recuerda tiene que volver al director, o no lo recuerda nadie.
-  const improvised = Object.keys(ctx.state.world.npcs).filter((id) => !ctx.pack.npcs.has(id) && npcNow(ctx, id) !== '')
-  if (improvised.length) {
-    lines.push('', 'NPCs que nacieron en esta mesa:')
-    for (const id of improvised) lines.push(`- npc:${id}.${npcNow(ctx, id)}`)
   }
 
   const quests = [...ctx.pack.quests.values()]
@@ -198,18 +187,10 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
   // Lo mismo con los secretos: sin ninguno declarado, el GM se inventaba uno para "revelarlo" (partida de prueba, 05-10).
   if (ctx.pack.secrets.size === 0) lines.push('', 'Este mundo no declara secretos: no propongas "secret_revealed". Lo que un personaje descubre se registra con "discovery" o con una pista.')
   if (quests.length) {
-    lines.push('', 'Misiones del pack (con lo conseguido en esta campaña):')
+    lines.push('', 'Misiones del pack (lo conseguido en esta campaña está en "Estado del mundo"):')
     for (const quest of quests) {
-      const progreso = ctx.state.quests?.[quest.id]
-      const hechos = progreso?.completed ?? []
-      const pendientes = quest.objectives.filter((o) => !hechos.includes(o.id))
-      const estado = progreso ? ({ active: 'en marcha', done: 'cumplida', failed: 'fracasada' }[progreso.status]) : 'sin empezar'
-      lines.push(`- ${quest.title} (quest:${quest.id}, ${estado}): ${quest.summary}`)
-      if (hechos.length) lines.push(`  Ya conseguido: ${hechos.join(', ')}.`)
-      if (pendientes.length && progreso?.status !== 'done') {
-        lines.push(`  Pendiente: ${pendientes.map((o) => `${o.id}${o.optional ? ' (opcional)' : ''}: ${o.text}`).join(' | ')}`)
-      }
-      if (progreso?.note) lines.push(`  Nota: ${progreso.note}`)
+      lines.push(`- ${quest.title} (quest:${quest.id}): ${quest.summary}`)
+      lines.push(`  Objetivos: ${quest.objectives.map((o) => `${o.id}${o.optional ? ' (opcional)' : ''}: ${o.text}`).join(' | ')}`)
     }
   }
 
@@ -221,6 +202,51 @@ function worldLayer(ctx: GMTurnContext, budget: ContextBudget, party: string[] =
     if (sessionNote) lines.push(`<nota_de_la_sesion>`, untrusted(sessionNote), `</nota_de_la_sesion>`)
   }
 
+  return lines.join('\n')
+}
+
+/** Lo que el mundo tiene de vivo: la hora, quien esta donde, como quedo cada NPC y que se consiguio de cada mision. */
+function worldLiveLayer(ctx: GMTurnContext, party: string[]): string {
+  const lines: string[] = ['# Estado del mundo', '']
+  const worldTime = ctx.state.world.worldTime
+  if (worldTime) lines.push(`Momento del mundo: ${worldTime}`)
+
+  // Con quien esta en cada sitio el GM puede narrar quien se cruza con quien.
+  const dondeEsta = new Map<string, string[]>()
+  for (const [id, character] of Object.entries(ctx.state.world.characters)) {
+    if (!character.location) continue
+    const nombre = ctx.pack.characters.get(id)?.name ?? id
+    dondeEsta.set(character.location, [...(dondeEsta.get(character.location) ?? []), nombre])
+  }
+  for (const [locationId, gente] of dondeEsta) {
+    const location = ctx.pack.locations.get(locationId)
+    lines.push(`En ${location?.name ?? locationId} (location:${locationId}): ${gente.join(', ')}.`)
+  }
+  const sinSitio = Object.entries(ctx.state.world.characters)
+    .filter(([id, c]) => c.location === null && party.includes(id))
+    .map(([id]) => ctx.pack.characters.get(id)?.name ?? id)
+  if (sinSitio.length) lines.push(`De camino o fuera de escena: ${sinSitio.join(', ')}.`)
+
+  // "Ahora" es lo que la mesa ya provoco en el NPC: actitud de -5 enemigo a 5
+  // aliado, condiciones, lo que lleva. Tambien de los NPCs que nacieron en la
+  // mesa: lo que el motor recuerda tiene que volver al GM, o no lo recuerda nadie.
+  const known = [...ctx.pack.npcs.values()].filter((npc) => npcNow(ctx, npc.id) !== '').map((npc) => `- ${npc.name} (npc:${npc.id}):${npcNow(ctx, npc.id)}`)
+  const improvised = Object.keys(ctx.state.world.npcs).filter((id) => !ctx.pack.npcs.has(id) && npcNow(ctx, id) !== '').map((id) => `- npc:${id} (nació en esta mesa):${npcNow(ctx, id)}`)
+  if (known.length || improvised.length) lines.push('', 'NPCs, como quedaron (actitud de -5 enemigo a 5 aliado):', ...known, ...improvised)
+
+  const progress = [...ctx.pack.quests.values()].flatMap((quest) => {
+    const progreso = ctx.state.quests?.[quest.id]
+    if (!progreso) return []
+    const hechos = progreso.completed ?? []
+    const pendientes = quest.objectives.filter((o) => !hechos.includes(o.id))
+    const estado = { active: 'en marcha', done: 'cumplida', failed: 'fracasada' }[progreso.status]
+    const out = [`- ${quest.title} (quest:${quest.id}): ${estado}.${hechos.length ? ` Ya conseguido: ${hechos.join(', ')}.` : ''}${pendientes.length && progreso.status !== 'done' ? ` Pendiente: ${pendientes.map((o) => o.id).join(', ')}.` : ''}`]
+    if (progreso.note) out.push(`  Nota: ${progreso.note}`)
+    return out
+  })
+  if (progress.length) lines.push('', 'Misiones, como van:', ...progress)
+
+  if (lines.length === 2) lines.push('Nada registrado todavía.')
   return lines.join('\n')
 }
 
@@ -242,17 +268,29 @@ function npcNow(ctx: GMTurnContext, id: string): string {
 }
 
 // Capa b: party con estado vivo.
-function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string {
+function partyFixedLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string {
   const lines: string[] = ['# Party presente', '']
   if (party.length === 0) lines.push('(nadie en escena)')
 
   for (const id of party) {
     const sheet = ctx.pack.characters.get(id)
-    const live = ctx.state.world.characters[id]
-    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, sheet: ctx.session?.arc?.sheets?.[id] }))
+    lines.push(characterCard(id, sheet, undefined, undefined, budget.sheets, ctx.pack, ctx.notes?.personas?.[id], { goal: ctx.session?.arc?.goal, sheet: ctx.session?.arc?.sheets?.[id] }))
     lines.push('')
   }
 
+  return lines.join('\n').trimEnd()
+}
+
+/** El estado vivo de cada personaje de la party (HP, condiciones, inventario, pistas, lo que sabe y lo que oyo). */
+function partyLiveLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget): string | null {
+  if (party.length === 0) return null
+  const lines: string[] = ['# Estado de la party', '']
+  for (const id of party) {
+    const sheet = ctx.pack.characters.get(id)
+    const live = ctx.state.world.characters[id]
+    lines.push(characterCard(id, sheet, live, ctx.state, budget.sheets, ctx.pack, undefined, { liveOnly: true }))
+    lines.push('')
+  }
   return lines.join('\n').trimEnd()
 }
 
@@ -261,13 +299,15 @@ function partyLayer(ctx: GMTurnContext, party: string[], budget: ContextBudget):
  * la ficha seguia diciendo "estudiar Medicina en la UNAM"). `view.player`: la
  * ficha como la conoce su jugador, sin lo que solo sabe el GM (que rumor es falso).
  */
-function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string, view: { goal?: string | undefined; player?: boolean; sheet?: NonNullable<SessionArc['sheets']>[string] | undefined } = {}): string {
+function characterCard(id: string, sheet: Character | undefined, live: CharacterState | undefined, state: CampaignState | undefined, sheets: ContextBudget['sheets'], pack: LoadedPack, persona?: string, view: { goal?: string | undefined; player?: boolean; sheet?: NonNullable<SessionArc['sheets']>[string] | undefined; liveOnly?: boolean } = {}): string {
   // La sesion puede decir quien es el personaje ahora (un salto de quince años).
   if (sheet && view.sheet) sheet = { ...sheet, ...(view.sheet.class ? { class: view.sheet.class } : {}), ...(view.sheet.age ? { age: view.sheet.age } : {}), ...(view.sheet.bio ? { bio: view.sheet.bio } : {}) }
   const lines: string[] = []
   const name = sheet?.name ?? id
   lines.push(`## ${name} (character:${id})`)
-  if (sheet && sheets === 'compact') {
+  if (view.liveOnly) {
+    // Solo lo vivo: la ficha ya fue en la parte fija del contexto.
+  } else if (sheet && sheets === 'compact') {
     lines.push(`${sheet.race}, ${sheet.class}. Meta: ${view.goal ?? sheet.goal} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
   } else if (sheet) {
     lines.push(`${sheet.race}, ${sheet.class}, ${sheet.age}. "${sheet.quote}"`)
@@ -286,6 +326,7 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
   }
   if (live) {
     const parts = [`HP ${live.hp.current}/${live.hp.max}`]
+    if (view.liveOnly && live.location) parts.push(`en ${pack.locations.get(live.location)?.name ?? live.location}`)
     parts.push(live.conditions.length ? `condiciones: ${live.conditions.join(', ')}` : 'sin condiciones')
     parts.push(live.inventory.length ? `inventario: ${live.inventory.map((i) => i.note ? `${i.id} (${i.note})` : i.id).join(', ')}` : 'inventario vacío')
     if (live.fortune) parts.push(`Fortuna: ${live.fortune.result} (${live.fortune.tier})`)
@@ -306,11 +347,11 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     if (Array.isArray(bonds) && bonds.length) parts.push(`vínculos: ${bonds.map((b) => `${refName(pack, String((b as { with: string }).with))} (${String((b as { state: string }).state)})`).join(', ')}`)
     lines.push(`Estado: ${parts.join('; ')}.`)
   }
-  const facts = Object.keys(state.knowledge[id]?.facts ?? {})
+  const facts = Object.keys(state?.knowledge[id]?.facts ?? {})
   if (facts.length) lines.push(`Sabe (descubierto): ${facts.map((f) => refId(f)).join(', ')}.`)
   // Lo que ha oido, aparte de lo que sabe: un rumor puede ser falso, y el GM
   // tiene que poder jugarlo como tal.
-  const rumors = state.knowledge[id]?.rumors ?? []
+  const rumors = state?.knowledge[id]?.rumors ?? []
   // Que un rumor es falso lo sabe el GM, no quien lo oyo.
   if (rumors.length) lines.push(`Ha oído (rumores, no hechos): ${rumors.map((r) => (r.false && !view.player ? `${r.text} [FALSO]` : r.text)).join('; ')}.`)
   // Lo escribio su jugador: describe al personaje (como es, que busca, que no

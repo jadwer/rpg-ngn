@@ -318,8 +318,12 @@ describe('apps/engine', () => {
 
       const params = anthropicCalls.filter((c) => c.model === 'claude-sonnet-5').at(-1)!
       expect(params.max_tokens).toBe(1200)
-      const user = String(params.messages[0]?.content)
-      expect(user).toContain('<premisa_de_la_mesa>\nEsta noche esperan a Calder en la posada.\n</premisa_de_la_mesa>')
+      // El mensaje de usuario va en dos bloques: el prefijo fijo (mundo y fichas, cacheado) y lo vivo del turno.
+      const content = params.messages[0]?.content as Array<{ type: string; text: string; cache_control?: unknown }>
+      expect(content).toHaveLength(2)
+      expect(content[0]).toMatchObject({ cache_control: { type: 'ephemeral', ttl: '1h' } })
+      const user = content.map((c) => c.text).join('')
+      expect(content[0]!.text).toContain('<premisa_de_la_mesa>\nEsta noche esperan a Calder en la posada.\n</premisa_de_la_mesa>')
       expect(user).toContain('Anochecer')
       expect(JSON.stringify(params)).not.toContain(KEY)
     })

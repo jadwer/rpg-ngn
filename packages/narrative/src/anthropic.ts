@@ -59,7 +59,7 @@ export class AnthropicTransport implements ModelTransport {
       max_tokens: prompt.maxOutputTokens,
       stream: true,
       system: [{ type: 'text', text: prompt.system, cache_control: { type: 'ephemeral', ttl: '1h' } }],
-      messages: [{ role: 'user', content: prompt.user }],
+      messages: [{ role: 'user', content: userContent(prompt) }],
       ...(acceptsEffort(this.model) ? { output_config: { effort: this.effort } } : {}),
     })
 
@@ -97,6 +97,23 @@ export class AnthropicTransport implements ModelTransport {
     const info = await this.client.models.retrieve(this.model)
     return { ok: true, model: info.id, message: `Anthropic: ${info.display_name} disponible` }
   }
+}
+
+/**
+ * El mensaje de usuario en dos bloques cuando el prompt trae su prefijo fijo
+ * (mundo y fichas): el primero se cachea una hora como el de sistema, el
+ * segundo es lo vivo del turno. Si el prefijo no encabeza el mensaje (no
+ * deberia pasar), va todo en un bloque y no se cachea nada de mas.
+ */
+function userContent(prompt: ModelPrompt): string | Anthropic.TextBlockParam[] {
+  const fixed = prompt.fixed
+  if (!fixed || !prompt.user.startsWith(fixed)) return prompt.user
+  const rest = prompt.user.slice(fixed.length)
+  if (rest.trim() === '') return prompt.user
+  return [
+    { type: 'text', text: fixed, cache_control: { type: 'ephemeral', ttl: '1h' } },
+    { type: 'text', text: rest },
+  ]
 }
 
 /**
