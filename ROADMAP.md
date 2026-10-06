@@ -117,7 +117,8 @@ con respaldo previo.
 - [ ] Que Gabino juegue el one-shot en produccion y se lea con `tables:review`
 - [ ] Regrabar las voces de las cronicas publicadas (`speech:chronicle --dry-run` primero)
 - [x] Costo por partida: cache del prompt del sistema con una hora de vida y tokens de cache medidos (06-10, desplegado); `effort: low` medido en local (-36% de salida, misma historia), pendiente de que Gabino lo apruebe para produccion (`ANTHROPIC_EFFORT=low`)
-- [ ] Costo, siguiente paso si hace falta: segundo punto de cache con la parte fija del mundo (unos 0.15 USD por one-shot); medir Haiku con `tables:review`
+- [x] Segundo punto de cache: prefijo fijo (mundo y fichas sin estado) cacheado una hora; mascarada de 0.54 a 0.36 USD la sesion corta de tres (06-10, desplegado)
+- [ ] Costo, si hace falta mas: medir Haiku como narrador con `tables:review`
 - [x] Mesas de tres con modelo real: boticaria y mascarada (06-10); secretos propios por personaje (`knownBy`), parrafo cortado por el lint se reconsidera, logros sin repetir, ideas cortadas se rescatan. Desplegado
 - [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y modelo real
 - [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
