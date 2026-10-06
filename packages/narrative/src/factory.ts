@@ -23,6 +23,7 @@ export function createProvider(config: ProviderConfig, deps: ProviderDeps = {}):
         model: config.model,
         credential: config.credential,
         contextProfile: config.contextProfile,
+        ...(config.effort ? { effort: config.effort } : {}),
         ...(deps.anthropicClient ? { client: deps.anthropicClient } : {}),
         ...(deps.fetch ? { fetch: deps.fetch } : {}),
         ...(deps.timeoutMs ? { timeoutMs: deps.timeoutMs } : {}),

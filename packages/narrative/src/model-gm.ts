@@ -22,6 +22,19 @@ export interface ModelReply {
   finish: 'stop' | 'length' | 'refusal' | 'other'
   inputTokens: number
   outputTokens: number
+  /** Tokens leidos del cache de prompt y escritos en el, si el proveedor los reporta. */
+  cacheReadTokens?: number
+  cacheWriteTokens?: number
+}
+
+/** El `usage` de una respuesta, con el cache solo si el proveedor lo reporto. */
+export function usageOf(reply: ModelReply): { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number } {
+  return {
+    inputTokens: reply.inputTokens,
+    outputTokens: reply.outputTokens,
+    ...(reply.cacheReadTokens !== undefined ? { cacheReadTokens: reply.cacheReadTokens } : {}),
+    ...(reply.cacheWriteTokens !== undefined ? { cacheWriteTokens: reply.cacheWriteTokens } : {}),
+  }
 }
 
 /**
@@ -458,7 +471,7 @@ export class ModelGMProvider implements GMProvider {
       const closed = interpreter.closed ?? {}
       const endingId = closed.endingId ?? interpreter.defaultEnding ?? undefined
       yield { kind: 'close', ...closed, ...(endingId ? { endingId } : {}) }
-      yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
+      yield { kind: 'usage', ...usageOf(reply) }
       return
     }
     // Quien tiene tirada pedida tira, siempre con la palabra (aunque el modelo
@@ -487,7 +500,7 @@ export class ModelGMProvider implements GMProvider {
       yield { kind: 'event', event: { type: 'world_event', payload: { note }, visibility: { layer: 'gm', witnesses: [] } } }
     }
     yield { kind: 'addressed', characterIds: addressed }
-    yield { kind: 'usage', inputTokens: reply.inputTokens, outputTokens: reply.outputTokens }
+    yield { kind: 'usage', ...usageOf(reply) }
   }
 
   /**

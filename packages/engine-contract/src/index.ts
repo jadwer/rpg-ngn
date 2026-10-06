@@ -118,6 +118,8 @@ export const ProviderConfig = z.discriminatedUnion('kind', [
     model: z.string().min(1),
     credential: z.string().min(1),
     contextProfile: ContextProfile.optional(),
+    /** Esfuerzo del pensamiento adaptativo (`medium` si falta); `low` para medir cuanto cuesta razonar. */
+    effort: z.enum(['low', 'medium', 'high']).optional(),
   }),
   /**
    * Cualquier API compatible con OpenAI (Chat Completions con streaming).
@@ -461,10 +463,19 @@ export const PackNpc = z.strictObject({
 })
 export type PackNpc = z.infer<typeof PackNpc>
 
+/**
+ * Tokens de la llamada del narrador. `inputTokens` es lo que el proveedor
+ * cobra a precio normal: lo leido del cache (`cacheReadTokens`, a un decimo)
+ * y lo escrito en el (`cacheWriteTokens`, al doble con una hora de vida) van
+ * aparte, como los reporta Anthropic. Sin cache, los dos faltan.
+ */
 export const TurnUsage = z.strictObject({
   inputTokens: z.number().int().nonnegative(),
   outputTokens: z.number().int().nonnegative(),
+  cacheReadTokens: z.number().int().nonnegative().optional(),
+  cacheWriteTokens: z.number().int().nonnegative().optional(),
 })
+export type TurnUsage = z.infer<typeof TurnUsage>
 
 export const TurnProjections = z.strictObject({
   world: z.unknown(),

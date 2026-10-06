@@ -241,7 +241,7 @@ describe('apps/engine', () => {
           async create(params) {
             anthropicCalls.push(params)
             async function* events(): AsyncGenerator<Anthropic.RawMessageStreamEvent> {
-              yield { type: 'message_start', message: { usage: { input_tokens: 900 } } } as unknown as Anthropic.RawMessageStreamEvent
+              yield { type: 'message_start', message: { usage: { input_tokens: 900, cache_read_input_tokens: 3800, cache_creation_input_tokens: 0 } } } as unknown as Anthropic.RawMessageStreamEvent
               yield { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } }
               yield { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 120 } } as unknown as Anthropic.RawMessageStreamEvent
             }
@@ -306,7 +306,7 @@ describe('apps/engine', () => {
       expect(result.events.map((e) => [e.seq, e.type])).toEqual([[23, 'player_action'], [24, 'narration'], [25, 'world_event']])
       expect(result.addressed).toEqual(['calder'])
       // El consumo del turno es el del narrador; las ideas van aparte, al modelo barato (docs/27, bloque I).
-      expect(result.usage).toEqual({ inputTokens: 900, outputTokens: 120 })
+      expect(result.usage).toEqual({ inputTokens: 900, outputTokens: 120, cacheReadTokens: 3800, cacheWriteTokens: 0 })
       // (El cliente falso contesta lo mismo a todo, asi que esa llamada no trae ideas: queda apuntado y el turno sale igual.)
       expect(result.diagnostics?.dropped.join(' ')).toContain('sin ideas para calder')
       const ideas = anthropicCalls.at(-1)!

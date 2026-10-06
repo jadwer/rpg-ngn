@@ -1,13 +1,14 @@
 import type Anthropic from '@anthropic-ai/sdk'
 import { describe, expect, it } from 'vitest'
 import { AnthropicTransport, createAnthropicProvider, type AnthropicClientLike } from './anthropic.js'
+import { createProvider } from './factory.js'
 import { collect, contextFor, openSession003, response, turn } from './pilot.test-helpers.js'
 
 const KEY = 'sk-ant-api03-SECRETA-abcdefghijklmnop'
 
 function events(text: string[], stop: Anthropic.StopReason = 'end_turn'): Anthropic.RawMessageStreamEvent[] {
   // Fixtures minimos: solo los campos que el transporte lee. El cast evita perseguir cada campo nuevo del SDK.
-  const usage = { input_tokens: 1800, output_tokens: 1 } as unknown as Anthropic.Usage
+  const usage = { input_tokens: 1800, output_tokens: 1, cache_read_input_tokens: 4000, cache_creation_input_tokens: 0 } as unknown as Anthropic.Usage
   const message = { id: 'msg_1', type: 'message', role: 'assistant', model: 'claude-sonnet-5', content: [], stop_reason: null, stop_sequence: null, usage } as unknown as Anthropic.Message
   return [
     { type: 'message_start', message },
@@ -56,7 +57,7 @@ describe('AnthropicTransport', () => {
     expect(blocks.map((b) => b?.type)).toEqual(['dialogue', 'narration'])
     expect(blocks[1]).toMatchObject({ text: 'El farol parpadea.' })
     expect(outputs.find((o) => o.kind === 'addressed')).toEqual({ kind: 'addressed', characterIds: ['calder'] })
-    expect(outputs.at(-1)).toEqual({ kind: 'usage', inputTokens: 1800, outputTokens: 310 })
+    expect(outputs.at(-1)).toEqual({ kind: 'usage', inputTokens: 1800, outputTokens: 310, cacheReadTokens: 4000, cacheWriteTokens: 0 })
     // Las ideas no salen de `narrate`: las pide el engine aparte, al modelo barato (docs/27, bloque I).
     expect(calls).toHaveLength(1)
     expect(provider.separateIdeas).toBe(true)
@@ -64,9 +65,16 @@ describe('AnthropicTransport', () => {
     const params = calls[0]!
     expect(params.stream).toBe(true)
     expect(params.max_tokens).toBe(4800)
-    expect(params.system).toEqual([expect.objectContaining({ type: 'text', cache_control: { type: 'ephemeral' } })])
+    expect(params.system).toEqual([expect.objectContaining({ type: 'text', cache_control: { type: 'ephemeral', ttl: '1h' } })])
     expect(params.output_config).toEqual({ effort: 'medium' })
     expect(params.messages).toHaveLength(1)
+  })
+
+  it('el esfuerzo del pensamiento se elige desde la plataforma (ProviderConfig.effort)', async () => {
+    const base = await openSession003()
+    const fake = fakeClient(['{"kind":"narration","text":"Llueve."}'])
+    await collect(createProvider({ kind: 'anthropic', model: 'claude-sonnet-5', credential: KEY, effort: 'low' }, { anthropicClient: fake.client }).narrate(contextFor(base, turn(1, []))))
+    expect(fake.calls[0]?.output_config).toEqual({ effort: 'low' })
   })
 
   it('a Haiku no le manda output_config, que no lo acepta', async () => {

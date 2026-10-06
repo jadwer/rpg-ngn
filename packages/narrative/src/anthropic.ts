@@ -29,8 +29,10 @@ export interface AnthropicProviderOptions extends ModelGMOptions {
 
 /**
  * Messages API con streaming. El prompt de sistema es estable y se marca
- * como prefijo cacheable; lo que cambia por turno va en el mensaje de
- * usuario.
+ * como prefijo cacheable con una hora de vida: son unos 4,000 tokens por
+ * turno (la mitad de la entrada) y con los cinco minutos por omision el
+ * cache expiraba entre turno y turno (los jugadores tardan de 4 a 6 min).
+ * Lo que cambia por turno va en el mensaje de usuario.
  */
 export class AnthropicTransport implements ModelTransport {
   readonly kind = 'anthropic'
@@ -56,7 +58,7 @@ export class AnthropicTransport implements ModelTransport {
       model: this.model,
       max_tokens: prompt.maxOutputTokens,
       stream: true,
-      system: [{ type: 'text', text: prompt.system, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: prompt.system, cache_control: { type: 'ephemeral', ttl: '1h' } }],
       messages: [{ role: 'user', content: prompt.user }],
       ...(acceptsEffort(this.model) ? { output_config: { effort: this.effort } } : {}),
     })
@@ -64,11 +66,15 @@ export class AnthropicTransport implements ModelTransport {
     let finish: ModelReply['finish'] = 'other'
     let inputTokens = 0
     let outputTokens = 0
+    let cacheReadTokens = 0
+    let cacheWriteTokens = 0
 
     for await (const event of events) {
       switch (event.type) {
         case 'message_start':
           inputTokens = event.message.usage.input_tokens ?? 0
+          cacheReadTokens = event.message.usage.cache_read_input_tokens ?? 0
+          cacheWriteTokens = event.message.usage.cache_creation_input_tokens ?? 0
           break
         case 'content_block_delta':
           if (event.delta.type === 'text_delta' && event.delta.text !== '') yield event.delta.text
@@ -84,7 +90,7 @@ export class AnthropicTransport implements ModelTransport {
       }
     }
 
-    return { finish, inputTokens, outputTokens }
+    return { finish, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens }
   }
 
   async probe(): Promise<GMProbe> {

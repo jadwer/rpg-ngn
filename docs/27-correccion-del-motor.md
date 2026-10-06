@@ -189,6 +189,50 @@ Lo que esa partida destapo y ninguna prueba local podia ver:
 - Doña Chelo, casera del capitulo 2, aparecio en el edificio del capitulo 3: los NPCs del mundo se listan en todas las sesiones. El canon de los capitulos 1 y 3 lo corta; falta poder decir por sesion que NPCs existen.
 - Las ideas de Haiku salian a veces en infinitivo o como orden; el encargo ahora pide primera persona en presente, con ejemplos.
 
+## Costo por partida (06-10)
+
+Lo medido el 05-10 (0.94 USD el one-shot con Sonnet) estaba incompleto:
+`input_tokens` de Anthropic excluye el cache de prompt, y el prompt del
+sistema son 6,914 tokens por turno (la mitad de la entrada). Con el cache de
+cinco minutos por omision, en una mesa real (de 4 a 6 min por turno) se
+pagaba como escritura (1.25x) casi cada vez: el one-shot real costaba entre
+1.0 y 1.5 USD.
+
+Cambios:
+
+- Cache del prompt del sistema con una hora de vida (`ttl: '1h'`): se
+  escribe una vez por hora (2x) y se lee el resto (0.1x). Para el one-shot,
+  de 0.48 a 0.60 USD baja a unos 0.12 USD.
+- Los tokens de cache se guardan por turno y por campaña
+  (`cache_read_tokens`, `cache_write_tokens`); `turns:usage` y el panel los
+  cobran a su precio (`prices.*.cache_read`, `cache_write`).
+- `ANTHROPIC_EFFORT` (low, medium, high; `medium` si falta) llega al engine
+  por `ProviderConfig.effort`.
+
+Medido en local, capitulo 1 del medico (8 turnos, Sonnet, ideas con Haiku):
+
+| | `medium` (mesa 40) | `low` (mesa 41) |
+|---|---|---|
+| Entrada sin cache | 53,782 | 55,492 |
+| Salida | 9,641 | 6,167 (-36%) |
+| Cache | no medido | 6,914 escritos, 48,398 leidos |
+| Palabras del GM por turno (mediana) | 197 | 179 |
+| Tiempo del GM por turno (media) | 19 s | 14 s |
+| Historia perdida / ignoradas | 0 / 0 | 0 / 2 (un `clue` con forma vieja, un delta 0) |
+| Costo del capitulo | 0.35 (hits) a 0.53 USD (misses) | 0.32 USD |
+
+Con `low` la historia se leyo igual de bien: canon respetado (un solo coche,
+la mama en su turno, la patrulla le cree a Rogelio), tres logros, cierre con
+ESIME. Dos narraciones en tercera persona ("Emiliano guarda silencio"), que
+ya pasaba con `medium`. Decision pendiente de Gabino: poner `low` en
+produccion (es una linea del `.env` y reiniciar el worker).
+
+Lo que sigue pesando: el contexto dinamico (mundo, party, memoria, unos 7,000
+tokens por turno a precio normal) es ahora mas de la mitad del costo. Siguiente
+paso si hace falta: segundo punto de cache con la parte fija del mundo
+(manifiesto, arco, lugares, NPCs sin su "Ahora"), unos 0.15 USD por one-shot;
+exige partir `worldLayer` en fija y viva.
+
 ## Abierto
 
 | Que | Por que queda | Dueño |
@@ -203,7 +247,6 @@ Lo que esa partida destapo y ninguna prueba local podia ver:
 | Lector critico en `play-session`: una llamada que lee la sesion entera mas `arc.canon` y lista contradicciones | No se hizo; hoy se lee a mano con `tables:review` | Siguiente sesion |
 | Panel del anfitrion con el diagnostico del turno | Hoy solo se lee por comando; el anfitrion ya no ve avisos tecnicos, que es lo que pidio | Si hace falta |
 | `reopen()` sigue escribiendo "El relato se ha trabado" con el error tecnico en el detalle para el anfitrion | La mesa tiene que saber que el turno se reabrio | Revisar el texto |
-| Medir cuanto de la salida del narrador es razonamiento y probar `effort: low` | Ahora se puede: el consumo de las ideas va aparte | Con `ab-opening`, antes de tocar produccion |
 | El piloto, la mascarada y la boticaria no tienen `canon` ni `scene` de cierre | Son campos nuevos y opcionales | Al tocar cada mundo |
 
 ## Como se revisa de aqui en adelante

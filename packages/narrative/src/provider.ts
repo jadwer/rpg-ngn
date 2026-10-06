@@ -50,7 +50,7 @@ export type GMOutput =
   | { kind: 'block'; block: TurnBlock }
   | { kind: 'event'; event: ProposedEvent }
   | { kind: 'addressed'; characterIds: string[] }
-  | { kind: 'usage'; inputTokens: number; outputTokens: number }
+  | { kind: 'usage'; inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number }
   /** Hallazgo del lint de conocimiento; el engine lo acumula en `result.lint`. */
   | { kind: 'lint'; finding: LintFinding }
   /** El director cerro la sesion en su turno de cierre (docs/26, H1); el engine lo pasa a `result.close`. */
