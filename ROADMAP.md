@@ -121,7 +121,7 @@ con respaldo previo.
 - [ ] Costo, si hace falta mas: medir Haiku como narrador con `tables:review`
 - [x] Mesas de tres con modelo real: boticaria y mascarada (06-10); secretos propios por personaje (`knownBy`), parrafo cortado por el lint se reconsidera, logros sin repetir, ideas cortadas se rescatan. Desplegado
 - [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y modelo real
-- [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
+- [x] AAB v26 (06-10, `C:\Users\JadweR\ad-astra-mentis-v26.aab`, firmado con la llave de subida, verificado): cierre de capitulo, GM en vez de director, textos del 05 y 06-10. Falta subirlo a Pruebas internas
 - [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
 
 ### Avance
