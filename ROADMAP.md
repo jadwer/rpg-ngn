@@ -116,7 +116,8 @@ con respaldo previo.
 - [x] Desplegar (migracion `turn_diagnostics`; engine y API juntos)
 - [ ] Que Gabino juegue el one-shot en produccion y se lea con `tables:review`
 - [ ] Regrabar las voces de las cronicas publicadas (`speech:chronicle --dry-run` primero)
-- [ ] Costo por partida (hoy 0.94 USD el one-shot con Sonnet): cachear el bloque fijo del contexto, probar `effort: low`, medir Haiku y mezcla con `tables:review`
+- [x] Costo por partida: cache del prompt del sistema con una hora de vida y tokens de cache medidos (06-10, desplegado); `effort: low` medido en local (-36% de salida, misma historia), pendiente de que Gabino lo apruebe para produccion (`ANTHROPIC_EFFORT=low`)
+- [ ] Costo, siguiente paso si hace falta: segundo punto de cache con la parte fija del mundo (unos 0.15 USD por one-shot); medir Haiku con `tables:review`
 - [ ] Probar con modelo real los otros tres sistemas y una mesa de tres (el tope de tiradas no se ejercito con modelo)
 - [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
 - [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
