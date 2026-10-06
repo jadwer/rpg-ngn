@@ -12,9 +12,9 @@ lo desplegado el 03-10 esta listado en el ROADMAP, "Plan del 04-10".
 jugar el one-shot en produccion se leyeron completas las mesas 43 y 44 y se
 corrigio el motor de punta a punta: formato plano del GM, interprete que no
 pierde historia, ideas desde lo que el jugador sabe, tope de tiradas,
-diagnostico del turno fuera de la historia y canon de autor. Esta en commits
-(monorepo `db2e13d`, API `22b364d`) y **sin desplegar**; el detalle y lo que
-queda abierto, en [docs/27](27-correccion-del-motor.md). Para revisar una
+diagnostico del turno fuera de la historia y canon de autor. Tras cuatro
+rondas de VAM se desplego el 06-10 (monorepo `f06a61a`, API `08f872a`); el
+detalle y lo que queda abierto, en [docs/27](27-correccion-del-motor.md). Para revisar una
 partida ya no se consulta la base a mano: `php artisan tables:review <mesa>`
 y `php artisan turns:notices`.
 

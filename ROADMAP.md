@@ -96,10 +96,11 @@ mas one-shots de un jugador por genero.
 Gabino jugo el one-shot en produccion (mesa 44) y se perdio un turno entero,
 hubo turnos sin ideas y avisos tecnicos dentro de la historia; leidas completas
 esa mesa y la 43, salieron 16 fallos del motor, 3 de reglas y los del mundo.
-Detalle, pruebas, VAM de dos rondas y prueba con el modelo real en
+Detalle, pruebas, VAM de cuatro rondas y prueba con el modelo real en
 [docs/27-correccion-del-motor.md](docs/27-correccion-del-motor.md). Lo hizo
-Fable; monorepo `db2e13d` y `47bfa1a`, API `22b364d`, boticaria `86aa784`,
-mascarada `1dfa970`. **Sin desplegar**: falta el visto bueno de Gabino.
+Fable; monorepo `db2e13d`, `47bfa1a` y `f06a61a`, API `22b364d` y `08f872a`,
+boticaria `86aa784`, mascarada `1dfa970`. Desplegado el 06-10 (00:00 UTC)
+con respaldo previo.
 
 - [x] Formato plano del GM y un interprete donde una linea rota no daña a las demas (repara, rescata la historia, apunta lo perdido con su texto)
 - [x] Lo que el jugador escribe junto al dado llega al GM
@@ -108,10 +109,14 @@ mascarada `1dfa970`. **Sin desplegar**: falta el visto bueno de Gabino.
 - [x] NPCs con memoria (actitud y condicion se guardan y vuelven al GM); dar un objeto ya no tumba el turno en los sistemas sin combate
 - [x] Diagnostico del turno fuera de la historia: `turn_diagnostics` con la salida del modelo, `turns:notices` y `tables:review`
 - [x] Canon, "Anteriormente" y meta por capitulo escritos por el autor; QUIERO SER MEDICO corregido (canon, la venganza, Rogelio con veinte años)
-- [x] El video, la presentacion y la voz quitan lo que el jugador escribio como accion
+- [x] El video, la presentacion y la voz quitan lo que el jugador escribio como accion y las preguntas con que el GM devuelve la palabra; el audio viejo queda `stale` y se regenera
+- [x] VAM rondas 3 y 4 del interprete (prosa como dialogo, notas del modelo, lineas rotas) y `arc.sheets` por personaje
 - [x] De cara al jugador se dice GM
 - [x] Prueba de contrato: todo ejemplo de los prompts lo acepta y lo aplica el motor
-- [ ] **Desplegar** (migracion `turn_diagnostics`; engine y API juntos) y que Gabino juegue el one-shot
+- [x] Desplegar (migracion `turn_diagnostics`; engine y API juntos)
+- [ ] Que Gabino juegue el one-shot en produccion y se lea con `tables:review`
+- [ ] Regrabar las voces de las cronicas publicadas (`speech:chronicle --dry-run` primero)
+- [ ] Costo por partida (hoy 0.94 USD el one-shot con Sonnet): cachear el bloque fijo del contexto, probar `effort: low`, medir Haiku y mezcla con `tables:review`
 - [ ] Probar con modelo real los otros tres sistemas y una mesa de tres (el tope de tiradas no se ejercito con modelo)
 - [ ] AAB v26 con el boton de cierre de capitulo y los textos nuevos
 - [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`

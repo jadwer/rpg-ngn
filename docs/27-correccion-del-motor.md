@@ -107,7 +107,8 @@ Mesa 43 (boticaria):
 ## Validacion adversarial (VAM)
 
 Un defensor y dos fiscales independientes, cada ataque con una entrada
-reproducible; dos rondas sobre el interprete, que es el tope.
+reproducible. Cuatro rondas sobre el interprete y tres sobre el contexto y
+la API (Gabino pidio dos mas antes de desplegar, 05-10).
 
 Lo que la primera ronda tumbo y se corrigio:
 
@@ -127,7 +128,34 @@ Lo que tumbo la segunda ronda, ya sobre lo corregido, y tambien se corrigio:
 - Con la salida cortada por el limite se tiraba tambien la linea anterior, a la que solo le faltaba una llave.
 - JSON con formato al que le falta una llave: el registro siguiente se perdia. Ahora una llave tras un valor ya cerrado empieza registro.
 
-Riesgos que quedan del interprete, aceptados tras dos rondas: un texto que cita
+Tercera y cuarta ronda, sobre lo que el modelo escribe fuera del formato:
+
+- Una linea JSON sin su llave final se tragaba la prosa que venia detras y la
+  ponia en boca del NPC. Ahora, dentro de una cadena solo la cierra otro
+  registro; fuera de ella la cierra lo que no puede continuar JSON (texto,
+  una comilla, un guion, un numero o un corchete al empezar la linea).
+- La prosa escrita como dialogo se leia como dialogo con hablantes falsos
+  ("Las once: «ya es tarde»"). Solo es dialogo si habla alguien conocido (NPC
+  del mundo, personaje, o quien ya hablo) y la cita cierra la linea.
+- Las notas del modelo para si mismo llegaban a la mesa ("Nota: el jugador
+  eligio X, sigue el final medico", "Objetivo oculto:", "Narrador (para mi):",
+  anotaciones con `//` o `<-`). Se descartan y cuentan como historia perdida.
+  "Nota el frio en la nuca", "Todo esta en silencio:" o "(La puerta se cierra
+  sola.)" siguen siendo historia.
+- Una narracion con `characterId` se descartaba y un dialogo con
+  `characterId` se publicaba: al reves. Ahora el hablante se publica sin su
+  referencia interna y un destinatario escrito como texto vuelve susurro.
+- La cola que corto el limite de salida se narraba a medias; se descarta.
+- Hablantes en negrita (`**Bren:** "..."`), prosa pegada a un objeto por
+  delante o por detras y "[entre corchetes]" como prosa entera.
+- Contexto y API (fiscal B): `arc.sheet` aplicaba a toda la party; ahora es
+  `arc.sheets` por id de personaje. `withoutClosingQuestion` dejaba "Y si no
+  vas." de un dilema de dos ramas y cortaba vocativos con raya ("—Mijo, ¿me
+  vas a dejar solo?"): una condicion delante de la pregunta se va con ella y
+  un parrafo que abre con raya o comilla no se toca. La nota de una tirada de
+  mas solo llega al GM el turno siguiente, no el resto de la sesion.
+
+Riesgos que quedan del interprete, aceptados tras cuatro rondas: un texto que cita
 literalmente `","speaker"` se trunca; una narracion cerrada con `")` deja ese
 resto en el parrafo; un salto de linea dentro de un texto seguido de una linea
 que empieza con `{` corta el parrafo ahi. Son entradas que no se han visto en
@@ -167,7 +195,8 @@ Lo que esa partida destapo y ninguna prueba local podia ver:
 |---|---|---|
 | Probar el formato plano y las reglas nuevas con el modelo real en los otros tres sistemas y con tres jugadores | Solo se jugo el medico (drama, un jugador); el tope de tiradas y la separacion de la mesa no se ejercitaron con modelo | Antes de desplegar, o Gabino juega una mesa corta de la boticaria |
 | Decir por sesion que NPCs del mundo existen | Hoy se listan todos en todas; se tapa con `canon` | Siguiente sesion |
-| Una linea de prosa que no es historia (una nota del modelo para si mismo) se narra como historia | Paso una vez en 35 turnos de prueba; no hay forma segura de distinguirla de narracion | Vigilar en `tables:review`; si se repite, exigir JSON y descartar la prosa cuando el turno ya trae lineas JSON de historia |
+| Una nota del modelo para si mismo que no empieza con una etiqueta conocida se narra como historia | Se descartan las etiquetadas (Nota, Recordatorio, Objetivo oculto, GM, anotaciones); una nota en prosa limpia no se distingue de narracion | Vigilar en `tables:review`; si se repite, descartar la prosa cuando el turno ya trae lineas JSON de historia |
+| Las voces de las cronicas publicadas con audio quedan `stale` al cambiar el texto que se cuenta | El audio viejo lleva las preguntas del GM; se regenera al pedirlo y el video no se arma con el | Regrabar con `speech:chronicle <token>` (primero `--dry-run` por el costo) |
 | El GM a veces narra en tercera persona ("Emiliano cierra la guia") en mesa de uno, sobre todo sin razonar | Es del modelo; el prompt ya pide segunda persona | Medir con el prompt nuevo |
 | Con modelos locales (perfil compacto) las ideas siguen saliendo del GM, con los secretos delante | Otra llamada por turno son minutos en una M1 | Aceptado; partidas privadas |
 | El canon es instruccion: el motor no lo hace cumplir | Haria falta un lector que compare la narracion con el canon | Lector critico, abajo |
