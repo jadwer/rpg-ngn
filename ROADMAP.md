@@ -124,6 +124,21 @@ con respaldo previo.
 - [x] AAB v26 (06-10, `C:\Users\JadweR\ad-astra-mentis-v26.aab`, firmado con la llave de subida, verificado): cierre de capitulo, GM en vez de director, textos del 05 y 06-10. Falta subirlo a Pruebas internas
 - [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
 
+### Mundos inspirados para la beta (08-10, decision de Gabino)
+
+Cuatro mundos "en nuestra version inspirada" para que los testers jueguen
+algo que conocen: Konosuba, Among Us, GTA San Andreas y Genshin Impact, en
+ese orden. Privados como la boticaria (`third-party-ip`: beta cerrada,
+nunca catalogo abierto ni venta). Diseño y plan en `~/dev/rpg-packs/inspirados/`
+(`DISENO.md` con los cuatro, `inutiles.md` con el primero en detalle para
+que Opus lo implemente). Fable diseña, Gabino revisa nombres y tono, Opus
+implementa.
+
+- [ ] Konosuba, "Benditos sean los inutiles" (3 dias: `quirk`, `tone`, deuda de la party, pack de 6 misiones, prueba con modelo)
+- [ ] Among Us, "Turno de noche en la Persefone" (6 dias: declaraciones privadas, reunion y voto, bandos, ruleset)
+- [ ] GTA, "Vuelta al barrio" (3.5 dias: ruleset calle-d20 con calor y respeto, 6 misiones)
+- [ ] Genshin, "Las Siete Coronas" (6.5 dias: reacciones por el motor, vida de enemigos, sorteo de personaje)
+
 ### Avance
 
 - [x] **Comunidad v1** (02-10, API `aac4330`, monorepo `81e0d32`, desplegada): Historias en `/comunidad` (se ve sin cuenta) y en la pestaña de la app; al compartir la cronica se puede pedir "publicarla tambien en Comunidad", que toda la mesa acepta aparte del enlace (las ya compartidas no se listan solas). Creadores con mundos publicados y amigos con cuenta. Mesas abiertas, despues del 15-11
