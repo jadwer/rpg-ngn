@@ -56,6 +56,11 @@ export interface BuiltContext {
   party: string[]
 }
 
+/** Si en esta mesa lo que escribe cada jugador es privado: ajuste de la mesa, o lo que diga el mundo. */
+export function privateActions(ctx: Pick<GMTurnContext, 'notes' | 'pack'>): boolean {
+  return ctx.notes?.privateActions ?? ctx.pack.manifest.privateActions ?? false
+}
+
 export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEFAULT_BUDGET): BuiltContext {
   const session = ctx.state.meta.sessions[ctx.turn.sessionId]
   const party = session?.party ?? []
@@ -68,12 +73,20 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     memoryLayer(ctx, session, budget),
     gmLayer(ctx, party, budget),
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx) && !ctx.session?.arc?.previously),
+    privateActions(ctx) ? PRIVATE_ACTIONS_NOTE : null,
     rollsLayer(ctx, party),
     clock ? clockLayer(clock, party.length, ctx.session?.arc, achievedSoFar(ctx)) : null,
   ].filter((s) => s !== null)
 
   return { user: [fixed, ...live].join('\n\n'), fixed, party }
 }
+
+/** Lo que el GM tiene que saber cuando cada jugador declara en privado (juegos de roles ocultos). */
+const PRIVATE_ACTIONS_NOTE = [
+  '# Acciones privadas',
+  '',
+  'En esta mesa lo que escribe cada jugador lo lees tú y nadie más. Narra en público solo lo que se ve desde cada sala: quién estaba con quién, qué se oyó, qué apareció. Lo que hizo alguien sin testigos no lo cuentes en público: si hace falta, susúrraselo a quien lo hizo o a quien lo vio. Nunca repitas en público lo que un jugador escribió, ni lo resumas ni lo insinúes.',
+].join('\n')
 
 /** Los logros que ya salieron en esta sesion, por sus eventos en la cronica reciente. */
 function achievedSoFar(ctx: GMTurnContext): string[] {
@@ -693,7 +706,8 @@ export function buildPlayerContext(ctx: GMTurnContext, characterId: string, narr
   if (nowText.length) lines.push('', '# Esta sesión', '', ...nowText.map((l) => `- ${l}`))
 
   lines.push('', '# Ahora mismo', '')
-  for (const response of ctx.turn.responses) {
+  // Con acciones privadas, el jugador solo sabe lo que escribio el.
+  for (const response of ctx.turn.responses.filter((r) => !privateActions(ctx) || r.characterId === id)) {
     const who = ctx.pack.characters.get(response.characterId)?.name ?? response.characterId
     lines.push(`${who} hizo: ${clip(response.text, 400)}`)
   }

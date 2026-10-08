@@ -4,7 +4,7 @@ import { rollD20, rollDice, webCryptoRandom, type RandomSource } from '@rpg-ngn/
 import { RollKind, RollRequest, TurnBlock, type DiceMode, type LintMode } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
 import { z } from 'zod'
-import { budgetFor, buildPlayerContext, buildTurnContext, clockOf, hasPreviousSession, rollAllowance, type ContextBudget, type ContextProfile } from './context.js'
+import { budgetFor, buildPlayerContext, buildTurnContext, clockOf, hasPreviousSession, privateActions, rollAllowance, type ContextBudget, type ContextProfile } from './context.js'
 import { MILESTONE_NOTE, milestoneDue } from './pacing.js'
 import { buildKnowledgeView, lintText, markRevealed, type KnowledgeView } from './lint.js'
 import { systemPromptFor } from './prompt.js'
@@ -363,12 +363,16 @@ export class ModelGMProvider implements GMProvider {
       : ''
 
     // Las declaraciones se registran siempre, sin depender del modelo.
+    // En una mesa de acciones privadas lo que escribio cada uno lo ve el y
+    // el GM: el bloque va con `to` y el evento en la capa del jugador.
+    const secretActions = privateActions(ctx)
     for (const response of ctx.turn.responses) {
       const name = ctx.pack.characters.get(response.characterId)?.name ?? response.characterId
-      yield { kind: 'block', block: { type: 'dialogue', speaker: name, speakerRef: `character:${response.characterId}`, text: response.text, declared: true } }
+      const ref = `character:${response.characterId}`
+      yield { kind: 'block', block: { type: 'dialogue', speaker: name, speakerRef: ref, text: response.text, declared: true, ...(secretActions ? { to: [response.characterId] } : {}) } }
       yield {
         kind: 'event',
-        event: { type: 'player_action', actor: `character:${response.characterId}`, declared: response.text, visibility: { layer: 'campaign', witnesses } },
+        event: { type: 'player_action', actor: ref, declared: response.text, visibility: secretActions ? { layer: 'player', witnesses: [ref] } : { layer: 'campaign', witnesses } },
       }
     }
 

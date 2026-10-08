@@ -37,7 +37,9 @@ export function buildKnowledgeView(ctx: GMTurnContext, party: readonly string[])
   const heardParts: string[] = []
   const knownRefs = new Set<string>()
 
-  for (const response of ctx.turn.responses) heardParts.push(response.text)
+  // Con acciones privadas lo que escribio un jugador no lo oyo la mesa: no
+  // cuenta como dicho y el GM no puede repetirlo en publico sin que el lint lo vea.
+  if (!(ctx.notes?.privateActions ?? ctx.pack.manifest.privateActions ?? false)) for (const response of ctx.turn.responses) heardParts.push(response.text)
   // Un susurro (H7) no lo oyo la mesa: no cuenta como dicho.
   for (const entry of state.narrative.log) if (!entry.to) heardParts.push(entry.text)
   // Un NPC con estado guardado no es por eso un NPC que la mesa conozca: la

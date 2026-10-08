@@ -112,6 +112,12 @@ export const PackManifest = z.strictObject({
    */
   tone: z.string().min(1).max(1500).optional(),
   /**
+   * Las acciones de cada jugador son privadas por omision en este mundo: lo
+   * que escribe lo lee el GM y el, no la mesa (roles ocultos). La mesa puede
+   * cambiarlo en sus ajustes.
+   */
+  privateActions: z.boolean().optional(),
+  /**
    * La party debe dinero y eso es parte del juego (la posada, las multas del
    * Gremio, el Recaudador). `start` es la deuda al empezar la campaña; el GM
    * la mueve con el effect `debt` y la mesa la ve en la cabecera.

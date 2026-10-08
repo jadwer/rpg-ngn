@@ -170,6 +170,12 @@ export const TurnContext = z.strictObject({
   personas: z.record(KebabId, z.string().max(600)).optional(),
   /** Reloj de la historia (docs/26, H1). Sin el, la sesion no tiene presupuesto de turnos. */
   pacing: TurnPacing.optional(),
+  /**
+   * Lo que cada jugador escribe lo ve el GM y no la mesa (juegos de roles
+   * ocultos: Turno de noche en la Persefone). Ajuste de la mesa; sin el,
+   * manda `privateActions` del manifiesto del pack.
+   */
+  privateActions: z.boolean().optional(),
 })
 export type TurnContext = z.infer<typeof TurnContext>
 
