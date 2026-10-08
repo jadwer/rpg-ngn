@@ -162,6 +162,8 @@ describe('deduccion social en el motor', () => {
       { blocks: [{ type: 'narration', text: 'La tripulación discute junto a la esclusa.' }], events: [{ type: 'state_change', effects: [{ op: 'kill', who: 'character:brorg', target: 'character:dayan' }] }] },
     )
     expect(blocks(meeting.lines).find((b) => b.type === 'dialogue' && b.declared && b.text === 'Brorg estaba en la plaza.')).not.toHaveProperty('to')
+    // Calder esta muerto: su "Fui yo." no lo oye nadie mas, y su voto no cuenta.
+    expect(blocks(meeting.lines).find((b) => b.type === 'dialogue' && b.declared && b.text === 'Fui yo.')).toMatchObject({ to: ['calder'] })
     const system = blocks(meeting.lines).flatMap((b) => (b.type === 'system' ? [b] : []))
     expect(system.find((b) => b.text.includes('sella a Brorg'))?.text).toContain('Era el Huésped')
     expect(world(meeting.result).characters['dayan']?.custom['alive']).toBe(true)

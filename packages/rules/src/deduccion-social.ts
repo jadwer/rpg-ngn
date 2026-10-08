@@ -103,10 +103,9 @@ export function verdict(world: WorldState, lastTurn = false): DeductionRole | nu
   return lastTurn ? 'huesped' : null
 }
 
-/** Si el turno que viene es reunion. */
+/** Si el turno que viene es reunion. Lo deja calculado el ruleset en `meetingNext`, para que la API lo lea sin repetir la regla. */
 export function meetingNext(world: WorldState): boolean {
-  const deduction = deductionOf(world)
-  return deduction.meetingNext || deduction.sinceMeeting >= MEETING_EVERY
+  return deductionOf(world).meetingNext
 }
 
 /**
@@ -259,7 +258,8 @@ export const deduccionSocial: Ruleset = {
         const sabotage = deduction.sabotage
         const deadline = sabotage ? SABOTAGES[sabotage.kind].deadline : null
         const reactorLost = deduction.reactorLost || (sabotage !== null && deadline !== null && actionTurns - sabotage.since >= deadline)
-        return setDeduction(world, { actionTurns, sinceMeeting: deduction.sinceMeeting + 1, reactorLost })
+        const sinceMeeting = deduction.sinceMeeting + 1
+        return setDeduction(world, { actionTurns, sinceMeeting, reactorLost, meetingNext: deduction.meetingNext || sinceMeeting >= MEETING_EVERY })
       }
       case 'vote': {
         const who = ref(effect['who'], 'who', event)

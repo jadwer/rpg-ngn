@@ -297,7 +297,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       const effects = events.flatMap((e) => (e.type === 'state_change' ? (e.effects ?? []) : []))
       const kills = effects.filter((e) => e['op'] === 'kill').map((e) => ({ killer: String(e['who']).replace('character:', ''), victim: String(e['target']).replace('character:', '') }))
       const found = effects.some((e) => e['op'] === 'report')
-      for (const block of guardBlocks(held, kills, found, pack)) yield { kind: 'block', block }
+      // En una reunion, lo que escribe un muerto no se oye: va solo para el.
+      const ghosts = (block: EngineTurnBlock): EngineTurnBlock =>
+        meeting && block.type === 'dialogue' && block.declared && block.speakerRef?.startsWith('character:') && state.world.characters[block.speakerRef.slice(10)]?.custom['alive'] === false ? { ...block, to: [block.speakerRef.slice(10)] } : block
+      for (const block of guardBlocks(held.map(ghosts), kills, found, pack)) yield { kind: 'block', block }
       // Fin de un turno de accion: cuenta para la recarga, la reunion y el
       // reactor. La apertura (sin declaraciones) no es un turno de accion.
       if (!meeting && request.turn.responses.length > 0) {
