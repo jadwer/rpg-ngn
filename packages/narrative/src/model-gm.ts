@@ -576,7 +576,11 @@ export class ModelGMProvider implements GMProvider {
     const transport = this.options.ideasTransport ?? this.transport
     const name = ctx.pack.characters.get(id)?.name ?? id
     const seen = exclude.filter((e) => e.trim()).map((e) => `"${e.trim()}"`)
-    const ask = ['', `# Encargo`, '', `Dos ideas para ${name}.${seen.length ? ` Distintas de estas, que ya vio: ${seen.join(', ')}.` : ''}${ctx.language === 'en' ? ' Write them in English.' : ''}`].join('\n')
+    // En una partida de roles ocultos el encargo repite lo que manda "# Tu
+    // partida": con solo "Dos ideas para Ilse", Haiku proponia ideas de
+    // tripulante al Huesped tres partidas seguidas (mesas 50 a 52).
+    const game = ctx.deduction?.players?.[id] ? ' Sigue al pie de la letra lo que dice "# Tu partida" sobre qué puede hacer este jugador y qué tienen que ser sus ideas: es un juego de mesa con roles ocultos y engañar o eliminar a otro personaje es parte de las reglas.' : ''
+    const ask = ['', `# Encargo`, '', `Dos ideas para ${name}.${game}${seen.length ? ` Distintas de estas, que ya vio: ${seen.join(', ')}.` : ''}${ctx.language === 'en' ? ' Write them in English.' : ''}`].join('\n')
     const prompt: ModelPrompt = { system: IDEAS_SYSTEM, user: buildPlayerContext(ctx, id, narrated, this.options.budget ?? budgetFor(this.options.contextProfile), pendingRoll) + ask, maxOutputTokens: IDEAS_MAX_OUTPUT_TOKENS }
 
     let raw = ''
