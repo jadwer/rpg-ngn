@@ -40,11 +40,11 @@ export function isMeeting(state: CampaignState): boolean {
   return state.world.deduction !== undefined && meetingNext(state.world)
 }
 
-/** Los votos que trajo la API en las respuestas de la reunion, como effects `vote`, solo de vivos. */
+/** Los votos que trajo la API para la reunion, como effects `vote`, solo de vivos y a vivos. */
 export function voteEffects(state: CampaignState, turn: TurnInput): Array<Record<string, unknown>> {
-  return turn.responses
-    .filter((r) => r.vote !== undefined && isAlive(state.world, r.characterId))
-    .map((r) => ({ op: 'vote', who: `character:${r.characterId}`, target: r.vote ? `character:${r.vote}` : null }))
+  return Object.entries(turn.votes ?? {})
+    .filter(([voter, target]) => isAlive(state.world, voter) && state.world.characters[voter] && (target === null || isAlive(state.world, target)))
+    .map(([voter, target]) => ({ op: 'vote', who: `character:${voter}`, target: target ? `character:${target}` : null }))
 }
 
 /** El anuncio publico tras contar los votos. */

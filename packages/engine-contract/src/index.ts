@@ -59,8 +59,6 @@ export const TurnResponse = z.strictObject({
   late: z.boolean().default(false),
   /** Si la respuesta es una tirada pedida y ya registrada por la API. Opcional: no sube la version. */
   roll: ResponseRoll.optional(),
-  /** Voto en una reunion de deduccion social: el personaje votado, o null para saltar. Sin el campo, no voto. */
-  vote: KebabId.nullable().optional(),
 })
 export type TurnResponse = z.infer<typeof TurnResponse>
 
@@ -69,6 +67,11 @@ export const TurnInput = z.strictObject({
   number: z.number().int().positive(),
   sessionId: SessionId,
   responses: z.array(TurnResponse),
+  /**
+   * Votos de una reunion de deduccion social (Persefone): quien vota a quien,
+   * o null para saltar. Aparte de las respuestas: se puede votar sin hablar.
+   */
+  votes: z.record(KebabId, KebabId.nullable()).optional(),
 })
 export type TurnInput = z.infer<typeof TurnInput>
 

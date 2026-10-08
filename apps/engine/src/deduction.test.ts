@@ -45,6 +45,7 @@ const first = { nextInt: () => 0, describe: () => 'primero' }
 const started = { id: 'evt-00001', v: 1, seq: 1, type: 'session_started', sessionId: '003', recordedAt: at, payload: { party: PARTY.map((id) => `character:${id}`) } }
 
 function request(turn: number, events: unknown[], responses: Array<{ characterId: string; text: string; vote?: string | null }>): ResolveTurnRequest {
+  const votes = Object.fromEntries(responses.filter((r) => r.vote !== undefined).map((r) => [r.characterId, r.vote ?? null]))
   return {
     contract: 1,
     campaignId: 'persefone',
@@ -52,7 +53,7 @@ function request(turn: number, events: unknown[], responses: Array<{ characterId
     ruleset: 'deduccion-social@1.0.0',
     snapshot: null,
     events: events as ResolveTurnRequest['events'],
-    turn: { id: `t-${turn}`, number: turn, sessionId: '003', responses: responses.map((r) => ({ ...r, playerId: r.characterId, submittedAt: at, late: false })) },
+    turn: { id: `t-${turn}`, number: turn, sessionId: '003', responses: responses.map(({ vote: _vote, ...r }) => ({ ...r, playerId: r.characterId, submittedAt: at, late: false })), ...(Object.keys(votes).length ? { votes } : {}) },
     provider: { kind: 'scripted' },
     dice: 'engine',
   }
