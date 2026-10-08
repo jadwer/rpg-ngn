@@ -57,7 +57,9 @@ export interface BuiltContext {
 }
 
 /** Si en esta mesa lo que escribe cada jugador es privado: ajuste de la mesa, o lo que diga el mundo. */
-export function privateActions(ctx: Pick<GMTurnContext, 'notes' | 'pack'>): boolean {
+export function privateActions(ctx: Pick<GMTurnContext, 'notes' | 'pack' | 'deduction'>): boolean {
+  // En una reunion se habla en voz alta: los argumentos son publicos.
+  if (ctx.deduction?.phase === 'reunion') return false
   return ctx.notes?.privateActions ?? ctx.pack.manifest.privateActions ?? false
 }
 
@@ -75,7 +77,7 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
     turnLayer(ctx.pack, ctx.turn, party, ctx.preRolled ?? {}, hasPreviousSession(ctx) && !ctx.session?.arc?.previously),
     privateActions(ctx) ? PRIVATE_ACTIONS_NOTE : null,
     rollsLayer(ctx, party),
-    clock ? clockLayer(clock, party.length, ctx.session?.arc, achievedSoFar(ctx)) : null,
+    ctx.deduction ? ctx.deduction.view : clock ? clockLayer(clock, party.length, ctx.session?.arc, achievedSoFar(ctx)) : null,
   ].filter((s) => s !== null)
 
   return { user: [fixed, ...live].join('\n\n'), fixed, party }

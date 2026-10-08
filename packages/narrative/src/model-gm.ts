@@ -265,6 +265,25 @@ const INTRIGUE_EVENT = z.discriminatedUnion('type', [
   RumorHeardEvent,
   QuestUpdateEvent,
 ])
+// deduccion-social (Persefone): lo que un jugador hizo en su turno de accion.
+// El ruleset valida que cuadre (su sala, su rol, la recarga); aqui solo la forma.
+const DeductionWho = { who: CharacterRef }
+const DEDUCTION_EFFECT = z.union([
+  z.strictObject({ op: z.literal('task_done'), ...DeductionWho, task: KebabId }),
+  z.strictObject({ op: z.literal('kill'), ...DeductionWho, target: CharacterRef }),
+  z.strictObject({ op: z.literal('vent'), ...DeductionWho, to: KebabId }),
+  z.strictObject({ op: z.literal('sabotage'), ...DeductionWho, kind: z.enum(['luces', 'reactor']) }),
+  z.strictObject({ op: z.literal('fix'), ...DeductionWho, kind: z.enum(['luces', 'reactor']).optional() }),
+  z.strictObject({ op: z.literal('report'), ...DeductionWho }),
+  z.strictObject({ op: z.literal('button'), ...DeductionWho }),
+  z.strictObject({ op: z.literal('ability'), ...DeductionWho }),
+])
+const DEDUCTION_EVENT = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([DEDUCTION_EFFECT, MoveEffect])).min(1) }),
+  WorldEvent,
+  NpcActionEvent,
+  SceneEvent,
+])
 const MASQUERADE_EVENT = z.discriminatedUnion('type', [
   RollEvent,
   z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([ConditionEffect, PrestigeEffect, ScandalEffect, BondEffect, RelationshipEffect, MoveEffect])).min(1) }),
@@ -283,10 +302,11 @@ const MASQUERADE_EVENT = z.discriminatedUnion('type', [
  * existe en la corte y `suspicion` no existe en el d20: lo que el ruleset no
  * sabe aplicar se descarta aqui, antes de llegar al reductor.
  */
-export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT | typeof MASQUERADE_EVENT {
+export function allowedEventFor(rulesetId: string | undefined): typeof D20_EVENT | typeof INTRIGUE_EVENT | typeof MASQUERADE_EVENT | typeof DEDUCTION_EVENT {
   // drama-lite (H5) mueve lo mismo que la corte: reputacion, presion y pistas.
   if (rulesetId === 'court-intrigue' || rulesetId === 'drama-lite') return INTRIGUE_EVENT
   if (rulesetId === 'masquerade') return MASQUERADE_EVENT
+  if (rulesetId === 'deduccion-social') return DEDUCTION_EVENT
   return D20_EVENT
 }
 

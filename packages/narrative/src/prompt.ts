@@ -316,7 +316,20 @@ const MASQUERADE_EVENTS_COMPACT = `Eventos permitidos (1 a 3 por turno; nunca "p
 Estados de vínculo: interes, atraccion, confianza, quimica, decepcion, desconfianza. Si dudas de cómo llenar un evento, no lo propongas.`
 
 /** Rulesets con seccion de eventos propia; el resto usa la del d20 del piloto. */
-export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue', 'masquerade', 'drama-lite']
+export const RULESETS_WITH_OWN_EVENTS: readonly string[] = ['court-intrigue', 'masquerade', 'drama-lite', 'deduccion-social']
+
+/**
+ * Deduccion social (Persefone): aqui el motor decide muertes, votos y
+ * victorias; el GM solo registra lo que cada jugador hizo, con los efectos
+ * que trae la seccion "# La partida" del contexto de cada turno.
+ */
+const DEDUCTION_EVENTS = `# Eventos que puedes proponer
+
+Esta mesa es una partida de deducción social: hay roles ocultos, tareas, reuniones y votos. Tú narras; el motor decide quién muere, a quién sellan y quién gana. NO propongas "player_action" ni "narration", ni tiradas, ni puntos de vida. En cada turno de acción registra lo que cada jugador hizo con los efectos que trae la sección "# La partida" del contexto (move, task_done, kill, vent, sabotage, fix, report, button, ability), en nombre de quien lo declaró. En una reunión no propongas efectos. Además puedes usar:
+  {"kind":"world_event","payload":{"note":"Las luces del pasillo parpadean"}}
+  {"kind":"npc_action","actor":"npc:madre","payload":{"text":"MADRE anuncia que el aire alcanza para la jornada"}}
+  {"kind":"state_change","effects":[{"op":"move","who":"character:medica","to":"electrico"}]}
+Si dudas de cómo llenar un evento, no lo propongas.`
 
 /**
  * Drama sin combate (H5): los mismos eventos que la corte con otras
@@ -334,6 +347,7 @@ const OWN_EVENTS: Record<string, { full: string; compact: string }> = {
   'court-intrigue': { full: INTRIGUE_EVENTS, compact: INTRIGUE_EVENTS_COMPACT },
   masquerade: { full: MASQUERADE_EVENTS, compact: MASQUERADE_EVENTS_COMPACT },
   'drama-lite': { full: DRAMA_EVENTS, compact: DRAMA_EVENTS_COMPACT },
+  'deduccion-social': { full: DEDUCTION_EVENTS, compact: DEDUCTION_EVENTS },
 }
 
 /** El prompt de sistema para un ruleset y un modo de dados; sin ruleset o con uno desconocido, el del d20. */

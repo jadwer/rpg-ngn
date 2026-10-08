@@ -1,6 +1,8 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
+import { DEDUCTION, ejectionText, gmView, guardBlocks, isMeeting, openGame, rolesReveal, voteEffects, winner } from './deduction.js'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
-import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse, TurnDiagnostics, TurnUsage } from '@rpg-ngn/engine-contract'
+import { webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
+import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse, TurnBlock as EngineTurnBlock, TurnDiagnostics, TurnUsage } from '@rpg-ngn/engine-contract'
 import { tFor } from '@rpg-ngn/i18n'
 import { createProvider, GMProviderError, redact, storyClock, type GMProvider, type GMTurnContext, type ProviderDeps } from '@rpg-ngn/narrative'
 import { resolveRuleset, type Ruleset } from '@rpg-ngn/rules'
@@ -15,6 +17,8 @@ export interface ResolveDeps {
   providers?: ProviderDeps
   /** Modo del lint de conocimiento cuando la peticion no lo fija (GM_LINT del engine). */
   lintMode?: LintMode | undefined
+  /** Azar del motor (sorteo de roles en deduccion social); por omision, Web Crypto. */
+  random?: RandomSource | undefined
 }
 
 /**
@@ -141,6 +145,24 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         }
       }
 
+      // Deduccion social (Persefone): el motor sortea roles y tareas y se los
+      // susurra a cada uno. El rol nunca lo decide ni lo sabe la mesa.
+      if (ruleset.id === DEDUCTION) {
+        const game = openGame(pack, session.party, deps.random ?? webCryptoRandom())
+        const dealt = seal({ type: 'state_change', effects: game.effects, visibility: { layer: 'gm', witnesses: [] } })
+        if (!dealt.success) throw new Error(`no se pudieron repartir los roles: ${dealt.error.issues.map((i) => i.message).join('; ')}`)
+        state = applyEvent(state, dealt.data, ruleset, secrets)
+        events.push(dealt.data)
+        for (const whisper of game.whispers) {
+          yield { kind: 'block', block: { type: 'narration', text: whisper.text, to: [whisper.id] } }
+          const told = seal({ type: 'narration', payload: { text: whisper.text }, visibility: { layer: 'player', witnesses: [`character:${whisper.id}`] } })
+          if (told.success) {
+            state = applyEvent(state, told.data, ruleset, secrets)
+            events.push(told.data)
+          }
+        }
+      }
+
       // Y se coloca a la party donde el pack dice que arranca la sesion. Sin
       // esto nadie tiene ubicacion hasta que el GM mueva a alguien, y el mapa
       // de la mesa sale vacio de gente durante toda la primera escena.
@@ -170,6 +192,18 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       }
     }
 
+    // Deduccion social: en una reunion los votos se cuentan antes de narrar,
+    // para que el GM cuente lo que paso y no lo decida.
+    const game = ruleset.id === DEDUCTION && state.world.deduction !== undefined
+    const meeting = game && isMeeting(state)
+    if (meeting) {
+      const tally = seal({ type: 'state_change', effects: [...voteEffects(state, request.turn), { op: 'tally', confirm: true }], visibility: { layer: 'gm', witnesses: [] } })
+      if (!tally.success) throw new Error(`no se pudo contar la votacion: ${tally.error.issues.map((i) => i.message).join('; ')}`)
+      state = applyEvent(state, tally.data, ruleset, secrets)
+      events.push(tally.data)
+      yield { kind: 'block', block: { type: 'system', text: ejectionText(state, pack), audience: 'table', tone: 'action' } }
+    }
+
     const context: GMTurnContext = {
       pack,
       state,
@@ -183,11 +217,16 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       language: request.language,
       // El prompt y los eventos aceptados dependen del ruleset de la mesa.
       rulesetId: ruleset.id,
+      ...(game ? { deduction: { phase: meeting ? ('reunion' as const) : ('accion' as const), view: gmView(state, pack, meeting) } } : {}),
     }
+    // En deduccion social los bloques esperan al final del turno: la guardia
+    // de privacidad necesita saber si hubo una muerte antes de publicar nada.
+    const held: EngineTurnBlock[] = []
     const outputs = provider.narrate(context)
     for await (const output of outputs) {
       if (output.kind === 'block') {
-        yield { kind: 'block', block: output.block }
+        if (game) held.push(output.block)
+        else yield { kind: 'block', block: output.block }
         continue
       }
 
@@ -236,6 +275,11 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       if (!parsed.success) {
         throw new Error(`el GM propuso un evento invalido (${output.event.type}): ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
       }
+      // En una reunion nadie hace nada: el GM no puede matar ni hacer tareas.
+      if (meeting && (parsed.data.effects ?? []).some((e) => DEDUCTION_OPS.has(String(e['op'])))) {
+        dropped.push(`${output.event.type}: en una reunion no hay acciones de la partida`)
+        continue
+      }
       // Un evento del GM que el ruleset no sabe aplicar se descarta y se
       // apunta; el turno ya narrado no se repite por un efecto. Antes lanzaba y
       // la mesa pagaba dos veces la espera y el modelo (mesa 42, 04-10).
@@ -246,6 +290,33 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
       events.push(parsed.data)
+    }
+
+    if (game) {
+      // La guardia: lo que nombre al asesino o (sin cuerpo encontrado) a la victima, en susurro.
+      const effects = events.flatMap((e) => (e.type === 'state_change' ? (e.effects ?? []) : []))
+      const kills = effects.filter((e) => e['op'] === 'kill').map((e) => ({ killer: String(e['who']).replace('character:', ''), victim: String(e['target']).replace('character:', '') }))
+      const found = effects.some((e) => e['op'] === 'report')
+      for (const block of guardBlocks(held, kills, found, pack)) yield { kind: 'block', block }
+      // Fin de un turno de accion: cuenta para la recarga, la reunion y el
+      // reactor. La apertura (sin declaraciones) no es un turno de accion.
+      if (!meeting && request.turn.responses.length > 0) {
+        const tick = seal({ type: 'state_change', effects: [{ op: 'tick' }], visibility: { layer: 'gm', witnesses: [] } })
+        if (tick.success) {
+          state = applyEvent(state, tick.data, ruleset, secrets)
+          events.push(tick.data)
+        }
+      }
+      // Quien gana lo decide el ruleset, no el GM. En el ultimo turno sin
+      // ganador, el Huesped: se acabo el aire.
+      const won = winner(state, clock?.phase === 'cierre')
+      if (won) {
+        closed = { ...(closed?.cliffhanger ? { cliffhanger: closed.cliffhanger } : {}), endingId: won }
+        yield { kind: 'block', block: { type: 'system', title: 'Los roles', text: rolesReveal(state, pack), audience: 'table', tone: 'info' } }
+      } else if (closed) {
+        // El GM no cierra una partida que sigue.
+        closed = null
+      }
     }
 
     // Ideas de accion (docs/27, bloque I): se piden aqui, con los eventos del
@@ -313,6 +384,9 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 }
 
 /** Cuanto se espera a las ideas de un personaje antes de abrir el turno sin ellas. */
+/** Lo que solo se hace en un turno de accion de deduccion social. */
+const DEDUCTION_OPS = new Set(['task_done', 'kill', 'vent', 'sabotage', 'fix', 'report', 'button', 'ability'])
+
 const IDEAS_TIMEOUT_MS = 15_000
 
 /** Rechaza si la promesa no termina a tiempo; la llamada sigue por su cuenta y su resultado se ignora. */
