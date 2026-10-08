@@ -26,6 +26,7 @@ export function initialState(options: ReduceOptions): CampaignState {
     world.characters[id] = options.ruleset.initialCharacterState(character)
     knowledge[id] = { characterId: id, facts: {}, witnessed: [] }
   }
+  if (options.pack.manifest.debt) world.partyDebt = options.pack.manifest.debt.start
 
   return {
     meta: {

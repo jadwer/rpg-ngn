@@ -142,6 +142,9 @@ describe('cabecera de la mesa', () => {
   it('arma el subtitulo con sesion, momento, turno y faltantes, y el titulo de la pestaña', () => {
     expect(tableSubtitle({ sessionTitle: null, loading: true, worldTime: null, turnNumber: null, pending: [], narrating: false })).toBe('Conectando...')
     expect(tableSubtitle({ sessionTitle: null, loading: false, worldTime: null, turnNumber: null, pending: [], narrating: false })).toBe('Sin sesión abierta')
+    // Un mundo con deuda la muestra al lado del momento del mundo (Benditos sean los inútiles).
+    expect(tableSubtitle({ sessionTitle: 'Los sapos', loading: false, worldTime: null, partyDebt: 18, turnNumber: 2, pending: [], narrating: false })).toBe('Los sapos · Deuda: 18 monedas · Turno 2')
+    expect(tableSubtitle({ sessionTitle: 'Los sapos', loading: false, worldTime: null, partyDebt: 1, turnNumber: null, pending: [], narrating: false })).toBe('Los sapos · Deuda: 1 moneda')
     expect(tableSubtitle({ sessionTitle: 'La campana', loading: false, worldTime: 'Anochece', turnNumber: 2, pending: ['Zahira'], narrating: false })).toBe('La campana · Anochece · Turno 2 · faltan Zahira')
     expect(tableSubtitle({ sessionTitle: 'La campana', loading: false, worldTime: null, turnNumber: 2, pending: ['Zahira'], narrating: true })).toBe('La campana · Turno 2')
     expect(tableTitle('Posada', '003')).toBe('Posada, sesión 003 | rpg-ngn')

@@ -194,6 +194,11 @@ function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
     }
   }
 
+  if (manifest.tone) lines.push('', `Tono de este mundo (manda sobre tu estilo por omisión): ${manifest.tone}`)
+  if (manifest.debt) {
+    lines.push('', `La party debe dinero y eso es parte del juego${manifest.debt.note ? ` (${manifest.debt.note})` : ''}. Cuando cobren, paguen, gasten o les pongan una multa, muévela con {"kind":"state_change","effects":[{"op":"debt","delta":12}]} (positivo: deben más; negativo: pagaron). La cifra actual está en "Estado del mundo".`)
+  }
+
   const premise = ctx.notes?.premise?.trim()
   const sessionNote = ctx.notes?.sessionNote?.trim()
   if (premise || sessionNote) {
@@ -210,6 +215,7 @@ function worldLiveLayer(ctx: GMTurnContext, party: string[]): string {
   const lines: string[] = ['# Estado del mundo', '']
   const worldTime = ctx.state.world.worldTime
   if (worldTime) lines.push(`Momento del mundo: ${worldTime}`)
+  if (ctx.state.world.partyDebt !== undefined) lines.push(`Deuda de la party: ${ctx.state.world.partyDebt} monedas.`)
 
   // Con quien esta en cada sitio el GM puede narrar quien se cruza con quien.
   const dondeEsta = new Map<string, string[]>()
@@ -278,6 +284,17 @@ function partyFixedLayer(ctx: GMTurnContext, party: string[], budget: ContextBud
     lines.push('')
   }
 
+  // Los compañeros que nadie juega en esta mesa: los lleva el GM, con su
+  // ficha corta para no inventarles genero, oficio ni manias.
+  const companions = (ctx.session?.companions ?? []).filter((id) => !party.includes(id) && ctx.pack.characters.has(id))
+  if (companions.length) {
+    lines.push('# Compañeros que lleva el GM', '', 'Van con la party aunque nadie los juegue en esta mesa: los interpretas tú como NPC (sin speakerRef de jugador; usa su nombre como speaker). No deciden por los jugadores ni les roban el protagonismo; sus gracias sí se disparan.')
+    for (const id of companions) {
+      const c = ctx.pack.characters.get(id)!
+      lines.push(`- ${c.name}: ${c.race}, ${c.class}, ${c.age}. "${c.quote}" ${clip(c.bio, budget.sheets === 'compact' ? 160 : 400)}${c.quirk ? ` Gracia: ${c.quirk}` : ''}`)
+    }
+  }
+
   return lines.join('\n').trimEnd()
 }
 
@@ -308,11 +325,13 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
   if (view.liveOnly) {
     // Solo lo vivo: la ficha ya fue en la parte fija del contexto.
   } else if (sheet && sheets === 'compact') {
-    lines.push(`${sheet.race}, ${sheet.class}. Meta: ${view.goal ?? sheet.goal} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
+    lines.push(`${sheet.race}, ${sheet.class}. Meta: ${view.goal ?? sheet.goal} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.${sheet.quirk && !view.player ? ` Gracia (una vez por sesión): ${sheet.quirk}` : ''}`)
   } else if (sheet) {
     lines.push(`${sheet.race}, ${sheet.class}, ${sheet.age}. "${sheet.quote}"`)
     lines.push(sheet.bio)
     lines.push(`Meta: ${view.goal ?? sheet.goal}`)
+    // La gracia es para el GM: el jugador la juega sin que se la anuncien.
+    if (sheet.quirk && !view.player) lines.push(`Gracia (provócala una vez por sesión, narrada como algo que ya pasó, y cóbrasela a este personaje, no a la mesa): ${sheet.quirk}`)
     const stats = Object.entries(sheet.stats).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(', ')
     // CA y ataques son del d20; un personaje de corte no los tiene y antes
     // salia "CA undefined" y "Ataques: ." (VAM del 19-09, motor A8).

@@ -79,6 +79,13 @@ export const Character = z.strictObject({
   roles: z.array(z.string().min(1)).min(1),
   goal: z.string().min(1),
   /**
+   * La gracia del personaje: lo que el GM provoca una vez por sesion y le
+   * cobra a el (la diosa ya gasto el adelanto, la maga quiere lanzar su
+   * hechizo antes de tiempo). Es tono, no mecanica: va a la ficha del GM y
+   * no a la del jugador.
+   */
+  quirk: z.string().min(1).optional(),
+  /**
    * Lo que solo este personaje sabe al empezar (docs/26, H7): su jugador lo
    * recibe en privado al abrir la sesion, junto con su meta. Es el "por que
    * existe" de cada jugador en una historia de grupo.

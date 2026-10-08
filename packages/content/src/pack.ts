@@ -105,6 +105,18 @@ export const PackManifest = z.strictObject({
    * Sin el, se usa un estilo pictorico neutro.
    */
   artStyle: z.string().min(1).optional(),
+  /**
+   * Como suena este mundo: las reglas de tono que el GM sigue por encima de
+   * su estilo por omision (la comedia de "Benditos sean los inutiles": el
+   * plan falla por alguien de la party, el gran golpe gana y arruina).
+   */
+  tone: z.string().min(1).max(1500).optional(),
+  /**
+   * La party debe dinero y eso es parte del juego (la posada, las multas del
+   * Gremio, el Recaudador). `start` es la deuda al empezar la campaña; el GM
+   * la mueve con el effect `debt` y la mesa la ve en la cabecera.
+   */
+  debt: z.strictObject({ start: z.number().int().min(0), note: z.string().min(1).optional() }).optional(),
   /** La ficha del mundo en el catalogo (E9). Obligatoria para publicar; opcional en un mundo privado. */
   catalog: PackCatalog.optional(),
   /** Idioma en que esta escrito el pack (i18n). Los packs de antes de declararlo son en español. */

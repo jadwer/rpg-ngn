@@ -156,6 +156,8 @@ export const table = {
     noSession: 'Sin sesión abierta',
     turn: 'Turno {{number}}',
     missing: 'faltan {{names}}',
+    debtOne: 'Deuda: {{count}} moneda',
+    debtMany: 'Deuda: {{count}} monedas',
     session: ', sesión {{code}}',
   },
   start: {

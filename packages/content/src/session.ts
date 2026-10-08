@@ -123,6 +123,13 @@ export const Session = z.strictObject({
    * sitio (el baile empieza en el salon); el GM los mueve despues.
    */
   startLocation: KebabId.optional(),
+  /**
+   * Personajes del pack que van con la party aunque nadie los juegue: el GM
+   * los lleva como NPC (la party de cuatro en una mesa de uno). Sin esto el
+   * GM los conocia solo por el nombre del gancho y le cambio el genero a la
+   * diosa (Benditos sean los inutiles, mesa 46).
+   */
+  companions: z.array(KebabId).optional(),
   party: z.array(PartyMember),
   notes: z.string().optional(),
   recap: z.string().optional(),

@@ -105,6 +105,8 @@ const ConditionEffect = z
   .refine((e) => Boolean(e.add || e.remove), 'condition requiere add o remove')
   .refine((e) => e.who.startsWith('character:') || e.who.startsWith('npc:'), 'condition solo sobre personajes o NPCs')
 const MemoryEffect = z.strictObject({ op: z.literal('memory_recovered'), who: CharacterRef })
+// La deuda de la party entera, en los mundos que la declaran (`manifest.debt`).
+const DebtEffect = z.strictObject({ op: z.literal('debt'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
 const LoseEffect = z.strictObject({ op: z.literal('lose'), item: KebabId, holder: EntityRef.optional() })
 // court-intrigue: credito, sospecha y pistas (packages/rules/src/court-intrigue.ts).
@@ -241,7 +243,7 @@ const QuestUpdateEvent = z.strictObject({
 
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect, DebtEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
@@ -1533,11 +1535,14 @@ class LineInterpreter {
             if (refKind(effect.who) !== 'npc' || !present(effect.with)) return null
             continue
           }
+          // La deuda es de la party entera: no tiene sujeto.
+          if (effect.op === 'debt') continue
           if (effect.op === 'condition' && refKind(effect.who) === 'npc') continue
           if (!present(effect.who)) return null
           if (effect.op === 'condition' && effect.remove && !characters[refId(effect.who)]!.conditions.includes(effect.remove)) return null
         }
-        return { ...event, actor: event.actor ?? event.effects[0]!.who, visibility: { layer: 'campaign', witnesses } }
+        const subject = event.effects.find((e): e is Extract<typeof e, { who: string }> => 'who' in e)?.who
+        return { ...event, ...(event.actor ?? subject ? { actor: event.actor ?? subject } : {}), visibility: { layer: 'campaign', witnesses } }
       }
       case 'inventory_change': {
         for (const effect of event.effects) {

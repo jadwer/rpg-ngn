@@ -139,10 +139,11 @@ export function memberTag(member: TableMember, nameOf: (id: string) => string): 
   return `${member.userName ?? '?'}${member.role === 'host' ? t('table.members.hostTag') : ''}${member.characterId ? `: ${nameOf(member.characterId)}` : ''}`
 }
 
-/** Subtitulo de la cabecera de la mesa: sesion, momento del mundo, turno y quien falta. */
-export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
+/** Subtitulo de la cabecera de la mesa: sesion, momento del mundo, deuda de la party, turno y quien falta. */
+export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; partyDebt?: number | null | undefined; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
   const parts = [input.sessionTitle ?? (input.loading ? t('table.members.connecting') : t('table.members.noSession'))]
   if (input.worldTime) parts.push(input.worldTime)
+  if (typeof input.partyDebt === 'number') parts.push(t(input.partyDebt === 1 ? 'table.members.debtOne' : 'table.members.debtMany', { count: input.partyDebt }))
   if (input.turnNumber !== null) {
     parts.push(t('table.members.turn', { number: input.turnNumber }))
     if (input.pending.length > 0 && !input.narrating) parts.push(t('table.members.missing', { names: input.pending.join(', ') }))

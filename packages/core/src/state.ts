@@ -47,6 +47,11 @@ export interface WorldState {
   worldTime: string | null
   characters: Record<string, CharacterState>
   npcs: Record<string, NpcState>
+  /**
+   * Lo que la party debe, en monedas del mundo (la posada, el Gremio, el
+   * Recaudador). Lo mueve el effect `debt`; sin el, no existe.
+   */
+  partyDebt?: number
 }
 
 export function emptyWorld(): WorldState {

@@ -10,6 +10,8 @@ export interface WorldProjection {
   worldTime: string | null
   characters: Record<string, CharacterState>
   npcs: WorldState['npcs']
+  /** Lo que debe la party; ausente si el mundo no lleva deuda. */
+  partyDebt?: number
 }
 
 export interface PlayerProjection {
@@ -20,7 +22,7 @@ export interface PlayerProjection {
 }
 
 export function worldProjection(state: CampaignState): WorldProjection {
-  return { worldTime: state.world.worldTime, characters: state.world.characters, npcs: state.world.npcs }
+  return { worldTime: state.world.worldTime, characters: state.world.characters, npcs: state.world.npcs, ...(state.world.partyDebt !== undefined ? { partyDebt: state.world.partyDebt } : {}) }
 }
 
 export function playerProjection(state: CampaignState, characterId: string): PlayerProjection {

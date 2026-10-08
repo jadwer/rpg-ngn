@@ -127,6 +127,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [worldTime, setWorldTime] = useState<string | null>(null)
+  const [partyDebt, setPartyDebt] = useState<number | null>(null)
   const [voiceNoticeDismissed, setVoiceNoticeDismissed] = useState(true)
   const [projections, setProjections] = useState<{ seq: number | null; own: CharacterState | undefined; world: Record<string, CharacterState> | undefined }>({ seq: null, own: undefined, world: undefined })
   const [existingCodes, setExistingCodes] = useState<Array<{ id: string; code: string; status: string; openedSeq: number | null; closedSeq: number | null }>>([])
@@ -394,12 +395,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   useEffect(() => {
     if (!campaignId || !sessionCode) {
       setWorldTime(null)
+      setPartyDebt(null)
       return
     }
     let alive = true
     void client.worldProjection(campaignId).then(
       (p) => {
-        if (alive) setWorldTime(p.projection.worldTime)
+        if (!alive) return
+        setWorldTime(p.projection.worldTime)
+        setPartyDebt(p.projection.partyDebt ?? null)
       },
       () => undefined,
     )
@@ -656,7 +660,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const line = turnLine(turn, progress, nameOf)
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
   const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingCodes.length === 0, dice: diceModeOf(table.settings) }) : null
-  const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
+  const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, partyDebt, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
   const waiting = progress.narrating && turn ? waitingPhrase(turn.number, now) : null
   const portraitOf = (id: string) => {
     const local = pack?.characters.get(id)?.portrait

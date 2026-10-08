@@ -158,6 +158,8 @@ export const table: Messages<typeof es> = {
     noSession: 'No open session',
     turn: 'Turn {{number}}',
     missing: 'waiting for {{names}}',
+    debtOne: 'Debt: {{count}} coin',
+    debtMany: 'Debt: {{count}} coins',
     session: ', session {{code}}',
   },
   start: {

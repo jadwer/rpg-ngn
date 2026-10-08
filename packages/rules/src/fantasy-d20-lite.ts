@@ -94,6 +94,15 @@ export const fantasyD20Lite: Ruleset = {
           return { ...c, conditions }
         })
       }
+      case 'debt': {
+        // Lo que debe la party entera (Benditos sean los inutiles): sube con
+        // multas y facturas, baja al pagar, nunca por debajo de cero.
+        const delta = effect['delta']
+        if (typeof delta !== 'number' || !Number.isInteger(delta)) {
+          throw new Error(`${event.id}: el effect "debt" requiere "delta" entero`)
+        }
+        return { ...world, partyDebt: Math.max(0, (world.partyDebt ?? 0) + delta) }
+      }
       default:
         throw new UnknownEffectError(op, 'fantasy-d20-lite')
     }

@@ -308,6 +308,8 @@ export interface WorldProjection {
   worldTime: string | null
   characters: Record<string, CharacterState>
   npcs: Record<string, unknown>
+  /** Lo que debe la party, si el mundo lleva deuda. */
+  partyDebt?: number
 }
 
 /** Una historia de Comunidad: una cronica que su mesa acepto publicar (02-10). */
