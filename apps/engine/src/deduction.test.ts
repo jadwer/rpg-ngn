@@ -4,6 +4,7 @@ import type { ResolveLine, ResolveTurnRequest } from '@rpg-ngn/engine-contract'
 import { ModelGMProvider, type GMProvider, type ModelPrompt, type ModelReply, type ModelTransport } from '@rpg-ngn/narrative'
 import { describe, expect, it } from 'vitest'
 import { fsSource } from './packs.js'
+import { playerView } from './deduction.js'
 import { resolveTurn } from './resolve.js'
 
 /**
@@ -170,5 +171,23 @@ describe('deduccion social en el motor', () => {
     expect(world(meeting.result).characters['dayan']?.custom['alive']).toBe(true)
     expect(meeting.result.close?.endingId).toBe('tripulacion')
     expect(system.find((b) => b.title === 'Los roles')?.text).toContain('Brorg: el Huésped')
+  })
+
+  it('el GM no habla por nadie que juegue; las ideas saben el rol, las tareas y la fase de cada uno', async () => {
+    const pack = await station()
+    const opening = await play(pack, request(1, [started], []), scripted([{ blocks: [{ type: 'narration', text: 'La alarma suena.' }] }]))
+    const events = [started, ...opening.result.events]
+    const lines = ['{"kind":"narration","text":"Calder revisa la plaza."}', '{"kind":"dialogue","speaker":"Zahira","speakerRef":"character:zahira","text":"Brorg, te vi salir de los ductos."}', '{"kind":"dialogue","speaker":"Calder","speakerRef":null,"text":"Yo no fui."}', '{"kind":"addressed","characterIds":["calder"]}'].join('\n')
+    const out = await play(pack, request(2, events, [{ characterId: 'calder', text: 'Reviso la plaza.' }]), new ModelGMProvider(new Lines(lines), 'sk-test-deduccion-000000'))
+    const said = blocks(out.lines).flatMap((b) => (b.type === 'dialogue' && !b.declared ? [b.text] : []))
+    expect(said).toEqual([])
+    expect(out.result.diagnostics?.dropped?.join(' ')).toContain('dialogo del GM por un jugador')
+
+    const state = out.result.state as Parameters<typeof playerView>[0]
+    expect(playerView(state, pack, 'brorg', false)).toContain('Eres el Huésped')
+    expect(playerView(state, pack, 'brorg', false)).toContain('matar a alguien')
+    expect(playerView(state, pack, 'calder', false)).toContain('Tus tareas: Tarea 1 de')
+    expect(playerView(state, pack, 'calder', true)).toContain('REUNIÓN')
+    expect(playerView(state, pack, 'calder', false)).not.toContain('Huésped')
   })
 })

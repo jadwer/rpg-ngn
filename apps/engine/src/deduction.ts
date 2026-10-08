@@ -104,6 +104,41 @@ export function guardBlocks(blocks: EngineTurnBlock[], kills: Array<{ killer: st
 }
 
 /**
+ * Lo que un jugador sabe de la partida, para sus ideas: su rol, sus tareas y
+ * que toca este turno. Sin esto las ideas no sabian el rol: casi nadie hizo
+ * tareas y el Huesped nunca mato (mesa 50).
+ */
+export function playerView(state: CampaignState, pack: LoadedPack, id: string, meeting: boolean): string | null {
+  const world = state.world
+  const role = roleOf(world, id)
+  if (!role) return null
+  const name = (who: string) => pack.characters.get(who)?.name ?? who
+  const room = (where: string | null | undefined) => (where ? (pack.locations.get(where)?.name ?? where) : 'sin sala')
+  const alive = isAlive(world, id)
+  const lines = ['# Tu partida', '']
+  if (!alive) {
+    lines.push('Estás muerto: eres un fantasma. Nadie te ve ni te oye. Solo puedes seguir haciendo tus tareas.')
+  } else if (role === 'huesped') {
+    lines.push('Eres el Huésped. Nadie lo sabe y nadie debe saberlo. Tus tareas son falsas: fíngelas para que te vean en esas salas.')
+  } else {
+    lines.push('Eres tripulante. Tu trabajo es hacer tus tareas en su sala y fijarte en quién entra y sale.')
+  }
+  lines.push(`Estás en ${room(world.characters[id]?.location)}. Siguen con vida: ${Object.keys(world.characters).filter((c) => roleOf(world, c) && isAlive(world, c)).map(name).join(', ')}.`)
+  const tasks = tasksOf(world, id)
+  if (tasks.length) lines.push(`Tus tareas: ${tasks.map((t) => `${t.name ?? t.id} en ${t.roomName ?? room(t.room)}${t.done ? ' (hecha)' : ''}`).join('; ')}.`)
+  if (meeting) {
+    lines.push(alive ? 'Ahora es una REUNIÓN: las ideas son lo que dices en voz alta (dónde estuviste, qué viste, a quién acusas y por qué), no moverte ni hacer tareas. El voto va aparte.' : 'Es una reunión y los fantasmas no hablan.')
+  } else if (alive && role === 'huesped') {
+    const lastKill = world.characters[id]?.custom['lastKill']
+    const ready = typeof lastKill !== 'number' || (world.deduction?.actionTurns ?? 0) - lastKill >= 2
+    lines.push(`Este turno puedes: ir a una sala y fingir una tarea, seguir a alguien, ${ready ? 'matar a alguien que esté a solas contigo en tu sala, ' : ''}sabotear las luces o el reactor, o moverte por los ductos (Reactor, Médica, Carga). Una idea puede ser matar a alguien concreto si está solo.`)
+  } else if (alive) {
+    lines.push('Este turno: ve a la sala de una tarea pendiente y hazla, sigue a alguien, o revisa algo. Si encuentras un cuerpo, repórtalo.')
+  }
+  return lines.join('\n')
+}
+
+/**
  * Lo que el GM tiene que saber de la partida este turno: la fase, lo publico
  * y lo que solo el sabe (quien es el Huesped, cuerpos sin encontrar, tareas).
  * Sustituye al reloj de historia en el contexto: aqui no hay gancho ni climax.

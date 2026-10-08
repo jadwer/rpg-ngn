@@ -1,5 +1,5 @@
 import { applyEvent, type CampaignState } from '@rpg-ngn/campaign'
-import { DEDUCTION, ejectionText, gmView, guardBlocks, isMeeting, openGame, rolesReveal, voteEffects, winner } from './deduction.js'
+import { DEDUCTION, ejectionText, gmView, guardBlocks, isMeeting, openGame, playerView, rolesReveal, voteEffects, winner } from './deduction.js'
 import { CampaignEvent, EVENT_SCHEMA_VERSION, eventIdFor, type LoadedPack } from '@rpg-ngn/content'
 import { webCryptoRandom, type RandomSource } from '@rpg-ngn/core'
 import type { LintFinding, LintMode, ResolveLine, ResolveTurnRequest, RollRequest, SuggestRequest, SuggestResponse, TurnBlock as EngineTurnBlock, TurnDiagnostics, TurnUsage } from '@rpg-ngn/engine-contract'
@@ -217,7 +217,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       language: request.language,
       // El prompt y los eventos aceptados dependen del ruleset de la mesa.
       rulesetId: ruleset.id,
-      ...(game ? { deduction: { phase: meeting ? ('reunion' as const) : ('accion' as const), view: gmView(state, pack, meeting) } } : {}),
+      ...(game ? { deduction: { phase: meeting ? ('reunion' as const) : ('accion' as const), view: gmView(state, pack, meeting), players: {} } } : {}),
     }
     // En deduccion social los bloques esperan al final del turno: la guardia
     // de privacidad necesita saber si hubo una muerte antes de publicar nada.
@@ -300,7 +300,21 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
       // En una reunion, lo que escribe un muerto no se oye: va solo para el.
       const ghosts = (block: EngineTurnBlock): EngineTurnBlock =>
         meeting && block.type === 'dialogue' && block.declared && block.speakerRef?.startsWith('character:') && state.world.characters[block.speakerRef.slice(10)]?.custom['alive'] === false ? { ...block, to: [block.speakerRef.slice(10)] } : block
-      for (const block of guardBlocks(held.map(ghosts), kills, found, pack)) yield { kind: 'block', block }
+      // En una partida de roles ocultos el GM no habla por nadie que juegue:
+      // en la mesa 50 puso en boca de una jugadora una acusacion contra el
+      // Huesped, que solo el sabia. Se descarta y se apunta.
+      const party = new Set(session.party)
+      const partyNames = new Set(session.party.map((id) => (pack.characters.get(id)?.name ?? id).toLowerCase()))
+      const own = (block: EngineTurnBlock): boolean => {
+        if (block.type !== 'dialogue' || block.declared) return true
+        const ref = block.speakerRef?.startsWith('character:') ? block.speakerRef.slice(10) : null
+        if ((ref && party.has(ref)) || partyNames.has(block.speaker.toLowerCase())) {
+          dropped.push(`dialogo del GM por un jugador: ${block.speaker}: ${block.text.slice(0, 120)}`)
+          return false
+        }
+        return true
+      }
+      for (const block of guardBlocks(held.filter(own).map(ghosts), kills, found, pack)) yield { kind: 'block', block }
       // Fin de un turno de accion: cuenta para la recarga, la reunion y el
       // reactor. La apertura (sin declaraciones) no es un turno de accion.
       if (!meeting && request.turn.responses.length > 0) {
@@ -330,7 +344,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     // llegan no pueden retener ni tumbar el turno.
     if (provider.separateIdeas && provider.suggest && !closed) {
       const suggest = provider.suggest.bind(provider)
-      const after: GMTurnContext = { ...context, state, recentEvents: [...recentEvents, ...events] }
+      // Las ideas de una partida de roles ocultos salen con el estado ya aplicado: el turno que viene es reunion o accion segun quedo.
+      const nextMeeting = game && isMeeting(state)
+      const players = game ? Object.fromEntries(session.party.flatMap((id) => { const view = playerView(state, pack, id, nextMeeting); return view ? [[id, view]] : [] })) : {}
+      const after: GMTurnContext = { ...context, state, recentEvents: [...recentEvents, ...events], ...(game && context.deduction ? { deduction: { ...context.deduction, players } } : {}) }
       const asked = await Promise.all(
         addressed.map(async (id) => {
           try {

@@ -1763,6 +1763,8 @@ export function isModelNote(text: string): boolean {
   // "Todo está en silencio:" ni "Nota el frío:", que son narracion.
   if (/^[([]?\s*(?:(?:Nota|Note|Recordatorio|Objetivo oculto|Pensamiento|Razonamiento|Thinking|Plan del GM|Siguiente turno|GM|DM|OOC|TODO)(?:\s*(?:\(?para m[ií]\)?|del GM|interna?))?|Narrador\s*\(para m[ií]\))\s*:/u.test(bare)) return true
   // Ids del motor fuera de un dialogo: "character:zahira", "ending:medico".
+  // El modelo corrigiendose en voz alta ("Espera, tengo que corregir: el contexto dice...", mesa 50).
+  if (/^(?:espera|corrijo|corrección|correccion|un momento)\b[^.]*\b(?:corregir|contexto|reviso)\b/iu.test(bare) || /\bel contexto (?:dice|indica|marca)\b/iu.test(bare)) return true
   return /\b(?:npc|ending|location|character|quest|fact):[a-z0-9]+(?:-[a-z0-9]+)*\b/i.test(bare)
 }
 

@@ -34,7 +34,7 @@ export interface GMTurnContext {
    * Partida de deduccion social (Persefone): la fase del turno y la vista del
    * GM que arma el motor con el ruleset. Sustituye al reloj de historia.
    */
-  deduction?: { phase: 'accion' | 'reunion'; view: string } | undefined
+  deduction?: { phase: 'accion' | 'reunion'; view: string; players?: Record<string, string> } | undefined
   /**
    * Un d20 ya tirado por el motor para cada personaje que declaro algo este
    * turno (`characterId -> resultado`). El GM lo usa cuando la accion tiene

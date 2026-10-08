@@ -714,6 +714,9 @@ export function buildPlayerContext(ctx: GMTurnContext, characterId: string, narr
     lines.push(`${who} hizo: ${clip(response.text, 400)}`)
   }
   for (const text of narrated) lines.push(`Narración: ${clip(text, 700)}`)
+  // Partida de roles ocultos: lo que este jugador sabe de su rol y sus tareas, y que toca hacer.
+  const game = ctx.deduction?.players?.[id]
+  if (game) lines.push('', game)
   if (pendingRoll) lines.push(`A ${name} le toca soltar un dado${pendingRoll.skill ? ` (${pendingRoll.skill})` : ''}${pendingRoll.reason ? `: ${pendingRoll.reason}` : ''}. Las ideas son qué intenta con esa tirada.`)
   return lines.join('\n')
 }

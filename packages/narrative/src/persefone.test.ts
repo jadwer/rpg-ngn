@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildPlayerContext, buildTurnContext } from './context.js'
 import { buildKnowledgeView } from './lint.js'
+import { isModelNote } from './model-gm.js'
 import { ModelGMProvider } from './model-gm.js'
 import { collect, contextFor, FakeTransport, openSession003, response, turn } from './pilot.test-helpers.js'
 
@@ -37,6 +38,18 @@ describe('acciones privadas', () => {
     expect(forCalder).toContain('Reviso las cámaras')
     expect(forCalder).not.toContain('saboteo las luces')
     expect(buildKnowledgeView(ctx, ['zahira', 'calder']).heard).not.toContain('saboteo')
+  })
+
+  it('las ideas de una partida de roles ocultos ven la vista de su jugador, nunca la del GM; el modelo corrigiendose no llega a la mesa', async () => {
+    const base = await openSession003()
+    const ctx = contextFor(base, turn(2, answers()), { notes: { privateActions: true }, deduction: { phase: 'accion', view: 'SOLO PARA EL GM: Brorg es el Huésped', players: { calder: '# Tu partida\n\nEres tripulante.' } } })
+    const forCalder = buildPlayerContext(ctx, 'calder')
+    expect(forCalder).toContain('Eres tripulante.')
+    expect(forCalder).not.toContain('SOLO PARA EL GM')
+    expect(buildTurnContext(ctx).user).toContain('SOLO PARA EL GM')
+    expect(isModelNote('Espera, tengo que corregir: el contexto dice que es reunión.')).toBe(true)
+    expect(isModelNote('Reviso: según el contexto dice que nadie se mueve.')).toBe(true)
+    expect(isModelNote('Espera un momento en la puerta, sin moverse.')).toBe(false)
   })
 
   it('sin el ajuste, todo sigue publico como siempre; el mundo puede pedirlo y la mesa apagarlo', async () => {

@@ -176,6 +176,18 @@ async function main(): Promise<void> {
           await p.api.rollRequested(turn.id, mine.suggestions[PICK] ?? mine.suggestions[0]).catch((e: unknown) => console.log('tirada fallo', String(e)))
           continue
         }
+        // Roles ocultos (Persefone): en una reunion cada vivo vota. El Huesped
+        // vota a un tripulante; la tripulacion, a quien la ultima narracion
+        // haya señalado o, si no, al primero que no sea ella misma.
+        const game = mine.deduction
+        if (game?.phase === 'reunion' && game.me?.role && game.me.alive) {
+          const others = game.alive.filter((id) => id !== p.character)
+          const suspect = process.env['SUSPECT'] && others.includes(process.env['SUSPECT']) ? process.env['SUSPECT'] : others[0]
+          const target = game.me.role === 'huesped' ? (others.find((id) => id !== suspect) ?? null) : (suspect ?? null)
+          await p.api.vote(turn.id, target).catch((e: unknown) => console.log('voto fallo', String(e)))
+          console.log(`  ${p.character} (${game.me.role}) vota a ${target ?? 'saltar'}`)
+        }
+        if (game?.me && !game.me.alive && game.phase === 'reunion') continue
         await p.api.respond(turn.id, idea).catch((e: unknown) => console.log('respuesta fallo', String(e)))
       }
       await reader.api.closeTurn(turn.id).catch((e: unknown) => console.log('cierre fallo', String(e)))
