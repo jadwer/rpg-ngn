@@ -11,6 +11,7 @@ export const play: Messages<typeof es> = {
   sendFailed: 'Could not send the answer.',
   closeFailed: 'Could not close the turn.',
   holdFailed: 'Could not change the hold.',
+  voteFailed: 'Could not record your vote.',
   presenceOwnFailed: 'Could not change your presence.',
   presenceFailed: 'Could not change the presence.',
   openSessionFailed: 'Could not open the session.',

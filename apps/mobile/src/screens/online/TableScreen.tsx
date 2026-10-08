@@ -2,9 +2,10 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, deductionProgress, deductionRoomName, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
+import { DeductionPanel } from '../../components/DeductionPanel'
 import { BlockGroups } from '../../components/BlockGroups'
 import { Button } from '../../components/Button'
 import { CharacterPicker } from '../../components/CharacterPicker'
@@ -202,7 +203,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const tts = useTts(blocks, { autoRead: true })
   useEffect(() => setListening(tts.autoRead), [tts.autoRead])
   const pendingRoll = snapshot?.rolls?.pending ?? null
-  const progress = useMemo(() => turnProgress(turn, viewer, pendingRoll), [turn, viewer, pendingRoll])
+  // En una reunion de roles ocultos (Persefone) faltan los que no han votado, no los que no han escrito.
+  const deduction = snapshot?.deduction ?? null
+  const progress = useMemo(() => deductionProgress(turnProgress(turn, viewer, pendingRoll), deduction, turn?.status === 'open', viewer.role === 'host'), [turn, viewer, pendingRoll, deduction])
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNames, id), [pack, remoteNames])
 
   // Cuenta atras cancelable antes de narrar (docs/18, D-UX-6), igual que en la
@@ -483,6 +486,9 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         t('play.closeFailed'),
       )
   }
+  const vote = (target: string | null) => {
+    if (turn) void act(() => client.vote(turn.id, target).then(() => undefined), t('play.voteFailed'))
+  }
   const holdTurn = (held: boolean) => {
     if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), t('play.holdFailed'))
   }
@@ -682,6 +688,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
               <Text style={styles.objectiveText}>{snapshot.session.objective}</Text>
             </View>
           ) : null}
+          {deduction && !screen ? <DeductionPanel view={deduction} self={viewer.characterId} nameOf={nameOf} roomName={(id) => deductionRoomName(deduction, id)} busy={busy} onVote={vote} /> : null}
           {blocks.length === 0 && connection !== 'loading' && !start ? <Text style={styles.empty}>{emptyText}</Text> : null}
           <BlockGroups groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} assetBase={client.baseUrl} large={screen} onOpenEnding={setOpenedEnding} />
           {start ? (

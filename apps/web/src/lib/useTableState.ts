@@ -32,6 +32,8 @@ export interface TableSnapshot {
   countdown: number | null
   /** Reloj de la historia (docs/26, H1); null si la mesa juega libre. */
   pacing: TableState['pacing'] | null
+  /** Partida de roles ocultos (Persefone): lo que este asiento puede saber; null si la mesa no lo es. */
+  deduction: TableState['deduction'] | null
   /** El historial ya llego entero (la API pagina de 200 en 200). */
   caughtUp: boolean
   quota: TableState['quota']
@@ -89,7 +91,7 @@ export function useTableState(client: ApiClient, tableId: string, onUnauthorized
         if (state.blocks.length > 0) envelopes = [...envelopes, ...state.blocks]
         // El cursor avanza hasta lo leido aunque no llegara nada visible (S9).
         after = Math.max(after, state.lastBlockId)
-        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, countdown: state.countdown ?? null, pacing: state.pacing ?? null, caughtUp: state.more !== true, quota: state.quota ?? null, envelopes, lastBlockId: after })
+        setSnapshot({ campaign: state.campaign, viewer: state.viewer, session: state.session, turn: state.turn, narrators: state.narrators, typing: state.typing, away: state.away, fortune: state.fortune, rolls: state.rolls ?? { pending: null }, suggestions: state.suggestions, ideas: state.ideas ?? { more: 'none', used: 0 }, countdown: state.countdown ?? null, pacing: state.pacing ?? null, deduction: state.deduction ?? null, caughtUp: state.more !== true, quota: state.quota ?? null, envelopes, lastBlockId: after })
         setConnection('online')
         setError(null)
       } catch (caught) {

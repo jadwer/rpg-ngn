@@ -9,6 +9,7 @@ export const play = {
   sendFailed: 'No se pudo enviar la respuesta.',
   closeFailed: 'No se pudo cerrar el turno.',
   holdFailed: 'No se pudo cambiar la espera.',
+  voteFailed: 'No se pudo registrar tu voto.',
   presenceOwnFailed: 'No se pudo cambiar tu presencia.',
   presenceFailed: 'No se pudo cambiar la presencia.',
   openSessionFailed: 'No se pudo abrir la sesión.',

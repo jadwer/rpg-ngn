@@ -124,6 +124,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   /** "Otras" ideas para el propio personaje; sustituyen a las anteriores. 409 si no toca o hay que pagar. */
   moreIdeas(turnId: number): Promise<{ options: string[]; ideas: TableState['ideas'] }>
   respond(turnId: number, text: string, idempotencyKey?: string): Promise<ResponseReceipt>
+  /** Vota en una reunion de roles ocultos (`target` null = saltar). Se puede cambiar hasta que el turno cierra. 409 si no toca. */
+  vote(turnId: number, target: string | null): Promise<{ characterId: string; target: string | null }>
   closeTurn(turnId: number, force?: boolean): Promise<TurnView>
   /** Cancela (true) o reanuda (false) la cuenta atras del cierre; cualquiera de la mesa puede. */
   holdTurn(turnId: number, held: boolean): Promise<TurnView>
@@ -367,6 +369,11 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     async holdTurn(turnId, held) {
       const { data } = await request<{ data: TurnView }>(`/api/v1/turns/${turnId}/hold`, { method: 'POST', body: { held } })
+      return data.data
+    },
+
+    async vote(turnId, target) {
+      const { data } = await request<{ data: { characterId: string; target: string | null } }>(`/api/v1/turns/${turnId}/vote`, { method: 'POST', body: { target } })
       return data.data
     },
 

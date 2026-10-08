@@ -251,10 +251,37 @@ export interface TableState {
   countdown?: number
   /** Reloj de la historia (docs/26, H1): "Turno 5 de 8". Null si la mesa juega libre; ausente en una API vieja. */
   pacing?: { length: 'corta' | 'media' | 'larga' | 'libre'; turn: number; total: number; wrap: boolean } | null
+  /** Partida de roles ocultos (Turno de noche en la Persefone): lo que este asiento puede saber. Null si la mesa no lo es. */
+  deduction?: DeductionView | null
   /** Para el siguiente `after`: el ultimo bloque leido, tambien si era solo para el anfitrion. */
   lastBlockId: number
   /** La pagina vino llena: hay mas bloques por pedir. */
   more?: boolean
+}
+
+/**
+ * Lo que un asiento sabe de una partida de roles ocultos: lo publico (fase,
+ * vivos, tareas de la tripulacion, cuerpos encontrados, sabotaje, ultimo
+ * sellado, quien ya voto) y lo suyo (`me`). El rol ajeno nunca viene.
+ */
+export interface DeductionView {
+  phase: 'accion' | 'reunion'
+  players: string[]
+  alive: string[]
+  tasks: { done: number; total: number }
+  bodies: Array<{ who: string; room: string }>
+  sabotage: { kind: 'luces' | 'reactor' } | null
+  lastEjected: { who: string | null; role?: 'tripulante' | 'huesped' } | null
+  voted: string[]
+  pendingVotes: string[]
+  me: {
+    role: 'tripulante' | 'huesped' | null
+    alive: boolean
+    tasks: Array<{ id: string; room: string; done: boolean; name?: string; roomName?: string }>
+    abilityUsed: boolean
+    buttonUsed: boolean
+    vote: { target: string | null } | null
+  } | null
 }
 
 /** Un miembro señalado por la API en un aviso (narra, escribe, puso el turno en espera). */

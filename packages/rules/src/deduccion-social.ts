@@ -25,6 +25,9 @@ export interface DeductionTask {
   id: string
   room: string
   done: boolean
+  /** Como se llaman la tarea y su sala, para que la mesa las pinte sin el pack. */
+  name?: string
+  roomName?: string
 }
 
 /** Los dos sabotajes de la v1: donde se arreglan y cuanta gente hace falta. */
@@ -114,12 +117,12 @@ export function meetingNext(world: WorldState): boolean {
  * la estacion. `random` es el generador del motor (0 a 1). Devuelve los
  * effects `role`, uno por jugador.
  */
-export function assignRoles(party: readonly string[], tasks: ReadonlyArray<{ id: string; room: string }>, random: () => number, perPlayer = 3): Array<{ op: 'role'; who: string; role: DeductionRole; tasks: Array<{ id: string; room: string }> }> {
+export function assignRoles<T extends { id: string; room: string }>(party: readonly string[], tasks: ReadonlyArray<T>, random: () => number, perPlayer = 3): Array<{ op: 'role'; who: string; role: DeductionRole; tasks: T[] }> {
   if (party.length < 4) throw new Error(`deduccion social pide al menos 4 jugadores; hay ${party.length}`)
   const host = party[Math.floor(random() * party.length)]!
   return party.map((id) => {
     const pool = [...tasks]
-    const mine: Array<{ id: string; room: string }> = []
+    const mine: T[] = []
     while (mine.length < perPlayer && pool.length > 0) mine.push(pool.splice(Math.floor(random() * pool.length), 1)[0]!)
     return { op: 'role' as const, who: `character:${id}`, role: id === host ? ('huesped' as const) : ('tripulante' as const), tasks: mine }
   })
@@ -171,7 +174,9 @@ export const deduccionSocial: Ruleset = {
         const who = ref(effect['who'], 'who', event)
         const role = effect['role']
         if (role !== 'tripulante' && role !== 'huesped') throw new Error(`${event.id}: rol desconocido ${String(role)}`)
-        const tasks = Array.isArray(effect['tasks']) ? (effect['tasks'] as Array<{ id: string; room: string }>).map((t) => ({ id: t.id, room: t.room, done: false })) : []
+        const tasks = Array.isArray(effect['tasks'])
+          ? (effect['tasks'] as Array<{ id: string; room: string; name?: string; roomName?: string }>).map((t) => ({ id: t.id, room: t.room, done: false, ...(t.name ? { name: t.name } : {}), ...(t.roomName ? { roomName: t.roomName } : {}) }))
+          : []
         const next = setCustom(world, who, { role, alive: true, tasks, abilityUsed: false, buttonUsed: false, lastKill: null, lucky: false })
         return next.deduction ? next : setDeduction(next, {})
       }

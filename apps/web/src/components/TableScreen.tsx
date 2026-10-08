@@ -4,13 +4,14 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, deductionProgress, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
 import { storage, type StoredUser } from '../lib/storage'
 import { useTableState } from '../lib/useTableState'
 import { useTts } from '../lib/useTts'
+import { DeductionPanel } from './DeductionPanel'
 import { Blocks } from './Blocks'
 import { CharacterPicker } from './CharacterPicker'
 import { ChroniclePanel } from './ChroniclePanel'
@@ -267,7 +268,12 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   }, [screen])
   const turn = snapshot?.turn ?? null
   const pendingRoll = snapshot?.rolls?.pending ?? null
-  const progress = useMemo(() => turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }, pendingRoll), [turn, viewer.role, viewer.characterId, pendingRoll])
+  // En una reunion de roles ocultos (Persefone) faltan los que no han votado, no los que no han escrito.
+  const deduction = snapshot?.deduction ?? null
+  const progress = useMemo(
+    () => deductionProgress(turnProgress(turn, { role: viewer.role, characterId: viewer.characterId }, pendingRoll), deduction, turn?.status === 'open', viewer.role === 'host'),
+    [turn, viewer.role, viewer.characterId, pendingRoll, deduction],
+  )
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNamesAll, id), [pack, remoteNamesAll])
   const headSeq = snapshot?.campaign.headSeq ?? 0
   const sessionCode = snapshot?.session?.code ?? null
@@ -584,6 +590,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       )
   }
   closeTurnRef.current = closeTurn
+  const vote = (target: string | null) => {
+    if (turn) void act(() => client.vote(turn.id, target).then(() => undefined), t('play.voteFailed'))
+  }
   const holdTurn = (held: boolean) => {
     if (turn) void act(() => client.holdTurn(turn.id, held).then(() => undefined), t('play.holdFailed'))
   }
@@ -778,6 +787,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 </p>
               ) : null}
             </section>
+            {deduction ? <DeductionPanel view={deduction} self={viewer.characterId} nameOf={nameOf} roomName={(id) => deductionRoomName(deduction, id)} busy={busy} onVote={vote} /> : null}
             {blocks.length === 0 && connection !== 'loading' && !start ? <p className="empty">{emptyText}</p> : null}
             <Blocks groups={groups} currentBlockId={tts.currentBlockId} onPressBlock={(id) => tts.start(id)} onOpenEnding={setOpenedEnding} />
             {start ? (

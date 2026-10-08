@@ -5998,3 +5998,54 @@ a {
   border-color: var(--accent-bright);
   background: rgba(124, 58, 237, 0.22);
 }
+
+/* Partida de roles ocultos (Persefone, 08-10): con los tokens de la escena; el diseño fino es de Gabino. */
+.deduction-panel {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  background: var(--panel, rgba(0, 0, 0, 0.25));
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+.deduction-panel b {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+}
+.deduction-phase {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.deduction-role,
+.deduction-alert,
+.deduction-current,
+.deduction-waiting {
+  margin: 6px 0 0;
+}
+.deduction-host .deduction-role b {
+  color: var(--danger, #e05d5d);
+}
+.deduction-ghost {
+  opacity: 0.8;
+}
+.deduction-tasks ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.deduction-tasks li.done {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.deduction-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

@@ -14,8 +14,8 @@ import { assignRoles, isAlive, meetingNext, roleOf, tasksOf, verdict } from '@rp
 export const DEDUCTION = 'deduccion-social'
 
 /** Las tareas que ofrece la estacion, de los lugares del pack. */
-export function stationTasks(pack: LoadedPack): Array<{ id: string; room: string; name: string }> {
-  return [...pack.locations.values()].flatMap((location) => (location.tasks ?? []).map((task) => ({ id: task.id, room: location.id, name: task.name })))
+export function stationTasks(pack: LoadedPack): Array<{ id: string; room: string; name: string; roomName: string }> {
+  return [...pack.locations.values()].flatMap((location) => (location.tasks ?? []).map((task) => ({ id: task.id, room: location.id, name: task.name, roomName: location.name })))
 }
 
 /** Reparto al abrir: los effects `role` y el susurro de cada jugador con su rol y sus tareas. */
