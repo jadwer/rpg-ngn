@@ -52,6 +52,30 @@ export interface WorldState {
    * Recaudador). Lo mueve el effect `debt`; sin el, no existe.
    */
   partyDebt?: number
+  /** Estado de una partida de deduccion social (ruleset `deduccion-social`). */
+  deduction?: DeductionState
+}
+
+/**
+ * Lo que una partida de deduccion social guarda a nivel de mundo. Lo de cada
+ * personaje (rol, tareas, si vive, habilidad usada) va en su `custom`, que
+ * la API ya oculta a los demas asientos.
+ */
+export interface DeductionState {
+  /** Turnos de accion jugados (la recarga y el reactor se cuentan en estos). */
+  actionTurns: number
+  /** Turnos de accion desde la ultima reunion: a los dos, la siguiente es reunion. */
+  sinceMeeting: number
+  /** El turno siguiente es reunion (cuerpo reportado, boton, o tocaba). */
+  meetingNext: boolean
+  bodies: Array<{ who: string; room: string; found: boolean }>
+  sabotage: { kind: 'luces' | 'reactor'; since: number; fixers: string[] } | null
+  /** Votos de la reunion en curso: quien vota a quien (null = saltar). */
+  votes: Record<string, string | null>
+  /** El ultimo sellado por la esclusa, con su rol si la mesa lo confirma. */
+  lastEjected: { who: string | null; role?: 'tripulante' | 'huesped' } | null
+  /** Si el reactor saboteado no se arreglo a tiempo. */
+  reactorLost: boolean
 }
 
 export function emptyWorld(): WorldState {

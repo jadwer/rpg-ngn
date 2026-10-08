@@ -13,6 +13,16 @@ export const Location = z.strictObject({
   connections: z.array(KebabId).default([]),
   tags: z.array(z.string().min(1)).default([]),
   /**
+   * Tareas que se hacen en este lugar (deduccion social: Turno de noche en
+   * la Persefone). El motor las reparte al abrir la sesion.
+   */
+  tasks: z.array(z.strictObject({ id: KebabId, name: z.string().min(1) })).optional(),
+  /**
+   * Solo se entra si el ruleset lo permite (los ductos de la estacion: solo
+   * el Huesped). El GM no narra a nadie mas ahi.
+   */
+  restricted: z.boolean().optional(),
+  /**
    * Donde cae este lugar en un mapa del pack. `map` es el id del mapa, y
    * `x`/`y` van en porcentaje del ancho y el alto de la imagen (0 a 100),
    * no en pixeles: asi la misma coordenada vale en un movil y en una

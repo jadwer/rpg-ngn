@@ -1,10 +1,11 @@
 import { courtIntrigue } from './court-intrigue.js'
+import { deduccionSocial } from './deduccion-social.js'
 import { dramaLite } from './drama-lite.js'
 import { fantasyD20Lite } from './fantasy-d20-lite.js'
 import { masquerade } from './masquerade.js'
 import type { Ruleset } from './ruleset.js'
 
-const rulesets: ReadonlyArray<Ruleset> = [fantasyD20Lite, courtIntrigue, masquerade, dramaLite]
+const rulesets: ReadonlyArray<Ruleset> = [fantasyD20Lite, courtIntrigue, masquerade, dramaLite, deduccionSocial]
 
 /**
  * Resuelve `id` o `id@version`. Sin version devuelve la unica disponible;
