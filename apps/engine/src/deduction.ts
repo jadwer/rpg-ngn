@@ -131,7 +131,7 @@ export function playerView(state: CampaignState, pack: LoadedPack, id: string, m
   } else if (alive && role === 'huesped') {
     const lastKill = world.characters[id]?.custom['lastKill']
     const ready = typeof lastKill !== 'number' || (world.deduction?.actionTurns ?? 0) - lastKill >= 2
-    lines.push(`Este turno puedes: ir a una sala y fingir una tarea, seguir a alguien, ${ready ? 'matar a alguien que esté a solas contigo en tu sala, ' : ''}sabotear las luces o el reactor, o moverte por los ductos (Reactor, Médica, Carga). Una idea puede ser matar a alguien concreto si está solo.`)
+    lines.push(`Este turno puedes: ir a una sala y fingir una tarea, seguir a alguien, ${ready ? 'matar a alguien que esté a solas contigo en tu sala, ' : ''}sabotear las luces o el reactor, o moverte por los ductos (Reactor, Médica, Carga). Una de tus dos ideas tiene que ser siempre una jugada de Huésped (${ready ? 'matar a alguien concreto que esté solo, ' : ''}sabotear o meterte en un ducto); la otra, algo que te cubra.`)
   } else if (alive) {
     lines.push('Este turno: ve a la sala de una tarea pendiente y hazla, sigue a alguien, o revisa algo. Si encuentras un cuerpo, repórtalo.')
   }
