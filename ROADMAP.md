@@ -134,7 +134,7 @@ nunca catalogo abierto ni venta). Diseño y plan en `~/dev/rpg-packs/inspirados/
 que Opus lo implemente). Fable diseña, Gabino revisa nombres y tono, Opus
 implementa.
 
-- [ ] Konosuba, "Benditos sean los inutiles" (3 dias: `quirk`, `tone`, deuda de la party, pack de 6 misiones, prueba con modelo)
+- [x] Konosuba, "Benditos sean los inutiles" (08-10): motor (`quirk`, `tone`, `debt`, `companions`, monorepo `c757ec7`, API `ba6bdc4`, desplegado) y pack de 6 misiones en `~/dev/rpg-packs/inutiles`, probado con modelo (mesas 46, 47 y 49). Falta: crear los repos `rpg-packs/inutiles` y `rpg-packs/inspirados` en Gitea, clonarlo en el servidor y portada definitiva
 - [ ] Among Us, "Turno de noche en la Persefone" (6 dias: declaraciones privadas, reunion y voto, bandos, ruleset)
 - [ ] GTA, "Vuelta al barrio" (3.5 dias: ruleset calle-d20 con calor y respeto, 6 misiones)
 - [ ] Genshin, "Las Siete Coronas" (6.5 dias: reacciones por el motor, vida de enemigos, sorteo de personaje)
