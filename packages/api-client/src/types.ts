@@ -337,6 +337,8 @@ export interface WorldProjection {
   npcs: Record<string, unknown>
   /** Lo que debe la party, si el mundo lleva deuda. */
   partyDebt?: number
+  /** Calor de la banda (0 a 6), si el mundo es de calle. */
+  heat?: number
 }
 
 /** Una historia de Comunidad: una cronica que su mesa acepto publicar (02-10). */

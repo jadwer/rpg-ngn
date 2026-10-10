@@ -76,6 +76,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const [notice, setNotice] = useState<string | null>(null)
   const [worldTime, setWorldTime] = useState<string | null>(null)
   const [partyDebt, setPartyDebt] = useState<number | null>(null)
+  const [heat, setHeat] = useState<number | null>(null)
   const [projections, setProjections] = useState<{ seq: number | null; own: CharacterState | undefined; world: Record<string, CharacterState> | undefined }>({ seq: null, own: undefined, world: undefined })
   const [existingSessions, setExistingSessions] = useState<SessionSummary[]>([])
   const [maps, setMaps] = useState<PackMapView[]>([])
@@ -409,6 +410,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     if (!campaignId || !sessionCode) {
       setWorldTime(null)
       setPartyDebt(null)
+      setHeat(null)
       return
     }
     let alive = true
@@ -417,6 +419,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
         if (!alive) return
         setWorldTime(p.projection.worldTime)
         setPartyDebt(p.projection.partyDebt ?? null)
+        setHeat(p.projection.heat ?? null)
       },
       () => undefined,
     )
@@ -577,7 +580,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const suggestedCode = useMemo(() => nextFromEnding ?? suggestedSessionCode(pack, existingSessions), [nextFromEnding, pack, existingSessions])
   const connectionNotice = connection === 'offline' ? t('play.offline') : error
   const sessionTitle = snapshot?.session ? (pack?.sessions.get(snapshot.session.code)?.title ?? t('play.session', { code: snapshot.session.code })) : null
-  const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, partyDebt, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
+  const subtitle = tableSubtitle({ sessionTitle, loading: connection === 'loading', worldTime, partyDebt, heat, turnNumber: turn?.number ?? null, pending: progress.pending.map(nameOf), narrating: progress.narrating })
   const emptyText = emptyTableText(!!snapshot?.session, isHost)
   const start = snapshot ? startCard({ hasSession: !!snapshot.session, host: isHost, hostName: hostOf(table)?.userName ?? null, nextCode: suggestedCode, firstSession: existingSessions.length === 0, dice: diceModeOf(table.settings) }) : null
 

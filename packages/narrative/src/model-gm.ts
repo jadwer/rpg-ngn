@@ -107,6 +107,9 @@ const ConditionEffect = z
 const MemoryEffect = z.strictObject({ op: z.literal('memory_recovered'), who: CharacterRef })
 // La deuda de la party entera, en los mundos que la declaran (`manifest.debt`).
 const DebtEffect = z.strictObject({ op: z.literal('debt'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+// Mundos de calle (`manifest.street`): el calor de la banda y el respeto de cada uno.
+const HeatEffect = z.strictObject({ op: z.literal('heat'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
+const RespectEffect = z.strictObject({ op: z.literal('respect'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
 const LoseEffect = z.strictObject({ op: z.literal('lose'), item: KebabId, holder: EntityRef.optional() })
 // court-intrigue: credito, sospecha y pistas (packages/rules/src/court-intrigue.ts).
@@ -243,7 +246,7 @@ const QuestUpdateEvent = z.strictObject({
 
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect, DebtEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect, DebtEffect, HeatEffect, RespectEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
@@ -1563,8 +1566,8 @@ class LineInterpreter {
             if (refKind(effect.who) !== 'npc' || !present(effect.with)) return null
             continue
           }
-          // La deuda es de la party entera: no tiene sujeto.
-          if (effect.op === 'debt') continue
+          // La deuda y el calor son de la party entera: no tienen sujeto.
+          if (effect.op === 'debt' || effect.op === 'heat') continue
           if (effect.op === 'condition' && refKind(effect.who) === 'npc') continue
           if (!present(effect.who)) return null
           if (effect.op === 'condition' && effect.remove && !characters[refId(effect.who)]!.conditions.includes(effect.remove)) return null

@@ -158,6 +158,7 @@ export const table = {
     missing: 'faltan {{names}}',
     debtOne: 'Deuda: {{count}} moneda',
     debtMany: 'Deuda: {{count}} monedas',
+    heat: 'Calor: {{stars}}',
     session: ', sesión {{code}}',
   },
   start: {

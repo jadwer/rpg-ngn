@@ -123,6 +123,13 @@ export const PackManifest = z.strictObject({
    * la mueve con el effect `debt` y la mesa la ve en la cabecera.
    */
   debt: z.strictObject({ start: z.number().int().min(0), note: z.string().min(1).optional() }).optional(),
+  /**
+   * Mundo de calle (Vuelta al barrio, inspirado en GTA): el calor de 0 a 6
+   * (cuanto busca la policia a la banda, a la vista en la mesa) y el
+   * respeto de 0 a 10 de cada personaje en el barrio. Los mueve el GM con
+   * los effects `heat` y `respect`.
+   */
+  street: z.strictObject({ heat: z.boolean().default(true), respect: z.boolean().default(true) }).optional(),
   /** La ficha del mundo en el catalogo (E9). Obligatoria para publicar; opcional en un mundo privado. */
   catalog: PackCatalog.optional(),
   /** Idioma en que esta escrito el pack (i18n). Los packs de antes de declararlo son en español. */

@@ -94,6 +94,23 @@ export const fantasyD20Lite: Ruleset = {
           return { ...c, conditions }
         })
       }
+      case 'heat': {
+        // Mundo de calle (Vuelta al barrio): cuanto busca la policia a la banda, de 0 a 6.
+        const delta = effect['delta']
+        if (typeof delta !== 'number' || !Number.isInteger(delta)) {
+          throw new Error(`${event.id}: el effect "heat" requiere "delta" entero`)
+        }
+        return { ...world, heat: Math.max(0, Math.min(6, (world.heat ?? 0) + delta)) }
+      }
+      case 'respect': {
+        // Lo que vale ese personaje en el barrio, de 0 a 10.
+        const who = characterId(str(effect, 'who', event), event)
+        const delta = effect['delta']
+        if (typeof delta !== 'number' || !Number.isInteger(delta)) {
+          throw new Error(`${event.id}: el effect "respect" requiere "delta" entero`)
+        }
+        return updateCharacter(world, who, (c) => ({ ...c, custom: { ...c.custom, respect: Math.max(0, Math.min(10, Number(c.custom['respect'] ?? 0) + delta)) } }))
+      }
       case 'debt': {
         // Lo que debe la party entera (Benditos sean los inutiles): sube con
         // multas y facturas, baja al pagar, nunca por debajo de cero.

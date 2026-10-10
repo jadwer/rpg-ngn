@@ -52,6 +52,8 @@ export interface WorldState {
    * Recaudador). Lo mueve el effect `debt`; sin el, no existe.
    */
   partyDebt?: number
+  /** Calor de la banda, de 0 a 6 (mundos de calle): cuanto la busca la policia. */
+  heat?: number
   /** Estado de una partida de deduccion social (ruleset `deduccion-social`). */
   deduction?: DeductionState
 }

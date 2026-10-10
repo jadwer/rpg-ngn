@@ -12,6 +12,8 @@ export interface WorldProjection {
   npcs: WorldState['npcs']
   /** Lo que debe la party; ausente si el mundo no lleva deuda. */
   partyDebt?: number
+  /** Calor de la banda (0 a 6); ausente si el mundo no es de calle. */
+  heat?: number
 }
 
 export interface PlayerProjection {
@@ -22,7 +24,7 @@ export interface PlayerProjection {
 }
 
 export function worldProjection(state: CampaignState): WorldProjection {
-  return { worldTime: state.world.worldTime, characters: state.world.characters, npcs: state.world.npcs, ...(state.world.partyDebt !== undefined ? { partyDebt: state.world.partyDebt } : {}) }
+  return { worldTime: state.world.worldTime, characters: state.world.characters, npcs: state.world.npcs, ...(state.world.partyDebt !== undefined ? { partyDebt: state.world.partyDebt } : {}), ...(state.world.heat !== undefined ? { heat: state.world.heat } : {}) }
 }
 
 export function playerProjection(state: CampaignState, characterId: string): PlayerProjection {

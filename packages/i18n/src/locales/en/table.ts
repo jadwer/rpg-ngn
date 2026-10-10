@@ -160,6 +160,7 @@ export const table: Messages<typeof es> = {
     missing: 'waiting for {{names}}',
     debtOne: 'Debt: {{count}} coin',
     debtMany: 'Debt: {{count}} coins',
+    heat: 'Heat: {{stars}}',
     session: ', session {{code}}',
   },
   start: {

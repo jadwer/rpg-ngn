@@ -140,10 +140,12 @@ export function memberTag(member: TableMember, nameOf: (id: string) => string): 
 }
 
 /** Subtitulo de la cabecera de la mesa: sesion, momento del mundo, deuda de la party, turno y quien falta. */
-export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; partyDebt?: number | null | undefined; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
+export function tableSubtitle(input: { sessionTitle: string | null; loading: boolean; worldTime: string | null; partyDebt?: number | null | undefined; heat?: number | null | undefined; turnNumber: number | null; pending: readonly string[]; narrating: boolean }): string {
   const parts = [input.sessionTitle ?? (input.loading ? t('table.members.connecting') : t('table.members.noSession'))]
   if (input.worldTime) parts.push(input.worldTime)
   if (typeof input.partyDebt === 'number') parts.push(t(input.partyDebt === 1 ? 'table.members.debtOne' : 'table.members.debtMany', { count: input.partyDebt }))
+  // El calor en estrellas, como en los juegos de calle: llenas las que hay, vacias hasta seis.
+  if (typeof input.heat === 'number') parts.push(t('table.members.heat', { stars: '★'.repeat(input.heat) + '☆'.repeat(Math.max(0, 6 - input.heat)) }))
   if (input.turnNumber !== null) {
     parts.push(t('table.members.turn', { number: input.turnNumber }))
     if (input.pending.length > 0 && !input.narrating) parts.push(t('table.members.missing', { names: input.pending.join(', ') }))

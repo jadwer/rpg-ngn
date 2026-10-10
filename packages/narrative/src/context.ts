@@ -83,6 +83,25 @@ export function buildTurnContext(ctx: GMTurnContext, budget: ContextBudget = DEF
   return { user: [fixed, ...live].join('\n\n'), fixed, party }
 }
 
+/** Lo que hace la ciudad en cada nivel de calor (mundos de calle). */
+const HEAT_LEVELS = [
+  'Nadie los busca.',
+  'Una patrulla se fija en ellos y pregunta.',
+  'Patrullas los buscan por la zona; los paran si los ven.',
+  'Cierran calles y sale el helicóptero: hay que perderse.',
+  'Judiciales con armas largas; disparan primero.',
+  'Retenes en las salidas y el ejército en la calle.',
+  'Toda la ciudad los busca: no hay dónde esconderse mucho tiempo.',
+]
+
+/** Las reglas de calor y respeto que lee el GM en un mundo de calle. */
+const STREET_RULES = [
+  'Calor y respeto (este mundo es de calle): el calor dice cuánto busca la policía a la banda, de 0 a 6, y la mesa lo ve. Súbelo con lo que se hace a la vista: robar un coche frente a testigos +1, una persecución +1, una balacera +2, herir a un policía +3. Bájalo cuando se esconden: perder a la patrulla -1, meter el coche al taller o cambiarlo -2, un turno entero sin hacer nada que se vea -1. Narra lo que hace la ciudad en ese nivel; no lo anuncies con números.',
+  '{"kind":"state_change","effects":[{"op":"heat","delta":2}]}',
+  'El respeto es lo que vale cada uno en el barrio, de 0 a 10: sube con misiones cumplidas, territorio ganado o un favor a la banda; baja al huir, al fallarle a alguien o al perder territorio. Con respeto alto la banda ayuda (te presta gente, un coche, un escondite).',
+  '{"kind":"state_change","effects":[{"op":"respect","who":"character:<id>","delta":1}]}',
+].join('\n')
+
 /** Lo que el GM tiene que saber cuando cada jugador declara en privado (juegos de roles ocultos). */
 const PRIVATE_ACTIONS_NOTE = [
   '# Acciones privadas',
@@ -210,6 +229,9 @@ function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
   }
 
   if (manifest.tone) lines.push('', `Tono de este mundo (manda sobre tu estilo por omisión): ${manifest.tone}`)
+  if (manifest.street) {
+    lines.push('', STREET_RULES)
+  }
   if (manifest.debt) {
     lines.push('', `La party debe dinero y eso es parte del juego${manifest.debt.note ? ` (${manifest.debt.note})` : ''}. Cuando cobren, paguen, gasten o les pongan una multa, muévela con {"kind":"state_change","effects":[{"op":"debt","delta":12}]} (positivo: deben más; negativo: pagaron). La cifra actual está en "Estado del mundo".`)
   }
@@ -231,6 +253,9 @@ function worldLiveLayer(ctx: GMTurnContext, party: string[]): string {
   const worldTime = ctx.state.world.worldTime
   if (worldTime) lines.push(`Momento del mundo: ${worldTime}`)
   if (ctx.state.world.partyDebt !== undefined) lines.push(`Deuda de la party: ${ctx.state.world.partyDebt} monedas.`)
+  if (ctx.state.world.heat !== undefined) lines.push(`Calor de la banda: ${ctx.state.world.heat} de 6. ${HEAT_LEVELS[ctx.state.world.heat] ?? ''}`)
+  const respect = Object.entries(ctx.state.world.characters).flatMap(([id, c]) => (typeof c.custom['respect'] === 'number' ? [`${ctx.pack.characters.get(id)?.name ?? id} ${c.custom['respect']}`] : []))
+  if (respect.length) lines.push(`Respeto en el barrio (0 a 10): ${respect.join(', ')}.`)
 
   // Con quien esta en cada sitio el GM puede narrar quien se cruza con quien.
   const dondeEsta = new Map<string, string[]>()
