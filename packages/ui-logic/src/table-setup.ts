@@ -257,3 +257,12 @@ function firstSentence(text: string, max = 120): string {
   const first = end > 0 ? clean.slice(0, end + 1) : clean
   return first.length > max ? `${first.slice(0, max - 1).trimEnd()}...` : first
 }
+
+/**
+ * "Pedir un deseo": un personaje libre al azar (Las Siete Coronas, inspirado
+ * en el gacha de Genshin Impact, pero gratis). Null si no queda ninguno.
+ */
+export function wishCharacter(free: ReadonlyArray<{ id: string }>, random: () => number = Math.random): string | null {
+  if (free.length === 0) return null
+  return free[Math.min(free.length - 1, Math.floor(random() * free.length))]!.id
+}

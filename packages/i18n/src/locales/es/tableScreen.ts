@@ -11,6 +11,7 @@ export const tableScreen = {
   losQueYaJuega: 'Los que ya juega alguien no se pueden elegir: el primero que llega se lo queda. Sin personaje puedes leer, pero no responder.',
   cargandoLosPersonajesDel: 'Cargando los personajes del pack...',
   jugarConEstePersonaje: 'Jugar con este personaje',
+  pedirUnDeseo: 'Pedir un deseo (personaje al azar)',
   arrastraParaVerMas: 'Arrastra para ver más escena o más texto',
   escena: 'Escena',
   inicioDeLaPartida: 'Inicio de la partida',

@@ -222,6 +222,7 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
     // En deduccion social los bloques esperan al final del turno: la guardia
     // de privacidad necesita saber si hubo una muerte antes de publicar nada.
     const held: EngineTurnBlock[] = []
+    const blows: string[] = []
     const outputs = provider.narrate(context)
     for await (const output of outputs) {
       if (output.kind === 'block') {
@@ -290,6 +291,10 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         continue
       }
       events.push(parsed.data)
+      // Combate por elementos (Las Siete Coronas): cada golpe se anuncia a la mesa con su reaccion.
+      for (const effect of parsed.data.type === 'state_change' ? (parsed.data.effects ?? []) : []) {
+        if (effect['op'] === 'elemental') blows.push(blowText(state, pack, effect))
+      }
     }
 
     if (game) {
@@ -335,6 +340,8 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
         closed = null
       }
     }
+
+    for (const text of blows) yield { kind: 'block', block: { type: 'system', text, audience: 'table', tone: 'action' } }
 
     // Ideas de accion (docs/27, bloque I): se piden aqui, con los eventos del
     // turno ya aplicados, para que salgan del mundo como quedo (el lugar al
@@ -404,6 +411,19 @@ export async function* resolveTurn(request: ResolveTurnRequest, deps: ResolveDep
 }
 
 /** Cuanto se espera a las ideas de un personaje antes de abrir el turno sin ellas. */
+/** El anuncio de un golpe elemental, con lo que dejo el ruleset en el enemigo. */
+function blowText(state: CampaignState, pack: LoadedPack, effect: Record<string, unknown>): string {
+  const npcId = String(effect['target']).replace('npc:', '')
+  const hit = state.world.npcs[npcId]?.custom['lastHit'] as { element: string; damage: number; reaction: string | null; hp: number; hpMax: number } | undefined
+  const who = pack.characters.get(String(effect['who']).replace('character:', ''))?.name ?? String(effect['who'])
+  const foe = pack.npcs.get(npcId)?.name ?? npcId
+  if (!hit) return `${who} golpea a ${foe}.`
+  const element = hit.element.charAt(0).toUpperCase() + hit.element.slice(1)
+  const head = hit.reaction ? `¡${hit.reaction}! ` : ''
+  const tail = hit.hp === 0 ? `${foe} cae derrotado.` : `${foe}: ${hit.hp} de ${hit.hpMax}.`
+  return `${head}${who} golpea con ${element}: ${hit.damage} de daño. ${tail}`
+}
+
 /** Lo que solo se hace en un turno de accion de deduccion social. */
 const DEDUCTION_OPS = new Set(['task_done', 'kill', 'vent', 'sabotage', 'fix', 'report', 'button', 'ability'])
 

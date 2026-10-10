@@ -13,6 +13,7 @@ export const tableScreen: Messages<typeof es> = {
   losQueYaJuega: 'Characters someone already plays cannot be picked: the first to arrive keeps it. Without a character you can read, but not answer.',
   cargandoLosPersonajesDel: 'Loading the pack’s characters...',
   jugarConEstePersonaje: 'Play this character',
+  pedirUnDeseo: 'Make a wish (random character)',
   arrastraParaVerMas: 'Drag to see more scene or more text',
   escena: 'Scene',
   inicioDeLaPartida: 'Start of the game',

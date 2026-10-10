@@ -108,6 +108,9 @@ const MemoryEffect = z.strictObject({ op: z.literal('memory_recovered'), who: Ch
 // La deuda de la party entera, en los mundos que la declaran (`manifest.debt`).
 const DebtEffect = z.strictObject({ op: z.literal('debt'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 // Mundos de calle (`manifest.street`): el calor de la banda y el respeto de cada uno.
+// Combate por elementos (`manifest.elements`): quien ataca, a quien y con que
+// ataque. El elemento y el daño los pone el motor con el dado del ataque.
+const ElementalEffect = z.strictObject({ op: z.literal('elemental'), who: CharacterRef, target: EntityRef, attack: KebabId })
 const HeatEffect = z.strictObject({ op: z.literal('heat'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const RespectEffect = z.strictObject({ op: z.literal('respect'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
@@ -246,7 +249,7 @@ const QuestUpdateEvent = z.strictObject({
 
 const D20_EVENT = z.discriminatedUnion('type', [
   RollEvent,
-  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect, DebtEffect, HeatEffect, RespectEffect])).min(1) }),
+  z.strictObject({ type: z.literal('state_change'), actor: CharacterRef.optional(), effects: z.array(z.union([HpEffect, ConditionEffect, MemoryEffect, RelationshipEffect, MoveEffect, DebtEffect, HeatEffect, RespectEffect, ElementalEffect])).min(1) }),
   InventoryEvent,
   WorldEvent,
   SecretEvent,
@@ -1568,12 +1571,30 @@ class LineInterpreter {
           }
           // La deuda y el calor son de la party entera: no tienen sujeto.
           if (effect.op === 'debt' || effect.op === 'heat') continue
+          // Un golpe elemental: quien ataca tiene que estar en escena, el blanco
+          // ser un enemigo con vida en el pack y el ataque, uno suyo con elemento.
+          if (effect.op === 'elemental') {
+            if (!present(effect.who) || refKind(effect.target) !== 'npc') return null
+            const foe = this.ctx.pack.npcs.get(refId(effect.target))
+            const sheet = this.ctx.pack.characters.get(refId(effect.who))
+            const attack = [...(sheet?.attacks ?? []), ...(sheet?.abilities ?? []).flatMap((a) => (a.damage && a.damageType ? [{ id: a.id, damage: a.damage, damageType: a.damageType }] : []))].find((a) => a.id === effect.attack)
+            if (!foe?.combat || !attack || !ELEMENT_IDS.has(attack.damageType)) return null
+            continue
+          }
           if (effect.op === 'condition' && refKind(effect.who) === 'npc') continue
           if (!present(effect.who)) return null
           if (effect.op === 'condition' && effect.remove && !characters[refId(effect.who)]!.conditions.includes(effect.remove)) return null
         }
         const subject = event.effects.find((e): e is Extract<typeof e, { who: string }> => 'who' in e)?.who
-        return { ...event, ...(event.actor ?? subject ? { actor: event.actor ?? subject } : {}), visibility: { layer: 'campaign', witnesses } }
+        // El golpe elemental sale con su elemento y su daño ya tirados por el motor (regla 1: el modelo nunca pone el numero).
+        const effects = event.effects.map((effect) => {
+          if (effect.op !== 'elemental') return effect
+          const sheet = this.ctx.pack.characters.get(refId(effect.who))!
+          const attack = [...sheet.attacks, ...sheet.abilities.flatMap((a) => (a.damage && a.damageType ? [{ id: a.id, damage: a.damage, damageType: a.damageType }] : []))].find((a) => a.id === effect.attack)!
+          const rolled = rollDice(attack.damage, this.random)
+          return { ...effect, element: attack.damageType, damage: Math.max(1, rolled.total), targetMax: this.ctx.pack.npcs.get(refId(effect.target))!.combat!.hp }
+        })
+        return { ...event, effects, ...(event.actor ?? subject ? { actor: event.actor ?? subject } : {}), visibility: { layer: 'campaign', witnesses } }
       }
       case 'inventory_change': {
         for (const effect of event.effects) {
@@ -1641,6 +1662,9 @@ function wantsRawLog(): boolean {
 }
 
 /** Kinds de las lineas de control: lo que no es ni historia ni evento. */
+/** Los siete elementos de Las Siete Coronas, como `damageType` de un ataque. */
+const ELEMENT_IDS: ReadonlySet<string> = new Set(['fuego', 'agua', 'hielo', 'rayo', 'viento', 'roca', 'flora'])
+
 const CONTROL_KINDS = new Set(['addressed', 'scene', 'recap', 'where', 'suggest', 'milestone', 'whisper', 'close', 'ask_roll'])
 
 type NormalizedRecord = { kind: 'block'; raw: unknown } | { kind: 'event'; raw: unknown } | { kind: 'line'; line: z.infer<typeof ModelLine> }

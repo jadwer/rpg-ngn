@@ -130,6 +130,12 @@ export const PackManifest = z.strictObject({
    * los effects `heat` y `respect`.
    */
   street: z.strictObject({ heat: z.boolean().default(true), respect: z.boolean().default(true) }).optional(),
+  /**
+   * Combate por elementos (Las Siete Coronas, inspirado en Genshin Impact):
+   * los ataques llevan elemento en su `damageType` y el motor aplica auras y
+   * reacciones sobre los enemigos con `combat`.
+   */
+  elements: z.boolean().optional(),
   /** La ficha del mundo en el catalogo (E9). Obligatoria para publicar; opcional en un mundo privado. */
   catalog: PackCatalog.optional(),
   /** Idioma en que esta escrito el pack (i18n). Los packs de antes de declararlo son en español. */

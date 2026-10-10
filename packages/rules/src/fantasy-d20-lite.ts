@@ -1,6 +1,7 @@
 import type { CampaignEvent, Character } from '@rpg-ngn/content'
 import { refId, refKind } from '@rpg-ngn/content'
 import { adjust, resource, updateCharacter, type CharacterState, type Fortune, type WorldState } from '@rpg-ngn/core'
+import { applyElemental } from './elements.js'
 import { applyInventoryEffect, optionalStr, str, type Effect } from './inventory.js'
 import { UnknownEffectError, type Ruleset } from './ruleset.js'
 import type { FortuneTier } from './fortune-tiers.js'
@@ -94,6 +95,9 @@ export const fantasyD20Lite: Ruleset = {
           return { ...c, conditions }
         })
       }
+      case 'elemental':
+        // Combate por elementos (Las Siete Coronas): aura, reaccion y vida del enemigo.
+        return applyElemental(world, effect, event)
       case 'heat': {
         // Mundo de calle (Vuelta al barrio): cuanto busca la policia a la banda, de 0 a 6.
         const delta = effect['delta']

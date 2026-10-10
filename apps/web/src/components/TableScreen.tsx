@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, deductionProgress, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -975,6 +975,9 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
                 }}
               >
                 {t('tableScreen.jugarConEstePersonaje')}
+              </button>
+              <button type="button" className="btn ghost" disabled={busy} onClick={() => setChoosing(wishCharacter(pack ? freeCharacters(pack, table.members) : freeRemoteCharacters(remote, table.members)) ?? choosing)}>
+                {t('tableScreen.pedirUnDeseo')}
               </button>
             </div>
           </section>

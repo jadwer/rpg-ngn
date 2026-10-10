@@ -94,6 +94,14 @@ const HEAT_LEVELS = [
   'Toda la ciudad los busca: no hay dónde esconderse mucho tiempo.',
 ]
 
+/** El combate por elementos que lee el GM (Las Siete Coronas). */
+const ELEMENT_RULES = [
+  'Combate por elementos (este mundo): cada ataque de un personaje tiene un elemento (Fuego, Agua, Hielo, Rayo, Viento, Roca o Flora; está en su ficha como tipo de daño). Cuando un personaje ataca a un enemigo con vida, registra el golpe y el motor tira el daño, aplica la reacción y le anuncia a la mesa el resultado:',
+  '{"kind":"state_change","effects":[{"op":"elemental","who":"character:<id>","target":"npc:<id>","attack":"<id del ataque>"}]}',
+  'Reglas que aplica el motor: Fuego, Agua, Hielo, Rayo y Flora dejan un aura en el enemigo; Viento y Roca no se pegan. Un golpe de otro elemento sobre un aura reacciona y la consume: Agua sobre Fuego o Fuego sobre Hielo, daño doble (Vaporizar, Derretir; al revés, vez y media); Rayo con Fuego, Sobrecarga (lo derriba); Rayo con Hielo, Superconducción (defensa rota); Agua con Rayo, Electrocargado; Agua con Hielo, Congelado (pierde su turno); Viento sobre un aura, Torbellino; Roca sobre un aura, Cristalizar (escudo para quien ataca); Flora con Agua, Florecer; con Fuego, Quemar; con Rayo, Catalizar.',
+  'Mira el aura de cada enemigo en "Estado del mundo" y narra la reacción que va a pasar con su nombre, para que la mesa aprenda a combinarse. No pongas números: los anuncia el motor. A cero de vida, el enemigo cae. Los enemigos también atacan: quita vida a los personajes con "hp".',
+].join('\n')
+
 /** Las reglas de calor y respeto que lee el GM en un mundo de calle. */
 const STREET_RULES = [
   'Calor y respeto (este mundo es de calle): el calor dice cuánto busca la policía a la banda, de 0 a 6, y la mesa lo ve. Súbelo con lo que se hace a la vista: robar un coche frente a testigos +1, una persecución +1, una balacera +2, herir a un policía +3. Bájalo cuando se esconden: perder a la patrulla -1, meter el coche al taller o cambiarlo -2, un turno entero sin hacer nada que se vea -1. Narra lo que hace la ciudad en ese nivel; no lo anuncies con números.',
@@ -211,7 +219,8 @@ function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
     lines.push('', 'NPCs del pack (usa speakerRef npc:<id>; lo que la mesa ya provocó en cada uno está en "Estado del mundo"):')
     for (const npc of npcs) {
       const goals = npc.goals.length ? ` Objetivos: ${npc.goals.join('; ')}.` : ''
-      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}`)
+      const combat = npc.combat ? ` Enemigo: ${npc.combat.hp} de vida${npc.combat.element ? `, de ${npc.combat.element}` : ''}.` : ''
+      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}${combat}`)
     }
   }
 
@@ -231,6 +240,9 @@ function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
   if (manifest.tone) lines.push('', `Tono de este mundo (manda sobre tu estilo por omisión): ${manifest.tone}`)
   if (manifest.street) {
     lines.push('', STREET_RULES)
+  }
+  if (manifest.elements) {
+    lines.push('', ELEMENT_RULES)
   }
   if (manifest.debt) {
     lines.push('', `La party debe dinero y eso es parte del juego${manifest.debt.note ? ` (${manifest.debt.note})` : ''}. Cuando cobren, paguen, gasten o les pongan una multa, muévela con {"kind":"state_change","effects":[{"op":"debt","delta":12}]} (positivo: deben más; negativo: pagaron). La cifra actual está en "Estado del mundo".`)
@@ -254,6 +266,14 @@ function worldLiveLayer(ctx: GMTurnContext, party: string[]): string {
   if (worldTime) lines.push(`Momento del mundo: ${worldTime}`)
   if (ctx.state.world.partyDebt !== undefined) lines.push(`Deuda de la party: ${ctx.state.world.partyDebt} monedas.`)
   if (ctx.state.world.heat !== undefined) lines.push(`Calor de la banda: ${ctx.state.world.heat} de 6. ${HEAT_LEVELS[ctx.state.world.heat] ?? ''}`)
+  // Enemigos en combate por elementos: vida, aura y condiciones, como los dejo el motor.
+  const foes = Object.entries(ctx.state.world.npcs).flatMap(([id, npc]) => {
+    const c = npc.custom
+    if (typeof c['hp'] !== 'number') return []
+    const conditions = Array.isArray(c['conditions']) ? (c['conditions'] as string[]) : []
+    return [`${ctx.pack.npcs.get(id)?.name ?? id} (npc:${id}): ${c['hp']} de ${String(c['hpMax'])} de vida${c['aura'] ? `, aura de ${String(c['aura'])}` : ', sin aura'}${conditions.length ? `, ${conditions.join(', ')}` : ''}.`]
+  })
+  if (foes.length) lines.push('', 'Enemigos en combate:', ...foes.map((f) => `- ${f}`))
   const respect = Object.entries(ctx.state.world.characters).flatMap(([id, c]) => (typeof c.custom['respect'] === 'number' ? [`${ctx.pack.characters.get(id)?.name ?? id} ${c.custom['respect']}`] : []))
   if (respect.length) lines.push(`Respeto en el barrio (0 a 10): ${respect.join(', ')}.`)
 

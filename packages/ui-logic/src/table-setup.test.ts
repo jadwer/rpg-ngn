@@ -25,6 +25,7 @@ import {
   sessionOptions,
   suggestedSessionCode,
   tableSubtitle,
+  wishCharacter,
   tableTitle,
   takenCharacters,
 } from './table-setup.js'
@@ -146,6 +147,9 @@ describe('cabecera de la mesa', () => {
     expect(tableSubtitle({ sessionTitle: 'Los sapos', loading: false, worldTime: null, partyDebt: 18, turnNumber: 2, pending: [], narrating: false })).toBe('Los sapos · Deuda: 18 monedas · Turno 2')
     expect(tableSubtitle({ sessionTitle: 'Los sapos', loading: false, worldTime: null, partyDebt: 1, turnNumber: null, pending: [], narrating: false })).toBe('Los sapos · Deuda: 1 moneda')
     // Un mundo de calle muestra el calor en estrellas (Vuelta al barrio).
+    expect(wishCharacter([{ id: 'lumi' }, { id: 'brasa' }], () => 0.99)).toBe('brasa')
+    expect(wishCharacter([{ id: 'lumi' }, { id: 'brasa' }], () => 0)).toBe('lumi')
+    expect(wishCharacter([])).toBeNull()
     expect(tableSubtitle({ sessionTitle: 'El velorio', loading: false, worldTime: null, heat: 2, turnNumber: 3, pending: [], narrating: false })).toBe('El velorio · Calor: ★★☆☆☆☆ · Turno 3')
     expect(tableSubtitle({ sessionTitle: 'La campana', loading: false, worldTime: 'Anochece', turnNumber: 2, pending: ['Zahira'], narrating: false })).toBe('La campana · Anochece · Turno 2 · faltan Zahira')
     expect(tableSubtitle({ sessionTitle: 'La campana', loading: false, worldTime: null, turnNumber: 2, pending: ['Zahira'], narrating: true })).toBe('La campana · Turno 2')

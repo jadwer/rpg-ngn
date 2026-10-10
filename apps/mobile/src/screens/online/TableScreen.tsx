@@ -2,7 +2,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, deductionProgress, deductionRoomName, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { DeductionPanel } from '../../components/DeductionPanel'
@@ -743,6 +743,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
               }, t('play.pickFailed'))
             }}
           />
+          <Button label={t('tableScreen.pedirUnDeseo')} disabled={busy} onPress={() => setChoosing(wishCharacter(freeToPick) ?? choosing)} />
         </View>
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
