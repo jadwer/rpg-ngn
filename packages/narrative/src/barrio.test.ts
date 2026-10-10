@@ -1,4 +1,4 @@
-import { applyEvent, initialState } from '@rpg-ngn/campaign'
+import { applyEvent, initialState, type CampaignState } from '@rpg-ngn/campaign'
 import { CampaignEvent, type LoadedPack } from '@rpg-ngn/content'
 import { fantasyD20Lite } from '@rpg-ngn/rules'
 import { describe, expect, it } from 'vitest'
@@ -16,7 +16,7 @@ describe('mundo de calle: calor y respeto', () => {
     const base = await openSession003()
     const pack: LoadedPack = { ...base.pack, manifest: { ...base.pack.manifest, street: { heat: true, respect: true } } }
     expect(initialState({ pack, ruleset: fantasyD20Lite }).world.heat).toBe(0)
-    const state0 = { ...base.state, world: { ...base.state.world, heat: 0 } }
+    const state0: CampaignState = { ...base.state, world: { ...base.state.world, heat: 0 } }
     const ctx = contextFor({ ...base, pack, state: state0 }, turn(2, [response('zahira', 'Me robo el coche frente al Oxxo.')]))
     expect(buildTurnContext(ctx).fixed).toContain('Calor y respeto (este mundo es de calle)')
     expect(buildTurnContext(ctx).user).toContain('Calor de la banda: 0 de 6. Nadie los busca.')
