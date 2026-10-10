@@ -110,7 +110,7 @@ const DebtEffect = z.strictObject({ op: z.literal('debt'), delta: z.number().int
 // Mundos de calle (`manifest.street`): el calor de la banda y el respeto de cada uno.
 // Combate por elementos (`manifest.elements`): quien ataca, a quien y con que
 // ataque. El elemento y el daño los pone el motor con el dado del ataque.
-const ElementalEffect = z.strictObject({ op: z.literal('elemental'), who: CharacterRef, target: EntityRef, attack: KebabId })
+const ElementalEffect = z.strictObject({ op: z.literal('elemental'), who: CharacterRef, target: EntityRef, attack: z.string().min(1).max(60) })
 const HeatEffect = z.strictObject({ op: z.literal('heat'), delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const RespectEffect = z.strictObject({ op: z.literal('respect'), who: CharacterRef, delta: z.number().int().refine((d) => d !== 0, 'delta 0 no cambia nada') })
 const GainEffect = z.strictObject({ op: z.literal('gain'), item: KebabId, holder: EntityRef.optional(), note: z.string().optional(), source: z.string().optional() })
@@ -1576,8 +1576,7 @@ class LineInterpreter {
           if (effect.op === 'elemental') {
             if (!present(effect.who) || refKind(effect.target) !== 'npc') return null
             const foe = this.ctx.pack.npcs.get(refId(effect.target))
-            const sheet = this.ctx.pack.characters.get(refId(effect.who))
-            const attack = [...(sheet?.attacks ?? []), ...(sheet?.abilities ?? []).flatMap((a) => (a.damage && a.damageType ? [{ id: a.id, damage: a.damage, damageType: a.damageType }] : []))].find((a) => a.id === effect.attack)
+            const attack = elementalAttack(this.ctx.pack.characters.get(refId(effect.who)), effect.attack)
             if (!foe?.combat || !attack || !ELEMENT_IDS.has(attack.damageType)) return null
             continue
           }
@@ -1589,8 +1588,7 @@ class LineInterpreter {
         // El golpe elemental sale con su elemento y su daño ya tirados por el motor (regla 1: el modelo nunca pone el numero).
         const effects = event.effects.map((effect) => {
           if (effect.op !== 'elemental') return effect
-          const sheet = this.ctx.pack.characters.get(refId(effect.who))!
-          const attack = [...sheet.attacks, ...sheet.abilities.flatMap((a) => (a.damage && a.damageType ? [{ id: a.id, damage: a.damage, damageType: a.damageType }] : []))].find((a) => a.id === effect.attack)!
+          const attack = elementalAttack(this.ctx.pack.characters.get(refId(effect.who)), effect.attack)!
           const rolled = rollDice(attack.damage, this.random)
           return { ...effect, element: attack.damageType, damage: Math.max(1, rolled.total), targetMax: this.ctx.pack.npcs.get(refId(effect.target))!.combat!.hp }
         })
@@ -1662,6 +1660,18 @@ function wantsRawLog(): boolean {
 }
 
 /** Kinds de las lineas de control: lo que no es ni historia ni evento. */
+/**
+ * El ataque o la habilidad con daño de un personaje, por id o por su nombre
+ * en kebab ("espada-de-viajera" por "Espada de viajera"): en la mesa 54 el GM
+ * nombro los ataques por su nombre y ningun golpe se aplico.
+ */
+function elementalAttack(sheet: { attacks: ReadonlyArray<{ id: string; name: string; damage: string; damageType: string }>; abilities: ReadonlyArray<{ id: string; name: string; damage?: string | undefined; damageType?: string | undefined }> } | undefined, wanted: string): { id: string; damage: string; damageType: string } | undefined {
+  if (!sheet) return undefined
+  const slug = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const options = [...sheet.attacks, ...sheet.abilities.flatMap((a) => (a.damage && a.damageType ? [{ id: a.id, name: a.name, damage: a.damage, damageType: a.damageType }] : []))]
+  return options.find((a) => a.id === wanted) ?? options.find((a) => slug(a.name) === slug(wanted))
+}
+
 /** Los siete elementos de Las Siete Coronas, como `damageType` de un ataque. */
 const ELEMENT_IDS: ReadonlySet<string> = new Set(['fuego', 'agua', 'hielo', 'rayo', 'viento', 'roca', 'flora'])
 

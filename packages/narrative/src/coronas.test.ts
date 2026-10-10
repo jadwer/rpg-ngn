@@ -32,13 +32,22 @@ describe('combate por elementos', () => {
     const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY, { random: { nextInt: () => 3, describe: () => 'fijo' } }).narrate(ctx))
     expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
     const event = outputs.find((o) => o.kind === 'event' && o.event['type'] === 'state_change')
-    const effect = (event as { event: { effects: Array<Record<string, unknown>> } }).event.effects[0]!
+    const effect = (event as unknown as { event: { effects: Array<Record<string, unknown>> } }).event.effects[0]!
     expect(effect).toMatchObject({ op: 'elemental', element: 'agua', damage: 8, targetMax: 40 })
 
     const sealed = CampaignEvent.parse({ ...(event as { event: object }).event, id: 'evt-00099', v: 1, seq: base.state.meta.headSeq + 1, sessionId: '003', recordedAt: '2026-10-10T10:00:00Z' })
     const state = applyEvent(base.state, sealed, fantasyD20Lite)
     expect(state.world.npcs[foe]?.custom).toMatchObject({ hp: 32, hpMax: 40, aura: 'agua' })
     expect(buildTurnContext(contextFor({ ...base, state }, turn(3, []))).user).toContain('32 de 40 de vida, aura de agua')
+  })
+
+  it('el GM puede nombrar el ataque por su nombre en vez de su id, y la ficha le muestra el id', async () => {
+    const { base, foe } = await arena()
+    const ctx = contextFor(base, turn(2, [response('zahira', 'Le lanzo una ola.')]))
+    expect(buildTurnContext(ctx).fixed).toContain('Ola (id ola; 2d6 agua, corta)')
+    const lines = [`{"kind":"state_change","effects":[{"op":"elemental","who":"character:zahira","target":"npc:${foe}","attack":"Ola"}]}`, '{"kind":"narration","text":"Agua."}'].join('\n')
+    const outputs = await collect(new ModelGMProvider(new FakeTransport(lines), KEY).narrate(ctx))
+    expect(diagnosticsOf(outputs).ignoredCount).toBe(0)
   })
 
   it('un ataque sin elemento o un blanco sin vida no se registra', async () => {

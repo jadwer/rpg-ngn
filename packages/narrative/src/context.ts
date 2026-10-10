@@ -397,10 +397,10 @@ function characterCard(id: string, sheet: Character | undefined, live: Character
     // salia "CA undefined" y "Ataques: ." (VAM del 19-09, motor A8).
     const ca = sheet.ac !== undefined && sheet.ac !== null ? ` CA ${sheet.ac}.` : ''
     lines.push(`Características: ${stats}.${ca} Habilidades: ${sheet.skills.join(', ')}. Roles: ${sheet.roles.join(', ')}.`)
-    if (sheet.attacks.length) lines.push(`Ataques: ${sheet.attacks.map((a) => `${a.name} (${a.damage} ${a.damageType}, ${a.range})`).join('; ')}.`)
+    if (sheet.attacks.length) lines.push(`Ataques: ${sheet.attacks.map((a) => `${a.name} (id ${a.id}; ${a.damage} ${a.damageType}, ${a.range})`).join('; ')}.`)
     if (sheet.faction || sheet.rank) lines.push(`Posición: ${[sheet.faction, sheet.rank].filter(Boolean).join(', ')}.`)
     if (sheet.abilities.length) {
-      lines.push(`Capacidades: ${sheet.abilities.map((a) => `${a.name}${a.uses ? ` (${a.uses}/${a.per ?? 'sesión'})` : ''}: ${a.effect}`).join(' | ')}`)
+      lines.push(`Capacidades: ${sheet.abilities.map((a) => `${a.name}${a.damage && a.damageType ? ` (id ${a.id}; ${a.damage} ${a.damageType})` : ''}${a.uses ? ` (${a.uses}/${a.per ?? 'sesión'})` : ''}: ${a.effect}`).join(' | ')}`)
     }
   }
   if (live) {
