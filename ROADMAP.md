@@ -136,7 +136,8 @@ implementa.
 
 - [x] Konosuba, "Benditos sean los inutiles" (08-10): motor (`quirk`, `tone`, `debt`, `companions`, monorepo `c757ec7`, API `ba6bdc4`, desplegado) y pack de 6 misiones en `~/dev/rpg-packs/inutiles`, probado con modelo (mesas 46, 47 y 49). Falta: crear los repos `rpg-packs/inutiles` y `rpg-packs/inspirados` en Gitea, clonarlo en el servidor y portada definitiva
 - [x] Among Us, "Turno de noche en la Persefone" (08-10): acciones privadas, ruleset `deduccion-social`, sorteo, guardia de privacidad, votos y veredicto en el motor, votacion y vista por asiento en la API (`turn_votes`), panel en web y app, pack de 8 oficios y 2 sesiones; tres partidas reales de cinco (mesas 50 a 52) y lo que destaparon, corregido. Desplegado (monorepo `55df26c`, API `0854d8f`). Falta: repos en Gitea y portada
-- [ ] GTA, "Vuelta al barrio" (3.5 dias: ruleset calle-d20 con calor y respeto, 6 misiones)
+- [x] GTA, "Vuelta al barrio" (10-10): calor (0 a 6, en estrellas en la mesa) y respeto como `manifest.street` sobre el d20, pack de 4 personajes, 7 NPCs y 6 misiones, probado con modelo (mesa 53). Desplegado
+- [x] Arte de los tres mundos (10-10): portada, retratos y mapa con los lugares ubicados, estilo y paleta en `artStyle`. Aprobado por Gabino
 - [ ] Genshin, "Las Siete Coronas" (6.5 dias: reacciones por el motor, vida de enemigos, sorteo de personaje)
 
 ### Avance
