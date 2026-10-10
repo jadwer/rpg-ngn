@@ -139,7 +139,7 @@ implementa.
 - [x] GTA, "Vuelta al barrio" (10-10): calor (0 a 6, en estrellas en la mesa) y respeto como `manifest.street` sobre el d20, pack de 4 personajes, 7 NPCs y 6 misiones, probado con modelo (mesa 53). Desplegado
 - [x] Arte de los tres mundos (10-10): portada, retratos y mapa con los lugares ubicados, estilo y paleta en `artStyle`. Aprobado por Gabino
 - [ ] Despues de la beta (decision de Gabino, 10-10): quitar "(Inspirado en ...)" del titulo de los mundos con nombres y contenido propios (inutiles, persefone, barrio, coronas) y subirlos como contenido original: revisar antes el parecido del arte (Chispa se parece a Megumin), pasar `provenance` a `original` y moverlos al catalogo abierto. La boticaria no: usa los personajes originales
-- [ ] Genshin, "Las Siete Coronas" (6.5 dias: reacciones por el motor, vida de enemigos, sorteo de personaje)
+- [x] Genshin, "Las Siete Coronas" (10-10): combate por elementos (`manifest.elements`, `npc.combat`, effect `elemental` con tabla de reacciones y anuncio a la mesa), "Pedir un deseo" en web y app, pack de 10 personajes, 8 NPCs, 6 sesiones y arte; probado con modelo (mesas 54 y 55). Desplegado (monorepo `c07e844`)
 
 ### Avance
 
