@@ -164,6 +164,26 @@ Al abrir la sesion, el engine coloca ahi a todo personaje de la party que no
 tenga ya ubicacion (docs/08). El cargador comprueba que el lugar exista en el
 pack. Es opcional: un pack sin lugares no lo usa.
 
+**Quien existe en cada sesion: `npcs` en la sesion.** Sin el campo, el GM
+recibe todos los NPCs del pack con la descripcion de su ficha en todas las
+sesiones. Una historia que salta en el tiempo o cambia de escenario lo
+necesita: en la mesa 44 el GM trajo a escena a quien no estaba esa noche y
+contaba a los personajes como eran quince años antes. Cada id lleva lo que el
+NPC es ahora, o `null` si es como en su ficha:
+
+```json
+"npcs": {
+  "rogelio": "Quince años más viejo; sube pasada la medianoche con un pastel.",
+  "mariana": "Treinta y tres años, médica; se casa el sábado con un médico.",
+  "dona-chelo": null
+}
+```
+
+Los NPCs que no aparecen le llegan al GM solo por su nombre, como ausentes,
+con la orden de no traerlos a escena. El cargador comprueba que cada id exista.
+El lector critico (`apps/engine/scripts/critic.mts`) usa la misma lista para
+señalar a un ausente que habla.
+
 ## Secretos: la capa `gm` del pack
 
 `secrets/<id>.json`, declarados en `pack.json` bajo `secrets`. Son la capa GM knowledge de

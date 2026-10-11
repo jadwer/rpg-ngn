@@ -285,16 +285,35 @@ permite en el juego). Ninguno de los dos mundos tiene `canon` ni `arc`.
 | Que | Por que queda | Dueño |
 |---|---|---|
 | Probar con el modelo real fantasy-d20-lite (el piloto) con tres jugadores | Jugados drama (uno), court-intrigue y masquerade (tres); falta el sistema con combate | Cuando toque el piloto |
-| Decir por sesion que NPCs del mundo existen | Hoy se listan todos en todas; se tapa con `canon` | Siguiente sesion |
+| ~~Decir por sesion que NPCs del mundo existen~~ | Hecho el 11-10: `npcs` en la sesion (docs/05); el medico lo declara en sus tres capitulos | Cerrado |
 | Una nota del modelo para si mismo que no empieza con una etiqueta conocida se narra como historia | Se descartan las etiquetadas (Nota, Recordatorio, Objetivo oculto, GM, anotaciones); una nota en prosa limpia no se distingue de narracion | Vigilar en `tables:review`; si se repite, descartar la prosa cuando el turno ya trae lineas JSON de historia |
 | Las voces de las cronicas publicadas con audio quedan `stale` al cambiar el texto que se cuenta | El audio viejo lleva las preguntas del GM; se regenera al pedirlo y el video no se arma con el | Regrabar con `speech:chronicle <token>` (primero `--dry-run` por el costo) |
 | El GM a veces narra en tercera persona ("Emiliano cierra la guia") en mesa de uno, sobre todo sin razonar | Es del modelo; el prompt ya pide segunda persona | Medir con el prompt nuevo |
 | Con modelos locales (perfil compacto) las ideas siguen saliendo del GM, con los secretos delante | Otra llamada por turno son minutos en una M1 | Aceptado; partidas privadas |
-| El canon es instruccion: el motor no lo hace cumplir | Haria falta un lector que compare la narracion con el canon | Lector critico, abajo |
-| Lector critico en `play-session`: una llamada que lee la sesion entera mas `arc.canon` y lista contradicciones | No se hizo; hoy se lee a mano con `tables:review` | Siguiente sesion |
+| El canon es instruccion: el motor no lo hace cumplir | El lector critico lo vigila despues de jugar (11-10); el motor sigue sin impedirlo en vivo | Aceptado |
+| ~~Lector critico~~ | Hecho el 11-10: `critique()` en narrative y `apps/engine/scripts/critic.mts` sobre la salida de `tables:review` (local o produccion); `play-session` imprime el comando al terminar. Probado en las mesas 44 y 55 a 58: encontro el canon roto de Lucia (mesa 44) y un `move` a Farmacias Parecidas la noche del choque (mesa 56, corregido en el mundo con `esquina-del-choque`) | Cerrado |
 | Panel del anfitrion con el diagnostico del turno | Hoy solo se lee por comando; el anfitrion ya no ve avisos tecnicos, que es lo que pidio | Si hace falta |
 | `reopen()` sigue escribiendo "El relato se ha trabado" con el error tecnico en el detalle para el anfitrion | La mesa tiene que saber que el turno se reabrio | Revisar el texto |
 | El piloto, la mascarada y la boticaria no tienen `canon` ni `scene` de cierre | Son campos nuevos y opcionales | Al tocar cada mundo |
+
+## Lector critico (11-10)
+
+Una llamada (Sonnet, esfuerzo medium, de 3 a 20 s y unos centavos por mesa)
+que recibe la referencia del mundo (fichas, NPCs, lugares, y por sesion el
+canon, el desenlace fijo, las fichas de la sesion y los NPCs presentes y
+ausentes) y la mesa como la escribe `tables:review`. Devuelve una linea JSON
+por contradiccion con la cita, el hecho que rompe y la gravedad.
+
+Afinado contra mesas reales: con "si dudas, no lo señales" no veia nada; con
+"si dudas, baja" llenaba la lista de detalles inventados que no chocan con
+nada. Lo que quedo: cada hallazgo cita el hecho concreto que contradice, o no
+es hallazgo. Esfuerzo high costo el triple sin encontrar mas. Deja pasar los
+casos discutibles (pants con bata; "Lucia contesta" cuando pudo devolver la
+llamada), que es lo correcto.
+
+De paso aparecio "vosotros" en 14 bloques de 10 mesas locales (ninguno en
+produccion en diez dias): el prompt decia "vosotros o ustedes, segun el pack"
+y ningun pack lo fija. Ahora dice ustedes, nunca vosotros.
 
 ## Como se revisa de aqui en adelante
 
@@ -302,6 +321,7 @@ permite en el juego). Ninguno de los dos mundos tiene `canon` ni `arc`.
 php artisan turns:notices --since=7 --show=10   # que no pudo usar el motor, por clase
 php artisan turns:notices --raw=<turno>          # lo que escribio el modelo en ese turno
 php artisan tables:review <mesa>                 # la mesa entera, legible, con sus conteos
+php artisan tables:review <mesa> | node --env-file=<.env con la clave> --import tsx apps/engine/scripts/critic.mts <pack>   # contradicciones contra el canon
 ```
 
 Antes de dar por bueno un cambio del motor: `turns:notices` sin historia

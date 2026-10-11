@@ -58,7 +58,7 @@ Lo planeo Fable; lo implementa Opus, bloque por bloque.
 - [ ] **H2. Gancho de apertura y prueba A/B** (04-10: apertura nueva hecha, `4e9095b`; A/B con Claude en `gm/ab/`, falta la parte de GPT por falta de clave local): la apertura arranca con un incidente que exige decidir, no con presentaciones; `tools/ab-opening` compara Claude y GPT lado a lado y Gabino decide el proveedor por omision
 - [x] **H3. Imagenes por formato** (04-10, motor `319ac65`, API `13d022f`): apertura, climax y final garantizadas; hueco de 2 turnos en sesion corta, 3 en media, 5 en larga
 - [x] **H4. Arcos de autor** (04-10, motor `b6f9167`, API `e360e2b`): `arc` en la sesion del mundo (capitulo, presupuesto de turnos, gancho, objetivo visible, puntos de trama, desenlace inevitable, finales con rama) y `finale` en el manifiesto; mesa "Terminada"
-- [ ] **H5. One-shot "Ya descubrí mi pasión: ¡QUIERO SER MÉDICO!"** (04-10: mundo escrito con el sistema nuevo drama-lite, `f73706b`; capitulos 1 y 2 jugados en local y cierran como se escribieron; falta jugar el 3 por sus dos finales, frenado porque la cuenta de Anthropic se quedo sin credito): un jugador, tres capitulos cortos, dos finales. Universidades reales, farmacia parodiada (decision de Gabino). Es la prueba de aceptacion del plan
+- [x] **H5. One-shot "Ya descubrí mi pasión: ¡QUIERO SER MÉDICO!"** (04-10: mundo escrito con el sistema nuevo drama-lite, `f73706b`; 11-10: capitulo 3 jugado por sus dos finales, mesas 56 a 59: "se repite" cierra en 2 a 4 turnos y "medico" en 6 con su epilogo, los dos con mesa Terminada; NPCs por sesion y lugar nuevo `esquina-del-choque`, porque el GM llevaba la noche del choque a Farmacias Parecidas): un jugador, tres capitulos cortos, dos finales. Universidades reales, farmacia parodiada (decision de Gabino). Falta que Gabino lo juegue completo en produccion
 - [x] **H6. Estrellas y reseñas** (04-10, API `55c5f12`): la pantalla de fin pide siempre la valoracion; promedio bayesiano en Explorar; el texto de las reseñas, privado hasta tener moderacion
 - [x] **H7. Lo privado** (04-10, motor `9cd3da4`, API `faf3faa`; falta el AAB v25): susurros del director a un solo jugador, objetivo personal garantizado al abrir la sesion, la API filtra por jugador (ni el anfitrion ve lo ajeno). Cierra de paso la deuda de informacion asimetrica (S14 y E1 del VAM del 19-09). Al cerrar, AAB v25 (antes del 14-10)
 - [x] **H8. Formatos en la mesa y en Explorar** (04-10, API `27475d5`): formato, un jugador o grupo, largo de sesion, generos y estilo como datos del mundo con vocabulario controlado; el largo de sesion se elige al crear la mesa; filtros en Explorar, web y app
@@ -122,7 +122,8 @@ con respaldo previo.
 - [x] Mesas de tres con modelo real: boticaria y mascarada (06-10); secretos propios por personaje (`knownBy`), parrafo cortado por el lint se reconsidera, logros sin repetir, ideas cortadas se rescatan. Desplegado
 - [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y modelo real
 - [x] AAB v26 (06-10, `C:\Users\JadweR\ad-astra-mentis-v26.aab`, firmado con la llave de subida, verificado): cierre de capitulo, GM en vez de director, textos del 05 y 06-10. Falta subirlo a Pruebas internas
-- [ ] Lo abierto de docs/27: NPCs por sesion, lector critico en `play-session`, panel del anfitrion con el diagnostico, medir `effort: low`
+- [x] NPCs por sesion y lector critico (11-10, docs/27): `npcs` en la sesion del mundo; `apps/engine/scripts/critic.mts` lee una mesa de `tables:review` contra el canon y lista contradicciones
+- [ ] Lo abierto de docs/27: panel del anfitrion con el diagnostico; `effort: low` medido el 06-10 y en produccion
 
 ### Mundos inspirados para la beta (08-10, decision de Gabino)
 
