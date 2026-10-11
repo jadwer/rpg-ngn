@@ -18,6 +18,19 @@ detalle y lo que queda abierto, en [docs/27](27-correccion-del-motor.md). Para r
 partida ya no se consulta la base a mano: `php artisan tables:review <mesa>`
 y `php artisan turns:notices`.
 
+**Nota del 11-10.** Despues de docs/27: cache de una hora del prompt y
+`effort: low` en produccion (06-10, la sesion corta de tres bajo de 0.54 a
+0.36 USD); AAB v26 en Pruebas internas con los siete productos de Google Play
+(08-10). Para la beta cerrada se hicieron cuatro mundos inspirados (privados,
+`third-party-ip`), cada uno con una mecanica nueva sobre el d20 o un ruleset
+propio: "Benditos sean los inutiles" (Konosuba: manias, tono y deuda de la
+party), "Turno de noche en la Persefone" (Among Us: ruleset
+`deduccion-social`, acciones privadas y votos), "Vuelta al barrio" (GTA San
+Andreas: calor y respeto) y "Las Siete Coronas" (Genshin: combate por
+elementos y Pedir un deseo). Los cuatro se probaron con el modelo real y estan
+desplegados en la beta del catalogo, con arte. Detalle en el ROADMAP, "Mundos
+inspirados para la beta".
+
 Este archivo existe para responder cuatro preguntas sin tener que leer el
 codigo: que esta implementado, que esta en progreso, que esta pendiente y que
 decisiones estan cerradas. Se escribio a peticion de un colaborador externo

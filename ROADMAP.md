@@ -134,12 +134,15 @@ nunca catalogo abierto ni venta). Diseño y plan en `~/dev/rpg-packs/inspirados/
 que Opus lo implemente). Fable diseña, Gabino revisa nombres y tono, Opus
 implementa.
 
-- [x] Konosuba, "Benditos sean los inutiles" (08-10): motor (`quirk`, `tone`, `debt`, `companions`, monorepo `c757ec7`, API `ba6bdc4`, desplegado) y pack de 6 misiones en `~/dev/rpg-packs/inutiles`, probado con modelo (mesas 46, 47 y 49). Falta: crear los repos `rpg-packs/inutiles` y `rpg-packs/inspirados` en Gitea, clonarlo en el servidor y portada definitiva
-- [x] Among Us, "Turno de noche en la Persefone" (08-10): acciones privadas, ruleset `deduccion-social`, sorteo, guardia de privacidad, votos y veredicto en el motor, votacion y vista por asiento en la API (`turn_votes`), panel en web y app, pack de 8 oficios y 2 sesiones; tres partidas reales de cinco (mesas 50 a 52) y lo que destaparon, corregido. Desplegado (monorepo `55df26c`, API `0854d8f`). Falta: repos en Gitea y portada
+- [x] Konosuba, "Benditos sean los inutiles" (08-10): motor (`quirk`, `tone`, `debt`, `companions`, monorepo `c757ec7`, API `ba6bdc4`, desplegado) y pack de 6 misiones en `~/dev/rpg-packs/inutiles`, probado con modelo (mesas 46, 47 y 49).
+- [x] Among Us, "Turno de noche en la Persefone" (08-10): acciones privadas, ruleset `deduccion-social`, sorteo, guardia de privacidad, votos y veredicto en el motor, votacion y vista por asiento en la API (`turn_votes`), panel en web y app, pack de 8 oficios y 2 sesiones; tres partidas reales de cinco (mesas 50 a 52) y lo que destaparon, corregido. Desplegado (monorepo `55df26c`, API `0854d8f`)
 - [x] GTA, "Vuelta al barrio" (10-10): calor (0 a 6, en estrellas en la mesa) y respeto como `manifest.street` sobre el d20, pack de 4 personajes, 7 NPCs y 6 misiones, probado con modelo (mesa 53). Desplegado
 - [x] Arte de los tres mundos (10-10): portada, retratos y mapa con los lugares ubicados, estilo y paleta en `artStyle`. Aprobado por Gabino
 - [ ] Despues de la beta (decision de Gabino, 10-10): quitar "(Inspirado en ...)" del titulo de los mundos con nombres y contenido propios (inutiles, persefone, barrio, coronas) y subirlos como contenido original: revisar antes el parecido del arte (Chispa se parece a Megumin), pasar `provenance` a `original` y moverlos al catalogo abierto. La boticaria no: usa los personajes originales
-- [x] Genshin, "Las Siete Coronas" (10-10): combate por elementos (`manifest.elements`, `npc.combat`, effect `elemental` con tabla de reacciones y anuncio a la mesa), "Pedir un deseo" en web y app, pack de 10 personajes, 8 NPCs, 6 sesiones y arte; probado con modelo (mesas 54 y 55). Desplegado (monorepo `c07e844`)
+- [x] Genshin, "Las Siete Coronas" (10-10): combate por elementos (`manifest.elements`, `npc.combat`, effect `elemental` con tabla de reacciones y anuncio a la mesa), "Pedir un deseo" en web y app, pack de 10 personajes, 8 NPCs, 6 sesiones y arte; probado con modelo (mesas 54 y 55). Desplegado (monorepo `c07e844`). La vida de los jefes se bajo tras la mesa 55 y no se ha probado en partida
+- [x] Repos en Gitea (`rpg-packs/inutiles`, `persefone`, `barrio`, `coronas`), empujados (10-10)
+- [ ] Llave de despliegue `rpg-ngn-hetzner` (solo lectura) en los cuatro repos (Gabino). Revisado el 11-10: el servidor aun no tiene acceso y sirve copias subidas por tar (mismo contenido que los repos). Con la llave: `git fetch` y `reset --hard origin/main` como `rpg` en cada `/srv/rpg/packs-<mundo>`
+- [ ] Repo `rpg-packs/inspirados` (documentos de diseño; hoy solo local), opcional
 
 ### Avance
 
