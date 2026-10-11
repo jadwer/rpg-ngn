@@ -19,6 +19,9 @@ const SESSIONS = (process.env['SESSIONS'] ?? '001').split(',')
 const SEATS = (process.env['SEATS'] ?? 'jaz@example.com:zahira,armando@example.com:calder').split(',').map((s) => s.split(':') as [string, string])
 /** Si esta, el primer jugador responde siempre esto en vez de la primera idea del GM. */
 const ACTION = process.env['ACTION'] ?? null
+/** Acciones del primer jugador en orden, separadas por "|": una por turno; al acabarse, ACTION o la idea. Para guiar una rama de la historia. */
+const ACTIONS = process.env['ACTIONS']?.split('|').map((a) => a.trim()).filter(Boolean) ?? []
+let scripted = 0
 /** Quien tira los dados. Por omision `dice`, como las mesas de produccion: el GM pide la tirada y el jugador la suelta. */
 const DICE = process.env['DICE'] ?? 'dice'
 /** Que idea elige cada jugador: la primera (prudente) o la segunda (atrevida). */
@@ -169,7 +172,7 @@ async function main(): Promise<void> {
           }
         }
         if (mine.suggestions.length === 0) console.log(`  ! ${p.character} abrio el turno ${turn.number} SIN IDEAS`)
-        const idea = (p === players[0] && ACTION) || mine.suggestions[PICK] || mine.suggestions[0] || 'Observo con cuidado lo que pasa.'
+        const idea = (p === players[0] && (ACTIONS[scripted++] ?? ACTION)) || mine.suggestions[PICK] || mine.suggestions[0] || 'Observo con cuidado lo que pasa.'
         // Con tirada pedida, el turno del jugador es soltar el dado (y decir que intenta con el).
         if (mine.rolls.pending) {
           console.log(`  ${p.character} suelta el dado: ${mine.rolls.pending.skill ?? mine.rolls.pending.kind} (${mine.rolls.pending.reason ?? ''})`)
@@ -196,6 +199,8 @@ async function main(): Promise<void> {
     for (const [id, entry] of perTurn) console.log(`  ${id}: ${entry.words} palabras${entry.milestones.length ? `, logro: ${entry.milestones.join(' | ')}` : ''}`)
     console.log(`sesion ${code}, fin:`, JSON.stringify(ended))
   }
+  // El lector critico (docs/27) lee la mesa contra el canon del mundo; una llamada, centavos.
+  console.log(`\nlector critico: (cd ../rpg-ngn-api && php artisan tables:review ${tableId}) | (cd apps/engine && node --env-file=../../../rpg-ngn-api/.env --import tsx scripts/critic.mts ${PACK})`)
 }
 
 main().catch((error: unknown) => {
