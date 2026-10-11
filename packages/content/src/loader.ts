@@ -184,6 +184,9 @@ export async function loadPack(source: FileSource, options: LoadPackOptions = {}
         issues.push({ level: 'error', path, message: `availableCharacters referencia a ${characterId}, que no esta en el pack` })
       }
     }
+    for (const npcId of Object.keys(session.npcs ?? {})) {
+      if (!npcs.has(npcId)) issues.push({ level: 'error', path, message: `npcs referencia a ${npcId}, que no esta en el pack` })
+    }
     if (session.startLocation !== undefined && !locations.has(session.startLocation)) {
       issues.push({ level: 'error', path, message: `startLocation apunta a ${session.startLocation}, que no esta en el pack` })
     }

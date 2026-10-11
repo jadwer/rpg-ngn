@@ -13,6 +13,12 @@
     "emiliano"
   ],
   "startLocation": "el-departamento",
+  "npcs": {
+    "rogelio": "Quince años más viejo; sube pasada la medianoche con un pastel.",
+    "lucia": "Dejó a Rogelio hace años; vive aparte y habla con Emiliano de vez en cuando.",
+    "mariana": "Treinta y tres años, médica; se casa el sábado con un médico.",
+    "dona-chelo": "La casera del cuarto del octavo piso."
+  },
   "party": [],
   "arc": {
     "chapter": {

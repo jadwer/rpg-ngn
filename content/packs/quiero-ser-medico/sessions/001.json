@@ -13,6 +13,12 @@
     "emiliano"
   ],
   "startLocation": "casa-de-mama",
+  "npcs": {
+    "rogelio": "Borracho e ileso junto al Tsuru chocado; llama por teléfono.",
+    "lucia": "En el hospital, turno de noche: solo por teléfono.",
+    "mariana": null,
+    "el-agente": null
+  },
   "party": [],
   "arc": {
     "chapter": {
@@ -43,7 +49,7 @@
       "Emiliano está solo en la casa de su mamá: un departamento chico en la Gustavo A. Madero, en un edificio de pocos pisos con zaguán a la calle.",
       "Lucía es enfermera y está en el hospital: su turno de noche empezó a las once. No está en casa, no puede ir y solo puede llamar por teléfono.",
       "El teléfono de la casa lo contesta Emiliano, y quien llama es Rogelio.",
-      "Rogelio chocó el Tsuru gris de Lucía a unas cuadras de la casa, junto a una farmacia. Es el único coche de la familia y está a nombre de Lucía; Emiliano no tiene coche y se mueve a pie. Rogelio está borracho e ileso.",
+      "Rogelio chocó el Tsuru gris de Lucía a unas cuadras de la casa, junto a una farmacia de barrio (location:esquina-del-choque). No es Farmacias Parecidas, que no existe en esta noche. Es el único coche de la familia y está a nombre de Lucía; Emiliano no tiene coche y se mueve a pie. Rogelio está borracho e ileso.",
       "Mariana es compañera de Emiliano en la Vocacional 10 y presenta Medicina ese mismo día.",
       "Esta noche solo existen Rogelio, Lucía, Mariana, los vecinos y la policía. Doña Chelo es la casera de un cuarto donde Emiliano vivirá quince años después: no vive en este edificio ni aparece."
     ]

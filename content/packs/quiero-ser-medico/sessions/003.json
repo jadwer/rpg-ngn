@@ -13,6 +13,12 @@
     "emiliano"
   ],
   "startLocation": "casa-de-mama",
+  "npcs": {
+    "rogelio": "La misma noche del capítulo 1: borracho, ileso, junto al Tsuru chocado; piensa culpar a Emiliano.",
+    "lucia": "En el hospital, turno de noche: solo por teléfono.",
+    "mariana": null,
+    "el-agente": null
+  },
   "party": [],
   "arc": {
     "chapter": {
@@ -57,7 +63,7 @@
       "Emiliano está solo en la casa de su mamá: un departamento chico en la Gustavo A. Madero, en un edificio de pocos pisos con zaguán a la calle.",
       "Lucía es enfermera y está en el hospital: su turno de noche empezó a las once. No está en casa, no puede ir y solo puede llamar por teléfono.",
       "El teléfono de la casa lo contesta Emiliano, y quien llama es Rogelio.",
-      "Rogelio chocó el Tsuru gris de Lucía a unas cuadras de la casa, junto a una farmacia. Es el único coche de la familia y está a nombre de Lucía; Emiliano no tiene coche y se mueve a pie. Rogelio está borracho e ileso.",
+      "Rogelio chocó el Tsuru gris de Lucía a unas cuadras de la casa, junto a una farmacia de barrio (location:esquina-del-choque). No es Farmacias Parecidas, que no existe en esta noche. Es el único coche de la familia y está a nombre de Lucía; Emiliano no tiene coche y se mueve a pie. Rogelio está borracho e ileso.",
       "Mariana es compañera de Emiliano en la Vocacional 10 y presenta Medicina ese mismo día.",
       "Es la misma noche del capítulo 1, repetida igual: mismo teléfono, misma hora, misma llamada. Solo Emiliano recuerda los quince años que vienen; nadie más sabe nada.",
       "Rogelio provocó el choque a propósito y piensa culpar a Emiliano en cuanto llegue. Emiliano lo sabe y puede usarlo: decírselo a Lucía, a la patrulla o al propio Rogelio. Decir la verdad o denunciarlo no es ir a salvarlo, aunque para eso salga de la casa.",

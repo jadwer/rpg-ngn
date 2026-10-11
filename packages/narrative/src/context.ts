@@ -214,14 +214,22 @@ function worldFixedLayer(ctx: GMTurnContext, budget: ContextBudget): string {
     }
   }
 
-  const npcs = [...ctx.pack.npcs.values()]
+  // Con `npcs` en la sesion solo entran los que existen en ella, con lo que
+  // son ahora; los demas van por nombre como ausentes (docs/27, mesa 44).
+  const present = ctx.session?.npcs
+  const npcs = [...ctx.pack.npcs.values()].filter((npc) => !present || npc.id in present)
   if (npcs.length) {
-    lines.push('', 'NPCs del pack (usa speakerRef npc:<id>; lo que la mesa ya provocó en cada uno está en "Estado del mundo"):')
+    lines.push('', `${present ? 'NPCs de esta sesión' : 'NPCs del pack'} (usa speakerRef npc:<id>; lo que la mesa ya provocó en cada uno está en "Estado del mundo"):`)
     for (const npc of npcs) {
       const goals = npc.goals.length ? ` Objetivos: ${npc.goals.join('; ')}.` : ''
       const combat = npc.combat ? ` Enemigo: ${npc.combat.hp} de vida${npc.combat.element ? `, de ${npc.combat.element}` : ''}.` : ''
-      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}${combat}`)
+      const now = present?.[npc.id] ? ` En esta sesión: ${present[npc.id]}` : ''
+      lines.push(`- ${npc.name} (npc:${npc.id}): ${npc.description}${goals}${combat}${now}`)
     }
+  }
+  const absent = present ? [...ctx.pack.npcs.values()].filter((npc) => !(npc.id in present)) : []
+  if (absent.length) {
+    lines.push('', `No están en esta sesión: ${absent.map((npc) => npc.name).join(', ')}. No los traigas a escena ni hables por ellos; si la mesa los busca, no aparecen o no contestan.`)
   }
 
   const quests = [...ctx.pack.quests.values()]

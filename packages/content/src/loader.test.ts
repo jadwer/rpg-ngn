@@ -107,6 +107,19 @@ describe('loadPack sobre packs en memoria', () => {
     expect(issues).toContainEqual(expect.objectContaining({ level: 'error', message: expect.stringContaining('ninguna-parte') }))
   })
 
+  it('marca error cuando la sesion declara un NPC que no esta en el pack', async () => {
+    const source = memorySource({
+      'pack.json': JSON.stringify(manifest),
+      'characters/ana.json': JSON.stringify(ana),
+      'sessions/001.json': JSON.stringify({ ...session, npcs: { 'nadie-aqui': 'No existe.' } }),
+    })
+
+    const { pack, issues } = await loadPack(source)
+
+    expect(pack).toBeNull()
+    expect(issues).toContainEqual(expect.objectContaining({ level: 'error', message: expect.stringContaining('nadie-aqui') }))
+  })
+
   it('avisa de puntos de trama que no caben en el presupuesto o que son ramas, y acepta los campos de autor', async () => {
     // Con 5 puntos en 6 turnos el GM salto la escena central entera, y una
     // rama puesta en fila ("Si va...") le hizo empujar la que el jugador no eligio (mesa 44).

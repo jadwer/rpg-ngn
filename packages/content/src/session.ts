@@ -130,6 +130,15 @@ export const Session = z.strictObject({
    * diosa (Benditos sean los inutiles, mesa 46).
    */
   companions: z.array(KebabId).optional(),
+  /**
+   * Los NPCs del mundo que existen en ESTA sesion, por id, con lo que son
+   * ahora si cambio ("33 años, casada con un medico"). Sin esto el GM recibe
+   * todos con la descripcion de la ficha en todas las sesiones, y en una
+   * historia que salta en el tiempo trae a escena a quien no esta o lo cuenta
+   * como era antes (docs/27, mesa 44). Un NPC que no aparece aqui le llega al
+   * GM solo por su nombre, como ausente.
+   */
+  npcs: z.record(KebabId, z.string().min(1).nullable()).optional(),
   party: z.array(PartyMember),
   notes: z.string().optional(),
   recap: z.string().optional(),

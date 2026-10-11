@@ -1,0 +1,14 @@
+{
+  "id": "esquina-del-choque",
+  "name": "La esquina del choque",
+  "description": "A unas cuadras de la casa de mamá, junto a una farmacia de barrio con la cortina a medio bajar. Ahí quedó el Tsuru gris de Lucía contra el poste. No es Farmacias Parecidas: esa aparece en la vida de Emiliano muchos años después.",
+  "newcomerView": "Vidrios en el asfalto, el cofre del Tsuru doblado contra un poste y el letrero de una farmacia de barrio parpadeando.",
+  "connections": [
+    "casa-de-mama",
+    "agencia-del-mp"
+  ],
+  "tags": [
+    "calle",
+    "noche"
+  ]
+}
