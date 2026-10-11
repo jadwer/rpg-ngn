@@ -141,7 +141,7 @@ implementa.
 - [ ] Despues de la beta (decision de Gabino, 10-10): quitar "(Inspirado en ...)" del titulo de los mundos con nombres y contenido propios (inutiles, persefone, barrio, coronas) y subirlos como contenido original: revisar antes el parecido del arte (Chispa se parece a Megumin), pasar `provenance` a `original` y moverlos al catalogo abierto. La boticaria no: usa los personajes originales
 - [x] Genshin, "Las Siete Coronas" (10-10): combate por elementos (`manifest.elements`, `npc.combat`, effect `elemental` con tabla de reacciones y anuncio a la mesa), "Pedir un deseo" en web y app, pack de 10 personajes, 8 NPCs, 6 sesiones y arte; probado con modelo (mesas 54 y 55). Desplegado (monorepo `c07e844`). La vida de los jefes se bajo tras la mesa 55 y no se ha probado en partida
 - [x] Repos en Gitea (`rpg-packs/inutiles`, `persefone`, `barrio`, `coronas`), empujados (10-10)
-- [ ] Llave de despliegue `rpg-ngn-hetzner` (solo lectura) en los cuatro repos (Gabino). Revisado el 11-10: el servidor aun no tiene acceso y sirve copias subidas por tar (mismo contenido que los repos). Con la llave: `git fetch` y `reset --hard origin/main` como `rpg` en cada `/srv/rpg/packs-<mundo>`
+- [x] Llave de despliegue `rpg-ngn-hetzner` (solo lectura) en los cuatro repos (11-10): el servidor los actualiza con `git pull` como la boticaria
 - [ ] Repo `rpg-packs/inspirados` (documentos de diseño; hoy solo local), opcional
 
 ### Avance
