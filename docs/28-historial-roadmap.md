@@ -1,0 +1,904 @@
+# 28. Historial del ROADMAP (hasta el 11-10)
+
+Copia integra del ROADMAP tal como estaba el 2026-10-11, antes de
+compactarlo. Es historia: lo que sigue abierto se paso, verificado, al
+[ROADMAP](../ROADMAP.md). Los enlaces relativos a `docs/` de este archivo
+apuntan a la carpeta equivocada; se dejaron como estaban.
+
+El orden viene de [docs/11-adr-stack-saas.md](docs/11-adr-stack-saas.md), que
+manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
+
+**Para saber como esta el proyecto hoy** (que funciona, que falta, que
+decisiones estan cerradas) sin leer entrega por entrega:
+[docs/17-estado-del-proyecto.md](docs/17-estado-del-proyecto.md). Este archivo
+es el detalle; aquel es el resumen con fecha de corte.
+
+## LANZAMIENTO: 15 de noviembre de 2026 (fecha fijada por Gabino el 01-10)
+
+Esta seccion manda sobre el resto del archivo hasta esa fecha. Lo que no esta
+aqui no entra al lanzamiento. Prioridad de Gabino: **Comunidad y video
+primero**, para tener contenido en redes antes de publicar.
+
+### Calendario por semana
+
+| Semana | Que se cierra |
+|---|---|
+| 1 (02 al 08-10) | **Comunidad v1**: Historias (las cronicas que su mesa acepto compartir, con portada e ilustraciones) y Creadores (autores con mundos publicados), en web y app. Gabino decide el cobro en Google Play |
+| 2 (09 al 15-10) | **Voz del narrador en el servidor** (base de 6c): audio por bloque, guardado, una voz por idioma. **Google Play**: App Bundle, ficha, formulario de datos, clasificacion, y **cobro con Google Play Billing** (turnos y Bendicion, verificado en el servidor); la **prueba cerrada arranca a mas tardar el 15-10** |
+| 3 (16 al 22-10) | **Video de la sesion v1** (10d): de una cronica compartida a un video vertical (redes) y uno horizontal, con imagenes, texto y voz (ya existen: ilustraciones, voz afinada y ffmpeg en el servidor). Empieza el contenido para redes. v2 despues: animar dos o tres momentos por sesion con un modelo de imagen a video (Kling o Veo por API) |
+| 4 (23 al 29-10) | **Antes de abrir**: verificacion de correo, boticaria fuera del catalogo publico, vigilancia de servicios, desplegar sin cortar, claves de imagen rotadas, copias fuera del servidor |
+| 5 (30-10 al 05-11) | Legales con el abogado; Plata, Oro y Diamante definidos o retirados de la venta; medir paquetes con cuatro jugadores; mundos de la temporada. La prueba cerrada termina el 29-10 y se pide produccion a Google |
+| 6 (06 al 12-11) | **Congelado de funciones el 06-11**: solo errores. Prueba en dispositivo real, materiales de redes |
+| 13 y 14-11 | Version candidata, despliegue final |
+| **15-11** | **Lanzamiento** |
+
+La regla de Google para cuentas personales nuevas (12 probadores durante 14
+dias antes de publicar, y luego una revision de hasta una semana) es la que
+fija la semana 2: si la prueba cerrada arranca despues del 22-10, la app de
+Android no llega al 15-11 y el lanzamiento seria solo web.
+
+### Decisiones de Gabino, con fecha limite
+
+- [x] **Cobro en Google Play** (decidido el 02-10): Google Play Billing para **paquetes de turnos y Bendicion**, con el precio 15% arriba del de la web (la comision). El pase de temporada y los mundos en venta solo en la web; la app no los vende ni manda a pagarlos (muestra si ya son tuyos). Razon de Gabino: los turnos se compran por impulso
+- [x] **Proveedor de voz del narrador** (decidido el 02-10): fase 1 con OpenAI, detras de una interfaz para poder cambiar; el audio se genera una vez por bloque y se guarda. Investigar despues que proveedor suena mejor (Gabino: "no vamos a cerrarnos con ese por ser facil")
+- [ ] **Doce probadores para la prueba cerrada** (14-10): sus correos de Google
+- [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta hasta despues
+- [ ] **Legales con el abogado** (05-11): version en ingles, terceros del aviso, clausula de la Bendicion
+- [ ] **Copias fuera del servidor** (29-10): el NAS, o mientras tanto un Storage Box de Hetzner
+- [ ] Arte: tema de la temporada, retrato de Bren (06-11). "La corte exterior" ya tiene punto en el mapa de la ciudad (03-10); portada y retrato del one-shot de H5
+
+### Plan del 04-10: historias que enganchan, avanzan y cierran
+
+Manda sobre el resto del calendario hasta cerrarse. Sale de la partida real
+del 03-10 (mesas 42 y 43, boticaria): 12 turnos en 1 h 50 min, ningun cierre,
+una ilustracion, nada privado, y un jugador pidiendo "ya solo quiero saber
+quien es el asesino". El calendario lo aguanta: Comunidad, voz y video
+(semanas 1 a 3) se cerraron el 02-10. Diseño completo, archivos y criterio de
+hecho de cada bloque en
+[docs/26-plan-historias-que-enganchan.md](docs/26-plan-historias-que-enganchan.md).
+Lo planeo Fable; lo implementa Opus, bloque por bloque.
+
+- [x] **H0. Preparacion** (04-10): suite completa de la API (274 en verde) y `pnpm check` de lo del 03-10; aviso de compartir en ventana tambien en la app (`6d27a88`); el video del servidor corta los subtitulos igual que la web (`Captions`, API `33adc7b`, con prueba de paridad). Atomo entrego atomo/taxonomy en v0.4.1 (sesion `atomoplatform-d4`)
+- [x] **H1. Reloj de la historia, logros y cierre automatico** (04-10, motor `8106670`, API `fdcc912`, clientes `6782fca`; partida de prueba local con Sonnet: cerro sola en el turno 8, 4 logros, 126 a 200 palabras por turno, cliffhanger): ajuste de mesa `pacing.length` (corta 8 turnos, media 14, larga 22, libre); el motor le dice al director en que tramo va (gancho, complicacion, escalada, climax, cierre); logros (`milestone`) cada dos o tres turnos; el director cierra solo (`close`) y todos ven la pantalla de fin; "Un turno mas" y "Pedir el final" para el anfitrion. Las mesas existentes siguen en libre
+- [ ] **H2. Gancho de apertura y prueba A/B** (04-10: apertura nueva hecha, `4e9095b`; A/B con Claude en `gm/ab/`, falta la parte de GPT por falta de clave local): la apertura arranca con un incidente que exige decidir, no con presentaciones; `tools/ab-opening` compara Claude y GPT lado a lado y Gabino decide el proveedor por omision
+- [x] **H3. Imagenes por formato** (04-10, motor `319ac65`, API `13d022f`): apertura, climax y final garantizadas; hueco de 2 turnos en sesion corta, 3 en media, 5 en larga
+- [x] **H4. Arcos de autor** (04-10, motor `b6f9167`, API `e360e2b`): `arc` en la sesion del mundo (capitulo, presupuesto de turnos, gancho, objetivo visible, puntos de trama, desenlace inevitable, finales con rama) y `finale` en el manifiesto; mesa "Terminada"
+- [x] **H5. One-shot "Ya descubrí mi pasión: ¡QUIERO SER MÉDICO!"** (04-10: mundo escrito con el sistema nuevo drama-lite, `f73706b`; 11-10: capitulo 3 jugado por sus dos finales, mesas 56 a 59: "se repite" cierra en 2 a 4 turnos y "medico" en 6 con su epilogo, los dos con mesa Terminada; NPCs por sesion y lugar nuevo `esquina-del-choque`, porque el GM llevaba la noche del choque a Farmacias Parecidas): un jugador, tres capitulos cortos, dos finales. Universidades reales, farmacia parodiada (decision de Gabino). Falta que Gabino lo juegue completo en produccion
+- [x] **H6. Estrellas y reseñas** (04-10, API `55c5f12`): la pantalla de fin pide siempre la valoracion; promedio bayesiano en Explorar; el texto de las reseñas, privado hasta tener moderacion
+- [x] **H7. Lo privado** (04-10, motor `9cd3da4`, API `faf3faa`; falta el AAB v25): susurros del director a un solo jugador, objetivo personal garantizado al abrir la sesion, la API filtra por jugador (ni el anfitrion ve lo ajeno). Cierra de paso la deuda de informacion asimetrica (S14 y E1 del VAM del 19-09). Al cerrar, AAB v25 (antes del 14-10)
+- [x] **H8. Formatos en la mesa y en Explorar** (04-10, API `27475d5`): formato, un jugador o grupo, largo de sesion, generos y estilo como datos del mundo con vocabulario controlado; el largo de sesion se elige al crear la mesa; filtros en Explorar, web y app
+- [x] **H9. Catalogo sobre atomo/taxonomy** (04-10, API `57f5b44` y `bcd810d`, platform v0.4.1; `catalog:taxonomy` corre en cada despliegue): cuando Atomo avise con la etiqueta; no bloquea lo anterior
+
+Metas medibles (misma consulta del 04-10 sobre `turns`, `turn_blocks` y
+`scene_images`): hasta 200 palabras del director por turno (eran 350), cierre
+en el turno 8 (no hubo en 12), dos logros o mas y cuatro ilustraciones o mas
+por sesion corta, y todos los jugadores ven la pantalla de fin. Compuerta:
+Gabino juega una sesion corta con sus amigos antes de dar H1 a H3 por buenos.
+
+Arreglos de la partida del 03-10, ya desplegados (monorepo `ee6f457`, API
+`99aa5c8`, boticaria `57782af`): el motor entiende bloques con su tipo como
+`kind` y devuelve la palabra si el ultimo bloque llega roto; quien elige
+personaje con la sesion en marcha entra al turno abierto; corregir la
+respuesta enviada; ideas en la tarjeta de tirada; sin el aviso "ya esta
+closing"; el panel de Jugadores ya no se abre solo; mundos derivados ilustran
+mientras sean privados, con deslinde en la cronica y sin video ni Comunidad;
+"La corte exterior" en el mapa.
+
+Decidido el 05-10 (Gabino): el modelo se queda como esta (Sonnet en las
+mesas de pago y en los primeros turnos de cada cuenta, Haiku en el cupo
+gratuito). Comparacion de apertura Haiku contra Sonnet en
+`gm/ab/apertura-2026-10-05.md`: Haiku cuesta la quinta parte pero se salta el
+limite de palabras y comete errores de mundo (Rin viva, Maomao de treinta
+años). El modo mixto por tramo (Sonnet en apertura, climax y cierre; Haiku en
+medio, la mitad del costo) queda para cuando se definan Plata, Oro y Diamante.
+
+Despues de este plan: one-shots como misiones del camino de temporada, limite
+de tiempo por respuesta en sesiones cortas, reseñas publicas con moderacion,
+mas one-shots de un jugador por genero.
+
+### Correccion del motor del 05-10 (tras leer las mesas 43 y 44)
+
+Gabino jugo el one-shot en produccion (mesa 44) y se perdio un turno entero,
+hubo turnos sin ideas y avisos tecnicos dentro de la historia; leidas completas
+esa mesa y la 43, salieron 16 fallos del motor, 3 de reglas y los del mundo.
+Detalle, pruebas, VAM de cuatro rondas y prueba con el modelo real en
+[docs/27-correccion-del-motor.md](docs/27-correccion-del-motor.md). Lo hizo
+Fable; monorepo `db2e13d`, `47bfa1a` y `f06a61a`, API `22b364d` y `08f872a`,
+boticaria `86aa784`, mascarada `1dfa970`. Desplegado el 06-10 (00:00 UTC)
+con respaldo previo.
+
+- [x] Formato plano del GM y un interprete donde una linea rota no daña a las demas (repara, rescata la historia, apunta lo perdido con su texto)
+- [x] Lo que el jugador escribe junto al dado llega al GM
+- [x] Ideas desde lo que el jugador sabe: llamada aparte tras aplicar el turno, sin secretos delante, con tope de espera y garantizadas
+- [x] Tope de tiradas pedidas (una por personaje cada ocho turnos de presupuesto); fallar avanza; sin dados cuando el desenlace ya esta decidido
+- [x] NPCs con memoria (actitud y condicion se guardan y vuelven al GM); dar un objeto ya no tumba el turno en los sistemas sin combate
+- [x] Diagnostico del turno fuera de la historia: `turn_diagnostics` con la salida del modelo, `turns:notices` y `tables:review`
+- [x] Canon, "Anteriormente" y meta por capitulo escritos por el autor; QUIERO SER MEDICO corregido (canon, la venganza, Rogelio con veinte años)
+- [x] El video, la presentacion y la voz quitan lo que el jugador escribio como accion y las preguntas con que el GM devuelve la palabra; el audio viejo queda `stale` y se regenera
+- [x] VAM rondas 3 y 4 del interprete (prosa como dialogo, notas del modelo, lineas rotas) y `arc.sheets` por personaje
+- [x] De cara al jugador se dice GM
+- [x] Prueba de contrato: todo ejemplo de los prompts lo acepta y lo aplica el motor
+- [x] Desplegar (migracion `turn_diagnostics`; engine y API juntos)
+- [ ] Que Gabino juegue el one-shot en produccion y se lea con `tables:review`
+- [ ] Regrabar las voces de las cronicas publicadas (`speech:chronicle --dry-run` primero)
+- [x] Costo por partida: cache del prompt del sistema con una hora de vida y tokens de cache medidos (06-10, desplegado); `effort: low` medido en local (-36% de salida, misma historia), pendiente de que Gabino lo apruebe para produccion (`ANTHROPIC_EFFORT=low`)
+- [x] Segundo punto de cache: prefijo fijo (mundo y fichas sin estado) cacheado una hora; mascarada de 0.54 a 0.36 USD la sesion corta de tres (06-10, desplegado)
+- [ ] Costo, si hace falta mas: medir Haiku como narrador con `tables:review`
+- [x] Mesas de tres con modelo real: boticaria y mascarada (06-10); secretos propios por personaje (`knownBy`), parrafo cortado por el lint se reconsidera, logros sin repetir, ideas cortadas se rescatan. Desplegado
+- [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y modelo real
+- [x] AAB v26 (06-10, `C:\Users\JadweR\ad-astra-mentis-v26.aab`, firmado con la llave de subida, verificado): cierre de capitulo, GM en vez de director, textos del 05 y 06-10. Falta subirlo a Pruebas internas
+- [x] NPCs por sesion y lector critico (11-10, docs/27): `npcs` en la sesion del mundo; `apps/engine/scripts/critic.mts` lee una mesa de `tables:review` contra el canon y lista contradicciones
+- [ ] Lo abierto de docs/27: panel del anfitrion con el diagnostico; `effort: low` medido el 06-10 y en produccion
+
+### Mundos inspirados para la beta (08-10, decision de Gabino)
+
+Cuatro mundos "en nuestra version inspirada" para que los testers jueguen
+algo que conocen: Konosuba, Among Us, GTA San Andreas y Genshin Impact, en
+ese orden. Privados como la boticaria (`third-party-ip`: beta cerrada,
+nunca catalogo abierto ni venta). Diseño y plan en `~/dev/rpg-packs/inspirados/`
+(`DISENO.md` con los cuatro, `inutiles.md` con el primero en detalle para
+que Opus lo implemente). Fable diseña, Gabino revisa nombres y tono, Opus
+implementa.
+
+- [x] Konosuba, "Benditos sean los inutiles" (08-10): motor (`quirk`, `tone`, `debt`, `companions`, monorepo `c757ec7`, API `ba6bdc4`, desplegado) y pack de 6 misiones en `~/dev/rpg-packs/inutiles`, probado con modelo (mesas 46, 47 y 49).
+- [x] Among Us, "Turno de noche en la Persefone" (08-10): acciones privadas, ruleset `deduccion-social`, sorteo, guardia de privacidad, votos y veredicto en el motor, votacion y vista por asiento en la API (`turn_votes`), panel en web y app, pack de 8 oficios y 2 sesiones; tres partidas reales de cinco (mesas 50 a 52) y lo que destaparon, corregido. Desplegado (monorepo `55df26c`, API `0854d8f`)
+- [x] GTA, "Vuelta al barrio" (10-10): calor (0 a 6, en estrellas en la mesa) y respeto como `manifest.street` sobre el d20, pack de 4 personajes, 7 NPCs y 6 misiones, probado con modelo (mesa 53). Desplegado
+- [x] Arte de los tres mundos (10-10): portada, retratos y mapa con los lugares ubicados, estilo y paleta en `artStyle`. Aprobado por Gabino
+- [ ] Despues de la beta (decision de Gabino, 10-10): quitar "(Inspirado en ...)" del titulo de los mundos con nombres y contenido propios (inutiles, persefone, barrio, coronas) y subirlos como contenido original: revisar antes el parecido del arte (Chispa se parece a Megumin), pasar `provenance` a `original` y moverlos al catalogo abierto. La boticaria no: usa los personajes originales
+- [x] Genshin, "Las Siete Coronas" (10-10): combate por elementos (`manifest.elements`, `npc.combat`, effect `elemental` con tabla de reacciones y anuncio a la mesa), "Pedir un deseo" en web y app, pack de 10 personajes, 8 NPCs, 6 sesiones y arte; probado con modelo (mesas 54 y 55). Desplegado (monorepo `c07e844`). La vida de los jefes se bajo tras la mesa 55 y no se ha probado en partida
+- [x] Repos en Gitea (`rpg-packs/inutiles`, `persefone`, `barrio`, `coronas`), empujados (10-10)
+- [x] Llave de despliegue `rpg-ngn-hetzner` (solo lectura) en los cuatro repos (11-10): el servidor los actualiza con `git pull` como la boticaria
+- [ ] Repo `rpg-packs/inspirados` (documentos de diseño; hoy solo local), opcional
+
+### Avance
+
+- [x] **Comunidad v1** (02-10, API `aac4330`, monorepo `81e0d32`, desplegada): Historias en `/comunidad` (se ve sin cuenta) y en la pestaña de la app; al compartir la cronica se puede pedir "publicarla tambien en Comunidad", que toda la mesa acepta aparte del enlace (las ya compartidas no se listan solas). Creadores con mundos publicados y amigos con cuenta. Mesas abiertas, despues del 15-11
+- [x] Tirada y accion en el mismo turno (02-10, desplegada; app en el APK v22)
+- [x] **Voz del narrador fase 1** (02-10, API `7a2812d`, desplegada): `SpeechProvider` con OpenAI (`gpt-4o-mini-tts`, voz `onyx`) detras, audio por bloque generado una vez y guardado (`block_audio`), `speech:chronicle <token>` con estimacion previa y `audioUrl` en la cronica. Prueba real: mesa 33 narrada completa, 52 bloques, 14 min de audio, unos 0.21 USD estimados, 3 min de generacion. Falta: elegir la voz definitiva (escuchar opciones) y comparar proveedores. Afinada con ffmpeg a la variante B que eligio Gabino (15% mas rapida, tono 0.94; `speech:retune` re-afina sin pagar) y escuchable en `/cronica/<token>` con barra de reproduccion; costo confirmado en la factura: 0.24 USD por 16.5 min
+- [x] **Video de la sesion v1** (02-10, API `8e52dcb`): `video:chronicle <token> --format=vertical|horizontal` con ffmpeg (ilustraciones con zoom lento, voz, subtitulos con la letra de la marca, titulo y cierre); mesa 33 en vertical (71 s en 36 s) y horizontal completo (15 min, 56 MB). Decision de Gabino: el video procesado en el servidor no escala para todos (CPU y disco); queda para Oro y para nuestras redes, con cola y caducidad cuando se abra
+- [x] **Presentacion de la cronica en la web** (02-10, `61cf486`): `/cronica/<token>/presentacion?formato=vertical|horizontal` reproduce en el navegador el mismo aspecto que el video, sin botones para grabarla con OBS; costo cero de servidor. Es lo gratis para todos
+- [ ] **Cobro con Google Play** (02-10, escrito): servidor desplegado (API `458329d`: `play/config`, `play/purchases` confirma con la Play Developer API y registra un pago capturado; `play:voided` retira lo anulado) y app lista (`7f30a00`, `expo-iap`, precio de Google, el servidor confirma antes de consumir). Falta: compilar el AAB v23 (el intento murio por falta de RAM en WSL), subirlo a Pruebas internas, crear los 7 productos, la cuenta de servicio de verificacion en el servidor e instalar `rpg-play-voided.timer`
+
+### Paridad de la app con la web (analizada el 02-10)
+
+La app esta a la par en juego, tienda (con Google Play), Comunidad, pase,
+soporte, avisos e idioma. Lo que falta, por orden:
+
+- [x] **P0 (02-10, `5537f7b`, AAB v24): quitar de Explorar los enlaces "Comprar en la web"** de mundos y del pase. Contradicen la decision del 02-10 (la app no vende ni manda a pagar el pase ni los mundos) y Google puede rechazar la app por ellos. Despues, AAB v24 con lo de hoy (accesos a la presentacion y "Generar video")
+- [x] P1 (02-10, `241815f`): idioma de la mesa al crearla y en Ajustes de la mesa, y el ajuste de secretos del pack (la web los tiene en `TableRulesPanel`, la app solo dados, cuenta atras e ilustraciones)
+- [x] P1 (02-10): idioma en Explorar (filtro y aviso de los idiomas de cada mundo)
+- [x] P1 (02-10): accesos a la historia y a la presentacion en Opciones de cada mesa (en la app solo estan en Lectura)
+- [ ] P2: la Guia de como jugar (solo en la web)
+- [ ] Despues del 15-11, en las dos: la voz del narrador generada dentro de la mesa (hoy solo suena en la cronica de la web)
+
+Solo en la app, a proposito: lectura sin conexion, cobro con Google Play. Solo en la web: pago con Stripe, presentacion (la app la abre en el navegador).
+
+### Despues del 15-11 (fuera del lanzamiento a proposito)
+
+Mesas abiertas a desconocidos (necesita moderacion), Campañas y Personajes
+(hoy "Pronto"), narrador estandar o premium (10e), afinidad con NPC (10f),
+rehacer la ultima accion, constructor de historias (E13), app de iPhone,
+colaboraciones con streamers, excepciones a mano en el panel, capturas en
+soporte.
+
+## Fase 0: Diseño y piloto (cerrada el 2026-09-05)
+
+- [x] Alcance del motor y ejes de agnosticismo
+- [x] Estructura del repo y SDD en `docs/`
+- [x] Content pack `pilot`: 9 personajes pregenerados + campaña Valdoria
+- [x] Visor de fichas mobile (GitHub Pages)
+- [x] Sesiones piloto 001 y 002 con GM Claude; 003 planeada para el 2026-09-06
+- [x] Alcance del SaaS a partir de la mesa ([09](docs/09-saas-scope.md))
+- [x] Auditoria del SDD ([10](docs/10-audit-2026-09-05.md)) y ADR de stack ([11](docs/11-adr-stack-saas.md))
+
+## Entrega 0: AtomoPlatform lista para consumir (hecha el 2026-09-05)
+
+- [x] Commit y push de los fixes del smoke run de julio (aca0f01)
+- [x] `atomo/auth` con modo token (Expo) ademas de cookie SPA, expiracion obligatoria; 10 feature tests (60012db)
+- [x] `atomo/payments` con Stripe portado de api-base, webhook idempotente; 16 feature tests (52df8b4)
+- [x] Template y scaffolder con `atomo/payments`; CI backend en SQLite y PostgreSQL 16 (b5f84aa)
+- [ ] Runner de Gitea Actions activo (act_runner en el MicroServer, lo levanta Gabino)
+
+## Entrega 1: Contratos y contenido (hecha el 2026-09-05)
+
+- [x] BA1: version de schema por evento, `upcastEvent` en `packages/content`
+- [x] `tools/migrate-pilot`: los 21 eventos del piloto a `v:1` (unica reescritura permitida)
+- [x] Schemas zod de evento, personaje, NPC, ubicacion, quest, sesion y pack
+- [x] `tools/validate` en CI sobre `content/` y `campaigns/`; un evento roto falla el CI (test)
+- [x] Workflow de Pages que publica solo `apps/sheets` y `content/packs/pilot`
+- [x] Pages sirve desde "GitHub Actions" (Gabino lo configuro; confirmado el 2026-09-14)
+
+## Entrega 2: Motor (hecha el 2026-09-06)
+
+- [x] `packages/core`: `RandomSource` inyectable (semilla, dados fisicos, Web Crypto), dados con ventaja y desventaja, recursos, estado del mundo, `stableStringify`. Cobertura 100% exigida en el test
+- [x] `packages/rules`: interfaz `Ruleset` y `fantasy-d20-lite@1.0.0` (Fortuna abierta, ops `memory_recovered`, `gain`, `lose`, `hp`, `condition`); un op desconocido lanza, no se ignora
+- [x] `packages/campaign`: `reduce` con ruleset como parametro, proyecciones de mundo, jugador y narrativa, snapshots con `diffSnapshot`
+- [x] `campaigns/pilot/snapshots/002.json`: estado canonico de la sesion 002; el test lo reproduce byte a byte
+- [x] **Segundo ruleset real** (2026-09-19): `court-intrigue`, investigacion de corte sin combate. No hay puntos de vida ni iniciativa: se gasta **credito** (cuanto te abren las puertas) y sube la **sospecha**; las pistas se acumulan y un envenenamiento es una `condition`. Siete tests, y rechaza los effects del d20 en vez de ignorarlos. **El engine carga los dos packs a la vez, cada uno con su sistema: el eje "agnostico de sistema" deja de ser una promesa.** Lo estrena un pack privado (`rpg-packs/boticaria` en Gitea)
+- [x] El schema de personaje deja de asumir D&D: `ac` y `attacks` son opcionales, y hay `faction` y `rank` para los rulesets que reparten acceso en vez de golpes. **Lo descubrio el segundo pack**, que es para lo que servia: un personaje sin armas obligaba a inventar datos falsos
+
+## Entrega 3: App movil sin servidor (hecha el 2026-09-06)
+
+- [x] `packages/ui-logic` sin React: bloques tipados, `sessionBlocks` desde el pack y el estado reducido, vistas narrativa y dialogo como agrupaciones del mismo array, velado de fichas (misma regla que `apps/sheets`), cola de TTS con `SpeechEngine` inyectable; tests sobre el pack piloto
+- [x] `apps/mobile` (Expo SDK 57): pack piloto empaquetado con `bundle-pack`, reduccion en el dispositivo con `fantasy-d20-lite`, selector de sesion, vistas narrativa y dialogo, fichas de la party en modal, TTS por bloques con `expo-speech`, bandera de narrador local, tema pergamino
+- [x] Spike de Expo con pnpm aislado: `pnpm install`, `build`, `typecheck`, `lint` y `test` pasan desde la raiz con la app en el workspace; `expo export --platform android` produce el bundle con los packages del monorepo
+- [x] Probada en telefono con Expo Go el 2026-09-06: funciona, fichas bien logradas, TTS basico pero util. Pendiente de diseño: la app se compara con `apps/sheets` y se queda corta en acabado (tema, tipografia, espaciado); se atiende con la superficie de jugador de la entrega 5
+
+## Entrega 4: Plataforma (hecha el 2026-09-06)
+
+- [x] `rpg-ngn-api` desde `templates/backend` de Atomo (solo core + payments), repo privado en GitHub, AtomoPlatform como submodule `platform/`, Postgres local, login por token verificado de punta a punta
+- [x] Secret `ATOMO_DEPLOY_KEY` en GitHub y deploy key en Gitea para que el CI clone el submodule
+- [x] Modulos `Tables` (mesas, membresia, amistad) y `Campaigns` (event store append-only con trigger, snapshots, proyecciones); 18 feature tests en SQLite y Postgres
+- [x] `campaign:import` de los 21 eventos con el snapshot canonico como fixture; el engine lo sustituye en la entrega 5
+- [x] CI de `rpg-ngn-api` en verde con el submodule clonado desde Gitea (SQLite y Postgres 16)
+
+## Entrega 5: Turnos (hecha el 2026-09-11)
+
+- [x] `packages/engine-contract`: contrato versionado Laravel/engine (peticion de turno, NDJSON de bloques y resultado, validacion, reproyeccion con auditoria, probe)
+- [x] `packages/narrative` con `GMProvider` y `ScriptedGMProvider` determinista
+- [x] `apps/engine` (Hono): resuelve turnos aplicando cada evento propuesto con schema y ruleset, valida y reproyecta; `.env` opcional con `--env-file-if-exists`
+- [x] API: modulo `Turns` (abrir y cerrar sesion, respuestas con `Idempotency-Key`, cierre por compare-and-swap, job unico por turno, reapertura ante error, polling `GET /tables/{table}/state`); 8 feature tests en SQLite y Postgres
+- [x] Turno completo de punta a punta con API y engine reales (smoke con curl: 201/201/200, 202, 409, turno 2 abierto, 4 bloques, headSeq 4)
+- [x] `packages/api-client`: cliente fetch tipado sin React (login por token, mesas JSON:API aplanadas, estado por polling, respuestas con `Idempotency-Key`, cierre, sesiones, proyecciones); tests con fetch falso y uno de integracion con `RPG_API_URL`
+- [x] `apps/mobile` en modo online: login por token en `expo-secure-store`, mesas, mesa con polling cada 1.5 s, las dos vistas sobre los bloques del GM, cuadro de respuesta con quien falta, cierre cuando no falta nadie (forzado solo GM), mando del GM, fichas con el estado vivo de las proyecciones; convive con el modo offline
+- [x] Turno completo desde el cliente contra API y engine reales (`pnpm --filter mobile smoke-api`: 403 al jugador que abre sesion, 201/201, 409 a la segunda respuesta, cierre, 4 bloques por polling, turno 2 abierto, proyeccion ajena 403, sesion cerrada con snapshot)
+- [x] Primera partida por LAN el 2026-09-11 (mesa "Posada", dos telefonos): destapo la IP por DHCP, el firewall de Hyper-V en modo espejo y la sesion de Expo Go
+- [x] GM scripted con guion por turno (`script` en `settings.provider` de la mesa, escenas como datos en `tools/scenes/`, `tools/smoke/scene.sh`): demos sin modelo
+- [x] El dueño de la mesa fija su propio personaje (`POST tables/{t}/members` sobre si mismo)
+- [x] Criterio del ADR: escena entera desde dos telefonos por LAN (Posada, 2026-09-11). Entrega 5 cerrada
+
+Pasada a la app tras la partida del 2026-09-11 (hecha el 2026-09-12, salvo el rename en la API):
+
+- [x] En la app el asiento `gm` se muestra como anfitrion en todo (mesas, mando, forzar cierre); el GM es la IA. Crear mesa desde la app con personaje del anfitrion (retrato) y premisa, e invitar con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje) desde la mesa nueva y desde el mando. Logica pura con tests (hoy en `packages/ui-logic`, `table-setup`)
+- [x] Renombrar el asiento `gm` a `host` en la API (migracion 2026_09_12_000001 sobre las filas existentes) y en `api-client`, `ui-logic`, web y app a la vez (2026-09-12)
+- [x] Android: `KeyboardAvoidingView` con `behavior="padding"` en las dos plataformas (Expo Go 57 va edge-to-edge y `resize` ya no encoge la ventana; queda explicito en `app.json`), la narracion baja al final al enfocar, chips escondidos con el teclado abierto. Pendiente de confirmar en telefono; el README dice que mirar
+- [x] Selector de voz del sistema (`getAvailableVoicesAsync` filtrado al idioma de lectura, nombre, idioma y calidad, boton Oir para elegir de oido), voz, velocidad y tono recordados por telefono en el almacen seguro, narrador a 0.85 (ajustable), party al natural y tono fijo por NPC (hash del `speakerRef`, hoy en `ui-logic`); `TtsItem` de ui-logic lleva tipo y hablante. Aviso de sin voz en el idioma una sola vez
+- [x] La barra de TTS y la bandera de narrador son una sola linea plegable; la narracion ocupa la pantalla
+- [x] Tema oscuro de `apps/sheets` con Cinzel y Crimson Pro (`expo-font`, seis pesos importados por subruta); las fichas en modal se conservan
+
+## Entrega 5b: Web, el producto principal (docs/11 D8, directriz del 2026-09-06)
+
+`apps/web` en Next.js 15 con mesa propia, independiente de la app movil; `apps/sheets` como referencia visual y una vista limpia "en pantalla" para streamers. Lo que Gabino listo el 2026-09-11 como faltante y aqui queda explicito:
+
+- [x] `apps/web` (Next.js 15, App Router, CSS con el tema de `apps/sheets`, Cinzel y Crimson Pro): acceso con URL de la API, correo y contraseña; token en `localStorage` (provisional); `/api/*` reenviado a la API por Next para que la LAN y el iPhone entren sin CORS (2026-09-12)
+- [x] Mesas del usuario con asiento, pack y party; crear mesa con pack, personaje del anfitrion con retrato y premisa (`settings.premise`); invitar por correo con el flujo real de amistad (pedir, aceptar pendientes, invitar con personaje). El asiento `gm` se muestra como "anfitrion"
+- [x] La mesa: polling, cabecera con sesion, momento del mundo, turno y faltantes; vistas narrativa y dialogo; cuadro de respuesta con Ctrl+Enter e `Idempotency-Key` estable por turno; cierre y cierre forzado; "El GM esta narrando..."; mando del anfitrion (abrir con codigo sugerido y nota, cerrar con cliffhanger); fichas con estado vivo y velado; voz con Web Speech (voz en español elegible, velocidad, leer lo nuevo); modo pantalla (tecla F) para streamers; autoscroll con pausa
+- [x] `api-client`: `createTable`, `setOwnerCharacter`, `invite`, `listFriendships`, `requestFriendship`, `acceptFriendship`, `findUserByEmail`, `premise` y `viewer`; tests con fetch falso. `apps/web` en `pnpm check` (build, typecheck, lint, tests)
+- [x] Cuenta (2026-09-12): registro en `/crear-cuenta` con `POST /api/auth/register` de atomo/auth en modo token (entra directo con `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`; con verificacion, aviso y login 403 hasta el enlace), perfil en `/perfil` (nombre por `PATCH /api/v1/profile`, contraseña por `PATCH /api/v1/profile/password`), "olvide mi contraseña" en `/recuperar` (solo util con correo configurado). `AccountTest` en la API fija el contrato
+- [x] Buscar usuarios por correo desde cualquier cuenta: `GET /api/v1/users/lookup?email=` (coincidencia exacta, sin listar, throttle); la web lo usa al invitar y el api-client lo expone como `lookupUser`
+- [x] Ajustes: `/ajustes` con idioma de lectura, voz por defecto, velocidad y leer lo nuevo (localStorage; la barra de la mesa es el acceso rapido). Proveedor del GM por mesa entre los presets del servidor: `GET /api/v1/gm/presets` (sin credenciales), `POST /api/v1/tables/{t}/gm/probe` (solo anfitrion, llama al engine), `settings.provider = {preset, model?}` validado y resuelto a credenciales del servidor por `GmProvider`; selector al crear la mesa y pestaña GM del mando con Probar y Guardar. `GmSettingsTest`
+- [x] Landing publica en `/` (que es, como se juega, mockup de un turno, Entrar y Crear cuenta); el acceso paso a `/entrar`
+- [x] Token en cookie httpOnly: route handlers `/auth/session` y `/auth/register` ponen la cookie `rpg_session` (SameSite=Lax, Secure con https) y el proxy `/api/[...path]` inyecta el Bearer; guardia CSRF por cabecera `X-Requested-With`. El modo API directa (otra URL) conserva el token en localStorage. Documentado en `apps/web/README.md`
+- [x] Cola: migracion de `jobs`, `job_batches` y `failed_jobs`; `ResolveTurnJob` sin reintentos, falla al agotar el timeout y `failed()` reabre el turno; el cierre responde 202 aunque el job en `sync` falle. `QueueTest` con `Queue::fake` y con `sync`. El `.env` sigue en `sync` (RUNBOOK, terminal 4 para pasar a `database`)
+- [x] Nombre de la app en metadatos y titulo de pestaña con la mesa y la sesion; `icon.svg`, `apple-icon.png` y `favicon.ico`
+- [x] Bandera de narrador compartida (2026-09-14): `POST tables/{t}/narrator` que cualquier miembro escribe y `state` devuelve en `narrators`. El dispositivo que lee lo anuncia solo mientras habla y lo refresca cada 12 s; el anuncio caduca a los 25 s, asi que si se apaga o cierra la app la mesa deja de verlo sin que nadie lo suelte. Web y movil muestran quien narra por su personaje ("Zahira narra"); desaparece la casilla manual
+- [x] Amigos fuera de la mesa: panel al pie de `/mesas` con solicitudes recibidas, busqueda por correo y lista de amigos (una jugadora nueva no tiene mesa donde aceptar)
+- [x] Cambio de correo (2026-09-14): el perfil lo edita en web y movil. En AtomoPlatform se cerro un agujero real (`PATCH /api/v1/profile` aceptaba el correo de otra cuenta y dejaba cambiarse el `status`): ahora exige unicidad entre usuarios vivos, ignora `status` y deja el correo nuevo sin verificar, con `emailVerified` en la respuesta. El aviso de verificacion solo sale si el proyecto marca su usuario como `MustVerifyEmail`; el de Atomo no lo hace todavia y esta API tiene `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`
+- [x] BYOK: clave propia en `provider_configs` con cast `encrypted` (docs/11 D6), administrada por el usuario desde `GET/PUT/DELETE /api/v1/profile/keys`. **Cambio sobre el ADR: la clave es por usuario y las mesas la heredan**, no por mesa, porque pegar la misma clave en cada mesa era justo la incomodidad que esto quita. Se comprueba contra el proveedor antes de guardarla y no vuelve a salir (solo las ultimas cuatro letras como pista). Quien trae su clave **no gasta cupo ni se le cobra por turno**: paga sus tokens al proveedor y nosotros ponemos motor, web y mesa. Pantalla en web (`/ajustes`) y en movil (perfil), las dos sobre `ui-logic/own-key.ts`
+- [x] Admin con `@atomo/ui` y `@atomo/core`: panel en https://dashboard.adastramentis.com (E11b.1, 28-09), app aparte en `rpg-ngn-api/admin/`; lo del juego sigue en E11b.2
+
+### Paridad web y movil (revisada el 2026-09-12, hecha tras la partida)
+
+La lista del 2026-09-12 (movil sin cuenta, perfil, recuperacion, presets del GM, lookup, amigos fuera de la mesa, idioma de lectura, cabecera completa ni "bajar a lo nuevo"; web sin tono por hablante ni bandera de narrador) queda cerrada. Lo que sigue faltando a las dos: BYOK, bandera de narrador compartida, avatar, cambio de correo.
+
+- [x] `packages/ui-logic` absorbe lo que estaba duplicado a mano: preparacion de la mesa (`table-setup`: codigo sugerido, personajes libres, estado de cada amistad, `seatPowers`, textos de asiento y cabecera), voz sin plataforma (`voice`: idiomas de lectura, ajustes acotados, `pitchFor` con narrador grave, party al natural y tono fijo por NPC), bandera de narrador (`narrator`: reducer y resumen de la linea de voz), presets del GM (`gm-presets`) y lecturas del pack (`pack`). `turnStatusLine` con acentos y `turnLine` sustituyen a los `statusLine` de cada app. Los tests viven en `ui-logic`; `apps/web/src/lib/tableSetup.ts`, `gmPresets.ts` y `apps/mobile/src/online/tableSetup.ts` desaparecen y `speech/voices.ts` solo conserva lo que depende de expo-speech
+- [x] Movil: crear cuenta (registro en modo token, entra directo), perfil (nombre y contraseña), recuperar contraseña; director de juego al crear la mesa y boton GM del mando con Probar y Guardar; busqueda por correo con `users/lookup` (ya no cae a conocidos por el 403); panel de amigos al pie de "Tus mesas"; idioma de lectura en el selector de voz y en la linea plegada; cabecera con sesion, momento del mundo, turno y faltantes; "Bajar a lo nuevo" cuando se subio a leer. Sin telefono ni emulador: `expo export` en verde, los llamados probados contra la API con `tools/smoke` a mano; los pasos de prueba manual estan en `apps/mobile/README.md`
+- [x] Web: tono por hablante en Web Speech (`utterance.pitch` con `pitchFor`; tono del narrador ajustable en `/ajustes`, la prueba lee narracion, party y NPC) y bandera de narrador local en la barra de voz ("Otro dispositivo narra", aviso de que nadie narra con "Jugamos leyendo")
+- [x] Recuperar contraseña funciona (2026-09-14): el 500 venia de que nadie registraba el enlace de reset y Laravel buscaba la ruta web `password.reset`, que una API sin vistas no tiene. Arreglado en AtomoPlatform (`atomo-auth` registra `ResetPassword::createUrlUsing` hacia `FRONTEND_URL`, commit 05f6c69, con dos tests); en la API basta `FRONTEND_URL=http://localhost:3010`. Verificado de punta a punta: responde 200 y el correo lleva `/auth/reset-password?token=...`. Falta un servidor de correo real para que el enlace llegue a alguien
+- [x] Cronica publica de la campaña (23-09, como "cronica compartible" de la entrega 9, abajo). Lo que decia este punto: `GET campaigns/{c}/projections/narrative` exige ser miembro y no hay endpoint publico ni token de solo lectura; necesita en la API una ruta `GET /public/campaigns/{c}/chronicle` (o un token de invitado por mesa) antes de que la web pueda pintarla
+
+## Entrega 6: GM IA (primer turno real el 2026-09-12)
+
+- [x] `packages/narrative`: context builder de cuatro capas (mundo y premisa, party con estado vivo, cronica recortada por longitud, turno), `ModelGMProvider` comun con prompt desde docs/03 y docs/06, parser NDJSON en streaming tolerante (basura antes del JSON, fences, JSON partido en lineas, prosa suelta como narracion) y validacion local de los eventos que el modelo propone contra el estado (tiradas solo si el jugador escribio el numero, HP e inventario solo de la party presente)
+- [x] Adapters: Anthropic (Messages API con streaming, prompt de sistema cacheado, esfuerzo medio) y OpenAI compatible (Chat Completions con streaming, `baseUrl` para DeepSeek y Ollama, perfil de contexto compacto para modelos locales). `probe()` real por `models.retrieve` o `models.list`
+- [x] Premisa de mesa (`settings.premise`, hasta 4000 caracteres) y nota de sesion (`worldTime` al abrir): viajan en `context` de `ResolveTurnRequest` y entran al prompt delimitadas como texto del usuario que no puede cambiar las reglas del GM. Sustituyen al guion fijo del GM scripted para jugar de verdad
+- [x] Clave custodiada en el servidor: presets `GM_PROVIDER` (scripted, anthropic, openai, deepseek, ollama) en `rpg-ngn-api`, la mesa solo puede fijar `scripted`; redaccion de la credencial en todo error del engine y de la API (tests). `php artisan gm:probe` verifica clave, modelo y engine sin jugar
+- [x] Turno real de punta a punta con Claude Sonnet 5 sobre una mesa desechable (`tools/smoke/turn.sh`): 36 s el turno completo, narro en español, pidio la tirada en vez de inventarla
+- [x] Capa `gm` del pack (2026-09-12): coleccion `secrets/` con `about`, `text`, `keywords`, `revealWhen` (por evento o manual), `revealedBy`; evento `secret_revealed` con testigos obligatorios (tipo nuevo, sin subir la version de evento); `packages/campaign` proyecta `knowledge[<pc>].secrets` y el context builder mete la capa al modelo con quien de la party conoce cada secreto. El pack piloto lleva dos (`osric-esta-abajo`, `brorg-pago-por-zahira`), sin subir de version porque las mesas vivas fijan 0.4.0. `bundle-pack` de la movil omite `secrets/`; el visor de fichas no lee la coleccion. Documentado en docs/05 y docs/08
+- [x] Lint de conocimiento (2026-09-12, docs/08 invariante 3): `packages/narrative/lint.ts` compara cada bloque y cada `world_event` con lo que saben los receptores; una keyword de un secreto no revelado es `error` (el bloque pasa a `system` y no entra a la cronica), una entidad del pack no presenciada es `warning`. Hallazgos en `result.lint` (campo opcional, contrato en 1) y en el log del engine; modos `enforce`, `report`, `off` por turno (`lint` en la peticion) o por engine (`GM_LINT`). La API no guarda `lint` todavia: solo ve el bloque `system`; guardarlo pide una columna en `turns` o un bloque con detalle para el anfitrion
+- [x] Prompt de agencia del jugador (2026-09-12): seccion con ejemplos permitidos y prohibidos, el turno termina siempre con la palabra a la mesa; test que lo fija. Pendiente un caso grabado con salida real del modelo
+- [x] El anfitrion ve los hallazgos del lint y fija el modo por mesa (2026-09-14): el bloque `system` del corte lleva `audience: host` con el motivo, y `settings.lint` (enforce, report, off) se elige en el panel del GM de la web
+- [x] Los hallazgos del lint se guardan en el turno (2026-09-14): columna `lint` (json) en `turns`, escrita al resolver desde `result.lint` del engine, y expuesta en `GET tables/{t}/state` solo al asiento `host`. Asi se revisan despues de la partida, no solo en el aviso del momento
+- [x] Boton de tirar en el cuadro de respuesta de web y movil (2026-09-14): `quickRoll` en `ui-logic` con el mismo generador del motor (Web Crypto) y `appendRoll`, que escribe "Tiro 1d20: 14" sin pisar lo declarado. No es una segunda fuente de azar: cuando el GM pide la tirada la resuelve el engine; esto es para el jugador que tira al declarar
+- [x] Cola real lista y **activa por defecto** (2026-09-14): `QUEUE_CONNECTION=database` en el `.env` y `queue:work --queue=turns,default --timeout=600` como terminal 4 del RUNBOOK. Medido: el cierre responde 202 en 0.09 s en vez de esperar los 20 a 35 s del modelo. Job unico por turno, sin reintentos, con reapertura si el worker muere. Pega conocida: sin worker levantado el turno se queda en `resolving`
+- 6b: `apps/host` para modelos locales (Ollama). Mientras, Ollama en la LAN entra por el preset `ollama` (endpoint compatible con OpenAI); el relay sigue haciendo falta para no exponer el puerto del modelo fuera de la LAN
+- 6c: voz neural por bloque para el tier de pago (docs/09, "el usuario oye lo que paga"): `SpeechProvider` del lado servidor con el contrato de OpenAI `/v1/audio/speech`, audio generado por bloque en paralelo a la resolucion del turno y expuesto como `audioUrl` en `TurnBlock`, voz por NPC via `speakerRef`. Proveedores: VoiceStudio (local o self-hosted, AGPL usado sin modificar como servicio aparte; motores con licencia comercial, no OmniVoice que es CC-BY-NC) y OpenAI TTS o ElevenLabs en produccion sin GPU. Evaluado el 2026-09-07
+
+## Entrega 7: Cobro y cupo (cerrada el 2026-09-19)
+
+Criterio del ADR cumplido: un usuario compra creditos con tarjeta y juega con
+ellos, de punta a punta en produccion.
+
+- [x] Medicion del consumo: `usage` del engine guardado por turno (`input_tokens`, `output_tokens`, `model`) y acumulado en la campaña; `php artisan turns:usage` lo reporta en tokens y en dinero con los precios de `config/engine.php`
+- [x] **Curva de coste medida** (2026-09-19, seis turnos consecutivos reales con un jugador): entrada 2,248 / 2,525 / 2,872 / 3,302 / 3,667 / 4,118. **Crece 374 tokens por turno**, y el snapshot al cerrar sesion la reinicia. Una sesion de 20 turnos con cuatro jugadores cuesta **1.26 USD en Sonnet y 0.42 en Haiku**
+- [x] Cupo por turnos: tabla `quotas` por usuario, `QuotaService`, `php artisan quota:grant`. Lo paga el dueño de la mesa, no cada jugador; se descuenta al resolver y no al cerrar, asi que un turno que falla no cobra. Sin cupo, cerrar da 409 y el turno se queda abierto; `GET tables/{t}/state` devuelve `quota.remainingTurns`
+- [x] **Cualquier mesa que use nuestra clave gasta cupo**, no solo las One Shot: era lo que quedaba sin cobrar
+- [x] Las mesas que gastan cupo narran con el modelo barato (`QUOTA_MODEL`, Haiku). **Probado en produccion el 19-09**: narra bien, el estilo es mas directo que Sonnet pero no se cae. Quien trae su clave conserva el modelo que quiera
+- [x] Proveedor obligatorio al crear mesa. **La regla es de creacion, no de resolucion**: las mesas de antes se siguen jugando con el preset por defecto
+- [x] **BYOK** (docs/11 D6, con el alcance cambiado a **por usuario** en vez de por mesa): `provider_configs` con la credencial cifrada, `GET/PUT/DELETE /api/v1/profile/keys`, pantalla en web y movil. Se comprueba contra el proveedor antes de guardarla y **no vuelve a salir** (solo las ultimas cuatro letras). Quien trae su clave no gasta cupo ni se le cobra
+- [x] **Creditos de prepago con Stripe**: `config/credits.php` con cuatro paquetes (2, 5, 10 y 15 USD) y tres planes con beneficios sin definir, visibles pero apagados. **Solo el webhook acredita** y es idempotente porque Stripe reintenta. Pantalla con Stripe Elements en la web; la movil enseña el saldo y manda a **nuestra** web a recargar (el SDK nativo romperia Expo Go)
+- [ ] **Revisar los turnos por paquete con una sesion de cuatro jugadores medida.** Los numeros actuales salen de seis turnos con **un** jugador; el factor de cuatro esta extrapolado
+- [ ] Pago dentro de la app movil, cuando existan builds propias con EAS
+- [ ] Definir que incluyen Plata, Oro y Diamante (decision de Gabino; siguen anunciados como "Pronto" en Mi cuenta, se discute el 27-09)
+
+## Cierre del motor y mapa (2026-09-20 y 21)
+
+Sale de una sesion con invitados que salio mal el 20-09. El diagnostico de
+Gabino fue que la culpa era **del motor, no de la falta de adornos**, y de ahi
+salieron las dos cosas: cerrar los huecos del motor y congelar lo visual
+(`docs/14`).
+
+- [x] **Cuatro causas del fiasco, todas arregladas**: toda mesa nueva del piloto nacia **dentro de la mina** (`suggestedSessionCode` devolvia la primera sesion `planned`, y las jugadas por Gabino estaban marcadas `played`, asi que un grupo nuevo abria en la 003, a mitad de la historia); el `recap` de una sesion llegaba al GM aunque esa campaña no la hubiera jugado, y se sentia como spoiler entre mesas; el panel de personalidad salia en todos los packs cuando es de uno solo (bandera `playerPersona`); y "Sin personaje: solo miras y diriges" tambien al invitar, donde es falso. **El `status` del pack es la bitacora del autor, no el punto de partida de las mesas ajenas**
+- [x] **El motor sin huecos conocidos.** Se midio preguntandole al validador que formas rechazaba de las que un GM propone en una partida normal: eran seis, mas una septima que solo aparecio jugando. Ahora pasan las diez que se prueban. Lo cerrado: escenas y reloj del mundo (`scene_started`/`scene_closed` y `worldTime`, que el GM no podia emitir y por eso una sesion nueva arrastraba el momento de la anterior), condiciones sobre NPC, `rumor_heard` como evento propio (un rumor **no** es conocimiento: se guarda aparte de `facts`, con quien lo conto y si el GM sabe que es falso), progreso de misiones en `CampaignState`, y NPCs improvisados (el interprete exigia que el NPC estuviera declarado, **y el piloto no declara ninguno** mientras su historia esta llena de ellos)
+- [x] **Los fallos de turno ya no rompen la partida**: `resolve` reintenta una vez borrando antes los bloques del intento fallido. Si el segundo sale, solo el anfitrion recibe el motivo. Si fallan los dos, la mesa lee texto de mesa, no jerga del motor
+- [x] **Boton "Iniciar partida"**: tarjeta con los pasos y el boton para el anfitrion mientras no hay sesion. Antes habia que escribir tres digitos a ciegas
+- [x] **Tercer ruleset `masquerade`** (prestigio, escandalo, rumores, vinculos) y el pack **La Mascarada**: 8 jugables con retrato, 13 NPC, 6 lugares, 5 actos como misiones, 7 secretos
+- [x] **Personalidad por jugador** (600 caracteres con plantilla): la escribe el jugador, el GM la recibe en la ficha. Dos jugadores con el mismo arquetipo viven noches distintas
+- [x] **Mapa de la partida** (21-09, unica cosa que salio del congelador de `docs/14`, porque Gabino queria medir la reaccion de la gente a su uso narrativo): imagen del pack con los lugares posados por coordenadas en porcentaje, caminos desde las conexiones que los lugares ya declaraban, y quien esta en cada uno. **No es un tablero tactico.** Modal a pantalla completa en web y en la app. Formato en `docs/05`, ubicacion en `docs/08`, lo que se ve en `docs/13` 4.10
+- [x] **La party empieza en algun sitio** (21-09): la sesion del pack declara `startLocation` y el engine emite un `world_event` con un `move` por personaje que no tenga ya ubicacion. Sin esto el mapa decia "de camino o fuera de escena" de toda la mesa hasta que el GM moviera a alguien
+- [x] **Los tres packs con mapa, y dos con varios** (22-09): Valdoria y la mina en el piloto, el palacio y la ciudad en la boticaria, generados con los prompts de `docs/20`. Las catorce coordenadas se midieron sobre la imagen real y cayeron bien a la primera (frente a dos de seis mal en el palacio de La Mascarada, pedido con un prompt corto). El piloto gano ademas nueve lugares y tres NPC (Tomas, Bren, Osric) sacados de la cronica; la boticaria, el camino de vuelta al barrio que le faltaba. La validacion pasa por primera vez con cero avisos
+- [x] **Con varios mapas la mesa enseña el que toca** (22-09): `currentMapIndex` en ui-logic (el mapa del personaje de quien mira, si no el de mas gente, si no el primero) y selector en el modal. Los dos clientes hacian `maps[0]`, que en el piloto era la mina por orden alfabetico. **Lo destapo la primera mesa de Valdoria con dos mapas.** De paso, el lienzo del movil era cuadrado con `cover` y con mapas 3:2 los porcentajes caian fuera: ahora toma la proporcion de la imagen
+- [x] **El enlace de invitacion tambien en la app** (22-09 noche): el anfitrion lo crea y lo **comparte con la hoja nativa** (por WhatsApp, que es como se manda), y quien lo recibe lo **pega** en "Tengo un enlace" desde su lista de mesas: vale la URL entera o solo el codigo (`inviteTokenFrom` en ui-logic, con tests), ve la mesa y quien invita, y entra directo a ella. El enlace apunta a la web publica porque quien lo recibe puede no tener la app. Bundle de Android comprobado; **lo que no se puede comprobar sin telefono es como se ve**
+- [x] **Paridad movil del resto del 22-09** (noche): retirar una mesa (archivar, borrar si nunca se jugo, salir de la mesa) con las archivadas plegadas al final de la lista, y borrar la cuenta desde el perfil con la misma explicacion que en la web. Al borrarla, la app limpia la sesion local sin pasar por la API, que ya responderia 401. Bundle de Android comprobado; como se ve, sin telefono no
+- [x] **Retratos de los nueve NPC** (22-09 noche): Gabino genero dos laminas con los prompts de `docs/20` (una por pack, cada una en el estilo de su pack), recortadas con `crop-portraits.py` al estandar de 512x512 WebP. Comprobado en produccion a 1280 y a 390: Tomas con su cara en el dialogo del piloto
+- [x] **Los NPC de un pack no empaquetado hablan con cara** (22-09 noche). **Hueco anterior a hoy que salio al comprobar los otros packs**: el resolver de hablantes solo conocia el pack empaquetado (el piloto), asi que en la boticaria y en La Mascarada los NPC hablaban sin retrato en los dos clientes, y los trece de La Mascarada lo tenian desde el dia uno. Ahora el engine expone `packs/{id}/{v}/npcs`, la API lo reenvia con cache, y `speakerResolverFor` en ui-logic resuelve con el pack o con las listas remotas (`portraitUri`). Comprobado en produccion: Jinshi con su cara en una mesa de la boticaria, a 1280 y a 390
+- [ ] **Observar el mapa jugando**: si los jugadores lo abren por su cuenta, si cambia como se declara ("me voy a la biblioteca") y si el director se acuerda de emitir `move` en una partida larga. Es observacion, no construccion
+
+## Produccion (desplegada el 2026-09-18)
+
+- [x] **https://rpg-worlds.gabinoramirez.com** en Hetzner CX23 (Nuremberg, 7.09 USD/mes): Ubuntu 24.04, HTTPS con Let's Encrypt y renovacion automatica, ufw con solo 22/80/443, fail2ban. Postgres, engine y API cerrados desde fuera
+- [x] Seis servicios de systemd con arranque automatico (`rpg-engine`, `rpg-worker`, `rpg-web`, nginx, php8.3-fpm, postgresql). **Comprobado en un reinicio real el 19-09**: vuelven solos
+- [x] Nginx: la web de Next sirve `/api/*` (su proxy traduce la cookie httpOnly a Bearer) y Laravel escucha en 127.0.0.1:8010. El webhook de Stripe va directo a Laravel, sin pasar por el proxy
+- [x] **Packs privados en Gitea** (organizacion `rpg-packs`, un repo por pack): el repo publico solo admite contenido original o licenciado (docs/07), asi que lo demas vive versionado y respaldado en privado. `tools/packs/new-pack.sh` crea el repo y lo sube; el pack se enlaza a `content/packs` y **la carpeta debe llamarse como el `id` del pack**, porque el engine busca por id
+- [x] Los personajes y retratos de un pack del servidor los sirve la API: la web solo lleva empaquetado el piloto, asi que sin esto no se podia elegir personaje en otro pack
+- [ ] Despliegue automatico: hoy es `git pull` a mano por SSH
+- [x] **Copias de seguridad de Postgres** (2026-09-19, del bloque HOY del VAM): `rpg-backup.timer` diario a las 04:32 UTC con dumps en `/srv/rpg/backups/`, y `deploy/pg-restore-test.sh` que comprueba la restauracion con las mismas cuentas que produccion y el trigger append-only presente
+- [ ] Vigilancia: nadie avisa si un servicio se cae
+
+## Lo que sigue: plan de ejecucion (validado a matar el 2026-09-22)
+
+Sale de la auditoria de `docs/16` a `docs/20` y de la primera señal de gente
+real: los amigos de Gabino, que ya juegan, dicen que la interfaz parece "muy
+junior", amontonada y con colores poco profesionales. El plan original iba en
+ocho puntos sueltos; el VAM (inline, una ronda por seccion) lo dejo en seis
+bloques con tope de tiempo. Regla que manda: **se despliega un bloque antes de
+abrir el siguiente**, y cada cierre pasa por memoria, ancla, este archivo y
+`docs/17`.
+
+**B0. ~~Levantar el congelamiento de `docs/14`.~~ Hecho: Gabino lo levanto
+el 22-09** y esta anotado en `docs/14` con el motivo. Decidio ademas que **lo
+que se valide con gente sea la interfaz nueva, no la vieja** (ya jugaron
+varias veces la vieja), asi que B4 desaparece del plan; y que **Stripe espera**
+a que esto termine.
+
+**B1. La mesa a 390 px** (tope: 4 dias web + 2 app). **Web hecha y en
+produccion el 23-09 de madrugada** (`ad219a2`, API `e922fcd`), en una noche:
+dos menus, jugadores con estado, "escribiendo" (API nueva: `typing_until`
+que caduca solo), cuenta atras cancelable con la espera guardada en el turno
+(`held_at`, `held_by`, `completedAt`), espera como ficcion, cabecera de escena
+sobre el mapa del pack y la paleta del borrador (Gabino la pidio al ver la
+primera version "todavia cafe"; anotado en `docs/14`). Probado en local con
+tres cuentas a la vez (escribiendo, cuenta atras, cancelar con nombre,
+reanudar desde diez, cierre solo) y en produccion con una mesa temporal a
+1280 y 390; primer feedback de Gabino en el telefono corregido la misma noche (menu del sitio fuera de pantalla en /mesas, estados pulsados aun dorados). El 23-09 por la mañana, con el segundo feedback: los paneles no cerraban (capas) y atras salia de la mesa (ahora los paneles entran en el historial); y **el contenido de los menus reordenado por bloques funcionales** (`docs/18`, D-UX-7: invitar y presencia ajena en Jugadores, personalidad en la propia ficha, "Lectura" en vez de "Mas", Anfitrion en Sesion y Ajustes de la mesa, menu del sitio con nombres que dicen lo que abren). **Fallo real de los dados**: el modo no se guardaba en la web (el Guardar del director solo se encendia al cambiar el proveedor); ahora dados y secretos guardan al elegir, y el estado de la mesa lleva `away` para que la presencia se vea en vivo. **App, 23-09 por la tarde** (`411609a` a `c2fd202`): paleta de
+docs/22 con los mismos roles que la web, iconos de la marca y nombre visible
+Ad Astra Mentis; cuenta atras cancelable, escribiendo, quien se fue y la
+espera como ficcion; barra del juego con una hoja por cosa (Fichas con la
+personalidad propia, Mapa, Jugadores con invitar, Anfitrion en Sesion y
+Ajustes, Lectura con la cronica); pantalla Mundos (los tuyos, catalogo con
+visor, revision; subir sigue en la web). Dos fallos de paso: el enlace de
+invitar de la app apuntaba a `/movil/unirse` (404) y los retratos remotos
+iban con ruta relativa. **Sin verificar en un telefono**: typecheck, tests y
+bundle de Android en verde; falta que Gabino lo mire en Expo Go. Con la
+cabecera de escena (`1dfbf96`) la app tiene todo lo de B1. **Tarde del
+23-09, con Gabino en el telefono** (`cbebdf5` a `ac034f4`): portada segun
+`img/branding/concepto home.png`, splash con el isotipo, e interfaz con el
+sistema de `img/ideas_movil.png` (Inter para UI, serif para titulos y
+narracion, pildora del turno, cuadro "¿Que hace tu personaje?", Jugadores
+con retrato redondo y check). El velo olivo de los campos era el
+autocompletado de Android: en Expo Go se apaga con `isRunningInExpoGo`, en
+la app instalada lo quita `plugins/withNoAutofillHighlight.js`. La ficha del
+concepto (barra de vida, rejilla, pestañas Inventario, Habilidades y Rasgos)
+quedo en `0d3f38f`. **Sigue**: que Gabino la recorra entera en el telefono,
+y el APK para ver splash, icono y el autocompletado sin velo.
+
+**Tras la mesa 33 de Gabino (23-09, tarde)**, en produccion (`dfb65ef`,
+`523bfa6`, API `3f07305`): los primeros 20 turnos de cupo de cada cuenta
+narran con Sonnet (`quota.first_turns`, `quota.first_model`), despues Haiku;
+`GET tables/{t}/gm` y Ajustes del director dicen con que narra la mesa y
+quien lo paga (Gabino creyo usar su clave y la tenia en otra cuenta);
+Fortuna tirada por el motor al abrir una sesion que trae su tabla (la tabla
+pasa a ser opcional por sesion); el aviso del lint va una vez al final y,
+si corto el ultimo bloque, el motor devuelve la palabra; la apertura de una
+mesa de una persona le habla en singular; dado de mantener presionado con
+inercia de 1 a 5 s; boton de narracion en la cabecera, en web y app.
+**Pendiente de esa lista**: que el pack adapte el briefing al tamaño de la
+mesa desde el contenido (hoy lo corrige el prompt). La Fortuna **la tira
+cada jugador** (Gabino, 24-09): el dado de mantener presionado llama a
+`POST tables/{t}/fortune`, el numero lo saca el servidor y queda en el log y
+en la mesa; el motor ya no la tira al abrir y un d20 del modelo marcado como
+Fortuna cuenta como tirada cualquiera (monorepo `fef8e45`, API `97c6928`). Lo que se
+decidio sobre la marcha: Un solo bloque, no dos, porque lo que desamontona el pie es lo mismo
+que quita al anfitrion de operador (`docs/13` §7, dolores 1 y 5):
+- Composicion nueva del pie: la respuesta del turno arriba de todo, lo demas
+  (personalidad, mando del anfitrion, fichas) bajo demanda (D-UX-2: jerarquia
+  a 390, acabado primero en web; D-UX-5: dos composiciones).
+- **Dos menus, no uno** (Gabino, 22-09, D-UX-6 en `docs/18`): uno de
+  **sistema y sitio** (mesas, perfil, saldo, salir) y otro **del juego**
+  (fichas, mapa, jugadores, historial). En 390 px el del sistema es una
+  hamburguesa, porque durante la partida casi no se toca, y el del juego una
+  barra al pie (es el "Sesion / Personaje / Jugadores / Mas" de `docs/16` y
+  del mockup movil); dos barras fijas a la vez se comerian el alto que
+  necesita la narracion. En escritorio el del sistema puede ser barra
+  superior.
+- **Jugadores con estado** (listo, escribiendo, pensando) en vez de "faltan
+  por responder". "Escribiendo" no existe: hace falta que el cliente avise
+  mientras teclea (marca en `table_members`, la sonda ya existe).
+- **Cuenta atras cancelable** (D-UX-3): cuando todos respondieron, "El
+  director narra en 10 segundos. Cancelar", cancelable por cualquiera (el que
+  quiere corregirse es quien necesita el boton). Mas tiempo maximo de turno con
+  "forzar cierre" para el anfitrion. Cualquier miembro ya puede cerrar si
+  todos respondieron (supuesto 4 del VAM del 19-09), asi que es cliente mas
+  una marca de "espera" compartida.
+- **La espera como ficcion** ("el destino se prepara") en vez del indicador
+  tecnico: 5 a 25 segundos por turno que hoy son tiempo muerto.
+- El saldo no aparece en la mesa (D-UX-4).
+
+**B1b. Marca y portada (23-09, decidido por Gabino sobre la marcha).** La
+identidad **Ad Astra Mentis** (docs/21 y docs/22, propuesta con GPT; lamina
+y trazado en `img/branding/`) se adopta **antes de registrarla**: es barato
+cambiar de nombre ahora y caro pedirle al cliente que se imagine que esta
+bonito. Hecho y en produccion (`eaca12c`): portada nueva con el orden de
+docs/22 (hero con la lamina y el logo en vector, pilares, "Un motor.
+Infinitos mundos.", tarjetas de mundos por escenario sin nombres de terceros,
+como funciona, cierre, pie con redes), marca en vector (`components/Brand.tsx`
+sobre `generated/brand.ts`), icono, favicon, metadatos y cabeceras con el
+nombre nuevo, legales con "antes rpg-worlds" en la misma version. **Pendiente
+antes de registrar**: busqueda de marca (IMPI, USPTO), dominio, acento de
+"Mentis" (docs/21 juega con "de a mentis"), URLs de Discord, YouTube y X
+(hoy en gris), un redibujo limpio del logo para imprenta, y el
+`android.package` (H14), que fija este nombre para siempre.
+
+**B2. Paleta y jerarquia.** Decidido por Claude el 22-09 (Gabino se lo dejo):
+**la paleta se queda**; lo "junior" es composicion (todo tarjeta con borde y
+etiqueta en mayusculas, apilado), asi que la jerarquia entra en B1 como
+reescritura del CSS de la mesa, y la ambientacion se hace con **el mapa del
+pack desenfocado como fondo de la cabecera**, sin tocar el formato de pack.
+Motivos en `docs/14`. Solo si tras B1 los mismos amigos siguen diciendo "poco
+profesional" se prueba una segunda paleta con dos variantes delante de ellos,
+con tope de un dia.
+
+**B3. ~~Guia del anfitrion en texto~~ Hecha el 24-09** en `/guia`, enlazada desde el pie y el menu del sitio (tope: 2 horas, cualquier tarde, antes de
+B4). Crear mesa, enlace, abrir sesion, cerrar turno, retirar mesa. Sin
+capturas, para que el rediseño no la deje vieja. La documentacion completa va
+despues de B1 y B2, como decidio Gabino el 22-09.
+
+**B4. ~~Una sesion con un novato sobre la interfaz actual.~~ Descartado por
+Gabino el 22-09**: ya se jugo varias veces con la interfaz vieja; lo que se
+valida con gente es la nueva, con el criterio de aceptacion de `docs/16` como
+guion y observando ahi el mapa. El Fiscal del VAM lo pedia para no perder la
+version 1; Gabino, que decide, prefiere no gastar una noche en ella.
+
+**B5. Higiene, hecha el 24-09** salvo Stripe: casilla de edad y cuentas sembradas borradas (ver "Antes de abrir"). Lo original: casilla de edad explicita en el registro
+(2 horas) y cuentas sembradas de produccion (borrar `gabino@example.com`,
+rotar `god`, cambiar `jaz` y `armando`; Gabino, 30 minutos, pendiente desde el
+19-09). **Stripe espera** (Gabino, 22-09): ni el endurecimiento P1 a P4 ni la
+tarea de la cuenta se tocan hasta terminar B1; se retoma "mañana o terminando
+esto". El interruptor a live sigue siendo una compuerta ("el primer
+desconocido que quiera pagar"), no una fecha.
+
+**B6. Despues de medir**: avisos de mesa por correo, documentacion completa
+con capturas, y la lista que salga de B4. La verificacion de correo sigue
+apagada (argumento de D-UX-1). Los APK quedan fuera: los amigos entran por la
+web, que es el producto principal.
+
+**Rumbo al 24-09 por la noche** (Gabino): la Entrega 10 (10a a 10c) quedo en
+produccion; **lo que sigue es lo pendiente de Stripe en real** y lo demas de
+esta lista. 10d (video de la sesion) espera a que haya sesiones ilustradas
+jugadas; 10e y 10f, a Stripe.
+
+**Y despues de estos bloques, el rumbo que fijo Gabino el 23-09** para llegar
+a produccion, corregido esa tarde con los docs 23 y 24: (1) ~~resto de la
+Entrega 8~~ (hecho el 23-09); (2) **Stripe en real**, compuerta y tarea de
+Gabino; (3) ~~embudo en SQL y cronica compartible~~ (hechos el 23-09; la
+cronica ya esta tambien en la app); (4) **beta cerrada con amigos creadores
+de contenido**; (5) **Entrega 9, catalogo y pase de historias**, con el
+bosquejo del catalogo que trae Gabino; y ya, produccion. **Steam y Epic:
+diferidos** hasta product-market fit (`docs/23`, con las cuatro condiciones
+para reabrirlo).
+
+**Lo que el VAM tumbo del plan original**: "visual primero y cuenta atras
+despues" (era la misma cosa partida en dos y en el orden equivocado); "paleta"
+como tarea abierta (ahora es un experimento de un dia con dos variantes);
+"documentacion despues de todo" (la guia del anfitrion no puede esperar);
+"Stripe live" como paso del plan (es una compuerta); y "medir al final" (una
+sesion antes de desplegar, no antes de empezar).
+
+## Dominio propio (24-09, hecho)
+
+- [x] adastramentis.com con HTTPS, correo de entrada en JettHost y de salida por Resend; el dominio viejo redirige salvo /movil y el webhook de Stripe
+- [x] Webhook de Stripe live en el dominio nuevo (26-09)
+
+## Antes de abrir a usuarios reales
+
+El servidor ya es publico (https://adastramentis.com). Esto es lo
+que falta para que entre alguien que no seamos nosotros. **El orden esta en
+"Lo que sigue"**; aqui queda el inventario.
+
+- [x] **Enlace de invitacion a la mesa** (2026-09-22). **Probado de punta a punta en produccion**: el anfitrion crea el enlace, una desconocida lo abre sin cuenta y ve la mesa y quien invita, se registra conservando el enlace, vuelve a el y entra. Sin amistad de por medio. Tope de plazas (5 por omision) como proteccion principal, porque quien entra gasta turnos del anfitrion; caducidad de 7 dias como segundo cinturon; uno vivo por mesa, revocable. El token se guarda hasheado y solo se enseña al crearlo. La consulta del enlace es publica a proposito. La amistad se queda para invitar a mano, pero deja de ser obligatoria. ~~PENDIENTE NUMERO UNO~~ (Gabino, 21-09). Hoy entrar son **seis pasos**: el invitado se registra, da su correo por fuera, recibe solicitud de amistad, la acepta, el anfitrion lo invita buscandolo por correo y recarga. La regla esta en `TableMemberActionController` ("sin amistad aceptada no hay invitacion") y **no existe enlace ni codigo de mesa**. Explica por que la sesion con invitados del 20-09 empezo mal antes de la primera narracion. **No es UX, es funcionalidad de servidor.** Restriccion que condiciona el diseño: quien entra **gasta turnos del anfitrion** (el cupo se descuenta de `owner_id`), y con `MAIL_MAILER=log` el correo no prueba identidad, asi que hace falta tope de plazas, caducidad y revocacion. Opciones en `docs/18` (D-UX-1)
+- [x] **Guia del anfitrion** (24-09, `/guia`): crear mesa, invitar, abrir sesion, turnos, quien paga, cerrar, cronica y retirar, con los nombres de la interfaz. Falta la del jugador y la completa con capturas (B6). Lo que decia antes: no existe ninguna: `docs/` es SDD, y README, ROADMAP y RUNBOOK son para desarrollar. Nadie ajeno sabria como entrar, crear mesa, invitar o jugar un turno
+- [x] **Cuentas sembradas borradas** (24-09, con dump previo): `god`, `gabino@example.com`, `armando`, `jaz` y `ux@example.com`. `jadwer@msn.com` pasa a `admin` para la cola de revision de mundos. `DatabaseSeeder` se niega a correr en produccion. Lo que decia: `gabino@example.com` es `admin` con `password`, y `admin` recibe de los seeders de Atomo `users.*` y `payments.refund` (VAM del 19-09): se borra, no se le cambia la clave. `god@example.com` tiene todos los permisos con la clave de `SEED_GOD_PASSWORD`: rotarla. `jaz` y `armando` tienen `password`: cambiarlas. La cuenta real de Gabino es `jadwer@msn.com`, `customer`
+- [ ] **El correo todavia no prueba quien eres.** Ya sale correo (ver "Correo saliente"), pero `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`: cualquiera puede registrarse con una direccion ajena. Recuperar contraseña **si funciona** desde el 22-09, asi que la via de rescate ya no es el anfitrion. Encender la verificacion es una decision aparte, porque añade un paso al registro justo donde la gente abandona (`docs/18`, D-UX-1)
+- [x] **Stripe en modo real** (26-09): claves live, cobro en MXN al tipo del dia, compra y reembolso reales verificados (ver "Plan del 26-09")
+- [ ] **Sacar la boticaria del catalogo**: entra por la beta cerrada con amigos (Gabino, 26-09) aunque su procedencia es derivada (docs/07). Antes de abrir: `php artisan catalog:set private-botica --no-beta`. Mientras tanto va gratis y nunca a la venta (el API lo impide aunque tenga precio)
+- [x] **Terminos de servicio y aviso de privacidad** (2026-09-22): publicados como **version 1** en `/terminos` y `/privacidad`, enlazados desde el pie de la portada y desde el registro en web y movil. **Pendiente la revision del abogado**; Gabino decidio publicar antes porque tener algo publicado protege mas que esperar sin nada. Escritos mirando el sistema y no una plantilla: los datos que se guardan, los cuatro terceros (Anthropic, Stripe, Resend, Hetzner con el servidor en Alemania) y que el numero de tarjeta nunca toca el servidor. Alcance: solo mayores de 18, responsable persona fisica, ley mexicana. Texto y cinco preguntas para el abogado en `docs/19-legal-aviso-y-terminos.md`
+- [x] **Retirar una mesa desde el producto** (2026-09-22). Lo señalo Gabino y era una promesa incumplida desde que se publicaron los legales. Tres acciones con reglas distintas: **archivar** (la saca de la lista sin tocar la cronica, y es lo normal porque una partida jugada tambien es de los demas), **borrar** solo si la mesa nunca llego a jugarse (409 con el motivo si ya tiene eventos), y **salir de la mesa** para el invitado, que antes tampoco podia. El anfitrion no puede salirse de lo suyo: dejaria la mesa sin quien abra sesiones ni pague los turnos. **Hallazgo de paso: el `DELETE` que JSON:API dejaba expuesto respondia 500 con la sentencia SQL y el nombre de la base**, porque chocaba con el disparador de solo-anexar; ahora esa ruta es propia y da un motivo entendible. `tableRetirement` decide en ui-logic con tests; 6 tests nuevos en la API
+- [x] **Guardar la aceptacion de los legales** (2026-09-22): tabla `legal_acceptances` con version, fecha y origen, en tabla aparte porque una persona acepta varias veces y la constancia **sobrevive al borrado de su cuenta**, disociada. El origen sale de `device_name` y no de una cabecera: el registro web lo hace el servidor de Next, asi que ninguna cabecera del navegador llega a la API
+- [x] **Buzon `privacidad@gabinoramirez.com`** (2026-09-22, creado por Gabino en JettHost y probado con un envio real desde el servidor)
+- [x] **Borrar la propia cuenta** (2026-09-22): el derecho de cancelacion del aviso llevado al producto. Se borra **de verdad** (`forceDelete`, no el soft delete de la plataforma, que dejaria el nombre y el correo en la base) y lo escrito en las partidas queda huerfano de identidad. Bloquea mientras la persona sea anfitriona de alguna mesa y le dice cuales. Pide la contraseña. **Fallo de diseño que encontro el test: `turn_responses` caia en cascada con el miembro**, asi que al irse alguien de una mesa su texto se destruia y la cronica quedaba con huecos para los demas; ahora es `nullOnDelete`
+- [x] **Casilla de edad explicita en el registro** (24-09): "Tengo 18 años o más" en web y app; la API la exige (`atomo-auth.legal.min_age`, en Atomo) y `legal_acceptances.min_age` guarda lo declarado. De paso, los errores de validacion salen en español. Antes se declaraba en el texto junto al boton y la aceptacion queda registrada; una casilla separada es mas defendible
+- [x] **Correo saliente** (2026-09-22): **Resend por SMTP estandar**, sin paquete ni dependencia nueva, asi que cambiar de proveedor es cambiar variables. La clave vive en `/root/.rpg/resendkey` y se copia al `.env`, nunca en el repo. Trampas pagadas: `MAIL_SCHEME` en Laravel 12 acepta `smtp` o `smtps`, **no `tls`** (para el 587 con STARTTLS es `smtp`), y tras tocar el `.env` hay que reiniciar **`rpg-worker` y `php8.3-fpm`**, no solo limpiar la cache
+  - [x] **Recuperar contraseña**, probado de punta a punta en produccion: correo enviado, token valido, pagina, cambio y login con la clave nueva. Hizo falta arreglar tres cosas: las notifications de `atomo-auth` estaban escritas pero **no las mandaba nadie** (Laravel enviaba las suyas en ingles), una barra final en `FRONTEND_URL` dejaba doble barra en el enlace, y **la pagina `/auth/reset-password` no existia**, asi que el correo acababa en un 404
+  - [x] **Correo de bienvenida** (pedido por Gabino el 19-09): `UserRegistered` en la plataforma y `WelcomeNotification` propia de rpg-ngn, que habla de la mesa y no del producto. No se manda si ademas hay que verificar el correo. Va a la cola. De paso: el registro mandaba el correo de verificacion **siempre**, tambien con la verificacion apagada
+  - [x] **Dominio `gabinoramirez.com` verificado en Resend** (2026-09-22): DKIM en `resend._domainkey` mas dos CNAME (`rsend` y `send` a `forge.rmta.net`). El remitente es `no-responder@gabinoramirez.com`, probado con un envio real
+  - [x] **SPF con `include:_spf.resend.com`** (2026-09-22, lo puso Gabino en JettHost editando el registro existente, nunca añadiendo un segundo). Sin el, DMARC pasaba solo por DKIM y Outlook mandaba el correo a no deseado. Propagado y comprobado desde dos resolvedores
+  - [ ] **Avisos de mesa**: "es tu turno", "abrieron sesion". Es lo que trae a la gente de vuelta sin que tenga que acordarse sola. Se decide cuando avisar sin volverse pesado viendo jugar a gente, no antes
+- [x] Sin creditos (24-09): el 409 dice donde recargar y la web avisa al anfitrion con enlace a Mi cuenta y créditos antes de que choque
+- [ ] **Lo que salio del VAM de arquitectura del 19-09** (rpg-ngn-api/docs/vam-2026-09-19.md, con orden de ejecucion y horas): copias de seguridad, roles de Postgres, reserva de cupo, redaccion de credenciales en logs, modo pantalla que lee bloques de anfitrion, el segundo ruleset jugable de verdad, `world` y la capa `gm` antes de roles ocultos, la app antes del primer APK. Los supuestos nuevos estan escritos en docs/11, docs/06 y los READMEs que cada fallo indica. **Revisado contra el codigo el 27-09**: hechos H1, H2, H4, H5, H7, H9 a H14, S2, R4, P2 a P4, E2 y E3. Superados por decisiones posteriores: A2, A4 y A5 (la app entra por `/movil` a proposito, ver `server-url.ts`) y A3 (APK local, sin EAS). A medias: S12 (queda `PACK_OPTIONS`), S13 (`GM_LINT` sigue en `report`), R3 (arreglado sin el contrato `publicView`), E4 (reembolso si, libro por transaccion no). Abiertos: H8, S1 (espera el NAS), S3, S4, S6 a S8, S11, R1, A1 y E5. S5 cerrado el 28-09. **Cerrados el 27-09**: S9 (cerrar sesion pide la proyeccion antes de anotar el cierre; un estado sin `world` reabre el turno en vez de vaciar proyecciones; leer el estado ya no crea la fila de cupo; el cursor de bloques avanza hasta lo leido), la cuenta atras elegible (0 a 15 s, viaja en el estado), E1 (el mundo por asiento: de las fichas ajenas solo vida, condiciones y lugar, `custom` vacio por compatibilidad; de los NPC, que existen), S14 (el reductor no narra la capa `gm` y la proyeccion `narrative` es solo del anfitrion), S10 (`pollDelay` en ui-logic: 1.5 s con sesion, 5 s sin ella, nada con la pantalla oculta salvo que se este escuchando la narracion, y consulta inmediata al volver), R2 (`TableRequest` rechaza un ruleset distinto al `system` del pack; sin engine no bloquea) y P1 sin `Idempotency-Key`: el boton se bloquea mientras compra y un reintento solo deja un PaymentIntent sin confirmar, que no cobra
+
+## Entrega 8: Packs de usuario
+
+- [x] **WebP como formato de los retratos** (24-09, los nueve jugables del piloto convertidos de sus recortes de 512; el visor de `main` sigue con JPG hasta el siguiente merge). Ya es el estandar (`docs/05`: 512x512 WebP) y `crop-portraits.py` lo produce; la boticaria, La Mascarada y los tres NPC del piloto ya estan asi. Los doce retratos del piloto ya son WebP; el visor de fichas de `main` sigue con JPG hasta el siguiente merge
+
+- [x] **Subida de packs, catalogo y activacion** (23-09, primera version, `docs/15` "Decidido el 23-09 y lo que hay"): `.rpgpack` desde `/mundos`, cuarentena, imagenes a WebP, validacion por el engine (`POST /v1/packs/validate`), id unico `<slug>-<hash>`, dos mundos gratis, publicar con revision por `packs:review`, catalogo, activar es una fila, retirar sin romper mesas. Proxy de Next reenviando bytes (E2 del VAM). Probado de punta a punta en local: subir, rechazo con avisos, publicar, aprobar, activar desde otra cuenta y crear mesa con sus personajes
+- [x] **Fichas completas por API** (23-09, E3 del VAM): el engine expone `GET /v1/packs/:id/:version/sheets` (fichas y sesiones), la API lo releva con cache y la web y la app lo piden cuando el pack no viene empaquetado; los retratos salen de la API. La logica de que se ve de cada personaje vive en ui-logic (`sheet-source.ts`) con una fuente comun para el pack empaquetado y para la respuesta de la API. Probado en local (boticaria) y en produccion (La Mascarada, mesa temporal borrada). De paso, una Armadura sin valor se pinta con ? en vez de null
+- [x] **Pantalla de revision, visor y pack.sh** (23-09): la cola de revision aparece en Mis mundos para god y admin (publicar, o rechazar con motivo), cada mundo tiene "Ver personajes" (fichas y sesiones, antes de añadirlo), y `tools/packs/pack.sh <carpeta>` valida con las reglas del servidor (`rpg-validate --pack`) y arma el `.rpgpack`. **Hallazgo de paso, cerrado**: las fichas, personajes y NPC de un mundo privado se servian a cualquiera que supiera su id; ahora `PackAccess::canRead` (autor, publicado, quien juega en una mesa con el, administracion)
+- El catalogo que hay hoy (lista con "añadir a mis mundos") es la primera version; **se rediseña como escaparate en la Entrega 9**
+- **Packs de la comunidad: diseño escrito en `docs/15-packs-de-la-comunidad.md`** (21-09). Cubre la subida `.rpgpack`, el catalogo publico, el cobro (limite de packs y turnos, no espacio en disco), la revision en dos vias (privado al instante, publico en cola) y el riesgo de procedencia, que es el que puede doler. Lo que falta decidir esta listado ahi. No se construye antes de medir con gente real (docs/14) ni antes de cerrar los cuatro bloqueos de "Antes de abrir a usuarios reales"
+- Subida `.rpgpack`, inspeccion en dos pasos, hash como directorio
+- Takedown y aviso de descarga externa
+- Texto de pack como contenido no confiable en el contexto del GM
+- Informacion asimetrica para packs de deduccion social (issue #2, analisis de GPT del 2026-09-18). Verificado contra el codigo el 2026-09-19 (VAM, reproducido con el reductor): `visibility.layer` existe, `visibleTo()` la respeta y el feed de eventos la filtra en la API (`CampaignEvent::scopeVisibleToPlayers`). Lo que NO la respeta es el reductor: `appendLog` no consulta `visibility`, asi que un evento de capa `gm` entra en `narrative.log` y la proyeccion `narrative` lo sirve a toda la mesa; y `worldProjection` devuelve el estado vivo completo de todos los personajes (`inventory`, `custom`) a cualquier miembro. Hoy nadie emite eventos `gm` y ningun cliente lee esas proyecciones, asi que es trampa armada, no fuga activa. Antes de cualquier pack con roles ocultos hay que cerrar las dos cosas (rpg-ngn-api/docs/vam-2026-09-19.md, S14 y E1). Lo que ademas falta es el modelo de audiencias mas alla de `table`/`host` (por personaje, por rol, por faccion), y se diseña con un pack concreto delante, no antes. Reuniones, votos y condiciones de victoria quedan para v2 si algun pack los pide
+- Principio de coste que manda sobre el diseño (del mismo issue): las llamadas al proveedor escalan con eventos del mundo, no con el numero de jugadores. Cinco jugadores que ven la misma explosion son una generacion narrativa y cinco proyecciones deterministas. A 0.019 USD por turno medidos, la version ingenua multiplica el coste por jugador y ahi no hay negocio
+
+## Entrega 9: Catalogo y pase de historias (decidida el 2026-09-23)
+
+Diseño y numeros en `docs/24`. Va despues de Stripe en real y de la beta
+cerrada: sin cobro vivo el pase no cobra, y sin embudo no se fijan precios
+ni umbrales. El diseño visual del catalogo lo trae Gabino (bosquejo de GPT,
+como la portada).
+
+- [x] **9a. Catalogo como escaparate** (26-09, ver "Plan del 26-09", 3a): tabla `catalog_worlds` (portada, titulo, genero, etiquetas de tono, jugadores y duracion, autor, sinopsis sin spoilers, precio nulo o en centavos, origen oficial o comunidad) apuntando a una version de pack inmutable; `pack_activations.source` (gratis, desbloqueo, pase, compra, creador); `GET /api/v1/catalog/worlds` **publico** con filtros y paginacion (sin cuenta se ve; jugar pide cuenta); `/mundos` rediseñado con los estados de tarjeta de `docs/24` seccion 3 y "Jugar" que crea la mesa
+- [x] **9b. Capitulos y camino de temporada** (26-09, 3b): ledger por usuario que anota un capitulo al resolver un turno en el que respondio (anfitrion o invitado), temporadas de 3 meses con umbrales, desbloqueo permanente al cruzar un umbral, barra de progreso en la tarjeta y en el perfil
+- [x] **9c. Pase de temporada** (26-09, 3c; sin `atomo-subscriptions`.): compra unica por Stripe con `atomo/payments` (ya instalado) y el webhook que ya acredita creditos; capitulos x2, mundos de la temporada al instante, mas mundos privados y revision con prioridad. Sustituye a Plata, Oro y Diamante en `config/credits.php`
+- [x] **9d. Compra directa de un mundo** (26-09, 3d): solo originales o licenciados (`docs/07`); mismo camino de Stripe y activacion con `source = compra`
+- [x] **Cronica compartible** (23-09, en produccion; `docs/24` seccion 4): cualquiera de la mesa pide el enlace desde Lectura, responde 404 hasta que acepta cada miembro actual (y vuelve a pendiente si entra alguien), cualquiera lo retira para siempre, opcion de no enseñar quien jugo. `/cronica/<token>` publica, por sesiones, con lo que hizo cada personaje y lo que paso; nunca bloques `system`. En la app desde el 23-09 por la tarde (Lectura)
+- [x] **Embudo** (23-09): `php artisan funnel:report [--weeks=8] [--exclude-domain=example.com]`, por semana de registro: con mesa, primer turno, segunda sesion, invitados por anfitrion, capitulos por persona y compras
+
+**De donde sale el catalogo.** Regla (Gabino, 23-09): **lo que sirva de base se sube a AtomoPlatform y rpg-ngn lo consume de ahi**; `base/` va mas avanzado y es la fuente de donde se porta, no una dependencia. rpg-ngn solo escribe lo que es del juego. Inventario del 23-09:
+
+- **Ya esta en Atomo y se usa** (hoy solo con smoke tests: cada uno gana tests reales en Atomo antes de que rpg-ngn dependa de el):
+  - `atomo-taxonomy`: vocabularios, terminos y etiquetado polimorfico. Genero, tono, jugadores y duracion de un mundo son terminos, no columnas nuevas
+  - `atomo-subscriptions`: planes con entitlements, suscripciones con inicio y caducidad, reglas de paywall. **El pase de temporada es un plan** con caducidad al cierre de la temporada y entitlements (`capitulos-x2`, `mundos-de-temporada`, `mundos-privados-extra`, `revision-prioritaria`), pagado una vez con `atomo/payments`
+  - `atomo-media`: portadas y capturas del mundo, con redimensionado
+  - `atomo/payments` (ya instalado): pase y compra directa por el mismo webhook que acredita creditos
+- **Se porta de `base/` a Atomo** (no a rpg-ngn):
+  - Del API: el servidor JSON:API publico de `base/api-base/Modules/Product/routes/public.php` y `PublicProductSchema.php` (filtro de visibilidad, busqueda, filtros multiples por coma, slug, paginacion con tope) como capacidad de `atomo/json-api-base`: registrar un servidor publico de solo lectura sin copiar el patron en cada proyecto
+  - Del frontend: la logica de `base/webapp-base/packages/ecommerce/src/public-catalog/` (hooks con SWR inmutable, capa `services/transform` que separa JSON:API del modelo de UI, query inicial para SSR, y sus tests) a un package `@atomo/*` sin dependencia de framework. Los componentes visuales (grid, tarjeta, filtros, detalle) se hacen en rpg-ngn con el bosquejo de Gabino, porque la web es Next y los `*-ui` de Atomo son Vite y de back-office
+- **Se queda en rpg-ngn** porque es del juego: la fila de mundo que apunta a una version de pack, `pack_activations.source`, el ledger de capitulos y las temporadas del camino
+- **No se usa**: `atomo-product`, `atomo-ecommerce`, `atomo-editorial` (productos, variantes, carrito, wishlist y reseñas que el plan descarta en `docs/24` seccion 8)
+
+## Entrega 10: Historia ilustrada (decidida el 2026-09-24)
+
+Sale del analisis de Tipsy Chat (`docs/analisis-competencia-tipsy.md`).
+Gabino decidio el orden: **imagenes primero**, antes de Stripe en real,
+gratis durante la beta y con tope por sesion. Lo que cobra (narrador
+premium, imagenes fuera del tope) espera a Stripe.
+
+- [x] **10a. Imagen por escena** (24-09, desplegada; en produccion `IMAGES_ENABLED=false` hasta tener las claves de Gemini y OpenAI). Con interruptor por mesa, cronica ilustrada y `artStyle` en piloto y La Mascarada. Contrato: el motor decide *cuando* (cambio
+  de lugar, apertura de sesion y momentos clave que el GM marca, con tope
+  por sesion) y *que* (prompt armado desde el estilo del pack, el lugar y los
+  personajes presentes, nunca desde el texto libre del jugador); la API
+  genera en la cola, convierte a WebP, guarda y añade un bloque `image` al
+  turno, asi que el texto nunca espera. Proveedor detras de una interfaz
+  (`ImageProvider`, como `GMProvider`) con retratos del pack como referencia
+  para que las caras se mantengan. Solo en packs originales o con licencia
+  (`docs/07`). Ajuste por mesa para apagarlas. Tabla de costes por imagen
+  para `turns:usage`. Web, app y cronica pintan el bloque
+- [x] **Mesa con escena de fondo** (24-09, web; pedido de Gabino al verla en el telefono): la ultima ilustracion es el fondo de la mesa, el texto se lee en la mitad de abajo sobre vidrio ahumado, y el cuadro de respuesta queda plegado en una barra "¿Que hace tu personaje?" que se abre al tocarla o al bajar leyendo hasta el final (la carga y el autoscroll no cuentan); mientras se escribe, la escena cede alto. Minimo 5 turnos entre imagenes (`images.min_turn_gap`, eran 3 hasta el 26-09) y tope de 12 por sesion (eran 6), la apertura siempre lleva la suya. En la app desde el 24-09 por la noche (velo negro sin desenfoque, barra plegada con "Ocultar", apertura al bajar con el dedo, la escena cede alto al escribir); sin verificar en el telefono
+- [x] **10b. Sugerencias de respuesta por jugador** (24-09, desplegada; "Otras" desde el 25-09: llamada aparte al modelo (`POST /v1/turns/suggest` en el engine, `GMProvider.suggest`, `IdeasService` en la API, `POST turns/{turn}/ideas`), la primera ronda de cada turno gratis y las siguientes solo con clave propia o con un paquete de 10 USD o mas ya cobrado (Gabino), tope 5 por turno, una llamada que falla no cobra; las nuevas sustituyen a las anteriores y el motor recibe las que ya vio). Dos acciones por
+  personaje interpelado, en la misma llamada del GM, filtradas por lo que el
+  personaje sabe; tocarla la copia al cuadro. **El cuadro de texto siempre
+  sigue abierto** para "otra respuesta" (Gabino, 24-09): las sugerencias
+  orientan cuando no se sabe que espera el narrador, pero no cierran
+  romances internos ni lineas paralelas. "Otras" pide dos nuevas (tope 2 por
+  turno). Se apagan por jugador
+- [x] **10c. "Anteriormente..."** (24-09, desplegada): en la apertura de una
+  sesion con otra antes, el GM escribe el resumen en la misma llamada (linea
+  `recap`, pasa el lint) y sale como bloque `system` con `recap: true`. Quien
+  entra a la mesa con la sesion abierta lo ve en una pantalla con Continuar,
+  una vez por resumen (web: por navegador; app: mientras esta abierta); si
+  llega en vivo durante la apertura, se lee en la narracion y no tapa nada
+- [ ] **10d. Video de la sesion**: cronica, imagenes de 10a y voz del
+  narrador a un video por sesion (ffmpeg en la cola), descargable desde
+  Lectura. Depende de 10a
+- [ ] **10e. Narrador estandar o premium** con su coste en turnos a la
+  vista (Haiku y Sonnet). Despues de Stripe en real
+- [ ] **10f. Afinidad con los NPC**: evento `relation_changed` validado por
+  el motor (una etapa por turno, con motivo), desbloqueos que declara el
+  pack, "Relaciones" en Fichas. Despues de Stripe, con un mundo original
+
+Van a otras entregas: invitacion con recompensa y etiquetas de
+descubrimiento (E9), editor web de mundos (beta con creadores), ayuda en la
+app, idiomas y pulido (sin fecha).
+
+## Plan del 26-09 (aprobado por Gabino): Stripe en real, mesas nuevas, catalogo completo
+
+Sale de probar el APK v5 y la web el 25-09 por la noche. Orden y
+dependencias (detalle en el plan de la sesion; aqui lo que hay que marcar):
+
+- [x] **1. Stripe en real** (26-09, madrugada): claves live instaladas (por `read -rs`, respaldo del `.env` y de la base antes), webhook live verificado. La primera compra real la rechazo la tarjeta de debito de Gabino ("Non-MXN currencies are not supported for this card"), asi que desde hoy **los precios se anuncian en USD y se cobran en MXN** al tipo del dia (BCE via Frankfurter, respaldo open.er-api y ultimo conocido) mas 5 %, redondeado hacia abajo a pesos: "$2 USD ($37 MXN)". Vive en `atomo-payments` (`ExchangeRates`, `CreditPackCatalog::charge`). Compra de humo de $37 MXN capturada, 40 turnos acreditados por el webhook, reembolso con `charge.refunded` recibido; pagos de sandbox borrados. Tras pagar, una tarjeta dorada con tono de cronica. "Otras" ideas se desbloquea por paquete (Campaña o mayor), no por importe. Deuda: un reembolso no retira los turnos acreditados
+- [x] **0. Imagenes** (26-09): una cada 5 turnos y tope de 12 por sesion
+  (60 turnos, 65 con la apertura); el anfitrion ve un aviso cuando la sesion
+  agota su cupo. Antes eran 3 y 6, y la mesa 39 dejo de ilustrar en el turno
+  22 sin que nadie supiera por que
+- [x] **2. Mesas con el tablero nuevo** (26-09, `img/design_ui_ux/mesas_ux.png`):
+  barra superior con logo, barra lateral en escritorio, barra inferior en la
+  app, paginas "Pronto", fondo nuevo, filtros con conteo y tarjetas con
+  portada y avatares. El mismo marco cubre Mis mundos, Mi cuenta, Voz y Nueva
+  mesa, y el menu de la mesa lleva las mismas secciones que la barra lateral
+- [x] **3a. Explorar mundos** (26-09): bloque `catalog` en `pack.json`,
+  `catalog_worlds` y `catalog:set`, catalogo publico con filtros y estado por
+  usuario, detalle con personajes y mapas, "Jugar" crea la mesa
+- [x] **3b. Capitulos y camino de temporada** (26-09): ledger de capitulos
+  al resolver, temporadas con umbrales, desbloqueo permanente
+  (`season:open`). Temporada 1: piloto gratis, La Mascarada a 20
+- [x] **3c. Pase de temporada** (26-09): 5 USD pago unico cobrado en MXN
+  como los paquetes (`season_passes`, `PassService`). Da capitulos x2, abre
+  los mundos del camino al momento (`source = pase`, se quedan) y sube los
+  mundos propios de 2 a 5. No usa `atomo-subscriptions`: ese package es el
+  editorial (lectores, paywall, medidores) y un pago unico no lo necesita.
+  La revision con prioridad queda fuera hasta que la cola tenga volumen
+- [x] **3d. Compra directa** (26-09): `POST /api/v1/catalog/worlds/{id}/purchase`
+  para mundos oficiales con precio (`catalog:set <pack> --price=300`), solo
+  los de procedencia original o con licencia. El webhook crea la activacion
+  (`source = compra`) y un reembolso la retira; `PackAccess` bloquea el
+  mundo hasta comprarlo, salvo a quien ya lo juega en una mesa. En la app,
+  "Comprar en la web", como los paquetes
+- [x] **Home con el catalogo vivo** (26-09): "Mundos destacados" lee el
+  catalogo (estado por usuario, huecos "Proximamente" hasta completar la
+  fila) y una franja de temporada con el camino, tus capitulos y el pase.
+  Hueco para su ilustracion en `ARTE_TEMPORADA` de
+  `components/home/HomeCatalog.tsx` (1600x600, escena a la derecha)
+- [x] **4. APK v6** (26-09), y de ahi a la **v14** la misma noche con lo que
+  salio de probarla en telefono y tablet: tarjeta de mesa que crecia con su
+  portada, filtros que se colapsaban, fondo de toda la pantalla con degradado
+  real (`expo-linear-gradient`), login sobre el arte, perfil y Mis mundos en
+  el marco nuevo, tablet centrada, zoom en los mapas y sin barra de estado
+- [x] **Extra 26-09 (web)**: zoom en los mapas, modo pantalla con texto que
+  escala con la ventana, A- / A+ y la agarradera del panel de texto; el pie
+  de la web recupero sus redes (choque de la clase `.pronto`)
+- [x] **5. Auditoria valida a matar** (26-09, 3 frentes con Fiscal y Defensor
+  por frente, Juez: Claude). Punto de retorno: monorepo `6172a81`, API
+  `49ddb31`. Veredicto en la lista de abajo, **pendiente de aprobacion de
+  Gabino antes de tocar codigo**. Aprobado y ejecutado el 26-09 por la tarde
+  (P0 a P2); lo que salio de mas se anota en cada punto.
+
+### Veredicto del VAM del 26-09 (por prioridad)
+
+**P0, dinero (arreglar primero, con test antes del arreglo):**
+- [x] **E1. Webhook que se consume sin entregar.** `PaymentService::handleWebhook`
+  registra el evento (`recordEvent`, fuera de la transaccion) antes de
+  entregar; si el listener falla, la entrega hace rollback, Stripe reintenta
+  y el reintento se ignora por duplicado: cobro sin pase, mundo ni turnos.
+  Rediseño en atomo-payments: evento "recibido" y "aplicado" por separado;
+  solo es duplicado lo ya aplicado. Test: listener que lanza y reintento que
+  entrega. No ha pasado en produccion. Hecho: platform `858ae95`.
+- [x] **E2. Reembolso de paquete de turnos.** Retirar los turnos del paquete al
+  reembolsar (hasta dejar el cupo en lo ya gastado, nunca negativo), igual
+  que ya hacen el pase y los mundos. Paso con la compra de humo (37 MXN).
+  Hecho: `CreditRefundedTurns` (los 40 turnos de la compra de humo se
+  quedan: el reembolso fue antes del arreglo).
+
+**P1, una sola fuente de verdad (rediseño de piezas, no parches):**
+- [x] **A2. Estado de acceso a un mundo** calculado en un solo servicio de la
+  API (tuyo, camino, venta, beta, gratis) que usen `PackAccess`,
+  `CatalogService` y `PurchaseService`; hoy dos lo recalculan por su cuenta.
+  Hecho: `WorldAccess`. Salieron dos bugs reales: quien jugaba un mundo con
+  precio veia su tarjeta en venta y podia pagarlo otra vez.
+- [x] **D2. Numeros de la config en la UI desde la API**: "hasta 6
+  ilustraciones" (son 12) sale de `ui-logic/scene-images.ts`; la API debe
+  mandar `per_session` y el texto usarlo.
+- [x] **A1 + A9. Textos del camino y del pase** a `ui-logic` (`stopLabel`, frase
+  de precio del pase): hoy hay 4 copias en web y app con textos distintos.
+- [x] **A3. Algebra del zoom del mapa** (limites, clamp, pellizco) a `ui-logic`;
+  web y app solo ponen los eventos.
+
+**P2, diseño:**
+- [x] **D3. Selector de voz desplegado** siempre en la hoja Lectura (decision de
+  Gabino): "Nadie narra en voz alta" no parece boton.
+- [x] **D6 + D5. Una sola cabecera de hoja en la app** (`SheetHeader`: volver o
+  titulo, y Cerrar siempre a la derecha) para GameSheet, SheetsModal,
+  VoicePicker, MapPanel y el flujo de entrar; hoy el mapa pone Cerrar a la
+  izquierda.
+- [x] **D8. Proveedor sin configurar**: decir que hacer (clave propia en Mi
+  cuenta) en vez de solo "sin configurar en el servidor". Era un bug: con tu
+  clave guardada el proveedor seguia bloqueado aunque la API lo acepta.
+  `presetAvailability` en ui-logic lo resuelve en web y app.
+- [x] **D4 + A7. CSS**: consolidar `.table-header` (3 bloques) y dejar de crecer
+  `globals.css` (6007 lineas): lo nuevo en archivos por dominio, sin
+  migracion masiva.
+- [x] **D7.** Comentario de `theme.ts` ("Cinzel solo para la marca") desfasado.
+
+**Despues del VAM, 27-09 (lo que salio de la sesion de Gabino con sus amigos):**
+- [x] **Las hojas de la mesa con la semantica del tablero** (Lectura, Anfitrion,
+  Jugadores, la party, el mapa y la voz, en web y app): textura de fondo
+  sacada de `img/assets/backgrounds/backgrounds.png`, secciones en superficie
+  translucida con titulo en Cinzel dorado (una sola pieza: `Panel` y
+  `SectionTitle`; en la app habia cinco copias del estilo), cabeceras en
+  Cinzel, anillo dorado en los retratos de personas y el rojo de peligro de
+  la paleta en retirar y borrar (la web lo tenia violeta). En la app, un solo
+  armazon de hoja (`SheetModal`) en vez de cuatro modales armados a mano.
+- [x] **Nueva mesa en el marco nuevo**: mundos como tarjetas con portada y el
+  director de juego legible (`presetOptionParts`: nombre arriba, quien paga y
+  modelo abajo).
+- [x] **Amigos con lugar propio**: la pestaña Comunidad (app) y `/comunidad`
+  (web), con el texto corregido (ya no hace falta ser amigos para sentarse:
+  basta el enlace).
+- [x] **Hueco negro arriba en la app**: Android reporta el alto de la barra de
+  estado aunque este oculta; `useTopInset` lo resuelve en un solo sitio.
+- [x] **Ocultar** del cuadro de respuesta en dorado y mas grande.
+
+**P3, deuda planificada (no ahora):**
+- [ ] **A4.** Catalogo comercial generico (`CatalogWorld`, estados, featured) a
+  un `atomo/catalog` cuando haya un segundo producto que lo use.
+- [x] **A5.** Build de la APK reproducible (27-09): `apps/mobile/scripts/release.sh`
+  (prebuild limpio, JDK 17, se niega sin la llave de subida y comprueba el
+  certificado) y `expo-doctor` en CI. Salieron dos fallas: `splash` duplicado
+  en `app.json` (el SDK 57 lo ignora) y cuatro parches de Expo atrasados.
+  El paso de CI estuvo en rojo hasta el 28-09: `pnpm --filter mobile doctor`
+  corria el `doctor` de pnpm; ahora es `run doctor` con `npx expo-doctor`.
+- [ ] **A8.** Partir `TableScreen` (878 web, 834 app) la proxima vez que se
+  toque a fondo.
+
+**Riesgos abiertos (aceptados, con dueño Gabino):**
+- E3: reembolsar el pase deja los mundos ganados con capitulos x2. Coherente
+  con "lo ganado no se quita" (docs/24); se acepta salvo que Gabino diga otra
+  cosa.
+- E5: "Creditos acreditados" salio dos veces en el log el 19-09 sin efecto
+  doble (la entrega es idempotente); causa sin aislar, vigilar en la
+  siguiente compra real.
+- E6: sin engine, `PackAccess` deja crear mesa (decision documentada); el
+  primer turno falla igual. Añadir un aviso en el log cuando pase.
+
+**Descartados por el Defensor con evidencia:** D1 (barra de estado, resuelta
+en v14), E4 (la firma invalida fue al instalar las claves y Stripe reintento
+todo), A6 (el lint raiz cubre web y app), A10 (la deuda tecnica esta en el
+ROADMAP del monorepo, donde el CLAUDE.md de la API la busca).
+
+## Pendientes del 25-09
+
+- [ ] **Claves de imagen rotadas**: Gabino creo claves nuevas de Gemini y OpenAI pero el servidor sigue con las viejas (que siguen activas). Subirlas con `read -rs` a `/root/.rpg/`, pasarlas al `.env` y revocar las viejas
+- [x] **Stripe en real** (26-09): ver "Plan del 26-09", punto 1. Precios en USD, cobro en MXN
+- [x] **Verificar en el telefono** (APK v3, 25-09): el dado ya no cierra la app y las imagenes salen; en tablet el hero se ve bien. Lo que salio mal fueron las tiradas (abajo)
+- [x] **Tirada pedida por el director** (25-09, tras la mesa 39: con los dados en manos de la mesa, el GM inventaba un 13 y un 9 "del motor", narraba la consecuencia y el motor descartaba la linea en silencio; nadie le pedia tirar a Gabino). Tres capas que no se conocen: el GM **pide** (`ask_roll`, `turns.roll_requests`), la API **resuelve** (`DiceService`: `random_int`, evento y bloque `roll`, y la tirada es la respuesta del personaje, `turn_responses.roll`) y el cliente **presenta** (`DiceRoller`, hoy `SpriteDie` con la lamina; un dado 3D con fisicas entra cambiando una linea porque el resultado llega antes que la animacion). Si el turno solo exige tirada, no hay cuadro de texto: se tira directo. **Tres modos de dados**: `dice` (por omision desde hoy: el jugador suelta el dado en pantalla, el numero lo pone el servidor, lo escrito no cuenta), `engine` (el motor tira en silencio y narra al momento) y `table` (presencial, el numero escrito vale). El prompt cambia por modo (`withDiceMode`); red de seguridad: un numero inventado se vuelve peticion y el anfitrion lo ve. Hecho tambien: caras precargadas en la web (la primera tirada las pedia a mitad del giro), tarjeta apilada en el telefono, ventaja y desventaja con los dos d20 a la vista y el que no cuenta atenuado (dado y bloque). Las seis laminas (d4, d6, d8, d10, d12, d20) llegaron el 25-09 por la noche (`img/assets/dices/`, reticula 6x6): `tools/dice/crop-sheets.py` detecta las celdas ocupadas y recorta las 60 caras a 192 px para web y app. La mesa 39 ya esta en `dice` (cambiada en produccion el 25-09 al desplegar)
+
+- [x] **Dos heros, uno por orientacion** (25-09, generados por Gabino con GPT a partir del prompt con conteo de manos y SIN logo pintado): `hero.webp` 1914x822 para landscape y `hero-movil.webp` 941x1672 para portrait; la web elige por `(orientation: portrait)` y no por ancho, la app usa el vertical. El logo va solo en vector encima del hueco estrellado, asi que ya no se ve doble. Fuentes en `img/assets/hero/`
+- [x] **Primer APK** (25-09): `com.adastramentis.app` 0.1.0, compilado en la WSL (ver memoria `apk-local`), firmado con la llave de subida respaldada en el disco E:; instalado y corriendo en el telefono de Gabino
+
+## Packs de prueba (plan del 25-09)
+
+Para probar el juego con las correcciones y medir las censuras de narracion
+e imagen. Reglas que aplican (`docs/07`):
+
+1. **Genshin Impact** y 2. **GTA San Andreas**: obra ajena, solo como packs
+   **privados de prueba** (clase `user-provided`), nunca publicados ni
+   vendidos, y sin ilustraciones salvo un permiso de administrador que las
+   encienda en mesas privadas para probar la censura de imagen. GTA prueba
+   violencia y crimen: donde se detiene el modelo.
+3. **Coqueteo muy sugerente**: sugerente, nunca explicito. Stripe prohibe el
+   contenido sexual explicito (cerraria la cuenta) y Google Play tambien.
+   Sirve para fijar la frontera y escribirla como politica de contenido.
+4. **Terror de pasillo en bucle con anomalias** (inspirado en la idea de Exit 8,
+   sin su nombre ni su arte): original, puede pedir un ruleset de "notar
+   anomalias".
+5. **Niveles liminales** (inspirado en la idea de Backrooms, sin copiar el wiki
+   CC BY-SA, que obligaria a publicar con esa licencia): original.
+6. **Terror psicologico propio**: 100% original, ilustrable, publicable y
+   vendible. El que mas hay que cuidar.
+
+Los retratos se pueden generar con Gemini desde la ficha de cada personaje.
+
+## Deuda tecnica (sin entrega asignada)
+
+- [x] **Piezas genericas de rpg-ngn-api subidas a Atomo** (23-09, en produccion, platform `08361ea`): borrar la propia cuenta y constancia de legales en `atomo-auth` (contrato `AccountDeletionGuard`; la migracion conservo su nombre y produccion no la repitio), busqueda por correo exacto en `atomo-user` (primer harness de tests del package, ya en CI), creditos de prepago en `atomo-payments` (`credits.enabled`, evento `CreditPackPurchased`, contrato `CreditBalance`). En la API quedan `OwnedTablesGuard`, `TurnBalance` y `CreditPurchasedTurns`. Mismas rutas y respuestas
+- [x] Un pack que no existe devolvia 502 en `packs/{pack}/{version}/sheets`; ahora 404 con motivo (23-09, API `be11b57`)
+- [x] `composer analyse` de la API vuelve a correr (23-09): Larastan nivel 5 con linea base de 141 hallazgos (tipos de Eloquent; los dos que parecian fallos son falsos positivos) y en el CI de GitHub
+- [x] **El CI de AtomoPlatform** (25-09): nunca corrio en Gitea (cero runners, y no hay MicroServer). Se resolvio con el job `atomo` del CI de GitHub de rpg-ngn-api, que corre los tests de `atomo-auth`, `atomo-user` y `atomo-payments` en SQLite y Postgres
+
+- **`campaign:import` solo trae eventos.** Una campaña importada llega sin turnos ni bloques, asi que la mesa se ve vacia (los clientes pintan bloques, no eventos) y, si la sesion estaba abierta, queda abierta sin turno: nadie puede responder. Paso con la mina el 19-09 y se arreglo a mano copiando `turns` y `turn_blocks` de la base local mas un bloque `system` de recapitulo ("Donde lo dejamos"). Lo bueno: que el import lleve turnos y bloques, o que `openSession` escriba el recapitulo desde la proyeccion `narrative` cuando la campaña ya tiene historia
+
+Lo cerrado en septiembre queda en el historial de git; aqui solo lo que sigue
+abierto.
+
+- [x] **Desplegar sin cortar** (02-10, API `e9ff522`, web `760b035`): dos instancias `rpg-web@3010` y `@3011` que se turnan, cada una con su carpeta de build; nginx cambia por upstream con recarga y PHP-FPM se recarga. Medido: 65 de 65 consultas con 200 durante un despliegue. Antes el build pisaba la carpeta que servia (paginas a medias) y el reinicio daba 502
+- [x] **Portado a la plantilla de Atomo** (30-09, platform `8becf33`): sin sesion, `/api` responde 401 en JSON y no 500
+- [ ] Un solo comando que levante los servicios locales (engine, API, web, worker). En produccion ya lo resuelve systemd; en la laptop siguen siendo cuatro terminales
+- [x] **Renombre DM a GM** (29-09): hecho en todo el proyecto (codigo, API, rutas, permiso, prompts, UI, docs). La capa `gm` de los eventos tambien, sin migrar datos porque nada la usaba (acepta `dm` al leer). Quedan alias `/dm`, `dm:probe`, `dm:key` y `DM_*` para APK y `.env` viejos. Detalle en `docs/12-plan-renombre-gm.md`
+- [ ] Traer `legacy` a `dev` con merge **antes** del primer merge de `dev` a `main`, y ampliar el schema `Session` con `veiledFields`, `veilNote` y `hideChronicle`
+- [x] **Migrar la campaña de la mina al servidor** (hecho el 2026-09-19, rehecho el 20-09 tras el borrado de mesas de prueba): vive como mesa 15 a nombre de Gabino, importada desde `campaigns/pilot/events.jsonl` + `snapshots/002.json`. **La partida piloto es el repo, no el servidor**: ahi solo vive su continuacion web
+- [x] APKs de Android (25-09): se compilan en local con el SDK y JDK 17, sin EAS (memoria `apk-local`); v3 instalado en el telefono de Gabino
+
+## Entrega 11: Administracion y trazabilidad (planeada el 2026-09-28, `docs/25`)
+
+Hoy todo se opera por comandos y SSH. Plan completo, inventario de Atomo y
+decisiones en `docs/25-plan-administracion.md`.
+
+- [x] **E11a. Trazabilidad** (28-09, API `acbbfdc`, platform `3602f3a`): rastro en todos los modelos de negocio con lista cerrada de campos (trait `Audited`), origen de cada cambio (`http`, `webhook:stripe`, `cli:<comando>`, `queue:<job>`) e id de peticion en el rastro, en los logs y en la respuesta (`X-Request-Id`), cambios de rol registrados. Lo generico vive en `atomo-audit`, ahora con tests reales en el CI
+- [x] **S5. Roles de Postgres** (28-09, API `fb99362`): `rpg_owner` es dueño de las tablas y migra; la app solo lee e inserta en `campaign_events` (comprobado: borrar, vaciar o apagar el trigger da error de permisos). Respaldo previo bajado a `D:\BackUp\ad-astra-mentis` con `deploy/pull-backup.sh` y restaurado de prueba con los mismos conteos que produccion
+- [x] **E11b.1. Panel, primera version** (28-09, en `https://dashboard.adastramentis.com`): login por cookie de Sanctum, solo el equipo (god, admin, tech), inicio con salud y actividad, usuarios, roles, auditoria con filtros por peticion, origen y registro y el detalle campo por campo, y salud del sistema. De paso se arreglo Atomo: `@atomo/ui` no tenia CSS para sus 88 clases (todo salia sin estilo), la API de auditoria serializaba el modelo entero del causante y del afectado, la plantilla usaba un token de color que no existe y la plataforma no versionaba su lockfile. Deuda: el formulario de login de `@atomo/auth-ui` esta en ingles
+- [x] **E11b.1b. Permisos al estilo de LWM** (28-09, platform `f171e48`, API `33ae6f9`): roles vivos god, admin y customer; `tech` y `storyteller` son plantillas que copian permisos directos al usuario y luego se ajustan por persona. El codigo revisa permisos (`packs.create`, `packs.review`, `gm-providers.index`, `dashboard.access`), no nombres de rol. `PermissionCatalog` da etiqueta, modulo y recurso a cada permiso; el panel trae el gestor de plantillas (pestañas Plantillas y Permisos) y, por usuario, roles de sistema, plantilla y checklist con lo que se aparta de la plantilla. Rol Story Teller creado: sube mundos sin el tope de propios (50)
+- [x] **E11b.2. Panel, lo del juego en lectura** (30-09, API `8538130`, desplegado). API bajo `/api/v1/admin/*` (controladores propios, sin JSON:API), cada ruta con su permiso; el panel con `DataTable` de `@atomo/ui` en un grupo "Juego":
+  - Mesas: busqueda por nombre, correo del dueño o id; dueño, mundo, idioma, estado, miembros, sesiones, turnos, ultima actividad, tokens y coste estimado. Detalle con miembros, sesiones y ultimos turnos (estado, error, tokens, tiempos)
+  - Turnos atascados: `closing` o `resolving` hace mas de 5 minutos, y turnos abiertos con error
+  - Pagos (por correo o id de Stripe), cupos (cubeta, reserva, `plans.bypass`), pases de temporada y trabajos fallidos
+  - Permisos: `admin-tables.index` y `failed-jobs.index` (god, admin, tech); `payments.index`, `quotas.index` y `season-passes.index` (god, admin: dinero). El coste sale del mismo calculo que `turns:usage`
+- [x] **E11b.3. Operaciones desde el panel** (30-09, API `f498d7f` y `02462df`, desplegado; suspender cuentas en atomo-user `0370c0c`). Cada una con confirmacion y motivo escrito, que queda en la auditoria (`log_name` admin, con quien, sobre que y el motivo), y su permiso:
+  - Desatascar un turno (`turns.unstick`, god, admin, tech): solo `closing` o `resolving` hace mas de 10 minutos (el doble del limite del job, 300 s); lo reabre con `TurnService::abandon`, igual que cuando el job falla
+  - Dar cupo (`quotas.grant`, god, admin): suma turnos a la reserva, de 1 a 1000, como `quota:grant`
+  - Revision de mundos (`packs.review`, ya existe): la cola con aprobar y rechazar con motivo, sobre la API de hoy
+  - Catalogo (`catalog-worlds.update`, god, admin): precio, destacado, orden, oculto y beta, como `catalog:set`
+  - Reembolsar (`payments.refund` de atomo/payments, god, admin): endpoint propio que guarda el motivo y llama a `PaymentService::refund`; el efecto sigue llegando por el webhook `charge.refunded`
+  - Suspender y reactivar una cuenta (`users.suspend` de atomo-user, god y admin): estado `suspended`, tokens y sesiones cerrados, y `EnsureAccountIsActive` corta lo que siga abierto
+- [x] **Diseño del panel** (30-09, platform `d6ab6ed`): plantilla de diseño neutra en Atomo (`docs/DESIGN.md` de la plataforma, regla 12 de su CLAUDE.md): tablas que pasan a tarjetas en el telefono, modal como hoja, bloques de pagina y marco nuevo; el panel es la referencia viva. La identidad visual propia del panel, si se quiere, sale de un designboard de Gabino
+- [x] **E11c. Soporte** (30-09, platform `33b9880`, API `f761f17`, web `ed86961`, desplegado): `atomo/support` generico (reportes con estado, prioridad, responsable, notas internas y enlace a lo que tratan) y `@atomo/support-ui` (la cola del panel); en la web, Reportar un problema en la mesa y en Mi cuenta, Mis reportes y la conversacion; correo al responder o resolver
+- [x] Soporte en la app movil (30-09, `ce10011`, APK v19): Reportar un problema desde la mesa (Lectura) y desde Perfil, Mis reportes y la conversacion en una hoja
+- [ ] Adjuntar capturas a un reporte (con atomo-media)
+- [ ] **Deuda: copias fuera del servidor (S1)**. Hoy la copia diaria vive en la misma maquina; si el servidor se pierde, se pierde con el. Espera la compra del NAS (Gabino, 28-09)
+
+## Entrega 12: Modelo de monetizacion (platicado el 2026-09-29)
+
+El modelo completo (free, temporadas, pases, suscripciones, social) vive en el repo privado: `rpg-ngn-api/docs/modelo-de-monetizacion.md`, porque trae precios y costos. Lo revisa el concilio antes de implementar. Sustituye al bosquejo de E12 en `docs/25`. Reglas de juego que salen de ahi y no dependen del concilio:
+
+- [x] **Paso 1, plan gratuito** (29-09, API `0b76b50`, monorepo `c509c47`, platform `ae7af9d`, desplegado): cubeta de 5 turnos que recarga uno cada 96 min y se gasta antes que la reserva; quien no paga lleva hasta 2 mesas activas como anfitrion, narra a los 10 s fijos y tiene 1 ilustracion por sesion; ser anfitrion pide el correo confirmado (entrar a mesas ajenas no); `plans.bypass` exime (god y admin por rol, cualquiera a mano desde el panel). Web y app dicen cuando llega el siguiente turno gratuito y bloquean el selector de cuenta atras. En Atomo: la verificacion de correo nunca habia funcionado (el enlace no llevaba la firma que exige la ruta); ahora va firmada y caduca, y el registro rechaza alias de un correo existente y buzones desechables
+- [x] Avisos de la cubeta en la web (29-09, desplegado): package nuevo `atomo/push` (dispositivos por usuario, Web Push con VAPID y Expo, canal `push` de Laravel); al gastar de la cubeta se programan "Tu mesa tiene turno" (si se vacio) y "Turnos listos" (al llenarse), y el job descarta los que dejaron de valer. Service worker y manifest en la web; interruptor en Mi cuenta (en iPhone pide agregar la web a la pantalla de inicio). Probado de punta a punta con Chrome real via FCM
+- [x] Avisos en la app (01-10, `efb9c3c`, `3639a5d`, `acc7faf`, APK v21): `expo-notifications`, interruptor en Perfil, token al canal `expo` de atomo/push; Firebase (`google-services.json` fuera del repo publico) y proyecto `@jadwer/rpg-ngn` en expo.dev con la cuenta de servicio FCM V1 asignada. Aviso de prueba recibido en el telefono de Gabino
+- [x] Tienda, promos y globo de idioma en la app (30-09, `594df83`, APK v20); `blessing:grant` para regalar dias con motivo y `ends_at` en UTC (API `b374807`, `5babb7a`)
+- [x] **Pase de descubridor v1** (29-09, API `c431fce`, web `19b1331`, desplegado): los capitulos tambien se ganan el primer turno de cada dia (2 mas la racha, hasta 3; fallar un dia la reinicia) y con 8 logros deterministas (dias jugados, tiradas bajas y altas, un 20 natural, sesiones cerradas, abrir mesa). Camino de 20 premios en 4 bloques: el quinto de cada bloque es un mundo del camino o "Historia por anunciar"; los menores los sortea `season:rewards` sin repetir cosmeticos. Lo ganado va a la coleccion (`/coleccion`); los beneficios por tiempo (sin cuenta atras, una ilustracion mas) los respeta el plan gratuito y se suman si se repiten. Web: `/temporada`, enlazada desde Explorar mundos. PROVISIONAL y por diseñar: la lista definitiva de logros (y los narrativos), los premios de cada bloque, su arte, y donde va el pase en la navegacion
+- [x] Pase y coleccion en la app (30-09, `6709f62`, APK v19): una pantalla, desde Mundos y desde Perfil
+- [x] La tirada y la accion van en el mismo turno (02-10, monorepo `9cc3aaf`, API `d473077`, desplegado): con tirada pedida, el jugador escribe que intenta con ella ("si paso, salto el muro") y suelta el dado; la accion viaja en la misma respuesta y el director narra el resultado y esa accion en la misma resolucion. En la app entra con el APK v22
+- [x] El tope de jugadores lo pone la historia (29-09): `catalog.players.max`, con techo de 9 en packs oficiales y 6 en los de usuario; Los Nueve Viajeros pasa a 9
+- [x] **Bendicion del bardo** (30-09, API `f761f17`, web `ed86961`, desplegada): 30 dias acumulables hasta 180, 10 turnos al comprar y 4 al dia desde las 3 am (aviso a pantalla completa que solo se cierra con Recoger), reembolsable hasta la segunda recogida. El aviso en la app llego con el APK v19 (`ce10011`). Falta: el arte del tema de cada temporada y la clausula en los terminos
+- [x] **Tienda** (30-09, web `3f7dd7a`, desplegada): `/tienda` con la Bendicion (precio en pesos), el pase de temporada, los paquetes de turnos y los mundos en venta; acceso en la barra de arriba, el menu lateral y la barra inferior del telefono
+- [x] Paquetes de turnos del modelo nuevo (30-09): 0.99 a 99.99 USD en seis escalones, nombres traducidos por id; Plata, Oro y Diamante anunciados con el precio del modelo. Es la prueba de precio con los beta testers
+- [ ] Rehacer la ultima accion (de paga)
+- [ ] Excepciones a mano desde el panel (clave propia sin suscripcion, clave nuestra con limites a medida), con E11b.3
+- [ ] Colaboraciones con streamers: despues de ajustar el producto base
+
+## Demo en ingles para la beta cerrada (29-09, desplegada)
+
+Para prospectos de Estados Unidos y streamers: una demo jugable en ingles sin romper los otros proyectos de Atomo.
+
+- [x] AtomoPlatform: `ATOMO_LOCALES` (apagado por defecto), middleware `SetLocale`, `users.locale`, textos de atomo-auth en `lang/`
+- [x] API: `lang/{es,en}/game.php` y `pass.php`; avisos guardados en el idioma de la mesa; lecturas del pack con `lang` y cache por idioma
+- [x] Motor: `language` en el contrato, prompt que narra en ingles, bloques de sistema con `tFor`, pack cargado por idioma
+- [x] Web: toda la interfaz, globo de idioma arriba a la derecha y `?lang=` en la URL (web `d69603f`, API `e15c10d`)
+- [x] Los Nueve Viajeros en ingles con la capa `i18n/en/` (docs/05)
+- [x] Packs multilingues (30-09, web `8922bbe`, API `cf1718d`): el manifiesto declara `language` y `translations`; solo esas se aplican y se validan (tambien al subir); el catalogo muestra y filtra por idioma; la mesa solo nace o cambia a un idioma que su mundo trae (Ajustes de la mesa)
+- [x] Turno real en ingles en produccion (mesa 41, 30-09): Gabino lo aprobo
+- [x] App movil en ingles (30-09, `de95c28` y `ab3107b`, APK v19): idioma del telefono o el elegido (en Perfil y al entrar), guardado en la cuenta, `X-Locale` en cada peticion; los textos reusan las claves de la web y lo propio de la app vive en el namespace `mobile`
+- [x] La Mascarada (The Masquerade) y la boticaria (The Tea No One Tasted) en ingles, en sus repos privados (30-09); tramos de Fortuna traducibles (`bb50ee6`) y `pnpm validate` carga cada traduccion
+- [x] Incoherencias de los originales (30-09): piloto `1add271` (Mera posadera con su retrato, Bren guardia sin retrato, Tomas minero, "El GM interpreta"), boticaria `4480103` (cinco sitios, lugar nuevo corte exterior sin posicion en el mapa, Maomao encubre a la consorte, palabras clave fuera del texto publico) y Mascarada `a07b833` (boda, Conversacion en vez de Seduccion, GM, acentos)
+- [ ] Legales: version oficial en ingles con el abogado; faltan terceros en el aviso (Google Gemini y OpenAI por las imagenes, servicios push de Google y Apple), el estado del INAI y la frase "no es una suscripcion" frente a las suscripciones futuras
+- [ ] Rama `legacy` (fichas de Pages): "El DM interpreta" sigue en las reglas de sus sesiones; se arregla al traer `legacy` a `dev` (deuda tecnica)
+- [ ] Pendientes visuales de Gabino: retrato de Bren (guardia) y posicion de "La corte exterior" en el mapa de la boticaria
+
+## Entrega 13: Constructor de historias (planeada el 2026-09-28)
+
+- [ ] Editor de packs sobre el schema de `packages/content`, borradores versionados, salida `.rpgpack` por el camino de siempre y mesa de prueba desde el panel
+- [ ] Validador de propiedad intelectual (procedencia + revision automatica con evidencia; lo marcado no sale al catalogo abierto) y validador de calidad (rubrica fija + datos de partidas reales). Ninguno publica solo
+
+## v2 (sin fecha)
+
+- GM humano y modo remoto (narracion por microfono, analisis de respuestas). Candidato para el reconocimiento de voz de la mesa: VibeVoice-ASR streaming (quien dijo que, 50+ idiomas). Su TTS queda descartado: Microsoft lo declara solo para investigacion y retiro el codigo en 2025
+- SSE desde el engine si el polling deja de bastar

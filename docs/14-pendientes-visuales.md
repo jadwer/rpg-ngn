@@ -1,5 +1,10 @@
 # 14. Pendientes de mejora visual y de experiencia
 
+**Superado el 2026-10-11.** Casi toda la lista se hizo (dados con lamina,
+identidad visual, ficha y jugadores en el telefono, escena de fondo). Lo que
+queda (dados 3D, sonido ambiental) esta en el ROADMAP, "Despues del 15-11";
+los mapas tacticos se descartaron. Se conserva por lo aprendido.
+
 Estado: **descongelado el 2026-09-22** (decision de Gabino). Fecha original:
 2026-09-20.
 
