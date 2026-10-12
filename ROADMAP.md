@@ -82,6 +82,16 @@ existen por SSH:
 - [ ] Repo `rpg-packs/inspirados` en Gitea para los documentos de diseño (hoy solo local)
 - [ ] App: la Guia de como jugar (solo esta en la web)
 
+### Narrador del plan gratuito con DeepSeek (decision de Gabino, 12-10)
+
+Gratis narra DeepSeek (declarado: procesa en China y puede entrenar con lo
+jugado); pagando turnos, Sonnet; con clave propia, el modelo que el
+jugador elija. El modelo lo decide el plan del anfitrion.
+
+- [ ] Gabino: cuenta en platform.deepseek.com con 5 USD y su clave al `.env` local con `read -rs`
+- [ ] Prueba de calidad: la misma mascarada de tres con DeepSeek, Haiku y Sonnet; lector critico, costo real, tiempo por turno y textos lado a lado. Si DeepSeek no sigue el formato o narra mal en español, no entra
+- [ ] Si pasa: DeepSeek como modelo barato del cupo (hoy Haiku, despues de los 20 primeros turnos de cada cuenta en Sonnet); aviso visible al crear la mesa y al unirse; aviso de privacidad (tercero nuevo, transferencia a China, entrenamiento) y formulario de seguridad de datos de Google Play; pregunta para el abogado
+
 ## 5. Deuda tecnica
 
 - [ ] **Reserva de cupo** (S8 del VAM del 19-09): el descuento por CAS al cerrar y la devolucion solo si el modelo no llego a responder. Hoy funciona, pero la regla de cuando cuesta un turno no esta escrita en el codigo
