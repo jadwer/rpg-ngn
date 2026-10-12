@@ -37,7 +37,7 @@ lanza solo en web.
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros que faltan en el aviso (Gemini y OpenAI por las imagenes, push de Google y Apple), estado del INAI, "no es una suscripcion", clausula de la Bendicion
 - [ ] **Jugar en produccion**: el one-shot del medico completo, y un mundo inspirado con amigos (Persefone pide de 4 a 6; Coronas, para ver el combate con la vida rebajada de los jefes)
 - [ ] **Arte**: tema de la temporada, retrato de Bren (guardia) y punto de "La corte exterior" en el mapa de la boticaria
-- [ ] **Marca**: registro de "Ad Astra Mentis" (IMPI), cuentas en redes (en la portada Discord, YouTube y X siguen en gris) y el logo redibujado para imprenta
+- [ ] **Marca**: registro de "Ad Astra Mentis" en el IMPI, nominativa, una sola solicitud multiclase (clase 9 la app descargable, 41 el entretenimiento y juego en linea, 42 opcional por el servicio en linea; 2,994.62 MXN la primera clase mas 845.45 cada adicional, mas IVA, tarifas 2026 a confirmar en la tarifa vigente). Antes, busqueda de anterioridad en Marcanet ("Ad Astra" es frase comun). Pregunta para el abogado. Despues: cuentas en redes (Discord, YouTube y X siguen en gris en la portada) y logo redibujado para imprenta
 - [ ] **Pase de descubridor**: sigue provisional desde el 29-09. Lista de logros (y los narrativos), premios de cada bloque, su arte y donde va el pase en la navegacion. Precio del pase y umbrales del camino, con las metricas de la beta
 - [ ] Decisiones de negocio sin fecha: revenue share de creadores (tras la primera venta), ritmo de mundos originales por temporada (minimo dos), herramientas de Diamante para streamers, contenido para menores (con el abogado), y si el catalogo publico de mundos de la gente entra en la primera version o solo la subida privada (docs/15)
 - [ ] Decidir el A/B de la apertura con GPT (hace falta una clave de OpenAI con credito en local) o darlo por cerrado con Claude
@@ -82,11 +82,26 @@ existen por SSH:
 - [ ] Repo `rpg-packs/inspirados` en Gitea para los documentos de diseño (hoy solo local)
 - [ ] App: la Guia de como jugar (solo esta en la web)
 
-### Narrador del plan gratuito con DeepSeek (decision de Gabino, 12-10)
+### Escalera del narrador (decision de Gabino, 12-10)
 
-Gratis narra DeepSeek (declarado: procesa en China y puede entrenar con lo
-jugado); pagando turnos, Sonnet; con clave propia, el modelo que el
-jugador elija. El modelo lo decide el plan del anfitrion.
+El modelo lo decide lo que tiene pagado el anfitrion. Hecho en la API el
+12-10 (`QuotaService::narratorFor`, `quotas.paid_turns`): turnos comprados,
+Sonnet (se gastan antes que la cubeta); cuenta nueva, Sonnet sus primeros 20;
+Bendicion activa, `QUOTA_BLESSING_MODEL` (Haiku); lo demas, `QUOTA_MODEL`
+(hoy Haiku; DeepSeek si pasa la prueba). `/gm` devuelve `tier` para la
+etiqueta. Antes de esto, quien compraba turnos narraba con Haiku al pasar sus
+primeros 20.
+
+Etiquetas (diseño, sin construir): nombres propios con el modelo en letra
+chica, que tambien es el aviso legal. Narrador aprendiz (gratis, DeepSeek),
+de oficio (Bendicion, Haiku), maestro (turnos, Sonnet); arriba, voz de bardo
+(ElevenLabs), ilustraciones de galeria y cronica de cine (Veo o Kling) para
+Plata, Oro y Diamante. Se ven en la cabecera de la mesa y en la pantalla de
+fin, nunca en medio de la narracion, y cada mejora lleva a algo que se puede
+comprar ya. Midjourney no: no tiene API y sus terminos prohiben automatizarlo.
+
+- [ ] Medir costo de ElevenLabs y de un video corto con Veo o Kling, para la tabla de Plata, Oro y Diamante
+- [ ] Etiqueta del narrador en la cabecera de la mesa y en la pantalla de fin, web y app (lee `tier` de `/gm`)
 
 - [ ] Gabino: cuenta en platform.deepseek.com con 5 USD y su clave al `.env` local con `read -rs`
 - [ ] Prueba de calidad: la misma mascarada de tres con DeepSeek, Haiku y Sonnet; lector critico, costo real, tiempo por turno y textos lado a lado. Si DeepSeek no sigue el formato o narra mal en español, no entra
