@@ -39,6 +39,6 @@ La plataforma (cuentas, mesas, cobro, event store) vive en un repo privado apart
 - [Modelo de eventos y conocimiento](docs/08-event-model.md) (el corazon tecnico)
 - [Contrato del GM](docs/03-gm-contract.md)
 - [Especificacion de content packs](docs/05-content-pack-spec.md)
-- [Alcance del SaaS](docs/09-saas-scope.md) (lo que pidio la mesa)
+- [Alcance del SaaS](docs/archivo/09-saas-scope.md) (lo que pidio la mesa)
 - [ADR de stack y arquitectura](docs/11-adr-stack-saas.md)
 - [ROADMAP](ROADMAP.md)

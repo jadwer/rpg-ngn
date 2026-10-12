@@ -2,7 +2,7 @@
 
 Lo que falta, en un solo lugar. Compactado el 2026-10-11: cada pendiente se
 verifico contra el codigo y el servidor ese dia; lo hecho y la historia de
-cada entrega estan en [docs/28-historial-roadmap.md](docs/28-historial-roadmap.md).
+cada entrega estan en [docs/archivo/28](docs/archivo/28-historial-roadmap.md).
 El orden de arquitectura sigue en [docs/11](docs/11-adr-stack-saas.md) y el
 resumen de lo que funciona en [docs/17](docs/17-estado-del-proyecto.md).
 
@@ -37,6 +37,9 @@ lanza solo en web.
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros que faltan en el aviso (Gemini y OpenAI por las imagenes, push de Google y Apple), estado del INAI, "no es una suscripcion", clausula de la Bendicion
 - [ ] **Jugar en produccion**: el one-shot del medico completo, y un mundo inspirado con amigos (Persefone pide de 4 a 6; Coronas, para ver el combate con la vida rebajada de los jefes)
 - [ ] **Arte**: tema de la temporada, retrato de Bren (guardia) y punto de "La corte exterior" en el mapa de la boticaria
+- [ ] **Marca**: registro de "Ad Astra Mentis" (IMPI), cuentas en redes (en la portada Discord, YouTube y X siguen en gris) y el logo redibujado para imprenta
+- [ ] **Pase de descubridor**: sigue provisional desde el 29-09. Lista de logros (y los narrativos), premios de cada bloque, su arte y donde va el pase en la navegacion. Precio del pase y umbrales del camino, con las metricas de la beta
+- [ ] Decisiones de negocio sin fecha: revenue share de creadores (tras la primera venta), ritmo de mundos originales por temporada (minimo dos), herramientas de Diamante para streamers, contenido para menores (con el abogado), y si el catalogo publico de mundos de la gente entra en la primera version o solo la subida privada (docs/15)
 - [ ] Decidir el A/B de la apertura con GPT (hace falta una clave de OpenAI con credito en local) o darlo por cerrado con Claude
 
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
@@ -90,6 +93,7 @@ existen por SSH:
 - [ ] Traer `legacy` a `dev` antes del primer merge de `dev` a `main` (y `veiledFields`, `veilNote`, `hideChronicle` en `Session`); de paso "El DM interpreta" en las reglas de sus sesiones
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker)
 - [ ] Partir `TableScreen` (web y app, unas 850 lineas cada una) la proxima vez que se toque a fondo (A8)
+- [ ] Subir el submodule de AtomoPlatform de v0.4.1 a v0.4.2 (taxonomy y accesibilidad de @atomo/ui, sin pasos de actualizacion; opcional)
 - [ ] Catalogo comercial generico a `atomo/catalog` cuando un segundo producto lo use (A4)
 
 Riesgos aceptados (dueño Gabino): E3, reembolsar el pase deja los mundos

@@ -146,7 +146,7 @@ Y el cobro principal sigue siendo el que ya esta medido y funciona: **turnos**
 se juega mucho consume turnos, que es margen conocido, sin inventar un precio
 nuevo. El 23-09 se decidio ademas cobrar el **contenido oficial** (camino de
 temporada, pase y compra directa) y el pase sustituye a Plata, Oro y
-Diamante: el detalle esta en [24](24-plan-monetizacion-e-historias.md).
+Diamante: el detalle esta en [24](archivo/24-plan-monetizacion-e-historias.md).
 **Solo se vende o entra al camino lo original o licenciado** (docs/07); los
 mundos de la comunidad siguen siendo gratis de activar.
 

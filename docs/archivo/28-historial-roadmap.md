@@ -2,15 +2,14 @@
 
 Copia integra del ROADMAP tal como estaba el 2026-10-11, antes de
 compactarlo. Es historia: lo que sigue abierto se paso, verificado, al
-[ROADMAP](../ROADMAP.md). Los enlaces relativos a `docs/` de este archivo
-apuntan a la carpeta equivocada; se dejaron como estaban.
+[ROADMAP](../../ROADMAP.md).
 
-El orden viene de [docs/11-adr-stack-saas.md](docs/11-adr-stack-saas.md), que
+El orden viene de [docs/11-adr-stack-saas.md](../11-adr-stack-saas.md), que
 manda sobre este archivo. Cada entrega lleva su criterio de "hecho" ahi.
 
 **Para saber como esta el proyecto hoy** (que funciona, que falta, que
 decisiones estan cerradas) sin leer entrega por entrega:
-[docs/17-estado-del-proyecto.md](docs/17-estado-del-proyecto.md). Este archivo
+[docs/17-estado-del-proyecto.md](../17-estado-del-proyecto.md). Este archivo
 es el detalle; aquel es el resumen con fecha de corte.
 
 ## LANZAMIENTO: 15 de noviembre de 2026 (fecha fijada por Gabino el 01-10)
@@ -55,7 +54,7 @@ una ilustracion, nada privado, y un jugador pidiendo "ya solo quiero saber
 quien es el asesino". El calendario lo aguanta: Comunidad, voz y video
 (semanas 1 a 3) se cerraron el 02-10. Diseño completo, archivos y criterio de
 hecho de cada bloque en
-[docs/26-plan-historias-que-enganchan.md](docs/26-plan-historias-que-enganchan.md).
+[docs/26-plan-historias-que-enganchan.md](26-plan-historias-que-enganchan.md).
 Lo planeo Fable; lo implementa Opus, bloque por bloque.
 
 - [x] **H0. Preparacion** (04-10): suite completa de la API (274 en verde) y `pnpm check` de lo del 03-10; aviso de compartir en ventana tambien en la app (`6d27a88`); el video del servidor corta los subtitulos igual que la web (`Captions`, API `33adc7b`, con prueba de paridad). Atomo entrego atomo/taxonomy en v0.4.1 (sesion `atomoplatform-d4`)
@@ -102,7 +101,7 @@ Gabino jugo el one-shot en produccion (mesa 44) y se perdio un turno entero,
 hubo turnos sin ideas y avisos tecnicos dentro de la historia; leidas completas
 esa mesa y la 43, salieron 16 fallos del motor, 3 de reglas y los del mundo.
 Detalle, pruebas, VAM de cuatro rondas y prueba con el modelo real en
-[docs/27-correccion-del-motor.md](docs/27-correccion-del-motor.md). Lo hizo
+[docs/27-correccion-del-motor.md](../27-correccion-del-motor.md). Lo hizo
 Fable; monorepo `db2e13d`, `47bfa1a` y `f06a61a`, API `22b364d` y `08f872a`,
 boticaria `86aa784`, mascarada `1dfa970`. Desplegado el 06-10 (00:00 UTC)
 con respaldo previo.
@@ -188,8 +187,8 @@ soporte.
 - [x] Content pack `pilot`: 9 personajes pregenerados + campaña Valdoria
 - [x] Visor de fichas mobile (GitHub Pages)
 - [x] Sesiones piloto 001 y 002 con GM Claude; 003 planeada para el 2026-09-06
-- [x] Alcance del SaaS a partir de la mesa ([09](docs/09-saas-scope.md))
-- [x] Auditoria del SDD ([10](docs/10-audit-2026-09-05.md)) y ADR de stack ([11](docs/11-adr-stack-saas.md))
+- [x] Alcance del SaaS a partir de la mesa ([09](09-saas-scope.md))
+- [x] Auditoria del SDD ([10](10-audit-2026-09-05.md)) y ADR de stack ([11](../11-adr-stack-saas.md))
 
 ## Entrega 0: AtomoPlatform lista para consumir (hecha el 2026-09-05)
 

@@ -8,7 +8,7 @@ sobre cualquier mencion de Steam o Epic en el ROADMAP.
 ## Contexto
 
 Ad Astra Mentis es una web (Next.js) con una app de telefono detras, sobre
-una plataforma Laravel que es la unica dueña del estado ([11](11-adr-stack-saas.md)).
+una plataforma Laravel que es la unica dueña del estado ([11](../11-adr-stack-saas.md)).
 La web es el producto principal (directriz del 2026-09-06). Hoy no hay
 usuarios que no seamos nosotros, Stripe esta en modo prueba y el catalogo
 tiene tres mundos. GPT propuso preparar la llegada a Steam y a Epic Games

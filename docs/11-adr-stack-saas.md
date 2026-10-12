@@ -1,7 +1,7 @@
 # ADR: stack y arquitectura del SaaS
 
 Decidido el 2026-09-05 tras dos revisiones independientes: una fiscal sobre
-[09](09-saas-scope.md) y [10](10-audit-2026-09-05.md), y una de arquitectura
+[09](archivo/09-saas-scope.md) y [10](archivo/10-audit-2026-09-05.md), y una de arquitectura
 sobre las plantillas reales de Atomo. Este documento cierra la "decision abierta"
 de 10 y sustituye la seccion "Arquitectura" y el "Orden sugerido" de 09. Manda
 sobre 09 y sobre el ROADMAP en lo que se contradigan; el contrato de realidad

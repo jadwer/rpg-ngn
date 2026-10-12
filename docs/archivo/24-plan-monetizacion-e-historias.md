@@ -3,7 +3,7 @@
 Sale del brief que GPT dejo con este numero (commit `b4b430a`, en el
 historial) y de las decisiones de Gabino del 2026-09-23. El brief hacia
 veintidos preguntas; aqui estan las respuestas, lo que queda abierto con
-dueño, y lo que no se construye. Completa a [15](15-packs-de-la-comunidad.md)
+dueño, y lo que no se construye. Completa a [15](../15-packs-de-la-comunidad.md)
 (packs y catalogo) y a [09](09-saas-scope.md) (cobro); cuando se
 contradigan, manda este.
 

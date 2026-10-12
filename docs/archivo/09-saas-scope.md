@@ -2,8 +2,8 @@
 
 Escrito el 2026-09-05, despues de dos sesiones jugadas del piloto. Este documento
 recoge lo que la mesa pidio y las decisiones de producto. Como se construye lo
-decide el ADR de stack ([11](11-adr-stack-saas.md)), que manda sobre este en lo
-que se contradigan; el contrato de realidad ([06](06-reality-contract.md)) manda
+decide el ADR de stack ([11](../11-adr-stack-saas.md)), que manda sobre este en lo
+que se contradigan; el contrato de realidad ([06](../06-reality-contract.md)) manda
 sobre ambos.
 
 ## Que valido el piloto
@@ -55,7 +55,7 @@ narracion, sin navegar fuera. La propia y las ajenas (la mesa comparte informaci
 mecanica constantemente).
 
 Lo que se ve de un PJ ajeno: ficha completa. Lo que NO se ve: su conocimiento
-privado. `PlayerKnowledge` es por personaje ([08](08-event-model.md)) y esa
+privado. `PlayerKnowledge` es por personaje ([08](../08-event-model.md)) y esa
 separacion no se rompe por conveniencia de UI.
 
 ### Respuesta y cierre de turno
@@ -107,14 +107,14 @@ En mesa presencial suena en un solo dispositivo (ver Voz, mas abajo).
 La version original de esta seccion (2026-09-05, madrugada) proponia un
 `apps/server` sin tecnologia y un `packages/ui` generico, derivados del prototipo
 del piloto y no de lo acordado en `CLAUDE.md`. Quedo sustituida por el ADR de
-stack ([11](11-adr-stack-saas.md)): plataforma Laravel sobre el core de
+stack ([11](../11-adr-stack-saas.md)): plataforma Laravel sobre el core de
 AtomoPlatform en un repo privado aparte, motor TypeScript corriendo una sola vez
 en `apps/engine`, PostgreSQL como event store, Next.js y Expo como clientes.
 
 Lo que se conserva de aqui porque no cambia con el stack:
 
 - **Contenido canonico** en Git (`content/packs/`), versionado y revisable.
-- **Estado de campaña** como log append-only ([08](08-event-model.md)); en el
+- **Estado de campaña** como log append-only ([08](../08-event-model.md)); en el
   SaaS vive en la base de datos de la plataforma, no en Git. Cada mesa es una
   campaña con su log. El contenido puede ser publico o privado del usuario.
 - **Secretos del GM** fuera del repo publico (`gm/`, o capa `gm` del event store).
@@ -139,9 +139,9 @@ Requisito de producto, no de codigo: **tutoriales**. Configurar Ollama con un
 modelo decente no es dificil, pero si nadie lo explica, no se usa. Un tutorial por
 proveedor, con el modelo recomendado y como apuntar la app.
 
-Consecuencia tecnica: el contrato de `GMProvider` ([02](02-architecture.md)) es el
+Consecuencia tecnica: el contrato de `GMProvider` ([02](../02-architecture.md)) es el
 mismo para ambos casos, pero donde corre el adapter no era una decision tomada
-(hallazgo BA3 de [10](10-audit-2026-09-05.md)). Lo resuelve [11](11-adr-stack-saas.md),
+(hallazgo BA3 de [10](10-audit-2026-09-05.md)). Lo resuelve [11](../11-adr-stack-saas.md),
 D6: nube con la clave custodiada en el servidor; modelo local a traves de un relay
 que corre junto a Ollama, con probe de capacidad al configurarlo.
 
@@ -212,7 +212,7 @@ usuario distinga lo nuestro de lo subido por otros.
 
 ### Formato
 
-Un pack es una carpeta con la estructura de [05](05-content-pack-spec.md)
+Un pack es una carpeta con la estructura de [05](../05-content-pack-spec.md)
 empaquetada: `pack.json` en la raiz mas sus colecciones. Extension propia
 (`.rpgpack`) sobre un zip.
 
@@ -289,8 +289,8 @@ la tabla estaba publicada en el visor.
 
 V1 es con **GM IA**. El GM humano es v2, junto con el modo remoto.
 
-El orden de construccion vive en el [ROADMAP](../ROADMAP.md), derivado de
-[11](11-adr-stack-saas.md). Dos correcciones respecto a la version anterior de
+El orden de construccion vive en el [ROADMAP](../../ROADMAP.md), derivado de
+[11](../11-adr-stack-saas.md). Dos correcciones respecto a la version anterior de
 esta seccion: la app movil offline no puede ser "solo lectura de narrativa"
 porque el log del piloto no tiene ningun evento `narration` (la narrativa esta en
 los `recap` de las sesiones), y "BYOK primero porque no necesita facturacion"

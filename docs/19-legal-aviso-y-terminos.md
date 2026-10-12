@@ -484,10 +484,9 @@ que hay que sostener:
   ¿basta esa declaracion para que la responsabilidad por un mundo con
   contenido ajeno recaiga en quien lo subio, y hace falta un procedimiento
   formal de notificacion y retirada?
-- [ ] **Casilla de edad explicita.** Hoy se declara en el texto junto al boton
-  de crear cuenta, y queda registrado; una casilla separada es mas defendible.
-- [ ] **Stripe en modo real.** Sigue en modo prueba, asi que el apartado de
-  creditos describe algo que todavia no cobra de verdad.
+- [x] **Casilla de edad explicita** (24-09): "Tengo 18 años o más" en web y
+  app; la API la exige y `legal_acceptances.min_age` guarda lo declarado.
+- [x] **Stripe en modo real** (26-09): claves live, cobro en MXN.
 
 Relacionado: `docs/17` (estado del proyecto), `docs/15` (packs de la comunidad,
 que añadira obligaciones nuevas sobre contenido de terceros), `docs/07`
