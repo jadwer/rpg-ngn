@@ -1,4 +1,4 @@
-import { t } from '@rpg-ngn/i18n'
+import { language, t } from '@rpg-ngn/i18n'
 import type { PackOption } from '@rpg-ngn/api-client'
 
 /**
@@ -18,11 +18,7 @@ import type { PackOption } from '@rpg-ngn/api-client'
  * jamas gana. Aqui el orden esta explicito, que es lo que hacia falta para que
  * la mesa no diga "juegas a shiho".
  */
-export function characterNameFrom(
-  local: { characters: { get(id: string): { name: string } | undefined } } | null,
-  remote: Readonly<Record<string, string>>,
-  id: string,
-): string {
+export function characterNameFrom(local: { characters: { get(id: string): { name: string } | undefined } } | null, remote: Readonly<Record<string, string>>, id: string): string {
   return local?.characters.get(id)?.name ?? remote[id] ?? id
 }
 
@@ -35,13 +31,18 @@ export function tableNamePlaceholder(pack: Pick<PackOption, 'name'> | null): str
  * Ejemplo de premisa. Sin pack, uno neutro; con pack, se apoya en su nombre
  * y su lema, que es lo unico suyo que conocemos sin cargar el contenido.
  */
-export function premisePlaceholder(pack: Pick<PackOption, 'name' | 'tagline'> | null): string {
+export function premisePlaceholder(pack: (Pick<PackOption, 'name' | 'tagline'> & { languages?: string[] | undefined }) | null): string {
   const base = t('table.copy.premiseBase')
   if (!pack) return `${base} ${t('table.copy.premiseExample')}`
+  // El lema viene en el idioma del mundo: en un mundo que no trae el de la
+  // interfaz salia una frase a medias ("We play Vuelta al barrio. Volviste
+  // por el velorio de tu madre. Mystery tone...", tester del 20-10). Ahi va
+  // solo el nombre.
+  const sameLanguage = !pack.languages?.length || pack.languages.includes(language())
   // El lema es una frase suelta y necesita su punto, o se lee pegada a la
   // siguiente ("...Nueve Viajeros. Diferentes caminos Tono de misterio"). Sin
   // comillas: el ejemplo entero ya va entre comillas y anidarlas queda peor.
-  const gancho = pack.tagline ? ` ${pack.tagline.replace(/[.,;:]$/, '')}.` : ''
+  const gancho = pack.tagline && sameLanguage ? ` ${pack.tagline.replace(/[.,;:]$/, '')}.` : ''
   return `${base} ${t('table.copy.premiseExamplePack', { pack: pack.name, hook: gancho })}`
 }
 
@@ -72,10 +73,7 @@ export function packSummaryText(pack: PackOption | null): string | null {
  * el motor necesita saber y a quien juega no le dice nada. Con el catalogo
  * cargado se pone el nombre del pack; sin el, el id, que al menos es corto.
  */
-export function tableCardMeta(
-  table: { packId: string; packVersion: string; premise?: string | null },
-  packs: readonly PackOption[] = [],
-): string {
+export function tableCardMeta(table: { packId: string; packVersion: string; premise?: string | null }, packs: readonly PackOption[] = []): string {
   const pack = packs.find((p) => p.id === table.packId)
   const partes = [pack?.name ?? table.packId]
   if (table.premise) partes.push(t('table.copy.withPremise'))

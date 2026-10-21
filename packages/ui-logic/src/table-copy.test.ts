@@ -1,3 +1,4 @@
+import { setLanguage } from '@rpg-ngn/i18n'
 import type { PackOption } from '@rpg-ngn/api-client'
 import { describe, expect, it } from 'vitest'
 import { characterNameFrom, noCharacterText, packOptionLabel, packOriginText, packStatusText, packSummaryText, premisePlaceholder, retirementText, tableCardMeta, tableNamePlaceholder, tableRetirement } from './table-copy.js'
@@ -23,6 +24,19 @@ describe('table-copy', () => {
     expect(premisePlaceholder(botica)).toContain('Alguien sabía que ella no estaría')
     // Lo que no puede pasar: que el ejemplo hable de otro mundo.
     expect(premisePlaceholder(botica)).not.toContain('Valdoria')
+  })
+
+  it('con la interfaz en otro idioma que el mundo, el ejemplo no mezcla su lema (tester del 20-10)', () => {
+    const barrio = { ...pack({ name: 'Vuelta al barrio', tagline: 'Volviste por el velorio de tu madre' }), languages: ['es'] }
+    setLanguage('en')
+    try {
+      expect(premisePlaceholder(barrio)).toContain('Vuelta al barrio')
+      expect(premisePlaceholder(barrio)).not.toContain('Volviste')
+      expect(premisePlaceholder(barrio)).not.toContain('American')
+    } finally {
+      setLanguage('es')
+    }
+    expect(premisePlaceholder(barrio)).toContain('Volviste por el velorio de tu madre')
   })
 
   it('sin pack todavia, el ejemplo es neutro y no menciona ninguno', () => {

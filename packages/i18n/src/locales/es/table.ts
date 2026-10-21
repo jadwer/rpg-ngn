@@ -60,7 +60,7 @@ export const table = {
     namePlaceholder: 'La mesa del sábado',
     premiseBase: 'Campaña, escena o tono; el GM la usa como punto de partida.',
     premiseExample: 'Por ejemplo: "Primera noche, todos se conocen por primera vez y algo va mal desde el principio."',
-    premiseExamplePack: 'Por ejemplo: "Jugamos {{pack}}.{{hook}} Tono de misterio, ritmo ágil, español de México."',
+    premiseExamplePack: 'Por ejemplo: "Jugamos {{pack}}.{{hook}} Tono de misterio, ritmo ágil."',
     campaign: 'campaña',
     world: 'mundo',
     characterOne: '{{count}} personaje',

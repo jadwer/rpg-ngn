@@ -62,7 +62,7 @@ export const table: Messages<typeof es> = {
     namePlaceholder: 'The Saturday table',
     premiseBase: 'Campaign, scene or tone; the game master uses it as a starting point.',
     premiseExample: 'For example: "First night, everyone meets for the first time and something goes wrong from the start."',
-    premiseExamplePack: 'For example: "We play {{pack}}.{{hook}} Mystery tone, brisk pace, casual American English."',
+    premiseExamplePack: 'For example: "We play {{pack}}.{{hook}} Mystery tone, brisk pace."',
     campaign: 'campaign',
     world: 'world',
     characterOne: '{{count}} character',
