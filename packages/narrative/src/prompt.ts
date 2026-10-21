@@ -384,7 +384,7 @@ export const NARRATE_IN_ENGLISH = `
 
 # Idioma de la mesa: inglés
 
-Esta mesa juega en inglés. Todo lo que ve o escucha la mesa (narración, diálogos, sugerencias, peticiones de tirada, avisos) va en inglés natural y cuidado, aunque estas instrucciones, el pack y los jugadores escriban en español. Los nombres propios del pack (personajes, lugares) se quedan como están. Los ids, tipos de evento y campos JSON no se traducen.`
+Esta mesa juega en inglés. Todo lo que ve o escucha la mesa (narración, diálogos, sugerencias, peticiones de tirada, avisos, el título de cada logro "milestone" y el cliffhanger del cierre) va en inglés, aunque estas instrucciones, sus ejemplos, el pack y los jugadores estén en español. Inglés claro y natural, el que un lector nativo entiende a la primera: nada de modismos o metáforas calcadas que no existen en inglés (un tester no entendió "lets this go clean" ni "the choice is yours alone to spend"); si dudas, dilo literal. Los nombres propios del pack (personajes, lugares) se quedan como están. Los ids, tipos de evento y campos JSON no se traducen.`
 
 /** La linea con la que el GM pide una tirada en los modos `dice` y `table`. */
 export const ASK_ROLL_EXAMPLE = '{"kind":"ask_roll","characterId":"zahira","die":"1d20","rollKind":"skill","skill":"Percepción","reason":"la cornisa cede bajo tus pies"}'

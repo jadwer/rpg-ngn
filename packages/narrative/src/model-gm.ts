@@ -631,7 +631,7 @@ export class ModelGMProvider implements GMProvider {
       if (typeof parsed.characterId === 'string' && refId(parsed.characterId) !== id) continue
       for (const rawOption of parsed.options) {
         if (typeof rawOption !== 'string') continue
-        const option = rawOption.trim().replace(/\s+/g, ' ').slice(0, 120)
+        const option = clipWords(rawOption.trim().replace(/\s+/g, ' '), IDEA_MAX)
         if (!option || options.includes(option) || exclude.includes(option)) continue
         const findings = knowledge ? lintText(option, knowledge, ctx.pack, [id]) : []
         if (findings.length > 0) {
@@ -1202,7 +1202,7 @@ class LineInterpreter {
         if (!this.party.includes(id) || this.suggestions[id]) return
         const options: string[] = []
         for (const raw of line.data.options) {
-          const option = raw.trim().replace(/\s+/g, ' ').slice(0, 120)
+          const option = clipWords(raw.trim().replace(/\s+/g, ' '), IDEA_MAX)
           if (!option || options.includes(option)) continue
           const cut = yield* this.lint(option)
           if (!cut) options.push(option)
@@ -1996,6 +1996,13 @@ export function preRollFor(characterIds: readonly string[], random: RandomSource
   }
   return rolled
 }
+
+/**
+ * Largo maximo de una idea de accion. Era un corte seco a 120 caracteres: en
+ * ingles las acciones salen mas largas y el tester leia "recording everything
+ * in my log w" (mesa 45, 21-10). Ahora corta en palabra entera y con mas aire.
+ */
+const IDEA_MAX = 180
 
 /** Corta en la ultima palabra entera que cabe y marca el corte. */
 function clipWords(text: string, max: number): string {
