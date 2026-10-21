@@ -41,3 +41,6 @@ content/packs/mascarada
 
 # Capturas de apps de la competencia: traen datos de cuentas personales
 img/competencia/
+
+# Correos reales de los testers de Google Play: el repo es publico
+docs/testers/
