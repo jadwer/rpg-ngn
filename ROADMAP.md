@@ -44,7 +44,7 @@ lanza solo en web.
 
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
 
-- [ ] **Vigilancia** (S3 del VAM del 19-09): nadie avisa si un servicio se cae. Alerta externa gratuita (UptimeRobot o Healthchecks.io) sobre un endpoint publico de salud, con aviso al telefono
+- [ ] **Vigilancia** (S3 del VAM del 19-09): nadie avisa si un servicio se cae. Alerta externa gratuita (UptimeRobot o Healthchecks.io) sobre un endpoint publico de salud, con aviso al telefono Que pruebe tambien la clave del GM (`gm:probe`) cada hora: del 05 al 21-10 produccion tuvo la clave de Anthropic muerta (401) y nadie lo supo porque nadie jugo; se descubrio con los testers ya entrando
 - [ ] **Turnos atascados solos** (S6): no hay scheduler en el servidor; hoy se desatascan a mano desde el panel. `turns:unstick` cada 5 min con `withSchedule` y su timer
 - [ ] **`rpg-play-voided.timer`**: la unidad esta en `deploy/` pero no instalada en el servidor (retira compras anuladas en Google Play). Instalar cuando exista la cuenta de servicio
 - [ ] **Servidor**: `PasswordAuthentication yes` en sshd (S4): pasarlo a `no` (las entradas son por llave). `unattended-upgrades` ya esta
