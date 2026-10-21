@@ -44,6 +44,9 @@ lanza solo en web.
 
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
 
+- [ ] **AAB v29 para Play** con lo del 21-10 que la app aun no tiene: sacar de la mesa y bloquear en Jugadores y Amigos. La v28 (ojo de contraseña, motivo del registro) esta en revision de la prueba cerrada. De paso quitar del manifiesto `SYSTEM_ALERT_WINDOW` y `READ/WRITE_EXTERNAL_STORAGE`, que meten librerias de Expo y Play puede preguntar por ellos
+- [ ] Panel de administracion: ver los bloqueos y quien saco a quien, para atender reportes
+
 - [ ] **Vigilancia** (S3 del VAM del 19-09): nadie avisa si un servicio se cae. Alerta externa gratuita (UptimeRobot o Healthchecks.io) sobre un endpoint publico de salud, con aviso al telefono Que pruebe tambien la clave del GM (`gm:probe`) cada hora: del 05 al 21-10 produccion tuvo la clave de Anthropic muerta (401) y nadie lo supo porque nadie jugo; se descubrio con los testers ya entrando
 - [ ] **Turnos atascados solos** (S6): no hay scheduler en el servidor; hoy se desatascan a mano desde el panel. `turns:unstick` cada 5 min con `withSchedule` y su timer
 - [ ] **`rpg-play-voided.timer`**: la unidad esta en `deploy/` pero no instalada en el servidor (retira compras anuladas en Google Play). Instalar cuando exista la cuenta de servicio
@@ -128,6 +131,7 @@ ganados; E6, sin engine se puede crear mesa y el primer turno falla.
 
 - Quitar "(Inspirado en ...)" de inutiles, persefone, barrio y coronas y publicarlos como propios: revisar antes el parecido del arte (Chispa con Megumin), `provenance` a `original`, catalogo abierto. La boticaria no
 - Mesas abiertas a desconocidos (necesita moderacion); reseñas publicas con moderacion
+- Anuncios con premio solo en el plan gratuito ("mira un anuncio y recarga un turno"), sin banners ni intersticiales; condicionado a la prueba de DeepSeek, porque solo con el narrador barato el anuncio paga el turno
 - Campañas y Personajes (hoy "Pronto"); avisos de mesa ("es tu turno", "abrieron sesion")
 - Narrador estandar o premium (10e); afinidad con NPC (10f); rehacer la ultima accion (de paga)
 - Dados 3D con fisicas (entra como otro `DiceRoller`) y sonido ambiental por escena (docs/14)
