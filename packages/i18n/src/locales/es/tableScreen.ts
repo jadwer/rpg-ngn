@@ -30,4 +30,5 @@ export const tableScreen = {
   faseDeAcciones: 'fase de acciones',
   esteNavegadorNoTiene: 'Este navegador no tiene voces en español instaladas; la lectura sonará en otro idioma o no sonará.',
   soloNarrativaYDialogos: 'Solo narrativa y diálogos, en grande, para compartir o proyectar (tecla F).',
+  inicioDelTurno: '↑ Inicio del turno',
 }

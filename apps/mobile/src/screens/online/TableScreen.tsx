@@ -318,6 +318,10 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
   const userScrollRef = useRef(false)
   const [readToEnd, setReadToEnd] = useState(false)
   const lastYRef = useRef(0)
+  // "Inicio del turno" (Gabino, 21-10): donde empezo la narracion de este
+  // turno; si el lector bajo mas alla, un boton lo regresa.
+  const turnStartYRef = useRef<number | null>(null)
+  const [aboveStart, setAboveStart] = useState(false)
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
     const distance = contentSize.height - contentOffset.y - layoutMeasurement.height
@@ -327,6 +331,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     lastYRef.current = contentOffset.y
     if (userScrollRef.current && goingDown && distance < 40) setReadToEnd(true)
     if (atBottomRef.current) setBehind(false)
+    const startY = turnStartYRef.current
+    setAboveStart(startY !== null && contentOffset.y > startY + 160)
   }
   // Donde empieza lo nuevo: al llegar la narracion de un turno la vista se
   // queda al inicio de ella, no al final (Gabino, 25-09: se iba hasta abajo
@@ -358,6 +364,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       return
     }
     prevCountRef.current = blocks.length
+    // Con cada texto nuevo la barra de desplazamiento se asoma: hay mas arriba.
+    setTimeout(() => scrollRef.current?.flashScrollIndicators(), 400)
     if (firstLoadRef.current) {
       firstLoadRef.current = false
       scrollToEnd()
@@ -369,6 +377,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     }
     if (anchoredRef.current) return
     anchoredRef.current = true
+    turnStartYRef.current = Math.max(0, before - 48)
     // Al inicio de lo nuevo, con un poco de lo anterior como contexto.
     setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(0, before - 48), animated: true }), 120)
   }, [blocks.length, scrollToEnd])
@@ -694,6 +703,8 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
           keyboardDismissMode="on-drag"
           onScroll={onScroll}
           onContentSizeChange={onContentSizeChange}
+          persistentScrollbar
+          indicatorStyle="white"
           onScrollBeginDrag={() => {
             userScrollRef.current = true
           }}
@@ -739,9 +750,10 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             </View>
           ) : null}
         </ScrollView>
-        {behind ? (
+        {(aboveStart && !screen) || behind ? (
           <View style={styles.jump}>
-            <Button label={t('tableScreen.bajarALoNuevo')} primary small onPress={scrollToEnd} />
+            {aboveStart && !screen ? <Button label={t('tableScreen.inicioDelTurno')} small onPress={() => turnStartYRef.current !== null && scrollRef.current?.scrollTo({ y: turnStartYRef.current, animated: true })} /> : null}
+            {behind ? <Button label={t('tableScreen.bajarALoNuevo')} primary small onPress={scrollToEnd} /> : null}
           </View>
         ) : null}
       </View>
@@ -934,7 +946,7 @@ const styles = StyleSheet.create({
   sceneVeil: { backgroundColor: 'rgba(0, 0, 0, 0.3)', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderTopWidth: 1, borderColor: 'rgba(167, 139, 250, 0.35)' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 24 },
-  jump: { position: 'absolute', bottom: 12, alignSelf: 'center' },
+  jump: { position: 'absolute', bottom: 12, alignSelf: 'center', flexDirection: 'row', gap: 8 },
   empty: { fontFamily: theme.fonts.ui, fontSize: 15, lineHeight: 22, color: theme.colors.inkDim, textAlign: 'center', paddingVertical: 24 },
   start: { marginVertical: 16, padding: 18, gap: 10, backgroundColor: theme.colors.panel, borderWidth: 1, borderColor: theme.colors.goldBright, borderRadius: theme.radius },
   startTitle: { fontFamily: theme.fonts.serifSemiBold, fontSize: 20, color: theme.colors.ink, textAlign: 'center' },

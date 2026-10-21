@@ -479,6 +479,21 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   // final sin que nadie haya leido nada.
   const userScrollRef = useRef(false)
   const [readToEnd, setReadToEnd] = useState(false)
+  // "Inicio del turno" (Gabino, 21-10): al bajar leyendo se pierde donde empezo
+  // la narracion de este turno; si ese parrafo quedo arriba, un boton regresa.
+  // Desde el primer bloque de la narracion del turno: solo el primero de cada grupo lleva `data-block`.
+  const turnStartRef = useRef<string[]>([])
+  const turnStartId = latestNarrationStart(blocks)
+  const turnStartIndex = turnStartId ? blocks.findIndex((b) => b.id === turnStartId) : -1
+  turnStartRef.current = turnStartIndex >= 0 ? blocks.slice(turnStartIndex).map((b) => b.id) : []
+  const [aboveStart, setAboveStart] = useState(false)
+  const turnStartElement = () => {
+    for (const id of turnStartRef.current) {
+      const el = scrollRef.current?.querySelector(`[data-block="${id}"]`)
+      if (el) return el
+    }
+    return null
+  }
   const onScroll = () => {
     const el = scrollRef.current
     if (!el) return
@@ -486,6 +501,11 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
     atBottomRef.current = distance < 160
     if (userScrollRef.current && distance < 40) setReadToEnd(true)
     if (atBottomRef.current) setBehind(false)
+    const start = turnStartElement()
+    setAboveStart(start !== null && start.getBoundingClientRect().top < el.getBoundingClientRect().top - 80)
+  }
+  const goToTurnStart = () => {
+    turnStartElement()?.scrollIntoView({ block: 'start', behavior: 'smooth' })
   }
   const markUserScroll = () => {
     userScrollRef.current = true
@@ -840,10 +860,19 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             ) : null}
           </div>
         </div>
-        {behind ? (
-          <button type="button" className="btn primary small jump" onClick={() => scrollToEnd(true)}>
-            {t('tableScreen.bajarALoNuevo')}
-          </button>
+        {(aboveStart && !screen) || behind ? (
+          <div className="jump">
+            {aboveStart && !screen ? (
+              <button type="button" className="btn small" onClick={goToTurnStart}>
+                {t('tableScreen.inicioDelTurno')}
+              </button>
+            ) : null}
+            {behind ? (
+              <button type="button" className="btn primary small" onClick={() => scrollToEnd(true)}>
+                {t('tableScreen.bajarALoNuevo')}
+              </button>
+            ) : null}
+          </div>
         ) : null}
         {sheetsOpen && !screen ? (
           <SheetsPanel

@@ -745,7 +745,11 @@ h3 {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  /* La barra se ve: con texto que llega solo, hay que saber que hay mas arriba (21-10). */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.55) transparent;
 }
+
 
 .blocks {
   max-width: 780px;
@@ -1358,8 +1362,14 @@ h3 {
   left: 50%;
   bottom: 14px;
   transform: translateX(-50%);
-  box-shadow: var(--shadow);
   z-index: 3;
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.jump .btn {
+  box-shadow: var(--shadow);
 }
 
 .table-footer {
@@ -5773,7 +5783,7 @@ a {
 }
 .block.milestone .milestone-star {
   color: var(--gold-bright);
-  font-size: 1.2rem;
+  flex: none;
 }
 .block.milestone .milestone-kind {
   font-family: var(--font-display);

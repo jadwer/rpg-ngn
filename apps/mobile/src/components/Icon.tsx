@@ -21,6 +21,8 @@ export const ICON = {
   plus: 'M12 5v14M5 12h14',
   link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5',
   dots: 'M5 12h.01M12 12h.01M19 12h.01',
+  /** Logro de la sesion: un trofeo se lee como logro; el destello parecia un boton de IA (tester, 21-10). */
+  trophy: 'M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z',
 } as const
 
 interface Props {

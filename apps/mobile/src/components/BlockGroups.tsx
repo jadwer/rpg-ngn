@@ -5,6 +5,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { DICE_FACES } from '../generated/dice'
 import { theme } from '../theme'
 import { Button } from './Button'
+import { Icon, ICON } from './Icon'
 import { Portrait } from './Portrait'
 
 /**
@@ -181,7 +182,7 @@ function Whisper({ group, currentBlockId, onPressBlock }: GroupProps<WhisperGrou
 function Milestone({ group }: { group: MilestoneGroup }) {
   return (
     <View style={styles.milestone} accessibilityRole="text">
-      <Text style={styles.milestoneStar}>✦</Text>
+      <Icon d={ICON.trophy} size={22} color={theme.colors.goldBright} />
       <View style={styles.milestoneBody}>
         <Text style={styles.milestoneKind}>{t('ending.milestone')}</Text>
         <Text style={styles.milestoneTitle}>{group.block.title}</Text>
@@ -207,7 +208,6 @@ const styles = StyleSheet.create({
   whisperTag: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.3, textTransform: 'uppercase', color: theme.colors.accentBright },
   whisperText: { fontFamily: theme.fonts.serifItalic, fontSize: 17, lineHeight: 25, color: theme.colors.ink },
   milestone: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.colors.gold, backgroundColor: 'rgba(212, 175, 55, 0.12)' },
-  milestoneStar: { fontSize: 18, color: theme.colors.goldBright },
   milestoneBody: { flex: 1, gap: 2 },
   milestoneKind: { fontFamily: theme.fonts.uiSemiBold, fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: theme.colors.goldBright },
   milestoneTitle: { fontFamily: theme.fonts.serif, fontSize: 17, color: theme.colors.ink },

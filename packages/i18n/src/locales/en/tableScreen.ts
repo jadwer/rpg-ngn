@@ -32,4 +32,5 @@ export const tableScreen: Messages<typeof es> = {
   faseDeAcciones: 'action phase',
   esteNavegadorNoTiene: 'This browser has no Spanish voices installed; the reading will sound in another language or not sound at all.',
   soloNarrativaYDialogos: 'Only narration and dialogue, in large text, to share or project (key F).',
+  inicioDelTurno: '↑ Start of the turn',
 }
