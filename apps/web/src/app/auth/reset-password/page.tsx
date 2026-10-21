@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState, type FormEvent } from 'react'
 import { WEB_HEADER, useSession } from '../../../lib/session'
+import { PasswordInput } from '../../../components/PasswordInput'
 
 /**
  * Poner una contraseña nueva con el enlace que llego por correo.
@@ -97,11 +98,11 @@ function ResetPasswordForm() {
           </p>
           <label className="field">
             <span>{t('auth.newPassword')}</span>
-            <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required autoFocus minLength={8} />
+            <PasswordInput name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required autoFocus minLength={8} />
           </label>
           <label className="field">
             <span>{t('auth.repeatIt')}</span>
-            <input className="input" type="password" name="password_confirmation" value={repeat} onChange={(e) => setRepeat(e.target.value)} autoComplete="new-password" required minLength={8} />
+            <PasswordInput name="password_confirmation" value={repeat} onChange={(e) => setRepeat(e.target.value)} autoComplete="new-password" required minLength={8} />
           </label>
           {corta ? <p className="hint">{t('auth.atLeast8')}</p> : null}
           {distintas ? <p className="hint">{t('auth.twoDiffer')}</p> : null}

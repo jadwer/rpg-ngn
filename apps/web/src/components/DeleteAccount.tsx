@@ -4,6 +4,7 @@ import { t } from '@rpg-ngn/i18n'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { PasswordInput } from './PasswordInput'
 
 interface Props {
   client: ApiClient
@@ -62,8 +63,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
           {t('deleteAccount.borrarMiCuenta')}
         </div>
         <p className="hint">
-          {t('deleteAccount.puedesBorrarTuCuenta')}{' '}
-          <Link href="/privacidad">{t('deleteAccount.avisoDePrivacidad')}</Link>.
+          {t('deleteAccount.puedesBorrarTuCuenta')} <Link href="/privacidad">{t('deleteAccount.avisoDePrivacidad')}</Link>.
         </p>
         <div className="row">
           <button type="button" className="btn ghost small" onClick={() => setOpen(true)}>
@@ -105,7 +105,7 @@ export function DeleteAccount({ client, onDeleted }: Props) {
           </p>
           <label className="field">
             <span>{t('deleteAccount.escribeTuContrasenaPara')}</span>
-            <input className="input" type="password" name="confirmar_password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+            <PasswordInput name="confirmar_password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </label>
         </>
       ) : null}
@@ -119,7 +119,16 @@ export function DeleteAccount({ client, onDeleted }: Props) {
             Borrar mi cuenta para siempre
           </button>
         ) : null}
-        <button type="button" className="btn ghost small" disabled={busy} onClick={() => { setOpen(false); setPassword(''); setError(null) }}>
+        <button
+          type="button"
+          className="btn ghost small"
+          disabled={busy}
+          onClick={() => {
+            setOpen(false)
+            setPassword('')
+            setError(null)
+          }}
+        >
           {t('deleteAccount.cancelar')}
         </button>
       </div>

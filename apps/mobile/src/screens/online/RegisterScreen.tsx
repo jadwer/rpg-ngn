@@ -1,5 +1,6 @@
 import { t } from '@rpg-ngn/i18n'
 import type { RegisterInput } from '@rpg-ngn/api-client'
+import { registerBlocker, registerBlockerText } from '@rpg-ngn/ui-logic'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
@@ -32,7 +33,9 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
 
   const mismatch = confirmation.length > 0 && password !== confirmation
   const tooShort = password.length > 0 && password.length < 8
-  const canSubmit = !busy && serverUrl.trim().length > 0 && name.trim().length > 0 && email.trim().length > 0 && password.length >= 8 && confirmation.length > 0 && !mismatch && adult
+  // Lo que impide crear la cuenta, dicho junto al boton: apagado sin motivo, la gente no sabe que falta (20-10).
+  const blocker = registerBlocker({ name, email, password, confirmation, adult })
+  const canSubmit = !busy && serverUrl.trim().length > 0 && blocker === null
   /** Los legales son del servidor al que se conecta, no de la app. */
   const legalBase = (serverUrl.trim() || PUBLIC_SERVER_URL).replace(/\/+$/, '')
 
@@ -55,13 +58,12 @@ export function RegisterScreen({ initialUrl, busy, notice, onRegister, onBack }:
         <Field label={t('auth.email')} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="emailAddress" />
         <Field label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry textContentType="newPassword" hint={t('auth.atLeast8')} />
         <Field label={t('auth.repeatPassword')} value={confirmation} onChangeText={setConfirmation} secureTextEntry textContentType="newPassword" onSubmitEditing={submit} />
-        {tooShort ? <Text style={styles.error}>{t('auth.tooShort')}</Text> : null}
-        {mismatch ? <Text style={styles.error}>{t('auth.mismatch')}</Text> : null}
         <Pressable style={styles.check} onPress={() => setAdult((v) => !v)} accessibilityRole="checkbox" accessibilityState={{ checked: adult }}>
           <Switch value={adult} onValueChange={setAdult} trackColor={{ true: theme.colors.accent, false: theme.colors.border }} thumbColor={theme.colors.ink} />
           <Text style={styles.checkText}>{t('auth.adult')}</Text>
         </Pressable>
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+        {blocker && !busy ? <Text style={tooShort || mismatch ? styles.error : styles.foot}>{registerBlockerText(blocker)}</Text> : null}
         <Button label={t('auth.createAccount')} primary busy={busy} disabled={!canSubmit} onPress={submit} />
         {/* Los legales viven en el servidor al que se conecta, no en la app. */}
         <Text style={styles.foot}>

@@ -9,6 +9,7 @@ import { destinoSeguro } from '../../lib/volver'
 import { ServerField } from '../../components/ServerField'
 import { useSession } from '../../lib/session'
 import { displayServerUrl } from '../../lib/storage'
+import { PasswordInput } from '../../components/PasswordInput'
 
 /**
  * Acceso: correo y contraseña. Por defecto entra por el proxy de Next y el
@@ -74,7 +75,7 @@ function AccessPageForm() {
           </label>
           <label className="field">
             <span>{t('auth.password')}</span>
-            <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+            <PasswordInput name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
           </label>
           {error ? <div className="error">{error}</div> : null}
           <div className="row">
@@ -87,7 +88,8 @@ function AccessPageForm() {
             </Link>
           </div>
           <p className="hint">
-            {t('auth.noAccount')} <Link href={`/crear-cuenta?volver=${encodeURIComponent(destino)}`}>{t('auth.createHere')}</Link>{t('auth.takesAMinute')}
+            {t('auth.noAccount')} <Link href={`/crear-cuenta?volver=${encodeURIComponent(destino)}`}>{t('auth.createHere')}</Link>
+            {t('auth.takesAMinute')}
           </p>
           <ServerField value={server} onChange={setServer} />
         </form>

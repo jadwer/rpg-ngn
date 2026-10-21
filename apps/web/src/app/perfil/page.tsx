@@ -15,6 +15,7 @@ import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { AppShell } from '../../components/shell/AppShell'
 import { useSession } from '../../lib/session'
 import type { StoredUser } from '../../lib/storage'
+import { PasswordInput } from '../../components/PasswordInput'
 
 export default function ProfilePage() {
   return (
@@ -134,15 +135,15 @@ function Profile({ client, user, unauthorized, logout }: { client: ApiClient; us
         </div>
         <label className="field">
           <span>{t('profilePage.contrasenaActual')}</span>
-          <input className="input" type="password" name="actual" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
+          <PasswordInput name="actual" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
         </label>
         <label className="field">
           <span>{t('profilePage.nuevaContrasena')}</span>
-          <input className="input" type="password" name="nueva" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="nueva" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
         </label>
         <label className="field">
           <span>{t('profilePage.repiteLaNueva')}</span>
-          <input className="input" type="password" name="nueva_confirmacion" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="nueva_confirmacion" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
         </label>
         {mismatch ? <div className="error">{t('profilePage.lasContrasenasNoCoinciden')}</div> : null}
         {passNotice ? <div className={passNotice.ok ? 'ok' : 'error'}>{passNotice.text}</div> : null}

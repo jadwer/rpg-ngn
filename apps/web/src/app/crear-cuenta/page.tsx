@@ -9,6 +9,8 @@ import { destinoSeguro } from '../../lib/volver'
 import { ServerField } from '../../components/ServerField'
 import { useSession } from '../../lib/session'
 import { displayServerUrl } from '../../lib/storage'
+import { PasswordInput } from '../../components/PasswordInput'
+import { registerBlocker, registerBlockerText } from '@rpg-ngn/ui-logic'
 
 /**
  * Registro: nombre, correo, contraseña y confirmacion. Con la verificacion
@@ -42,10 +44,12 @@ function RegisterPageForm() {
 
   const mismatch = confirmation.length > 0 && password !== confirmation
   const tooShort = password.length > 0 && password.length < 8
+  // Lo que impide crear la cuenta, dicho junto al boton: apagado sin motivo, la gente no sabe que falta.
+  const blocker = registerBlocker({ name, email, password, confirmation, adult })
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (mismatch || tooShort) return
+    if (blocker) return
     setBusy(true)
     setError(null)
     const sameOrigin = typeof window !== 'undefined' && server.trim().replace(/\/+$/, '') === window.location.origin
@@ -88,32 +92,35 @@ function RegisterPageForm() {
           </label>
           <label className="field">
             <span>{t('auth.password')}</span>
-            <input className="input" type="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
+            <PasswordInput name="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} required />
             <span className="hint" style={{ textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-serif)' }}>
               {t('auth.atLeast8')}
             </span>
           </label>
           <label className="field">
             <span>{t('auth.repeatPassword')}</span>
-            <input className="input" type="password" name="password_confirmation" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
+            <PasswordInput name="password_confirmation" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} autoComplete="new-password" minLength={8} required />
           </label>
-          {tooShort ? <div className="error">{t('auth.tooShort')}</div> : null}
-          {mismatch ? <div className="error">{t('auth.mismatch')}</div> : null}
           <label className="check">
             <input type="checkbox" name="age_confirmed" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
             {t('auth.adult')}
           </label>
           {error ? <div className="error">{error}</div> : null}
+          {blocker && !busy ? (
+            <p className={tooShort || mismatch ? 'error' : 'hint'} role="status">
+              {registerBlockerText(blocker)}
+            </p>
+          ) : null}
           <div className="row">
-            <button type="submit" className="btn primary" disabled={busy || !name.trim() || !email || !password || !confirmation || mismatch || tooShort || !adult}>
+            <button type="submit" className="btn primary" disabled={busy || blocker !== null}>
               {busy ? <span className="spinner" aria-hidden /> : null}
               {t('auth.createAccount')}
             </button>
             <span className="hint">{t('auth.straightToTables')}</span>
           </div>
+
           <p className="hint">
-            {t('auth.acceptPrefix')} <Link href="/terminos">{t('auth.terms')}</Link> {t('auth.andThe')}{' '}
-            <Link href="/privacidad">{t('auth.privacy')}</Link>.
+            {t('auth.acceptPrefix')} <Link href="/terminos">{t('auth.terms')}</Link> {t('auth.andThe')} <Link href="/privacidad">{t('auth.privacy')}</Link>.
           </p>
           <p className="hint">
             {t('auth.haveAccount')} <Link href={`/entrar?volver=${encodeURIComponent(destino)}`}>{t('auth.signInHere')}</Link>.
