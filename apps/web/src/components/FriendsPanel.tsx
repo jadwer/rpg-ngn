@@ -1,7 +1,7 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { ApiError, type ApiClient, type AuthUser, type Friendship } from '@rpg-ngn/api-client'
+import { ApiError, type ApiClient, type AuthUser, type BlockedUser, type Friendship } from '@rpg-ngn/api-client'
 import { acceptedFriends, friendshipWith, pendingReceived } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -22,10 +22,15 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
   const [found, setFound] = useState<AuthUser | null>(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
+  const [blocked, setBlocked] = useState<BlockedUser[]>([])
+  // Bloquear no se deshace con un clic: se confirma en la misma fila.
+  const [confirming, setConfirming] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
-      setFriendships(await client.listFriendships())
+      const [list, blocks] = await Promise.all([client.listFriendships(), client.listBlocks()])
+      setFriendships(list)
+      setBlocked(blocks)
     } catch (caught) {
       if (caught instanceof ApiError && caught.isUnauthorized) onUnauthorized()
       else setNotice({ ok: false, text: caught instanceof Error ? caught.message : String(caught) })
@@ -83,6 +88,38 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
       await load()
     })
 
+  const block = (userId: string) =>
+    act(async () => {
+      setConfirming(null)
+      await client.blockUser(userId)
+      setNotice({ ok: true, text: t('friendsPanel.bloqueado') })
+      await load()
+    })
+
+  const unblock = (userId: string) =>
+    act(async () => {
+      await client.unblockUser(userId)
+      await load()
+    })
+
+  /** Boton de bloquear con confirmacion, para una solicitud o un amigo. */
+  const blockControl = (userId: string, name: string) =>
+    confirming === userId ? (
+      <span className="row">
+        <span className="hint">{t('friendsPanel.confirmBloquear', { name })}</span>
+        <button type="button" className="btn small danger" onClick={() => void block(userId)} disabled={busy}>
+          {t('friendsPanel.siBloquear')}
+        </button>
+        <button type="button" className="btn ghost small" onClick={() => setConfirming(null)}>
+          {t('friendsPanel.cancelar')}
+        </button>
+      </span>
+    ) : (
+      <button type="button" className="btn ghost small" onClick={() => setConfirming(userId)} disabled={busy}>
+        {t('friendsPanel.bloquear')}
+      </button>
+    )
+
   const list = friendships ?? []
   const pending = pendingReceived(list, meId)
   const friends = acceptedFriends(list, meId)
@@ -104,6 +141,7 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
               <button type="button" className="btn small primary" onClick={() => void accept(f.id)} disabled={busy}>
                 {t('friendsPanel.aceptar')}
               </button>
+              {blockControl(f.user.id, f.user.name)}
             </div>
           ))}
         </div>
@@ -145,18 +183,33 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
       {notice ? <div className={notice.ok ? 'ok' : 'error'}>{notice.text}</div> : null}
 
       {friends.length > 0 ? (
-        <div className="row">
+        <div className="stack">
           <span className="hint">{t('friendsPanel.tusAmigos')}</span>
           {friends.map((u) => (
-            <span key={u.id} className="chip done">
-              {u.name}
-            </span>
+            <div key={u.id} className="row">
+              <span className="chip done">{u.name}</span>
+              {blockControl(u.id, u.name)}
+            </div>
           ))}
         </div>
       ) : friendships !== null && pending.length === 0 ? (
         <p className="hint" style={{ margin: 0 }}>
           {t('friendsPanel.todaviaNoTienesAmigos')}
         </p>
+      ) : null}
+
+      {blocked.length > 0 ? (
+        <div className="stack">
+          <span className="hint">{t('friendsPanel.bloqueados')}</span>
+          {blocked.map((b) => (
+            <div key={b.userId} className="row">
+              <span className="chip">{b.name ?? '?'}</span>
+              <button type="button" className="btn ghost small" onClick={() => void unblock(b.userId)} disabled={busy}>
+                {t('friendsPanel.desbloquear')}
+              </button>
+            </div>
+          ))}
+        </div>
       ) : null}
     </section>
   )

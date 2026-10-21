@@ -12,4 +12,11 @@ export const friendsPanel = {
   todaviaNoTienesAmigos: 'Todavía no tienes amigos aquí.',
   amigos: 'Amigos',
   correoDelAnfitrionO: 'correo del anfitrión o del jugador',
+  bloquear: 'Bloquear',
+  confirmBloquear: '¿Bloquear a {{name}}? No podrá enviarte solicitudes ni entrar a tus mesas.',
+  siBloquear: 'Sí, bloquear',
+  cancelar: 'Cancelar',
+  bloqueado: 'Listo: bloqueaste a esa persona y salió de las mesas que compartían.',
+  bloqueados: 'Bloqueados:',
+  desbloquear: 'Desbloquear',
 }

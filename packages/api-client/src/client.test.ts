@@ -249,6 +249,21 @@ describe('turno', () => {
     expect(JSON.parse((calls[0]?.init.body as string | undefined) ?? '{}')).toEqual({ text: 'Miro la campana.' })
   })
 
+  it('sacar de la mesa y bloquear van a sus rutas (Google Play, contenido de usuarios)', async () => {
+    const { api, calls } = client({
+      'DELETE /api/v1/tables/7/members/3': { status: 200, body: { meta: {} } },
+      'POST /api/v1/blocks': { status: 201, body: { meta: {} } },
+      'GET /api/v1/blocks': { status: 200, body: { data: [{ userId: '9', name: 'Jaz', blockedAt: null }] } },
+      'DELETE /api/v1/blocks/9': { status: 200, body: { meta: {} } },
+    })
+    await api.removeMember(7, 3)
+    await api.blockUser('9')
+    expect(JSON.parse((calls[1]?.init.body as string | undefined) ?? '{}')).toEqual({ user_id: 9 })
+    expect(await api.listBlocks()).toEqual([{ userId: '9', name: 'Jaz', blockedAt: null }])
+    await api.unblockUser('9')
+    expect(calls.map((c) => c.url.replace(/^https?:\/\/[^/]+/, ''))).toEqual(['/api/v1/tables/7/members/3', '/api/v1/blocks', '/api/v1/blocks', '/api/v1/blocks/9'])
+  })
+
   it('un 409 al responder dos veces llega como conflicto con el mensaje de la API', async () => {
     const { api } = client({ 'POST /api/v1/turns/2/responses': { status: 409, body: { error: 'zahira ya respondio en este turno' } } })
     const error = await api.respond(2, 'Otra.').catch((e: unknown) => e)

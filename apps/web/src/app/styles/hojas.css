@@ -27,9 +27,7 @@
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.09), rgba(124, 58, 237, 0) 72px),
-    rgba(18, 24, 38, 0.86);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.09), rgba(124, 58, 237, 0) 72px), rgba(18, 24, 38, 0.86);
 }
 
 .hoja-panel + .hoja-panel,
@@ -195,4 +193,31 @@
 
 .party-grid .portrait.muted {
   border-color: var(--border);
+}
+
+/* Panel de Jugadores: sacar y bloquear, con confirmacion en la misma fila. */
+.seats .seat {
+  flex-wrap: wrap;
+}
+
+.seats .seat .right {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.seat-confirm {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.seat-confirm p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink);
 }

@@ -156,6 +156,13 @@ export interface Friendship {
   acceptedAt: string | null
 }
 
+/** Alguien que bloqueaste (`GET /api/v1/blocks`). */
+export interface BlockedUser {
+  userId: string
+  name: string | null
+  blockedAt: string | null
+}
+
 export interface FriendshipRecord {
   id: number
   userId: number

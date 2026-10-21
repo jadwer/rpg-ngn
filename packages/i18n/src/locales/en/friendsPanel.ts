@@ -14,4 +14,11 @@ export const friendsPanel: Messages<typeof es> = {
   todaviaNoTienesAmigos: 'You have no friends here yet.',
   amigos: 'Friends',
   correoDelAnfitrionO: 'host’s or player’s email',
+  bloquear: 'Block',
+  confirmBloquear: 'Block {{name}}? They will not be able to send you requests or join your tables.',
+  siBloquear: 'Yes, block',
+  cancelar: 'Cancel',
+  bloqueado: 'Done: you blocked that person and they left the tables you shared.',
+  bloqueados: 'Blocked:',
+  desbloquear: 'Unblock',
 }

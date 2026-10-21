@@ -13,6 +13,8 @@ export const play: Messages<typeof es> = {
   holdFailed: 'Could not change the hold.',
   voteFailed: 'Could not record your vote.',
   presenceOwnFailed: 'Could not change your presence.',
+  removeFailed: 'Could not remove that person from the table.',
+  blockFailed: 'Could not block that person.',
   presenceFailed: 'Could not change the presence.',
   openSessionFailed: 'Could not open the session.',
   closeSessionFailed: 'Could not close the session.',

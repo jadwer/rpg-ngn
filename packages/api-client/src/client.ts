@@ -31,6 +31,7 @@ import type {
   TableSummary,
   TurnView,
   WorldProjection,
+  BlockedUser,
 } from './types.js'
 
 export interface ApiClientOptions {
@@ -74,6 +75,8 @@ export interface ApiClient extends AccountApi, SettingsApi {
   deleteTable(tableId: string | number): Promise<void>
   /** El invitado se va de la mesa; la mesa sigue para los demas. El anfitrion no puede (409). */
   leaveTable(tableId: string | number): Promise<void>
+  /** El anfitrion saca a alguien de su mesa: sale del turno abierto y el enlace vigente se revoca. */
+  removeMember(tableId: string | number, memberId: string | number): Promise<void>
   /**
    * Crea el enlace de la mesa (solo el anfitrion) y **devuelve el token, que
    * no se vuelve a enseñar**: se guarda hasheado. Crear uno corta el anterior.
@@ -109,6 +112,11 @@ export interface ApiClient extends AccountApi, SettingsApi {
   listFriendships(): Promise<Friendship[]>
   requestFriendship(friendId: string | number): Promise<FriendshipRecord>
   acceptFriendship(friendshipId: string | number): Promise<FriendshipRecord>
+  /** A quien bloqueaste. */
+  listBlocks(): Promise<BlockedUser[]>
+  /** Bloquear: sin amistad, invitaciones ni mesas en comun. */
+  blockUser(userId: string | number): Promise<void>
+  unblockUser(userId: string | number): Promise<void>
   /** Busca un usuario por correo exacto (`users?filter[email]=`); null si no existe. Solo cuentas admin (403 al resto); `lookupUser` sirve a cualquiera. */
   findUserByEmail(email: string): Promise<AuthUser | null>
   tableState(tableId: string | number, after?: number): Promise<TableState>
@@ -232,6 +240,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       await request(`/api/v1/tables/${tableId}/me`, { method: 'DELETE' })
     },
 
+    async removeMember(tableId, memberId) {
+      await request(`/api/v1/tables/${tableId}/members/${memberId}`, { method: 'DELETE' })
+    },
+
     async createInvite(tableId, options) {
       const body: Record<string, number> = {}
       if (options?.maxUses !== undefined) body['max_uses'] = options.maxUses
@@ -324,6 +336,19 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       return friendshipRecord(data.data, status === 201)
     },
 
+    async listBlocks() {
+      const { data } = await request<{ data: BlockedUser[] }>('/api/v1/blocks')
+      return data.data
+    },
+
+    async blockUser(userId) {
+      await request('/api/v1/blocks', { method: 'POST', body: { user_id: Number(userId) } })
+    },
+
+    async unblockUser(userId) {
+      await request(`/api/v1/blocks/${userId}`, { method: 'DELETE' })
+    },
+
     async acceptFriendship(friendshipId) {
       const { data } = await request<{ data: RawFriendship }>(`/api/v1/friendships/${friendshipId}/accept`, { method: 'POST' })
       return friendshipRecord(data.data, false)
@@ -338,7 +363,19 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     async tableState(tableId, after = 0) {
       const { data } = await request<{ data: Omit<TableState, 'lastBlockId' | 'more'>; meta: { lastBlockId: number; more?: boolean } }>(`/api/v1/tables/${tableId}/state${query({ after: after > 0 ? after : undefined })}`)
       // `narrators` y `typing` no existian antes de los avisos compartidos: una API vieja no rompe al cliente.
-      return { ...data.data, blocks: data.data.blocks as BlockEnvelope[], narrators: data.data.narrators ?? [], typing: data.data.typing ?? [], away: data.data.away ?? [], fortune: data.data.fortune ?? { pending: false }, rolls: data.data.rolls ?? { pending: null }, suggestions: data.data.suggestions ?? [], ideas: data.data.ideas ?? { more: 'none', used: 0 }, lastBlockId: data.meta.lastBlockId, more: data.meta.more ?? data.data.blocks.length >= 200 }
+      return {
+        ...data.data,
+        blocks: data.data.blocks as BlockEnvelope[],
+        narrators: data.data.narrators ?? [],
+        typing: data.data.typing ?? [],
+        away: data.data.away ?? [],
+        fortune: data.data.fortune ?? { pending: false },
+        rolls: data.data.rolls ?? { pending: null },
+        suggestions: data.data.suggestions ?? [],
+        ideas: data.data.ideas ?? { more: 'none', used: 0 },
+        lastBlockId: data.meta.lastBlockId,
+        more: data.meta.more ?? data.data.blocks.length >= 200,
+      }
     },
 
     async setNarrating(tableId, narrating) {

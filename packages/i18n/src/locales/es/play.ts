@@ -11,6 +11,8 @@ export const play = {
   holdFailed: 'No se pudo cambiar la espera.',
   voteFailed: 'No se pudo registrar tu voto.',
   presenceOwnFailed: 'No se pudo cambiar tu presencia.',
+  removeFailed: 'No se pudo sacar a esa persona de la mesa.',
+  blockFailed: 'No se pudo bloquear a esa persona.',
   presenceFailed: 'No se pudo cambiar la presencia.',
   openSessionFailed: 'No se pudo abrir la sesión.',
   closeSessionFailed: 'No se pudo cerrar la sesión.',

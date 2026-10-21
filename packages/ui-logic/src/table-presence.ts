@@ -11,6 +11,8 @@ import type { TurnProgress, TurnSummary } from './turn.js'
 
 export interface SeatMember {
   id: string | number
+  /** La cuenta detras del asiento: para bloquear desde el panel de Jugadores. */
+  userId?: string | number | null | undefined
   role: 'host' | 'player'
   characterId: string | null
   userName: string | null
@@ -27,6 +29,7 @@ export type SeatState = 'ready' | 'writing' | 'thinking' | 'away' | 'narrating' 
 
 export interface Seat {
   memberId: string
+  userId: string | null
   characterId: string | null
   /** Nombre del personaje si tiene, si no el de la persona. */
   name: string
@@ -81,6 +84,7 @@ export function seats({ members, turn, typing, narrators, away = [], viewerMembe
     else state = 'ready'
     return {
       memberId,
+      userId: m.userId != null ? String(m.userId) : null,
       characterId: m.characterId,
       name: m.characterId ? nameOf(m.characterId) : (m.userName ?? 'Alguien'),
       role: m.role,

@@ -1,8 +1,9 @@
 import { t } from '@rpg-ngn/i18n'
 import { SEAT_LABELS, type Seat } from '@rpg-ngn/ui-logic'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { theme } from '../theme'
+import { Button } from './Button'
 import { Icon, ICON } from './Icon'
 import { Panel } from './Panel'
 import { Portrait } from './Portrait'
@@ -16,6 +17,10 @@ interface Props {
   busy: boolean
   onTogglePresence: () => void
   onPresence: (memberId: string, present: boolean) => void
+  /** El anfitrion saca a alguien de la mesa. */
+  onRemove: (memberId: string) => void
+  /** Bloquear a la persona de un asiento (cualquiera, sobre los demas). */
+  onBlock: (seat: Seat) => void
   /** Invitar (enlace y por correo); solo el anfitrion. */
   invite?: ReactNode
 }
@@ -35,7 +40,9 @@ const DOT: Record<Seat['state'], string> = {
  * estado. En la tuya, "me tengo que ir"; en las ajenas, el anfitrion marca
  * ausente a quien se fue sin avisar. Abajo, para el anfitrion, invitar.
  */
-export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTogglePresence, onPresence, invite }: Props) {
+export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTogglePresence, onPresence, onRemove, onBlock, invite }: Props) {
+  // Sacar y bloquear no se deshacen con un toque: se confirman en la misma fila.
+  const [confirming, setConfirming] = useState<{ memberId: string; action: 'remove' | 'block' } | null>(null)
   const withCharacter = seats.filter((s) => s.characterId)
   const ready = withCharacter.filter((s) => s.state === 'ready').length
   return (
@@ -74,6 +81,45 @@ export function PlayersPanel({ seats, portraitOf, ownPresent, isHost, busy, onTo
                     <Text style={styles.action}>{away ? t('play.markPresent') : t('play.markAway')}</Text>
                   </Pressable>
                 ) : null}
+                {!seat.mine ? (
+                  <View style={styles.actions}>
+                    {isHost && seat.role !== 'host' ? (
+                      <Pressable onPress={() => setConfirming({ memberId: seat.memberId, action: 'remove' })} disabled={busy} hitSlop={6} accessibilityRole="button">
+                        <Text style={styles.action}>{t('playersPanel.sacar')}</Text>
+                      </Pressable>
+                    ) : null}
+                    {seat.userId ? (
+                      <Pressable onPress={() => setConfirming({ memberId: seat.memberId, action: 'block' })} disabled={busy} hitSlop={6} accessibilityRole="button">
+                        <Text style={[styles.action, styles.danger]}>{t('playersPanel.bloquear')}</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
+                {confirming?.memberId === seat.memberId ? (
+                  <View style={styles.confirm}>
+                    <Text style={styles.confirmText}>
+                      {confirming.action === 'remove'
+                        ? t('playersPanel.confirmSacar', { name: seat.name })
+                        : seat.role === 'host'
+                          ? t('playersPanel.confirmBloquearAnfitrion', { name: seat.name })
+                          : t('playersPanel.confirmBloquear', { name: seat.name })}
+                    </Text>
+                    <View style={styles.actions}>
+                      <Button
+                        small
+                        danger
+                        disabled={busy}
+                        label={confirming.action === 'remove' ? t('playersPanel.siSacar') : t('playersPanel.siBloquear')}
+                        onPress={() => {
+                          setConfirming(null)
+                          if (confirming.action === 'remove') onRemove(seat.memberId)
+                          else onBlock(seat)
+                        }}
+                      />
+                      <Button small label={t('playersPanel.cancelar')} onPress={() => setConfirming(null)} />
+                    </View>
+                  </View>
+                ) : null}
               </View>
               {seat.state === 'ready' ? <Icon d={ICON.check} size={24} color={theme.colors.success} strokeWidth={2.2} /> : null}
             </View>
@@ -101,4 +147,8 @@ const styles = StyleSheet.create({
   stateRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   away: { color: theme.colors.inkFaint },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, alignItems: 'center' },
+  danger: { color: theme.colors.danger },
+  confirm: { marginTop: 8, gap: 8, padding: 10, borderRadius: 10, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: 'rgba(0,0,0,0.25)' },
+  confirmText: { fontFamily: theme.fonts.ui, fontSize: 14, color: theme.colors.ink },
 })

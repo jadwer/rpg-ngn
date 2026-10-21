@@ -1,8 +1,8 @@
-import { ApiError, type ApiClient, type AuthUser, type Friendship } from '@rpg-ngn/api-client'
+import { ApiError, type ApiClient, type AuthUser, type BlockedUser, type Friendship } from '@rpg-ngn/api-client'
 import { t } from '@rpg-ngn/i18n'
 import { acceptedFriends, friendshipWith, pendingReceived } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { theme } from '../theme'
 import { Button } from './Button'
 
@@ -24,10 +24,15 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
   const [found, setFound] = useState<AuthUser | null>(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null)
+  const [blocked, setBlocked] = useState<BlockedUser[]>([])
+  // Bloquear no se deshace con un toque: se confirma en la misma fila.
+  const [confirming, setConfirming] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
-      setFriendships(await client.listFriendships())
+      const [list, blocks] = await Promise.all([client.listFriendships(), client.listBlocks()])
+      setFriendships(list)
+      setBlocked(blocks)
     } catch (caught) {
       if (caught instanceof ApiError && caught.isUnauthorized) onUnauthorized()
       else setNotice({ ok: false, text: caught instanceof Error ? caught.message : String(caught) })
@@ -83,6 +88,36 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
       await load()
     })
 
+  const block = (userId: string) =>
+    act(async () => {
+      setConfirming(null)
+      await client.blockUser(userId)
+      setNotice({ ok: true, text: t('friendsPanel.bloqueado') })
+      await load()
+    })
+
+  const unblock = (userId: string) =>
+    act(async () => {
+      await client.unblockUser(userId)
+      await load()
+    })
+
+  /** Bloquear con confirmacion, para una solicitud o un amigo. */
+  const blockControl = (userId: string, name: string) =>
+    confirming === userId ? (
+      <View style={styles.confirm}>
+        <Text style={styles.rowText}>{t('friendsPanel.confirmBloquear', { name })}</Text>
+        <View style={styles.row}>
+          <Button label={t('friendsPanel.siBloquear')} small danger busy={busy} onPress={() => void block(userId)} />
+          <Button label={t('friendsPanel.cancelar')} small onPress={() => setConfirming(null)} />
+        </View>
+      </View>
+    ) : (
+      <Pressable onPress={() => setConfirming(userId)} disabled={busy} hitSlop={8} accessibilityRole="button">
+        <Text style={styles.blockLink}>{t('friendsPanel.bloquear')}</Text>
+      </Pressable>
+    )
+
   const list = friendships ?? []
   const pending = pendingReceived(list, meId)
   const friends = acceptedFriends(list, meId)
@@ -96,11 +131,24 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
         <View key={f.id} style={styles.row}>
           <Text style={styles.rowText}>{t('mobile.friendsPanel.wantsToBeYourFriend', { name: f.user.name, email: f.user.email })}</Text>
           <Button label={t('friendsPanel.aceptar')} small primary busy={busy} onPress={() => void accept(f.id)} />
+          {blockControl(f.user.id, f.user.name)}
         </View>
       ))}
 
       <View style={styles.row}>
-        <TextInput value={email} onChangeText={setEmail} placeholder={t('friendsPanel.correoDelAnfitrionO')} placeholderTextColor={theme.colors.inkFaint} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" editable={!busy} onSubmitEditing={() => void search()} returnKeyType="search" style={styles.input} />
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('friendsPanel.correoDelAnfitrionO')}
+          placeholderTextColor={theme.colors.inkFaint}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          editable={!busy}
+          onSubmitEditing={() => void search()}
+          returnKeyType="search"
+          style={styles.input}
+        />
         <Button label={t('friendsPanel.buscar')} small busy={busy} disabled={!email.trim()} onPress={() => void search()} />
       </View>
 
@@ -127,11 +175,28 @@ export function FriendsPanel({ client, meId, onUnauthorized }: Props) {
               <Text style={styles.friendName} numberOfLines={1}>
                 {u.name}
               </Text>
+              {blockControl(u.id, u.name)}
             </View>
           ))}
         </View>
       ) : friendships !== null && pending.length === 0 ? (
         <Text style={styles.hint}>{t('friendsPanel.todaviaNoTienesAmigos')}</Text>
+      ) : null}
+
+      {blocked.length > 0 ? (
+        <View style={styles.list}>
+          <Text style={styles.hint}>{t('friendsPanel.bloqueados')}</Text>
+          {blocked.map((b) => (
+            <View key={b.userId} style={styles.friend}>
+              <Text style={styles.friendName} numberOfLines={1}>
+                {b.name ?? '?'}
+              </Text>
+              <Pressable onPress={() => void unblock(b.userId)} disabled={busy} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.unblockLink}>{t('friendsPanel.desbloquear')}</Text>
+              </Pressable>
+            </View>
+          ))}
+        </View>
       ) : null}
     </View>
   )
@@ -155,4 +220,7 @@ const styles = StyleSheet.create({
   initial: { width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: theme.colors.gold, backgroundColor: theme.colors.panel3, alignItems: 'center', justifyContent: 'center' },
   initialText: { fontFamily: theme.fonts.display, fontSize: 15, color: theme.colors.ink },
   friendName: { flex: 1, fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.ink },
+  blockLink: { fontFamily: theme.fonts.uiMedium, fontSize: 13, color: theme.colors.danger },
+  unblockLink: { fontFamily: theme.fonts.uiMedium, fontSize: 13, color: theme.colors.nebula },
+  confirm: { flex: 1, gap: 8 },
 })

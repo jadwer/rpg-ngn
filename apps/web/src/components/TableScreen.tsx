@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type Seat, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -615,6 +615,28 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
       refresh()
     }, t('play.presenceFailed'))
   }
+  /** El anfitrion saca a alguien: deja el turno y el enlace vigente se revoca. */
+  const removeMember = (memberId: string) => {
+    void act(async () => {
+      await client.removeMember(table.id, memberId)
+      onTableChanged()
+      refresh()
+    }, t('play.removeFailed'))
+  }
+  /** Bloquear a alguien de la mesa. Si es el anfitrion, quien bloquea sale de esta mesa: vuelve a la lista. */
+  const blockSeat = (seat: Seat) => {
+    if (!seat.userId) return
+    const userId = seat.userId
+    void act(async () => {
+      await client.blockUser(userId)
+      if (seat.role === 'host') {
+        window.location.assign('/mesas')
+        return
+      }
+      onTableChanged()
+      refresh()
+    }, t('play.blockFailed'))
+  }
   const openSession = (code: string, note: string | null) => {
     if (campaignId) void act(() => client.openSession(campaignId, code, note ?? undefined).then(() => undefined), t('play.openSessionFailed'))
   }
@@ -855,6 +877,8 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
             busy={busy}
             onTogglePresence={togglePresence}
             onPresence={setMemberPresence}
+            onRemove={removeMember}
+            onBlock={blockSeat}
             invite={
               isHost ? (
                 <>
