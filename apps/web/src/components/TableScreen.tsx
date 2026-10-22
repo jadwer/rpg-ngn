@@ -4,7 +4,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, memberOf, packMapUrl, packPortraitUrl, randomKey, type ApiClient, type PackCharacter, type PackNpc, type PackMapView, type PackSheets, type TableSummary, type TableViewer } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type Seat, type ViewMode } from '@rpg-ngn/ui-logic'
+import { blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, worldLanguages, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorBadge, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, nextFreeTurnText, narratorLabel, narratorsToFlag, remoteCharacterNames, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, tableTitle, takenCharacters, turnLine, turnProgress, waitingPhrase, type EndingBlock, type NarratorBadge, type Seat, type ViewMode } from '@rpg-ngn/ui-logic'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { sheetEntries } from '../lib/sheets'
 import { useNarrator } from '../lib/narrator'
@@ -278,6 +278,21 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   const nameOf = useCallback((id: string) => characterNameFrom(pack, remoteNamesAll, id), [pack, remoteNamesAll])
   const headSeq = snapshot?.campaign.headSeq ?? 0
   const sessionCode = snapshot?.session?.code ?? null
+
+  // La etiqueta del narrador (22-10). Se relee al cambiar de turno: el
+  // escalon baja cuando se acaban los turnos comprados o la bendicion.
+  const [gmBadge, setGmBadge] = useState<NarratorBadge | null>(null)
+  const turnNumber = turn?.number ?? null
+  useEffect(() => {
+    let alive = true
+    void client.tableGm(table.id).then(
+      (info) => alive && setGmBadge(narratorBadge(info)),
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.id, sessionCode, turnNumber])
 
   // Cuenta atras del cierre (D-UX-3). Arranca cuando ESTE cliente ve el turno
   // completo (`completedAt` cambia) o cuando se reanuda tras una espera, con
@@ -751,7 +766,7 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
   return (
     <div className={`table${screen ? ' screen' : ''}${sceneUrl ? ' has-scene' : ''}`} style={screen ? ({ '--pantalla-escala': screenScale } as CSSProperties) : undefined}>
       <RecapOverlay tableId={table.id} recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry && !screen} />
-      <EndingOverlay client={client} tableId={table.id} ending={openedEnding} isHost={isHost} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
+      <EndingOverlay client={client} tableId={table.id} ending={openedEnding} isHost={isHost} narrator={gmBadge} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
       <header className="table-header hide-on-screen">
         <SystemMenu
@@ -763,7 +778,15 @@ export function TableScreen({ client, table, user, pack, remoteNames = {}, onTab
           }}
         />
         <div className="titles">
-          <div className="title">{table.name}</div>
+          <div className="title-row">
+            <div className="title">{table.name}</div>
+            {gmBadge ? (
+              <span className={`narrator-tag ${gmBadge.level}`} title={gmBadge.detail}>
+                {gmBadge.label}
+                <small> · {gmBadge.detail}</small>
+              </span>
+            ) : null}
+          </div>
           <div className="subtitle" title={subtitle}>
             {sessionTitle ? <b>{sessionTitle}</b> : null}
             {sessionTitle ? subtitle.slice(sessionTitle.length) : subtitle}

@@ -2,7 +2,7 @@ import { t, type Language } from '@rpg-ngn/i18n'
 import { ApiError, packMapUrl, randomKey, type ApiClient, type PackMapView, type PackNpc, type PackSheets, type SessionSummary, type TableMember, type TableSummary, packPortraitUrl, type PackCharacter } from '@rpg-ngn/api-client'
 import type { CharacterState } from '@rpg-ngn/core'
 import type { LoadedPack } from '@rpg-ngn/content'
-import { worldLanguages, blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type Seat, type ViewMode } from '@rpg-ngn/ui-logic'
+import { worldLanguages, blocksForSeat, countdown, deductionProgress, wishCharacter, deductionRoomName, tableLanguageOf, outOfTurnsText, countdownSecondsOf, diceModeOf, blocksFromApi, characterNameFrom, emptyTableText, freeCharacters, freeRemoteCharacters, groupBlocks, hostOf, latestNarrationStart, narratorBadge, endingCloseLabel, latestEnding, latestRecap, latestSceneImage, pacingLine, withoutImages, narratorLabel, narratorsToFlag, seats, seatsSummary, sheetSourceFrom, sheetSourceOf, speakerResolverFor, startCard, suggestedSessionCode, tableSubtitle, takenCharacters, turnProgress, waitingPhrase, type EndingBlock, type NarratorBadge, type Seat, type ViewMode } from '@rpg-ngn/ui-logic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Image, KeyboardAvoidingView, PanResponder, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native'
 import { DeductionPanel } from '../../components/DeductionPanel'
@@ -22,7 +22,7 @@ import { SceneHero } from '../../components/SceneHero'
 import { HostPanel } from '../../components/HostPanel'
 import { RecapModal } from '../../components/RecapModal'
 import { ShareConsentModal } from '../../components/ShareConsentModal'
-import { EndingModal, seenEndings } from '../../components/EndingModal'
+import { EndingModal, narratorColor, seenEndings } from '../../components/EndingModal'
 import { MapPanel } from '../../components/MapPanel'
 import { PersonaPanel } from '../../components/PersonaPanel'
 import { TtsBar } from '../../components/TtsBar'
@@ -49,6 +49,8 @@ interface Props {
   /** La mesa cambio (invitacion nueva): que el padre la recargue. */
   onTableChanged: () => void
   onUnauthorized: () => void
+  /** Abre la tienda (Mejora tu narrador, en la pantalla de fin). */
+  onOpenShop?: () => void
 }
 
 /** A menos de esta distancia del final se considera que el usuario esta abajo y la narracion baja sola. */
@@ -60,7 +62,7 @@ const NEAR_BOTTOM = 160
  * el estado vivo de las proyecciones. El GM es la IA; el anfitrion es la
  * persona con el asiento `host` de la API.
  */
-export function TableScreen({ client, table, me, user, pack, remoteNames = {}, onBack, onTableChanged, onUnauthorized }: Props) {
+export function TableScreen({ client, table, me, user, pack, remoteNames = {}, onBack, onTableChanged, onUnauthorized, onOpenShop }: Props) {
   const campaignId = table.campaignId
   // "Leer lo nuevo" encendido: con la pantalla oculta la mesa sigue llegando, despacio (S10).
   const [listening, setListening] = useState(false)
@@ -297,6 +299,21 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
     })
   }, [pack, remote, table.members, table.packId, client.baseUrl])
   const sessionCode = snapshot?.session?.code ?? null
+
+  // La etiqueta del narrador (22-10), como en la web: se relee al cambiar de
+  // turno porque el escalon baja al acabarse lo comprado o la bendicion.
+  const [gmBadge, setGmBadge] = useState<NarratorBadge | null>(null)
+  const turnNumber = turn?.number ?? null
+  useEffect(() => {
+    let alive = true
+    void client.tableGm(table.id).then(
+      (info) => alive && setGmBadge(narratorBadge(info)),
+      () => undefined,
+    )
+    return () => {
+      alive = false
+    }
+  }, [client, table.id, sessionCode, turnNumber])
   const headSeq = snapshot?.campaign.headSeq ?? 0
 
   /** Clave de idempotencia estable por turno: reintentar el mismo envio no duplica. */
@@ -658,6 +675,11 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
             <Text style={styles.subtitle} numberOfLines={1}>
               {turn ? (progress.narrating ? t('mobile.tableScreen.elDirectorNarraCap') : progress.complete ? t('mobile.tableScreen.todosRespondieronCap') : t('mobile.tableScreen.faseDeAccionesCap')) : subtitle}
             </Text>
+            {gmBadge ? (
+              <Text style={[styles.narratorTag, { color: narratorColor(gmBadge) }]} numberOfLines={1} accessibilityLabel={`${gmBadge.label}, ${gmBadge.detail}`}>
+                {gmBadge.label}
+              </Text>
+            ) : null}
           </View>
         </View>
         <Pressable
@@ -782,7 +804,7 @@ export function TableScreen({ client, table, me, user, pack, remoteNames = {}, o
       ) : null}
       <RecapModal recap={recap} enabled={!!snapshot?.session && !!recap && recap.id === recapAtEntry} />
       {screen ? null : <ShareConsentModal client={client} tableId={table.id} />}
-      <EndingModal client={client} tableId={table.id} ending={openedEnding} isHost={isHost} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
+      <EndingModal client={client} tableId={table.id} ending={openedEnding} isHost={isHost} narrator={gmBadge} onOpenShop={onOpenShop} onClose={closeEnding} onKeepPlaying={() => setPanel('host')} />
       {screen ? (
         <Pressable style={styles.screenExit} onPress={() => setScreen(false)} accessibilityRole="button" accessibilityLabel={t('mobile.tableScreen.salirDeLaPantallaDe')}>
           <Text style={styles.screenExitText}>{t('tableScreen.salirDePantalla')}</Text>
@@ -921,6 +943,7 @@ const styles = StyleSheet.create({
   titles: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   title: { fontFamily: theme.fonts.uiSemiBold, fontSize: 15, color: theme.colors.ink },
   subtitle: { fontFamily: theme.fonts.ui, fontSize: 12, color: theme.colors.nebula },
+  narratorTag: { fontFamily: theme.fonts.uiSemiBold, fontSize: 10, letterSpacing: 0.5 },
   connection: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.goldBright, backgroundColor: theme.colors.warning, textAlign: 'center', paddingVertical: 4, paddingHorizontal: 12 },
   segmented: { flexDirection: 'row', borderWidth: 1, borderColor: theme.colors.border, borderRadius: 8, overflow: 'hidden', alignSelf: 'flex-start' },
   segment: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: theme.colors.panel },

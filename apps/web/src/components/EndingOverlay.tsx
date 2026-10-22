@@ -1,7 +1,8 @@
 'use client'
 
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, type EndingBlock } from '@rpg-ngn/ui-logic'
+import { endingTitle, type EndingBlock, type NarratorBadge } from '@rpg-ngn/ui-logic'
+import Link from 'next/link'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { RatingForm } from './RatingForm'
 
@@ -11,6 +12,8 @@ interface Props {
   /** El fin que se enseña; null para no enseñar nada. */
   ending: EndingBlock | null
   isHost: boolean
+  /** Quien narro la mesa; al anfitrion le ofrece un narrador mejor. */
+  narrator: NarratorBadge | null
   /** Se cierra: quien mira ya vio el fin y la mesa puede seguir. */
   onClose: () => void
   /** El anfitrion abre la sesion siguiente desde su panel. */
@@ -23,7 +26,7 @@ interface Props {
  * encima del ultimo texto y no se alcanzaba a leer como acabo); la abre el
  * boton "Cerrar el capitulo" que queda al final de la historia.
  */
-export function EndingOverlay({ client, tableId, ending, isHost, onClose, onKeepPlaying }: Props) {
+export function EndingOverlay({ client, tableId, ending, isHost, narrator, onClose, onKeepPlaying }: Props) {
   if (!ending) return null
   const close = onClose
 
@@ -49,6 +52,17 @@ export function EndingOverlay({ client, tableId, ending, isHost, onClose, onKeep
         {ending.cliffhanger ? (
           <p className="ending-next">
             <b>{t('ending.toBeContinued')}</b> {ending.cliffhanger}
+          </p>
+        ) : null}
+        {narrator ? (
+          <p className={`ending-narrator narrator-tag ${narrator.level}`}>
+            {narrator.label}
+            <small> · {narrator.detail}</small>
+            {isHost && narrator.canUpgrade ? (
+              <Link href="/tienda" className="ending-upgrade">
+                {t('table.narrator.upgrade')}
+              </Link>
+            ) : null}
           </p>
         ) : null}
         <section className="ending-rate">

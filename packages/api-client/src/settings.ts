@@ -344,7 +344,7 @@ export interface SettingsApi {
   /** El catalogo publico: lo que otros publicaron y paso revision. */
   listCatalog(): Promise<PackOption[]>
   /** Con que narra la mesa y quien lo paga (clave propia, cupo o gratis). */
-  tableGm(tableId: string | number): Promise<{ source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null }>
+  tableGm(tableId: string | number): Promise<{ source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null; tier?: 'paid' | 'first' | 'blessing' | 'free' | null }>
   /** La cola de revision del catalogo; 403 si la cuenta no es de administracion. */
   reviewQueue(): Promise<Array<PackOption & { requestedAt?: string | null; bytes?: number }>>
   /** Aprobar un mundo pendiente, o rechazarlo con el motivo que leera su autor. */
@@ -469,7 +469,7 @@ export function settingsApi(request: Request): SettingsApi {
     },
 
     async tableGm(tableId) {
-      const { data } = await request<{ data: { source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null } }>(`/api/v1/tables/${tableId}/gm`)
+      const { data } = await request<{ data: { source: 'own' | 'quota' | 'free' | 'none'; kind: string | null; model: string | null; firstTurnsLeft: number | null; tier?: 'paid' | 'first' | 'blessing' | 'free' | null } }>(`/api/v1/tables/${tableId}/gm`)
       return data.data
     },
 

@@ -1,7 +1,7 @@
 import { t } from '@rpg-ngn/i18n'
-import { endingTitle, type EndingBlock } from '@rpg-ngn/ui-logic'
+import { endingTitle, type EndingBlock, type NarratorBadge } from '@rpg-ngn/ui-logic'
 import { useEffect, useRef } from 'react'
-import { Animated, Modal, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { Animated, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 import type { ApiClient } from '@rpg-ngn/api-client'
 import { theme } from '../theme'
 import { Button } from './Button'
@@ -13,6 +13,10 @@ interface Props {
   /** El fin que se muestra; null la cierra. La abre el boton de su tarjeta. */
   ending: EndingBlock | null
   isHost: boolean
+  /** Quien narro la mesa; al anfitrion le ofrece un narrador mejor. */
+  narrator: NarratorBadge | null
+  /** Lleva a la tienda (Mejora tu narrador). */
+  onOpenShop?: () => void
   /** El anfitrion abre la sesion siguiente desde su panel. */
   onKeepPlaying: () => void
   onClose: () => void
@@ -25,7 +29,7 @@ export const seenEndings = new Set<string>()
  * La pantalla de fin (docs/26, H1), como la web. No sale sola: la abre el
  * boton de la tarjeta de fin para que primero se termine de leer (Gabino, 05-10).
  */
-export function EndingModal({ client, tableId, ending, isHost, onKeepPlaying, onClose }: Props) {
+export function EndingModal({ client, tableId, ending, isHost, narrator, onOpenShop, onKeepPlaying, onClose }: Props) {
   const open = ending !== null
   const fade = useRef(new Animated.Value(0)).current
 
@@ -60,6 +64,24 @@ export function EndingModal({ client, tableId, ending, isHost, onKeepPlaying, on
               </View>
             ) : null}
             {ending.cliffhanger ? <Text style={styles.next}>{`${t('ending.toBeContinued')} ${ending.cliffhanger}`}</Text> : null}
+            {narrator ? (
+              <View style={styles.narrator}>
+                <Text style={[styles.narratorLabel, { color: narratorColor(narrator) }]}>{narrator.label}</Text>
+                <Text style={styles.hint}>{narrator.detail}</Text>
+                {isHost && narrator.canUpgrade && onOpenShop ? (
+                  <Pressable
+                    onPress={() => {
+                      close()
+                      onOpenShop()
+                    }}
+                    hitSlop={8}
+                    accessibilityRole="link"
+                  >
+                    <Text style={styles.upgrade}>{t('table.narrator.upgrade')}</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('ending.rateTitle')}</Text>
               <Text style={styles.text}>{t('ending.rateText')}</Text>
@@ -84,6 +106,11 @@ export function EndingModal({ client, tableId, ending, isHost, onKeepPlaying, on
   )
 }
 
+/** El color de cada escalon, igual que en la web. */
+export function narratorColor(narrator: NarratorBadge): string {
+  return narrator.level === 'master' ? theme.colors.gold : narrator.level === 'craft' ? theme.colors.nebula : narrator.level === 'own' ? theme.colors.ink : theme.colors.inkDim
+}
+
 const styles = StyleSheet.create({
   backdrop: { flex: 1, justifyContent: 'center', padding: 16, backgroundColor: 'rgba(11, 11, 18, 0.9)' },
   card: { maxHeight: '90%', borderRadius: 18, borderWidth: 1, borderColor: theme.colors.gold, backgroundColor: theme.colors.panel },
@@ -94,4 +121,7 @@ const styles = StyleSheet.create({
   text: { fontFamily: theme.fonts.serif, fontSize: 17, lineHeight: 24, color: theme.colors.ink, textAlign: 'center' },
   next: { fontFamily: theme.fonts.serifItalic, fontSize: 17, lineHeight: 24, color: theme.colors.ink, textAlign: 'center' },
   hint: { fontFamily: theme.fonts.ui, fontSize: 13, color: theme.colors.inkDim, textAlign: 'center' },
+  narrator: { alignItems: 'center', gap: 2 },
+  narratorLabel: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, letterSpacing: 0.6 },
+  upgrade: { fontFamily: theme.fonts.uiSemiBold, fontSize: 14, color: theme.colors.goldBright, paddingTop: 4 },
 })

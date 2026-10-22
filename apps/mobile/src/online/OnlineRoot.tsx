@@ -396,6 +396,7 @@ export function OnlineRoot({ pack, onExit, initialTab = 'mesas' }: Props) {
           void loadTables(session.client)
         }}
         onTableChanged={() => reloadTable(session.client, stage.table.id)}
+        onOpenShop={() => setStage({ name: 'shop' })}
         onUnauthorized={() => unauthorized()}
       />
     )

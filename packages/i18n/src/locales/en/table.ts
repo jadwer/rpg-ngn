@@ -140,6 +140,15 @@ export const table: Messages<typeof es> = {
     quotaFirstMany: '{{who}} narrates with your quota. You have {{count}} turns left with this model; after that, a cheaper one. With your own key it always narrates with the one you choose.',
     quota: '{{who}} narrates with your quota. With your own key it narrates with the model you choose.',
   },
+  narrator: {
+    master: 'Master narrator',
+    craft: 'Journeyman narrator',
+    apprentice: 'Apprentice narrator',
+    own: 'Your own narrator',
+    detail: 'narrated by {{who}}',
+    ownDetail: 'narrated by {{who}}, the model you chose',
+    upgrade: 'Upgrade your narrator',
+  },
 
   members: {
     someone: 'Someone',

@@ -622,6 +622,62 @@ h3 {
   white-space: nowrap;
 }
 
+.table-header .title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* La etiqueta del narrador (22-10): escalon y, en letra chica, el modelo. */
+.narrator-tag {
+  flex: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--ink-dim);
+}
+
+.narrator-tag small {
+  font-size: 0.68rem;
+  opacity: 0.8;
+}
+
+.narrator-tag.master {
+  color: var(--gold);
+}
+
+.narrator-tag.craft {
+  color: var(--accent-bright);
+}
+
+.narrator-tag.own {
+  color: var(--ink);
+}
+
+.ending-narrator {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 12px auto 0;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  white-space: normal;
+}
+
+.ending-narrator small {
+  font-size: 0.78rem;
+}
+
+.ending-upgrade {
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
 .table-header .subtitle {
   color: var(--ink-dim);
   font-size: 0.88rem;
@@ -2175,6 +2231,10 @@ a.plain {
 
   .table-header .title {
     font-size: 0.95rem;
+  }
+
+  .table-header .narrator-tag small {
+    display: none;
   }
 
   .toolbar {

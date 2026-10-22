@@ -22,6 +22,8 @@ export interface TableGmInfo {
   kind: string | null
   model: string | null
   firstTurnsLeft: number | null
+  /** El escalon del narrador cuando paga el cupo: comprado, cuenta nueva, bendicion o gratis. */
+  tier?: 'paid' | 'first' | 'blessing' | 'free' | null
 }
 
 /** Nombre legible de un modelo ("claude-sonnet-5" -> "Claude Sonnet 5"). */
@@ -33,6 +35,8 @@ export function modelLabel(model: string | null): string {
     .map((p) => (/^\d/.test(p) ? p.replace(/-/g, '.') : p.charAt(0).toUpperCase() + p.slice(1)))
     .join(' ')
     .replace(/(\d) (\d)/g, '$1.$2')
+    .replace(/^Deepseek\b/, 'DeepSeek')
+    .replace(/^Gpt\b/, 'GPT')
 }
 
 /**
@@ -53,6 +57,40 @@ export function tableGmText(info: TableGmInfo): string {
         return info.firstTurnsLeft === 1 ? t('table.gm.quotaFirstOne', { who }) : t('table.gm.quotaFirstMany', { who, count: info.firstTurnsLeft })
       }
       return t('table.gm.quota', { who })
+  }
+}
+
+export interface NarratorBadge {
+  /** "Narrador maestro", "Narrador de oficio"... */
+  label: string
+  /** La letra chica: con que modelo narra (aviso legal, 21-10). */
+  detail: string
+  /** El escalon, para el estilo de la etiqueta. */
+  level: 'master' | 'craft' | 'apprentice' | 'own'
+  /** Hay un narrador mejor al alcance: el anfitrion ve "Mejora tu narrador". */
+  canUpgrade: boolean
+}
+
+/**
+ * La etiqueta del narrador de la mesa (decidido con Gabino el 22-10): dice
+ * con que modelo narra, que es aviso obligado, y a la vez enseña que hay un
+ * escalon mejor. Null si no aplica (GM con guion o sin GM).
+ */
+export function narratorBadge(info: TableGmInfo): NarratorBadge | null {
+  const who = modelLabel(info.model)
+  if (info.source === 'own' || (info.source === 'free' && info.kind !== 'scripted')) {
+    return { label: t('table.narrator.own'), detail: t('table.narrator.ownDetail', { who }), level: 'own', canUpgrade: false }
+  }
+  if (info.source !== 'quota') return null
+  const detail = t('table.narrator.detail', { who })
+  switch (info.tier) {
+    case 'paid':
+    case 'first':
+      return { label: t('table.narrator.master'), detail, level: 'master', canUpgrade: false }
+    case 'blessing':
+      return { label: t('table.narrator.craft'), detail, level: 'craft', canUpgrade: true }
+    default:
+      return { label: t('table.narrator.apprentice'), detail, level: 'apprentice', canUpgrade: true }
   }
 }
 

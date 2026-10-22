@@ -138,6 +138,15 @@ export const table = {
     quotaFirstMany: 'Narra {{who}} con tu cupo. Te quedan {{count}} turnos con este modelo; después, uno más económico. Con tu propia clave narra siempre el que elijas.',
     quota: 'Narra {{who}} con tu cupo. Con tu propia clave narra el modelo que elijas.',
   },
+  narrator: {
+    master: 'Narrador maestro',
+    craft: 'Narrador de oficio',
+    apprentice: 'Narrador aprendiz',
+    own: 'Tu propio narrador',
+    detail: 'narrado por {{who}}',
+    ownDetail: 'narrado por {{who}}, el modelo que elegiste',
+    upgrade: 'Mejora tu narrador',
+  },
 
   members: {
     someone: 'Alguien',
