@@ -21,7 +21,7 @@
     "@rpg-ngn/i18n": "workspace:*",
     "@rpg-ngn/narrative": "workspace:*",
     "@rpg-ngn/rules": "workspace:*",
-    "hono": "^4.9.0"
+    "hono": "^4.13.13"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.125.0",

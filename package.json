@@ -20,7 +20,13 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "postcss@<8.5.23": "^8.5.28",
+      "shell-quote@<1.11.0": "^1.11.0",
+      "compression@<1.8.2": "^1.8.2",
+      "source-map-js@<1.2.2": "^1.2.2"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
