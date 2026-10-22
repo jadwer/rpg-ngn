@@ -46,7 +46,6 @@ lanza solo en web.
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
 
 - [ ] **Quitar PHP 8.3 del servidor** (~29-10): desde el 22-10 todo corre en 8.4.27 y `php8.3-fpm` esta detenido y deshabilitado; si una semana no hubo que volver atras, `apt purge php8.3-*` y borrar `/root/.rpg/corte-php84-20261022/`
-- [ ] Panel de administracion: ver los bloqueos y quien saco a quien, para atender reportes
 
 - [ ] **`rpg-play-voided.timer`**: la unidad esta en `deploy/` pero no instalada en el servidor (retira compras anuladas en Google Play). Instalar cuando exista la cuenta de servicio
 - [ ] **Verificacion de correo**: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`. Ser anfitrion ya pide correo confirmado (29-09); decidir si se enciende para todos (añade un paso al registro) o se queda asi y se documenta
@@ -117,7 +116,6 @@ comprar ya. Midjourney no: no tiene API y sus terminos prohiben automatizarlo.
 - [ ] Traer `legacy` a `dev` antes del primer merge de `dev` a `main` (y `veiledFields`, `veilNote`, `hideChronicle` en `Session`); de paso "El DM interpreta" en las reglas de sus sesiones
 - [ ] Un solo comando que levante los servicios locales (engine, API, web, worker)
 - [ ] Partir `TableScreen` (web y app, unas 850 lineas cada una) la proxima vez que se toque a fondo (A8)
-- [ ] **Subir AtomoPlatform** (hoy v0.4.1; el aviso de seguridad del 21-10 lo pide junto con PHP 8.4): `changes.mjs since` desde 0.4.1, revisar los major y sus pasos antes de mover el submodule
 - [ ] Catalogo comercial generico a `atomo/catalog` cuando un segundo producto lo use (A4)
 
 Riesgos aceptados (dueño Gabino): E3, reembolsar el pase deja los mundos
