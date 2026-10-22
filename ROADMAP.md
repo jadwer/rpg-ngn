@@ -90,7 +90,7 @@ Bendicion activa, `QUOTA_BLESSING_MODEL` (Haiku); lo demas, `QUOTA_MODEL`
 etiqueta. Antes de esto, quien compraba turnos narraba con Haiku al pasar sus
 primeros 20.
 
-Etiquetas (diseño, sin construir): nombres propios con el modelo en letra
+Etiquetas (las del narrador hechas el 22-10, 93f69c9; la app las lleva en el siguiente AAB): nombres propios con el modelo en letra
 chica, que tambien es el aviso legal. Narrador aprendiz (gratis, DeepSeek),
 de oficio (Bendicion, Haiku), maestro (turnos, Sonnet); arriba, voz de bardo
 (ElevenLabs), ilustraciones de galeria y cronica de cine (Veo o Kling) para
@@ -99,7 +99,6 @@ fin, nunca en medio de la narracion, y cada mejora lleva a algo que se puede
 comprar ya. Midjourney no: no tiene API y sus terminos prohiben automatizarlo.
 
 - [ ] Medir costo de ElevenLabs y de un video corto con Veo o Kling, para la tabla de Plata, Oro y Diamante
-- [ ] Etiqueta del narrador en la cabecera de la mesa y en la pantalla de fin, web y app (lee `tier` de `/gm`)
 
 - [ ] Gabino: cuenta en platform.deepseek.com con 5 USD y su clave al `.env` local con `read -rs`
 - [ ] Prueba de calidad: la misma mascarada de tres con DeepSeek, Haiku y Sonnet; lector critico, costo real, tiempo por turno y textos lado a lado. Si DeepSeek no sigue el formato o narra mal en español, no entra
