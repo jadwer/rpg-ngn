@@ -30,6 +30,7 @@ lanza solo en web.
 ## 1. Bloqueos de Gabino (nadie mas los puede hacer)
 
 - [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando; arranque a mas tardar el 15-10
+- [ ] **Vigilante: aviso si se cae el servidor entero.** El vigilante (`deploy/watch.sh`, cada 5 min, correo a contacto@gabinoramirez.com) ya avisa de web, API, motor, servicios, disco y clave del GM, pero si muere el servidor no puede avisar. Crear cuenta gratuita en healthchecks.io, un chequeo de 5 min con 10 de gracia, y subir su URL de ping con `read -rs` a `/root/.rpg/healthchecks-url`
 - [ ] **Cuenta de servicio de Google Play** con la Play Developer API invitada en la consola; su JSON al servidor (`GOOGLE_PLAY_SERVICE_ACCOUNT`, hoy vacio). Sin ella las compras dentro de la app no se confirman
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
 - [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
@@ -47,10 +48,7 @@ lanza solo en web.
 - [ ] **AAB v29 para Play** con lo del 21-10 que la app aun no tiene: sacar de la mesa y bloquear en Jugadores y Amigos. La v28 (ojo de contraseña, motivo del registro) esta en revision de la prueba cerrada. De paso quitar del manifiesto `SYSTEM_ALERT_WINDOW` y `READ/WRITE_EXTERNAL_STORAGE`, que meten librerias de Expo y Play puede preguntar por ellos
 - [ ] Panel de administracion: ver los bloqueos y quien saco a quien, para atender reportes
 
-- [ ] **Vigilancia** (S3 del VAM del 19-09): nadie avisa si un servicio se cae. Alerta externa gratuita (UptimeRobot o Healthchecks.io) sobre un endpoint publico de salud, con aviso al telefono Que pruebe tambien la clave del GM (`gm:probe`) cada hora: del 05 al 21-10 produccion tuvo la clave de Anthropic muerta (401) y nadie lo supo porque nadie jugo; se descubrio con los testers ya entrando
-- [ ] **Turnos atascados solos** (S6): no hay scheduler en el servidor; hoy se desatascan a mano desde el panel. `turns:unstick` cada 5 min con `withSchedule` y su timer
 - [ ] **`rpg-play-voided.timer`**: la unidad esta en `deploy/` pero no instalada en el servidor (retira compras anuladas en Google Play). Instalar cuando exista la cuenta de servicio
-- [ ] **Servidor**: `PasswordAuthentication yes` en sshd (S4): pasarlo a `no` (las entradas son por llave). `unattended-upgrades` ya esta
 - [ ] **Verificacion de correo**: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`. Ser anfitrion ya pide correo confirmado (29-09); decidir si se enciende para todos (añade un paso al registro) o se queda asi y se documenta
 - [ ] **Limpiar `/root/.rpg`**: quedan `dev-gabino-password` y `dev-god-password` de cuentas que se borraron el 24-09, y seis respaldos viejos del `.env`. Borrar con Gabino enterado
 - [ ] Rotacion de secretos con procedimiento escrito (S7), junto con las claves de imagen
