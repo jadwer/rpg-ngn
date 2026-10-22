@@ -45,7 +45,6 @@ lanza solo en web.
 
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
 
-- [ ] **AAB v29 para Play** con lo del 21-10 que la app aun no tiene: sacar de la mesa y bloquear en Jugadores y Amigos. La v28 (ojo de contraseña, motivo del registro) esta en revision de la prueba cerrada. De paso quitar del manifiesto `SYSTEM_ALERT_WINDOW` y `READ/WRITE_EXTERNAL_STORAGE`, que meten librerias de Expo y Play puede preguntar por ellos
 - [ ] **Quitar PHP 8.3 del servidor** (~29-10): desde el 22-10 todo corre en 8.4.27 y `php8.3-fpm` esta detenido y deshabilitado; si una semana no hubo que volver atras, `apt purge php8.3-*` y borrar `/root/.rpg/corte-php84-20261022/`
 - [ ] Panel de administracion: ver los bloqueos y quien saco a quien, para atender reportes
 
@@ -78,7 +77,6 @@ existen por SSH:
 - [ ] Probar el piloto (fantasy-d20-lite, combate) con tres jugadores y el modelo real
 - [ ] **Medir los paquetes con una sesion de cuatro jugadores**: los numeros de turnos por paquete salen de un jugador y el factor de cuatro esta extrapolado (semana 5)
 - [ ] Panel del anfitrion con el diagnostico del turno (docs/27; hoy solo por comando)
-- [ ] `reopen()` escribe "El relato se ha trabado" con el error tecnico para el anfitrion: revisar el texto (docs/27)
 - [ ] Piloto, mascarada y boticaria sin `canon`, `npcs` por sesion ni `scene` de cierre (campos nuevos y opcionales); ponerlos al tocar cada mundo
 - [ ] Costo, si hace falta mas: medir Haiku como narrador con `tables:review` y el lector critico
 - [ ] Repo `rpg-packs/inspirados` en Gitea para los documentos de diseño (hoy solo local)
