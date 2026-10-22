@@ -62,7 +62,6 @@ dar cupo, reembolsar, suspender. Lo que falta contra el plan de
 [docs/25](docs/25-plan-administracion.md) y contra los comandos que hoy solo
 existen por SSH:
 
-- [ ] **Numeros** (E11b.4, nunca se hizo): el embudo de `funnel:report` y el coste de `turns:usage` por semana, en pantalla
 - [ ] **Campañas** con su registro de eventos y proyecciones (el plan las pedia en lectura; hoy solo hay mesas)
 - [ ] **Revisar una mesa**: `tables:review`, `turns:notices` y el lector critico (`critic.mts`) desde el detalle de la mesa, sin SSH
 - [ ] **Temporadas** (E12): hoy `season:open` y `season:rewards` son comandos. Programar la temporada, su camino y su arte desde el panel
