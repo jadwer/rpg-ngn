@@ -32,7 +32,6 @@ lanza solo en web.
 - [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando: al 23-10, 5 de 12 inscritos en Google y 10 de los 17 sin cuenta en el juego (Gabino les escribe)
 - [ ] **Visto bueno a la etiqueta del narrador** en la web a 390 px (colores mios: dorado, violeta, gris, blanco)
 - [ ] **Credito de AI Studio** ("MXN 26 disponible"): ver si es prepago. Si lo es, recargar o activar recarga automatica, y yo agrego al vigilante una prueba de Gemini (al llegar a cero las ilustraciones fallan sin aviso)
-- [ ] Clave de DeepSeek (cuenta con 5 USD) para la prueba de calidad del narrador gratis
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
 - [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
