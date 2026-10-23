@@ -310,7 +310,7 @@ describe('apps/engine', () => {
       // (El cliente falso contesta lo mismo a todo, asi que esa llamada no trae ideas: queda apuntado y el turno sale igual.)
       expect(result.diagnostics?.dropped.join(' ')).toContain('sin ideas para calder')
       const ideas = anthropicCalls.at(-1)!
-      expect(ideas.model).toBe('claude-haiku-4-5-20251001')
+      expect(ideas.model).toBe('claude-haiku-5-5')
       expect(String(ideas.messages[0]?.content)).not.toContain('Capa del GM')
       // Lo tecnico del turno viaja en el resultado, no en la historia.
       expect(result.diagnostics).toMatchObject({ finish: 'stop', ignoredCount: 0, lostStory: 0 })

@@ -126,8 +126,8 @@ export function acceptsEffort(model: string): boolean {
   return !/haiku-[1-4]\b|haiku-[1-4]-|claude-3/i.test(model)
 }
 
-/** El modelo de las ideas de accion: una llamada corta por personaje y turno, que no necesita al narrador. */
-export const ANTHROPIC_IDEAS_MODEL = 'claude-haiku-4-5-20251001'
+/** El modelo de las ideas de accion: una llamada corta por personaje y turno, que no necesita al narrador. Haiku 5.5 desde el 23-10 (diez veces mas barato que 4.5). */
+export const ANTHROPIC_IDEAS_MODEL = 'claude-haiku-5-5'
 const IDEAS_CALL_TIMEOUT_MS = 15_000
 
 export function createAnthropicProvider(options: AnthropicProviderOptions): ModelGMProvider {

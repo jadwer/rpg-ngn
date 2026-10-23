@@ -33,7 +33,7 @@ lanza solo en web.
 - [ ] **Visto bueno a la etiqueta del narrador** en la web a 390 px (colores mios: dorado, violeta, gris, blanco)
 - [ ] **Credito de AI Studio** ("MXN 26 disponible"): ver si es prepago. Si lo es, recargar o activar recarga automatica, y yo agrego al vigilante una prueba de Gemini (al llegar a cero las ilustraciones fallan sin aviso)
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
-- [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
+- [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina y solo lleva las bases (pg_dump). La copia de fuera debe llevar tambien los archivos privados: los del juego (`storage/app/private`: escenas, voz) y las fotos del inventario (`/srv/inventario/shared/storage/app/private`, pedido de la sesion del inventario 23-10); de paso sumarlos al respaldo local de 7 dias
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros que faltan en el aviso (Gemini y OpenAI por las imagenes, push de Google y Apple), estado del INAI, "no es una suscripcion", clausula de la Bendicion
 - [ ] **Jugar en produccion**: el one-shot del medico completo, y un mundo inspirado con amigos (Persefone pide de 4 a 6; Coronas, para ver el combate con la vida rebajada de los jefes)
@@ -47,6 +47,7 @@ lanza solo en web.
 
 - [ ] **Quitar PHP 8.3 del servidor** (~29-10): desde el 22-10 todo corre en 8.4.27 y `php8.3-fpm` esta detenido y deshabilitado; si una semana no hubo que volver atras, `apt purge php8.3-*` y borrar `/root/.rpg/corte-php84-20261022/`
 
+- [ ] **HSTS en el nginx del inventario** (pedido de la sesion del inventario, 23-10): Gabino vio "No seguro" en Chrome con `http://inventario.atomosoluciones.com`. El 301 a https y el certificado estan bien, pero falta HSTS. En el server de 443 (el que agrego certbot) `add_header Strict-Transport-Security "max-age=31536000" always;` sin `includeSubDomains` (otros subdominios viven en JettHost), repetido en los `location` con `add_header` propio (`/assets` e index), `nginx -t` y reload. Despues pasar el archivo instalado a la sesion del inventario para versionarlo en `deploy/nginx-inventario.conf` (el del repo solo tiene el bloque 80 de antes de certbot). Vale revisar lo mismo en adastramentis.com y dashboard
 - [ ] **Verificacion de correo**: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`. Ser anfitrion ya pide correo confirmado (29-09); decidir si se enciende para todos (añade un paso al registro) o se queda asi y se documenta
 - [ ] **Limpiar `/root/.rpg`**: quedan `dev-gabino-password` y `dev-god-password` de cuentas que se borraron el 24-09, y seis respaldos viejos del `.env`. Borrar con Gabino enterado
 - [ ] Rotacion de secretos con procedimiento escrito (S7), junto con las claves de imagen
