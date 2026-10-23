@@ -1,6 +1,6 @@
 import type Anthropic from '@anthropic-ai/sdk'
 import { describe, expect, it } from 'vitest'
-import { AnthropicTransport, createAnthropicProvider, type AnthropicClientLike } from './anthropic.js'
+import { acceptsEffort, AnthropicTransport, createAnthropicProvider, type AnthropicClientLike } from './anthropic.js'
 import { createProvider } from './factory.js'
 import { collect, contextFor, openSession003, response, turn } from './pilot.test-helpers.js'
 
@@ -110,5 +110,15 @@ describe('AnthropicTransport', () => {
     expect(probe).toMatchObject({ ok: false, model: 'claude-sonnet-5' })
     expect(probe.message).not.toContain('SECRETA')
     expect(probe.message).toContain('[credencial redactada]')
+  })
+})
+
+describe('acceptsEffort', () => {
+  it('Haiku 4.5 y anteriores no reciben esfuerzo; Haiku 5.5 y los demas si', () => {
+    expect(acceptsEffort('claude-haiku-4-5-20251001')).toBe(false)
+    expect(acceptsEffort('claude-haiku-4-5')).toBe(false)
+    expect(acceptsEffort('claude-3-5-haiku-20241022')).toBe(false)
+    expect(acceptsEffort('claude-haiku-5-5')).toBe(true)
+    expect(acceptsEffort('claude-sonnet-5')).toBe(true)
   })
 })

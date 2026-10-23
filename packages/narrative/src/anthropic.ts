@@ -117,12 +117,13 @@ function userContent(prompt: ModelPrompt): string | Anthropic.TextBlockParam[] {
 }
 
 /**
- * Si el modelo acepta `output_config.effort` (pensamiento adaptativo). Los
- * Haiku no lo soportan y responden 400, y el cupo gratuito narra justo con
- * Haiku: mandarlo a ciegas rompia el turno.
+ * Si el modelo acepta `output_config.effort` (pensamiento adaptativo). Haiku
+ * 4.5 y anteriores no lo soportan y responden 400, y el cupo gratuito narraba
+ * justo con Haiku: mandarlo a ciegas rompia el turno. Haiku 5.5 si lo acepta
+ * y piensa en `medium` si no se le dice otra cosa.
  */
-function acceptsEffort(model: string): boolean {
-  return !/haiku/i.test(model)
+export function acceptsEffort(model: string): boolean {
+  return !/haiku-[1-4]\b|haiku-[1-4]-|claude-3/i.test(model)
 }
 
 /** El modelo de las ideas de accion: una llamada corta por personaje y turno, que no necesita al narrador. */
