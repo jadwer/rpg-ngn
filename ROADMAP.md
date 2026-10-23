@@ -29,7 +29,10 @@ lanza solo en web.
 
 ## 1. Bloqueos de Gabino (nadie mas los puede hacer)
 
-- [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando; arranque a mas tardar el 15-10
+- [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando: al 23-10, 5 de 12 inscritos en Google y 10 de los 17 sin cuenta en el juego (Gabino les escribe)
+- [ ] **Visto bueno a la etiqueta del narrador** en la web a 390 px (colores mios: dorado, violeta, gris, blanco)
+- [ ] **Credito de AI Studio** ("MXN 26 disponible"): ver si es prepago. Si lo es, recargar o activar recarga automatica, y yo agrego al vigilante una prueba de Gemini (al llegar a cero las ilustraciones fallan sin aviso)
+- [ ] Clave de DeepSeek (cuenta con 5 USD) para la prueba de calidad del narrador gratis
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
 - [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
@@ -48,6 +51,7 @@ lanza solo en web.
 - [ ] **Verificacion de correo**: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`. Ser anfitrion ya pide correo confirmado (29-09); decidir si se enciende para todos (añade un paso al registro) o se queda asi y se documenta
 - [ ] **Limpiar `/root/.rpg`**: quedan `dev-gabino-password` y `dev-god-password` de cuentas que se borraron el 24-09, y seis respaldos viejos del `.env`. Borrar con Gabino enterado
 - [ ] Rotacion de secretos con procedimiento escrito (S7), junto con las claves de imagen
+- [ ] **AAB v30** con la etiqueta del narrador (y lo que se junte), con la lista de [releases de Play] verificada antes de pedirle a Gabino que lo suba
 - [ ] La boticaria **se queda** en el catalogo de la beta (decision de Gabino, 11-10: es la unica con IP ajena pero genera interes). Revisarlo de nuevo antes de abrir el catalogo al publico
 
 ## 3. Panel de administracion (dashboard.adastramentis.com)
