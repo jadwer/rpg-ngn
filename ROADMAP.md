@@ -30,7 +30,6 @@ lanza solo en web.
 ## 1. Bloqueos de Gabino (nadie mas los puede hacer)
 
 - [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando; arranque a mas tardar el 15-10
-- [ ] **Vigilante: aviso si se cae el servidor entero.** El vigilante (`deploy/watch.sh`, cada 5 min, correo a contacto@gabinoramirez.com) ya avisa de web, API, motor, servicios, disco y clave del GM, pero si muere el servidor no puede avisar. Crear cuenta gratuita en healthchecks.io, un chequeo de 5 min con 10 de gracia, y subir su URL de ping con `read -rs` a `/root/.rpg/healthchecks-url`
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
 - [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
