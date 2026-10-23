@@ -31,7 +31,6 @@ lanza solo en web.
 
 - [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando; arranque a mas tardar el 15-10
 - [ ] **Vigilante: aviso si se cae el servidor entero.** El vigilante (`deploy/watch.sh`, cada 5 min, correo a contacto@gabinoramirez.com) ya avisa de web, API, motor, servicios, disco y clave del GM, pero si muere el servidor no puede avisar. Crear cuenta gratuita en healthchecks.io, un chequeo de 5 min con 10 de gracia, y subir su URL de ping con `read -rs` a `/root/.rpg/healthchecks-url`
-- [ ] **Cuenta de servicio de Google Play** con la Play Developer API invitada en la consola; su JSON al servidor (`GOOGLE_PLAY_SERVICE_ACCOUNT`, hoy vacio). Sin ella las compras dentro de la app no se confirman
 - [ ] **Claves de imagen rotadas**: subir las nuevas de Gemini y OpenAI con `read -rs` y revocar las viejas (siguen activas desde el 24-09)
 - [ ] **Copias fuera del servidor** (29-10): NAS o Storage Box de Hetzner. Hoy la copia diaria vive en la misma maquina
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
@@ -47,7 +46,6 @@ lanza solo en web.
 
 - [ ] **Quitar PHP 8.3 del servidor** (~29-10): desde el 22-10 todo corre en 8.4.27 y `php8.3-fpm` esta detenido y deshabilitado; si una semana no hubo que volver atras, `apt purge php8.3-*` y borrar `/root/.rpg/corte-php84-20261022/`
 
-- [ ] **`rpg-play-voided.timer`**: la unidad esta en `deploy/` pero no instalada en el servidor (retira compras anuladas en Google Play). Instalar cuando exista la cuenta de servicio
 - [ ] **Verificacion de correo**: `ATOMO_REQUIRE_EMAIL_VERIFICATION=false`. Ser anfitrion ya pide correo confirmado (29-09); decidir si se enciende para todos (añade un paso al registro) o se queda asi y se documenta
 - [ ] **Limpiar `/root/.rpg`**: quedan `dev-gabino-password` y `dev-god-password` de cuentas que se borraron el 24-09, y seis respaldos viejos del `.env`. Borrar con Gabino enterado
 - [ ] Rotacion de secretos con procedimiento escrito (S7), junto con las claves de imagen
