@@ -1,9 +1,10 @@
 # 17. Estado del proyecto
 
-Fecha de corte: **2026-10-12**. Monorepo `dev` `36a05db`; API `main` `872af10`
-(platform AtomoPlatform v0.4.1). Produccion en https://adastramentis.com y el
-panel en https://dashboard.adastramentis.com. App: AAB v26 en Pruebas
-internas de Google Play; APK v27 local.
+Fecha de corte: **2026-10-23**. Monorepo `dev` `1e4fbb6`; API `main` `b6d42de`
+(platform AtomoPlatform 0.5, `20effd9`; PHP 8.4 y Node 22 en el servidor).
+Produccion en https://adastramentis.com y el panel en
+https://dashboard.adastramentis.com. App: prueba cerrada de Google Play con la
+v28 aprobada y la v29 en revision.
 
 Responde tres preguntas sin leer codigo: que es, que funciona y que
 decisiones estan cerradas. **Lo que falta vive solo en el
@@ -78,14 +79,24 @@ Vuelta al barrio y Las Siete Coronas.
   legales v1 publicados (falta el abogado).
 - Plan gratuito con cubeta de turnos; paquetes de turnos, Bendicion del
   bardo, pase de temporada y mundos en venta por Stripe (cobro en MXN); en la
-  app, Google Play Billing (falta la cuenta de servicio para confirmar).
+  app, Google Play Billing confirmado por el servidor con cuenta de servicio
+  y revision diaria de compras anuladas.
+- Escalera del narrador: turnos comprados y cuenta nueva con Sonnet, Bendicion
+  y gratis con Haiku; la mesa lo muestra con una etiqueta (Narrador maestro,
+  de oficio, aprendiz o tu propio narrador) y el modelo en letra chica.
 - Pase de descubridor con capitulos, camino de premios y coleccion.
 - Avisos push en web y app; soporte con reportes y conversacion.
 
 **Operacion**
 - Panel: salud, auditoria, usuarios y roles, mesas, turnos atascados, pagos,
-  cupos, pases, trabajos fallidos, revision de mundos, catalogo, soporte y
-  operaciones con motivo (dar cupo, desatascar, reembolsar, suspender).
+  cupos, pases, trabajos fallidos, revision de mundos, catalogo, soporte,
+  numeros por semana (embudo y costo), moderacion (bloqueos y salidas de
+  mesa) y operaciones con motivo (dar cupo, desatascar, reembolsar,
+  suspender).
+- Jugadores: sacar de la mesa y bloquear usuarios, en web y app.
+- Vigilante cada 5 minutos con aviso por correo, prueba horaria de la clave
+  del GM, reapertura de turnos trabados y pulso a healthchecks.io (aviso
+  externo si cae el servidor entero).
 - Despliegue con `/root/deploy-rpg.sh` (guardia de turnos en curso, web sin
   cortar); respaldo diario de la base en el mismo servidor.
 - Revisar una partida: `tables:review`, `turns:notices` y el lector critico
