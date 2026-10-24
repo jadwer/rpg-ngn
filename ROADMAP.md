@@ -31,7 +31,7 @@ lanza solo en web.
 
 - [ ] **12 testers** (mejor 14 o 15) inscritos en la prueba cerrada y jugando: al 23-10, 5 de 12 inscritos en Google y 10 de los 17 sin cuenta en el juego (Gabino les escribe)
 - [ ] **Visto bueno a la etiqueta del narrador** en la web a 390 px (colores mios: dorado, violeta, gris, blanco)
-- [ ] **Credito de AI Studio** ("MXN 26 disponible"): ver si es prepago. Si lo es, recargar o activar recarga automatica, y yo agrego al vigilante una prueba de Gemini (al llegar a cero las ilustraciones fallan sin aviso)
+- [ ] **Credito de AI Studio** ("MXN 26 disponible"): ver si es prepago; si lo es, recargar o activar recarga automatica. El vigilante ya prueba Gemini cada hora y avisa si falla (23-10)
 - [ ] **Healthchecks del respaldo en la Mac mini**: el respaldo fuera funciona desde el 23-10 (servidor cifra con age, `deploy/backup-out.sh`; la Mac lo jala a las 07:30 CST con launchd, 30 diarias + 1 por mes; restauracion probada). Falta que Gabino ponga en la Mac la URL de healthchecks.io del chequeo del respaldo
 - [ ] **Plata, Oro y Diamante** (31-10): que incluyen, o se retiran de la venta (siguen anunciados)
 - [ ] **Legales con el abogado** (05-11): version en ingles, terceros que faltan en el aviso (Gemini y OpenAI por las imagenes, push de Google y Apple), estado del INAI, "no es una suscripcion", clausula de la Bendicion
@@ -43,6 +43,12 @@ lanza solo en web.
 - [ ] Decidir el A/B de la apertura con GPT (hace falta una clave de OpenAI con credito en local) o darlo por cerrado con Claude
 
 ## 2. Antes de abrir (semana 4; lo hace Opus sin esperar a nadie)
+
+- [ ] **Lo que pidio el publico simulado** (MiroFish, corrida de 108 agentes del 24-10, `~/dev/mirofish-prueba/corrida2-textos.md`; hipotesis a contrastar con los testers):
+  - **Partida de ejemplo publica en la portada**: la cronica real de una sesion corta con su presentacion en video, elegida con Gabino. Fue la objecion numero uno ("espero pruebas, no promesas", unos 190 textos)
+  - **Pagina corta "Como funciona la IA y tus datos"**: que modelos narran (la etiqueta del narrador), que las partidas no entrenan a nadie, como borrar la cuenta y el historial. Entrenamiento y datos fueron la segunda objecion (unos 130 y 80 textos)
+  - **Una linea en la portada**: la primera aventura completa es gratis, sin energia ni pago para ganar (los turnos pagan al narrador). La espera de la cubeta puede leerse como "energia" y los jovenes la rechazan
+  - No se hace: subrayar "la IA es el GM" en la portada. Decision de Gabino (24-10): a muchos jugadores les va a gustar la aventura sin pensar en que es IA; la etiqueta del narrador ya lo dice donde hace falta
 
 - [ ] **Quitar PHP 8.3 del servidor** (~29-10): desde el 22-10 todo corre en 8.4.27 y `php8.3-fpm` esta detenido y deshabilitado; si una semana no hubo que volver atras, `apt purge php8.3-*` y borrar `/root/.rpg/corte-php84-20261022/`
 
